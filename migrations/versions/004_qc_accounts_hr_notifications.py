@@ -1,15 +1,15 @@
 """Add qc_inspections, invoices, hr_employees, notifications
 
 Revision ID: 004_qc_accounts_hr_notifications
-Revises: 003_inventory_pm
-Create Date: 2026-01-01 00:00:00
+Revises: 003_inventory_purchase_manufacturing
+Create Date: 2024-07-04
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 revision = "004_qc_accounts_hr_notifications"
-down_revision = "003_inventory_pm"
+down_revision = "003_inventory_purchase_manufacturing"
 branch_labels = None
 depends_on = None
 

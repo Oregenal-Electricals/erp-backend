@@ -1,4 +1,4 @@
-"""FlowERP — FastAPI Application — Phase 4"""
+"""FlowERP — FastAPI Application — Phase 6"""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,6 +24,9 @@ from app.modules.accounts.router      import router as accounts_router
 from app.modules.hr.router            import router as hr_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.sales.router         import router as sales_router
+from app.modules.documents.router     import router as documents_router
+from app.modules.reports.router       import router as reports_router
+from app.modules.saas.router          import router as saas_router
 
 
 @asynccontextmanager
@@ -40,7 +43,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
-        description="FlowERP — Modular ERP Platform API",
+        description="FlowERP — Modular SaaS ERP Platform API",
         docs_url="/api/docs" if not settings.is_production else None,
         redoc_url="/api/redoc" if not settings.is_production else None,
         openapi_url="/api/openapi.json" if not settings.is_production else None,
@@ -65,11 +68,11 @@ def create_app() -> FastAPI:
     API = settings.API_V1_PREFIX
     for r in [
         auth_router, users_router, config_router,
-        sales_router,          # ← Phase 4: full sales
-        crm_router, dashboard_router, inventory_router,
-        purchase_router, manufacturing_router,
+        sales_router, crm_router, dashboard_router,
+        inventory_router, purchase_router, manufacturing_router,
         qc_router, accounts_router, hr_router,
-        notifications_router,
+        notifications_router, documents_router, reports_router,
+        saas_router,
     ]:
         app.include_router(r, prefix=API)
 
@@ -80,15 +83,20 @@ def create_app() -> FastAPI:
             "status": "ok" if db_ok else "degraded",
             "app": settings.APP_NAME,
             "version": settings.APP_VERSION,
-            "env": settings.APP_ENV,
+            "phase": "6 — Documents + Reports + SaaS",
+            "modules": 16,
             "db": "connected" if db_ok else "disconnected",
-            "phase": "4 — Sales complete",
-            "modules": 12,
         }
 
     @app.get("/", tags=["Root"])
     async def root():
-        return {"app": settings.APP_NAME, "version": settings.APP_VERSION, "docs": "/api/docs"}
+        return {
+            "app": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+            "docs": "/api/docs",
+            "register": "/api/v1/saas/register",
+            "plans": "/api/v1/saas/plans",
+        }
 
     return app
 

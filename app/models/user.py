@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Boolean, JSON, ForeignKey, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+import uuid
 
 from app.core.database import Base
 
@@ -83,8 +84,8 @@ class User(Base):
     """
     extra_permissions structure (overrides):
     {
-      "sales": ["approve"],
-      "hr": []
+      "sales": ["approve"],   // grant extra
+      "hr": []               // revoke all
     }
     """
 
@@ -116,6 +117,7 @@ class User(Base):
         base = {}
         if self.role_obj:
             base = dict(self.role_obj.permissions or {})
+        # Apply extra_permissions overrides
         for module, actions in (self.extra_permissions or {}).items():
             base[module] = actions
         return base

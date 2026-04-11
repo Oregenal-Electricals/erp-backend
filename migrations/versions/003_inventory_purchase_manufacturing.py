@@ -1,6 +1,6 @@
 """Add inventory_products, purchase_orders, work_orders tables
 
-revision = "003_inventory_pm"
+Revision ID: 003_inventory_purchase_manufacturing
 Revises: 002_crm_leads
 Create Date: 2024-07-03
 """
@@ -8,7 +8,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-revision = "003_inventory_pm"
+revision = "003_inventory_purchase_manufacturing"
 down_revision = "002_crm_leads"
 branch_labels = None
 depends_on = None
