@@ -1,10 +1,11 @@
-"""FlowERP — FastAPI Application — Phase 6"""
+"""FlowERP — FastAPI Application — Phase 8"""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
+
 from app.core.config import settings
 from app.core.database import check_db_connection
 from app.core.exceptions import (
@@ -19,6 +20,7 @@ from app.modules.dashboard.router     import router as dashboard_router
 from app.modules.inventory.router     import router as inventory_router
 from app.modules.purchase.router      import router as purchase_router
 from app.modules.manufacturing.router import router as manufacturing_router
+from app.modules.manufacturing.bom_router import router as bom_router, work_router as bom_work_router
 from app.modules.qc.router            import router as qc_router
 from app.modules.accounts.router      import router as accounts_router
 from app.modules.hr.router            import router as hr_router
@@ -27,13 +29,16 @@ from app.modules.sales.router         import router as sales_router
 from app.modules.documents.router     import router as documents_router
 from app.modules.reports.router       import router as reports_router
 from app.modules.saas.router          import router as saas_router
+from app.modules.stock_ledger.router  import router as stock_ledger_router
+from app.modules.gst.router           import router as gst_router
+from app.modules.email.router         import router as email_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     import logging
     db_ok = await check_db_connection()
-    logging.info("✅  DB connected" if db_ok else "⚠️  DB not connected — degraded mode")
+    logging.info("✅  DB connected" if db_ok else "⚠️  DB not connected")
     yield
     from app.core.database import engine
     await engine.dispose()
@@ -43,8 +48,8 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
-        description="FlowERP — Modular SaaS ERP Platform API",
-        docs_url="/api/docs" if not settings.is_production else None,
+        description="FlowERP — Modular SaaS ERP Platform API — Phase 8",
+        docs_url="/api/docs"   if not settings.is_production else None,
         redoc_url="/api/redoc" if not settings.is_production else None,
         openapi_url="/api/openapi.json" if not settings.is_production else None,
         default_response_class=ORJSONResponse,
@@ -69,10 +74,11 @@ def create_app() -> FastAPI:
     for r in [
         auth_router, users_router, config_router,
         sales_router, crm_router, dashboard_router,
-        inventory_router, purchase_router, manufacturing_router,
+        inventory_router, purchase_router,
+        manufacturing_router, bom_router, bom_work_router,
         qc_router, accounts_router, hr_router,
         notifications_router, documents_router, reports_router,
-        saas_router,
+        saas_router, stock_ledger_router, gst_router, email_router,
     ]:
         app.include_router(r, prefix=API)
 
@@ -83,20 +89,14 @@ def create_app() -> FastAPI:
             "status": "ok" if db_ok else "degraded",
             "app": settings.APP_NAME,
             "version": settings.APP_VERSION,
-            "phase": "6 — Documents + Reports + SaaS",
-            "modules": 16,
+            "phase": "8 — Stock Ledger + BOM + GST + Email",
+            "modules": 20,
             "db": "connected" if db_ok else "disconnected",
         }
 
     @app.get("/", tags=["Root"])
     async def root():
-        return {
-            "app": settings.APP_NAME,
-            "version": settings.APP_VERSION,
-            "docs": "/api/docs",
-            "register": "/api/v1/saas/register",
-            "plans": "/api/v1/saas/plans",
-        }
+        return {"app": settings.APP_NAME, "docs": "/api/docs", "phase": 8}
 
     return app
 

@@ -79,3 +79,103 @@ async def delete_order(order_id: UUID, current_user: User=Depends(get_current_ac
     if not o: raise HTTPException(404,"Order not found")
     from datetime import datetime,timezone; o.deleted_at=datetime.now(timezone.utc)
     return {"success":True}
+
+
+# ── GRN (Goods Receipt Note) — receive PO into stock ─────────────────
+class GRNItem(BaseModel):
+    product_id:   UUID
+    product_name: str
+    quantity:     int
+    unit_cost:    float = 0.0
+
+class GRNRequest(BaseModel):
+    items:  list[GRNItem]
+    notes:  Optional[str] = None
+
+
+@router.post("/orders/{order_id}/receive")
+async def receive_purchase_order(
+    order_id: UUID,
+    payload:  GRNRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    GRN — Goods Receipt Note.
+    Marks PO as received and posts stock IN entries via the stock ledger.
+    Each line item is posted as a 'purchase_receipt' movement with WAC recalculation.
+    """
+    from decimal import Decimal
+    from app.engines.stock_ledger import post_stock_movement, StockProductNotFound
+
+    result = await db.execute(
+        select(PurchaseOrder).where(
+            PurchaseOrder.id == order_id,
+            PurchaseOrder.tenant_id == current_user.tenant_id,
+        )
+    )
+    po = result.scalar_one_or_none()
+    if not po:
+        raise HTTPException(404, "Purchase order not found")
+    if po.status == "received":
+        raise HTTPException(409, "Purchase order already received")
+
+    po_ref = po.order_number or f"PO-{str(order_id)[:8].upper()}"
+    entries = []
+
+    try:
+        for item in payload.items:
+            entry = await post_stock_movement(
+                db               = db,
+                tenant_id        = current_user.tenant_id,
+                product_id       = item.product_id,
+                movement_type    = "purchase_receipt",
+                quantity         = item.quantity,
+                direction        = "in",
+                unit_cost        = Decimal(str(item.unit_cost)),
+                reference_type   = "purchase_order",
+                reference_id     = str(order_id),
+                reference_number = po_ref,
+                notes            = payload.notes or f"GRN for {po_ref}",
+                created_by       = current_user.name,
+            )
+            entries.append({
+                "product_id":   str(item.product_id),
+                "product_name": item.product_name,
+                "quantity":     item.quantity,
+                "stock_after":  entry.stock_after,
+                "wac_after":    float(entry.wac_after or 0),
+            })
+
+        # Mark PO as received
+        po.status = "received"
+        await db.commit()
+
+        return {
+            "success":   True,
+            "po_ref":    po_ref,
+            "items_received": len(entries),
+            "entries":   entries,
+            "message":   f"GRN posted — {len(entries)} item(s) received into stock",
+        }
+    except StockProductNotFound as e:
+        await db.rollback()
+        raise HTTPException(404, str(e))
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(500, f"GRN failed: {str(e)}")
+
+
+@router.post("/orders/{order_id}/approve")
+async def approve_po(
+    order_id: UUID,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(PurchaseOrder).where(PurchaseOrder.id == order_id, PurchaseOrder.tenant_id == current_user.tenant_id)
+    )
+    po = result.scalar_one_or_none()
+    if not po: raise HTTPException(404, "PO not found")
+    po.status = "approved"
+    return po_out(po)

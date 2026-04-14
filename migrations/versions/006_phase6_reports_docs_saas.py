@@ -8,53 +8,60 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-revision = "006_phase6_reports_docs_saas"
+revision      = "006_phase6_reports_docs_saas"
 down_revision = "005_sales_module"
 branch_labels = None
-depends_on = None
+depends_on    = None
 
 
 def upgrade() -> None:
-    # Add plan column to tenants (if not exists)
-    try:
-        op.add_column("tenants", sa.Column("plan", sa.String(50), server_default="free", nullable=False))
-    except Exception:
-        pass  # Column may already exist
+    conn = op.get_bind()
 
-    # saved_reports
-    op.create_table(
-        "saved_reports",
-        sa.Column("id",          postgresql.UUID(as_uuid=True), nullable=False, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("created_at",  sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at",  sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("tenant_id",   postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("name",        sa.String(300), nullable=False),
-        sa.Column("description", sa.Text, nullable=True),
-        sa.Column("module",      sa.String(100), nullable=False),
-        sa.Column("config",      postgresql.JSON(astext_type=sa.Text()), server_default="{}", nullable=False),
-        sa.Column("is_public",   sa.Boolean, server_default="false", nullable=False),
-        sa.Column("schedule",    sa.String(50), nullable=True),
-        sa.Column("last_run_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_by",  postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("deleted_at",  sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(["tenant_id"], ["tenants.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["created_by"],["users.id"],   ondelete="SET NULL"),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index("ix_saved_reports_tenant", "saved_reports", ["tenant_id"])
+    # ── Add plan column to tenants (safe — checks existence first) ────
+    conn.execute(sa.text("""
+        ALTER TABLE tenants
+        ADD COLUMN IF NOT EXISTS plan VARCHAR(50) NOT NULL DEFAULT 'free'
+    """))
 
-    # company_config
-    op.create_table(
-        "company_config",
-        sa.Column("id",        postgresql.UUID(as_uuid=True), nullable=False, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("created_at",sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at",sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("tenant_id", postgresql.UUID(as_uuid=True), nullable=False, unique=True),
-        sa.Column("config",    postgresql.JSON(astext_type=sa.Text()), server_default="{}", nullable=False),
-        sa.ForeignKeyConstraint(["tenant_id"], ["tenants.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index("ix_company_config_tenant", "company_config", ["tenant_id"])
+    # ── saved_reports (safe create) ────────────────────────────────────
+    conn.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS saved_reports (
+            id          UUID        NOT NULL DEFAULT gen_random_uuid(),
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+            tenant_id   UUID        NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+            name        VARCHAR(300) NOT NULL,
+            description TEXT,
+            module      VARCHAR(100) NOT NULL,
+            config      JSON        NOT NULL DEFAULT '{}',
+            is_public   BOOLEAN     NOT NULL DEFAULT false,
+            schedule    VARCHAR(50),
+            last_run_at TIMESTAMPTZ,
+            created_by  UUID        REFERENCES users(id) ON DELETE SET NULL,
+            deleted_at  TIMESTAMPTZ,
+            PRIMARY KEY (id)
+        )
+    """))
+    conn.execute(sa.text("""
+        CREATE INDEX IF NOT EXISTS ix_saved_reports_tenant
+        ON saved_reports (tenant_id)
+    """))
+
+    # ── company_config (safe create) ──────────────────────────────────
+    conn.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS company_config (
+            id          UUID        NOT NULL DEFAULT gen_random_uuid(),
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+            tenant_id   UUID        NOT NULL UNIQUE REFERENCES tenants(id) ON DELETE CASCADE,
+            config      JSON        NOT NULL DEFAULT '{}',
+            PRIMARY KEY (id)
+        )
+    """))
+    conn.execute(sa.text("""
+        CREATE INDEX IF NOT EXISTS ix_company_config_tenant
+        ON company_config (tenant_id)
+    """))
 
 
 def downgrade() -> None:
