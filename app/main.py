@@ -1,4 +1,4 @@
-"""FlowERP — FastAPI Application — Phase 8"""
+"""FlowERP — FastAPI Application — Phase 9: Full Plant Operations"""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,26 +12,29 @@ from app.core.exceptions import (
     ERPException, erp_exception_handler,
     validation_exception_handler, integrity_error_handler, generic_exception_handler,
 )
-
-from app.modules.auth.router         import router as auth_router, users_router
-from app.modules.config.router        import router as config_router
-from app.modules.crm.router           import router as crm_router
-from app.modules.dashboard.router     import router as dashboard_router
-from app.modules.inventory.router     import router as inventory_router
-from app.modules.purchase.router      import router as purchase_router
-from app.modules.manufacturing.router import router as manufacturing_router
+from app.modules.auth.router              import router as auth_router, users_router
+from app.modules.config.router            import router as config_router
+from app.modules.crm.router               import router as crm_router
+from app.modules.dashboard.router         import router as dashboard_router
+from app.modules.inventory.router         import router as inventory_router
+from app.modules.purchase.router          import router as purchase_router
+from app.modules.manufacturing.router     import router as manufacturing_router
 from app.modules.manufacturing.bom_router import router as bom_router, work_router as bom_work_router
-from app.modules.qc.router            import router as qc_router
-from app.modules.accounts.router      import router as accounts_router
-from app.modules.hr.router            import router as hr_router
-from app.modules.notifications.router import router as notifications_router
-from app.modules.sales.router         import router as sales_router
-from app.modules.documents.router     import router as documents_router
-from app.modules.reports.router       import router as reports_router
-from app.modules.saas.router          import router as saas_router
-from app.modules.stock_ledger.router  import router as stock_ledger_router
-from app.modules.gst.router           import router as gst_router
-from app.modules.email.router         import router as email_router
+from app.modules.qc.router                import router as qc_router
+from app.modules.accounts.router          import router as accounts_router
+from app.modules.hr.router                import router as hr_router
+from app.modules.notifications.router     import router as notifications_router
+from app.modules.sales.router             import router as sales_router
+from app.modules.documents.router         import router as documents_router
+from app.modules.reports.router           import router as reports_router
+from app.modules.saas.router              import router as saas_router
+from app.modules.stock_ledger.router      import router as stock_ledger_router
+from app.modules.gst.router               import router as gst_router
+from app.modules.email.router             import router as email_router
+from app.modules.dispatch.router          import router as dispatch_router
+from app.modules.maintenance.router       import router as maintenance_router
+from app.modules.payroll.router           import router as payroll_router
+from app.modules.costing.router           import router as costing_router
 
 
 @asynccontextmanager
@@ -47,24 +50,15 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
-        version=settings.APP_VERSION,
-        description="FlowERP — Modular SaaS ERP Platform API — Phase 8",
+        version="9.0.0",
+        description="FlowERP — Full Plant Operations ERP",
         docs_url="/api/docs"   if not settings.is_production else None,
         redoc_url="/api/redoc" if not settings.is_production else None,
         openapi_url="/api/openapi.json" if not settings.is_production else None,
         default_response_class=ORJSONResponse,
         lifespan=lifespan,
     )
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["X-Total-Count"],
-    )
-
+    app.add_middleware(CORSMiddleware, allow_origins=settings.CORS_ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], expose_headers=["X-Total-Count"])
     app.add_exception_handler(ERPException, erp_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(IntegrityError, integrity_error_handler)
@@ -79,26 +73,19 @@ def create_app() -> FastAPI:
         qc_router, accounts_router, hr_router,
         notifications_router, documents_router, reports_router,
         saas_router, stock_ledger_router, gst_router, email_router,
+        dispatch_router, maintenance_router, payroll_router, costing_router,
     ]:
         app.include_router(r, prefix=API)
 
     @app.get("/health", tags=["Health"])
     async def health():
         db_ok = await check_db_connection()
-        return {
-            "status": "ok" if db_ok else "degraded",
-            "app": settings.APP_NAME,
-            "version": settings.APP_VERSION,
-            "phase": "8 — Stock Ledger + BOM + GST + Email",
-            "modules": 20,
-            "db": "connected" if db_ok else "disconnected",
-        }
+        return {"status": "ok" if db_ok else "degraded", "version": "9.0.0", "phase": "9 — Full Plant Ops", "modules": 24, "db": "connected" if db_ok else "disconnected"}
 
     @app.get("/", tags=["Root"])
     async def root():
-        return {"app": settings.APP_NAME, "docs": "/api/docs", "phase": 8}
+        return {"app": settings.APP_NAME, "version": "9.0.0", "docs": "/api/docs", "modules": 24}
 
     return app
-
 
 app = create_app()
