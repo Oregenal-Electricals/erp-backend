@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     )
 
     # ── App ───────────────────────────────────────────────────────────
-    APP_NAME: str = "FlowERP"
+    APP_NAME: str = "Oregenal ERP"
     APP_VERSION: str = "1.0.0"
     APP_ENV: str = "development"
     DEBUG: bool = True
@@ -55,18 +55,18 @@ class Settings(BaseSettings):
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_REGION: str = "ap-south-1"
-    S3_BUCKET_NAME: str = "flowerp-files-dev"
+    S3_BUCKET_NAME: str = "oregenal-files-dev"
 
     # ── Email ─────────────────────────────────────────────────────────
-    EMAIL_FROM: str = "noreply@flowerp.com"
-    EMAIL_FROM_NAME: str = "FlowERP"
+    EMAIL_FROM: str = "noreply@oregenal.com"
+    EMAIL_FROM_NAME: str = "Oregenal ERP"
 
     # ── Seed data ─────────────────────────────────────────────────────
-    SUPERADMIN_EMAIL: str = "admin@demo.com"
-    SUPERADMIN_PASSWORD: str = "demo1234"
+    SUPERADMIN_EMAIL: str = "admin@oregenal.com"
+    SUPERADMIN_PASSWORD: str = "Oregenal@2024"
     SUPERADMIN_NAME: str = "Super Admin"
-    DEMO_TENANT_NAME: str = "Demo Company"
-    DEMO_TENANT_SLUG: str = "demo"
+    DEMO_TENANT_NAME: str = "Oregenal Electrical India Private Limited"
+    DEMO_TENANT_SLUG: str = "oregenal"
 
     @property
     def is_production(self) -> bool:

@@ -179,3 +179,108 @@ async def approve_po(
     if not po: raise HTTPException(404, "PO not found")
     po.status = "approved"
     return po_out(po)
+
+
+# ── Purchase Order Line Items ─────────────────────────────────────────
+class POItem(Base):
+    __tablename__ = "purchase_order_items"
+    tenant_id    = sa.Column(PG_UUID(as_uuid=True), sa.ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    po_id        = sa.Column(PG_UUID(as_uuid=True), sa.ForeignKey("purchase_orders.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id   = sa.Column(PG_UUID(as_uuid=True), nullable=True)
+    product_name = sa.Column(sa.String(300), nullable=False)
+    product_sku  = sa.Column(sa.String(100), nullable=True)
+    quantity     = sa.Column(sa.Numeric(12,3), default=1, nullable=False)
+    unit         = sa.Column(sa.String(30), default="Pcs", nullable=False)
+    unit_price   = sa.Column(sa.Numeric(15,2), default=0, nullable=False)
+    tax_pct      = sa.Column(sa.Numeric(5,2), default=18, nullable=False)
+    discount_pct = sa.Column(sa.Numeric(5,2), default=0, nullable=False)
+    line_total   = sa.Column(sa.Numeric(15,2), default=0, nullable=False)
+    hsn_code     = sa.Column(sa.String(20), nullable=True)
+    received_qty = sa.Column(sa.Numeric(12,3), default=0, nullable=False)
+    notes        = sa.Column(sa.Text, nullable=True)
+
+
+class POItemCreate(BaseModel):
+    product_name: str
+    product_sku:  Optional[str] = None
+    product_id:   Optional[UUID] = None
+    quantity:     float = 1
+    unit:         str = "Pcs"
+    unit_price:   float = 0
+    tax_pct:      float = 18
+    discount_pct: float = 0
+    hsn_code:     Optional[str] = None
+    notes:        Optional[str] = None
+
+
+def poi_out(i: POItem) -> dict:
+    qty  = float(i.quantity or 1)
+    up   = float(i.unit_price or 0)
+    disc = float(i.discount_pct or 0)
+    tax  = float(i.tax_pct or 0)
+    sub  = qty * up * (1 - disc / 100)
+    tax_amt = sub * tax / 100
+    return {
+        "id": str(i.id), "po_id": str(i.po_id),
+        "product_id": str(i.product_id) if i.product_id else None,
+        "product_name": i.product_name, "product_sku": i.product_sku,
+        "quantity": qty, "unit": i.unit, "unit_price": float(i.unit_price or 0),
+        "tax_pct": tax, "discount_pct": disc, "line_total": float(i.line_total or 0),
+        "subtotal": round(sub, 2), "tax_amount": round(tax_amt, 2),
+        "hsn_code": i.hsn_code, "received_qty": float(i.received_qty or 0),
+        "notes": i.notes,
+    }
+
+
+async def _recalc_po(po_id: UUID, db: AsyncSession):
+    result = await db.execute(select(POItem).where(POItem.po_id == po_id))
+    items  = result.scalars().all()
+    total  = sum(float(i.line_total or 0) for i in items)
+    await db.execute(sa.text(
+        f"UPDATE purchase_orders SET total_amount={total}, items_count={len(items)} WHERE id='{po_id}'"
+    ))
+
+
+@router.get("/orders/{po_id}")
+async def get_po(po_id: UUID, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    r = await db.execute(select(PurchaseOrder).where(PurchaseOrder.id == po_id, PurchaseOrder.tenant_id == current_user.tenant_id))
+    po = r.scalar_one_or_none()
+    if not po: raise HTTPException(404, "PO not found")
+    items_r = await db.execute(select(POItem).where(POItem.po_id == po_id).order_by(POItem.created_at))
+    items = items_r.scalars().all()
+    result = po_out(po)
+    result["items"] = [poi_out(i) for i in items]
+    return result
+
+
+@router.post("/orders/{po_id}/items", status_code=201)
+async def add_po_item(po_id: UUID, payload: POItemCreate, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    r = await db.execute(select(PurchaseOrder).where(PurchaseOrder.id == po_id, PurchaseOrder.tenant_id == current_user.tenant_id))
+    po = r.scalar_one_or_none()
+    if not po: raise HTTPException(404)
+    qty  = payload.quantity
+    sub  = qty * payload.unit_price * (1 - payload.discount_pct / 100)
+    tax  = sub * payload.tax_pct / 100
+    item = POItem(
+        tenant_id=current_user.tenant_id, po_id=po_id,
+        product_name=payload.product_name, product_sku=payload.product_sku,
+        product_id=payload.product_id, quantity=qty, unit=payload.unit,
+        unit_price=payload.unit_price, tax_pct=payload.tax_pct,
+        discount_pct=payload.discount_pct, line_total=round(sub + tax, 2),
+        hsn_code=payload.hsn_code, notes=payload.notes,
+    )
+    db.add(item)
+    await db.flush()
+    await _recalc_po(po_id, db)
+    return poi_out(item)
+
+
+@router.delete("/orders/{po_id}/items/{item_id}")
+async def delete_po_item(po_id: UUID, item_id: UUID, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    r = await db.execute(select(POItem).where(POItem.id == item_id, POItem.po_id == po_id))
+    item = r.scalar_one_or_none()
+    if not item: raise HTTPException(404)
+    await db.delete(item)
+    await db.flush()
+    await _recalc_po(po_id, db)
+    return {"success": True}

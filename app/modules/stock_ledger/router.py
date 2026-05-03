@@ -357,3 +357,53 @@ async def post_opening_stock(
         "entries":       results,
         "message":       f"Opening stock posted for {len(results)} product(s)",
     }
+
+
+# ── GET /stock-ledger/entries — full movement log (required by movements page) ──
+@router.get("/entries")
+async def list_entries(
+    page:          int = Query(1, ge=1),
+    page_size:     int = Query(50, le=200),
+    movement_type: Optional[str] = Query(None),
+    product_id:    Optional[UUID] = Query(None),
+    search:        Optional[str] = Query(None),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """All stock ledger entries — used by Inventory → Movements page."""
+    from sqlalchemy import select, func, or_, text
+    q = select(StockLedger).where(StockLedger.tenant_id == current_user.tenant_id)
+    if movement_type: q = q.where(StockLedger.movement_type == movement_type)
+    if product_id:    q = q.where(StockLedger.product_id == product_id)
+    if search:
+        t = f"%{search}%"
+        q = q.where(or_(StockLedger.product_name.ilike(t), StockLedger.reference.ilike(t)))
+    total = (await db.execute(select(func.count()).select_from(q.subquery()))).scalar_one()
+    rows  = (await db.execute(q.order_by(StockLedger.created_at.desc()).offset((page-1)*page_size).limit(page_size))).scalars().all()
+
+    def entry_out(e):
+        return {
+            "id":            str(e.id),
+            "movement_type": e.movement_type,
+            "direction":     e.direction,
+            "product_id":    str(e.product_id) if e.product_id else None,
+            "product_name":  e.product_name,
+            "product_sku":   getattr(e, 'product_sku', None),
+            "quantity":      float(e.quantity or 0),
+            "unit_cost":     float(e.unit_cost or 0),
+            "total_cost":    float(e.total_cost or 0),
+            "stock_after":   float(e.stock_after or 0),
+            "reference":     e.reference,
+            "notes":         e.notes,
+            "created_at":    e.created_at.isoformat() if e.created_at else "",
+        }
+
+    import math
+    return {
+        "entries":     [entry_out(e) for e in rows],
+        "items":       [entry_out(e) for e in rows],
+        "total":       total,
+        "page":        page,
+        "page_size":   page_size,
+        "total_pages": math.ceil(total / page_size) if page_size else 1,
+    }

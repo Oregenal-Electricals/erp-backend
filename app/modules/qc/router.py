@@ -86,3 +86,81 @@ async def delete_inspection(iid: UUID, current_user: User=Depends(get_current_ac
     from datetime import datetime, timezone
     i.deleted_at = datetime.now(timezone.utc)
     return {"success": True}
+
+
+# ── QC Defect Tracking ────────────────────────────────────────────────
+class QCDefect(Base):
+    __tablename__ = "qc_defects"
+    tenant_id      = sa.Column(PG_UUID(as_uuid=True), sa.ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    inspection_id  = sa.Column(PG_UUID(as_uuid=True), sa.ForeignKey("qc_inspections.id", ondelete="CASCADE"), nullable=False, index=True)
+    category       = sa.Column(sa.String(100), nullable=False)   # visual, dimensional, functional, packaging
+    description    = sa.Column(sa.Text, nullable=False)
+    severity       = sa.Column(sa.String(20), default="minor", nullable=False)  # minor|major|critical
+    quantity       = sa.Column(sa.Integer, default=1, nullable=False)
+    disposition    = sa.Column(sa.String(30), default="rework", nullable=False)  # rework|scrap|accept
+    image_url      = sa.Column(sa.String(500), nullable=True)
+
+
+class DefectCreate(BaseModel):
+    category:    str
+    description: str
+    severity:    str = "minor"
+    quantity:    int = 1
+    disposition: str = "rework"
+
+
+def defect_out(d: QCDefect) -> dict:
+    return {"id": str(d.id), "category": d.category, "description": d.description,
+            "severity": d.severity, "quantity": d.quantity, "disposition": d.disposition,
+            "created_at": d.created_at.isoformat() if d.created_at else ""}
+
+
+@router.get("/inspections/{iid}")
+async def get_inspection(iid: UUID, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select as sel
+    r = await db.execute(sel(QCInspection).where(QCInspection.id == iid, QCInspection.tenant_id == current_user.tenant_id))
+    insp = r.scalar_one_or_none()
+    if not insp: raise HTTPException(404)
+    defects_r = await db.execute(sel(QCDefect).where(QCDefect.inspection_id == iid))
+    defects = defects_r.scalars().all()
+    result = qc_out(insp)
+    result["defects"] = [defect_out(d) for d in defects]
+    return result
+
+
+@router.post("/inspections/{iid}/defects", status_code=201)
+async def add_defect(iid: UUID, payload: DefectCreate, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    d = QCDefect(tenant_id=current_user.tenant_id, inspection_id=iid, **payload.model_dump())
+    db.add(d); await db.flush(); return defect_out(d)
+
+
+@router.post("/inspections/{iid}/pass")
+async def pass_inspection(iid: UUID, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select as sel
+    r = await db.execute(sel(QCInspection).where(QCInspection.id == iid, QCInspection.tenant_id == current_user.tenant_id))
+    insp = r.scalar_one_or_none()
+    if not insp: raise HTTPException(404)
+    insp.status = "passed"; insp.result = "pass"
+    return qc_out(insp)
+
+
+@router.post("/inspections/{iid}/fail")
+async def fail_inspection(iid: UUID, remarks: Optional[str] = None, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select as sel
+    r = await db.execute(sel(QCInspection).where(QCInspection.id == iid, QCInspection.tenant_id == current_user.tenant_id))
+    insp = r.scalar_one_or_none()
+    if not insp: raise HTTPException(404)
+    insp.status = "failed"; insp.result = "fail"
+    if remarks: insp.remarks = remarks
+    return qc_out(insp)
+
+
+@router.get("/stats")
+async def qc_stats(current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import func, select as sel
+    total  = (await db.execute(sel(func.count(QCInspection.id)).where(QCInspection.tenant_id == current_user.tenant_id))).scalar_one()
+    passed = (await db.execute(sel(func.count(QCInspection.id)).where(QCInspection.tenant_id == current_user.tenant_id, QCInspection.result == "pass"))).scalar_one()
+    failed = (await db.execute(sel(func.count(QCInspection.id)).where(QCInspection.tenant_id == current_user.tenant_id, QCInspection.result == "fail"))).scalar_one()
+    pending = (await db.execute(sel(func.count(QCInspection.id)).where(QCInspection.tenant_id == current_user.tenant_id, QCInspection.status == "pending"))).scalar_one()
+    rate   = round(passed / total * 100, 1) if total > 0 else 0
+    return {"total": total, "passed": passed, "failed": failed, "pending": pending, "pass_rate": rate}

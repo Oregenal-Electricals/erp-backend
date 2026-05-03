@@ -141,3 +141,80 @@ async def stock_alerts(current_user: User = Depends(get_current_active_user), db
     result = await db.execute(q)
     items = result.scalars().all()
     return {"items": [product_out(i) for i in items], "total": len(items)}
+
+
+# ── Warehouse CRUD ──────────────────────────────────────────────────────
+# These endpoints are called by the frontend inventory/warehouses page
+import sqlalchemy as _sa
+
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+    tenant_id = _sa.Column(PG_UUID(as_uuid=True), _sa.ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    name      = _sa.Column(_sa.String(300), nullable=False)
+    code      = _sa.Column(_sa.String(30), nullable=True)
+    location  = _sa.Column(_sa.String(300), nullable=True)
+    capacity  = _sa.Column(_sa.Numeric(12, 2), nullable=True)
+    manager   = _sa.Column(_sa.String(200), nullable=True)
+    notes     = _sa.Column(_sa.Text, nullable=True)
+    is_active = _sa.Column(_sa.Boolean, default=True, nullable=False)
+
+
+class WarehouseCreate(BaseModel):
+    name:     str
+    code:     Optional[str] = None
+    location: Optional[str] = None
+    capacity: Optional[float] = None
+    manager:  Optional[str] = None
+    notes:    Optional[str] = None
+
+
+class WarehouseUpdate(BaseModel):
+    name:     Optional[str] = None
+    code:     Optional[str] = None
+    location: Optional[str] = None
+    capacity: Optional[float] = None
+    manager:  Optional[str] = None
+    notes:    Optional[str] = None
+    is_active:Optional[bool] = None
+
+
+def wh_out(w: Warehouse) -> dict:
+    return {
+        "id": str(w.id), "name": w.name, "code": w.code,
+        "location": w.location, "capacity": float(w.capacity or 0),
+        "manager": w.manager, "notes": w.notes, "is_active": w.is_active,
+        "created_at": w.created_at.isoformat() if w.created_at else "",
+    }
+
+
+@router.get("/warehouses")
+async def list_warehouses(current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    result = await db.execute(select(Warehouse).where(Warehouse.tenant_id == current_user.tenant_id, Warehouse.is_active == True).order_by(Warehouse.name))
+    items = result.scalars().all()
+    return {"items": [wh_out(i) for i in items], "total": len(items)}
+
+
+@router.post("/warehouses", status_code=201)
+async def create_warehouse(payload: WarehouseCreate, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    w = Warehouse(tenant_id=current_user.tenant_id, **payload.model_dump())
+    db.add(w); await db.flush(); return wh_out(w)
+
+
+@router.put("/warehouses/{wid}")
+async def update_warehouse(wid: UUID, payload: WarehouseUpdate, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    r = await db.execute(select(Warehouse).where(Warehouse.id == wid, Warehouse.tenant_id == current_user.tenant_id))
+    w = r.scalar_one_or_none()
+    if not w: raise HTTPException(404)
+    for k, v in payload.model_dump(exclude_unset=True).items(): setattr(w, k, v)
+    return wh_out(w)
+
+
+@router.delete("/warehouses/{wid}")
+async def delete_warehouse(wid: UUID, current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    r = await db.execute(select(Warehouse).where(Warehouse.id == wid, Warehouse.tenant_id == current_user.tenant_id))
+    w = r.scalar_one_or_none()
+    if not w: raise HTTPException(404)
+    w.is_active = False; return {"success": True}

@@ -1,5 +1,5 @@
 """
-FlowERP — SaaS / Tenant Router
+Oregenal ERP — SaaS / Tenant Router
 ================================
 Endpoints:
   POST /saas/register             register new tenant (public)
@@ -221,7 +221,7 @@ async def register_tenant(
         "success":    True,
         "tenant_id":  str(tenant.id),
         "tenant_slug": slug,
-        "message":    f"Welcome to FlowERP! Your workspace '{payload.company_name}' is ready.",
+        "message":    f"Welcome to Oregenal ERP! Your workspace '{payload.company_name}' is ready.",
         "plan":       PLANS[payload.plan],
         "next_steps": [
             "Login at /login with your admin credentials",
@@ -353,3 +353,77 @@ async def list_tenants(
         "page": page,
         "page_size": page_size,
     }
+
+
+# ── Company Branding & Settings ────────────────────────────────────────
+class BrandingUpdate(BaseModel):
+    company_name:   Optional[str] = None
+    primary_color:  Optional[str] = None
+    logo_url:       Optional[str] = None
+    address:        Optional[str] = None
+    gstin:          Optional[str] = None
+    pan:            Optional[str] = None
+    phone:          Optional[str] = None
+    email:          Optional[str] = None
+    website:        Optional[str] = None
+    currency:       Optional[str] = None
+    timezone:       Optional[str] = None
+    financial_year_start: Optional[str] = None
+
+
+@router.get("/company")
+async def get_company(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get current company/tenant settings."""
+    result = await db.execute(select(Tenant).where(Tenant.id == current_user.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(404, "Tenant not found")
+    settings = tenant.settings or {}
+    return {
+        "id":            str(tenant.id),
+        "company_name":  tenant.name,
+        "slug":          tenant.slug,
+        "plan":          tenant.plan,
+        "primary_color": tenant.primary_color or "#4F46E5",
+        "logo_url":      tenant.logo_url,
+        "address":       settings.get("address"),
+        "gstin":         settings.get("gstin"),
+        "pan":           settings.get("pan"),
+        "phone":         settings.get("phone"),
+        "email":         settings.get("email"),
+        "website":       settings.get("website"),
+        "currency":      settings.get("currency", "INR"),
+        "timezone":      settings.get("timezone", "Asia/Kolkata"),
+        "financial_year_start": settings.get("financial_year_start", "04"),
+    }
+
+
+@router.put("/company")
+async def update_company(
+    payload: BrandingUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update company branding and settings."""
+    result = await db.execute(select(Tenant).where(Tenant.id == current_user.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(404, "Tenant not found")
+
+    if payload.company_name:  tenant.name          = payload.company_name
+    if payload.primary_color: tenant.primary_color = payload.primary_color
+    if payload.logo_url is not None: tenant.logo_url = payload.logo_url
+
+    # Store rest in settings JSON
+    settings = dict(tenant.settings or {})
+    for field in ["address","gstin","pan","phone","email","website","currency","timezone","financial_year_start"]:
+        val = getattr(payload, field, None)
+        if val is not None:
+            settings[field] = val
+    tenant.settings = settings
+
+    await db.flush()
+    return {"success": True, "message": "Company settings updated"}

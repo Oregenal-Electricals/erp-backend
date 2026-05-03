@@ -1,4 +1,4 @@
-"""FlowERP — FastAPI Application — Phase 9: Full Plant Operations"""
+"""Oregenal ERP — FastAPI Application — Oregenal Electrical India Pvt Ltd"""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +12,7 @@ from app.core.exceptions import (
     ERPException, erp_exception_handler,
     validation_exception_handler, integrity_error_handler, generic_exception_handler,
 )
-from app.modules.auth.router              import router as auth_router, users_router
+from app.modules.auth.router              import router as auth_router, users_router, roles_router, rbac_router
 from app.modules.config.router            import router as config_router
 from app.modules.crm.router               import router as crm_router
 from app.modules.dashboard.router         import router as dashboard_router
@@ -35,6 +35,7 @@ from app.modules.dispatch.router          import router as dispatch_router
 from app.modules.maintenance.router       import router as maintenance_router
 from app.modules.payroll.router           import router as payroll_router
 from app.modules.costing.router           import router as costing_router
+from app.modules.finance.router           import router as finance_router
 
 
 @asynccontextmanager
@@ -51,7 +52,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version="9.0.0",
-        description="FlowERP — Full Plant Operations ERP",
+        description="Oregenal ERP — Oregenal Electrical India Private Limited",
         docs_url="/api/docs"   if not settings.is_production else None,
         redoc_url="/api/redoc" if not settings.is_production else None,
         openapi_url="/api/openapi.json" if not settings.is_production else None,
@@ -66,7 +67,7 @@ def create_app() -> FastAPI:
 
     API = settings.API_V1_PREFIX
     for r in [
-        auth_router, users_router, config_router,
+        auth_router, users_router, roles_router, rbac_router, config_router,
         sales_router, crm_router, dashboard_router,
         inventory_router, purchase_router,
         manufacturing_router, bom_router, bom_work_router,
@@ -74,18 +75,20 @@ def create_app() -> FastAPI:
         notifications_router, documents_router, reports_router,
         saas_router, stock_ledger_router, gst_router, email_router,
         dispatch_router, maintenance_router, payroll_router, costing_router,
+        finance_router,
     ]:
         app.include_router(r, prefix=API)
 
     @app.get("/health", tags=["Health"])
     async def health():
         db_ok = await check_db_connection()
-        return {"status": "ok" if db_ok else "degraded", "version": "9.0.0", "phase": "9 — Full Plant Ops", "modules": 24, "db": "connected" if db_ok else "disconnected"}
+        return {"status": "ok" if db_ok else "degraded", "version": "9.0.0", "phase": "Production", "modules": 24, "db": "connected" if db_ok else "disconnected"}
 
     @app.get("/", tags=["Root"])
     async def root():
-        return {"app": settings.APP_NAME, "version": "9.0.0", "docs": "/api/docs", "modules": 24}
+        return {"app": settings.APP_NAME, "version": settings.APP_VERSION, "docs": "/api/docs", "modules": 24}
 
     return app
 
 app = create_app()
+

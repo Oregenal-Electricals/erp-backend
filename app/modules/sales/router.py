@@ -111,19 +111,6 @@ class OrderItem(Base):
     sort_order   = sa.Column(sa.Integer, default=0, nullable=False)
 
 
-class PaymentRecord(Base):
-    __tablename__ = "payment_records"
-
-    tenant_id    = sa.Column(PG_UUID(as_uuid=True), sa.ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
-    order_id     = sa.Column(PG_UUID(as_uuid=True), sa.ForeignKey("sales_orders.id", ondelete="CASCADE"), nullable=False, index=True)
-    amount       = sa.Column(sa.Numeric(15,2), nullable=False)
-    payment_date = sa.Column(sa.String(20), nullable=True)
-    method       = sa.Column(sa.String(50), default="bank_transfer", nullable=False)
-    reference    = sa.Column(sa.String(200), nullable=True)
-    notes        = sa.Column(sa.Text, nullable=True)
-    recorded_by  = sa.Column(PG_UUID(as_uuid=True), nullable=True)
-
-
 # ── Helper: recalculate order totals ──────────────────────────────────
 
 async def recalculate_order(order: SalesOrder, db: AsyncSession):
