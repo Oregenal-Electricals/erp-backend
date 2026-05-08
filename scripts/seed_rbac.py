@@ -46,7 +46,7 @@ def q(sql: str) -> str:
 ALL_MODULES = [
     "crm", "sales", "purchase", "inventory", "manufacturing",
     "qc", "accounts", "hr", "reports", "settings",
-    "dispatch", "finance", "gst", "payroll", "maintenance",
+    "dispatch", "gate", "masters", "finance", "gst", "payroll", "maintenance",
     "costing", "documents",
 ]
 ALL_ACTIONS = ["view", "create", "edit", "delete", "approve", "export"]
@@ -80,6 +80,8 @@ ROLES = [
             "inventory":    ["view", "create", "edit", "approve", "export"],
             "purchase":     ["view", "create", "edit", "approve", "export"],
             "dispatch":     ["view", "create", "edit"],
+            "gate":         ["view", "create", "edit", "approve"],
+            "masters":      ["view", "create", "edit"],
             "reports":      ["view", "export"],
             "crm":          ["view"],
             "sales":        ["view"],
@@ -108,6 +110,8 @@ ROLES = [
             "purchase":     ["view"],
             "manufacturing":["view"],
             "dispatch":     ["view"],
+            "gate":         ["view"],
+            "masters":      ["view"],
             "reports":      ["view", "export"],
             "crm":          [],
             "sales":        [],
@@ -129,7 +133,9 @@ ROLES = [
         "level":       20,
         "is_system":   True,
         "permissions": {
-            "dispatch":     ["view", "create"],
+            "gate":         ["view", "create"],
+            "masters":      ["view"],
+            "dispatch":     ["view"],
             "inventory":    ["view"],
             "purchase":     ["view"],
             "qc":           ["view"],

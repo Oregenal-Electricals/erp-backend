@@ -36,6 +36,9 @@ from app.modules.maintenance.router       import router as maintenance_router
 from app.modules.payroll.router           import router as payroll_router
 from app.modules.costing.router           import router as costing_router
 from app.modules.finance.router           import router as finance_router
+from app.modules.master.router            import router as master_router
+from app.modules.masters.router           import router as masters_router
+from app.modules.gate.router              import router as gate_router
 
 
 @asynccontextmanager
@@ -76,17 +79,20 @@ def create_app() -> FastAPI:
         saas_router, stock_ledger_router, gst_router, email_router,
         dispatch_router, maintenance_router, payroll_router, costing_router,
         finance_router,
+        master_router,
+        masters_router,
+        gate_router,
     ]:
         app.include_router(r, prefix=API)
 
     @app.get("/health", tags=["Health"])
     async def health():
         db_ok = await check_db_connection()
-        return {"status": "ok" if db_ok else "degraded", "version": "9.0.0", "phase": "Production", "modules": 24, "db": "connected" if db_ok else "disconnected"}
+        return {"status": "ok" if db_ok else "degraded", "version": "9.0.0", "phase": "Production", "modules": 26, "db": "connected" if db_ok else "disconnected"}
 
     @app.get("/", tags=["Root"])
     async def root():
-        return {"app": settings.APP_NAME, "version": settings.APP_VERSION, "docs": "/api/docs", "modules": 24}
+        return {"app": settings.APP_NAME, "version": settings.APP_VERSION, "docs": "/api/docs", "modules": 26}
 
     return app
 

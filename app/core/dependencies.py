@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from app.core.database import get_db
 from app.core.security import decode_access_token
-from app.models.user import User
+from app.models.user import User, Role
 from app.models.tenant import Tenant
 
 # ── Bearer token extractor ────────────────────────────────────────────
@@ -39,6 +39,14 @@ async def get_current_user(
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+
+    # Eagerly load the role so user.permissions property works correctly.
+    # role_obj uses lazy="noload" so we must fetch it explicitly here.
+    if user.role_id:
+        role_result = await db.execute(
+            select(Role).where(Role.id == user.role_id)
+        )
+        user.role_obj = role_result.scalar_one_or_none()
 
     return user
 
