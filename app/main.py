@@ -1,5 +1,11 @@
-"""Oregenal ERP — FastAPI Application — Oregenal Electrical India Pvt Ltd"""
+"""
+app/main.py
+============
+Oregenal ERP — FastAPI Application Entry Point
+Oregenal Electrical India Private Limited
+"""
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
@@ -9,10 +15,21 @@ from sqlalchemy.exc import IntegrityError
 from app.core.config import settings
 from app.core.database import check_db_connection
 from app.core.exceptions import (
-    ERPException, erp_exception_handler,
-    validation_exception_handler, integrity_error_handler, generic_exception_handler,
+    ERPException,
+    erp_exception_handler,
+    validation_exception_handler,
+    integrity_error_handler,
+    generic_exception_handler,
 )
-from app.modules.auth.router              import router as auth_router, users_router, roles_router, rbac_router
+
+# ── Module routers ────────────────────────────────────────────────────────
+from app.modules.auth.router import (
+    router as auth_router,
+    users_router,
+    roles_router,
+    rbac_router,
+    dept_router,
+)
 from app.modules.config.router            import router as config_router
 from app.modules.crm.router               import router as crm_router
 from app.modules.dashboard.router         import router as dashboard_router
@@ -53,48 +70,85 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(
+        redirect_slashes=False,
         title=settings.APP_NAME,
         version="9.0.0",
         description="Oregenal ERP — Oregenal Electrical India Private Limited",
-        docs_url="/api/docs"   if not settings.is_production else None,
-        redoc_url="/api/redoc" if not settings.is_production else None,
+        docs_url="/api/docs"        if not settings.is_production else None,
+        redoc_url="/api/redoc"      if not settings.is_production else None,
         openapi_url="/api/openapi.json" if not settings.is_production else None,
         default_response_class=ORJSONResponse,
         lifespan=lifespan,
     )
-    app.add_middleware(CORSMiddleware, allow_origins=settings.CORS_ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], expose_headers=["X-Total-Count"])
+
+    # ── CORS ──────────────────────────────────────────────────────────
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # ── Exception handlers ─────────────────────────────────────────────
     app.add_exception_handler(ERPException, erp_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(IntegrityError, integrity_error_handler)
     app.add_exception_handler(Exception, generic_exception_handler)
 
-    API = settings.API_V1_PREFIX
-    for r in [
-        auth_router, users_router, roles_router, rbac_router, config_router,
-        sales_router, crm_router, dashboard_router,
-        inventory_router, purchase_router,
-        manufacturing_router, bom_router, bom_work_router,
-        qc_router, accounts_router, hr_router,
-        notifications_router, documents_router, reports_router,
-        saas_router, stock_ledger_router, gst_router, email_router,
-        dispatch_router, maintenance_router, payroll_router, costing_router,
-        finance_router,
-        master_router,
-        masters_router,
-        gate_router,
-    ]:
-        app.include_router(r, prefix=API)
+    # ── API v1 routes ──────────────────────────────────────────────────
+    prefix = settings.API_V1_PREFIX  # /api/v1
 
+    # Auth + Users + Roles + RBAC + Departments
+    app.include_router(auth_router,    prefix=prefix)
+    app.include_router(users_router,   prefix=prefix)
+    app.include_router(roles_router,   prefix=prefix)
+    app.include_router(rbac_router,    prefix=prefix)
+    app.include_router(dept_router,    prefix=prefix)
+
+    # Config / Settings
+    app.include_router(config_router,       prefix=prefix)
+
+    # Core modules
+    app.include_router(master_router,       prefix=prefix)
+    app.include_router(masters_router,      prefix=prefix)
+    app.include_router(crm_router,          prefix=prefix)
+    app.include_router(sales_router,        prefix=prefix)
+    app.include_router(purchase_router,     prefix=prefix)
+    app.include_router(inventory_router,    prefix=prefix)
+    app.include_router(stock_ledger_router, prefix=prefix)
+    app.include_router(manufacturing_router, prefix=prefix)
+    app.include_router(bom_router,          prefix=prefix)
+    app.include_router(bom_work_router,     prefix=prefix)
+    app.include_router(qc_router,           prefix=prefix)
+    app.include_router(accounts_router,     prefix=prefix)
+    app.include_router(hr_router,           prefix=prefix)
+    app.include_router(finance_router,      prefix=prefix)
+    app.include_router(gst_router,          prefix=prefix)
+    app.include_router(payroll_router,      prefix=prefix)
+    app.include_router(costing_router,      prefix=prefix)
+    app.include_router(maintenance_router,  prefix=prefix)
+    app.include_router(gate_router,         prefix=prefix)
+    app.include_router(dispatch_router,     prefix=prefix)
+    app.include_router(documents_router,    prefix=prefix)
+    app.include_router(reports_router,      prefix=prefix)
+    app.include_router(notifications_router, prefix=prefix)
+    app.include_router(email_router,        prefix=prefix)
+    app.include_router(saas_router,         prefix=prefix)
+    app.include_router(dashboard_router,    prefix=prefix)
+
+    # ── Health check ───────────────────────────────────────────────────
     @app.get("/health", tags=["Health"])
     async def health():
         db_ok = await check_db_connection()
-        return {"status": "ok" if db_ok else "degraded", "version": "9.0.0", "phase": "Production", "modules": 26, "db": "connected" if db_ok else "disconnected"}
-
-    @app.get("/", tags=["Root"])
-    async def root():
-        return {"app": settings.APP_NAME, "version": settings.APP_VERSION, "docs": "/api/docs", "modules": 26}
+        return {
+            "status": "ok" if db_ok else "degraded",
+            "db": "connected" if db_ok else "disconnected",
+            "version": "9.0.0",
+            "env": settings.APP_ENV,
+        }
 
     return app
 
-app = create_app()
 
+app = create_app()

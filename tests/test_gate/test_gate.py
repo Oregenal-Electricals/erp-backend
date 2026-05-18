@@ -620,6 +620,10 @@ async def get_admin(client):
     return await login(client, "rahul@oregenal.com", "Admin@1234")
 
 
+async def get_store_manager(client):
+    return await login(client, "store@oregenal.com", "Store@1234")
+
+
 async def test_purge_removes_gate_test_data(client):
     """Purge endpoint must remove gate test data (is_test_data=True rows)."""
     sa = await get_super_admin(client)
