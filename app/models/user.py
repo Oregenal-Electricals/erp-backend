@@ -75,7 +75,7 @@ class User(Base):
     # Status
     is_active          = Column(Boolean, default=True, nullable=False)
     is_email_verified  = Column(Boolean, default=False, nullable=False)
-    last_login_at      = Column(String, nullable=True)
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
 
     # Preferences
     preferences = Column(JSON, default=dict, nullable=False)

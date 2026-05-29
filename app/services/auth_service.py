@@ -148,6 +148,8 @@ def _validate_slug(slug: str) -> str:
 
 def _validate_permissions(permissions: Dict) -> None:
     """Raise 422 if any action is not in VALID_ACTIONS."""
+    if not permissions:
+        return
     bad = []
     for mod, acts in permissions.items():
         for a in acts:
@@ -199,7 +201,7 @@ async def login(
     await db.execute(
         sa.update(User)
         .where(User.id == user.id)
-        .values(last_login_at=datetime.now(timezone.utc).isoformat())
+        .values(last_login_at=datetime.now(timezone.utc))
     )
 
     permissions = await _get_permissions(user, db)
@@ -278,6 +280,7 @@ async def list_users(
     tenant_id: UUID,
     db: AsyncSession,
     *,
+    caller: Optional["User"] = None,
     page: int = 1,
     page_size: int = 25,
     search: Optional[str] = None,
@@ -285,6 +288,9 @@ async def list_users(
     is_active: Optional[bool] = None,
 ) -> Dict:
     q = select(User).where(User.tenant_id == tenant_id)
+    # Admin cannot see super_admin users — only super_admin can
+    if caller and caller.role != "super_admin":
+        q = q.where(User.role != "super_admin")
     if search:
         like = f"%{search}%"
         q = q.where(sa.or_(User.name.ilike(like), User.email.ilike(like)))
@@ -554,6 +560,54 @@ async def delete_user(
     return {"success": True, "message": "User deactivated."}
 
 
+
+
+async def admin_reset_password(
+    target_user_id: UUID,
+    tenant_id: UUID,
+    caller: User,
+    new_password: str,
+    db: AsyncSession,
+    request: Optional[Request] = None,
+) -> Dict:
+    """
+    Admin/Super Admin resets another user's password without knowing the current one.
+    - super_admin: can reset any user
+    - admin: can reset any user except super_admin
+    """
+    if caller.role not in ("admin", "super_admin"):
+        raise HTTPException(403, "Admin access required.")
+
+    target = await _get_user_by_id(target_user_id, tenant_id, db)
+    if not target:
+        raise HTTPException(404, "User not found.")
+
+    if caller.role == "admin" and target.role == "super_admin":
+        raise HTTPException(403, "Admin cannot reset Super Admin password.")
+
+    if caller.id == target_user_id:
+        raise HTTPException(400, "Use /auth/change-password to change your own password.")
+
+    _validate_password(new_password)
+
+    await db.execute(
+        sa.update(User)
+        .where(User.id == target_user_id)
+        .values(hashed_password=hash_password(new_password))
+    )
+
+    log = PermissionAuditLog(
+        tenant_id=tenant_id,
+        changed_by_id=caller.id,
+        target_type="user",
+        target_id=target_user_id,
+        action="admin_password_reset",
+        new_value={"reset_by": str(caller.id), "reset_by_role": caller.role},
+        ip_address=request.client.host if request and request.client else None,
+    )
+    db.add(log)
+
+    return {"success": True, "message": f"Password reset for {target.email}."}
 # ── Role Service ──────────────────────────────────────────────────────────
 
 async def list_roles(tenant_id: UUID, db: AsyncSession) -> Dict:

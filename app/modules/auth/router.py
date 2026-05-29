@@ -198,6 +198,22 @@ async def forgot_password(
 # ROUTER 2 — USERS  (/users)
 # ═══════════════════════════════════════════════════════════════════════
 
+
+class AdminPasswordResetPayload(BaseModel):
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters.")
+        import re
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter.")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain at least one digit.")
+        return v
+
 users_router = APIRouter(prefix="/users", tags=["Users"], redirect_slashes=False)
 
 
@@ -216,6 +232,7 @@ async def list_users(
         raise HTTPException(403, "Admin access required.")
     return await svc.list_users(
         current_user.tenant_id, db,
+        caller=current_user,
         page=page, page_size=page_size,
         search=search, role=role, is_active=is_active,
     )
@@ -370,6 +387,27 @@ async def delete_user(
 # ═══════════════════════════════════════════════════════════════════════
 # ROUTER 3 — ROLES  (/roles)
 # ═══════════════════════════════════════════════════════════════════════
+
+
+@users_router.post("/{user_id}/reset-password")
+async def admin_reset_password(
+    user_id: UUID,
+    payload: AdminPasswordResetPayload,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession   = Depends(get_db),
+):
+    """Reset any user's password. Admin+ only. Admin cannot reset Super Admin."""
+    result = await svc.admin_reset_password(
+        user_id,
+        current_user.tenant_id,
+        current_user,
+        payload.new_password,
+        db,
+        request,
+    )
+    await db.commit()
+    return result
 
 roles_router = APIRouter(prefix="/roles", tags=["Roles"], redirect_slashes=False)
 
