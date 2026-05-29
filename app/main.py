@@ -5,7 +5,7 @@ Oregenal ERP — FastAPI Application Entry Point
 Oregenal Electrical India Private Limited
 """
 from contextlib import asynccontextmanager
-
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
@@ -82,9 +82,11 @@ def create_app() -> FastAPI:
     )
 
     # ── CORS ──────────────────────────────────────────────────────────
+    
+
     app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+    CORSMiddleware,
+        allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(","),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
