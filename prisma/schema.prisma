@@ -7,333 +7,312 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────
+// ============================================================
 // ENUMS
-// ─────────────────────────────────────────────
+// ============================================================
 
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  PENDING
-}
-
-enum AuditAction {
-  CREATE
-  UPDATE
-  DELETE
-  LOGIN
-  LOGOUT
-  APPROVE
-  REJECT
-  EXPORT
-  VIEW
+enum UserRole {
+  SUPER_ADMIN
+  CORPORATE_ADMIN
+  PLANT_HEAD
+  UNIT_HEAD
+  PRODUCTION_HEAD
+  PLANNING_MANAGER
+  PURCHASE_MANAGER
+  STORE_MANAGER
+  QC_MANAGER
+  FINANCE_MANAGER
+  HR_MANAGER
+  SUPERVISOR
+  OPERATOR
+  VIEWER
 }
 
 enum FinancialYearStatus {
   OPEN
+  CURRENT
   CLOSED
-  LOCKED
 }
 
-// ─────────────────────────────────────────────
-// USERS & AUTH
-// ─────────────────────────────────────────────
-
-model User {
-  id            String     @id @default(uuid())
-  email         String     @unique
-  username      String     @unique
-  password_hash String
-  full_name     String
-  phone         String?
-  avatar_url    String?
-  status        UserStatus @default(PENDING)
-  last_login_at DateTime?
-  failed_login_attempts Int @default(0)
-  locked_until  DateTime?
-
-  // Standard fields
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
-  created_by    String?
-  updated_by    String?
-  is_active     Boolean    @default(true)
-  is_test_data  Boolean    @default(false)
-
-  // Relations
-  roles         UserRole[]
-  audit_logs    AuditLog[]
-  companies     Company[]  @relation("CompanyCreatedBy")
-  plants        Plant[]    @relation("PlantCreatedBy")
-  units         Unit[]     @relation("UnitCreatedBy")
-  departments   Department[] @relation("DeptCreatedBy")
-  financial_years FinancialYear[] @relation("FYCreatedBy")
-
-  @@map("users")
-}
-
-model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  code        String   @unique
-  description String?
-  is_system   Boolean  @default(false)
-
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  created_by  String?
-  updated_by  String?
-  is_active   Boolean  @default(true)
-  is_test_data Boolean @default(false)
-
-  users       UserRole[]
-  permissions RolePermission[]
-
-  @@map("roles")
-}
-
-model Permission {
-  id          String   @id @default(uuid())
-  module      String
-  resource    String
-  action      String
-  code        String   @unique
-  description String?
-
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  created_by  String?
-  updated_by  String?
-  is_active   Boolean  @default(true)
-  is_test_data Boolean @default(false)
-
-  roles       RolePermission[]
-
-  @@map("permissions")
-}
-
-model UserRole {
-  id         String   @id @default(uuid())
-  user_id    String
-  role_id    String
-  company_id String?
-  plant_id   String?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  created_by String?
-  updated_by String?
-  is_active  Boolean  @default(true)
-  is_test_data Boolean @default(false)
-
-  user       User     @relation(fields: [user_id], references: [id])
-  role       Role     @relation(fields: [role_id], references: [id])
-
-  @@unique([user_id, role_id, company_id, plant_id])
-  @@map("user_roles")
-}
-
-model RolePermission {
-  id            String     @id @default(uuid())
-  role_id       String
-  permission_id String
-
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
-  created_by    String?
-  updated_by    String?
-  is_active     Boolean    @default(true)
-  is_test_data  Boolean    @default(false)
-
-  role          Role       @relation(fields: [role_id], references: [id])
-  permission    Permission @relation(fields: [permission_id], references: [id])
-
-  @@unique([role_id, permission_id])
-  @@map("role_permissions")
-}
-
-// ─────────────────────────────────────────────
+// ============================================================
 // AUDIT LOG
-// ─────────────────────────────────────────────
+// ============================================================
 
 model AuditLog {
-  id          String      @id @default(uuid())
-  user_id     String?
-  action      AuditAction
-  module      String
-  resource    String
-  resource_id String?
-  old_value   Json?
-  new_value   Json?
-  description String?
-  ip_address  String?
-  user_agent  String?
+  id         String   @id @default(uuid())
+  tableName  String
+  recordId   String
+  action     String
+  oldValues  Json?
+  newValues  Json?
+  changedBy  String
+  changedAt  DateTime @default(now())
+  ipAddress  String?
+  userAgent  String?
+  reason     String?
 
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
-  created_by  String?
-  updated_by  String?
-  is_active   Boolean     @default(true)
-  is_test_data Boolean    @default(false)
-
-  user        User?       @relation(fields: [user_id], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
 
   @@map("audit_logs")
+  @@index([tableName, recordId])
+  @@index([changedBy])
+  @@index([changedAt])
 }
 
-// ─────────────────────────────────────────────
-// MASTER — COMPANY
-// ─────────────────────────────────────────────
+// ============================================================
+// SYSTEM HEALTH
+// ============================================================
 
+model SystemHealth {
+  id        String   @id @default(uuid())
+  service   String
+  status    String
+  message   String?
+  checkedAt DateTime @default(now())
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("system_health")
+}
+
+// ============================================================
+// MODULE 1 — MASTER SETUP
+// ============================================================
+
+// ------------------------------------------------------------
+// COMPANY
+// ------------------------------------------------------------
 model Company {
-  id              String   @id @default(uuid())
-  code            String   @unique
-  name            String
-  legal_name      String?
-  gstin           String?
-  pan             String?
-  cin             String?
-  address_line1   String?
-  address_line2   String?
-  city            String?
-  state           String?
-  country         String   @default("India")
-  pincode         String?
-  phone           String?
-  email           String?
-  website         String?
-  logo_url        String?
-  currency        String   @default("INR")
-  fiscal_year_start Int    @default(4)
-  timezone        String   @default("Asia/Kolkata")
+  id               String   @id @default(uuid())
+  code             String   @unique
+  name             String
+  legalName        String
+  pan              String?
+  tan              String?
+  cin              String?
+  gstin            String?
+  msmeNumber       String?
+  address          String
+  city             String
+  state            String
+  country          String   @default("India")
+  pincode          String
+  phone            String?
+  email            String?
+  website          String?
+  logoUrl          String?
+  currencyCode     String   @default("INR")
+  fiscalYearStart  Int      @default(4)  // April = 4
+  timezone         String   @default("Asia/Kolkata")
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  created_by      String?
-  updated_by      String?
-  is_active       Boolean  @default(true)
-  is_test_data    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
 
-  creator         User?    @relation("CompanyCreatedBy", fields: [created_by], references: [id])
-  plants          Plant[]
-  financial_years FinancialYear[]
+  // Relations
+  plants         Plant[]
+  branches       Branch[]
+  departments    Department[]
+  financialYears FinancialYear[]
+  users          User[]
 
   @@map("companies")
+  @@index([code])
+  @@index([isActive])
 }
 
-// ─────────────────────────────────────────────
-// MASTER — PLANT
-// ─────────────────────────────────────────────
-
+// ------------------------------------------------------------
+// PLANT
+// ------------------------------------------------------------
 model Plant {
-  id            String   @id @default(uuid())
-  code          String   @unique
-  name          String
-  company_id    String
-  address_line1 String?
-  address_line2 String?
-  city          String?
-  state         String?
-  country       String   @default("India")
-  pincode       String?
-  phone         String?
-  email         String?
-  plant_head    String?
-  latitude      String?
-  longitude     String?
+  id          String  @id @default(uuid())
+  code        String  @unique
+  name        String
+  gstin       String?
+  address     String
+  city        String
+  state       String
+  country     String  @default("India")
+  pincode     String
+  phone       String?
+  email       String?
+  plantType   String  @default("MANUFACTURING") // MANUFACTURING, WAREHOUSE, OFFICE
 
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  created_by    String?
-  updated_by    String?
-  is_active     Boolean  @default(true)
-  is_test_data  Boolean  @default(false)
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
 
-  company       Company  @relation(fields: [company_id], references: [id])
-  creator       User?    @relation("PlantCreatedBy", fields: [created_by], references: [id])
-  units         Unit[]
-  departments   Department[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  // Relations
+  units Unit[]
 
   @@map("plants")
+  @@index([companyId])
+  @@index([code])
+  @@index([isActive])
 }
 
-// ─────────────────────────────────────────────
-// MASTER — UNIT
-// ─────────────────────────────────────────────
-
+// ------------------------------------------------------------
+// UNIT
+// ------------------------------------------------------------
 model Unit {
-  id          String   @id @default(uuid())
-  code        String   @unique
+  id          String  @id @default(uuid())
+  code        String  @unique
   name        String
-  plant_id    String
-  unit_type   String?
   description String?
+  unitType    String  @default("PRODUCTION") // PRODUCTION, WAREHOUSE, OFFICE, UTILITY
 
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  created_by  String?
-  updated_by  String?
-  is_active   Boolean  @default(true)
-  is_test_data Boolean @default(false)
+  plantId     String
+  plant       Plant   @relation(fields: [plantId], references: [id])
 
-  plant       Plant    @relation(fields: [plant_id], references: [id])
-  creator     User?    @relation("UnitCreatedBy", fields: [created_by], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
 
   @@map("units")
+  @@index([plantId])
+  @@index([code])
+  @@index([isActive])
 }
 
-// ─────────────────────────────────────────────
-// MASTER — DEPARTMENT
-// ─────────────────────────────────────────────
-
+// ------------------------------------------------------------
+// DEPARTMENT
+// ------------------------------------------------------------
 model Department {
-  id          String   @id @default(uuid())
-  code        String   @unique
+  id          String  @id @default(uuid())
+  code        String  @unique
   name        String
-  plant_id    String
-  parent_id   String?
   description String?
-  head_user_id String?
+  headName    String?
 
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  created_by  String?
-  updated_by  String?
-  is_active   Boolean  @default(true)
-  is_test_data Boolean @default(false)
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
 
-  plant       Plant      @relation(fields: [plant_id], references: [id])
-  creator     User?      @relation("DeptCreatedBy", fields: [created_by], references: [id])
-  parent      Department? @relation("DeptHierarchy", fields: [parent_id], references: [id])
-  children    Department[] @relation("DeptHierarchy")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
 
   @@map("departments")
+  @@index([companyId])
+  @@index([code])
+  @@index([isActive])
 }
 
-// ─────────────────────────────────────────────
-// MASTER — FINANCIAL YEAR
-// ─────────────────────────────────────────────
+// ------------------------------------------------------------
+// BRANCH
+// ------------------------------------------------------------
+model Branch {
+  id          String  @id @default(uuid())
+  code        String  @unique
+  name        String
+  gstin       String?
+  address     String
+  city        String
+  state       String
+  country     String  @default("India")
+  pincode     String
+  phone       String?
+  email       String?
+  branchType  String  @default("SALES") // SALES, OFFICE, WAREHOUSE
 
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("branches")
+  @@index([companyId])
+  @@index([code])
+  @@index([isActive])
+}
+
+// ------------------------------------------------------------
+// FINANCIAL YEAR
+// ------------------------------------------------------------
 model FinancialYear {
-  id          String              @id @default(uuid())
-  code        String              @unique
-  label       String
-  company_id  String
-  start_date  DateTime
-  end_date    DateTime
-  status      FinancialYearStatus @default(OPEN)
-  is_current  Boolean             @default(false)
+  id         String              @id @default(uuid())
+  code       String              @unique  // e.g. FY2024-25
+  label      String              // e.g. 2024-2025
+  startDate  DateTime
+  endDate    DateTime
+  status     FinancialYearStatus @default(OPEN)
 
-  created_at  DateTime            @default(now())
-  updated_at  DateTime            @updatedAt
-  created_by  String?
-  updated_by  String?
-  is_active   Boolean             @default(true)
-  is_test_data Boolean            @default(false)
+  companyId  String
+  company    Company @relation(fields: [companyId], references: [id])
 
-  company     Company             @relation(fields: [company_id], references: [id])
-  creator     User?               @relation("FYCreatedBy", fields: [created_by], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
 
   @@map("financial_years")
+  @@index([companyId])
+  @@index([status])
+  @@unique([companyId, label])
+}
+
+// ------------------------------------------------------------
+// USER (needed for JWT Auth — full build in Module 2,
+//       but skeleton required now so JWT works)
+// ------------------------------------------------------------
+model User {
+  id           String   @id @default(uuid())
+  employeeCode String?  @unique
+  firstName    String
+  lastName     String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         UserRole @default(VIEWER)
+  mustChangePwd Boolean @default(true)
+
+  companyId    String
+  company      Company @relation(fields: [companyId], references: [id])
+
+  lastLoginAt  DateTime?
+  isLocked     Boolean   @default(false)
+  loginAttempts Int      @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("users")
+  @@index([email])
+  @@index([companyId])
+  @@index([role])
 }
