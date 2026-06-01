@@ -1,43 +1,35 @@
-# Python
-venv/
-env/
-.env
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-dist/
-build/
-.eggs/
-
-# Node (if any)
+# Dependencies
 node_modules/
-.next/
+.pnp
+.pnp.js
 
-# Environment
+# Environment files - NEVER COMMIT THESE
 .env
 .env.local
+.env.development
 .env.staging
 .env.production
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Prisma
+prisma/migrations/**/migration.sql
+
+# Logs
+*.log
+npm-debug.log*
 
 # OS
 .DS_Store
 Thumbs.db
 
 # IDE
-.vscode/
+.vscode/settings.json
 .idea/
-*.swp
-
-# Logs
-*.log
-logs/
 
 # Testing
-.coverage
-htmlcov/
-
-# Prisma
-prisma/migrations/dev/
+coverage/
