@@ -15,19 +15,15 @@ export class PrismaService
 
   constructor() {
     super({
-      log: ['error', 'warn'],
-      errorFormat: 'minimal',
+      log: process.env.NODE_ENV === 'development'
+        ? ['query', 'info', 'warn', 'error']
+        : ['error'],
     });
   }
 
   async onModuleInit() {
-    try {
-      await this.$connect();
-      this.logger.log('Database connected successfully');
-    } catch (error) {
-      this.logger.error('Database connection failed', error);
-      throw error;
-    }
+    await this.$connect();
+    this.logger.log('Database connected');
   }
 
   async onModuleDestroy() {
@@ -41,6 +37,20 @@ export class PrismaService
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async cleanDatabase() {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('cleanDatabase not allowed in production');
+    }
+    const tablenames = await this.$queryRaw<Array<{ tablename: string }>>`
+      SELECT tablename FROM pg_tables WHERE schemaname='public'
+    `;
+    for (const { tablename } of tablenames) {
+      if (tablename !== '_prisma_migrations') {
+        await this.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE;`);
+      }
     }
   }
 }

@@ -7,51 +7,333 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================
-// AUDIT LOG TABLE - Required for all modules
-// ============================================
-model AuditLog {
-  id          String   @id @default(uuid())
-  tableName   String
-  recordId    String
-  action      String   // CREATE, UPDATE, DELETE, VIEW
-  oldValues   Json?
-  newValues   Json?
-  changedBy   String
-  changedAt   DateTime @default(now())
-  ipAddress   String?
-  userAgent   String?
-  reason      String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String   @default("system")
-  updatedBy   String   @default("system")
-  isActive    Boolean  @default(true)
-  isTestData  Boolean  @default(false)
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
 
-  @@map("audit_logs")
-  @@index([tableName, recordId])
-  @@index([changedBy])
-  @@index([changedAt])
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
 }
 
-// ============================================
-// HEALTH CHECK TABLE - Phase 0
-// ============================================
-model SystemHealth {
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  APPROVE
+  REJECT
+  EXPORT
+  VIEW
+}
+
+enum FinancialYearStatus {
+  OPEN
+  CLOSED
+  LOCKED
+}
+
+// ─────────────────────────────────────────────
+// USERS & AUTH
+// ─────────────────────────────────────────────
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  username      String     @unique
+  password_hash String
+  full_name     String
+  phone         String?
+  avatar_url    String?
+  status        UserStatus @default(PENDING)
+  last_login_at DateTime?
+  failed_login_attempts Int @default(0)
+  locked_until  DateTime?
+
+  // Standard fields
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  created_by    String?
+  updated_by    String?
+  is_active     Boolean    @default(true)
+  is_test_data  Boolean    @default(false)
+
+  // Relations
+  roles         UserRole[]
+  audit_logs    AuditLog[]
+  companies     Company[]  @relation("CompanyCreatedBy")
+  plants        Plant[]    @relation("PlantCreatedBy")
+  units         Unit[]     @relation("UnitCreatedBy")
+  departments   Department[] @relation("DeptCreatedBy")
+  financial_years FinancialYear[] @relation("FYCreatedBy")
+
+  @@map("users")
+}
+
+model Role {
   id          String   @id @default(uuid())
-  service     String
-  status      String
-  message     String?
-  checkedAt   DateTime @default(now())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  is_system   Boolean  @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String   @default("system")
-  updatedBy   String   @default("system")
-  isActive    Boolean  @default(true)
-  isTestData  Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  created_by  String?
+  updated_by  String?
+  is_active   Boolean  @default(true)
+  is_test_data Boolean @default(false)
 
-  @@map("system_health")
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  module      String
+  resource    String
+  action      String
+  code        String   @unique
+  description String?
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  created_by  String?
+  updated_by  String?
+  is_active   Boolean  @default(true)
+  is_test_data Boolean @default(false)
+
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  id         String   @id @default(uuid())
+  user_id    String
+  role_id    String
+  company_id String?
+  plant_id   String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  created_by String?
+  updated_by String?
+  is_active  Boolean  @default(true)
+  is_test_data Boolean @default(false)
+
+  user       User     @relation(fields: [user_id], references: [id])
+  role       Role     @relation(fields: [role_id], references: [id])
+
+  @@unique([user_id, role_id, company_id, plant_id])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  id            String     @id @default(uuid())
+  role_id       String
+  permission_id String
+
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  created_by    String?
+  updated_by    String?
+  is_active     Boolean    @default(true)
+  is_test_data  Boolean    @default(false)
+
+  role          Role       @relation(fields: [role_id], references: [id])
+  permission    Permission @relation(fields: [permission_id], references: [id])
+
+  @@unique([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  user_id     String?
+  action      AuditAction
+  module      String
+  resource    String
+  resource_id String?
+  old_value   Json?
+  new_value   Json?
+  description String?
+  ip_address  String?
+  user_agent  String?
+
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  created_by  String?
+  updated_by  String?
+  is_active   Boolean     @default(true)
+  is_test_data Boolean    @default(false)
+
+  user        User?       @relation(fields: [user_id], references: [id])
+
+  @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────────
+// MASTER — COMPANY
+// ─────────────────────────────────────────────
+
+model Company {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  name            String
+  legal_name      String?
+  gstin           String?
+  pan             String?
+  cin             String?
+  address_line1   String?
+  address_line2   String?
+  city            String?
+  state           String?
+  country         String   @default("India")
+  pincode         String?
+  phone           String?
+  email           String?
+  website         String?
+  logo_url        String?
+  currency        String   @default("INR")
+  fiscal_year_start Int    @default(4)
+  timezone        String   @default("Asia/Kolkata")
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  created_by      String?
+  updated_by      String?
+  is_active       Boolean  @default(true)
+  is_test_data    Boolean  @default(false)
+
+  creator         User?    @relation("CompanyCreatedBy", fields: [created_by], references: [id])
+  plants          Plant[]
+  financial_years FinancialYear[]
+
+  @@map("companies")
+}
+
+// ─────────────────────────────────────────────
+// MASTER — PLANT
+// ─────────────────────────────────────────────
+
+model Plant {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  company_id    String
+  address_line1 String?
+  address_line2 String?
+  city          String?
+  state         String?
+  country       String   @default("India")
+  pincode       String?
+  phone         String?
+  email         String?
+  plant_head    String?
+  latitude      String?
+  longitude     String?
+
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  created_by    String?
+  updated_by    String?
+  is_active     Boolean  @default(true)
+  is_test_data  Boolean  @default(false)
+
+  company       Company  @relation(fields: [company_id], references: [id])
+  creator       User?    @relation("PlantCreatedBy", fields: [created_by], references: [id])
+  units         Unit[]
+  departments   Department[]
+
+  @@map("plants")
+}
+
+// ─────────────────────────────────────────────
+// MASTER — UNIT
+// ─────────────────────────────────────────────
+
+model Unit {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  plant_id    String
+  unit_type   String?
+  description String?
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  created_by  String?
+  updated_by  String?
+  is_active   Boolean  @default(true)
+  is_test_data Boolean @default(false)
+
+  plant       Plant    @relation(fields: [plant_id], references: [id])
+  creator     User?    @relation("UnitCreatedBy", fields: [created_by], references: [id])
+
+  @@map("units")
+}
+
+// ─────────────────────────────────────────────
+// MASTER — DEPARTMENT
+// ─────────────────────────────────────────────
+
+model Department {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  plant_id    String
+  parent_id   String?
+  description String?
+  head_user_id String?
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  created_by  String?
+  updated_by  String?
+  is_active   Boolean  @default(true)
+  is_test_data Boolean @default(false)
+
+  plant       Plant      @relation(fields: [plant_id], references: [id])
+  creator     User?      @relation("DeptCreatedBy", fields: [created_by], references: [id])
+  parent      Department? @relation("DeptHierarchy", fields: [parent_id], references: [id])
+  children    Department[] @relation("DeptHierarchy")
+
+  @@map("departments")
+}
+
+// ─────────────────────────────────────────────
+// MASTER — FINANCIAL YEAR
+// ─────────────────────────────────────────────
+
+model FinancialYear {
+  id          String              @id @default(uuid())
+  code        String              @unique
+  label       String
+  company_id  String
+  start_date  DateTime
+  end_date    DateTime
+  status      FinancialYearStatus @default(OPEN)
+  is_current  Boolean             @default(false)
+
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+  created_by  String?
+  updated_by  String?
+  is_active   Boolean             @default(true)
+  is_test_data Boolean            @default(false)
+
+  company     Company             @relation(fields: [company_id], references: [id])
+  creator     User?               @relation("FYCreatedBy", fields: [created_by], references: [id])
+
+  @@map("financial_years")
 }

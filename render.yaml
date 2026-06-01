@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: erp-backend
+    runtime: node
+    region: singapore
+    branch: staging
+    buildCommand: npm install && npm run build && npx prisma generate && npx prisma migrate deploy
+    startCommand: node dist/main.js
+    healthCheckPath: /api/v1/health/ping
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: PORT
+        value: 3001

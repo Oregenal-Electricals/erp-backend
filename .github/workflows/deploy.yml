@@ -1,0 +1,59 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+  pull_request:
+    branches:
+      - develop
+      - staging
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Run tests
+        run: pnpm run test --passWithNoTests
+
+  deploy-staging:
+    name: Deploy to Render (Staging)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "Render deployment triggered"
+
+      - name: Wait and verify health
+        run: |
+          sleep 60
+          curl -f https://erp-backend.onrender.com/api/v1/health/ping || exit 1
+          echo "Health check passed"
