@@ -4,8 +4,8 @@ services:
     runtime: node
     region: singapore
     branch: staging
-    buildCommand: npm install --include=dev && npx prisma generate && npx prisma migrate deploy
-    startCommand: npm run build && node dist/main.js
+    buildCommand: npm install --include=dev && npm run build && npx prisma generate && npx prisma migrate deploy
+    startCommand: node dist/src/main.js
     healthCheckPath: /api/v1/health/ping
     envVars:
       - key: NODE_ENV
