@@ -11,7 +11,6 @@ node_modules/
 .env.production
 
 # Build outputs
-dist/
 build/
 .next/
 out/
