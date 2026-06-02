@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MastersController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const client_1 = require("@prisma/client");
 const masters_service_1 = require("./masters.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const permissions_guard_1 = require("../common/guards/permissions.guard");
@@ -28,7 +27,6 @@ const unit_dto_1 = require("./dto/unit.dto");
 const department_dto_1 = require("./dto/department.dto");
 const branch_dto_1 = require("./dto/branch.dto");
 const financial_year_dto_1 = require("./dto/financial-year.dto");
-const ADMIN_ROLES = [client_1.UserRole.SUPER_ADMIN, client_1.UserRole.CORPORATE_ADMIN];
 let MastersController = class MastersController {
     constructor(mastersService) {
         this.mastersService = mastersService;
@@ -36,8 +34,8 @@ let MastersController = class MastersController {
     createCompany(dto, user) {
         return this.mastersService.createCompany(dto, user.id);
     }
-    findAllCompanies(includeInactive) {
-        return this.mastersService.findAllCompanies(includeInactive === 'true');
+    findAllCompanies(includeInactive, user) {
+        return this.mastersService.findAllCompanies(includeInactive === 'true', user);
     }
     findOneCompany(id) {
         return this.mastersService.findOneCompany(id);
@@ -51,8 +49,8 @@ let MastersController = class MastersController {
     createPlant(dto, user) {
         return this.mastersService.createPlant(dto, user.id);
     }
-    findAllPlants(companyId, includeInactive) {
-        return this.mastersService.findAllPlants(companyId, includeInactive === 'true');
+    findAllPlants(companyId, includeInactive, user) {
+        return this.mastersService.findAllPlants(companyId, includeInactive === 'true', user);
     }
     findOnePlant(id) {
         return this.mastersService.findOnePlant(id);
@@ -66,8 +64,8 @@ let MastersController = class MastersController {
     createUnit(dto, user) {
         return this.mastersService.createUnit(dto, user.id);
     }
-    findAllUnits(plantId, includeInactive) {
-        return this.mastersService.findAllUnits(plantId, includeInactive === 'true');
+    findAllUnits(plantId, includeInactive, user) {
+        return this.mastersService.findAllUnits(plantId, includeInactive === 'true', user);
     }
     findOneUnit(id) {
         return this.mastersService.findOneUnit(id);
@@ -81,8 +79,8 @@ let MastersController = class MastersController {
     createDepartment(dto, user) {
         return this.mastersService.createDepartment(dto, user.id);
     }
-    findAllDepartments(companyId, includeInactive) {
-        return this.mastersService.findAllDepartments(companyId, includeInactive === 'true');
+    findAllDepartments(companyId, includeInactive, user) {
+        return this.mastersService.findAllDepartments(companyId, includeInactive === 'true', user);
     }
     findOneDepartment(id) {
         return this.mastersService.findOneDepartment(id);
@@ -96,8 +94,8 @@ let MastersController = class MastersController {
     createBranch(dto, user) {
         return this.mastersService.createBranch(dto, user.id);
     }
-    findAllBranches(companyId, includeInactive) {
-        return this.mastersService.findAllBranches(companyId, includeInactive === 'true');
+    findAllBranches(companyId, includeInactive, user) {
+        return this.mastersService.findAllBranches(companyId, includeInactive === 'true', user);
     }
     findOneBranch(id) {
         return this.mastersService.findOneBranch(id);
@@ -111,8 +109,8 @@ let MastersController = class MastersController {
     createFinancialYear(dto, user) {
         return this.mastersService.createFinancialYear(dto, user.id);
     }
-    findAllFinancialYears(companyId) {
-        return this.mastersService.findAllFinancialYears(companyId);
+    findAllFinancialYears(companyId, user) {
+        return this.mastersService.findAllFinancialYears(companyId, user);
     }
     getCurrentFinancialYear(companyId) {
         return this.mastersService.getCurrentFinancialYear(companyId);
@@ -141,17 +139,17 @@ __decorate([
 __decorate([
     (0, common_1.Get)('companies'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.COMPANY_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'List all companies' }),
+    (0, swagger_1.ApiOperation)({ summary: 'List companies' }),
     (0, swagger_1.ApiQuery)({ name: 'includeInactive', required: false, type: Boolean }),
     __param(0, (0, common_1.Query)('includeInactive')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], MastersController.prototype, "findAllCompanies", null);
 __decorate([
     (0, common_1.Get)('companies/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.COMPANY_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get company by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -160,7 +158,6 @@ __decorate([
 __decorate([
     (0, common_1.Put)('companies/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.COMPANY_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Update company' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
@@ -171,7 +168,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('companies/:id/toggle-status'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.COMPANY_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Activate or deactivate company' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -181,7 +177,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('plants'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PLANT_CREATE),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new plant' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -191,19 +186,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)('plants'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PLANT_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'List all plants' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'includeInactive', required: false, type: Boolean }),
     __param(0, (0, common_1.Query)('companyId')),
     __param(1, (0, common_1.Query)('includeInactive')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", void 0)
 ], MastersController.prototype, "findAllPlants", null);
 __decorate([
     (0, common_1.Get)('plants/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PLANT_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get plant by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -212,7 +206,6 @@ __decorate([
 __decorate([
     (0, common_1.Put)('plants/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PLANT_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Update plant' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
@@ -223,7 +216,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('plants/:id/toggle-status'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PLANT_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Activate or deactivate plant' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -233,7 +225,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('units'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.UNIT_CREATE),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new unit' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -243,19 +234,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)('units'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.UNIT_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'List all units' }),
     (0, swagger_1.ApiQuery)({ name: 'plantId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'includeInactive', required: false, type: Boolean }),
     __param(0, (0, common_1.Query)('plantId')),
     __param(1, (0, common_1.Query)('includeInactive')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", void 0)
 ], MastersController.prototype, "findAllUnits", null);
 __decorate([
     (0, common_1.Get)('units/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.UNIT_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get unit by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -264,7 +254,6 @@ __decorate([
 __decorate([
     (0, common_1.Put)('units/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.UNIT_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Update unit' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
@@ -275,7 +264,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('units/:id/toggle-status'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.UNIT_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Activate or deactivate unit' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -285,7 +273,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('departments'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DEPARTMENT_CREATE),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new department' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -295,19 +282,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)('departments'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DEPARTMENT_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'List all departments' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'includeInactive', required: false, type: Boolean }),
     __param(0, (0, common_1.Query)('companyId')),
     __param(1, (0, common_1.Query)('includeInactive')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", void 0)
 ], MastersController.prototype, "findAllDepartments", null);
 __decorate([
     (0, common_1.Get)('departments/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DEPARTMENT_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get department by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -316,7 +302,6 @@ __decorate([
 __decorate([
     (0, common_1.Put)('departments/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DEPARTMENT_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Update department' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
@@ -327,7 +312,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('departments/:id/toggle-status'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DEPARTMENT_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Activate or deactivate department' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -337,7 +321,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('branches'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BRANCH_CREATE),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new branch' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -347,19 +330,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)('branches'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BRANCH_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'List all branches' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'includeInactive', required: false, type: Boolean }),
     __param(0, (0, common_1.Query)('companyId')),
     __param(1, (0, common_1.Query)('includeInactive')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", void 0)
 ], MastersController.prototype, "findAllBranches", null);
 __decorate([
     (0, common_1.Get)('branches/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BRANCH_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get branch by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -368,7 +350,6 @@ __decorate([
 __decorate([
     (0, common_1.Put)('branches/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BRANCH_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Update branch' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
@@ -379,7 +360,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('branches/:id/toggle-status'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BRANCH_EDIT),
-    (0, swagger_1.ApiOperation)({ summary: 'Activate or deactivate branch' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -389,7 +369,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('financial-years'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCIAL_YEAR_CREATE),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new financial year' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -399,17 +378,16 @@ __decorate([
 __decorate([
     (0, common_1.Get)('financial-years'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCIAL_YEAR_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'List all financial years' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: false }),
     __param(0, (0, common_1.Query)('companyId')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], MastersController.prototype, "findAllFinancialYears", null);
 __decorate([
     (0, common_1.Get)('financial-years/current/:companyId'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCIAL_YEAR_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get current financial year for a company' }),
     __param(0, (0, common_1.Param)('companyId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -418,7 +396,6 @@ __decorate([
 __decorate([
     (0, common_1.Get)('financial-years/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCIAL_YEAR_VIEW),
-    (0, swagger_1.ApiOperation)({ summary: 'Get financial year by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -427,7 +404,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('financial-years/:id/set-current'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCIAL_YEAR_MANAGE),
-    (0, swagger_1.ApiOperation)({ summary: 'Set financial year as current' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -437,7 +413,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('financial-years/:id/close'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCIAL_YEAR_MANAGE),
-    (0, swagger_1.ApiOperation)({ summary: 'Close a financial year permanently' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),

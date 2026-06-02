@@ -37,7 +37,7 @@ export declare class MastersController {
         isActive: boolean;
         isTestData: boolean;
     }>;
-    findAllCompanies(includeInactive?: string): Promise<{
+    findAllCompanies(includeInactive?: string, user?: any): Promise<{
         id: string;
         code: string;
         name: string;
@@ -246,7 +246,7 @@ export declare class MastersController {
         plantType: string;
         companyId: string;
     }>;
-    findAllPlants(companyId?: string, includeInactive?: string): Promise<({
+    findAllPlants(companyId?: string, includeInactive?: string, user?: any): Promise<({
         company: {
             id: string;
             code: string;
@@ -370,7 +370,7 @@ export declare class MastersController {
         unitType: string;
         plantId: string;
     }>;
-    findAllUnits(plantId?: string, includeInactive?: string): Promise<({
+    findAllUnits(plantId?: string, includeInactive?: string, user?: any): Promise<({
         plant: {
             id: string;
             code: string;
@@ -477,7 +477,7 @@ export declare class MastersController {
         description: string | null;
         headName: string | null;
     }>;
-    findAllDepartments(companyId?: string, includeInactive?: string): Promise<({
+    findAllDepartments(companyId?: string, includeInactive?: string, user?: any): Promise<({
         company: {
             id: string;
             code: string;
@@ -565,7 +565,7 @@ export declare class MastersController {
         companyId: string;
         branchType: string;
     }>;
-    findAllBranches(companyId?: string, includeInactive?: string): Promise<({
+    findAllBranches(companyId?: string, includeInactive?: string, user?: any): Promise<({
         company: {
             id: string;
             code: string;
@@ -675,7 +675,7 @@ export declare class MastersController {
         endDate: Date;
         status: import(".prisma/client").$Enums.FinancialYearStatus;
     }>;
-    findAllFinancialYears(companyId?: string): Promise<({
+    findAllFinancialYears(companyId?: string, user?: any): Promise<({
         company: {
             id: string;
             code: string;
