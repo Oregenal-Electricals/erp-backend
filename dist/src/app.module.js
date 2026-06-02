@@ -18,6 +18,7 @@ const common_module_1 = require("./common/common.module");
 const health_module_1 = require("./health/health.module");
 const auth_module_1 = require("./auth/auth.module");
 const masters_module_1 = require("./masters/masters.module");
+const users_module_1 = require("./users/users.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -40,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             auth_module_1.AuthModule,
             masters_module_1.MastersModule,
+            users_module_1.UsersModule,
         ],
     })
 ], AppModule);
