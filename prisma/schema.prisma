@@ -7,55 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================
-// AUDIT LOG TABLE - Required for all modules
-// ============================================
-model AuditLog {
-  id          String   @id @default(uuid())
-  tableName   String
-  recordId    String
-  action      String   // CREATE, UPDATE, DELETE, VIEW
-  oldValues   Json?
-  newValues   Json?
-  changedBy   String
-  changedAt   DateTime @default(now())
-  ipAddress   String?
-  userAgent   String?
-  reason      String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String   @default("system")
-  updatedBy   String   @default("system")
-  isActive    Boolean  @default(true)
-  isTestData  Boolean  @default(false)
-
-  @@map("audit_logs")
-  @@index([tableName, recordId])
-  @@index([changedBy])
-  @@index([changedAt])
-}
-
-// ============================================
-// HEALTH CHECK TABLE - Phase 0
-// ============================================
-model SystemHealth {
-  id          String   @id @default(uuid())
-  service     String
-  status      String
-  message     String?
-  checkedAt   DateTime @default(now())
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String   @default("system")
-  updatedBy   String   @default("system")
-  isActive    Boolean  @default(true)
-  isTestData  Boolean  @default(false)
-
-  @@map("system_health")
-}
-
 // ============================================================
 // ENUMS
 // ============================================================
@@ -81,6 +32,57 @@ enum FinancialYearStatus {
   OPEN
   CURRENT
   CLOSED
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tableName  String
+  recordId   String
+  action     String
+  oldValues  Json?
+  newValues  Json?
+  changedBy  String
+  changedAt  DateTime @default(now())
+  ipAddress  String?
+  userAgent  String?
+  reason     String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("audit_logs")
+  @@index([tableName, recordId])
+  @@index([changedBy])
+  @@index([changedAt])
+}
+
+// ============================================================
+// SYSTEM HEALTH
+// ============================================================
+
+model SystemHealth {
+  id        String   @id @default(uuid())
+  service   String
+  status    String
+  message   String?
+  checkedAt DateTime @default(now())
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("system_health")
 }
 
 // ============================================================
@@ -117,11 +119,12 @@ model Company {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  plants         Plant[]
-  branches       Branch[]
-  departments    Department[]
-  financialYears FinancialYear[]
-  users          User[]
+  plants          Plant[]
+  branches        Branch[]
+  departments     Department[]
+  financialYears  FinancialYear[]
+  users           User[]
+  numberingSeries NumberingSeries[]
 
   @@map("companies")
   @@index([code])
@@ -281,7 +284,7 @@ model FinancialYear {
 }
 
 // ============================================================
-// MODULE 1 — USER (skeleton for JWT Auth)
+// MODULE 1 — USER
 // ============================================================
 
 model User {
@@ -313,4 +316,59 @@ model User {
   @@index([email])
   @@index([companyId])
   @@index([role])
+}
+
+// ============================================================
+// MODULE 4 — SYSTEM SETTINGS
+// ============================================================
+
+model SystemSetting {
+  id          String  @id @default(uuid())
+  key         String  @unique
+  value       String
+  description String?
+  category    String  @default("GENERAL")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("system_settings")
+  @@index([category])
+  @@index([key])
+}
+
+// ============================================================
+// MODULE 4 — NUMBERING SERIES
+// ============================================================
+
+model NumberingSeries {
+  id            String  @id @default(uuid())
+  companyId     String
+  company       Company @relation(fields: [companyId], references: [id])
+
+  documentType  String
+  prefix        String
+  separator     String  @default("-")
+  includeYear   Boolean @default(true)
+  yearFormat    String  @default("YY-YY")
+  padding       Int     @default(4)
+  currentNumber Int     @default(0)
+  lastGenerated String?
+  isLocked      Boolean @default(false)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("numbering_series")
+  @@unique([companyId, documentType])
+  @@index([companyId])
+  @@index([documentType])
 }
