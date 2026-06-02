@@ -37,11 +37,11 @@ let SettingsController = class SettingsController {
     getSetting(key) {
         return this.settingsService.getSetting(key);
     }
-    updateSetting(key, dto, user) {
-        return this.settingsService.updateSetting(key, dto, user.id);
-    }
     bulkUpdateSettings(dto, user) {
         return this.settingsService.bulkUpdateSettings(dto, user.id);
+    }
+    updateSetting(key, dto, user) {
+        return this.settingsService.updateSetting(key, dto, user.id);
     }
     initializeSeries(companyId, user) {
         return this.settingsService.initializeDefaultSeries(companyId, user.id);
@@ -50,18 +50,12 @@ let SettingsController = class SettingsController {
         return this.settingsService.getAllSeries(companyId);
     }
     getNextNumber(companyId, documentType) {
-        return this.settingsService
-            .getNextNumber(companyId, documentType)
+        return this.settingsService.getNextNumber(companyId, documentType)
             .then((number) => ({ number, documentType, companyId }));
     }
     previewNextNumber(companyId, documentType) {
-        return this.settingsService
-            .previewNextNumber(companyId, documentType)
-            .then((number) => ({
-            preview: number,
-            documentType,
-            note: 'This number will be used on next generation',
-        }));
+        return this.settingsService.previewNextNumber(companyId, documentType)
+            .then((number) => ({ preview: number, documentType }));
     }
     getOneSeries(id) {
         return this.settingsService.getOneSeries(id);
@@ -103,6 +97,16 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SettingsController.prototype, "getSetting", null);
 __decorate([
+    (0, common_1.Put)('system/bulk'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SETTINGS_MANAGE),
+    (0, swagger_1.ApiOperation)({ summary: 'Bulk update multiple settings at once' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [settings_dto_1.BulkUpdateSettingsDto, Object]),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "bulkUpdateSettings", null);
+__decorate([
     (0, common_1.Put)('system/:key'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SETTINGS_MANAGE),
     (0, swagger_1.ApiOperation)({ summary: 'Update a specific setting' }),
@@ -114,21 +118,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SettingsController.prototype, "updateSetting", null);
 __decorate([
-    (0, common_1.Put)('system'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SETTINGS_MANAGE),
-    (0, swagger_1.ApiOperation)({ summary: 'Bulk update multiple settings at once' }),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [settings_dto_1.BulkUpdateSettingsDto, Object]),
-    __metadata("design:returntype", void 0)
-], SettingsController.prototype, "bulkUpdateSettings", null);
-__decorate([
     (0, common_1.Post)('numbering/initialize/:companyId'),
     (0, roles_decorator_1.Roles)(client_1.UserRole.SUPER_ADMIN),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Initialize default numbering series for a company',
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Initialize default numbering series for a company' }),
     __param(0, (0, common_1.Param)('companyId', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -147,7 +139,7 @@ __decorate([
 ], SettingsController.prototype, "getAllSeries", null);
 __decorate([
     (0, common_1.Get)('numbering/next'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get next document number (used by all modules)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get next document number' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
     (0, swagger_1.ApiQuery)({ name: 'documentType', required: true }),
     __param(0, (0, common_1.Query)('companyId')),

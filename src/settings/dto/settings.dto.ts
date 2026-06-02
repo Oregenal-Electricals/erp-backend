@@ -1,12 +1,7 @@
 import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsInt,
-  IsUUID,
-  Min,
-  Max,
-  MaxLength,
+  IsString, IsOptional, IsBoolean,
+  IsInt, IsUUID, Min, Max, MaxLength,
+  IsObject,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
@@ -25,6 +20,7 @@ export class BulkUpdateSettingsDto {
   @ApiProperty({
     example: { app_name: 'Smart ERP', timezone: 'Asia/Kolkata' },
   })
+  @IsObject()
   settings: Record<string, string>;
 }
 
@@ -33,10 +29,7 @@ export class CreateNumberingSeriesDto {
   @IsUUID('4')
   companyId: string;
 
-  @ApiProperty({
-    example: 'PO',
-    description: 'Document type: PO, GRN, INV, WO, DC',
-  })
+  @ApiProperty({ example: 'PO' })
   @IsString()
   @MaxLength(10)
   documentType: string;
@@ -46,7 +39,7 @@ export class CreateNumberingSeriesDto {
   @MaxLength(10)
   prefix: string;
 
-  @ApiPropertyOptional({ example: '-', default: '-' })
+  @ApiPropertyOptional({ example: '-' })
   @IsOptional()
   @IsString()
   @MaxLength(2)
@@ -57,15 +50,12 @@ export class CreateNumberingSeriesDto {
   @IsBoolean()
   includeYear?: boolean;
 
-  @ApiPropertyOptional({
-    example: 'YY-YY',
-    description: 'YY-YY = 24-25, YYYY = 2025',
-  })
+  @ApiPropertyOptional({ example: 'YY-YY' })
   @IsOptional()
   @IsString()
   yearFormat?: string;
 
-  @ApiPropertyOptional({ example: 4, description: 'Digit padding: 4 = 0001' })
+  @ApiPropertyOptional({ example: 4 })
   @IsOptional()
   @IsInt()
   @Min(1)
@@ -73,6 +63,4 @@ export class CreateNumberingSeriesDto {
   padding?: number;
 }
 
-export class UpdateNumberingSeriesDto extends PartialType(
-  CreateNumberingSeriesDto,
-) {}
+export class UpdateNumberingSeriesDto extends PartialType(CreateNumberingSeriesDto) {}

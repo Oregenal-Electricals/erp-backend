@@ -32,6 +32,10 @@ export declare class SettingsController {
         key: string;
         category: string;
     }>;
+    bulkUpdateSettings(dto: BulkUpdateSettingsDto, user: any): Promise<{
+        updated: number;
+        settings: any[];
+    }>;
     updateSetting(key: string, dto: UpdateSystemSettingDto, user: any): Promise<{
         id: string;
         createdAt: Date;
@@ -44,10 +48,6 @@ export declare class SettingsController {
         value: string;
         key: string;
         category: string;
-    }>;
-    bulkUpdateSettings(dto: BulkUpdateSettingsDto, user: any): Promise<{
-        updated: number;
-        settings: any[];
     }>;
     initializeSeries(companyId: string, user: any): Promise<{
         message: string;
@@ -85,7 +85,6 @@ export declare class SettingsController {
     previewNextNumber(companyId: string, documentType: string): Promise<{
         preview: string;
         documentType: string;
-        note: string;
     }>;
     getOneSeries(id: string): Promise<{
         company: {

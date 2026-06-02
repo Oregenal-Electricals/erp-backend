@@ -33,6 +33,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         example: { app_name: 'Smart ERP', timezone: 'Asia/Kolkata' },
     }),
+    (0, class_validator_1.IsObject)(),
     __metadata("design:type", Object)
 ], BulkUpdateSettingsDto.prototype, "settings", void 0);
 class CreateNumberingSeriesDto {
@@ -44,10 +45,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateNumberingSeriesDto.prototype, "companyId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        example: 'PO',
-        description: 'Document type: PO, GRN, INV, WO, DC',
-    }),
+    (0, swagger_1.ApiProperty)({ example: 'PO' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(10),
     __metadata("design:type", String)
@@ -59,7 +57,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateNumberingSeriesDto.prototype, "prefix", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: '-', default: '-' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: '-' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(2),
@@ -72,16 +70,13 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateNumberingSeriesDto.prototype, "includeYear", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        example: 'YY-YY',
-        description: 'YY-YY = 24-25, YYYY = 2025',
-    }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'YY-YY' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateNumberingSeriesDto.prototype, "yearFormat", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 4, description: 'Digit padding: 4 = 0001' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 4 }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),

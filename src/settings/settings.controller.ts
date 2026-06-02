@@ -1,25 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  ParseUUIDPipe,
+  Controller, Get, Post, Put, Patch,
+  Body, Param, Query, UseGuards, ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -63,6 +49,16 @@ export class SettingsController {
     return this.settingsService.getSetting(key);
   }
 
+  @Put('system/bulk')
+  @RequirePermissions(Permission.SETTINGS_MANAGE)
+  @ApiOperation({ summary: 'Bulk update multiple settings at once' })
+  bulkUpdateSettings(
+    @Body() dto: BulkUpdateSettingsDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.settingsService.bulkUpdateSettings(dto, user.id);
+  }
+
   @Put('system/:key')
   @RequirePermissions(Permission.SETTINGS_MANAGE)
   @ApiOperation({ summary: 'Update a specific setting' })
@@ -74,23 +70,11 @@ export class SettingsController {
     return this.settingsService.updateSetting(key, dto, user.id);
   }
 
-  @Put('system')
-  @RequirePermissions(Permission.SETTINGS_MANAGE)
-  @ApiOperation({ summary: 'Bulk update multiple settings at once' })
-  bulkUpdateSettings(
-    @Body() dto: BulkUpdateSettingsDto,
-    @CurrentUser() user: any,
-  ) {
-    return this.settingsService.bulkUpdateSettings(dto, user.id);
-  }
-
   // ─── NUMBERING SERIES ────────────────────────
 
   @Post('numbering/initialize/:companyId')
   @Roles(UserRole.SUPER_ADMIN)
-  @ApiOperation({
-    summary: 'Initialize default numbering series for a company',
-  })
+  @ApiOperation({ summary: 'Initialize default numbering series for a company' })
   initializeSeries(
     @Param('companyId', ParseUUIDPipe) companyId: string,
     @CurrentUser() user: any,
@@ -107,15 +91,14 @@ export class SettingsController {
   }
 
   @Get('numbering/next')
-  @ApiOperation({ summary: 'Get next document number (used by all modules)' })
+  @ApiOperation({ summary: 'Get next document number' })
   @ApiQuery({ name: 'companyId', required: true })
   @ApiQuery({ name: 'documentType', required: true })
   getNextNumber(
     @Query('companyId') companyId: string,
     @Query('documentType') documentType: string,
   ) {
-    return this.settingsService
-      .getNextNumber(companyId, documentType)
+    return this.settingsService.getNextNumber(companyId, documentType)
       .then((number) => ({ number, documentType, companyId }));
   }
 
@@ -128,13 +111,8 @@ export class SettingsController {
     @Query('companyId') companyId: string,
     @Query('documentType') documentType: string,
   ) {
-    return this.settingsService
-      .previewNextNumber(companyId, documentType)
-      .then((number) => ({
-        preview: number,
-        documentType,
-        note: 'This number will be used on next generation',
-      }));
+    return this.settingsService.previewNextNumber(companyId, documentType)
+      .then((number) => ({ preview: number, documentType }));
   }
 
   @Get('numbering/:id')
