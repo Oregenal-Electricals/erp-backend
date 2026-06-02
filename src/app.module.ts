@@ -7,6 +7,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { MastersModule } from './masters/masters.module';
 import { UsersModule } from './users/users.module';
+import { PermissionsModule } from './permissions/permissions.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -24,6 +25,7 @@ import configuration from './config/configuration';
     AuthModule,
     MastersModule,
     UsersModule,
+    PermissionsModule,
   ],
 })
 export class AppModule implements NestModule {

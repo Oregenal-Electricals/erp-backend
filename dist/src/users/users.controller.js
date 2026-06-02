@@ -18,11 +18,11 @@ const swagger_1 = require("@nestjs/swagger");
 const client_1 = require("@prisma/client");
 const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
-const roles_guard_1 = require("../common/guards/roles.guard");
-const roles_decorator_1 = require("../common/decorators/roles.decorator");
+const permissions_guard_1 = require("../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
+const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const user_dto_1 = require("./dto/user.dto");
-const ADMIN_ROLES = [client_1.UserRole.SUPER_ADMIN, client_1.UserRole.CORPORATE_ADMIN];
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -32,11 +32,13 @@ let UsersController = class UsersController {
     }
     findAllUsers(companyId, role, isActive, search) {
         return this.usersService.findAllUsers({
-            companyId,
-            role,
+            companyId, role,
             isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
             search,
         });
+    }
+    changePwdInfo() {
+        return { message: 'Use PATCH /users/change-password' };
     }
     findOneUser(id) {
         return this.usersService.findOneUser(id);
@@ -60,7 +62,7 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Post)(),
-    (0, roles_decorator_1.Roles)(...ADMIN_ROLES),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_CREATE),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new user' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -70,7 +72,8 @@ __decorate([
 ], UsersController.prototype, "createUser", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List all users with optional filters' }),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_VIEW),
+    (0, swagger_1.ApiOperation)({ summary: 'List all users with filters' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'role', required: false, enum: client_1.UserRole }),
     (0, swagger_1.ApiQuery)({ name: 'isActive', required: false, type: Boolean }),
@@ -84,7 +87,15 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAllUsers", null);
 __decorate([
+    (0, common_1.Get)('change-password'),
+    (0, swagger_1.ApiOperation)({ summary: 'Placeholder — use PATCH below' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "changePwdInfo", null);
+__decorate([
     (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get user by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
@@ -93,7 +104,7 @@ __decorate([
 ], UsersController.prototype, "findOneUser", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    (0, roles_decorator_1.Roles)(...ADMIN_ROLES),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_EDIT),
     (0, swagger_1.ApiOperation)({ summary: 'Update user profile and role' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -104,7 +115,7 @@ __decorate([
 ], UsersController.prototype, "updateUser", null);
 __decorate([
     (0, common_1.Patch)(':id/toggle-status'),
-    (0, roles_decorator_1.Roles)(...ADMIN_ROLES),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_TOGGLE_STATUS),
     (0, swagger_1.ApiOperation)({ summary: 'Activate or deactivate user' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -114,7 +125,7 @@ __decorate([
 ], UsersController.prototype, "toggleUserStatus", null);
 __decorate([
     (0, common_1.Patch)(':id/unlock'),
-    (0, roles_decorator_1.Roles)(...ADMIN_ROLES),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_UNLOCK),
     (0, swagger_1.ApiOperation)({ summary: 'Unlock a locked user account' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -124,7 +135,7 @@ __decorate([
 ], UsersController.prototype, "unlockUser", null);
 __decorate([
     (0, common_1.Patch)(':id/reset-password'),
-    (0, roles_decorator_1.Roles)(...ADMIN_ROLES),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.USER_RESET_PASSWORD),
     (0, swagger_1.ApiOperation)({ summary: 'Admin resets password for a user' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -145,7 +156,7 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);

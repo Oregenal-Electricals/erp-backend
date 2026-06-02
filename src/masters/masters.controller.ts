@@ -1,58 +1,44 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  ParseUUIDPipe,
+  Controller, Get, Post, Put, Patch, Body,
+  Param, Query, UseGuards, ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { MastersService } from './masters.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Permission } from '../common/permissions/permissions.enum';
 import { CreateCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 import { CreatePlantDto, UpdatePlantDto } from './dto/plant.dto';
 import { CreateUnitDto, UpdateUnitDto } from './dto/unit.dto';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/department.dto';
 import { CreateBranchDto, UpdateBranchDto } from './dto/branch.dto';
-import {
-  CreateFinancialYearDto,
-  UpdateFinancialYearDto,
-} from './dto/financial-year.dto';
+import { CreateFinancialYearDto, UpdateFinancialYearDto } from './dto/financial-year.dto';
 
 const ADMIN_ROLES = [UserRole.SUPER_ADMIN, UserRole.CORPORATE_ADMIN];
 
 @ApiTags('Masters')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('masters')
 export class MastersController {
   constructor(private readonly mastersService: MastersService) {}
 
-  // ─────────────────────────────────────────────────────────
-  // COMPANY
-  // ─────────────────────────────────────────────────────────
+  // ── COMPANY ──────────────────────────────────
 
   @Post('companies')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.COMPANY_CREATE)
   @ApiOperation({ summary: 'Create a new company' })
   createCompany(@Body() dto: CreateCompanyDto, @CurrentUser() user: any) {
     return this.mastersService.createCompany(dto, user.id);
   }
 
   @Get('companies')
+  @RequirePermissions(Permission.COMPANY_VIEW)
   @ApiOperation({ summary: 'List all companies' })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
   findAllCompanies(@Query('includeInactive') includeInactive?: string) {
@@ -60,15 +46,14 @@ export class MastersController {
   }
 
   @Get('companies/:id')
-  @ApiOperation({
-    summary: 'Get company by ID (includes plants, branches, departments)',
-  })
+  @RequirePermissions(Permission.COMPANY_VIEW)
+  @ApiOperation({ summary: 'Get company by ID' })
   findOneCompany(@Param('id', ParseUUIDPipe) id: string) {
     return this.mastersService.findOneCompany(id);
   }
 
   @Put('companies/:id')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.COMPANY_EDIT)
   @ApiOperation({ summary: 'Update company' })
   updateCompany(
     @Param('id', ParseUUIDPipe) id: string,
@@ -79,27 +64,23 @@ export class MastersController {
   }
 
   @Patch('companies/:id/toggle-status')
-  @Roles(UserRole.SUPER_ADMIN)
+  @RequirePermissions(Permission.COMPANY_EDIT)
   @ApiOperation({ summary: 'Activate or deactivate company' })
-  toggleCompanyStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  toggleCompanyStatus(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.toggleCompanyStatus(id, user.id);
   }
 
-  // ─────────────────────────────────────────────────────────
-  // PLANT
-  // ─────────────────────────────────────────────────────────
+  // ── PLANT ────────────────────────────────────
 
   @Post('plants')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.PLANT_CREATE)
   @ApiOperation({ summary: 'Create a new plant' })
   createPlant(@Body() dto: CreatePlantDto, @CurrentUser() user: any) {
     return this.mastersService.createPlant(dto, user.id);
   }
 
   @Get('plants')
+  @RequirePermissions(Permission.PLANT_VIEW)
   @ApiOperation({ summary: 'List all plants' })
   @ApiQuery({ name: 'companyId', required: false })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
@@ -107,20 +88,18 @@ export class MastersController {
     @Query('companyId') companyId?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    return this.mastersService.findAllPlants(
-      companyId,
-      includeInactive === 'true',
-    );
+    return this.mastersService.findAllPlants(companyId, includeInactive === 'true');
   }
 
   @Get('plants/:id')
-  @ApiOperation({ summary: 'Get plant by ID (includes units)' })
+  @RequirePermissions(Permission.PLANT_VIEW)
+  @ApiOperation({ summary: 'Get plant by ID' })
   findOnePlant(@Param('id', ParseUUIDPipe) id: string) {
     return this.mastersService.findOnePlant(id);
   }
 
   @Put('plants/:id')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.PLANT_EDIT)
   @ApiOperation({ summary: 'Update plant' })
   updatePlant(
     @Param('id', ParseUUIDPipe) id: string,
@@ -131,27 +110,23 @@ export class MastersController {
   }
 
   @Patch('plants/:id/toggle-status')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.PLANT_EDIT)
   @ApiOperation({ summary: 'Activate or deactivate plant' })
-  togglePlantStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  togglePlantStatus(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.togglePlantStatus(id, user.id);
   }
 
-  // ─────────────────────────────────────────────────────────
-  // UNIT
-  // ─────────────────────────────────────────────────────────
+  // ── UNIT ─────────────────────────────────────
 
   @Post('units')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.UNIT_CREATE)
   @ApiOperation({ summary: 'Create a new unit' })
   createUnit(@Body() dto: CreateUnitDto, @CurrentUser() user: any) {
     return this.mastersService.createUnit(dto, user.id);
   }
 
   @Get('units')
+  @RequirePermissions(Permission.UNIT_VIEW)
   @ApiOperation({ summary: 'List all units' })
   @ApiQuery({ name: 'plantId', required: false })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
@@ -159,20 +134,18 @@ export class MastersController {
     @Query('plantId') plantId?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    return this.mastersService.findAllUnits(
-      plantId,
-      includeInactive === 'true',
-    );
+    return this.mastersService.findAllUnits(plantId, includeInactive === 'true');
   }
 
   @Get('units/:id')
+  @RequirePermissions(Permission.UNIT_VIEW)
   @ApiOperation({ summary: 'Get unit by ID' })
   findOneUnit(@Param('id', ParseUUIDPipe) id: string) {
     return this.mastersService.findOneUnit(id);
   }
 
   @Put('units/:id')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.UNIT_EDIT)
   @ApiOperation({ summary: 'Update unit' })
   updateUnit(
     @Param('id', ParseUUIDPipe) id: string,
@@ -183,27 +156,23 @@ export class MastersController {
   }
 
   @Patch('units/:id/toggle-status')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.UNIT_EDIT)
   @ApiOperation({ summary: 'Activate or deactivate unit' })
-  toggleUnitStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  toggleUnitStatus(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.toggleUnitStatus(id, user.id);
   }
 
-  // ─────────────────────────────────────────────────────────
-  // DEPARTMENT
-  // ─────────────────────────────────────────────────────────
+  // ── DEPARTMENT ───────────────────────────────
 
   @Post('departments')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.DEPARTMENT_CREATE)
   @ApiOperation({ summary: 'Create a new department' })
   createDepartment(@Body() dto: CreateDepartmentDto, @CurrentUser() user: any) {
     return this.mastersService.createDepartment(dto, user.id);
   }
 
   @Get('departments')
+  @RequirePermissions(Permission.DEPARTMENT_VIEW)
   @ApiOperation({ summary: 'List all departments' })
   @ApiQuery({ name: 'companyId', required: false })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
@@ -211,20 +180,18 @@ export class MastersController {
     @Query('companyId') companyId?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    return this.mastersService.findAllDepartments(
-      companyId,
-      includeInactive === 'true',
-    );
+    return this.mastersService.findAllDepartments(companyId, includeInactive === 'true');
   }
 
   @Get('departments/:id')
+  @RequirePermissions(Permission.DEPARTMENT_VIEW)
   @ApiOperation({ summary: 'Get department by ID' })
   findOneDepartment(@Param('id', ParseUUIDPipe) id: string) {
     return this.mastersService.findOneDepartment(id);
   }
 
   @Put('departments/:id')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.DEPARTMENT_EDIT)
   @ApiOperation({ summary: 'Update department' })
   updateDepartment(
     @Param('id', ParseUUIDPipe) id: string,
@@ -235,27 +202,23 @@ export class MastersController {
   }
 
   @Patch('departments/:id/toggle-status')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.DEPARTMENT_EDIT)
   @ApiOperation({ summary: 'Activate or deactivate department' })
-  toggleDepartmentStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  toggleDepartmentStatus(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.toggleDepartmentStatus(id, user.id);
   }
 
-  // ─────────────────────────────────────────────────────────
-  // BRANCH
-  // ─────────────────────────────────────────────────────────
+  // ── BRANCH ───────────────────────────────────
 
   @Post('branches')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.BRANCH_CREATE)
   @ApiOperation({ summary: 'Create a new branch' })
   createBranch(@Body() dto: CreateBranchDto, @CurrentUser() user: any) {
     return this.mastersService.createBranch(dto, user.id);
   }
 
   @Get('branches')
+  @RequirePermissions(Permission.BRANCH_VIEW)
   @ApiOperation({ summary: 'List all branches' })
   @ApiQuery({ name: 'companyId', required: false })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
@@ -263,20 +226,18 @@ export class MastersController {
     @Query('companyId') companyId?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    return this.mastersService.findAllBranches(
-      companyId,
-      includeInactive === 'true',
-    );
+    return this.mastersService.findAllBranches(companyId, includeInactive === 'true');
   }
 
   @Get('branches/:id')
+  @RequirePermissions(Permission.BRANCH_VIEW)
   @ApiOperation({ summary: 'Get branch by ID' })
   findOneBranch(@Param('id', ParseUUIDPipe) id: string) {
     return this.mastersService.findOneBranch(id);
   }
 
   @Put('branches/:id')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.BRANCH_EDIT)
   @ApiOperation({ summary: 'Update branch' })
   updateBranch(
     @Param('id', ParseUUIDPipe) id: string,
@@ -287,30 +248,23 @@ export class MastersController {
   }
 
   @Patch('branches/:id/toggle-status')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.BRANCH_EDIT)
   @ApiOperation({ summary: 'Activate or deactivate branch' })
-  toggleBranchStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  toggleBranchStatus(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.toggleBranchStatus(id, user.id);
   }
 
-  // ─────────────────────────────────────────────────────────
-  // FINANCIAL YEAR
-  // ─────────────────────────────────────────────────────────
+  // ── FINANCIAL YEAR ───────────────────────────
 
   @Post('financial-years')
-  @Roles(...ADMIN_ROLES)
+  @RequirePermissions(Permission.FINANCIAL_YEAR_CREATE)
   @ApiOperation({ summary: 'Create a new financial year' })
-  createFinancialYear(
-    @Body() dto: CreateFinancialYearDto,
-    @CurrentUser() user: any,
-  ) {
+  createFinancialYear(@Body() dto: CreateFinancialYearDto, @CurrentUser() user: any) {
     return this.mastersService.createFinancialYear(dto, user.id);
   }
 
   @Get('financial-years')
+  @RequirePermissions(Permission.FINANCIAL_YEAR_VIEW)
   @ApiOperation({ summary: 'List all financial years' })
   @ApiQuery({ name: 'companyId', required: false })
   findAllFinancialYears(@Query('companyId') companyId?: string) {
@@ -318,39 +272,30 @@ export class MastersController {
   }
 
   @Get('financial-years/current/:companyId')
+  @RequirePermissions(Permission.FINANCIAL_YEAR_VIEW)
   @ApiOperation({ summary: 'Get current financial year for a company' })
-  getCurrentFinancialYear(
-    @Param('companyId', ParseUUIDPipe) companyId: string,
-  ) {
+  getCurrentFinancialYear(@Param('companyId', ParseUUIDPipe) companyId: string) {
     return this.mastersService.getCurrentFinancialYear(companyId);
   }
 
   @Get('financial-years/:id')
+  @RequirePermissions(Permission.FINANCIAL_YEAR_VIEW)
   @ApiOperation({ summary: 'Get financial year by ID' })
   findOneFinancialYear(@Param('id', ParseUUIDPipe) id: string) {
     return this.mastersService.findOneFinancialYear(id);
   }
 
   @Patch('financial-years/:id/set-current')
-  @Roles(...ADMIN_ROLES)
-  @ApiOperation({
-    summary:
-      'Set financial year as current (only one can be current per company)',
-  })
-  setCurrentFinancialYear(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  @RequirePermissions(Permission.FINANCIAL_YEAR_MANAGE)
+  @ApiOperation({ summary: 'Set financial year as current' })
+  setCurrentFinancialYear(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.setCurrentFinancialYear(id, user.id);
   }
 
   @Patch('financial-years/:id/close')
-  @Roles(UserRole.SUPER_ADMIN)
+  @RequirePermissions(Permission.FINANCIAL_YEAR_MANAGE)
   @ApiOperation({ summary: 'Close a financial year permanently' })
-  closeFinancialYear(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: any,
-  ) {
+  closeFinancialYear(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.mastersService.closeFinancialYear(id, user.id);
   }
 }

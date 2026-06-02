@@ -5,43 +5,42 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Permission } from '../permissions/permissions.enum';
+import { roleHasPermission } from '../permissions/role-permissions';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
+    const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],
     );
 
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (isPublic || !requiredPermissions || requiredPermissions.length === 0) {
+    // No permissions required — allow
+    if (!requiredPermissions || requiredPermissions.length === 0) {
       return true;
     }
 
     const { user } = context.switchToHttp().getRequest();
 
-    if (!user) throw new ForbiddenException('No user in request');
+    if (!user) {
+      throw new ForbiddenException('No user found in request');
+    }
 
-    // Super admin bypasses all
-    if (user.is_super_admin) return true;
-
-    const userPermissions: string[] = user.permissions || [];
-    const hasAll = requiredPermissions.every((p) =>
-      userPermissions.includes(p),
+    // Check ALL required permissions
+    const hasAll = requiredPermissions.every((permission) =>
+      roleHasPermission(user.role, permission),
     );
 
     if (!hasAll) {
+      const missing = requiredPermissions.filter(
+        (p) => !roleHasPermission(user.role, p),
+      );
       throw new ForbiddenException(
-        `Missing permissions: ${requiredPermissions.join(', ')}`,
+        `Missing permissions: ${missing.join(', ')}`,
       );
     }
 

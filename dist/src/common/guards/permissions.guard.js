@@ -12,30 +12,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PermissionsGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
+const role_permissions_1 = require("../permissions/role-permissions");
 const permissions_decorator_1 = require("../decorators/permissions.decorator");
-const public_decorator_1 = require("../decorators/public.decorator");
 let PermissionsGuard = class PermissionsGuard {
     constructor(reflector) {
         this.reflector = reflector;
     }
     canActivate(context) {
         const requiredPermissions = this.reflector.getAllAndOverride(permissions_decorator_1.PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
-        const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-        if (isPublic || !requiredPermissions || requiredPermissions.length === 0) {
+        if (!requiredPermissions || requiredPermissions.length === 0) {
             return true;
         }
         const { user } = context.switchToHttp().getRequest();
-        if (!user)
-            throw new common_1.ForbiddenException('No user in request');
-        if (user.is_super_admin)
-            return true;
-        const userPermissions = user.permissions || [];
-        const hasAll = requiredPermissions.every((p) => userPermissions.includes(p));
+        if (!user) {
+            throw new common_1.ForbiddenException('No user found in request');
+        }
+        const hasAll = requiredPermissions.every((permission) => (0, role_permissions_1.roleHasPermission)(user.role, permission));
         if (!hasAll) {
-            throw new common_1.ForbiddenException(`Missing permissions: ${requiredPermissions.join(', ')}`);
+            const missing = requiredPermissions.filter((p) => !(0, role_permissions_1.roleHasPermission)(user.role, p));
+            throw new common_1.ForbiddenException(`Missing permissions: ${missing.join(', ')}`);
         }
         return true;
     }

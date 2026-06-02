@@ -1,0 +1,228 @@
+import { UserRole } from '@prisma/client';
+import { Permission } from './permissions.enum';
+
+// All permissions in the system
+const ALL_PERMISSIONS = Object.values(Permission);
+
+// All VIEW-only permissions
+const VIEW_ONLY_PERMISSIONS = [
+  Permission.COMPANY_VIEW,
+  Permission.PLANT_VIEW,
+  Permission.UNIT_VIEW,
+  Permission.DEPARTMENT_VIEW,
+  Permission.BRANCH_VIEW,
+  Permission.FINANCIAL_YEAR_VIEW,
+  Permission.USER_VIEW,
+  Permission.PURCHASE_VIEW,
+  Permission.INVENTORY_VIEW,
+  Permission.PRODUCTION_VIEW,
+  Permission.QUALITY_VIEW,
+  Permission.FINANCE_VIEW,
+  Permission.REPORTS_VIEW,
+  Permission.SETTINGS_VIEW,
+  Permission.AUDIT_VIEW,
+];
+
+export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
+  [UserRole.SUPER_ADMIN]: ALL_PERMISSIONS,
+
+  [UserRole.CORPORATE_ADMIN]: [
+    // Masters — full
+    Permission.COMPANY_VIEW,
+    Permission.COMPANY_CREATE,
+    Permission.COMPANY_EDIT,
+    Permission.PLANT_VIEW,
+    Permission.PLANT_CREATE,
+    Permission.PLANT_EDIT,
+    Permission.UNIT_VIEW,
+    Permission.UNIT_CREATE,
+    Permission.UNIT_EDIT,
+    Permission.DEPARTMENT_VIEW,
+    Permission.DEPARTMENT_CREATE,
+    Permission.DEPARTMENT_EDIT,
+    Permission.BRANCH_VIEW,
+    Permission.BRANCH_CREATE,
+    Permission.BRANCH_EDIT,
+    Permission.FINANCIAL_YEAR_VIEW,
+    Permission.FINANCIAL_YEAR_CREATE,
+    Permission.FINANCIAL_YEAR_MANAGE,
+    // Users — full
+    Permission.USER_VIEW,
+    Permission.USER_CREATE,
+    Permission.USER_EDIT,
+    Permission.USER_TOGGLE_STATUS,
+    Permission.USER_RESET_PASSWORD,
+    Permission.USER_UNLOCK,
+    // Operations
+    Permission.PURCHASE_VIEW,
+    Permission.PURCHASE_CREATE,
+    Permission.PURCHASE_EDIT,
+    Permission.PURCHASE_APPROVE,
+    Permission.INVENTORY_VIEW,
+    Permission.INVENTORY_CREATE,
+    Permission.INVENTORY_EDIT,
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.PRODUCTION_EDIT,
+    Permission.QUALITY_VIEW,
+    Permission.QUALITY_CREATE,
+    Permission.QUALITY_EDIT,
+    Permission.FINANCE_VIEW,
+    Permission.FINANCE_CREATE,
+    Permission.FINANCE_EDIT,
+    Permission.FINANCE_APPROVE,
+    Permission.REPORTS_VIEW,
+    Permission.REPORTS_EXPORT,
+    Permission.SETTINGS_VIEW,
+    Permission.AUDIT_VIEW,
+  ],
+
+  [UserRole.PLANT_HEAD]: [
+    Permission.COMPANY_VIEW,
+    Permission.PLANT_VIEW,
+    Permission.PLANT_EDIT,
+    Permission.UNIT_VIEW,
+    Permission.UNIT_CREATE,
+    Permission.UNIT_EDIT,
+    Permission.DEPARTMENT_VIEW,
+    Permission.BRANCH_VIEW,
+    Permission.FINANCIAL_YEAR_VIEW,
+    Permission.USER_VIEW,
+    Permission.PURCHASE_VIEW,
+    Permission.PURCHASE_CREATE,
+    Permission.PURCHASE_EDIT,
+    Permission.INVENTORY_VIEW,
+    Permission.INVENTORY_CREATE,
+    Permission.INVENTORY_EDIT,
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.PRODUCTION_EDIT,
+    Permission.QUALITY_VIEW,
+    Permission.QUALITY_CREATE,
+    Permission.QUALITY_EDIT,
+    Permission.REPORTS_VIEW,
+    Permission.REPORTS_EXPORT,
+    Permission.AUDIT_VIEW,
+  ],
+
+  [UserRole.UNIT_HEAD]: [
+    Permission.COMPANY_VIEW,
+    Permission.PLANT_VIEW,
+    Permission.UNIT_VIEW,
+    Permission.DEPARTMENT_VIEW,
+    Permission.USER_VIEW,
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.PRODUCTION_EDIT,
+    Permission.QUALITY_VIEW,
+    Permission.QUALITY_CREATE,
+    Permission.INVENTORY_VIEW,
+    Permission.REPORTS_VIEW,
+  ],
+
+  [UserRole.PRODUCTION_HEAD]: [
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.PRODUCTION_EDIT,
+    Permission.INVENTORY_VIEW,
+    Permission.INVENTORY_CREATE,
+    Permission.QUALITY_VIEW,
+    Permission.REPORTS_VIEW,
+    Permission.PLANT_VIEW,
+    Permission.UNIT_VIEW,
+  ],
+
+  [UserRole.PLANNING_MANAGER]: [
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.PRODUCTION_EDIT,
+    Permission.INVENTORY_VIEW,
+    Permission.PURCHASE_VIEW,
+    Permission.REPORTS_VIEW,
+    Permission.PLANT_VIEW,
+    Permission.UNIT_VIEW,
+  ],
+
+  [UserRole.PURCHASE_MANAGER]: [
+    Permission.PURCHASE_VIEW,
+    Permission.PURCHASE_CREATE,
+    Permission.PURCHASE_EDIT,
+    Permission.INVENTORY_VIEW,
+    Permission.REPORTS_VIEW,
+    Permission.PLANT_VIEW,
+    Permission.UNIT_VIEW,
+  ],
+
+  [UserRole.STORE_MANAGER]: [
+    Permission.INVENTORY_VIEW,
+    Permission.INVENTORY_CREATE,
+    Permission.INVENTORY_EDIT,
+    Permission.PURCHASE_VIEW,
+    Permission.REPORTS_VIEW,
+    Permission.PLANT_VIEW,
+    Permission.UNIT_VIEW,
+  ],
+
+  [UserRole.QC_MANAGER]: [
+    Permission.QUALITY_VIEW,
+    Permission.QUALITY_CREATE,
+    Permission.QUALITY_EDIT,
+    Permission.PRODUCTION_VIEW,
+    Permission.INVENTORY_VIEW,
+    Permission.REPORTS_VIEW,
+  ],
+
+  [UserRole.FINANCE_MANAGER]: [
+    Permission.FINANCE_VIEW,
+    Permission.FINANCE_CREATE,
+    Permission.FINANCE_EDIT,
+    Permission.FINANCE_APPROVE,
+    Permission.PURCHASE_VIEW,
+    Permission.REPORTS_VIEW,
+    Permission.REPORTS_EXPORT,
+    Permission.AUDIT_VIEW,
+    Permission.COMPANY_VIEW,
+    Permission.BRANCH_VIEW,
+    Permission.FINANCIAL_YEAR_VIEW,
+  ],
+
+  [UserRole.HR_MANAGER]: [
+    Permission.USER_VIEW,
+    Permission.USER_CREATE,
+    Permission.USER_EDIT,
+    Permission.USER_TOGGLE_STATUS,
+    Permission.USER_RESET_PASSWORD,
+    Permission.DEPARTMENT_VIEW,
+    Permission.REPORTS_VIEW,
+  ],
+
+  [UserRole.SUPERVISOR]: [
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.QUALITY_VIEW,
+    Permission.INVENTORY_VIEW,
+    Permission.REPORTS_VIEW,
+  ],
+
+  [UserRole.OPERATOR]: [
+    Permission.PRODUCTION_VIEW,
+    Permission.PRODUCTION_CREATE,
+    Permission.INVENTORY_VIEW,
+  ],
+
+  [UserRole.VIEWER]: VIEW_ONLY_PERMISSIONS,
+};
+
+// Helper: check if a role has a specific permission
+export function roleHasPermission(
+  role: UserRole,
+  permission: Permission,
+): boolean {
+  const permissions = ROLE_PERMISSIONS[role] || [];
+  return permissions.includes(permission);
+}
+
+// Helper: get all permissions for a role
+export function getPermissionsForRole(role: UserRole): Permission[] {
+  return ROLE_PERMISSIONS[role] || [];
+}

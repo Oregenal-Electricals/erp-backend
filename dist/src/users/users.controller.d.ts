@@ -43,6 +43,9 @@ export declare class UsersController {
         lastLoginAt: Date;
         isLocked: boolean;
     }[]>;
+    changePwdInfo(): {
+        message: string;
+    };
     findOneUser(id: string): Promise<{
         id: string;
         phone: string;
