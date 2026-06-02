@@ -1,8 +1,8 @@
 {
   "name": "erp-backend",
   "version": "0.0.1",
-  "description": "Smart Manufacturing ERP Backend",
-  "author": "ERP Team",
+  "description": "",
+  "author": "",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -18,14 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-<<<<<<< HEAD
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:studio": "prisma studio"
-=======
     "seed": "ts-node prisma/seeds/seed.ts"
->>>>>>> feature/module-1-master-setup
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
