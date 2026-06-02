@@ -17,7 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string; role: string }) {
+  async validate(payload: {
+    sub: string;
+    email: string;
+    role: string;
+    companyId: string;
+  }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       select: {
@@ -32,8 +37,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       },
     });
 
-    if (!user || !user.isActive || user.isLocked) {
-      throw new UnauthorizedException('User account is inactive or locked');
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
+    if (user.isLocked) {
+      throw new UnauthorizedException('Account is locked');
     }
 
     return user;

@@ -37,8 +37,8 @@ export class AuditService {
         },
       });
     } catch (error) {
-      // Audit failure must never crash main flow
-      this.logger.error('Audit log failed', error);
+      // Audit failure must NEVER crash the main business flow
+      this.logger.error('Audit log write failed', error);
     }
   }
 }

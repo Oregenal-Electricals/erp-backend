@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
@@ -16,9 +12,12 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto, ip?: string) {
+    // Find user
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
-      include: { company: { select: { id: true, name: true, code: true } } },
+      include: {
+        company: { select: { id: true, name: true, code: true } },
+      },
     });
 
     if (!user) {
@@ -26,38 +25,44 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Account is deactivated');
+      throw new UnauthorizedException(
+        'Account is deactivated. Contact administrator.',
+      );
     }
 
     if (user.isLocked) {
       throw new UnauthorizedException(
-        'Account is locked. Contact administrator.',
+        'Account is locked due to too many failed attempts. Contact administrator.',
       );
     }
 
+    // Verify password
     const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
 
     if (!passwordValid) {
-      // increment login attempts
+      const newAttempts = user.loginAttempts + 1;
       await this.prisma.user.update({
         where: { id: user.id },
         data: {
-          loginAttempts: { increment: 1 },
-          isLocked: user.loginAttempts >= 4, // lock on 5th failure
+          loginAttempts: newAttempts,
+          isLocked: newAttempts >= 5,
+          updatedBy: 'system',
         },
       });
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // Reset attempts on success
+    // Reset on success
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
         loginAttempts: 0,
         lastLoginAt: new Date(),
+        updatedBy: 'system',
       },
     });
 
+    // Sign JWT
     const payload = {
       sub: user.id,
       email: user.email,
@@ -65,10 +70,10 @@ export class AuthService {
       companyId: user.companyId,
     };
 
-    const token = this.jwt.sign(payload);
+    const accessToken = this.jwt.sign(payload);
 
     return {
-      accessToken: token,
+      accessToken,
       user: {
         id: user.id,
         email: user.email,
@@ -93,6 +98,7 @@ export class AuthService {
         role: true,
         companyId: true,
         mustChangePwd: true,
+        lastLoginAt: true,
         company: { select: { id: true, name: true, code: true } },
       },
     });
