@@ -55,3 +55,262 @@ model SystemHealth {
 
   @@map("system_health")
 }
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  CORPORATE_ADMIN
+  PLANT_HEAD
+  UNIT_HEAD
+  PRODUCTION_HEAD
+  PLANNING_MANAGER
+  PURCHASE_MANAGER
+  STORE_MANAGER
+  QC_MANAGER
+  FINANCE_MANAGER
+  HR_MANAGER
+  SUPERVISOR
+  OPERATOR
+  VIEWER
+}
+
+enum FinancialYearStatus {
+  OPEN
+  CURRENT
+  CLOSED
+}
+
+// ============================================================
+// MODULE 1 — COMPANY
+// ============================================================
+
+model Company {
+  id              String  @id @default(uuid())
+  code            String  @unique
+  name            String
+  legalName       String
+  pan             String?
+  tan             String?
+  cin             String?
+  gstin           String?
+  msmeNumber      String?
+  address         String
+  city            String
+  state           String
+  country         String  @default("India")
+  pincode         String
+  phone           String?
+  email           String?
+  website         String?
+  logoUrl         String?
+  currencyCode    String  @default("INR")
+  fiscalYearStart Int     @default(4)
+  timezone        String  @default("Asia/Kolkata")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  plants         Plant[]
+  branches       Branch[]
+  departments    Department[]
+  financialYears FinancialYear[]
+  users          User[]
+
+  @@map("companies")
+  @@index([code])
+  @@index([isActive])
+}
+
+// ============================================================
+// MODULE 1 — PLANT
+// ============================================================
+
+model Plant {
+  id        String  @id @default(uuid())
+  code      String  @unique
+  name      String
+  gstin     String?
+  address   String
+  city      String
+  state     String
+  country   String  @default("India")
+  pincode   String
+  phone     String?
+  email     String?
+  plantType String  @default("MANUFACTURING")
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  units Unit[]
+
+  @@map("plants")
+  @@index([companyId])
+  @@index([code])
+  @@index([isActive])
+}
+
+// ============================================================
+// MODULE 1 — UNIT
+// ============================================================
+
+model Unit {
+  id          String  @id @default(uuid())
+  code        String  @unique
+  name        String
+  description String?
+  unitType    String  @default("PRODUCTION")
+
+  plantId String
+  plant   Plant  @relation(fields: [plantId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("units")
+  @@index([plantId])
+  @@index([code])
+  @@index([isActive])
+}
+
+// ============================================================
+// MODULE 1 — DEPARTMENT
+// ============================================================
+
+model Department {
+  id          String  @id @default(uuid())
+  code        String  @unique
+  name        String
+  description String?
+  headName    String?
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("departments")
+  @@index([companyId])
+  @@index([code])
+  @@index([isActive])
+}
+
+// ============================================================
+// MODULE 1 — BRANCH
+// ============================================================
+
+model Branch {
+  id         String  @id @default(uuid())
+  code       String  @unique
+  name       String
+  gstin      String?
+  address    String
+  city       String
+  state      String
+  country    String  @default("India")
+  pincode    String
+  phone      String?
+  email      String?
+  branchType String  @default("SALES")
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("branches")
+  @@index([companyId])
+  @@index([code])
+  @@index([isActive])
+}
+
+// ============================================================
+// MODULE 1 — FINANCIAL YEAR
+// ============================================================
+
+model FinancialYear {
+  id        String              @id @default(uuid())
+  code      String              @unique
+  label     String
+  startDate DateTime
+  endDate   DateTime
+  status    FinancialYearStatus @default(OPEN)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("financial_years")
+  @@unique([companyId, label])
+  @@index([companyId])
+  @@index([status])
+}
+
+// ============================================================
+// MODULE 1 — USER (skeleton for JWT Auth)
+// ============================================================
+
+model User {
+  id            String   @id @default(uuid())
+  employeeCode  String?  @unique
+  firstName     String
+  lastName      String
+  email         String   @unique
+  phone         String?
+  passwordHash  String
+  role          UserRole @default(VIEWER)
+  mustChangePwd Boolean  @default(true)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  lastLoginAt   DateTime?
+  isLocked      Boolean   @default(false)
+  loginAttempts Int       @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("users")
+  @@index([email])
+  @@index([companyId])
+  @@index([role])
+}
