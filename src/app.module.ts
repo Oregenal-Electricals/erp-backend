@@ -9,6 +9,7 @@ import { MastersModule } from './masters/masters.module';
 import { UsersModule } from './users/users.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { SettingsModule } from './settings/settings.module';
+import { ChangeRequestsModule } from './change-requests/change-requests.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -28,6 +29,7 @@ import configuration from './config/configuration';
     UsersModule,
     PermissionsModule,
     SettingsModule,
+    ChangeRequestsModule,
   ],
 })
 export class AppModule implements NestModule {

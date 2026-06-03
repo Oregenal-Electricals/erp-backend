@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================
-// ENUMS
-// ============================================================
-
 enum UserRole {
   SUPER_ADMIN
   CORPORATE_ADMIN
@@ -34,9 +30,22 @@ enum FinancialYearStatus {
   CLOSED
 }
 
-// ============================================================
-// AUDIT LOG
-// ============================================================
+enum ChangeRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ChangeRequestType {
+  MASTER_DATA
+  USER_ACCESS
+  PRICE_CHANGE
+  CONFIG_CHANGE
+  OTHER
+}
 
 model AuditLog {
   id         String   @id @default(uuid())
@@ -64,10 +73,6 @@ model AuditLog {
   @@index([changedAt])
 }
 
-// ============================================================
-// SYSTEM HEALTH
-// ============================================================
-
 model SystemHealth {
   id        String   @id @default(uuid())
   service   String
@@ -84,10 +89,6 @@ model SystemHealth {
 
   @@map("system_health")
 }
-
-// ============================================================
-// MODULE 1 — COMPANY
-// ============================================================
 
 model Company {
   id              String  @id @default(uuid())
@@ -125,15 +126,12 @@ model Company {
   financialYears  FinancialYear[]
   users           User[]
   numberingSeries NumberingSeries[]
+  changeRequests  ChangeRequest[]
 
   @@map("companies")
   @@index([code])
   @@index([isActive])
 }
-
-// ============================================================
-// MODULE 1 — PLANT
-// ============================================================
 
 model Plant {
   id        String  @id @default(uuid())
@@ -167,10 +165,6 @@ model Plant {
   @@index([isActive])
 }
 
-// ============================================================
-// MODULE 1 — UNIT
-// ============================================================
-
 model Unit {
   id          String  @id @default(uuid())
   code        String  @unique
@@ -194,10 +188,6 @@ model Unit {
   @@index([isActive])
 }
 
-// ============================================================
-// MODULE 1 — DEPARTMENT
-// ============================================================
-
 model Department {
   id          String  @id @default(uuid())
   code        String  @unique
@@ -220,10 +210,6 @@ model Department {
   @@index([code])
   @@index([isActive])
 }
-
-// ============================================================
-// MODULE 1 — BRANCH
-// ============================================================
 
 model Branch {
   id         String  @id @default(uuid())
@@ -255,10 +241,6 @@ model Branch {
   @@index([isActive])
 }
 
-// ============================================================
-// MODULE 1 — FINANCIAL YEAR
-// ============================================================
-
 model FinancialYear {
   id        String              @id @default(uuid())
   code      String              @unique
@@ -282,10 +264,6 @@ model FinancialYear {
   @@index([companyId])
   @@index([status])
 }
-
-// ============================================================
-// MODULE 1 — USER
-// ============================================================
 
 model User {
   id            String   @id @default(uuid())
@@ -312,15 +290,15 @@ model User {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
+  requestsMade     ChangeRequest[]        @relation("RequestedBy")
+  requestsReviewed ChangeRequest[]        @relation("ReviewedBy")
+  comments         ChangeRequestComment[]
+
   @@map("users")
   @@index([email])
   @@index([companyId])
   @@index([role])
 }
-
-// ============================================================
-// MODULE 4 — SYSTEM SETTINGS
-// ============================================================
 
 model SystemSetting {
   id          String  @id @default(uuid())
@@ -340,10 +318,6 @@ model SystemSetting {
   @@index([category])
   @@index([key])
 }
-
-// ============================================================
-// MODULE 4 — NUMBERING SERIES
-// ============================================================
 
 model NumberingSeries {
   id            String  @id @default(uuid())
@@ -371,4 +345,64 @@ model NumberingSeries {
   @@unique([companyId, documentType])
   @@index([companyId])
   @@index([documentType])
+}
+
+model ChangeRequest {
+  id            String              @id @default(uuid())
+  requestNumber String              @unique
+  title         String
+  description   String
+  type          ChangeRequestType   @default(OTHER)
+  status        ChangeRequestStatus @default(DRAFT)
+  priority      String              @default("NORMAL")
+
+  companyId     String
+  company       Company @relation(fields: [companyId], references: [id])
+
+  requestedById String
+  requestedBy   User   @relation("RequestedBy", fields: [requestedById], references: [id])
+
+  reviewedById  String?
+  reviewedBy    User?  @relation("ReviewedBy", fields: [reviewedById], references: [id])
+
+  reviewedAt    DateTime?
+  reviewComment String?
+  submittedAt   DateTime?
+  dueDate       DateTime?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  comments ChangeRequestComment[]
+
+  @@map("change_requests")
+  @@index([companyId])
+  @@index([status])
+  @@index([type])
+  @@index([requestedById])
+  @@index([requestNumber])
+}
+
+model ChangeRequestComment {
+  id              String        @id @default(uuid())
+  changeRequestId String
+  changeRequest   ChangeRequest @relation(fields: [changeRequestId], references: [id])
+
+  comment   String
+  commentBy String
+  commenter User   @relation(fields: [commentBy], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("change_request_comments")
+  @@index([changeRequestId])
 }
