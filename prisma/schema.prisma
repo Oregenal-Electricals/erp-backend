@@ -129,6 +129,8 @@ model Company {
   changeRequests  ChangeRequest[]
   visitors        Visitor[]
   visitorLogs     VisitorLog[]
+  vehicles        Vehicle[]
+  vehicleLogs     VehicleLog[]
 
   @@map("companies")
   @@index([code])
@@ -162,6 +164,7 @@ model Plant {
   units Unit[]
 
   visitorLogs VisitorLog[]
+  vehicleLogs VehicleLog[] @relation("VehiclePlant")
 
   @@map("plants")
   @@index([companyId])
@@ -297,6 +300,8 @@ model User {
   hostVisits      VisitorLog[] @relation("HostEmployee")
   checkedInVisits  VisitorLog[] @relation("CheckedInBy")
   checkedOutVisits VisitorLog[] @relation("CheckedOutBy")
+  vehicleEntries   VehicleLog[] @relation("VehicleEntryBy")
+  vehicleExits     VehicleLog[] @relation("VehicleExitBy")
   requestsMade     ChangeRequest[]        @relation("RequestedBy")
   requestsReviewed ChangeRequest[]        @relation("ReviewedBy")
   comments         ChangeRequestComment[]
@@ -514,5 +519,115 @@ model VisitorLog {
   @@index([plantId])
   @@index([status])
   @@index([checkInTime])
+  @@index([logNumber])
+}
+
+// ============================================================
+// MODULE 8 — VEHICLE MANAGEMENT
+// ============================================================
+
+enum VehicleType {
+  TRUCK
+  TEMPO
+  CAR
+  TWO_WHEELER
+  CONTAINER
+  TANKER
+  OTHER
+}
+
+enum VehicleLogStatus {
+  INSIDE
+  EXITED
+  CANCELLED
+}
+
+enum VehiclePurpose {
+  INWARD
+  OUTWARD
+  INTERNAL
+  SERVICE
+  OTHER
+}
+
+model Vehicle {
+  id              String      @id @default(uuid())
+  companyId       String
+  company         Company     @relation(fields: [companyId], references: [id])
+
+  vehicleNumber   String
+  vehicleType     VehicleType @default(TRUCK)
+  ownerName       String?
+  ownerMobile     String?
+  isCompanyVehicle Boolean   @default(false)
+  remarks         String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  logs VehicleLog[]
+
+  @@map("vehicles")
+  @@unique([companyId, vehicleNumber])
+  @@index([companyId])
+  @@index([vehicleNumber])
+}
+
+model VehicleLog {
+  id            String           @id @default(uuid())
+  logNumber     String           @unique
+  companyId     String
+  company       Company          @relation(fields: [companyId], references: [id])
+
+  vehicleId     String
+  vehicle       Vehicle          @relation(fields: [vehicleId], references: [id])
+
+  plantId       String
+  plant         Plant            @relation("VehiclePlant", fields: [plantId], references: [id])
+
+  driverName    String
+  driverMobile  String?
+  driverLicense String?
+
+  purpose       VehiclePurpose   @default(INWARD)
+  status        VehicleLogStatus @default(INSIDE)
+
+  inWeight      Float?           // kg
+  outWeight     Float?           // kg
+  netWeight     Float?           // kg (calculated)
+
+  materialDescription String?
+  supplierName        String?
+  customerName        String?
+  poNumber            String?
+  remarks             String?
+
+  entryTime     DateTime         @default(now())
+  exitTime      DateTime?
+  expectedExitTime DateTime?
+
+  entryById     String
+  entryBy       User             @relation("VehicleEntryBy", fields: [entryById], references: [id])
+
+  exitById      String?
+  exitBy        User?            @relation("VehicleExitBy", fields: [exitById], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("vehicle_logs")
+  @@index([companyId])
+  @@index([vehicleId])
+  @@index([plantId])
+  @@index([status])
+  @@index([entryTime])
   @@index([logNumber])
 }

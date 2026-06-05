@@ -12,28 +12,18 @@ import { SettingsModule } from './settings/settings.module';
 import { ChangeRequestsModule } from './change-requests/change-requests.module';
 import { DummyDataModule } from './dummy-data/dummy-data.module';
 import { VisitorManagementModule } from './visitor-management/visitor-management.module';
+import { VehicleManagementModule } from './vehicle-management/vehicle-management.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-      envFilePath: ['.env'],
-    }),
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration], envFilePath: ['.env'] }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-    PrismaModule,
-    CommonModule,
-    HealthModule,
-    AuthModule,
-    MastersModule,
-    UsersModule,
-    PermissionsModule,
-    SettingsModule,
-    ChangeRequestsModule,
-    DummyDataModule,
-    VisitorManagementModule,
+    PrismaModule, CommonModule, HealthModule, AuthModule,
+    MastersModule, UsersModule, PermissionsModule, SettingsModule,
+    ChangeRequestsModule, DummyDataModule,
+    VisitorManagementModule, VehicleManagementModule,
   ],
 })
 export class AppModule implements NestModule {

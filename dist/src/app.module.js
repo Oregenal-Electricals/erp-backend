@@ -24,6 +24,7 @@ const settings_module_1 = require("./settings/settings.module");
 const change_requests_module_1 = require("./change-requests/change-requests.module");
 const dummy_data_module_1 = require("./dummy-data/dummy-data.module");
 const visitor_management_module_1 = require("./visitor-management/visitor-management.module");
+const vehicle_management_module_1 = require("./vehicle-management/vehicle-management.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -35,23 +36,12 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-                load: [configuration_1.default],
-                envFilePath: ['.env'],
-            }),
+            config_1.ConfigModule.forRoot({ isGlobal: true, load: [configuration_1.default], envFilePath: ['.env'] }),
             throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-            prisma_module_1.PrismaModule,
-            common_module_1.CommonModule,
-            health_module_1.HealthModule,
-            auth_module_1.AuthModule,
-            masters_module_1.MastersModule,
-            users_module_1.UsersModule,
-            permissions_module_1.PermissionsModule,
-            settings_module_1.SettingsModule,
-            change_requests_module_1.ChangeRequestsModule,
-            dummy_data_module_1.DummyDataModule,
-            visitor_management_module_1.VisitorManagementModule,
+            prisma_module_1.PrismaModule, common_module_1.CommonModule, health_module_1.HealthModule, auth_module_1.AuthModule,
+            masters_module_1.MastersModule, users_module_1.UsersModule, permissions_module_1.PermissionsModule, settings_module_1.SettingsModule,
+            change_requests_module_1.ChangeRequestsModule, dummy_data_module_1.DummyDataModule,
+            visitor_management_module_1.VisitorManagementModule, vehicle_management_module_1.VehicleManagementModule,
         ],
     })
 ], AppModule);
