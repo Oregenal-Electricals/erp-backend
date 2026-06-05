@@ -131,6 +131,7 @@ model Company {
   visitorLogs     VisitorLog[]
   vehicles        Vehicle[]
   vehicleLogs     VehicleLog[]
+  gateInwardEntries GateInwardEntry[]
 
   @@map("companies")
   @@index([code])
@@ -165,6 +166,7 @@ model Plant {
 
   visitorLogs VisitorLog[]
   vehicleLogs VehicleLog[] @relation("VehiclePlant")
+  gateInwardEntries GateInwardEntry[] @relation("GateInwardPlant")
 
   @@map("plants")
   @@index([companyId])
@@ -302,6 +304,8 @@ model User {
   checkedOutVisits VisitorLog[] @relation("CheckedOutBy")
   vehicleEntries   VehicleLog[] @relation("VehicleEntryBy")
   vehicleExits     VehicleLog[] @relation("VehicleExitBy")
+  ginReceived      GateInwardEntry[] @relation("GINReceivedBy")
+  ginVerified      GateInwardEntry[] @relation("GINVerifiedBy")
   requestsMade     ChangeRequest[]        @relation("RequestedBy")
   requestsReviewed ChangeRequest[]        @relation("ReviewedBy")
   comments         ChangeRequestComment[]
@@ -623,6 +627,8 @@ model VehicleLog {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
+  gateInwardEntries GateInwardEntry[]
+
   @@map("vehicle_logs")
   @@index([companyId])
   @@index([vehicleId])
@@ -630,4 +636,72 @@ model VehicleLog {
   @@index([status])
   @@index([entryTime])
   @@index([logNumber])
+}
+
+// ============================================================
+// MODULE 9 — GATE INWARD
+// ============================================================
+
+enum GateInwardStatus {
+  PENDING
+  VERIFIED
+  SENT_TO_STORES
+  COMPLETED
+  REJECTED
+}
+
+model GateInwardEntry {
+  id          String           @id @default(uuid())
+  ginNumber   String           @unique
+  companyId   String
+  company     Company          @relation(fields: [companyId], references: [id])
+  plantId     String
+  plant       Plant            @relation("GateInwardPlant", fields: [plantId], references: [id])
+
+  vehicleLogId String?
+  vehicleLog   VehicleLog?     @relation(fields: [vehicleLogId], references: [id])
+
+  supplierName    String
+  supplierMobile  String?
+  supplierGstin   String?
+
+  poNumber        String?
+  invoiceNumber   String?
+  invoiceDate     DateTime?
+  invoiceAmount   Float?
+
+  materialDescription String
+  quantity            Float
+  unit                String    @default("NOS")
+  grossWeight         Float?
+  netWeight           Float?
+  packageCount        Int?
+
+  status      GateInwardStatus @default(PENDING)
+  remarks     String?
+  rejectionReason String?
+
+  receivedById  String
+  receivedBy    User            @relation("GINReceivedBy", fields: [receivedById], references: [id])
+
+  verifiedById  String?
+  verifiedBy    User?           @relation("GINVerifiedBy", fields: [verifiedById], references: [id])
+
+  verifiedAt    DateTime?
+  completedAt   DateTime?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("gate_inward_entries")
+  @@index([companyId])
+  @@index([plantId])
+  @@index([status])
+  @@index([ginNumber])
+  @@index([poNumber])
+  @@index([createdAt])
 }
