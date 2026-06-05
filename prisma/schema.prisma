@@ -127,6 +127,8 @@ model Company {
   users           User[]
   numberingSeries NumberingSeries[]
   changeRequests  ChangeRequest[]
+  visitors        Visitor[]
+  visitorLogs     VisitorLog[]
 
   @@map("companies")
   @@index([code])
@@ -158,6 +160,8 @@ model Plant {
   isTestData Boolean  @default(false)
 
   units Unit[]
+
+  visitorLogs VisitorLog[]
 
   @@map("plants")
   @@index([companyId])
@@ -290,6 +294,9 @@ model User {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
+  hostVisits      VisitorLog[] @relation("HostEmployee")
+  checkedInVisits  VisitorLog[] @relation("CheckedInBy")
+  checkedOutVisits VisitorLog[] @relation("CheckedOutBy")
   requestsMade     ChangeRequest[]        @relation("RequestedBy")
   requestsReviewed ChangeRequest[]        @relation("ReviewedBy")
   comments         ChangeRequestComment[]
@@ -405,4 +412,107 @@ model ChangeRequestComment {
 
   @@map("change_request_comments")
   @@index([changeRequestId])
+}
+
+// ============================================================
+// MODULE 7 — VISITOR MANAGEMENT
+// ============================================================
+
+enum VisitorStatus {
+  PENDING
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum IdProofType {
+  AADHAAR
+  PAN
+  PASSPORT
+  DRIVING_LICENSE
+  VOTER_ID
+  EMPLOYEE_ID
+  OTHER
+}
+
+model Visitor {
+  id              String      @id @default(uuid())
+  companyId       String
+  company         Company     @relation(fields: [companyId], references: [id])
+
+  firstName       String
+  lastName        String
+  mobile          String
+  email           String?
+  visitorCompany  String?     // Company visitor belongs to
+  designation     String?
+  idProofType     IdProofType @default(AADHAAR)
+  idProofNumber   String
+  photoUrl        String?
+  isBlacklisted   Boolean     @default(false)
+  blacklistReason String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  logs VisitorLog[]
+
+  @@map("visitors")
+  @@index([companyId])
+  @@index([mobile])
+  @@index([idProofNumber])
+}
+
+model VisitorLog {
+  id            String        @id @default(uuid())
+  logNumber     String        @unique
+  companyId     String
+  company       Company       @relation(fields: [companyId], references: [id])
+
+  visitorId     String
+  visitor       Visitor       @relation(fields: [visitorId], references: [id])
+
+  plantId       String
+  plant         Plant         @relation(fields: [plantId], references: [id])
+
+  hostEmployeeId String?
+  hostEmployee   User?        @relation("HostEmployee", fields: [hostEmployeeId], references: [id])
+
+  checkedInById  String
+  checkedInBy    User         @relation("CheckedInBy", fields: [checkedInById], references: [id])
+
+  checkedOutById String?
+  checkedOutBy   User?        @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
+
+  purpose        String
+  vehicleNumber  String?
+  itemsCarried   String?
+  areasToVisit   String?
+  remarks        String?
+
+  checkInTime    DateTime     @default(now())
+  checkOutTime   DateTime?
+  expectedOutTime DateTime?
+
+  status         VisitorStatus @default(CHECKED_IN)
+  passNumber     String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("visitor_logs")
+  @@index([companyId])
+  @@index([visitorId])
+  @@index([plantId])
+  @@index([status])
+  @@index([checkInTime])
+  @@index([logNumber])
 }

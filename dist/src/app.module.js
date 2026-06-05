@@ -23,6 +23,7 @@ const permissions_module_1 = require("./permissions/permissions.module");
 const settings_module_1 = require("./settings/settings.module");
 const change_requests_module_1 = require("./change-requests/change-requests.module");
 const dummy_data_module_1 = require("./dummy-data/dummy-data.module");
+const visitor_management_module_1 = require("./visitor-management/visitor-management.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -50,6 +51,7 @@ exports.AppModule = AppModule = __decorate([
             settings_module_1.SettingsModule,
             change_requests_module_1.ChangeRequestsModule,
             dummy_data_module_1.DummyDataModule,
+            visitor_management_module_1.VisitorManagementModule,
         ],
     })
 ], AppModule);

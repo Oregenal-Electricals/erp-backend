@@ -11,6 +11,7 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { SettingsModule } from './settings/settings.module';
 import { ChangeRequestsModule } from './change-requests/change-requests.module';
 import { DummyDataModule } from './dummy-data/dummy-data.module';
+import { VisitorManagementModule } from './visitor-management/visitor-management.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -32,6 +33,7 @@ import configuration from './config/configuration';
     SettingsModule,
     ChangeRequestsModule,
     DummyDataModule,
+    VisitorManagementModule,
   ],
 })
 export class AppModule implements NestModule {
