@@ -17,8 +17,8 @@ export declare class SettingsService {
         isActive: boolean;
         isTestData: boolean;
         description: string | null;
-        value: string;
         key: string;
+        value: string;
         category: string;
     }[]>;
     getSetting(key: string): Promise<{
@@ -30,8 +30,8 @@ export declare class SettingsService {
         isActive: boolean;
         isTestData: boolean;
         description: string | null;
-        value: string;
         key: string;
+        value: string;
         category: string;
     }>;
     getSettingValue(key: string, defaultValue?: string): Promise<string>;
@@ -44,8 +44,8 @@ export declare class SettingsService {
         isActive: boolean;
         isTestData: boolean;
         description: string | null;
-        value: string;
         key: string;
+        value: string;
         category: string;
     }>;
     bulkUpdateSettings(dto: BulkUpdateSettingsDto, userId: string): Promise<{

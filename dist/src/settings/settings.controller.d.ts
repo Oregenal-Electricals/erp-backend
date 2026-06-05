@@ -15,8 +15,8 @@ export declare class SettingsController {
         isActive: boolean;
         isTestData: boolean;
         description: string | null;
-        value: string;
         key: string;
+        value: string;
         category: string;
     }[]>;
     getSetting(key: string): Promise<{
@@ -28,8 +28,8 @@ export declare class SettingsController {
         isActive: boolean;
         isTestData: boolean;
         description: string | null;
-        value: string;
         key: string;
+        value: string;
         category: string;
     }>;
     bulkUpdateSettings(dto: BulkUpdateSettingsDto, user: any): Promise<{
@@ -45,8 +45,8 @@ export declare class SettingsController {
         isActive: boolean;
         isTestData: boolean;
         description: string | null;
-        value: string;
         key: string;
+        value: string;
         category: string;
     }>;
     initializeSeries(companyId: string, user: any): Promise<{
