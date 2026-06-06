@@ -104,18 +104,33 @@ enum GateOutwardStatus {
   CANCELLED
 }
 
+enum GatePassType {
+  RETURNABLE
+  NON_RETURNABLE
+}
+
+enum GatePassStatus {
+  PENDING
+  APPROVED
+  ISSUED
+  RETURNED
+  EXPIRED
+  CLOSED
+  CANCELLED
+}
+
 model AuditLog {
-  id         String   @id @default(uuid())
-  tableName  String
-  recordId   String
-  action     String
-  oldValues  Json?
-  newValues  Json?
-  changedBy  String
-  changedAt  DateTime @default(now())
-  ipAddress  String?
-  userAgent  String?
-  reason     String?
+  id        String   @id @default(uuid())
+  tableName String
+  recordId  String
+  action    String
+  oldValues Json?
+  newValues Json?
+  changedBy String
+  changedAt DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+  reason    String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String   @default("system")
@@ -187,6 +202,7 @@ model Company {
   vehicleLogs        VehicleLog[]
   gateInwardEntries  GateInwardEntry[]
   gateOutwardEntries GateOutwardEntry[]
+  gatePasses         GatePass[]
 
   @@map("companies")
   @@index([code])
@@ -217,9 +233,10 @@ model Plant {
 
   units              Unit[]
   visitorLogs        VisitorLog[]
-  vehicleLogs        VehicleLog[]        @relation("VehiclePlant")
-  gateInwardEntries  GateInwardEntry[]   @relation("GateInwardPlant")
-  gateOutwardEntries GateOutwardEntry[]  @relation("GateOutwardPlant")
+  vehicleLogs        VehicleLog[]       @relation("VehiclePlant")
+  gateInwardEntries  GateInwardEntry[]  @relation("GateInwardPlant")
+  gateOutwardEntries GateOutwardEntry[] @relation("GateOutwardPlant")
+  gatePasses         GatePass[]         @relation("GatePassPlant")
 
   @@map("plants")
   @@index([companyId])
@@ -233,8 +250,8 @@ model Unit {
   name        String
   description String?
   unitType    String  @default("PRODUCTION")
-  plantId String
-  plant   Plant  @relation(fields: [plantId], references: [id])
+  plantId     String
+  plant       Plant   @relation(fields: [plantId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -254,8 +271,8 @@ model Department {
   name        String
   description String?
   headName    String?
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -282,8 +299,8 @@ model Branch {
   phone      String?
   email      String?
   branchType String  @default("SALES")
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
+  companyId  String
+  company    Company @relation(fields: [companyId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -329,8 +346,8 @@ model User {
   passwordHash  String
   role          UserRole @default(VIEWER)
   mustChangePwd Boolean  @default(true)
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id])
   lastLoginAt   DateTime?
   isLocked      Boolean   @default(false)
   loginAttempts Int       @default(0)
@@ -341,19 +358,23 @@ model User {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  requestsMade     ChangeRequest[]        @relation("RequestedBy")
-  requestsReviewed ChangeRequest[]        @relation("ReviewedBy")
+  requestsMade     ChangeRequest[]    @relation("RequestedBy")
+  requestsReviewed ChangeRequest[]    @relation("ReviewedBy")
   comments         ChangeRequestComment[]
-  hostVisits       VisitorLog[]           @relation("HostEmployee")
-  checkedInVisits  VisitorLog[]           @relation("CheckedInBy")
-  checkedOutVisits VisitorLog[]           @relation("CheckedOutBy")
-  vehicleEntries   VehicleLog[]           @relation("VehicleEntryBy")
-  vehicleExits     VehicleLog[]           @relation("VehicleExitBy")
-  ginReceived      GateInwardEntry[]      @relation("GINReceivedBy")
-  ginVerified      GateInwardEntry[]      @relation("GINVerifiedBy")
-  goeAuthorized    GateOutwardEntry[]     @relation("GOEAuthorizedBy")
-  goeDispatched    GateOutwardEntry[]     @relation("GOEDispatchedBy")
-  goeCreated       GateOutwardEntry[]     @relation("GOECreatedBy")
+  hostVisits       VisitorLog[]       @relation("HostEmployee")
+  checkedInVisits  VisitorLog[]       @relation("CheckedInBy")
+  checkedOutVisits VisitorLog[]       @relation("CheckedOutBy")
+  vehicleEntries   VehicleLog[]       @relation("VehicleEntryBy")
+  vehicleExits     VehicleLog[]       @relation("VehicleExitBy")
+  ginReceived      GateInwardEntry[]  @relation("GINReceivedBy")
+  ginVerified      GateInwardEntry[]  @relation("GINVerifiedBy")
+  goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
+  goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
+  goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
+  gpRequested      GatePass[]         @relation("GPRequestedBy")
+  gpAuthorized     GatePass[]         @relation("GPAuthorizedBy")
+  gpIssued         GatePass[]         @relation("GPIssuedBy")
+  gpClosed         GatePass[]         @relation("GPClosedBy")
 
   @@map("users")
   @@index([email])
@@ -434,8 +455,6 @@ model ChangeRequest {
 
   @@map("change_requests")
   @@index([companyId])
-  @@index([status])
-  @@index([type])
   @@index([requestedById])
   @@index([requestNumber])
 }
@@ -524,7 +543,6 @@ model VisitorLog {
   @@index([companyId])
   @@index([visitorId])
   @@index([plantId])
-  @@index([status])
   @@index([checkInTime])
   @@index([logNumber])
 }
@@ -597,20 +615,19 @@ model VehicleLog {
   @@index([companyId])
   @@index([vehicleId])
   @@index([plantId])
-  @@index([status])
   @@index([entryTime])
   @@index([logNumber])
 }
 
 model GateInwardEntry {
-  id          String           @id @default(uuid())
-  ginNumber   String           @unique
-  companyId   String
-  company     Company          @relation(fields: [companyId], references: [id])
-  plantId     String
-  plant       Plant            @relation("GateInwardPlant", fields: [plantId], references: [id])
+  id           String           @id @default(uuid())
+  ginNumber    String           @unique
+  companyId    String
+  company      Company          @relation(fields: [companyId], references: [id])
+  plantId      String
+  plant        Plant            @relation("GateInwardPlant", fields: [plantId], references: [id])
   vehicleLogId String?
-  vehicleLog   VehicleLog?     @relation(fields: [vehicleLogId], references: [id])
+  vehicleLog   VehicleLog?      @relation(fields: [vehicleLogId], references: [id])
   supplierName    String
   supplierMobile  String?
   supplierGstin   String?
@@ -620,17 +637,17 @@ model GateInwardEntry {
   invoiceAmount   Float?
   materialDescription String
   quantity            Float
-  unit                String    @default("NOS")
+  unit                String   @default("NOS")
   grossWeight         Float?
   netWeight           Float?
   packageCount        Int?
-  status      GateInwardStatus @default(PENDING)
-  remarks     String?
+  status          GateInwardStatus @default(PENDING)
+  remarks         String?
   rejectionReason String?
   receivedById  String
-  receivedBy    User            @relation("GINReceivedBy", fields: [receivedById], references: [id])
+  receivedBy    User             @relation("GINReceivedBy", fields: [receivedById], references: [id])
   verifiedById  String?
-  verifiedBy    User?           @relation("GINVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedBy    User?            @relation("GINVerifiedBy", fields: [verifiedById], references: [id])
   verifiedAt    DateTime?
   completedAt   DateTime?
   createdAt  DateTime @default(now())
@@ -643,21 +660,20 @@ model GateInwardEntry {
   @@map("gate_inward_entries")
   @@index([companyId])
   @@index([plantId])
-  @@index([status])
   @@index([ginNumber])
   @@index([poNumber])
   @@index([createdAt])
 }
 
 model GateOutwardEntry {
-  id          String            @id @default(uuid())
-  goeNumber   String            @unique
-  companyId   String
-  company     Company           @relation(fields: [companyId], references: [id])
-  plantId     String
-  plant       Plant             @relation("GateOutwardPlant", fields: [plantId], references: [id])
+  id           String            @id @default(uuid())
+  goeNumber    String            @unique
+  companyId    String
+  company      Company           @relation(fields: [companyId], references: [id])
+  plantId      String
+  plant        Plant             @relation("GateOutwardPlant", fields: [plantId], references: [id])
   vehicleLogId String?
-  vehicleLog   VehicleLog?      @relation("OutwardVehicleLog", fields: [vehicleLogId], references: [id])
+  vehicleLog   VehicleLog?       @relation("OutwardVehicleLog", fields: [vehicleLogId], references: [id])
   customerName    String
   customerMobile  String?
   customerAddress String?
@@ -693,7 +709,54 @@ model GateOutwardEntry {
   @@map("gate_outward_entries")
   @@index([companyId])
   @@index([plantId])
-  @@index([status])
   @@index([goeNumber])
+  @@index([createdAt])
+}
+
+model GatePass {
+  id          String         @id @default(uuid())
+  passNumber  String         @unique
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id])
+  plantId     String
+  plant       Plant          @relation("GatePassPlant", fields: [plantId], references: [id])
+  type        GatePassType   @default(NON_RETURNABLE)
+  status      GatePassStatus @default(PENDING)
+  purpose     String
+  carrierName    String
+  carrierMobile  String?
+  carrierIdProof String?
+  vehicleNumber  String?
+  itemDescription String
+  quantity        Float
+  unit            String   @default("NOS")
+  estimatedValue  Float?
+  validFrom   DateTime?
+  validTo     DateTime?
+  returnedAt  DateTime?
+  remarks     String?
+  cancelReason String?
+  requestedById  String
+  requestedBy    User    @relation("GPRequestedBy", fields: [requestedById], references: [id])
+  authorizedById String?
+  authorizedBy   User?   @relation("GPAuthorizedBy", fields: [authorizedById], references: [id])
+  authorizedAt   DateTime?
+  issuedById    String?
+  issuedBy      User?   @relation("GPIssuedBy", fields: [issuedById], references: [id])
+  issuedAt      DateTime?
+  closedById    String?
+  closedBy      User?   @relation("GPClosedBy", fields: [closedById], references: [id])
+  closedAt      DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("gate_passes")
+  @@index([companyId])
+  @@index([plantId])
+  @@index([passNumber])
   @@index([createdAt])
 }
