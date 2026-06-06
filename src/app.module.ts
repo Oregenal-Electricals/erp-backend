@@ -14,6 +14,7 @@ import { DummyDataModule } from './dummy-data/dummy-data.module';
 import { VisitorManagementModule } from './visitor-management/visitor-management.module';
 import { VehicleManagementModule } from './vehicle-management/vehicle-management.module';
 import { GateInwardModule } from './gate-inward/gate-inward.module';
+import { GateOutwardModule } from './gate-outward/gate-outward.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -24,7 +25,8 @@ import configuration from './config/configuration';
     PrismaModule, CommonModule, HealthModule, AuthModule,
     MastersModule, UsersModule, PermissionsModule, SettingsModule,
     ChangeRequestsModule, DummyDataModule,
-    VisitorManagementModule, VehicleManagementModule, GateInwardModule,
+    VisitorManagementModule, VehicleManagementModule,
+    GateInwardModule, GateOutwardModule,
   ],
 })
 export class AppModule implements NestModule {

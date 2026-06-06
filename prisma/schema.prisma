@@ -47,6 +47,63 @@ enum ChangeRequestType {
   OTHER
 }
 
+enum VisitorStatus {
+  PENDING
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum IdProofType {
+  AADHAAR
+  PAN
+  PASSPORT
+  DRIVING_LICENSE
+  VOTER_ID
+  EMPLOYEE_ID
+  OTHER
+}
+
+enum VehicleType {
+  TRUCK
+  TEMPO
+  CAR
+  TWO_WHEELER
+  CONTAINER
+  TANKER
+  OTHER
+}
+
+enum VehicleLogStatus {
+  INSIDE
+  EXITED
+  CANCELLED
+}
+
+enum VehiclePurpose {
+  INWARD
+  OUTWARD
+  INTERNAL
+  SERVICE
+  OTHER
+}
+
+enum GateInwardStatus {
+  PENDING
+  VERIFIED
+  SENT_TO_STORES
+  COMPLETED
+  REJECTED
+}
+
+enum GateOutwardStatus {
+  PENDING
+  APPROVED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
 model AuditLog {
   id         String   @id @default(uuid())
   tableName  String
@@ -59,7 +116,6 @@ model AuditLog {
   ipAddress  String?
   userAgent  String?
   reason     String?
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String   @default("system")
@@ -79,7 +135,6 @@ model SystemHealth {
   status    String
   message   String?
   checkedAt DateTime @default(now())
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String   @default("system")
@@ -112,7 +167,6 @@ model Company {
   currencyCode    String  @default("INR")
   fiscalYearStart Int     @default(4)
   timezone        String  @default("Asia/Kolkata")
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -120,18 +174,19 @@ model Company {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  plants          Plant[]
-  branches        Branch[]
-  departments     Department[]
-  financialYears  FinancialYear[]
-  users           User[]
-  numberingSeries NumberingSeries[]
-  changeRequests  ChangeRequest[]
-  visitors        Visitor[]
-  visitorLogs     VisitorLog[]
-  vehicles        Vehicle[]
-  vehicleLogs     VehicleLog[]
-  gateInwardEntries GateInwardEntry[]
+  plants             Plant[]
+  branches           Branch[]
+  departments        Department[]
+  financialYears     FinancialYear[]
+  users              User[]
+  numberingSeries    NumberingSeries[]
+  changeRequests     ChangeRequest[]
+  visitors           Visitor[]
+  visitorLogs        VisitorLog[]
+  vehicles           Vehicle[]
+  vehicleLogs        VehicleLog[]
+  gateInwardEntries  GateInwardEntry[]
+  gateOutwardEntries GateOutwardEntry[]
 
   @@map("companies")
   @@index([code])
@@ -151,10 +206,8 @@ model Plant {
   phone     String?
   email     String?
   plantType String  @default("MANUFACTURING")
-
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -162,11 +215,11 @@ model Plant {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  units Unit[]
-
-  visitorLogs VisitorLog[]
-  vehicleLogs VehicleLog[] @relation("VehiclePlant")
-  gateInwardEntries GateInwardEntry[] @relation("GateInwardPlant")
+  units              Unit[]
+  visitorLogs        VisitorLog[]
+  vehicleLogs        VehicleLog[]        @relation("VehiclePlant")
+  gateInwardEntries  GateInwardEntry[]   @relation("GateInwardPlant")
+  gateOutwardEntries GateOutwardEntry[]  @relation("GateOutwardPlant")
 
   @@map("plants")
   @@index([companyId])
@@ -180,10 +233,8 @@ model Unit {
   name        String
   description String?
   unitType    String  @default("PRODUCTION")
-
   plantId String
   plant   Plant  @relation(fields: [plantId], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -203,10 +254,8 @@ model Department {
   name        String
   description String?
   headName    String?
-
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -233,10 +282,8 @@ model Branch {
   phone      String?
   email      String?
   branchType String  @default("SALES")
-
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -257,10 +304,8 @@ model FinancialYear {
   startDate DateTime
   endDate   DateTime
   status    FinancialYearStatus @default(OPEN)
-
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -284,14 +329,11 @@ model User {
   passwordHash  String
   role          UserRole @default(VIEWER)
   mustChangePwd Boolean  @default(true)
-
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
-
   lastLoginAt   DateTime?
   isLocked      Boolean   @default(false)
   loginAttempts Int       @default(0)
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String   @default("system")
@@ -299,16 +341,19 @@ model User {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  hostVisits      VisitorLog[] @relation("HostEmployee")
-  checkedInVisits  VisitorLog[] @relation("CheckedInBy")
-  checkedOutVisits VisitorLog[] @relation("CheckedOutBy")
-  vehicleEntries   VehicleLog[] @relation("VehicleEntryBy")
-  vehicleExits     VehicleLog[] @relation("VehicleExitBy")
-  ginReceived      GateInwardEntry[] @relation("GINReceivedBy")
-  ginVerified      GateInwardEntry[] @relation("GINVerifiedBy")
   requestsMade     ChangeRequest[]        @relation("RequestedBy")
   requestsReviewed ChangeRequest[]        @relation("ReviewedBy")
   comments         ChangeRequestComment[]
+  hostVisits       VisitorLog[]           @relation("HostEmployee")
+  checkedInVisits  VisitorLog[]           @relation("CheckedInBy")
+  checkedOutVisits VisitorLog[]           @relation("CheckedOutBy")
+  vehicleEntries   VehicleLog[]           @relation("VehicleEntryBy")
+  vehicleExits     VehicleLog[]           @relation("VehicleExitBy")
+  ginReceived      GateInwardEntry[]      @relation("GINReceivedBy")
+  ginVerified      GateInwardEntry[]      @relation("GINVerifiedBy")
+  goeAuthorized    GateOutwardEntry[]     @relation("GOEAuthorizedBy")
+  goeDispatched    GateOutwardEntry[]     @relation("GOEDispatchedBy")
+  goeCreated       GateOutwardEntry[]     @relation("GOECreatedBy")
 
   @@map("users")
   @@index([email])
@@ -322,7 +367,6 @@ model SystemSetting {
   value       String
   description String?
   category    String  @default("GENERAL")
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String   @default("system")
@@ -339,7 +383,6 @@ model NumberingSeries {
   id            String  @id @default(uuid())
   companyId     String
   company       Company @relation(fields: [companyId], references: [id])
-
   documentType  String
   prefix        String
   separator     String  @default("-")
@@ -349,7 +392,6 @@ model NumberingSeries {
   currentNumber Int     @default(0)
   lastGenerated String?
   isLocked      Boolean @default(false)
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -371,21 +413,16 @@ model ChangeRequest {
   type          ChangeRequestType   @default(OTHER)
   status        ChangeRequestStatus @default(DRAFT)
   priority      String              @default("NORMAL")
-
   companyId     String
   company       Company @relation(fields: [companyId], references: [id])
-
   requestedById String
   requestedBy   User   @relation("RequestedBy", fields: [requestedById], references: [id])
-
   reviewedById  String?
   reviewedBy    User?  @relation("ReviewedBy", fields: [reviewedById], references: [id])
-
   reviewedAt    DateTime?
   reviewComment String?
   submittedAt   DateTime?
   dueDate       DateTime?
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -407,11 +444,9 @@ model ChangeRequestComment {
   id              String        @id @default(uuid())
   changeRequestId String
   changeRequest   ChangeRequest @relation(fields: [changeRequestId], references: [id])
-
   comment   String
   commentBy String
   commenter User   @relation(fields: [commentBy], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -423,44 +458,21 @@ model ChangeRequestComment {
   @@index([changeRequestId])
 }
 
-// ============================================================
-// MODULE 7 — VISITOR MANAGEMENT
-// ============================================================
-
-enum VisitorStatus {
-  PENDING
-  CHECKED_IN
-  CHECKED_OUT
-  CANCELLED
-}
-
-enum IdProofType {
-  AADHAAR
-  PAN
-  PASSPORT
-  DRIVING_LICENSE
-  VOTER_ID
-  EMPLOYEE_ID
-  OTHER
-}
-
 model Visitor {
   id              String      @id @default(uuid())
   companyId       String
   company         Company     @relation(fields: [companyId], references: [id])
-
   firstName       String
   lastName        String
   mobile          String
   email           String?
-  visitorCompany  String?     // Company visitor belongs to
+  visitorCompany  String?
   designation     String?
   idProofType     IdProofType @default(AADHAAR)
   idProofNumber   String
   photoUrl        String?
   isBlacklisted   Boolean     @default(false)
   blacklistReason String?
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -477,39 +489,30 @@ model Visitor {
 }
 
 model VisitorLog {
-  id            String        @id @default(uuid())
-  logNumber     String        @unique
-  companyId     String
-  company       Company       @relation(fields: [companyId], references: [id])
-
-  visitorId     String
-  visitor       Visitor       @relation(fields: [visitorId], references: [id])
-
-  plantId       String
-  plant         Plant         @relation(fields: [plantId], references: [id])
-
+  id             String        @id @default(uuid())
+  logNumber      String        @unique
+  companyId      String
+  company        Company       @relation(fields: [companyId], references: [id])
+  visitorId      String
+  visitor        Visitor       @relation(fields: [visitorId], references: [id])
+  plantId        String
+  plant          Plant         @relation(fields: [plantId], references: [id])
   hostEmployeeId String?
-  hostEmployee   User?        @relation("HostEmployee", fields: [hostEmployeeId], references: [id])
-
+  hostEmployee   User?         @relation("HostEmployee", fields: [hostEmployeeId], references: [id])
   checkedInById  String
-  checkedInBy    User         @relation("CheckedInBy", fields: [checkedInById], references: [id])
-
+  checkedInBy    User          @relation("CheckedInBy", fields: [checkedInById], references: [id])
   checkedOutById String?
-  checkedOutBy   User?        @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
-
+  checkedOutBy   User?         @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
   purpose        String
   vehicleNumber  String?
   itemsCarried   String?
   areasToVisit   String?
   remarks        String?
-
-  checkInTime    DateTime     @default(now())
+  checkInTime    DateTime      @default(now())
   checkOutTime   DateTime?
   expectedOutTime DateTime?
-
   status         VisitorStatus @default(CHECKED_IN)
   passNumber     String?
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -526,46 +529,16 @@ model VisitorLog {
   @@index([logNumber])
 }
 
-// ============================================================
-// MODULE 8 — VEHICLE MANAGEMENT
-// ============================================================
-
-enum VehicleType {
-  TRUCK
-  TEMPO
-  CAR
-  TWO_WHEELER
-  CONTAINER
-  TANKER
-  OTHER
-}
-
-enum VehicleLogStatus {
-  INSIDE
-  EXITED
-  CANCELLED
-}
-
-enum VehiclePurpose {
-  INWARD
-  OUTWARD
-  INTERNAL
-  SERVICE
-  OTHER
-}
-
 model Vehicle {
-  id              String      @id @default(uuid())
-  companyId       String
-  company         Company     @relation(fields: [companyId], references: [id])
-
-  vehicleNumber   String
-  vehicleType     VehicleType @default(TRUCK)
-  ownerName       String?
-  ownerMobile     String?
-  isCompanyVehicle Boolean   @default(false)
-  remarks         String?
-
+  id               String      @id @default(uuid())
+  companyId        String
+  company          Company     @relation(fields: [companyId], references: [id])
+  vehicleNumber    String
+  vehicleType      VehicleType @default(TRUCK)
+  ownerName        String?
+  ownerMobile      String?
+  isCompanyVehicle Boolean     @default(false)
+  remarks          String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -586,40 +559,30 @@ model VehicleLog {
   logNumber     String           @unique
   companyId     String
   company       Company          @relation(fields: [companyId], references: [id])
-
   vehicleId     String
   vehicle       Vehicle          @relation(fields: [vehicleId], references: [id])
-
   plantId       String
   plant         Plant            @relation("VehiclePlant", fields: [plantId], references: [id])
-
   driverName    String
   driverMobile  String?
   driverLicense String?
-
   purpose       VehiclePurpose   @default(INWARD)
   status        VehicleLogStatus @default(INSIDE)
-
-  inWeight      Float?           // kg
-  outWeight     Float?           // kg
-  netWeight     Float?           // kg (calculated)
-
+  inWeight      Float?
+  outWeight     Float?
+  netWeight     Float?
   materialDescription String?
   supplierName        String?
   customerName        String?
   poNumber            String?
   remarks             String?
-
   entryTime     DateTime         @default(now())
   exitTime      DateTime?
   expectedExitTime DateTime?
-
   entryById     String
   entryBy       User             @relation("VehicleEntryBy", fields: [entryById], references: [id])
-
   exitById      String?
   exitBy        User?            @relation("VehicleExitBy", fields: [exitById], references: [id])
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -627,7 +590,8 @@ model VehicleLog {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  gateInwardEntries GateInwardEntry[]
+  gateInwardEntries  GateInwardEntry[]
+  gateOutwardEntries GateOutwardEntry[] @relation("OutwardVehicleLog")
 
   @@map("vehicle_logs")
   @@index([companyId])
@@ -638,18 +602,6 @@ model VehicleLog {
   @@index([logNumber])
 }
 
-// ============================================================
-// MODULE 9 — GATE INWARD
-// ============================================================
-
-enum GateInwardStatus {
-  PENDING
-  VERIFIED
-  SENT_TO_STORES
-  COMPLETED
-  REJECTED
-}
-
 model GateInwardEntry {
   id          String           @id @default(uuid())
   ginNumber   String           @unique
@@ -657,39 +609,30 @@ model GateInwardEntry {
   company     Company          @relation(fields: [companyId], references: [id])
   plantId     String
   plant       Plant            @relation("GateInwardPlant", fields: [plantId], references: [id])
-
   vehicleLogId String?
   vehicleLog   VehicleLog?     @relation(fields: [vehicleLogId], references: [id])
-
   supplierName    String
   supplierMobile  String?
   supplierGstin   String?
-
   poNumber        String?
   invoiceNumber   String?
   invoiceDate     DateTime?
   invoiceAmount   Float?
-
   materialDescription String
   quantity            Float
   unit                String    @default("NOS")
   grossWeight         Float?
   netWeight           Float?
   packageCount        Int?
-
   status      GateInwardStatus @default(PENDING)
   remarks     String?
   rejectionReason String?
-
   receivedById  String
   receivedBy    User            @relation("GINReceivedBy", fields: [receivedById], references: [id])
-
   verifiedById  String?
   verifiedBy    User?           @relation("GINVerifiedBy", fields: [verifiedById], references: [id])
-
   verifiedAt    DateTime?
   completedAt   DateTime?
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String
@@ -703,5 +646,54 @@ model GateInwardEntry {
   @@index([status])
   @@index([ginNumber])
   @@index([poNumber])
+  @@index([createdAt])
+}
+
+model GateOutwardEntry {
+  id          String            @id @default(uuid())
+  goeNumber   String            @unique
+  companyId   String
+  company     Company           @relation(fields: [companyId], references: [id])
+  plantId     String
+  plant       Plant             @relation("GateOutwardPlant", fields: [plantId], references: [id])
+  vehicleLogId String?
+  vehicleLog   VehicleLog?      @relation("OutwardVehicleLog", fields: [vehicleLogId], references: [id])
+  customerName    String
+  customerMobile  String?
+  customerAddress String?
+  customerGstin   String?
+  salesOrderNumber      String?
+  deliveryChallanNumber String?
+  invoiceNumber         String?
+  invoiceAmount         Float?
+  materialDescription String
+  quantity            Float
+  unit                String   @default("NOS")
+  grossWeight         Float?
+  netWeight           Float?
+  packageCount        Int?
+  status        GateOutwardStatus @default(PENDING)
+  remarks       String?
+  cancelReason  String?
+  authorizedById String?
+  authorizedBy   User?    @relation("GOEAuthorizedBy", fields: [authorizedById], references: [id])
+  authorizedAt   DateTime?
+  dispatchedById String?
+  dispatchedBy   User?    @relation("GOEDispatchedBy", fields: [dispatchedById], references: [id])
+  dispatchedAt   DateTime?
+  createdById    String
+  createdByUser  User     @relation("GOECreatedBy", fields: [createdById], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("gate_outward_entries")
+  @@index([companyId])
+  @@index([plantId])
+  @@index([status])
+  @@index([goeNumber])
   @@index([createdAt])
 }
