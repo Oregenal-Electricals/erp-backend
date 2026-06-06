@@ -20,6 +20,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -59,7 +66,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -81,6 +93,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -120,7 +139,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -136,6 +160,7 @@ export declare class GatePassController {
         cancelled: number;
         returnable: number;
         nonReturnable: number;
+        staffExit: number;
     }>;
     findOne(id: string): Promise<{
         plant: {
@@ -153,6 +178,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -192,7 +224,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -214,6 +251,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -253,7 +297,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -275,6 +324,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -314,7 +370,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -336,6 +397,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -375,7 +443,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -397,6 +470,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -436,7 +516,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;
@@ -458,6 +543,13 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         issuedBy: {
             id: string;
             firstName: string;
@@ -497,7 +589,12 @@ export declare class GatePassController {
         estimatedValue: number | null;
         validFrom: Date | null;
         validTo: Date | null;
+        employeeId: string | null;
+        exitType: string | null;
+        expectedReturnTime: Date | null;
+        departmentName: string | null;
         returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
         closedAt: Date | null;
         issuedById: string | null;

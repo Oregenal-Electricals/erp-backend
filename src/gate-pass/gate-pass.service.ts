@@ -26,6 +26,10 @@ export class GatePassService {
     const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
     if (!plant) throw new NotFoundException('Plant not found');
 
+    if (dto.type === 'STAFF_EXIT' && !dto.employeeId) {
+      throw new BadRequestException('Employee ID is required for staff exit pass');
+    }
+
     let passNumber: string;
     try {
       passNumber = await this.settings.getNextNumber(user.companyId, 'GP');
@@ -39,24 +43,28 @@ export class GatePassService {
     const pass = await this.prisma.gatePass.create({
       data: {
         passNumber,
-        companyId:      user.companyId,
-        plantId:        dto.plantId,
-        type:           dto.type,
-        purpose:        dto.purpose,
-        carrierName:    dto.carrierName,
-        carrierMobile:  dto.carrierMobile,
-        carrierIdProof: dto.carrierIdProof,
-        vehicleNumber:  dto.vehicleNumber,
-        itemDescription: dto.itemDescription,
-        quantity:       dto.quantity,
-        unit:           dto.unit ?? 'NOS',
-        estimatedValue: dto.estimatedValue,
-        validFrom:      dto.validFrom ? new Date(dto.validFrom) : undefined,
-        validTo:        dto.validTo ? new Date(dto.validTo) : undefined,
-        remarks:        dto.remarks,
-        requestedById:  user.id,
-        createdBy:      user.id,
-        updatedBy:      user.id,
+        companyId:          user.companyId,
+        plantId:            dto.plantId,
+        type:               dto.type,
+        purpose:            dto.purpose,
+        carrierName:        dto.carrierName,
+        carrierMobile:      dto.carrierMobile,
+        carrierIdProof:     dto.carrierIdProof,
+        vehicleNumber:      dto.vehicleNumber,
+        itemDescription:    dto.itemDescription,
+        quantity:           dto.quantity,
+        unit:               dto.unit ?? 'NOS',
+        estimatedValue:     dto.estimatedValue,
+        validFrom:          dto.validFrom ? new Date(dto.validFrom) : undefined,
+        validTo:            dto.validTo ? new Date(dto.validTo) : undefined,
+        remarks:            dto.remarks,
+        employeeId:         dto.employeeId,
+        exitType:           dto.exitType,
+        expectedReturnTime: dto.expectedReturnTime ? new Date(dto.expectedReturnTime) : undefined,
+        departmentName:     dto.departmentName,
+        requestedById:      user.id,
+        createdBy:          user.id,
+        updatedBy:          user.id,
       },
       include: this.includes(),
     });
@@ -119,11 +127,17 @@ export class GatePassService {
     const pass = await this.prisma.gatePass.findUnique({ where: { id } });
     if (!pass) throw new NotFoundException('Gate pass not found');
     if (pass.status !== GatePassStatus.ISSUED) throw new BadRequestException('Only ISSUED passes can be marked returned');
-    if (pass.type !== 'RETURNABLE') throw new BadRequestException('Only RETURNABLE passes can be marked returned');
+    if (!['RETURNABLE','STAFF_EXIT'].includes(pass.type)) throw new BadRequestException('Only RETURNABLE or STAFF_EXIT passes can be marked returned');
 
     const updated = await this.prisma.gatePass.update({
       where: { id },
-      data: { status: GatePassStatus.RETURNED, returnedAt: new Date(), remarks: dto.remarks || pass.remarks, updatedBy: user.id },
+      data: {
+        status: GatePassStatus.RETURNED,
+        returnedAt: new Date(),
+        actualReturnTime: new Date(),
+        remarks: dto.remarks || pass.remarks,
+        updatedBy: user.id,
+      },
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'gate_passes', recordId: id, action: 'UPDATE', oldValues: { status: 'ISSUED' }, newValues: { status: 'RETURNED' }, changedBy: user.id });
@@ -163,7 +177,7 @@ export class GatePassService {
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
     const base = { companyId: user.companyId };
 
-    const [total, pending, approved, issued, returned, closed, cancelled, returnable, nonReturnable] = await Promise.all([
+    const [total, pending, approved, issued, returned, closed, cancelled, returnable, nonReturnable, staffExit] = await Promise.all([
       this.prisma.gatePass.count({ where: base }),
       this.prisma.gatePass.count({ where: { ...base, status: 'PENDING' } }),
       this.prisma.gatePass.count({ where: { ...base, status: 'APPROVED' } }),
@@ -173,9 +187,10 @@ export class GatePassService {
       this.prisma.gatePass.count({ where: { ...base, status: 'CANCELLED' } }),
       this.prisma.gatePass.count({ where: { ...base, type: 'RETURNABLE' } }),
       this.prisma.gatePass.count({ where: { ...base, type: 'NON_RETURNABLE' } }),
+      this.prisma.gatePass.count({ where: { ...base, type: 'STAFF_EXIT' } }),
     ]);
 
-    return { total, pending, approved, issued, returned, closed, cancelled, returnable, nonReturnable };
+    return { total, pending, approved, issued, returned, closed, cancelled, returnable, nonReturnable, staffExit };
   }
 
   private includes() {
@@ -185,6 +200,7 @@ export class GatePassService {
       authorizedBy: { select: { id: true, firstName: true, lastName: true } },
       issuedBy:     { select: { id: true, firstName: true, lastName: true } },
       closedBy:     { select: { id: true, firstName: true, lastName: true } },
+      employee:     { select: { id: true, firstName: true, lastName: true, employeeCode: true, role: true } },
     };
   }
 }

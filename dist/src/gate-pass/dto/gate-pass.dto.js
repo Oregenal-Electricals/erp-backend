@@ -97,6 +97,30 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateGatePassDto.prototype, "remarks", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'uuid-of-employee' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)('4'),
+    __metadata("design:type", String)
+], CreateGatePassDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'PERSONAL', enum: ['PERSONAL', 'OFFICIAL', 'MEDICAL', 'EMERGENCY'] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGatePassDto.prototype, "exitType", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '2024-06-10T18:00:00Z' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateGatePassDto.prototype, "expectedReturnTime", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Production' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGatePassDto.prototype, "departmentName", void 0);
 class ApproveGatePassDto {
 }
 exports.ApproveGatePassDto = ApproveGatePassDto;

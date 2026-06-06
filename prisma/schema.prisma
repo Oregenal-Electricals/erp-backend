@@ -107,6 +107,7 @@ enum GateOutwardStatus {
 enum GatePassType {
   RETURNABLE
   NON_RETURNABLE
+  STAFF_EXIT
 }
 
 enum GatePassStatus {
@@ -375,6 +376,7 @@ model User {
   gpAuthorized     GatePass[]         @relation("GPAuthorizedBy")
   gpIssued         GatePass[]         @relation("GPIssuedBy")
   gpClosed         GatePass[]         @relation("GPClosedBy")
+  gpEmployee       GatePass[]         @relation("GPEmployee")
 
   @@map("users")
   @@index([email])
@@ -736,6 +738,15 @@ model GatePass {
   returnedAt  DateTime?
   remarks     String?
   cancelReason String?
+
+  // Staff Exit Fields
+  employeeId          String?
+  employee            User?     @relation("GPEmployee", fields: [employeeId], references: [id])
+  exitType            String?   // PERSONAL, OFFICIAL, MEDICAL, EMERGENCY
+  expectedReturnTime  DateTime?
+  actualReturnTime    DateTime?
+  departmentName      String?
+
   requestedById  String
   requestedBy    User    @relation("GPRequestedBy", fields: [requestedById], references: [id])
   authorizedById String?

@@ -72,6 +72,27 @@ export class CreateGatePassDto {
   @IsOptional()
   @IsString()
   remarks?: string;
+
+  // Staff Exit Fields
+  @ApiPropertyOptional({ example: 'uuid-of-employee' })
+  @IsOptional()
+  @IsUUID('4')
+  employeeId?: string;
+
+  @ApiPropertyOptional({ example: 'PERSONAL', enum: ['PERSONAL','OFFICIAL','MEDICAL','EMERGENCY'] })
+  @IsOptional()
+  @IsString()
+  exitType?: string;
+
+  @ApiPropertyOptional({ example: '2024-06-10T18:00:00Z' })
+  @IsOptional()
+  @IsDateString()
+  expectedReturnTime?: string;
+
+  @ApiPropertyOptional({ example: 'Production' })
+  @IsOptional()
+  @IsString()
+  departmentName?: string;
 }
 
 export class ApproveGatePassDto {

@@ -14,6 +14,10 @@ export declare class CreateGatePassDto {
     validFrom?: string;
     validTo?: string;
     remarks?: string;
+    employeeId?: string;
+    exitType?: string;
+    expectedReturnTime?: string;
+    departmentName?: string;
 }
 export declare class ApproveGatePassDto {
     remarks?: string;
