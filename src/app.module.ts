@@ -19,6 +19,7 @@ import { GatePassModule } from './gate-pass/gate-pass.module';
 import { GateDashboardModule } from './gate-dashboard/gate-dashboard.module';
 import { ItemMasterModule } from './item-master/item-master.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
+import { VendorModule } from './vendors/vendor.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -32,6 +33,7 @@ import configuration from './config/configuration';
     VisitorManagementModule, VehicleManagementModule,
     GateInwardModule, GateOutwardModule, GatePassModule,
     GateDashboardModule, ItemMasterModule, WarehouseModule,
+    VendorModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -59,6 +59,11 @@ export enum Permission {
   FINANCE_EDIT = 'FINANCE_EDIT',
   FINANCE_APPROVE = 'FINANCE_APPROVE',
 
+  // ─── VENDORS ────────────────────────────────
+  VENDORS_VIEW = 'VENDORS_VIEW',
+  VENDORS_CREATE = 'VENDORS_CREATE',
+  VENDORS_EDIT = 'VENDORS_EDIT',
+  VENDORS_DELETE = 'VENDORS_DELETE',
   // ─── REPORTS ────────────────────────────────
   REPORTS_VIEW = 'REPORTS_VIEW',
   REPORTS_EXPORT = 'REPORTS_EXPORT',
