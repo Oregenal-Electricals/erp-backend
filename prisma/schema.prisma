@@ -120,6 +120,24 @@ enum GatePassStatus {
   CANCELLED
 }
 
+enum ItemType {
+  RAW_MATERIAL
+  SEMI_FINISHED
+  FINISHED_GOOD
+  CONSUMABLE
+  PACKAGING
+  SPARE_PART
+  TOOL
+  SERVICE
+}
+
+enum ItemStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+  UNDER_DEVELOPMENT
+}
+
 model AuditLog {
   id        String   @id @default(uuid())
   tableName String
@@ -204,6 +222,9 @@ model Company {
   gateInwardEntries  GateInwardEntry[]
   gateOutwardEntries GateOutwardEntry[]
   gatePasses         GatePass[]
+  unitOfMeasures     UnitOfMeasure[]
+  itemCategories     ItemCategory[]
+  items              Item[]
 
   @@map("companies")
   @@index([code])
@@ -738,15 +759,12 @@ model GatePass {
   returnedAt  DateTime?
   remarks     String?
   cancelReason String?
-
-  // Staff Exit Fields
   employeeId          String?
   employee            User?     @relation("GPEmployee", fields: [employeeId], references: [id])
-  exitType            String?   // PERSONAL, OFFICIAL, MEDICAL, EMERGENCY
+  exitType            String?
   expectedReturnTime  DateTime?
   actualReturnTime    DateTime?
   departmentName      String?
-
   requestedById  String
   requestedBy    User    @relation("GPRequestedBy", fields: [requestedById], references: [id])
   authorizedById String?
@@ -770,4 +788,111 @@ model GatePass {
   @@index([plantId])
   @@index([passNumber])
   @@index([createdAt])
+}
+
+// ============================================================
+// MODULE 13 — ITEM MASTER (UOM + Category + Item)
+// ============================================================
+
+model UnitOfMeasure {
+  id          String  @id @default(uuid())
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  description String?
+  isBase      Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  items           Item[]
+  purchaseUomItems Item[] @relation("PurchaseUom")
+  salesUomItems    Item[] @relation("SalesUom")
+
+  @@map("unit_of_measures")
+  @@unique([companyId, code])
+  @@index([companyId])
+}
+
+model ItemCategory {
+  id          String  @id @default(uuid())
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  description String?
+  parentId    String?
+  parent      ItemCategory?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    ItemCategory[] @relation("CategoryTree")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  items Item[]
+
+  @@map("item_categories")
+  @@unique([companyId, code])
+  @@index([companyId])
+}
+
+model Item {
+  id          String     @id @default(uuid())
+  companyId   String
+  company     Company    @relation(fields: [companyId], references: [id])
+  itemCode    String
+  itemName    String
+  shortName   String?
+  description String?
+  itemType    ItemType   @default(RAW_MATERIAL)
+  status      ItemStatus @default(ACTIVE)
+  categoryId  String?
+  category    ItemCategory? @relation(fields: [categoryId], references: [id])
+  uomId       String
+  uom         UnitOfMeasure @relation(fields: [uomId], references: [id])
+  purchaseUomId String?
+  purchaseUom   UnitOfMeasure? @relation("PurchaseUom", fields: [purchaseUomId], references: [id])
+  salesUomId  String?
+  salesUom    UnitOfMeasure? @relation("SalesUom", fields: [salesUomId], references: [id])
+  hsnCode     String?
+  gstRate     Float   @default(18)
+  sacCode     String?
+  purchaseRate     Float?
+  salesRate        Float?
+  standardCost     Float?
+  lastPurchaseRate Float?
+  reorderLevel    Float?
+  reorderQty      Float?
+  minOrderQty     Float?
+  maxOrderQty     Float?
+  leadTimeDays    Int?
+  shelfLifeDays   Int?
+  isBatchTracked  Boolean @default(false)
+  isSerialTracked Boolean @default(false)
+  isMaintenance   Boolean @default(false)
+  drawingNo       String?
+  specifications  Json?
+  imageUrl        String?
+  barcode         String?
+  abcClass        String?
+  criticalityLevel String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String
+  updatedBy  String
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+
+  @@map("items")
+  @@unique([companyId, itemCode])
+  @@index([companyId])
+  @@index([itemType])
+  @@index([categoryId])
+  @@index([hsnCode])
 }
