@@ -228,6 +228,7 @@ model Company {
   warehouses         Warehouse[]
   vendors            Vendor[]
   products           Product[]
+  rawMaterials       RawMaterial[]
 
   @@map("companies")
   @@index([code])
@@ -815,6 +816,7 @@ model UnitOfMeasure {
 
   items           Item[]
   products         Product[]
+  rawMaterials     RawMaterial[] @relation("RawMaterialUom")
   purchaseUomItems Item[] @relation("PurchaseUom")
   salesUomItems    Item[] @relation("SalesUom")
 
@@ -841,7 +843,8 @@ model ItemCategory {
   isTestData Boolean  @default(false)
 
   items    Item[]
-  products Product[]
+  products     Product[]
+  rawMaterials RawMaterial[]
 
   @@map("item_categories")
   @@unique([companyId, code])
@@ -1091,4 +1094,38 @@ model Product {
 
   @@unique([companyId, code])
   @@map("products")
+}
+
+// MODULE 16 — RAW MATERIAL MASTER
+// ============================================================
+model RawMaterial {
+  id              String        @id @default(uuid())
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id])
+  code            String
+  name            String
+  description     String?
+  materialType    String        @default("ELECTRONIC") // ELECTRONIC, MECHANICAL, ELECTRICAL, CHEMICAL, PACKAGING, OTHER
+  categoryId      String?
+  category        ItemCategory? @relation(fields: [categoryId], references: [id])
+  uomId           String?
+  uom             UnitOfMeasure? @relation("RawMaterialUom", fields: [uomId], references: [id])
+  hsnCode         String?
+  gstRate         Float?
+  brand           String?
+  partNumber      String?
+  specifications  Json?
+  minStockLevel   Float?
+  maxStockLevel   Float?
+  reorderQty      Float?
+  leadTimeDays    Int?
+  isActive        Boolean       @default(true)
+  isTestData      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, code])
+  @@map("raw_materials")
 }
