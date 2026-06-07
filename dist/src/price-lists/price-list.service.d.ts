@@ -1,0 +1,181 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreatePriceListDto, UpdatePriceListDto, CreatePriceListItemDto, UpdatePriceListItemDto } from './dto/price-list.dto';
+export declare class PriceListService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    create(dto: CreatePriceListDto, user: any): Promise<{
+        id: string;
+        code: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        isDefault: boolean;
+        currency: string;
+        listType: string;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: ({
+            _count: {
+                items: number;
+            };
+        } & {
+            id: string;
+            code: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string | null;
+            isDefault: boolean;
+            currency: string;
+            listType: string;
+        })[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            validFrom: Date;
+            validTo: Date | null;
+            itemCode: string;
+            itemName: string;
+            itemType: string;
+            uom: string | null;
+            itemId: string;
+            price: number;
+            minQty: number | null;
+            priceListId: string;
+            isApproved: boolean;
+        }[];
+    } & {
+        id: string;
+        code: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        isDefault: boolean;
+        currency: string;
+        listType: string;
+    }>;
+    update(id: string, dto: UpdatePriceListDto, user: any): Promise<{
+        id: string;
+        code: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        isDefault: boolean;
+        currency: string;
+        listType: string;
+    }>;
+    remove(id: string, user: any): Promise<{
+        message: string;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        active: number;
+        inactive: number;
+        sales: number;
+        purchase: number;
+        totalItems: number;
+    }>;
+    addItem(priceListId: string, dto: CreatePriceListItemDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        validFrom: Date;
+        validTo: Date | null;
+        itemCode: string;
+        itemName: string;
+        itemType: string;
+        uom: string | null;
+        itemId: string;
+        price: number;
+        minQty: number | null;
+        priceListId: string;
+        isApproved: boolean;
+    }>;
+    updateItem(priceListId: string, itemId: string, dto: UpdatePriceListItemDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        validFrom: Date;
+        validTo: Date | null;
+        itemCode: string;
+        itemName: string;
+        itemType: string;
+        uom: string | null;
+        itemId: string;
+        price: number;
+        minQty: number | null;
+        priceListId: string;
+        isApproved: boolean;
+    }>;
+    approveItem(priceListId: string, itemId: string, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        validFrom: Date;
+        validTo: Date | null;
+        itemCode: string;
+        itemName: string;
+        itemType: string;
+        uom: string | null;
+        itemId: string;
+        price: number;
+        minQty: number | null;
+        priceListId: string;
+        isApproved: boolean;
+    }>;
+    removeItem(priceListId: string, itemId: string, user: any): Promise<{
+        message: string;
+    }>;
+}

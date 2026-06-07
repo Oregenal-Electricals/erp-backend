@@ -230,6 +230,7 @@ model Company {
   products           Product[]
   rawMaterials       RawMaterial[]
   hsnSacCodes        HsnSacCode[]
+  priceLists         PriceList[]
 
   @@map("companies")
   @@index([code])
@@ -1154,4 +1155,54 @@ model HsnSacCode {
 
   @@unique([companyId, code])
   @@map("hsn_sac_codes")
+}
+
+// MODULE 18 — PRICE LIST MANAGEMENT
+// ============================================================
+model PriceList {
+  id          String          @id @default(uuid())
+  companyId   String
+  company     Company         @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  description String?
+  listType    String          @default("SALES") // SALES, PURCHASE
+  currency    String          @default("INR")
+  isDefault   Boolean         @default(false)
+  isActive    Boolean         @default(true)
+  isTestData  Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  items       PriceListItem[]
+
+  @@unique([companyId, code])
+  @@map("price_lists")
+}
+
+model PriceListItem {
+  id          String    @id @default(uuid())
+  priceListId String
+  priceList   PriceList @relation(fields: [priceListId], references: [id])
+  companyId   String
+  itemType    String    @default("PRODUCT") // PRODUCT, RAW_MATERIAL, ITEM
+  itemId      String
+  itemCode    String
+  itemName    String
+  uom         String?
+  price       Float
+  minQty      Float?
+  validFrom   DateTime  @default(now())
+  validTo     DateTime?
+  isApproved  Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  isTestData  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("price_list_items")
 }
