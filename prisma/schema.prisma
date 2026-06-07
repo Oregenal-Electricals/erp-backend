@@ -229,6 +229,7 @@ model Company {
   vendors            Vendor[]
   products           Product[]
   rawMaterials       RawMaterial[]
+  hsnSacCodes        HsnSacCode[]
 
   @@map("companies")
   @@index([code])
@@ -1128,4 +1129,29 @@ model RawMaterial {
 
   @@unique([companyId, code])
   @@map("raw_materials")
+}
+
+// MODULE 17 — HSN/SAC MASTER
+// ============================================================
+model HsnSacCode {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  code        String
+  codeType    String   @default("HSN") // HSN, SAC
+  description String
+  gstRate     Float    @default(18)
+  igstRate    Float    @default(18)
+  cgstRate    Float    @default(9)
+  sgstRate    Float    @default(9)
+  cessRate    Float?
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, code])
+  @@map("hsn_sac_codes")
 }

@@ -1,0 +1,98 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateHsnSacDto, UpdateHsnSacDto } from './dto/hsn-sac.dto';
+export declare class HsnSacService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    create(dto: CreateHsnSacDto, user: any): Promise<{
+        id: string;
+        code: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string;
+        gstRate: number;
+        codeType: string;
+        cessRate: number | null;
+        igstRate: number;
+        cgstRate: number;
+        sgstRate: number;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: {
+            id: string;
+            code: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string;
+            gstRate: number;
+            codeType: string;
+            cessRate: number | null;
+            igstRate: number;
+            cgstRate: number;
+            sgstRate: number;
+        }[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        id: string;
+        code: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string;
+        gstRate: number;
+        codeType: string;
+        cessRate: number | null;
+        igstRate: number;
+        cgstRate: number;
+        sgstRate: number;
+    }>;
+    update(id: string, dto: UpdateHsnSacDto, user: any): Promise<{
+        id: string;
+        code: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string;
+        gstRate: number;
+        codeType: string;
+        cessRate: number | null;
+        igstRate: number;
+        cgstRate: number;
+        sgstRate: number;
+    }>;
+    remove(id: string, user: any): Promise<{
+        message: string;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        active: number;
+        inactive: number;
+        hsn: number;
+        sac: number;
+        zeroRated: number;
+        standard: number;
+    }>;
+}

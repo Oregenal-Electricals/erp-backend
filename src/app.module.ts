@@ -22,6 +22,7 @@ import { WarehouseModule } from './warehouse/warehouse.module';
 import { VendorModule } from './vendors/vendor.module';
 import { ProductModule } from './products/product.module';
 import { RawMaterialModule } from './raw-materials/raw-material.module';
+import { HsnSacModule } from './hsn-sac/hsn-sac.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -38,6 +39,7 @@ import configuration from './config/configuration';
     VendorModule,
     ProductModule,
     RawMaterialModule,
+    HsnSacModule,
   ],
 })
 export class AppModule implements NestModule {
