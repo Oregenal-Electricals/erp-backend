@@ -32,6 +32,7 @@ const gate_dashboard_module_1 = require("./gate-dashboard/gate-dashboard.module"
 const item_master_module_1 = require("./item-master/item-master.module");
 const warehouse_module_1 = require("./warehouse/warehouse.module");
 const vendor_module_1 = require("./vendors/vendor.module");
+const product_module_1 = require("./products/product.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -52,6 +53,7 @@ exports.AppModule = AppModule = __decorate([
             gate_inward_module_1.GateInwardModule, gate_outward_module_1.GateOutwardModule, gate_pass_module_1.GatePassModule,
             gate_dashboard_module_1.GateDashboardModule, item_master_module_1.ItemMasterModule, warehouse_module_1.WarehouseModule,
             vendor_module_1.VendorModule,
+            product_module_1.ProductModule,
         ],
     })
 ], AppModule);

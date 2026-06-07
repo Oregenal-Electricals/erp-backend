@@ -227,6 +227,7 @@ model Company {
   items              Item[]
   warehouses         Warehouse[]
   vendors            Vendor[]
+  products           Product[]
 
   @@map("companies")
   @@index([code])
@@ -813,6 +814,7 @@ model UnitOfMeasure {
   isTestData Boolean  @default(false)
 
   items           Item[]
+  products         Product[]
   purchaseUomItems Item[] @relation("PurchaseUom")
   salesUomItems    Item[] @relation("SalesUom")
 
@@ -838,7 +840,8 @@ model ItemCategory {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
 
-  items Item[]
+  items    Item[]
+  products Product[]
 
   @@map("item_categories")
   @@unique([companyId, code])
@@ -1054,4 +1057,38 @@ model Vendor {
 
   @@unique([companyId, code])
   @@map("vendors")
+}
+
+// MODULE 15 — PRODUCT MASTER
+// ============================================================
+model Product {
+  id              String        @id @default(uuid())
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id])
+  code            String
+  name            String
+  description     String?
+  productType     String        @default("FINISHED_GOOD") // FINISHED_GOOD, SEMI_FINISHED, BY_PRODUCT
+  categoryId      String?
+  category        ItemCategory? @relation(fields: [categoryId], references: [id])
+  uomId           String?
+  uom             UnitOfMeasure? @relation(fields: [uomId], references: [id])
+  hsnCode         String?
+  gstRate         Float?
+  brand           String?
+  model           String?
+  revision        String?
+  drawingNumber   String?
+  specifications  Json?
+  minOrderQty     Float?
+  leadTimeDays    Int?
+  isActive        Boolean       @default(true)
+  isTestData      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, code])
+  @@map("products")
 }
