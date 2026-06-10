@@ -24,6 +24,7 @@ import { ProductModule } from './products/product.module';
 import { RawMaterialModule } from './raw-materials/raw-material.module';
 import { HsnSacModule } from './hsn-sac/hsn-sac.module';
 import { PriceListModule } from './price-lists/price-list.module';
+import { PriceHistoryModule } from './price-history/price-history.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -42,6 +43,7 @@ import configuration from './config/configuration';
     RawMaterialModule,
     HsnSacModule,
     PriceListModule,
+    PriceHistoryModule,
   ],
 })
 export class AppModule implements NestModule {
