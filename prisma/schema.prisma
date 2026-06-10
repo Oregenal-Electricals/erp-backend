@@ -231,6 +231,7 @@ model Company {
   rawMaterials       RawMaterial[]
   hsnSacCodes        HsnSacCode[]
   priceLists         PriceList[]
+  productRevisions    ProductRevision[]
 
   @@map("companies")
   @@index([code])
@@ -1094,6 +1095,8 @@ model Product {
   createdBy       String?
   updatedBy       String?
 
+  revisions       ProductRevision[]
+
   @@unique([companyId, code])
   @@map("products")
 }
@@ -1205,4 +1208,33 @@ model PriceListItem {
   updatedBy   String?
 
   @@map("price_list_items")
+}
+
+// MODULE 20 — PRODUCT REVISION CONTROL
+// ============================================================
+model ProductRevision {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  productId         String
+  product           Product   @relation(fields: [productId], references: [id])
+  revisionNumber    String
+  changeDescription String
+  changeType        String    @default("MINOR") // MAJOR, MINOR, PATCH
+  previousRevision  String?
+  drawingNumber     String?
+  specifications    Json?
+  effectiveDate     DateTime  @default(now())
+  approvedBy        String?
+  approvedAt        DateTime?
+  status            String    @default("DRAFT") // DRAFT, APPROVED, OBSOLETE
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, productId, revisionNumber])
+  @@map("product_revisions")
 }
