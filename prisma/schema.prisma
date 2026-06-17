@@ -233,6 +233,7 @@ model Company {
   priceLists         PriceList[]
   productRevisions    ProductRevision[]
   boms               Bom[]
+  bomRevisions       BomRevision[]
 
   @@map("companies")
   @@index([code])
@@ -1098,6 +1099,7 @@ model Product {
 
   revisions       ProductRevision[]
   boms            Bom[]
+  bomRevisions    BomRevision[] @relation("BomRevisionProduct")
 
   @@unique([companyId, code])
   @@map("products")
@@ -1272,6 +1274,8 @@ model Bom {
   updatedBy     String?
 
   items         BomItem[]
+  revisionsAsNew BomRevision[] @relation("BomRevisionNew")
+  revisionsAsOld BomRevision[] @relation("BomRevisionOld")
 
   @@unique([companyId, bomNumber])
   @@map("boms")
@@ -1304,4 +1308,35 @@ model BomItem {
   updatedBy       String?
 
   @@map("bom_items")
+}
+
+// MODULE 22 — BOM REVISION CONTROL
+// ============================================================
+model BomRevision {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  productId         String
+  product           Product  @relation("BomRevisionProduct", fields: [productId], references: [id])
+  bomId             String
+  bom               Bom      @relation("BomRevisionNew", fields: [bomId], references: [id])
+  previousBomId     String?
+  previousBom       Bom?     @relation("BomRevisionOld", fields: [previousBomId], references: [id])
+  revisionNumber    String
+  changeType        String   @default("MINOR") // MAJOR, MINOR, PATCH
+  changeDescription String
+  ecnNumber         String?
+  effectiveDate     DateTime @default(now())
+  approvedBy        String?
+  approvedAt        DateTime?
+  status            String   @default("DRAFT") // DRAFT, APPROVED
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, productId, revisionNumber])
+  @@map("bom_revisions")
 }

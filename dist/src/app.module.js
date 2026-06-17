@@ -39,6 +39,7 @@ const price_list_module_1 = require("./price-lists/price-list.module");
 const price_history_module_1 = require("./price-history/price-history.module");
 const product_revision_module_1 = require("./product-revisions/product-revision.module");
 const bom_module_1 = require("./bom/bom.module");
+const bom_revision_module_1 = require("./bom-revisions/bom-revision.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -66,6 +67,7 @@ exports.AppModule = AppModule = __decorate([
             price_history_module_1.PriceHistoryModule,
             product_revision_module_1.ProductRevisionModule,
             bom_module_1.BomModule,
+            bom_revision_module_1.BomRevisionModule,
         ],
     })
 ], AppModule);

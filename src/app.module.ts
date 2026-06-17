@@ -27,6 +27,7 @@ import { PriceListModule } from './price-lists/price-list.module';
 import { PriceHistoryModule } from './price-history/price-history.module';
 import { ProductRevisionModule } from './product-revisions/product-revision.module';
 import { BomModule } from './bom/bom.module';
+import { BomRevisionModule } from './bom-revisions/bom-revision.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -48,6 +49,7 @@ import configuration from './config/configuration';
     PriceHistoryModule,
     ProductRevisionModule,
     BomModule,
+    BomRevisionModule,
   ],
 })
 export class AppModule implements NestModule {
