@@ -26,6 +26,7 @@ import { HsnSacModule } from './hsn-sac/hsn-sac.module';
 import { PriceListModule } from './price-lists/price-list.module';
 import { PriceHistoryModule } from './price-history/price-history.module';
 import { ProductRevisionModule } from './product-revisions/product-revision.module';
+import { BomModule } from './bom/bom.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -46,6 +47,7 @@ import configuration from './config/configuration';
     PriceListModule,
     PriceHistoryModule,
     ProductRevisionModule,
+    BomModule,
   ],
 })
 export class AppModule implements NestModule {

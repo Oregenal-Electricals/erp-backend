@@ -232,6 +232,7 @@ model Company {
   hsnSacCodes        HsnSacCode[]
   priceLists         PriceList[]
   productRevisions    ProductRevision[]
+  boms               Bom[]
 
   @@map("companies")
   @@index([code])
@@ -1096,6 +1097,7 @@ model Product {
   updatedBy       String?
 
   revisions       ProductRevision[]
+  boms            Bom[]
 
   @@unique([companyId, code])
   @@map("products")
@@ -1130,6 +1132,8 @@ model RawMaterial {
   updatedAt       DateTime      @updatedAt
   createdBy       String?
   updatedBy       String?
+
+  bomItems        BomItem[]
 
   @@unique([companyId, code])
   @@map("raw_materials")
@@ -1235,6 +1239,69 @@ model ProductRevision {
   createdBy         String?
   updatedBy         String?
 
+  boms            Bom[]
+
   @@unique([companyId, productId, revisionNumber])
   @@map("product_revisions")
+}
+
+// MODULE 21 — BOM MANAGEMENT
+// ============================================================
+model Bom {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+  revisionId    String?
+  revision      ProductRevision? @relation(fields: [revisionId], references: [id])
+  bomNumber     String
+  version       String    @default("v1")
+  description   String?
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+  status        String    @default("DRAFT") // DRAFT, APPROVED, OBSOLETE
+  approvedBy    String?
+  approvedAt    DateTime?
+  totalCost     Float?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  items         BomItem[]
+
+  @@unique([companyId, bomNumber])
+  @@map("boms")
+}
+
+model BomItem {
+  id              String   @id @default(uuid())
+  bomId           String
+  bom             Bom      @relation(fields: [bomId], references: [id])
+  companyId       String
+  sequence        Int      @default(1)
+  itemType        String   @default("RAW_MATERIAL") // RAW_MATERIAL, COMPONENT, SUB_ASSEMBLY
+  rawMaterialId   String?
+  rawMaterial     RawMaterial? @relation(fields: [rawMaterialId], references: [id])
+  itemCode        String
+  itemName        String
+  uom             String
+  quantity        Float
+  wastagePercent  Float?   @default(0)
+  effectiveQty    Float
+  unitCost        Float?
+  totalCost       Float?
+  isCritical      Boolean  @default(false)
+  notes           String?
+  isActive        Boolean  @default(true)
+  isTestData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("bom_items")
 }
