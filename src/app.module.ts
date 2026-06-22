@@ -29,6 +29,7 @@ import { ProductRevisionModule } from './product-revisions/product-revision.modu
 import { BomModule } from './bom/bom.module';
 import { BomRevisionModule } from './bom-revisions/bom-revision.module';
 import { CustomFieldModule } from './custom-fields/custom-field.module';
+import { PurchaseRequisitionModule } from './purchase-requisitions/purchase-requisition.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -52,6 +53,7 @@ import configuration from './config/configuration';
     BomModule,
     BomRevisionModule,
     CustomFieldModule,
+    PurchaseRequisitionModule,
   ],
 })
 export class AppModule implements NestModule {

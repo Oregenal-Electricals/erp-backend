@@ -235,6 +235,7 @@ model Company {
   boms               Bom[]
   bomRevisions       BomRevision[]
   customFieldDefinitions CustomFieldDefinition[]
+  purchaseRequisitions PurchaseRequisition[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1138,6 +1139,7 @@ model RawMaterial {
   updatedBy       String?
 
   bomItems        BomItem[]
+  prItems         PurchaseRequisitionItem[]
 
   @@unique([companyId, code])
   @@map("raw_materials")
@@ -1384,4 +1386,70 @@ model CustomFieldValue {
 
   @@unique([companyId, module, recordId, fieldKey])
   @@map("custom_field_values")
+}
+
+// PHASE 4 — PURCHASE MANAGEMENT
+// MODULE 23 — PURCHASE REQUISITION
+// ============================================================
+model PurchaseRequisition {
+  id              String   @id @default(uuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
+  prNumber        String
+  title           String
+  description     String?
+  requestedBy     String
+  requestedDate   DateTime @default(now())
+  requiredDate    DateTime
+  department      String?
+  priority        String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  status          String   @default("DRAFT")  // DRAFT, SUBMITTED, APPROVED, REJECTED, PO_RAISED, CLOSED
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectedBy      String?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  totalAmount     Float?
+  notes           String?
+  isActive        Boolean  @default(true)
+  isTestData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  items           PurchaseRequisitionItem[]
+
+  @@unique([companyId, prNumber])
+  @@map("purchase_requisitions")
+}
+
+model PurchaseRequisitionItem {
+  id               String              @id @default(uuid())
+  prId             String
+  pr               PurchaseRequisition @relation(fields: [prId], references: [id])
+  companyId        String
+  sequence         Int                 @default(1)
+  itemType         String              @default("RAW_MATERIAL") // RAW_MATERIAL, ITEM, OTHER
+  rawMaterialId    String?
+  rawMaterial      RawMaterial?        @relation(fields: [rawMaterialId], references: [id])
+  itemCode         String
+  itemName         String
+  description      String?
+  uom              String
+  requiredQty      Float
+  approvedQty      Float?
+  estimatedUnitPrice Float?
+  estimatedTotal   Float?
+  hsnCode          String?
+  notes            String?
+  status           String              @default("PENDING") // PENDING, APPROVED, REJECTED, PO_RAISED
+  isActive         Boolean             @default(true)
+  isTestData       Boolean             @default(false)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  @@map("purchase_requisition_items")
 }
