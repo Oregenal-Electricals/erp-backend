@@ -237,6 +237,7 @@ model Company {
   customFieldDefinitions CustomFieldDefinition[]
   purchaseRequisitions PurchaseRequisition[]
   rfqs                 Rfq[]
+  vendorQuotations     VendorQuotation[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1068,6 +1069,7 @@ model Vendor {
   company           Company  @relation(fields: [companyId], references: [id])
 
   rfqVendors      RfqVendor[]
+  quotations      VendorQuotation[]
 
   @@unique([companyId, code])
   @@map("vendors")
@@ -1484,6 +1486,7 @@ model Rfq {
 
   vendors          RfqVendor[]
   items            RfqItem[]
+  quotations      VendorQuotation[]
 
   @@unique([companyId, rfqNumber])
   @@map("rfqs")
@@ -1527,4 +1530,63 @@ model RfqItem {
   updatedBy   String?
 
   @@map("rfq_items")
+}
+
+// MODULE 25 — VENDOR QUOTATION
+// ============================================================
+model VendorQuotation {
+  id               String    @id @default(uuid())
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id])
+  quotationNumber  String
+  rfqId            String
+  rfq              Rfq       @relation(fields: [rfqId], references: [id])
+  vendorId         String
+  vendor           Vendor    @relation(fields: [vendorId], references: [id])
+  validUntil       DateTime
+  deliveryDays     Int       @default(30)
+  paymentTerms     String?
+  currency         String    @default("INR")
+  totalAmount      Float?
+  status           String    @default("DRAFT") // DRAFT, SUBMITTED, FINALIZED, REJECTED
+  notes            String?
+  isActive         Boolean   @default(true)
+  isTestData       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  items            VendorQuotationItem[]
+
+  @@unique([companyId, quotationNumber])
+  @@unique([rfqId, vendorId])
+  @@map("vendor_quotations")
+}
+
+model VendorQuotationItem {
+  id             String          @id @default(uuid())
+  quotationId    String
+  quotation      VendorQuotation @relation(fields: [quotationId], references: [id])
+  rfqItemId      String?
+  companyId      String
+  itemCode       String
+  itemName       String
+  uom            String
+  requiredQty    Float
+  quotedQty      Float
+  unitPrice      Float
+  discount       Float?          @default(0)
+  taxRate        Float?          @default(0)
+  totalPrice     Float
+  deliveryDays   Int?
+  notes          String?
+  isActive       Boolean         @default(true)
+  isTestData     Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  @@map("vendor_quotation_items")
 }

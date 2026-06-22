@@ -1,0 +1,458 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateVendorQuotationDto, UpdateVendorQuotationDto, UpdateQuotationItemDto } from './dto/vendor-quotation.dto';
+export declare class VendorQuotationService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    private generateQuotationNumber;
+    private includes;
+    private calcItemTotal;
+    create(dto: CreateVendorQuotationDto, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+            phone: string;
+            email: string;
+        };
+        rfq: {
+            status: string;
+            title: string;
+            rfqNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: ({
+            vendor: {
+                code: string;
+                name: string;
+            };
+            rfq: {
+                title: string;
+                rfqNumber: string;
+            };
+            _count: {
+                items: number;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            paymentTerms: string | null;
+            currency: string;
+            notes: string | null;
+            totalAmount: number | null;
+            vendorId: string;
+            rfqId: string;
+            validUntil: Date;
+            deliveryDays: number;
+            quotationNumber: string;
+        })[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+            phone: string;
+            email: string;
+        };
+        rfq: {
+            status: string;
+            title: string;
+            rfqNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    }>;
+    findByRfq(rfqId: string, user: any): Promise<({
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    })[]>;
+    update(id: string, dto: UpdateVendorQuotationDto, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+            phone: string;
+            email: string;
+        };
+        rfq: {
+            status: string;
+            title: string;
+            rfqNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    }>;
+    submit(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+            phone: string;
+            email: string;
+        };
+        rfq: {
+            status: string;
+            title: string;
+            rfqNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    }>;
+    finalize(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+            phone: string;
+            email: string;
+        };
+        rfq: {
+            status: string;
+            title: string;
+            rfqNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    }>;
+    reject(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            notes: string | null;
+            requiredQty: number;
+            deliveryDays: number | null;
+            rfqItemId: string | null;
+            quotedQty: number;
+            unitPrice: number;
+            discount: number | null;
+            taxRate: number | null;
+            totalPrice: number;
+            quotationId: string;
+        }[];
+        vendor: {
+            code: string;
+            name: string;
+            phone: string;
+            email: string;
+        };
+        rfq: {
+            status: string;
+            title: string;
+            rfqNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        totalAmount: number | null;
+        vendorId: string;
+        rfqId: string;
+        validUntil: Date;
+        deliveryDays: number;
+        quotationNumber: string;
+    }>;
+    updateItem(id: string, itemId: string, dto: UpdateQuotationItemDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        notes: string | null;
+        requiredQty: number;
+        deliveryDays: number | null;
+        rfqItemId: string | null;
+        quotedQty: number;
+        unitPrice: number;
+        discount: number | null;
+        taxRate: number | null;
+        totalPrice: number;
+        quotationId: string;
+    }>;
+    private recalculateTotal;
+    getStats(user: any): Promise<{
+        total: number;
+        draft: number;
+        submitted: number;
+        finalized: number;
+        rejected: number;
+    }>;
+}

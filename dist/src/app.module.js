@@ -43,6 +43,7 @@ const bom_revision_module_1 = require("./bom-revisions/bom-revision.module");
 const custom_field_module_1 = require("./custom-fields/custom-field.module");
 const purchase_requisition_module_1 = require("./purchase-requisitions/purchase-requisition.module");
 const rfq_module_1 = require("./rfq/rfq.module");
+const vendor_quotation_module_1 = require("./vendor-quotations/vendor-quotation.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -74,6 +75,7 @@ exports.AppModule = AppModule = __decorate([
             custom_field_module_1.CustomFieldModule,
             purchase_requisition_module_1.PurchaseRequisitionModule,
             rfq_module_1.RfqModule,
+            vendor_quotation_module_1.VendorQuotationModule,
         ],
     })
 ], AppModule);
