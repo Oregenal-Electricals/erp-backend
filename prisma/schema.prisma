@@ -236,6 +236,7 @@ model Company {
   bomRevisions       BomRevision[]
   customFieldDefinitions CustomFieldDefinition[]
   purchaseRequisitions PurchaseRequisition[]
+  rfqs                 Rfq[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1066,6 +1067,8 @@ model Vendor {
 
   company           Company  @relation(fields: [companyId], references: [id])
 
+  rfqVendors      RfqVendor[]
+
   @@unique([companyId, code])
   @@map("vendors")
 }
@@ -1419,6 +1422,7 @@ model PurchaseRequisition {
   updatedBy       String?
 
   items           PurchaseRequisitionItem[]
+  rfqs            Rfq[]
 
   @@unique([companyId, prNumber])
   @@map("purchase_requisitions")
@@ -1452,4 +1456,75 @@ model PurchaseRequisitionItem {
   updatedBy        String?
 
   @@map("purchase_requisition_items")
+}
+
+// MODULE 24 — RFQ MANAGEMENT
+// ============================================================
+model Rfq {
+  id               String      @id @default(uuid())
+  companyId        String
+  company          Company     @relation(fields: [companyId], references: [id])
+  rfqNumber        String
+  prId             String
+  pr               PurchaseRequisition @relation(fields: [prId], references: [id])
+  title            String
+  description      String?
+  responseDeadline DateTime
+  deliveryLocation String?
+  paymentTerms     String?
+  status           String      @default("DRAFT") // DRAFT, SENT, CLOSED, CANCELLED
+  closedAt         DateTime?
+  notes            String?
+  isActive         Boolean     @default(true)
+  isTestData       Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  vendors          RfqVendor[]
+  items            RfqItem[]
+
+  @@unique([companyId, rfqNumber])
+  @@map("rfqs")
+}
+
+model RfqVendor {
+  id          String   @id @default(uuid())
+  rfqId       String
+  rfq         Rfq      @relation(fields: [rfqId], references: [id])
+  vendorId    String
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  companyId   String
+  status      String   @default("INVITED") // INVITED, QUOTED, DECLINED
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([rfqId, vendorId])
+  @@map("rfq_vendors")
+}
+
+model RfqItem {
+  id          String   @id @default(uuid())
+  rfqId       String
+  rfq         Rfq      @relation(fields: [rfqId], references: [id])
+  prItemId    String?
+  companyId   String
+  itemCode    String
+  itemName    String
+  uom         String
+  requiredQty Float
+  notes       String?
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("rfq_items")
 }

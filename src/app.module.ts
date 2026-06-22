@@ -30,6 +30,7 @@ import { BomModule } from './bom/bom.module';
 import { BomRevisionModule } from './bom-revisions/bom-revision.module';
 import { CustomFieldModule } from './custom-fields/custom-field.module';
 import { PurchaseRequisitionModule } from './purchase-requisitions/purchase-requisition.module';
+import { RfqModule } from './rfq/rfq.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -54,6 +55,7 @@ import configuration from './config/configuration';
     BomRevisionModule,
     CustomFieldModule,
     PurchaseRequisitionModule,
+    RfqModule,
   ],
 })
 export class AppModule implements NestModule {
