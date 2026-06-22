@@ -234,6 +234,8 @@ model Company {
   productRevisions    ProductRevision[]
   boms               Bom[]
   bomRevisions       BomRevision[]
+  customFieldDefinitions CustomFieldDefinition[]
+  customFieldValues      CustomFieldValue[]
 
   @@map("companies")
   @@index([code])
@@ -1339,4 +1341,47 @@ model BomRevision {
 
   @@unique([companyId, productId, revisionNumber])
   @@map("bom_revisions")
+}
+
+// MODULE 22A — CUSTOM FIELDS ENGINE
+// ============================================================
+model CustomFieldDefinition {
+  id            String   @id @default(uuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id])
+  module        String   // BOM, VENDOR, PRODUCT, RAW_MATERIAL, ITEM, PRICE_LIST
+  fieldKey      String
+  fieldLabel    String
+  fieldType     String   @default("TEXT") // TEXT, NUMBER, DATE, BOOLEAN, DROPDOWN
+  options       Json?
+  placeholder   String?
+  defaultValue  String?
+  isRequired    Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  isTestData    Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@unique([companyId, module, fieldKey])
+  @@map("custom_field_definitions")
+}
+
+model CustomFieldValue {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  module      String
+  recordId    String
+  fieldKey    String
+  value       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, module, recordId, fieldKey])
+  @@map("custom_field_values")
 }
