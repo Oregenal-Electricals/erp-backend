@@ -240,6 +240,8 @@ model Company {
   vendorQuotations     VendorQuotation[]
   quotationComparisons QuotationComparison[]
   purchaseOrders      PurchaseOrder[]
+  poApprovals         PoApproval[]
+  poApprovalSettings  PoApprovalSetting[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1663,6 +1665,7 @@ model PurchaseOrder {
   updatedBy        String?
 
   items            PurchaseOrderItem[]
+  approvals       PoApproval[]
 
   @@unique([companyId, poNumber])
   @@map("purchase_orders")
@@ -1700,4 +1703,45 @@ model PurchaseOrderItem {
   updatedBy        String?
 
   @@map("purchase_order_items")
+}
+
+// MODULE 28 — PO APPROVAL
+// ============================================================
+model PoApproval {
+  id            String   @id @default(uuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id])
+  poId          String
+  po            PurchaseOrder @relation(fields: [poId], references: [id])
+  approvalLevel Int
+  approvedBy    String
+  action        String   // APPROVED, REJECTED
+  remarks       String?
+  isActive      Boolean  @default(true)
+  isTestData    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("po_approvals")
+}
+
+model PoApprovalSetting {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  level       Int
+  levelName   String
+  minAmount   Float    @default(0)
+  maxAmount   Float?
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, level])
+  @@map("po_approval_settings")
 }

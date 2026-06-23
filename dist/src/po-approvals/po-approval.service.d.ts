@@ -1,0 +1,165 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { ApprovePoDto, RejectPoDto, CreateApprovalSettingDto, UpdateApprovalSettingDto } from './dto/po-approval.dto';
+export declare class PoApprovalService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    getSettings(user: any): Promise<{
+        level: number;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        levelName: string;
+        minAmount: number;
+        maxAmount: number | null;
+    }[]>;
+    createSetting(dto: CreateApprovalSettingDto, user: any): Promise<{
+        level: number;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        levelName: string;
+        minAmount: number;
+        maxAmount: number | null;
+    }>;
+    updateSetting(id: string, dto: UpdateApprovalSettingDto, user: any): Promise<{
+        level: number;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        levelName: string;
+        minAmount: number;
+        maxAmount: number | null;
+    }>;
+    private getRequiredLevels;
+    getPending(user: any): Promise<{
+        lastApprovalAction: string;
+        lastApprovalBy: string;
+        lastRemarks: string;
+        vendor: {
+            code: string;
+            name: string;
+        };
+        _count: {
+            items: number;
+        };
+        approvals: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            action: string;
+            remarks: string | null;
+            approvedBy: string;
+            poId: string;
+            approvalLevel: number;
+        }[];
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        poNumber: string;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        totalAmount: number;
+        prId: string | null;
+        vendorId: string;
+        rfqId: string | null;
+        deliveryDate: Date;
+        deliveryAddress: string | null;
+        termsConditions: string | null;
+        poDate: Date;
+        subtotal: number;
+        totalTax: number;
+    }[]>;
+    getHistory(poId: string, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        action: string;
+        remarks: string | null;
+        approvedBy: string;
+        poId: string;
+        approvalLevel: number;
+    }[]>;
+    approve(poId: string, dto: ApprovePoDto, user: any): Promise<{
+        approval: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            action: string;
+            remarks: string | null;
+            approvedBy: string;
+            poId: string;
+            approvalLevel: number;
+        };
+        allApproved: boolean;
+        levelsApproved: number[];
+        levelsRequired: number[];
+        poStatus: string;
+        message: string;
+    }>;
+    reject(poId: string, dto: RejectPoDto, user: any): Promise<{
+        approval: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            action: string;
+            remarks: string | null;
+            approvedBy: string;
+            poId: string;
+            approvalLevel: number;
+        };
+        message: string;
+        poStatus: string;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        approved: number;
+        rejected: number;
+        pendingPos: number;
+    }>;
+}
