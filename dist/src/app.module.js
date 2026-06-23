@@ -45,6 +45,7 @@ const purchase_requisition_module_1 = require("./purchase-requisitions/purchase-
 const rfq_module_1 = require("./rfq/rfq.module");
 const vendor_quotation_module_1 = require("./vendor-quotations/vendor-quotation.module");
 const quotation_comparison_module_1 = require("./quotation-comparison/quotation-comparison.module");
+const purchase_order_module_1 = require("./purchase-orders/purchase-order.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -78,6 +79,7 @@ exports.AppModule = AppModule = __decorate([
             rfq_module_1.RfqModule,
             vendor_quotation_module_1.VendorQuotationModule,
             quotation_comparison_module_1.QuotationComparisonModule,
+            purchase_order_module_1.PurchaseOrderModule,
         ],
     })
 ], AppModule);

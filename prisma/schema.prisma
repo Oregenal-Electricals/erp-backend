@@ -239,6 +239,7 @@ model Company {
   rfqs                 Rfq[]
   vendorQuotations     VendorQuotation[]
   quotationComparisons QuotationComparison[]
+  purchaseOrders      PurchaseOrder[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1072,6 +1073,7 @@ model Vendor {
   rfqVendors      RfqVendor[]
   quotations      VendorQuotation[]
   comparisonSelections QuotationComparison[] @relation("ComparisonVendor")
+  purchaseOrders  PurchaseOrder[]
 
   @@unique([companyId, code])
   @@map("vendors")
@@ -1427,6 +1429,7 @@ model PurchaseRequisition {
 
   items           PurchaseRequisitionItem[]
   rfqs            Rfq[]
+  purchaseOrders  PurchaseOrder[]
 
   @@unique([companyId, prNumber])
   @@map("purchase_requisitions")
@@ -1490,6 +1493,7 @@ model Rfq {
   items            RfqItem[]
   quotations      VendorQuotation[]
   comparisons     QuotationComparison[]
+  purchaseOrders  PurchaseOrder[]
 
   @@unique([companyId, rfqNumber])
   @@map("rfqs")
@@ -1623,4 +1627,77 @@ model QuotationComparison {
 
   @@unique([companyId, rfqId, rfqItemId])
   @@map("quotation_comparisons")
+}
+
+// MODULE 27 — PURCHASE ORDER
+// ============================================================
+model PurchaseOrder {
+  id               String    @id @default(uuid())
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id])
+  poNumber         String
+  rfqId            String?
+  rfq              Rfq?      @relation(fields: [rfqId], references: [id])
+  vendorId         String
+  vendor           Vendor    @relation(fields: [vendorId], references: [id])
+  prId             String?
+  pr               PurchaseRequisition? @relation(fields: [prId], references: [id])
+  poDate           DateTime  @default(now())
+  deliveryDate     DateTime
+  deliveryAddress  String?
+  paymentTerms     String?
+  currency         String    @default("INR")
+  subtotal         Float     @default(0)
+  totalTax         Float     @default(0)
+  totalAmount      Float     @default(0)
+  status           String    @default("DRAFT") // DRAFT, APPROVED, SENT, PARTIALLY_RECEIVED, CLOSED, CANCELLED
+  approvedBy       String?
+  approvedAt       DateTime?
+  notes            String?
+  termsConditions  String?
+  isActive         Boolean   @default(true)
+  isTestData       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  items            PurchaseOrderItem[]
+
+  @@unique([companyId, poNumber])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id               String        @id @default(uuid())
+  poId             String
+  po               PurchaseOrder @relation(fields: [poId], references: [id])
+  prItemId         String?
+  quotationItemId  String?
+  companyId        String
+  sequence         Int           @default(1)
+  itemCode         String
+  itemName         String
+  hsnCode          String?
+  uom              String
+  orderedQty       Float
+  receivedQty      Float         @default(0)
+  pendingQty       Float
+  unitPrice        Float
+  discount         Float?        @default(0)
+  taxRate          Float         @default(0)
+  igstRate         Float         @default(0)
+  cgstRate         Float         @default(0)
+  sgstRate         Float         @default(0)
+  taxAmount        Float         @default(0)
+  totalPrice       Float
+  status           String        @default("PENDING") // PENDING, PARTIALLY_RECEIVED, RECEIVED, CANCELLED
+  isActive         Boolean       @default(true)
+  isTestData       Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  @@map("purchase_order_items")
 }

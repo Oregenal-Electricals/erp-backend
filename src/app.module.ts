@@ -33,6 +33,7 @@ import { PurchaseRequisitionModule } from './purchase-requisitions/purchase-requ
 import { RfqModule } from './rfq/rfq.module';
 import { VendorQuotationModule } from './vendor-quotations/vendor-quotation.module';
 import { QuotationComparisonModule } from './quotation-comparison/quotation-comparison.module';
+import { PurchaseOrderModule } from './purchase-orders/purchase-order.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -60,6 +61,7 @@ import configuration from './config/configuration';
     RfqModule,
     VendorQuotationModule,
     QuotationComparisonModule,
+    PurchaseOrderModule,
   ],
 })
 export class AppModule implements NestModule {
