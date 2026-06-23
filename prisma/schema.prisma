@@ -238,6 +238,7 @@ model Company {
   purchaseRequisitions PurchaseRequisition[]
   rfqs                 Rfq[]
   vendorQuotations     VendorQuotation[]
+  quotationComparisons QuotationComparison[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1070,6 +1071,7 @@ model Vendor {
 
   rfqVendors      RfqVendor[]
   quotations      VendorQuotation[]
+  comparisonSelections QuotationComparison[] @relation("ComparisonVendor")
 
   @@unique([companyId, code])
   @@map("vendors")
@@ -1487,6 +1489,7 @@ model Rfq {
   vendors          RfqVendor[]
   items            RfqItem[]
   quotations      VendorQuotation[]
+  comparisons     QuotationComparison[]
 
   @@unique([companyId, rfqNumber])
   @@map("rfqs")
@@ -1529,6 +1532,8 @@ model RfqItem {
   createdBy   String?
   updatedBy   String?
 
+  comparisons     QuotationComparison[]
+
   @@map("rfq_items")
 }
 
@@ -1558,6 +1563,8 @@ model VendorQuotation {
   updatedBy        String?
 
   items            VendorQuotationItem[]
+
+  comparisons     QuotationComparison[]
 
   @@unique([companyId, quotationNumber])
   @@unique([rfqId, vendorId])
@@ -1589,4 +1596,31 @@ model VendorQuotationItem {
   updatedBy      String?
 
   @@map("vendor_quotation_items")
+}
+
+// MODULE 26 — QUOTATION COMPARISON
+// ============================================================
+model QuotationComparison {
+  id                   String   @id @default(uuid())
+  companyId            String
+  company              Company  @relation(fields: [companyId], references: [id])
+  rfqId                String
+  rfq                  Rfq      @relation(fields: [rfqId], references: [id])
+  rfqItemId            String
+  rfqItem              RfqItem  @relation(fields: [rfqItemId], references: [id])
+  selectedVendorId     String
+  selectedVendor       Vendor   @relation("ComparisonVendor", fields: [selectedVendorId], references: [id])
+  selectedQuotationId  String
+  selectedQuotation    VendorQuotation @relation(fields: [selectedQuotationId], references: [id])
+  selectedItemId       String
+  selectionReason      String?
+  isActive             Boolean  @default(true)
+  isTestData           Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  createdBy            String?
+  updatedBy            String?
+
+  @@unique([companyId, rfqId, rfqItemId])
+  @@map("quotation_comparisons")
 }
