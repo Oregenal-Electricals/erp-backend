@@ -35,6 +35,7 @@ import { VendorQuotationModule } from './vendor-quotations/vendor-quotation.modu
 import { QuotationComparisonModule } from './quotation-comparison/quotation-comparison.module';
 import { PurchaseOrderModule } from './purchase-orders/purchase-order.module';
 import { PoApprovalModule } from './po-approvals/po-approval.module';
+import { PoAmendmentModule } from './po-amendments/po-amendment.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -64,6 +65,7 @@ import configuration from './config/configuration';
     QuotationComparisonModule,
     PurchaseOrderModule,
     PoApprovalModule,
+    PoAmendmentModule,
   ],
 })
 export class AppModule implements NestModule {

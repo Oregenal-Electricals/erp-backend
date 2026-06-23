@@ -242,6 +242,7 @@ model Company {
   purchaseOrders      PurchaseOrder[]
   poApprovals         PoApproval[]
   poApprovalSettings  PoApprovalSetting[]
+  poAmendments        PoAmendment[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1666,6 +1667,7 @@ model PurchaseOrder {
 
   items            PurchaseOrderItem[]
   approvals       PoApproval[]
+  amendments      PoAmendment[]
 
   @@unique([companyId, poNumber])
   @@map("purchase_orders")
@@ -1744,4 +1746,33 @@ model PoApprovalSetting {
 
   @@unique([companyId, level])
   @@map("po_approval_settings")
+}
+
+// MODULE 29 — PO AMENDMENT
+// ============================================================
+model PoAmendment {
+  id              String        @id @default(uuid())
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id])
+  poId            String
+  po              PurchaseOrder @relation(fields: [poId], references: [id])
+  amendmentNumber String
+  amendmentType   String        @default("GENERAL") // QUANTITY_CHANGE, DATE_CHANGE, ITEM_ADDITION, ITEM_CANCELLATION, PRICE_CORRECTION, GENERAL
+  reason          String
+  requestedBy     String
+  status          String        @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, REJECTED
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectedBy      String?
+  rejectionReason String?
+  changes         Json?
+  isActive        Boolean       @default(true)
+  isTestData      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, amendmentNumber])
+  @@map("po_amendments")
 }
