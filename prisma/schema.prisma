@@ -244,6 +244,7 @@ model Company {
   poApprovalSettings  PoApprovalSetting[]
   poAmendments        PoAmendment[]
   importPurchaseOrders ImportPurchaseOrder[]
+  proformaInvoices    ProformaInvoice[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1817,6 +1818,7 @@ model ImportPurchaseOrder {
   updatedBy         String?
 
   items             ImportPoItem[]
+  proformaInvoices  ProformaInvoice[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -1853,4 +1855,64 @@ model ImportPoItem {
   updatedBy       String?
 
   @@map("import_po_items")
+}
+
+// MODULE 32 — PROFORMA INVOICE
+// ============================================================
+model ProformaInvoice {
+  id               String              @id @default(uuid())
+  companyId        String
+  company          Company             @relation(fields: [companyId], references: [id])
+  ipoId            String
+  ipo              ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  piNumber         String
+  vendorPiNumber   String?
+  piDate           DateTime            @default(now())
+  currency         String              @default("USD")
+  exchangeRate     Float               @default(1)
+  subtotalForeign  Float               @default(0)
+  totalAmount      Float               @default(0)
+  validUntil       DateTime?
+  bankName         String?
+  bankAddress      String?
+  swiftCode        String?
+  status           String              @default("DRAFT") // DRAFT, RECEIVED, ACCEPTED, REJECTED
+  rejectionReason  String?
+  notes            String?
+  isActive         Boolean             @default(true)
+  isTestData       Boolean             @default(false)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  items            ProformaInvoiceItem[]
+
+  @@unique([companyId, piNumber])
+  @@map("proforma_invoices")
+}
+
+model ProformaInvoiceItem {
+  id               String          @id @default(uuid())
+  piId             String
+  pi               ProformaInvoice @relation(fields: [piId], references: [id])
+  ipoItemId        String?
+  companyId        String
+  sequence         Int             @default(1)
+  itemCode         String
+  itemName         String
+  hsnCode          String?
+  uom              String
+  qty              Float
+  unitPriceForeign Float
+  totalForeign     Float
+  totalInr         Float
+  isActive         Boolean         @default(true)
+  isTestData       Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  @@map("proforma_invoice_items")
 }
