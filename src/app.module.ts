@@ -39,6 +39,7 @@ import { PoAmendmentModule } from './po-amendments/po-amendment.module';
 import { PurchaseAnalyticsModule } from './purchase-analytics/purchase-analytics.module';
 import { ImportOrderModule } from './import-orders/import-order.module';
 import { ProformaInvoiceModule } from './proforma-invoices/proforma-invoice.module';
+import { PaymentInstrumentModule } from './payment-instruments/payment-instrument.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -72,6 +73,7 @@ import configuration from './config/configuration';
     PurchaseAnalyticsModule,
     ImportOrderModule,
     ProformaInvoiceModule,
+    PaymentInstrumentModule,
   ],
 })
 export class AppModule implements NestModule {

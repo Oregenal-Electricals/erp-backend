@@ -245,6 +245,7 @@ model Company {
   poAmendments        PoAmendment[]
   importPurchaseOrders ImportPurchaseOrder[]
   proformaInvoices    ProformaInvoice[]
+  paymentInstruments  PaymentInstrument[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1819,6 +1820,7 @@ model ImportPurchaseOrder {
 
   items             ImportPoItem[]
   proformaInvoices  ProformaInvoice[]
+  paymentInstruments PaymentInstrument[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -1888,6 +1890,7 @@ model ProformaInvoice {
 
   items            ProformaInvoiceItem[]
 
+  paymentInstruments PaymentInstrument[]
   @@unique([companyId, piNumber])
   @@map("proforma_invoices")
 }
@@ -1915,4 +1918,40 @@ model ProformaInvoiceItem {
   updatedBy        String?
 
   @@map("proforma_invoice_items")
+}
+
+// MODULE 33 — LC / TT MANAGEMENT
+// ============================================================
+model PaymentInstrument {
+  id                   String              @id @default(uuid())
+  companyId            String
+  company              Company             @relation(fields: [companyId], references: [id])
+  ipoId                String
+  ipo                  ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  piId                 String?
+  pi                   ProformaInvoice?    @relation(fields: [piId], references: [id])
+  instrumentNumber     String
+  instrumentType       String              @default("LC") // LC, TT, DP, DA
+  bankName             String
+  bankReference        String?
+  vendorBankName       String?
+  vendorSwiftCode      String?
+  currency             String              @default("USD")
+  amount               Float
+  amountInr            Float
+  issueDate            DateTime            @default(now())
+  expiryDate           DateTime?
+  latestShipmentDate   DateTime?
+  presentationDays     Int?
+  status               String              @default("DRAFT") // DRAFT, OPENED, AMENDED, EXPIRED, SETTLED, CANCELLED
+  notes                String?
+  isActive             Boolean             @default(true)
+  isTestData           Boolean             @default(false)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  createdBy            String?
+  updatedBy            String?
+
+  @@unique([companyId, instrumentNumber])
+  @@map("payment_instruments")
 }

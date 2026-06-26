@@ -51,6 +51,7 @@ const po_amendment_module_1 = require("./po-amendments/po-amendment.module");
 const purchase_analytics_module_1 = require("./purchase-analytics/purchase-analytics.module");
 const import_order_module_1 = require("./import-orders/import-order.module");
 const proforma_invoice_module_1 = require("./proforma-invoices/proforma-invoice.module");
+const payment_instrument_module_1 = require("./payment-instruments/payment-instrument.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -90,6 +91,7 @@ exports.AppModule = AppModule = __decorate([
             purchase_analytics_module_1.PurchaseAnalyticsModule,
             import_order_module_1.ImportOrderModule,
             proforma_invoice_module_1.ProformaInvoiceModule,
+            payment_instrument_module_1.PaymentInstrumentModule,
         ],
     })
 ], AppModule);
