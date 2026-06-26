@@ -48,6 +48,7 @@ const quotation_comparison_module_1 = require("./quotation-comparison/quotation-
 const purchase_order_module_1 = require("./purchase-orders/purchase-order.module");
 const po_approval_module_1 = require("./po-approvals/po-approval.module");
 const po_amendment_module_1 = require("./po-amendments/po-amendment.module");
+const purchase_analytics_module_1 = require("./purchase-analytics/purchase-analytics.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -84,6 +85,7 @@ exports.AppModule = AppModule = __decorate([
             purchase_order_module_1.PurchaseOrderModule,
             po_approval_module_1.PoApprovalModule,
             po_amendment_module_1.PoAmendmentModule,
+            purchase_analytics_module_1.PurchaseAnalyticsModule,
         ],
     })
 ], AppModule);
