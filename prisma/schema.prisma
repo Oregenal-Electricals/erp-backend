@@ -243,6 +243,7 @@ model Company {
   poApprovals         PoApproval[]
   poApprovalSettings  PoApprovalSetting[]
   poAmendments        PoAmendment[]
+  importPurchaseOrders ImportPurchaseOrder[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1076,6 +1077,7 @@ model Vendor {
   rfqVendors      RfqVendor[]
   quotations      VendorQuotation[]
   comparisonSelections QuotationComparison[] @relation("ComparisonVendor")
+  importPurchaseOrders ImportPurchaseOrder[]
   purchaseOrders  PurchaseOrder[]
 
   @@unique([companyId, code])
@@ -1433,6 +1435,7 @@ model PurchaseRequisition {
   items           PurchaseRequisitionItem[]
   rfqs            Rfq[]
   purchaseOrders  PurchaseOrder[]
+  importPurchaseOrders ImportPurchaseOrder[]
 
   @@unique([companyId, prNumber])
   @@map("purchase_requisitions")
@@ -1775,4 +1778,79 @@ model PoAmendment {
 
   @@unique([companyId, amendmentNumber])
   @@map("po_amendments")
+}
+
+// MODULE 31 — IMPORT PURCHASE ORDER
+// ============================================================
+model ImportPurchaseOrder {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  ipoNumber         String
+  vendorId          String
+  vendor            Vendor    @relation(fields: [vendorId], references: [id])
+  prId              String?
+  pr                PurchaseRequisition? @relation(fields: [prId], references: [id])
+  poDate            DateTime  @default(now())
+  deliveryDate      DateTime
+  currency          String    @default("USD")
+  exchangeRate      Float     @default(1)
+  incoterms         String    @default("FOB") // FOB, CIF, EXW, CFR, DDP
+  portOfLoading     String?
+  portOfDischarge   String?
+  paymentTerms      String?
+  paymentMode       String    @default("LC") // LC, TT, DP, DA
+  subtotalForeign   Float     @default(0)
+  subtotalInr       Float     @default(0)
+  totalTax          Float     @default(0)
+  totalAmount       Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, APPROVED, SENT, PROFORMA_RECEIVED, LC_OPENED, SHIPPED, CUSTOMS_CLEARED, CLOSED, CANCELLED
+  approvedBy        String?
+  approvedAt        DateTime?
+  notes             String?
+  termsConditions   String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  items             ImportPoItem[]
+
+  @@unique([companyId, ipoNumber])
+  @@map("import_purchase_orders")
+}
+
+model ImportPoItem {
+  id              String              @id @default(uuid())
+  ipoId           String
+  ipo             ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  companyId       String
+  sequence        Int                 @default(1)
+  itemCode        String
+  itemName        String
+  hsnCode         String?
+  uom             String
+  orderedQty      Float
+  receivedQty     Float               @default(0)
+  pendingQty      Float
+  unitPriceForeign Float
+  unitPriceInr    Float
+  discount        Float?              @default(0)
+  taxRate         Float               @default(0)
+  igstRate        Float               @default(0)
+  bcdRate         Float               @default(0)
+  taxAmount       Float               @default(0)
+  totalForeign    Float
+  totalInr        Float
+  status          String              @default("PENDING")
+  isActive        Boolean             @default(true)
+  isTestData      Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("import_po_items")
 }
