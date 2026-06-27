@@ -249,6 +249,7 @@ model Company {
   shipments           Shipment[]
   shippingDocuments   ShippingDocument[]
   customsEntries     CustomsEntry[]
+  landedCosts        LandedCost[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1828,6 +1829,7 @@ model ImportPurchaseOrder {
   shipments         Shipment[]
   shippingDocuments ShippingDocument[]
   customsEntries   CustomsEntry[]
+  landedCosts      LandedCost[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -2095,4 +2097,64 @@ model CustomsEntry {
 
   @@unique([companyId, boeNumber])
   @@map("customs_entries")
+}
+
+// MODULE 37 — LANDED COST CALCULATION
+// ============================================================
+model LandedCost {
+  id                  String              @id @default(uuid())
+  companyId           String
+  company             Company             @relation(fields: [companyId], references: [id])
+  ipoId               String
+  ipo                 ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  lcNumber            String
+  invoiceValue        Float               @default(0)
+  customsDuty         Float               @default(0)
+  freightCharges      Float               @default(0)
+  chaCharges          Float               @default(0)
+  portCharges         Float               @default(0)
+  bankCharges         Float               @default(0)
+  insuranceCharges    Float               @default(0)
+  otherCharges        Float               @default(0)
+  totalLandedCost     Float               @default(0)
+  allocationMethod    String              @default("BY_VALUE") // BY_VALUE, BY_WEIGHT, BY_QTY
+  status              String              @default("DRAFT") // DRAFT, FINALIZED
+  notes               String?
+  isActive            Boolean             @default(true)
+  isTestData          Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  items               LandedCostItem[]
+
+  @@unique([companyId, lcNumber])
+  @@map("landed_costs")
+}
+
+model LandedCostItem {
+  id                  String      @id @default(uuid())
+  landedCostId        String
+  landedCost          LandedCost  @relation(fields: [landedCostId], references: [id])
+  companyId           String
+  ipoItemId           String?
+  itemCode            String
+  itemName            String
+  uom                 String
+  qty                 Float
+  unitPriceForeign    Float
+  valueForeign        Float
+  valueInr            Float
+  allocationRatio     Float       @default(0)
+  allocatedCost       Float       @default(0)
+  landedCostPerUnit   Float       @default(0)
+  isActive            Boolean     @default(true)
+  isTestData          Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@map("landed_cost_items")
 }

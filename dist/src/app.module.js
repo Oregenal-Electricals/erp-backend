@@ -55,6 +55,7 @@ const payment_instrument_module_1 = require("./payment-instruments/payment-instr
 const shipment_module_1 = require("./shipments/shipment.module");
 const shipping_document_module_1 = require("./shipping-documents/shipping-document.module");
 const customs_entry_module_1 = require("./customs-entries/customs-entry.module");
+const landed_cost_module_1 = require("./landed-costs/landed-cost.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -98,6 +99,7 @@ exports.AppModule = AppModule = __decorate([
             shipment_module_1.ShipmentModule,
             shipping_document_module_1.ShippingDocumentModule,
             customs_entry_module_1.CustomsEntryModule,
+            landed_cost_module_1.LandedCostModule,
         ],
     })
 ], AppModule);
