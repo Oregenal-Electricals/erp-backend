@@ -251,6 +251,7 @@ model Company {
   customsEntries     CustomsEntry[]
   landedCosts        LandedCost[]
   grnHeaders         GrnHeader[]
+  iqcInspections     IqcInspection[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -2194,6 +2195,7 @@ model GrnHeader {
 
   items           GrnItem[]
 
+  iqcInspections IqcInspection[]
   @@unique([companyId, grnNumber])
   @@map("grn_headers")
 }
@@ -2224,4 +2226,53 @@ model GrnItem {
   updatedBy           String?
 
   @@map("grn_items")
+}
+
+// MODULE 39 — IQC INSPECTION
+// ============================================================
+model IqcInspection {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  iqcNumber       String
+  grnId           String
+  grn             GrnHeader @relation(fields: [grnId], references: [id])
+  inspectedBy     String?
+  inspectionDate  DateTime  @default(now())
+  status          String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, APPROVED
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  items           IqcItem[]
+
+  @@unique([companyId, iqcNumber])
+  @@map("iqc_inspections")
+}
+
+model IqcItem {
+  id               String         @id @default(uuid())
+  companyId        String
+  iqcId            String
+  iqc              IqcInspection  @relation(fields: [iqcId], references: [id])
+  grnItemId        String
+  itemCode         String
+  itemName         String
+  uom              String
+  receivedQty      Float          @default(0)
+  acceptedQty      Float          @default(0)
+  rejectedQty      Float          @default(0)
+  rejectionReason  String?
+  isActive         Boolean        @default(true)
+  isTestData       Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  @@map("iqc_items")
 }
