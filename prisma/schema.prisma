@@ -252,6 +252,8 @@ model Company {
   landedCosts        LandedCost[]
   grnHeaders         GrnHeader[]
   iqcInspections     IqcInspection[]
+  stockLedgers       StockLedger[]
+  stockBalances      StockBalance[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -968,6 +970,8 @@ model Warehouse {
   zones Zone[]
 
   grnHeaders  GrnHeader[]
+  stockLedgers StockLedger[]
+  stockBalances StockBalance[]
   @@map("warehouses")
   @@unique([companyId, code])
   @@index([companyId])
@@ -2275,4 +2279,62 @@ model IqcItem {
   updatedBy        String?
 
   @@map("iqc_items")
+}
+
+// MODULE 40 — STOCK LEDGER & BALANCE
+// ============================================================
+model StockLedger {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  itemCode          String
+  itemName          String
+  warehouseId       String
+  warehouse         Warehouse @relation(fields: [warehouseId], references: [id])
+  transactionType   String    // GRN_RECEIPT, IQC_ACCEPT, IQC_REJECT, ISSUE, TRANSFER_IN, TRANSFER_OUT, ADJUSTMENT
+  referenceType     String?   // IQC, GRN, PO, IPO
+  referenceId       String?
+  referenceNumber   String?
+  inQty             Float     @default(0)
+  outQty            Float     @default(0)
+  balanceQty        Float     @default(0)
+  unitCost          Float     @default(0)
+  totalCost         Float     @default(0)
+  transactionDate   DateTime  @default(now())
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@index([companyId, itemCode])
+  @@index([companyId, warehouseId])
+  @@map("stock_ledger")
+}
+
+model StockBalance {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  itemCode      String
+  itemName      String
+  warehouseId   String
+  warehouse     Warehouse @relation(fields: [warehouseId], references: [id])
+  availableQty  Float     @default(0)
+  reservedQty   Float     @default(0)
+  inQcQty       Float     @default(0)
+  unitCost      Float     @default(0)
+  totalValue    Float     @default(0)
+  lastUpdated   DateTime  @default(now())
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@unique([companyId, itemCode, warehouseId])
+  @@map("stock_balance")
 }
