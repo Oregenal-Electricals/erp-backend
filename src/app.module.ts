@@ -47,6 +47,7 @@ import { LandedCostModule } from './landed-costs/landed-cost.module';
 import { GrnModule } from './grn/grn.module';
 import { IqcModule } from './iqc/iqc.module';
 import { StockLedgerModule } from './stock-ledger/stock-ledger.module';
+import { RejectedStockModule } from './rejected-stock/rejected-stock.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -88,6 +89,7 @@ import configuration from './config/configuration';
     GrnModule,
     IqcModule,
     StockLedgerModule,
+    RejectedStockModule,
   ],
 })
 export class AppModule implements NestModule {

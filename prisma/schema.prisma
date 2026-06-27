@@ -254,6 +254,7 @@ model Company {
   iqcInspections     IqcInspection[]
   stockLedgers       StockLedger[]
   stockBalances      StockBalance[]
+  rejectedStocks     RejectedStock[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -971,6 +972,7 @@ model Warehouse {
 
   grnHeaders  GrnHeader[]
   stockLedgers StockLedger[]
+  rejectedStocks  RejectedStock[]
   stockBalances StockBalance[]
   @@map("warehouses")
   @@unique([companyId, code])
@@ -2200,6 +2202,7 @@ model GrnHeader {
   items           GrnItem[]
 
   iqcInspections IqcInspection[]
+  rejectedStocks  RejectedStock[]
   @@unique([companyId, grnNumber])
   @@map("grn_headers")
 }
@@ -2254,6 +2257,7 @@ model IqcInspection {
 
   items           IqcItem[]
 
+  rejectedStocks RejectedStock[]
   @@unique([companyId, iqcNumber])
   @@map("iqc_inspections")
 }
@@ -2337,4 +2341,58 @@ model StockBalance {
 
   @@unique([companyId, itemCode, warehouseId])
   @@map("stock_balance")
+}
+
+// MODULE 41 — REJECTED STOCK HANDLING
+// ============================================================
+model RejectedStock {
+  id                String         @id @default(uuid())
+  companyId         String
+  company           Company        @relation(fields: [companyId], references: [id])
+  rejectionNumber   String
+  iqcId             String
+  iqc               IqcInspection  @relation(fields: [iqcId], references: [id])
+  grnId             String
+  grn               GrnHeader      @relation(fields: [grnId], references: [id])
+  warehouseId       String
+  warehouse         Warehouse      @relation(fields: [warehouseId], references: [id])
+  status            String         @default("QUARANTINED") // QUARANTINED, PARTIALLY_DISPOSITIONED, CLOSED
+  totalRejectedQty  Float          @default(0)
+  remarks           String?
+  isActive          Boolean        @default(true)
+  isTestData        Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  items             RejectedStockItem[]
+
+  @@unique([companyId, rejectionNumber])
+  @@map("rejected_stock")
+}
+
+model RejectedStockItem {
+  id                String        @id @default(uuid())
+  companyId         String
+  rejectedStockId   String
+  rejectedStock     RejectedStock @relation(fields: [rejectedStockId], references: [id])
+  iqcItemId         String?
+  itemCode          String
+  itemName          String
+  uom               String
+  rejectedQty       Float         @default(0)
+  rejectionReason   String?
+  disposition       String        @default("PENDING") // PENDING, RTV, SCRAPPED, REWORK, ACCEPTED
+  dispositionDate   DateTime?
+  dispositionBy     String?
+  dispositionNotes  String?
+  isActive          Boolean       @default(true)
+  isTestData        Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@map("rejected_stock_items")
 }
