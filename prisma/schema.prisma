@@ -246,6 +246,7 @@ model Company {
   importPurchaseOrders ImportPurchaseOrder[]
   proformaInvoices    ProformaInvoice[]
   paymentInstruments  PaymentInstrument[]
+  shipments           Shipment[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1821,6 +1822,7 @@ model ImportPurchaseOrder {
   items             ImportPoItem[]
   proformaInvoices  ProformaInvoice[]
   paymentInstruments PaymentInstrument[]
+  shipments         Shipment[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -1954,4 +1956,63 @@ model PaymentInstrument {
 
   @@unique([companyId, instrumentNumber])
   @@map("payment_instruments")
+}
+
+// MODULE 34 — SHIPMENT TRACKING
+// ============================================================
+model Shipment {
+  id                    String              @id @default(uuid())
+  companyId             String
+  company               Company             @relation(fields: [companyId], references: [id])
+  ipoId                 String
+  ipo                   ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  paymentInstrumentId   String?
+  shipmentNumber        String
+  shipmentMode          String              @default("SEA") // SEA, AIR, ROAD, COURIER
+  carrierName           String
+  vesselName            String?
+  voyageNumber          String?
+  flightNumber          String?
+  blNumber              String?
+  awbNumber             String?
+  portOfLoading         String?
+  portOfDischarge       String?
+  etd                   DateTime?
+  eta                   DateTime?
+  atd                   DateTime?
+  ata                   DateTime?
+  totalPackages         Int?
+  totalWeight           Float?
+  totalVolume           Float?
+  status                String              @default("BOOKED") // BOOKED, DEPARTED, IN_TRANSIT, ARRIVED, DELIVERED, CANCELLED
+  notes                 String?
+  isActive              Boolean             @default(true)
+  isTestData            Boolean             @default(false)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  containers            ShipmentContainer[]
+
+  @@unique([companyId, shipmentNumber])
+  @@map("shipments")
+}
+
+model ShipmentContainer {
+  id              String   @id @default(uuid())
+  shipmentId      String
+  shipment        Shipment @relation(fields: [shipmentId], references: [id])
+  companyId       String
+  containerNumber String
+  containerType   String   @default("20GP") // 20GP, 40GP, 40HC, 20RF, 40RF
+  sealNumber      String?
+  isActive        Boolean  @default(true)
+  isTestData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("shipment_containers")
 }

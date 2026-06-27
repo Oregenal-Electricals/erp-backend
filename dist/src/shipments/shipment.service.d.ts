@@ -1,0 +1,524 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateShipmentDto, UpdateShipmentDto, AddContainerDto } from './dto/shipment.dto';
+export declare class ShipmentService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    private generateNumber;
+    private includes;
+    create(dto: CreateShipmentDto, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: ({
+            _count: {
+                containers: number;
+            };
+            ipo: {
+                vendor: {
+                    code: string;
+                    name: string;
+                };
+                currency: string;
+                ipoNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            carrierName: string;
+            notes: string | null;
+            portOfLoading: string | null;
+            portOfDischarge: string | null;
+            ipoId: string;
+            paymentInstrumentId: string | null;
+            shipmentMode: string;
+            vesselName: string | null;
+            voyageNumber: string | null;
+            flightNumber: string | null;
+            blNumber: string | null;
+            awbNumber: string | null;
+            etd: Date | null;
+            eta: Date | null;
+            totalPackages: number | null;
+            totalWeight: number | null;
+            totalVolume: number | null;
+            atd: Date | null;
+            ata: Date | null;
+            shipmentNumber: string;
+        })[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    findByIpo(ipoId: string, user: any): Promise<({
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    })[]>;
+    update(id: string, dto: UpdateShipmentDto, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    depart(id: string, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    arrive(id: string, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    deliver(id: string, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    cancel(id: string, user: any): Promise<{
+        ipo: {
+            status: string;
+            vendor: {
+                code: string;
+                name: string;
+            };
+            currency: string;
+            ipoNumber: string;
+        };
+        containers: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            containerNumber: string;
+            containerType: string;
+            sealNumber: string | null;
+            shipmentId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        carrierName: string;
+        notes: string | null;
+        portOfLoading: string | null;
+        portOfDischarge: string | null;
+        ipoId: string;
+        paymentInstrumentId: string | null;
+        shipmentMode: string;
+        vesselName: string | null;
+        voyageNumber: string | null;
+        flightNumber: string | null;
+        blNumber: string | null;
+        awbNumber: string | null;
+        etd: Date | null;
+        eta: Date | null;
+        totalPackages: number | null;
+        totalWeight: number | null;
+        totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
+    }>;
+    addContainer(id: string, dto: AddContainerDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        containerNumber: string;
+        containerType: string;
+        sealNumber: string | null;
+        shipmentId: string;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        booked: number;
+        departed: number;
+        arrived: number;
+        delivered: number;
+        cancelled: number;
+        byMode: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.ShipmentGroupByOutputType, "shipmentMode"[]> & {
+            _count: number;
+        })[];
+    }>;
+}

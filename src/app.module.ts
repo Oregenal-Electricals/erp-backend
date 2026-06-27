@@ -40,6 +40,7 @@ import { PurchaseAnalyticsModule } from './purchase-analytics/purchase-analytics
 import { ImportOrderModule } from './import-orders/import-order.module';
 import { ProformaInvoiceModule } from './proforma-invoices/proforma-invoice.module';
 import { PaymentInstrumentModule } from './payment-instruments/payment-instrument.module';
+import { ShipmentModule } from './shipments/shipment.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -74,6 +75,7 @@ import configuration from './config/configuration';
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
+    ShipmentModule,
   ],
 })
 export class AppModule implements NestModule {
