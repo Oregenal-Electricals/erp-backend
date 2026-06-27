@@ -250,6 +250,7 @@ model Company {
   shippingDocuments   ShippingDocument[]
   customsEntries     CustomsEntry[]
   landedCosts        LandedCost[]
+  grnHeaders         GrnHeader[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -965,6 +966,7 @@ model Warehouse {
 
   zones Zone[]
 
+  grnHeaders  GrnHeader[]
   @@map("warehouses")
   @@unique([companyId, code])
   @@index([companyId])
@@ -1679,6 +1681,7 @@ model PurchaseOrder {
   approvals       PoApproval[]
   amendments      PoAmendment[]
 
+  grnHeaders    GrnHeader[]
   @@unique([companyId, poNumber])
   @@map("purchase_orders")
 }
@@ -1830,6 +1833,7 @@ model ImportPurchaseOrder {
   shippingDocuments ShippingDocument[]
   customsEntries   CustomsEntry[]
   landedCosts      LandedCost[]
+  grnHeaders      GrnHeader[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -2157,4 +2161,67 @@ model LandedCostItem {
   updatedBy           String?
 
   @@map("landed_cost_items")
+}
+
+// MODULE 38 — GRN (GOODS RECEIPT NOTE)
+// ============================================================
+model GrnHeader {
+  id              String   @id @default(uuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
+  grnNumber       String
+  grnType         String   @default("DOMESTIC") // DOMESTIC, IMPORT
+  poId            String?
+  po              PurchaseOrder? @relation(fields: [poId], references: [id])
+  ipoId           String?
+  ipo             ImportPurchaseOrder? @relation(fields: [ipoId], references: [id])
+  landedCostId    String?
+  warehouseId     String
+  warehouse       Warehouse @relation(fields: [warehouseId], references: [id])
+  receivedDate    DateTime @default(now())
+  vehicleNumber   String?
+  dcNumber        String?
+  invoiceNumber   String?
+  invoiceDate     DateTime?
+  status          String   @default("DRAFT") // DRAFT, SUBMITTED, IQC_PENDING, PARTIALLY_ACCEPTED, ACCEPTED, CLOSED
+  remarks         String?
+  isActive        Boolean  @default(true)
+  isTestData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  items           GrnItem[]
+
+  @@unique([companyId, grnNumber])
+  @@map("grn_headers")
+}
+
+model GrnItem {
+  id                  String     @id @default(uuid())
+  companyId           String
+  grnId               String
+  grn                 GrnHeader  @relation(fields: [grnId], references: [id])
+  poItemId            String?
+  ipoItemId           String?
+  itemCode            String
+  itemName            String
+  uom                 String
+  orderedQty          Float      @default(0)
+  previouslyReceived  Float      @default(0)
+  receivedQty         Float      @default(0)
+  acceptedQty         Float      @default(0)
+  rejectedQty         Float      @default(0)
+  unitPrice           Float      @default(0)
+  landedCostPerUnit   Float?     @default(0)
+  totalValue          Float      @default(0)
+  isActive            Boolean    @default(true)
+  isTestData          Boolean    @default(false)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@map("grn_items")
 }
