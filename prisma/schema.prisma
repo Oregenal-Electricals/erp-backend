@@ -255,6 +255,9 @@ model Company {
   stockLedgers       StockLedger[]
   stockBalances      StockBalance[]
   rejectedStocks     RejectedStock[]
+  warehouseZones     WarehouseZone[]
+  warehouseRacks     WarehouseRack[]
+  warehouseBins      WarehouseBin[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -973,6 +976,9 @@ model Warehouse {
   grnHeaders  GrnHeader[]
   stockLedgers StockLedger[]
   rejectedStocks  RejectedStock[]
+  warehouseZones WarehouseZone[]
+  warehouseRacks WarehouseRack[]
+  warehouseBins  WarehouseBin[]
   stockBalances StockBalance[]
   @@map("warehouses")
   @@unique([companyId, code])
@@ -2395,4 +2401,79 @@ model RejectedStockItem {
   updatedBy         String?
 
   @@map("rejected_stock_items")
+}
+
+// MODULE 43 — RACK & BIN MANAGEMENT
+// ============================================================
+model WarehouseZone {
+  id          String    @id @default(uuid())
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id])
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  code        String
+  name        String
+  description String?
+  isActive    Boolean   @default(true)
+  isTestData  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  racks       WarehouseRack[]
+
+  @@unique([companyId, warehouseId, code])
+  @@map("warehouse_zones")
+}
+
+model WarehouseRack {
+  id          String         @id @default(uuid())
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id])
+  warehouseId String
+  warehouse   Warehouse      @relation(fields: [warehouseId], references: [id])
+  zoneId      String?
+  zone        WarehouseZone? @relation(fields: [zoneId], references: [id])
+  code        String
+  name        String
+  totalBins   Int            @default(0)
+  description String?
+  isActive    Boolean        @default(true)
+  isTestData  Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  bins        WarehouseBin[]
+
+  @@unique([companyId, warehouseId, code])
+  @@map("warehouse_racks")
+}
+
+model WarehouseBin {
+  id          String        @id @default(uuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id])
+  warehouseId String
+  warehouse   Warehouse     @relation(fields: [warehouseId], references: [id])
+  rackId      String
+  rack        WarehouseRack @relation(fields: [rackId], references: [id])
+  code        String
+  name        String?
+  maxQty      Float?
+  maxWeight   Float?
+  status      String        @default("EMPTY") // EMPTY, PARTIAL, FULL, RESERVED, BLOCKED
+  currentQty  Float         @default(0)
+  itemCode    String?
+  isActive    Boolean       @default(true)
+  isTestData  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, warehouseId, code])
+  @@map("warehouse_bins")
 }

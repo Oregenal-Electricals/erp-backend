@@ -60,6 +60,7 @@ const grn_module_1 = require("./grn/grn.module");
 const iqc_module_1 = require("./iqc/iqc.module");
 const stock_ledger_module_1 = require("./stock-ledger/stock-ledger.module");
 const rejected_stock_module_1 = require("./rejected-stock/rejected-stock.module");
+const rack_bin_module_1 = require("./rack-bin/rack-bin.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -108,6 +109,7 @@ exports.AppModule = AppModule = __decorate([
             iqc_module_1.IqcModule,
             stock_ledger_module_1.StockLedgerModule,
             rejected_stock_module_1.RejectedStockModule,
+            rack_bin_module_1.RackBinModule,
         ],
     })
 ], AppModule);
