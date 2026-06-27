@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsBoolean,
   IsUUID,
+  IsArray,
   MinLength,
   MaxLength,
   Matches,
@@ -52,6 +53,11 @@ export class CreateUserDto {
   @ApiProperty({ enum: UserRole, example: UserRole.VIEWER })
   @IsEnum(UserRole, { message: 'Invalid role' })
   role: UserRole;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(UserRole, { each: true })
+  additionalRoles?: UserRole[];
 
   @ApiProperty({ example: 'aaba1738-6e81-44f7-b630-aa0327620870' })
   @IsUUID('4', { message: 'companyId must be a valid UUID' })

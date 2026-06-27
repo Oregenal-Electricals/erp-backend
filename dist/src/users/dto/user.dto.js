@@ -63,6 +63,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(client_1.UserRole, { each: true }),
+    __metadata("design:type", Array)
+], CreateUserDto.prototype, "additionalRoles", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ example: 'aaba1738-6e81-44f7-b630-aa0327620870' }),
     (0, class_validator_1.IsUUID)('4', { message: 'companyId must be a valid UUID' }),
     __metadata("design:type", String)

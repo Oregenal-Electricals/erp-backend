@@ -20,17 +20,19 @@ let PermissionsGuard = class PermissionsGuard {
     }
     canActivate(context) {
         const requiredPermissions = this.reflector.getAllAndOverride(permissions_decorator_1.PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
-        if (!requiredPermissions || requiredPermissions.length === 0) {
+        if (!requiredPermissions || requiredPermissions.length === 0)
             return true;
-        }
         const { user } = context.switchToHttp().getRequest();
-        if (!user) {
+        if (!user)
             throw new common_1.ForbiddenException('No user found in request');
-        }
-        const hasAll = requiredPermissions.every((permission) => (0, role_permissions_1.roleHasPermission)(user.role, permission));
+        const allRoles = user.allRoles ||
+            [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i);
+        if (allRoles.some(r => r === 'SUPER_ADMIN'))
+            return true;
+        const hasAll = requiredPermissions.every((permission) => allRoles.some((role) => (0, role_permissions_1.roleHasPermission)(role, permission)));
         if (!hasAll) {
-            const missing = requiredPermissions.filter((p) => !(0, role_permissions_1.roleHasPermission)(user.role, p));
-            throw new common_1.ForbiddenException(`Missing permissions: ${missing.join(', ')}`);
+            const missing = requiredPermissions.filter((p) => !allRoles.some((role) => (0, role_permissions_1.roleHasPermission)(role, p)));
+            throw new common_1.ForbiddenException(`Missing permissions: ${missing.join(',')}`);
         }
         return true;
     }

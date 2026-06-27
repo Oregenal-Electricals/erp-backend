@@ -59,40 +59,32 @@ let AuthService = class AuthService {
                 company: { select: { id: true, name: true, code: true } },
             },
         });
-        if (!user) {
+        if (!user)
             throw new common_1.UnauthorizedException('Invalid email or password');
-        }
-        if (!user.isActive) {
+        if (!user.isActive)
             throw new common_1.UnauthorizedException('Account is deactivated. Contact administrator.');
-        }
-        if (user.isLocked) {
+        if (user.isLocked)
             throw new common_1.UnauthorizedException('Account is locked due to too many failed attempts. Contact administrator.');
-        }
         const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
         if (!passwordValid) {
             const newAttempts = user.loginAttempts + 1;
             await this.prisma.user.update({
                 where: { id: user.id },
-                data: {
-                    loginAttempts: newAttempts,
-                    isLocked: newAttempts >= 5,
-                    updatedBy: 'system',
-                },
+                data: { loginAttempts: newAttempts, isLocked: newAttempts >= 5, updatedBy: 'system' },
             });
             throw new common_1.UnauthorizedException('Invalid email or password');
         }
         await this.prisma.user.update({
             where: { id: user.id },
-            data: {
-                loginAttempts: 0,
-                lastLoginAt: new Date(),
-                updatedBy: 'system',
-            },
+            data: { loginAttempts: 0, lastLoginAt: new Date(), updatedBy: 'system' },
         });
+        const allRoles = [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i);
         const payload = {
             sub: user.id,
             email: user.email,
             role: user.role,
+            additionalRoles: user.additionalRoles || [],
+            allRoles,
             companyId: user.companyId,
         };
         const accessToken = this.jwt.sign(payload);
@@ -104,6 +96,8 @@ let AuthService = class AuthService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 role: user.role,
+                additionalRoles: user.additionalRoles || [],
+                allRoles,
                 companyId: user.companyId,
                 company: user.company,
                 mustChangePwd: user.mustChangePwd,
@@ -114,20 +108,15 @@ let AuthService = class AuthService {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-                role: true,
-                companyId: true,
-                mustChangePwd: true,
-                lastLoginAt: true,
+                id: true, email: true, firstName: true, lastName: true,
+                role: true, additionalRoles: true,
+                companyId: true, mustChangePwd: true, lastLoginAt: true,
                 company: { select: { id: true, name: true, code: true } },
             },
         });
         if (!user)
             throw new common_1.UnauthorizedException('User not found');
-        return user;
+        return Object.assign(Object.assign({}, user), { allRoles: [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i) });
     }
 };
 exports.AuthService = AuthService;

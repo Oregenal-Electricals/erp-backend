@@ -7,6 +7,7 @@ export declare class CreateUserDto {
     phone?: string;
     password: string;
     role: UserRole;
+    additionalRoles?: UserRole[];
     companyId: string;
     mustChangePwd?: boolean;
 }

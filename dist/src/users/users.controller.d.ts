@@ -20,6 +20,7 @@ export declare class UsersController {
         firstName: string;
         lastName: string;
         role: import(".prisma/client").$Enums.UserRole;
+        additionalRoles: import(".prisma/client").$Enums.UserRole[];
         mustChangePwd: boolean;
         isLocked: boolean;
     }>;

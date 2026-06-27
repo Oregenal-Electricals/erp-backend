@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Permission } from '../permissions/permissions.enum';
 import { roleHasPermission } from '../permissions/role-permissions';
@@ -18,32 +13,29 @@ export class PermissionsGuard implements CanActivate {
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],
     );
-
-    // No permissions required — allow
-    if (!requiredPermissions || requiredPermissions.length === 0) {
-      return true;
-    }
+    if (!requiredPermissions || requiredPermissions.length === 0) return true;
 
     const { user } = context.switchToHttp().getRequest();
+    if (!user) throw new ForbiddenException('No user found in request');
 
-    if (!user) {
-      throw new ForbiddenException('No user found in request');
-    }
+    // Build allRoles from JWT payload (primary + additional)
+    const allRoles: string[] = user.allRoles ||
+      [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i);
 
-    // Check ALL required permissions
+    // SUPER_ADMIN in any role = bypass all checks
+    if (allRoles.some(r => r === 'SUPER_ADMIN')) return true;
+
+    // Check if ANY role has ALL required permissions
     const hasAll = requiredPermissions.every((permission) =>
-      roleHasPermission(user.role, permission),
+      allRoles.some((role) => roleHasPermission(role as any, permission))
     );
 
     if (!hasAll) {
       const missing = requiredPermissions.filter(
-        (p) => !roleHasPermission(user.role, p),
+        (p) => !allRoles.some((role) => roleHasPermission(role as any, p))
       );
-      throw new ForbiddenException(
-        `Missing permissions: ${missing.join(', ')}`,
-      );
+      throw new ForbiddenException(`Missing permissions: ${missing.join(',')}`);
     }
-
     return true;
   }
 }

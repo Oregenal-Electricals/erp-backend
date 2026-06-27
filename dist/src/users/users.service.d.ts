@@ -22,6 +22,7 @@ export declare class UsersService {
         firstName: string;
         lastName: string;
         role: import(".prisma/client").$Enums.UserRole;
+        additionalRoles: import(".prisma/client").$Enums.UserRole[];
         mustChangePwd: boolean;
         isLocked: boolean;
     }>;
