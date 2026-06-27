@@ -53,6 +53,7 @@ const import_order_module_1 = require("./import-orders/import-order.module");
 const proforma_invoice_module_1 = require("./proforma-invoices/proforma-invoice.module");
 const payment_instrument_module_1 = require("./payment-instruments/payment-instrument.module");
 const shipment_module_1 = require("./shipments/shipment.module");
+const shipping_document_module_1 = require("./shipping-documents/shipping-document.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -94,6 +95,7 @@ exports.AppModule = AppModule = __decorate([
             proforma_invoice_module_1.ProformaInvoiceModule,
             payment_instrument_module_1.PaymentInstrumentModule,
             shipment_module_1.ShipmentModule,
+            shipping_document_module_1.ShippingDocumentModule,
         ],
     })
 ], AppModule);

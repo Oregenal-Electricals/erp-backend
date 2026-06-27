@@ -247,6 +247,7 @@ model Company {
   proformaInvoices    ProformaInvoice[]
   paymentInstruments  PaymentInstrument[]
   shipments           Shipment[]
+  shippingDocuments   ShippingDocument[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1823,6 +1824,7 @@ model ImportPurchaseOrder {
   proformaInvoices  ProformaInvoice[]
   paymentInstruments PaymentInstrument[]
   shipments         Shipment[]
+  shippingDocuments ShippingDocument[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -1995,6 +1997,7 @@ model Shipment {
 
   containers            ShipmentContainer[]
 
+  shippingDocuments ShippingDocument[]
   @@unique([companyId, shipmentNumber])
   @@map("shipments")
 }
@@ -2015,4 +2018,40 @@ model ShipmentContainer {
   updatedBy       String?
 
   @@map("shipment_containers")
+}
+
+// MODULE 35 — BL / AWB MANAGEMENT
+// ============================================================
+model ShippingDocument {
+  id                  String   @id @default(uuid())
+  companyId           String
+  company             Company  @relation(fields: [companyId], references: [id])
+  shipmentId          String
+  shipment            Shipment @relation(fields: [shipmentId], references: [id])
+  ipoId               String
+  ipo                 ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  documentType        String   @default("BL") // BL, AWB, SEAWAY_BILL
+  documentNumber      String
+  issueDate           DateTime?
+  placeOfIssue        String?
+  shipperName         String?
+  consigneeName       String?
+  notifyParty         String?
+  portOfLoading       String?
+  portOfDischarge     String?
+  descriptionOfGoods  String?
+  freightTerms        String?  @default("PREPAID") // PREPAID, COLLECT
+  numberOfOriginals   Int?
+  originalsReceived   Int?
+  status              String   @default("RECEIVED") // DRAFT, RECEIVED, VERIFIED, SURRENDERED
+  notes               String?
+  isActive            Boolean  @default(true)
+  isTestData          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, documentNumber])
+  @@map("shipping_documents")
 }
