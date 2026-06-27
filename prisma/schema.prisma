@@ -248,6 +248,7 @@ model Company {
   paymentInstruments  PaymentInstrument[]
   shipments           Shipment[]
   shippingDocuments   ShippingDocument[]
+  customsEntries     CustomsEntry[]
   customFieldValues      CustomFieldValue[]
 
   @@map("companies")
@@ -1826,6 +1827,7 @@ model ImportPurchaseOrder {
   paymentInstruments PaymentInstrument[]
   shipments         Shipment[]
   shippingDocuments ShippingDocument[]
+  customsEntries   CustomsEntry[]
 
   @@unique([companyId, ipoNumber])
   @@map("import_purchase_orders")
@@ -1999,6 +2001,7 @@ model Shipment {
   containers            ShipmentContainer[]
 
   shippingDocuments ShippingDocument[]
+  customsEntries CustomsEntry[]
   @@unique([companyId, shipmentNumber])
   @@map("shipments")
 }
@@ -2055,4 +2058,41 @@ model ShippingDocument {
 
   @@unique([companyId, documentNumber])
   @@map("shipping_documents")
+}
+
+// MODULE 36 — CUSTOMS & DUTY (BOE)
+// ============================================================
+model CustomsEntry {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  ipoId             String
+  ipo               ImportPurchaseOrder @relation(fields: [ipoId], references: [id])
+  shipmentId        String
+  shipment          Shipment @relation(fields: [shipmentId], references: [id])
+  boeNumber         String
+  customsBoeNumber  String?
+  chaName           String?
+  portOfEntry       String?
+  cifValue          Float    @default(0)
+  bcdRate           Float    @default(0)
+  bcdAmount         Float    @default(0)
+  swsAmount         Float    @default(0)
+  igstRate          Float    @default(0)
+  igstAmount        Float    @default(0)
+  aidcAmount        Float?   @default(0)
+  totalDuty         Float    @default(0)
+  dutyPaidDate      DateTime?
+  outOfChargeDate   DateTime?
+  status            String   @default("DRAFT") // DRAFT, FILED, ASSESSED, DUTY_PAID, OUT_OF_CHARGE, CANCELLED
+  notes             String?
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, boeNumber])
+  @@map("customs_entries")
 }

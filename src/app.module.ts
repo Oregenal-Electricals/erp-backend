@@ -42,6 +42,7 @@ import { ProformaInvoiceModule } from './proforma-invoices/proforma-invoice.modu
 import { PaymentInstrumentModule } from './payment-instruments/payment-instrument.module';
 import { ShipmentModule } from './shipments/shipment.module';
 import { ShippingDocumentModule } from './shipping-documents/shipping-document.module';
+import { CustomsEntryModule } from './customs-entries/customs-entry.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -78,6 +79,7 @@ import configuration from './config/configuration';
     PaymentInstrumentModule,
     ShipmentModule,
     ShippingDocumentModule,
+    CustomsEntryModule,
   ],
 })
 export class AppModule implements NestModule {
