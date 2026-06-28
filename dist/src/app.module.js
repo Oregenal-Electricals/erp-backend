@@ -67,6 +67,7 @@ const stock_issue_module_1 = require("./stock-issues/stock-issue.module");
 const stock_transfer_module_1 = require("./stock-transfers/stock-transfer.module");
 const stock_adjustment_module_1 = require("./stock-adjustments/stock-adjustment.module");
 const stock_reports_module_1 = require("./stock-reports/stock-reports.module");
+const inventory_valuation_module_1 = require("./inventory-valuation/inventory-valuation.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -122,6 +123,7 @@ exports.AppModule = AppModule = __decorate([
             stock_transfer_module_1.StockTransferModule,
             stock_adjustment_module_1.StockAdjustmentModule,
             stock_reports_module_1.StockReportsModule,
+            inventory_valuation_module_1.InventoryValuationModule,
         ],
     })
 ], AppModule);
