@@ -50,6 +50,7 @@ import { StockLedgerModule } from './stock-ledger/stock-ledger.module';
 import { RejectedStockModule } from './rejected-stock/rejected-stock.module';
 import { RackBinModule } from './rack-bin/rack-bin.module';
 import { StockPutawayModule } from './stock-putaway/stock-putaway.module';
+import { StockBatchModule } from './stock-batches/stock-batch.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -94,6 +95,7 @@ import configuration from './config/configuration';
     RejectedStockModule,
     RackBinModule,
     StockPutawayModule,
+    StockBatchModule,
   ],
 })
 export class AppModule implements NestModule {
