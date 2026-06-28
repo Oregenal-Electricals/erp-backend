@@ -72,6 +72,7 @@ const inventory_dashboard_module_1 = require("./inventory-dashboard/inventory-da
 const inventory_reports_module_1 = require("./inventory-reports/inventory-reports.module");
 const work_order_module_1 = require("./work-orders/work-order.module");
 const mrp_module_1 = require("./mrp/mrp.module");
+const production_issue_module_1 = require("./production-issues/production-issue.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -132,6 +133,7 @@ exports.AppModule = AppModule = __decorate([
             inventory_reports_module_1.InventoryReportsModule,
             work_order_module_1.WorkOrderModule,
             mrp_module_1.MrpModule,
+            production_issue_module_1.ProductionIssueModule,
         ],
     })
 ], AppModule);

@@ -261,6 +261,7 @@ model Company {
   stockTransfers     StockTransfer[]
   stockAdjustments   StockAdjustment[]
   workOrders         WorkOrder[]
+  productionIssues   ProductionIssue[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -987,6 +988,7 @@ model Warehouse {
   stockIssues    StockIssue[]
   stockAdjustments StockAdjustment[]
   workOrders     WorkOrder[]
+  productionIssues ProductionIssue[]
   transfersFrom StockTransfer[] @relation("TransferFrom")
   transfersTo   StockTransfer[] @relation("TransferTo")
   warehouseZones WarehouseZone[]
@@ -2578,6 +2580,7 @@ model StockBatch {
 
   issueItems StockIssueItem[]
   transferItems StockTransferItem[]
+  productionIssueItems ProductionIssueItem[] @relation("ProductionIssueBatch")
   @@unique([companyId, batchNumber])
   @@index([companyId, itemCode])
   @@map("stock_batches")
@@ -2765,7 +2768,58 @@ model WorkOrder {
   createdBy         String?
   updatedBy         String?
 
+  productionIssues ProductionIssue[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
+}
+
+// MODULE 56 — PRODUCTION MATERIAL ISSUE
+// ============================================================
+model ProductionIssue {
+  id            String               @id @default(uuid())
+  companyId     String
+  company       Company              @relation(fields: [companyId], references: [id])
+  issueNumber   String
+  workOrderId   String
+  workOrder     WorkOrder            @relation(fields: [workOrderId], references: [id])
+  warehouseId   String
+  warehouse     Warehouse            @relation(fields: [warehouseId], references: [id])
+  issueMethod   String               @default("FIFO") // FIFO, FEFO
+  status        String               @default("DRAFT") // DRAFT, ISSUED, CANCELLED
+  remarks       String?
+  isActive      Boolean              @default(true)
+  isTestData    Boolean              @default(false)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  items         ProductionIssueItem[]
+
+  @@unique([companyId, issueNumber])
+  @@map("production_issues")
+}
+
+model ProductionIssueItem {
+  id                  String          @id @default(uuid())
+  companyId           String
+  productionIssueId   String
+  productionIssue     ProductionIssue @relation(fields: [productionIssueId], references: [id])
+  batchId             String?
+  batch               StockBatch?     @relation("ProductionIssueBatch", fields: [batchId], references: [id])
+  itemCode            String
+  itemName            String
+  uom                 String
+  requiredQty         Float           @default(0)
+  issuedQty           Float           @default(0)
+  unitCost            Float           @default(0)
+  isActive            Boolean         @default(true)
+  isTestData          Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@map("production_issue_items")
 }
