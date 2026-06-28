@@ -57,6 +57,7 @@ import { StockAdjustmentModule } from './stock-adjustments/stock-adjustment.modu
 import { StockReportsModule } from './stock-reports/stock-reports.module';
 import { InventoryValuationModule } from './inventory-valuation/inventory-valuation.module';
 import { InventoryDashboardModule } from './inventory-dashboard/inventory-dashboard.module';
+import { InventoryReportsModule } from './inventory-reports/inventory-reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -108,6 +109,7 @@ import configuration from './config/configuration';
     StockReportsModule,
     InventoryValuationModule,
     InventoryDashboardModule,
+    InventoryReportsModule,
   ],
 })
 export class AppModule implements NestModule {
