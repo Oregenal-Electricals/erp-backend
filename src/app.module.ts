@@ -49,6 +49,7 @@ import { IqcModule } from './iqc/iqc.module';
 import { StockLedgerModule } from './stock-ledger/stock-ledger.module';
 import { RejectedStockModule } from './rejected-stock/rejected-stock.module';
 import { RackBinModule } from './rack-bin/rack-bin.module';
+import { StockPutawayModule } from './stock-putaway/stock-putaway.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -92,6 +93,7 @@ import configuration from './config/configuration';
     StockLedgerModule,
     RejectedStockModule,
     RackBinModule,
+    StockPutawayModule,
   ],
 })
 export class AppModule implements NestModule {

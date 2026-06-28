@@ -255,6 +255,7 @@ model Company {
   stockLedgers       StockLedger[]
   stockBalances      StockBalance[]
   rejectedStocks     RejectedStock[]
+  stockPutaways      StockPutaway[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -976,6 +977,7 @@ model Warehouse {
   grnHeaders  GrnHeader[]
   stockLedgers StockLedger[]
   rejectedStocks  RejectedStock[]
+  stockPutaways  StockPutaway[]
   warehouseZones WarehouseZone[]
   warehouseRacks WarehouseRack[]
   warehouseBins  WarehouseBin[]
@@ -2209,6 +2211,7 @@ model GrnHeader {
 
   iqcInspections IqcInspection[]
   rejectedStocks  RejectedStock[]
+  stockPutaways   StockPutaway[]
   @@unique([companyId, grnNumber])
   @@map("grn_headers")
 }
@@ -2264,6 +2267,7 @@ model IqcInspection {
   items           IqcItem[]
 
   rejectedStocks RejectedStock[]
+  stockPutaways StockPutaway[]
   @@unique([companyId, iqcNumber])
   @@map("iqc_inspections")
 }
@@ -2474,6 +2478,57 @@ model WarehouseBin {
   createdBy   String?
   updatedBy   String?
 
+  putawayItems StockPutawayItem[]
   @@unique([companyId, warehouseId, code])
   @@map("warehouse_bins")
+}
+
+// MODULE 44 — STOCK PUTAWAY
+// ============================================================
+model StockPutaway {
+  id             String         @id @default(uuid())
+  companyId      String
+  company        Company        @relation(fields: [companyId], references: [id])
+  putawayNumber  String
+  grnId          String
+  grn            GrnHeader      @relation(fields: [grnId], references: [id])
+  iqcId          String?
+  iqc            IqcInspection? @relation(fields: [iqcId], references: [id])
+  warehouseId    String
+  warehouse      Warehouse      @relation(fields: [warehouseId], references: [id])
+  status         String         @default("DRAFT") // DRAFT, IN_PROGRESS, COMPLETED
+  remarks        String?
+  isActive       Boolean        @default(true)
+  isTestData     Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  items          StockPutawayItem[]
+
+  @@unique([companyId, putawayNumber])
+  @@map("stock_putaway")
+}
+
+model StockPutawayItem {
+  id          String       @id @default(uuid())
+  companyId   String
+  putawayId   String
+  putaway     StockPutaway @relation(fields: [putawayId], references: [id])
+  binId       String
+  bin         WarehouseBin @relation(fields: [binId], references: [id])
+  itemCode    String
+  itemName    String
+  uom         String
+  qty         Float        @default(0)
+  unitCost    Float        @default(0)
+  isActive    Boolean      @default(true)
+  isTestData  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("stock_putaway_items")
 }
