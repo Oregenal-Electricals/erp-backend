@@ -263,6 +263,7 @@ model Company {
   workOrders         WorkOrder[]
   productionIssues   ProductionIssue[]
   productionEntries  ProductionEntry[]
+  productionQcs      ProductionQc[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -2771,6 +2772,7 @@ model WorkOrder {
 
   productionIssues ProductionIssue[]
   productionEntries ProductionEntry[]
+  productionQcs ProductionQc[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -2851,7 +2853,42 @@ model ProductionEntry {
   createdBy     String?
   updatedBy     String?
 
+  qcInspections ProductionQc[]
   @@unique([companyId, entryNumber])
   @@index([companyId, workOrderId])
   @@map("production_entries")
+}
+
+// MODULE 58 — IN-PROCESS QUALITY CONTROL (IPQC)
+// ============================================================
+model ProductionQc {
+  id                  String          @id @default(uuid())
+  companyId           String
+  company             Company         @relation(fields: [companyId], references: [id])
+  qcNumber            String
+  workOrderId         String
+  workOrder           WorkOrder       @relation(fields: [workOrderId], references: [id])
+  productionEntryId   String?
+  productionEntry     ProductionEntry? @relation(fields: [productionEntryId], references: [id])
+  inspectionStage     String          @default("IN_PROCESS") // IN_PROCESS, FINAL, INLINE
+  inspectorName       String?
+  inspectionDate      DateTime        @default(now())
+  sampleSize          Int             @default(0)
+  passQty             Int             @default(0)
+  failQty             Int             @default(0)
+  result              String          @default("PENDING") // PASS, FAIL, CONDITIONAL, PENDING
+  defectDescription   String?
+  correctiveAction    String?
+  status              String          @default("PENDING") // PENDING, COMPLETED
+  remarks             String?
+  isActive            Boolean         @default(true)
+  isTestData          Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, qcNumber])
+  @@index([companyId, workOrderId])
+  @@map("production_qc")
 }

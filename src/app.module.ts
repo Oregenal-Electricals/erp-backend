@@ -62,6 +62,7 @@ import { WorkOrderModule } from './work-orders/work-order.module';
 import { MrpModule } from './mrp/mrp.module';
 import { ProductionIssueModule } from './production-issues/production-issue.module';
 import { ProductionEntryModule } from './production-entries/production-entry.module';
+import { ProductionQcModule } from './production-qc/production-qc.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -118,6 +119,7 @@ import configuration from './config/configuration';
     MrpModule,
     ProductionIssueModule,
     ProductionEntryModule,
+    ProductionQcModule,
   ],
 })
 export class AppModule implements NestModule {
