@@ -257,6 +257,7 @@ model Company {
   rejectedStocks     RejectedStock[]
   stockPutaways      StockPutaway[]
   stockBatches       StockBatch[]
+  stockIssues        StockIssue[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -980,6 +981,7 @@ model Warehouse {
   rejectedStocks  RejectedStock[]
   stockPutaways  StockPutaway[]
   stockBatches   StockBatch[]
+  stockIssues    StockIssue[]
   warehouseZones WarehouseZone[]
   warehouseRacks WarehouseRack[]
   warehouseBins  WarehouseBin[]
@@ -2566,7 +2568,59 @@ model StockBatch {
   createdBy     String?
   updatedBy     String?
 
+  issueItems StockIssueItem[]
   @@unique([companyId, batchNumber])
   @@index([companyId, itemCode])
   @@map("stock_batches")
+}
+
+// MODULE 46 — STOCK ISSUE / FIFO ENGINE
+// ============================================================
+model StockIssue {
+  id             String          @id @default(uuid())
+  companyId      String
+  company        Company         @relation(fields: [companyId], references: [id])
+  issueNumber    String
+  warehouseId    String
+  warehouse      Warehouse       @relation(fields: [warehouseId], references: [id])
+  issuedTo       String
+  referenceType  String          @default("INTERNAL") // PRODUCTION, SALES, INTERNAL
+  referenceId    String?
+  issueMethod    String          @default("FIFO") // FIFO, FEFO
+  status         String          @default("DRAFT") // DRAFT, ISSUED, CANCELLED
+  remarks        String?
+  isActive       Boolean         @default(true)
+  isTestData     Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  items          StockIssueItem[]
+
+  @@unique([companyId, issueNumber])
+  @@map("stock_issues")
+}
+
+model StockIssueItem {
+  id            String      @id @default(uuid())
+  companyId     String
+  issueId       String
+  issue         StockIssue  @relation(fields: [issueId], references: [id])
+  batchId       String?
+  batch         StockBatch? @relation(fields: [batchId], references: [id])
+  itemCode      String
+  itemName      String
+  uom           String
+  requestedQty  Float       @default(0)
+  issuedQty     Float       @default(0)
+  unitCost      Float       @default(0)
+  isActive      Boolean     @default(true)
+  isTestData    Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("stock_issue_items")
 }

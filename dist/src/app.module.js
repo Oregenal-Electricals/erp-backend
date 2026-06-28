@@ -63,6 +63,7 @@ const rejected_stock_module_1 = require("./rejected-stock/rejected-stock.module"
 const rack_bin_module_1 = require("./rack-bin/rack-bin.module");
 const stock_putaway_module_1 = require("./stock-putaway/stock-putaway.module");
 const stock_batch_module_1 = require("./stock-batches/stock-batch.module");
+const stock_issue_module_1 = require("./stock-issues/stock-issue.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -114,6 +115,7 @@ exports.AppModule = AppModule = __decorate([
             rack_bin_module_1.RackBinModule,
             stock_putaway_module_1.StockPutawayModule,
             stock_batch_module_1.StockBatchModule,
+            stock_issue_module_1.StockIssueModule,
         ],
     })
 ], AppModule);
