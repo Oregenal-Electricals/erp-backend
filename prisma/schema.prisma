@@ -258,6 +258,7 @@ model Company {
   stockPutaways      StockPutaway[]
   stockBatches       StockBatch[]
   stockIssues        StockIssue[]
+  stockTransfers     StockTransfer[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -982,6 +983,8 @@ model Warehouse {
   stockPutaways  StockPutaway[]
   stockBatches   StockBatch[]
   stockIssues    StockIssue[]
+  transfersFrom StockTransfer[] @relation("TransferFrom")
+  transfersTo   StockTransfer[] @relation("TransferTo")
   warehouseZones WarehouseZone[]
   warehouseRacks WarehouseRack[]
   warehouseBins  WarehouseBin[]
@@ -2569,6 +2572,7 @@ model StockBatch {
   updatedBy     String?
 
   issueItems StockIssueItem[]
+  transferItems StockTransferItem[]
   @@unique([companyId, batchNumber])
   @@index([companyId, itemCode])
   @@map("stock_batches")
@@ -2623,4 +2627,55 @@ model StockIssueItem {
   updatedBy     String?
 
   @@map("stock_issue_items")
+}
+
+// MODULE 47 — STOCK TRANSFER
+// ============================================================
+model StockTransfer {
+  id               String               @id @default(uuid())
+  companyId        String
+  company          Company              @relation(fields: [companyId], references: [id])
+  transferNumber   String
+  transferType     String               @default("INTER_WAREHOUSE") // INTER_WAREHOUSE, INTRA_WAREHOUSE
+  fromWarehouseId  String
+  fromWarehouse    Warehouse            @relation("TransferFrom", fields: [fromWarehouseId], references: [id])
+  toWarehouseId    String
+  toWarehouse      Warehouse            @relation("TransferTo", fields: [toWarehouseId], references: [id])
+  fromBinId        String?
+  toBinId          String?
+  status           String               @default("DRAFT") // DRAFT, CONFIRMED, CANCELLED
+  remarks          String?
+  isActive         Boolean              @default(true)
+  isTestData       Boolean              @default(false)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  items            StockTransferItem[]
+
+  @@unique([companyId, transferNumber])
+  @@map("stock_transfers")
+}
+
+model StockTransferItem {
+  id           String        @id @default(uuid())
+  companyId    String
+  transferId   String
+  transfer     StockTransfer @relation(fields: [transferId], references: [id])
+  batchId      String?
+  batch        StockBatch?   @relation(fields: [batchId], references: [id])
+  itemCode     String
+  itemName     String
+  uom          String
+  qty          Float         @default(0)
+  unitCost     Float         @default(0)
+  isActive     Boolean       @default(true)
+  isTestData   Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  createdBy    String?
+  updatedBy    String?
+
+  @@map("stock_transfer_items")
 }
