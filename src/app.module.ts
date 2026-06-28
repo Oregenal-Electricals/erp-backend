@@ -59,6 +59,7 @@ import { InventoryValuationModule } from './inventory-valuation/inventory-valuat
 import { InventoryDashboardModule } from './inventory-dashboard/inventory-dashboard.module';
 import { InventoryReportsModule } from './inventory-reports/inventory-reports.module';
 import { WorkOrderModule } from './work-orders/work-order.module';
+import { MrpModule } from './mrp/mrp.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -112,6 +113,7 @@ import configuration from './config/configuration';
     InventoryDashboardModule,
     InventoryReportsModule,
     WorkOrderModule,
+    MrpModule,
   ],
 })
 export class AppModule implements NestModule {
