@@ -265,6 +265,7 @@ model Company {
   productionEntries  ProductionEntry[]
   productionQcs      ProductionQc[]
   fgReceipts         FgReceipt[]
+  costSheets         ProductionCostSheet[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -2776,6 +2777,7 @@ model WorkOrder {
   productionEntries ProductionEntry[]
   productionQcs ProductionQc[]
   fgReceipts FgReceipt[]
+  costSheet ProductionCostSheet?
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -2928,4 +2930,46 @@ model FgReceipt {
   @@unique([companyId, receiptNumber])
   @@index([companyId, workOrderId])
   @@map("fg_receipts")
+}
+
+// MODULE 60 — PRODUCTION COST SHEET
+// ============================================================
+model ProductionCostSheet {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  costSheetNumber   String
+  workOrderId       String    @unique
+  workOrder         WorkOrder @relation(fields: [workOrderId], references: [id])
+  // Material Cost (auto from production issues)
+  materialCost      Float     @default(0)
+  // Labor Cost (from production entries)
+  totalShifts       Int       @default(0)
+  laborHours        Float     @default(0)
+  laborRatePerHour  Float     @default(0)
+  laborCost         Float     @default(0)
+  // Overhead (manual)
+  overheadCost      Float     @default(0)
+  overheadRemarks   String?
+  // Other
+  otherCost         Float     @default(0)
+  otherRemarks      String?
+  // Totals
+  totalCost         Float     @default(0)
+  completedQty      Float     @default(0)
+  unitCost          Float     @default(0)
+  // Variance
+  plannedMaterialCost Float   @default(0)
+  varianceCost      Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, FINALIZED
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, costSheetNumber])
+  @@map("production_cost_sheets")
 }
