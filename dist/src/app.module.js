@@ -75,6 +75,7 @@ const mrp_module_1 = require("./mrp/mrp.module");
 const production_issue_module_1 = require("./production-issues/production-issue.module");
 const production_entry_module_1 = require("./production-entries/production-entry.module");
 const production_qc_module_1 = require("./production-qc/production-qc.module");
+const fg_receipt_module_1 = require("./fg-receipts/fg-receipt.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -138,6 +139,7 @@ exports.AppModule = AppModule = __decorate([
             production_issue_module_1.ProductionIssueModule,
             production_entry_module_1.ProductionEntryModule,
             production_qc_module_1.ProductionQcModule,
+            fg_receipt_module_1.FgReceiptModule,
         ],
     })
 ], AppModule);

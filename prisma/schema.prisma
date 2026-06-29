@@ -264,6 +264,7 @@ model Company {
   productionIssues   ProductionIssue[]
   productionEntries  ProductionEntry[]
   productionQcs      ProductionQc[]
+  fgReceipts         FgReceipt[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -991,6 +992,7 @@ model Warehouse {
   stockAdjustments StockAdjustment[]
   workOrders     WorkOrder[]
   productionIssues ProductionIssue[]
+  fgReceipts FgReceipt[]
   transfersFrom StockTransfer[] @relation("TransferFrom")
   transfersTo   StockTransfer[] @relation("TransferTo")
   warehouseZones WarehouseZone[]
@@ -2773,6 +2775,7 @@ model WorkOrder {
   productionIssues ProductionIssue[]
   productionEntries ProductionEntry[]
   productionQcs ProductionQc[]
+  fgReceipts FgReceipt[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -2891,4 +2894,38 @@ model ProductionQc {
   @@unique([companyId, qcNumber])
   @@index([companyId, workOrderId])
   @@map("production_qc")
+}
+
+// MODULE 59 — FINISHED GOODS RECEIPT
+// ============================================================
+model FgReceipt {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  receiptNumber String
+  workOrderId   String
+  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id])
+  warehouseId   String
+  warehouse     Warehouse @relation(fields: [warehouseId], references: [id])
+  itemCode      String
+  itemName      String
+  uom           String    @default("PCS")
+  plannedQty    Float     @default(0)
+  receivedQty   Float     @default(0)
+  rejectedQty   Float     @default(0)
+  batchNumber   String?
+  unitCost      Float     @default(0)
+  totalCost     Float     @default(0)
+  status        String    @default("DRAFT") // DRAFT, RECEIVED
+  remarks       String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@unique([companyId, receiptNumber])
+  @@index([companyId, workOrderId])
+  @@map("fg_receipts")
 }

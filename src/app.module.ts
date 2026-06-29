@@ -63,6 +63,7 @@ import { MrpModule } from './mrp/mrp.module';
 import { ProductionIssueModule } from './production-issues/production-issue.module';
 import { ProductionEntryModule } from './production-entries/production-entry.module';
 import { ProductionQcModule } from './production-qc/production-qc.module';
+import { FgReceiptModule } from './fg-receipts/fg-receipt.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -120,6 +121,7 @@ import configuration from './config/configuration';
     ProductionIssueModule,
     ProductionEntryModule,
     ProductionQcModule,
+    FgReceiptModule,
   ],
 })
 export class AppModule implements NestModule {
