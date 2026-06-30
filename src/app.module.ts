@@ -66,6 +66,7 @@ import { ProductionQcModule } from './production-qc/production-qc.module';
 import { FgReceiptModule } from './fg-receipts/fg-receipt.module';
 import { CostSheetModule } from './production-cost-sheets/cost-sheet.module';
 import { ProductionDashboardModule } from './production-dashboard/production-dashboard.module';
+import { ProductionReportsModule } from './production-reports/production-reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -126,6 +127,7 @@ import configuration from './config/configuration';
     FgReceiptModule,
     CostSheetModule,
     ProductionDashboardModule,
+    ProductionReportsModule,
   ],
 })
 export class AppModule implements NestModule {
