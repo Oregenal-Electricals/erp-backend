@@ -67,6 +67,8 @@ import { FgReceiptModule } from './fg-receipts/fg-receipt.module';
 import { CostSheetModule } from './production-cost-sheets/cost-sheet.module';
 import { ProductionDashboardModule } from './production-dashboard/production-dashboard.module';
 import { ProductionReportsModule } from './production-reports/production-reports.module';
+import { NcrModule } from './ncr/ncr.module';
+import { CapaModule } from './capa/capa.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -128,6 +130,8 @@ import configuration from './config/configuration';
     CostSheetModule,
     ProductionDashboardModule,
     ProductionReportsModule,
+    NcrModule,
+    CapaModule,
   ],
 })
 export class AppModule implements NestModule {

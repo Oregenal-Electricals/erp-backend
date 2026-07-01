@@ -266,6 +266,8 @@ model Company {
   productionQcs      ProductionQc[]
   fgReceipts         FgReceipt[]
   costSheets         ProductionCostSheet[]
+  ncrRecords         NcrRecord[]
+  capaRecords        CapaRecord[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -2778,6 +2780,7 @@ model WorkOrder {
   productionQcs ProductionQc[]
   fgReceipts FgReceipt[]
   costSheet ProductionCostSheet?
+  ncrRecords NcrRecord[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -2972,4 +2975,73 @@ model ProductionCostSheet {
 
   @@unique([companyId, costSheetNumber])
   @@map("production_cost_sheets")
+}
+
+// PHASE 8 — QUALITY MANAGEMENT SYSTEM
+// MODULE 63 — NCR & CAPA MANAGEMENT
+// ============================================================
+model NcrRecord {
+  id                    String    @id @default(uuid())
+  companyId             String
+  company               Company   @relation(fields: [companyId], references: [id])
+  ncrNumber             String
+  source                String    @default("INTERNAL") // IQC, IPQC, OQC, CUSTOMER_COMPLAINT, INTERNAL_AUDIT, SUPPLIER
+  sourceReferenceId     String?
+  sourceReferenceNumber String?
+  itemCode              String?
+  itemName              String?
+  workOrderId           String?
+  workOrder             WorkOrder? @relation(fields: [workOrderId], references: [id])
+  description           String
+  severity              String    @default("MINOR") // MINOR, MAJOR, CRITICAL
+  qtyAffected           Float     @default(0)
+  detectedBy            String?
+  detectedDate          DateTime  @default(now())
+  disposition           String?   // USE_AS_IS, REWORK, SCRAP, RETURN_TO_VENDOR
+  status                String    @default("OPEN") // OPEN, ROOT_CAUSE_PENDING, CAPA_PENDING, VERIFICATION_PENDING, CLOSED
+  closedDate            DateTime?
+  closedBy              String?
+  remarks               String?
+  isActive              Boolean   @default(true)
+  isTestData            Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  capaRecords           CapaRecord[]
+
+  @@unique([companyId, ncrNumber])
+  @@index([companyId, status])
+  @@map("ncr_records")
+}
+
+model CapaRecord {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  capaNumber          String
+  ncrId               String
+  ncr                 NcrRecord @relation(fields: [ncrId], references: [id])
+  rootCause           String?
+  correctiveAction    String
+  preventiveAction    String?
+  assignedTo          String?
+  dueDate             DateTime
+  completedDate       DateTime?
+  effectivenessCheck  String?
+  verifiedBy          String?
+  verifiedDate        DateTime?
+  status              String    @default("ASSIGNED") // ASSIGNED, IN_PROGRESS, COMPLETED, VERIFIED
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, capaNumber])
+  @@index([companyId, status])
+  @@map("capa_records")
 }
