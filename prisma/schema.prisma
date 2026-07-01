@@ -271,6 +271,7 @@ model Company {
   rcaRecords         RcaRecord[]
   oqcInspections     OqcInspection[]
   supplierQualityRatings SupplierQualityRating[]
+  customerComplaints CustomerComplaint[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3208,4 +3209,46 @@ model SupplierCar {
 
   @@unique([companyId, carNumber])
   @@map("supplier_cars")
+}
+
+// MODULE 67 — CUSTOMER COMPLAINTS
+// ============================================================
+model CustomerComplaint {
+  id               String    @id @default(uuid())
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id])
+  complaintNumber  String
+  customerId       String?
+  customerName     String
+  customerPo       String?
+  invoiceNumber    String?
+  itemCode         String
+  itemName         String
+  batchNumber      String?
+  complaintDate    DateTime  @default(now())
+  receivedDate     DateTime  @default(now())
+  complaintType    String    @default("FUNCTIONAL") // FUNCTIONAL, VISUAL, WRONG_ITEM, DAMAGED, DOCUMENTATION, PERFORMANCE
+  description      String
+  qtyAffected      Float     @default(0)
+  customerRequest  String?   // REPLACEMENT, CREDIT_NOTE, REPAIR, NONE
+  severity         String    @default("MAJOR") // MINOR, MAJOR, CRITICAL
+  assignedTo       String?
+  eighthDNumber    String?
+  rootCause        String?
+  correctiveAction String?
+  responseDate     DateTime?
+  closedDate       DateTime?
+  closedBy         String?
+  status           String    @default("OPEN") // OPEN, INVESTIGATING, RESPONDED, CLOSED
+  remarks          String?
+  isActive         Boolean   @default(true)
+  isTestData       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  @@unique([companyId, complaintNumber])
+  @@index([companyId, status])
+  @@map("customer_complaints")
 }
