@@ -270,6 +270,8 @@ model Company {
   capaRecords        CapaRecord[]
   rcaRecords         RcaRecord[]
   oqcInspections     OqcInspection[]
+  supplierQualityRatings SupplierQualityRating[]
+  supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -1127,6 +1129,8 @@ model Vendor {
   purchaseOrders  PurchaseOrder[]
 
   @@unique([companyId, code])
+  qualityRatings SupplierQualityRating[]
+  supplierCars   SupplierCar[] @relation("SupplierCarVendor")
   @@map("vendors")
 }
 
@@ -3015,6 +3019,7 @@ model NcrRecord {
 
   capaRecords           CapaRecord[]
   rcaRecords RcaRecord[]
+  supplierCars SupplierCar[]
 
   @@unique([companyId, ncrNumber])
   @@index([companyId, status])
@@ -3140,4 +3145,67 @@ model OqcInspection {
   @@unique([companyId, oqcNumber])
   @@index([companyId, status])
   @@map("oqc_inspections")
+}
+
+// MODULE 66 — SUPPLIER QUALITY MANAGEMENT
+// ============================================================
+model SupplierQualityRating {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  vendorId        String
+  vendor          Vendor    @relation(fields: [vendorId], references: [id])
+  period          String    // e.g. "2026-Q1" or "2026-06"
+  periodType      String    @default("MONTHLY") // MONTHLY, QUARTERLY
+  totalReceived   Float     @default(0)
+  totalRejected   Float     @default(0)
+  defectRate      Float     @default(0)
+  ncrCount        Int       @default(0)
+  carCount        Int       @default(0)
+  onTimeDelivery  Float     @default(100)
+  qualityScore    Float     @default(100)
+  rating          String    @default("A") // A, B, C, D
+  avlStatus       String    @default("APPROVED") // APPROVED, PROBATION, BLACKLISTED
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, vendorId, period])
+  @@map("supplier_quality_ratings")
+}
+
+model SupplierCar {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  carNumber           String
+  vendorId            String
+  vendor              Vendor    @relation("SupplierCarVendor", fields: [vendorId], references: [id])
+  ncrId               String?
+  ncr                 NcrRecord? @relation(fields: [ncrId], references: [id])
+  description         String
+  severity            String    @default("MAJOR") // MINOR, MAJOR, CRITICAL
+  dueDate             DateTime
+  supplierResponse    String?
+  supplierRootCause   String?
+  supplierAction      String?
+  respondedDate       DateTime?
+  verifiedBy          String?
+  verifiedDate        DateTime?
+  closedDate          DateTime?
+  status              String    @default("SENT") // SENT, RESPONDED, VERIFIED, CLOSED
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, carNumber])
+  @@map("supplier_cars")
 }

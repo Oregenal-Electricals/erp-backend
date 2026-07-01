@@ -71,6 +71,7 @@ import { NcrModule } from './ncr/ncr.module';
 import { CapaModule } from './capa/capa.module';
 import { RcaModule } from './rca/rca.module';
 import { OqcModule } from './oqc/oqc.module';
+import { SupplierQualityModule } from './supplier-quality/supplier-quality.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -136,6 +137,7 @@ import configuration from './config/configuration';
     CapaModule,
     RcaModule,
     OqcModule,
+    SupplierQualityModule,
   ],
 })
 export class AppModule implements NestModule {
