@@ -1,0 +1,247 @@
+import { OqcService } from './oqc.service';
+import { CreateOqcDto, CompleteOqcDto } from './dto/oqc.dto';
+export declare class OqcController {
+    private readonly oqcService;
+    constructor(oqcService: OqcService);
+    getStats(req: any): Promise<{
+        total: number;
+        pending: number;
+        completed: number;
+        released: number;
+        pass: number;
+        fail: number;
+        conditional: number;
+        passRate: number;
+        totalSampled: number;
+    }>;
+    findAll(req: any, query: any): Promise<{
+        data: ({
+            workOrder: {
+                productName: string;
+                woNumber: string;
+            };
+            fgReceipt: {
+                receivedQty: number;
+                receiptNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            result: string;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            customerName: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            inspectionDate: Date;
+            lotNumber: string | null;
+            batchNumber: string | null;
+            workOrderId: string | null;
+            inspectorName: string | null;
+            sampleSize: number;
+            passQty: number;
+            failQty: number;
+            fgReceiptId: string | null;
+            visualCheck: string | null;
+            dimensionalCheck: string | null;
+            functionalCheck: string | null;
+            packagingCheck: string | null;
+            labellingCheck: string | null;
+            defectsFound: string | null;
+            cocNumber: string | null;
+            oqcNumber: string;
+            releasedBy: string | null;
+            releasedDate: Date | null;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, req: any): Promise<{
+        workOrder: {
+            productName: string;
+            woNumber: string;
+        };
+        fgReceipt: {
+            receivedQty: number;
+            receiptNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        result: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        customerName: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        inspectionDate: Date;
+        lotNumber: string | null;
+        batchNumber: string | null;
+        workOrderId: string | null;
+        inspectorName: string | null;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
+        fgReceiptId: string | null;
+        visualCheck: string | null;
+        dimensionalCheck: string | null;
+        functionalCheck: string | null;
+        packagingCheck: string | null;
+        labellingCheck: string | null;
+        defectsFound: string | null;
+        cocNumber: string | null;
+        oqcNumber: string;
+        releasedBy: string | null;
+        releasedDate: Date | null;
+    }>;
+    create(dto: CreateOqcDto, req: any): Promise<{
+        passRate: number;
+        workOrder: {
+            productName: string;
+            woNumber: string;
+        };
+        fgReceipt: {
+            receivedQty: number;
+            receiptNumber: string;
+        };
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        result: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        customerName: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        inspectionDate: Date;
+        lotNumber: string | null;
+        batchNumber: string | null;
+        workOrderId: string | null;
+        inspectorName: string | null;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
+        fgReceiptId: string | null;
+        visualCheck: string | null;
+        dimensionalCheck: string | null;
+        functionalCheck: string | null;
+        packagingCheck: string | null;
+        labellingCheck: string | null;
+        defectsFound: string | null;
+        cocNumber: string | null;
+        oqcNumber: string;
+        releasedBy: string | null;
+        releasedDate: Date | null;
+    }>;
+    complete(id: string, dto: CompleteOqcDto, req: any): Promise<{
+        workOrder: {
+            productName: string;
+            woNumber: string;
+        };
+        fgReceipt: {
+            receivedQty: number;
+            receiptNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        result: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        customerName: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        inspectionDate: Date;
+        lotNumber: string | null;
+        batchNumber: string | null;
+        workOrderId: string | null;
+        inspectorName: string | null;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
+        fgReceiptId: string | null;
+        visualCheck: string | null;
+        dimensionalCheck: string | null;
+        functionalCheck: string | null;
+        packagingCheck: string | null;
+        labellingCheck: string | null;
+        defectsFound: string | null;
+        cocNumber: string | null;
+        oqcNumber: string;
+        releasedBy: string | null;
+        releasedDate: Date | null;
+    }>;
+    release(id: string, req: any): Promise<{
+        workOrder: {
+            productName: string;
+            woNumber: string;
+        };
+        fgReceipt: {
+            receivedQty: number;
+            receiptNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        result: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        customerName: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        inspectionDate: Date;
+        lotNumber: string | null;
+        batchNumber: string | null;
+        workOrderId: string | null;
+        inspectorName: string | null;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
+        fgReceiptId: string | null;
+        visualCheck: string | null;
+        dimensionalCheck: string | null;
+        functionalCheck: string | null;
+        packagingCheck: string | null;
+        labellingCheck: string | null;
+        defectsFound: string | null;
+        cocNumber: string | null;
+        oqcNumber: string;
+        releasedBy: string | null;
+        releasedDate: Date | null;
+    }>;
+}

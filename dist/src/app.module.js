@@ -82,6 +82,7 @@ const production_reports_module_1 = require("./production-reports/production-rep
 const ncr_module_1 = require("./ncr/ncr.module");
 const capa_module_1 = require("./capa/capa.module");
 const rca_module_1 = require("./rca/rca.module");
+const oqc_module_1 = require("./oqc/oqc.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -152,6 +153,7 @@ exports.AppModule = AppModule = __decorate([
             ncr_module_1.NcrModule,
             capa_module_1.CapaModule,
             rca_module_1.RcaModule,
+            oqc_module_1.OqcModule,
         ],
     })
 ], AppModule);

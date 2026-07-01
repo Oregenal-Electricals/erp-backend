@@ -269,6 +269,7 @@ model Company {
   ncrRecords         NcrRecord[]
   capaRecords        CapaRecord[]
   rcaRecords         RcaRecord[]
+  oqcInspections     OqcInspection[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -2782,6 +2783,7 @@ model WorkOrder {
   fgReceipts FgReceipt[]
   costSheet ProductionCostSheet?
   ncrRecords NcrRecord[]
+  oqcInspections OqcInspection[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -2931,6 +2933,7 @@ model FgReceipt {
   createdBy     String?
   updatedBy     String?
 
+  oqcInspections OqcInspection[]
   @@unique([companyId, receiptNumber])
   @@index([companyId, workOrderId])
   @@map("fg_receipts")
@@ -3089,4 +3092,52 @@ model RcaRecord {
   @@unique([companyId, rcaNumber])
   @@index([companyId, ncrId])
   @@map("rca_records")
+}
+
+// MODULE 65 — OUTGOING QUALITY CONTROL (OQC)
+// ============================================================
+model OqcInspection {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  oqcNumber       String
+  fgReceiptId     String?
+  fgReceipt       FgReceipt? @relation(fields: [fgReceiptId], references: [id])
+  workOrderId     String?
+  workOrder       WorkOrder? @relation(fields: [workOrderId], references: [id])
+  itemCode        String
+  itemName        String
+  uom             String    @default("PCS")
+  customerName    String?
+  lotNumber       String?
+  batchNumber     String?
+  inspectionDate  DateTime  @default(now())
+  inspectorName   String?
+  sampleSize      Int       @default(0)
+  passQty         Int       @default(0)
+  failQty         Int       @default(0)
+  // Inspection parameters
+  visualCheck     String?   // PASS/FAIL/NA
+  dimensionalCheck String?  // PASS/FAIL/NA
+  functionalCheck String?   // PASS/FAIL/NA
+  packagingCheck  String?   // PASS/FAIL/NA
+  labellingCheck  String?   // PASS/FAIL/NA
+  // Result
+  result          String    @default("PENDING") // PASS, FAIL, CONDITIONAL, PENDING
+  defectsFound    String?
+  cocNumber       String?
+  status          String    @default("PENDING") // PENDING, COMPLETED, RELEASED
+  releasedBy      String?
+  releasedDate    DateTime?
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, oqcNumber])
+  @@index([companyId, status])
+  @@map("oqc_inspections")
 }
