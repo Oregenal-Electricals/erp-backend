@@ -85,6 +85,7 @@ const rca_module_1 = require("./rca/rca.module");
 const oqc_module_1 = require("./oqc/oqc.module");
 const supplier_quality_module_1 = require("./supplier-quality/supplier-quality.module");
 const complaint_module_1 = require("./customer-complaints/complaint.module");
+const quality_dashboard_module_1 = require("./quality-dashboard/quality-dashboard.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -158,6 +159,7 @@ exports.AppModule = AppModule = __decorate([
             oqc_module_1.OqcModule,
             supplier_quality_module_1.SupplierQualityModule,
             complaint_module_1.ComplaintModule,
+            quality_dashboard_module_1.QualityDashboardModule,
         ],
     })
 ], AppModule);

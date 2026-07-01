@@ -73,6 +73,7 @@ import { RcaModule } from './rca/rca.module';
 import { OqcModule } from './oqc/oqc.module';
 import { SupplierQualityModule } from './supplier-quality/supplier-quality.module';
 import { ComplaintModule } from './customer-complaints/complaint.module';
+import { QualityDashboardModule } from './quality-dashboard/quality-dashboard.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -140,6 +141,7 @@ import configuration from './config/configuration';
     OqcModule,
     SupplierQualityModule,
     ComplaintModule,
+    QualityDashboardModule,
   ],
 })
 export class AppModule implements NestModule {
