@@ -272,6 +272,7 @@ model Company {
   oqcInspections     OqcInspection[]
   supplierQualityRatings SupplierQualityRating[]
   customerComplaints CustomerComplaint[]
+  leads              Lead[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3251,4 +3252,39 @@ model CustomerComplaint {
   @@unique([companyId, complaintNumber])
   @@index([companyId, status])
   @@map("customer_complaints")
+}
+
+// PHASE 12 — SALES & DISPATCH
+// MODULE 95 — LEAD MANAGEMENT
+// ============================================================
+model Lead {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  leadNumber          String
+  companyName         String
+  contactPerson       String
+  phone               String?
+  email               String?
+  source              String    @default("COLD_CALL") // REFERRAL, COLD_CALL, EXHIBITION, WEBSITE, EXISTING_CUSTOMER, OTHER
+  productInterest     String?
+  estimatedValue      Float?
+  currency            String    @default("INR")
+  followUpDate        DateTime?
+  followUpNotes       String?
+  assignedTo          String?
+  lostReason          String?
+  convertedToQuoteId  String?
+  status              String    @default("NEW") // NEW, CONTACTED, QUALIFIED, CONVERTED, LOST
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, leadNumber])
+  @@index([companyId, status])
+  @@map("leads")
 }

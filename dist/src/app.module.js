@@ -87,6 +87,7 @@ const supplier_quality_module_1 = require("./supplier-quality/supplier-quality.m
 const complaint_module_1 = require("./customer-complaints/complaint.module");
 const quality_dashboard_module_1 = require("./quality-dashboard/quality-dashboard.module");
 const quality_reports_module_1 = require("./quality-reports/quality-reports.module");
+const leads_module_1 = require("./leads/leads.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -162,6 +163,7 @@ exports.AppModule = AppModule = __decorate([
             complaint_module_1.ComplaintModule,
             quality_dashboard_module_1.QualityDashboardModule,
             quality_reports_module_1.QualityReportsModule,
+            leads_module_1.LeadsModule,
         ],
     })
 ], AppModule);
