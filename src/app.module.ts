@@ -69,6 +69,7 @@ import { ProductionDashboardModule } from './production-dashboard/production-das
 import { ProductionReportsModule } from './production-reports/production-reports.module';
 import { NcrModule } from './ncr/ncr.module';
 import { CapaModule } from './capa/capa.module';
+import { RcaModule } from './rca/rca.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -132,6 +133,7 @@ import configuration from './config/configuration';
     ProductionReportsModule,
     NcrModule,
     CapaModule,
+    RcaModule,
   ],
 })
 export class AppModule implements NestModule {

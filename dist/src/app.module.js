@@ -81,6 +81,7 @@ const production_dashboard_module_1 = require("./production-dashboard/production
 const production_reports_module_1 = require("./production-reports/production-reports.module");
 const ncr_module_1 = require("./ncr/ncr.module");
 const capa_module_1 = require("./capa/capa.module");
+const rca_module_1 = require("./rca/rca.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -150,6 +151,7 @@ exports.AppModule = AppModule = __decorate([
             production_reports_module_1.ProductionReportsModule,
             ncr_module_1.NcrModule,
             capa_module_1.CapaModule,
+            rca_module_1.RcaModule,
         ],
     })
 ], AppModule);

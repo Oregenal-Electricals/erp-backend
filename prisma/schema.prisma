@@ -268,6 +268,7 @@ model Company {
   costSheets         ProductionCostSheet[]
   ncrRecords         NcrRecord[]
   capaRecords        CapaRecord[]
+  rcaRecords         RcaRecord[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
@@ -3010,6 +3011,7 @@ model NcrRecord {
   updatedBy             String?
 
   capaRecords           CapaRecord[]
+  rcaRecords RcaRecord[]
 
   @@unique([companyId, ncrNumber])
   @@index([companyId, status])
@@ -3044,4 +3046,47 @@ model CapaRecord {
   @@unique([companyId, capaNumber])
   @@index([companyId, status])
   @@map("capa_records")
+}
+
+// MODULE 64 — ROOT CAUSE ANALYSIS
+// ============================================================
+model RcaRecord {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  rcaNumber     String
+  ncrId         String
+  ncr           NcrRecord @relation(fields: [ncrId], references: [id])
+  method        String    @default("FIVE_WHY") // FIVE_WHY, FISHBONE, BOTH
+  problem       String
+  // 5-Why fields
+  why1          String?
+  why2          String?
+  why3          String?
+  why4          String?
+  why5          String?
+  rootCause     String?
+  // Fishbone fields (stored as JSON)
+  fishboneMan         String?
+  fishboneMachine     String?
+  fishboneMaterial    String?
+  fishboneMethod      String?
+  fishboneEnvironment String?
+  fishboneMeasurement String?
+  // Conclusion
+  conclusion    String?
+  conductedBy   String?
+  conductedDate DateTime  @default(now())
+  status        String    @default("DRAFT") // DRAFT, COMPLETED
+  remarks       String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@unique([companyId, rcaNumber])
+  @@index([companyId, ncrId])
+  @@map("rca_records")
 }
