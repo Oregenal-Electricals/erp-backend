@@ -276,6 +276,7 @@ model Company {
   quotations         Quotation[]
   customerPos        CustomerPo[]
   salesOrders        SalesOrder[]
+  dispatchPlans      DispatchPlan[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3464,6 +3465,7 @@ model SalesOrder {
 
   @@unique([companyId, soNumber])
   @@index([companyId, status])
+  dispatchPlans DispatchPlan[]
   @@map("sales_orders")
 }
 
@@ -3492,5 +3494,62 @@ model SalesOrderItem {
   createdBy     String?
   updatedBy     String?
 
+  dispatchPlanItems DispatchPlanItem[]
   @@map("sales_order_items")
+}
+
+// MODULE 100 — DISPATCH PLANNING
+// ============================================================
+model DispatchPlan {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  planNumber        String
+  soId              String
+  salesOrder        SalesOrder @relation(fields: [soId], references: [id])
+  customerName      String
+  deliveryAddress   String?
+  plannedDate       DateTime
+  transportMode     String    @default("ROAD") // ROAD, RAIL, AIR, COURIER
+  transporterName   String?
+  vehicleNumber     String?
+  driverName        String?
+  driverPhone       String?
+  status            String    @default("DRAFT") // DRAFT, APPROVED, DISPATCHED, CANCELLED
+  approvedBy        String?
+  approvedDate      DateTime?
+  cancelReason      String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  items             DispatchPlanItem[]
+
+  @@unique([companyId, planNumber])
+  @@index([companyId, status])
+  @@map("dispatch_plans")
+}
+
+model DispatchPlanItem {
+  id            String       @id @default(uuid())
+  planId        String
+  plan          DispatchPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  soItemId      String
+  soItem        SalesOrderItem @relation(fields: [soItemId], references: [id])
+  itemCode      String
+  itemName      String
+  plannedQty    Float        @default(0)
+  uom           String       @default("PCS")
+  isActive      Boolean      @default(true)
+  isTestData    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("dispatch_plan_items")
 }

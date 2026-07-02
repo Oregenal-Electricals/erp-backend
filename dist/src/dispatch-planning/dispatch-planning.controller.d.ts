@@ -1,0 +1,270 @@
+import { DispatchPlanningService } from './dispatch-planning.service';
+import { CreateDispatchPlanDto, CancelPlanDto } from './dto/dispatch-plan.dto';
+export declare class DispatchPlanningController {
+    private readonly dpService;
+    constructor(dpService: DispatchPlanningService);
+    getStats(req: any): Promise<{
+        total: number;
+        draft: number;
+        approved: number;
+        dispatched: number;
+        cancelled: number;
+        overdue: number;
+    }>;
+    getPendingSoItems(soId: string, req: any): Promise<{
+        soNumber: string;
+        customerName: string;
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            description: string | null;
+            itemCode: string;
+            itemName: string;
+            gstRate: number;
+            uom: string;
+            totalAmount: number;
+            unitPrice: number;
+            discount: number;
+            pendingQty: number;
+            qty: number;
+            taxableAmt: number;
+            gstAmount: number;
+            cpoItemId: string | null;
+            dispatchedQty: number;
+            soId: string;
+        }[];
+    }>;
+    findAll(req: any, query: any): Promise<{
+        data: ({
+            items: {
+                id: string;
+                itemCode: string;
+                plannedQty: number;
+            }[];
+            salesOrder: {
+                customerName: string;
+                soNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            vehicleNumber: string | null;
+            remarks: string | null;
+            driverName: string | null;
+            customerName: string;
+            cancelReason: string | null;
+            approvedBy: string | null;
+            deliveryAddress: string | null;
+            soId: string;
+            plannedDate: Date;
+            transportMode: string;
+            transporterName: string | null;
+            driverPhone: string | null;
+            planNumber: string;
+            approvedDate: Date | null;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, req: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        cancelReason: string | null;
+        approvedBy: string | null;
+        deliveryAddress: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    create(dto: CreateDispatchPlanDto, req: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        cancelReason: string | null;
+        approvedBy: string | null;
+        deliveryAddress: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    approve(id: string, req: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        cancelReason: string | null;
+        approvedBy: string | null;
+        deliveryAddress: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    cancel(id: string, dto: CancelPlanDto, req: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        cancelReason: string | null;
+        approvedBy: string | null;
+        deliveryAddress: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+}
