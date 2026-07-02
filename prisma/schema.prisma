@@ -281,6 +281,8 @@ model Company {
   deliveryConfirmations DeliveryConfirmation[]
   accounts           Account[]
   vouchers           Voucher[]
+  arInvoices         ArInvoice[]
+  arPayments         ArPayment[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3471,6 +3473,7 @@ model SalesOrder {
   @@index([companyId, status])
   dispatchPlans DispatchPlan[]
   dispatches Dispatch[]
+  arInvoices ArInvoice[]
   @@map("sales_orders")
 }
 
@@ -3595,6 +3598,7 @@ model Dispatch {
   @@unique([companyId, dispatchNumber])
   @@index([companyId, status])
   deliveryConfirmation DeliveryConfirmation?
+  arInvoices ArInvoice[]
   @@map("dispatches")
 }
 
@@ -3738,4 +3742,67 @@ model VoucherEntry {
   @@index([voucherId])
   @@index([accountId])
   @@map("voucher_entries")
+}
+
+// MODULE 105 — ACCOUNTS RECEIVABLE
+// ============================================================
+model ArInvoice {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  invoiceNumber     String
+  dispatchId        String?
+  dispatch          Dispatch? @relation(fields: [dispatchId], references: [id])
+  soId              String?
+  salesOrder        SalesOrder? @relation(fields: [soId], references: [id])
+  customerName      String
+  customerAddress   String?
+  invoiceDate       DateTime  @default(now())
+  dueDate           DateTime
+  paymentTerms      String    @default("NET_30") // NET_30, NET_45, NET_60, IMMEDIATE
+  subtotal          Float     @default(0)
+  totalGst          Float     @default(0)
+  totalAmount       Float     @default(0)
+  paidAmount        Float     @default(0)
+  outstandingAmount Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, SENT, PARTIAL, PAID, OVERDUE, CANCELLED
+  voucherId         String?
+  notes             String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  payments          ArPayment[]
+
+  @@unique([companyId, invoiceNumber])
+  @@index([companyId, status])
+  @@map("ar_invoices")
+}
+
+model ArPayment {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  paymentNumber   String
+  invoiceId       String
+  invoice         ArInvoice @relation(fields: [invoiceId], references: [id])
+  paymentDate     DateTime  @default(now())
+  amount          Float     @default(0)
+  paymentMode     String    @default("BANK_TRANSFER") // BANK_TRANSFER, CHEQUE, CASH, UPI, NEFT, RTGS
+  referenceNumber String?
+  bankAccountId   String?
+  voucherId       String?
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, paymentNumber])
+  @@map("ar_payments")
 }
