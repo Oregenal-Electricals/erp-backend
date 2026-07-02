@@ -275,6 +275,7 @@ model Company {
   leads              Lead[]
   quotations         Quotation[]
   customerPos        CustomerPo[]
+  salesOrders        SalesOrder[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3400,6 +3401,7 @@ model CustomerPo {
 
   @@unique([companyId, cpoNumber])
   @@index([companyId, status])
+  salesOrders SalesOrder[]
   @@map("customer_pos")
 }
 
@@ -3428,4 +3430,67 @@ model CustomerPoItem {
   updatedBy     String?
 
   @@map("customer_po_items")
+}
+
+// MODULE 98 — SALES ORDER
+// ============================================================
+model SalesOrder {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  soNumber        String
+  cpoId           String
+  cpo             CustomerPo @relation(fields: [cpoId], references: [id])
+  customerName    String
+  deliveryDate    DateTime
+  currency        String    @default("INR")
+  subtotal        Float     @default(0)
+  totalGst        Float     @default(0)
+  totalAmount     Float     @default(0)
+  status          String    @default("DRAFT") // DRAFT, CONFIRMED, IN_PRODUCTION, DISPATCHED, COMPLETED, CANCELLED
+  confirmedDate   DateTime?
+  confirmedBy     String?
+  cancelledDate   DateTime?
+  cancelReason    String?
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  items           SalesOrderItem[]
+
+  @@unique([companyId, soNumber])
+  @@index([companyId, status])
+  @@map("sales_orders")
+}
+
+model SalesOrderItem {
+  id            String      @id @default(uuid())
+  soId          String
+  salesOrder    SalesOrder  @relation(fields: [soId], references: [id], onDelete: Cascade)
+  cpoItemId     String?
+  itemCode      String
+  itemName      String
+  description   String?
+  qty           Float       @default(1)
+  uom           String      @default("PCS")
+  unitPrice     Float       @default(0)
+  discount      Float       @default(0)
+  gstRate       Float       @default(18)
+  taxableAmt    Float       @default(0)
+  gstAmount     Float       @default(0)
+  totalAmount   Float       @default(0)
+  dispatchedQty Float       @default(0)
+  pendingQty    Float       @default(0)
+  isActive      Boolean     @default(true)
+  isTestData    Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("sales_order_items")
 }

@@ -90,6 +90,7 @@ const quality_reports_module_1 = require("./quality-reports/quality-reports.modu
 const leads_module_1 = require("./leads/leads.module");
 const quotations_module_1 = require("./quotations/quotations.module");
 const customer_po_module_1 = require("./customer-po/customer-po.module");
+const sales_orders_module_1 = require("./sales-orders/sales-orders.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -168,6 +169,7 @@ exports.AppModule = AppModule = __decorate([
             leads_module_1.LeadsModule,
             quotations_module_1.QuotationsModule,
             customer_po_module_1.CustomerPoModule,
+            sales_orders_module_1.SalesOrdersModule,
         ],
     })
 ], AppModule);

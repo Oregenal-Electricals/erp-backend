@@ -78,6 +78,7 @@ import { QualityReportsModule } from './quality-reports/quality-reports.module';
 import { LeadsModule } from './leads/leads.module';
 import { QuotationsModule } from './quotations/quotations.module';
 import { CustomerPoModule } from './customer-po/customer-po.module';
+import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -150,6 +151,7 @@ import configuration from './config/configuration';
     LeadsModule,
     QuotationsModule,
     CustomerPoModule,
+    SalesOrdersModule,
   ],
 })
 export class AppModule implements NestModule {
