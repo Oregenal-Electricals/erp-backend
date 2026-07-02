@@ -83,6 +83,7 @@ import { DispatchPlanningModule } from './dispatch-planning/dispatch-planning.mo
 import { DispatchModule } from './dispatch/dispatch.module';
 import { DeliveryConfirmationModule } from './delivery-confirmation/delivery-confirmation.module';
 import { AccountsModule } from './accounts/accounts.module';
+import { VouchersModule } from './vouchers/vouchers.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -160,6 +161,7 @@ import configuration from './config/configuration';
     DispatchModule,
     DeliveryConfirmationModule,
     AccountsModule,
+    VouchersModule,
   ],
 })
 export class AppModule implements NestModule {

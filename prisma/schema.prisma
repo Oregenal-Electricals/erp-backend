@@ -280,6 +280,7 @@ model Company {
   dispatches         Dispatch[]
   deliveryConfirmations DeliveryConfirmation[]
   accounts           Account[]
+  vouchers           Voucher[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3676,29 +3677,65 @@ model Account {
   createdBy       String?
   updatedBy       String?
 
-  debitEntries    VoucherEntry[] @relation("DebitAccount")
-  creditEntries   VoucherEntry[] @relation("CreditAccount")
+  voucherEntries  VoucherEntry[]
 
   @@unique([companyId, accountCode])
   @@index([companyId, accountType])
   @@map("accounts")
 }
 
-// VOUCHER ENTRY STUB — will be replaced in Module 104
+// MODULE 104 — VOUCHER ENGINE
+// ============================================================
+model Voucher {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  voucherNumber   String
+  voucherType     String    // SALES_INVOICE, RECEIPT, PURCHASE_BILL, PAYMENT, JOURNAL, CREDIT_NOTE, DEBIT_NOTE
+  voucherDate     DateTime  @default(now())
+  referenceId     String?
+  referenceType   String?
+  referenceNumber String?
+  partyName       String?
+  narration       String?
+  totalAmount     Float     @default(0)
+  status          String    @default("DRAFT") // DRAFT, POSTED, CANCELLED
+  postedDate      DateTime?
+  postedBy        String?
+  cancelledDate   DateTime?
+  cancelReason    String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  entries         VoucherEntry[]
+
+  @@unique([companyId, voucherNumber])
+  @@index([companyId, voucherType, status])
+  @@map("vouchers")
+}
+
 model VoucherEntry {
-  id            String  @id @default(uuid())
+  id            String    @id @default(uuid())
   companyId     String
-  debitAccountId  String
-  creditAccountId String
-  debitAccount  Account @relation("DebitAccount", fields: [debitAccountId], references: [id])
-  creditAccount Account @relation("CreditAccount", fields: [creditAccountId], references: [id])
-  amount        Float   @default(0)
-  isActive      Boolean @default(true)
-  isTestData    Boolean @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  voucherId     String
+  voucher       Voucher   @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  accountId     String
+  account       Account   @relation(fields: [accountId], references: [id])
+  entryType     String    // DEBIT, CREDIT
+  amount        Float     @default(0)
+  narration     String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   createdBy     String?
   updatedBy     String?
 
+  @@index([voucherId])
+  @@index([accountId])
   @@map("voucher_entries")
 }
