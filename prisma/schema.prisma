@@ -279,6 +279,7 @@ model Company {
   dispatchPlans      DispatchPlan[]
   dispatches         Dispatch[]
   deliveryConfirmations DeliveryConfirmation[]
+  accounts           Account[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3647,4 +3648,57 @@ model DeliveryConfirmation {
 
   @@unique([companyId, dcNumber])
   @@map("delivery_confirmations")
+}
+
+// PHASE 13 — FINANCE & GST
+// MODULE 103 — CHART OF ACCOUNTS
+// ============================================================
+model Account {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  accountCode     String
+  accountName     String
+  accountType     String    // ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
+  accountSubType  String?   // BANK, CASH, DEBTOR, CREDITOR, GST, STOCK, FIXED_ASSET, REVENUE, COGS, OPEX
+  parentId        String?
+  parent          Account?  @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children        Account[] @relation("AccountHierarchy")
+  isSystemAccount Boolean   @default(false)
+  openingBalance  Float     @default(0)
+  currentBalance  Float     @default(0)
+  currency        String    @default("INR")
+  description     String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  debitEntries    VoucherEntry[] @relation("DebitAccount")
+  creditEntries   VoucherEntry[] @relation("CreditAccount")
+
+  @@unique([companyId, accountCode])
+  @@index([companyId, accountType])
+  @@map("accounts")
+}
+
+// VOUCHER ENTRY STUB — will be replaced in Module 104
+model VoucherEntry {
+  id            String  @id @default(uuid())
+  companyId     String
+  debitAccountId  String
+  creditAccountId String
+  debitAccount  Account @relation("DebitAccount", fields: [debitAccountId], references: [id])
+  creditAccount Account @relation("CreditAccount", fields: [creditAccountId], references: [id])
+  amount        Float   @default(0)
+  isActive      Boolean @default(true)
+  isTestData    Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("voucher_entries")
 }

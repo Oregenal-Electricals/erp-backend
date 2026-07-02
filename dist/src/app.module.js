@@ -94,6 +94,7 @@ const sales_orders_module_1 = require("./sales-orders/sales-orders.module");
 const dispatch_planning_module_1 = require("./dispatch-planning/dispatch-planning.module");
 const dispatch_module_1 = require("./dispatch/dispatch.module");
 const delivery_confirmation_module_1 = require("./delivery-confirmation/delivery-confirmation.module");
+const accounts_module_1 = require("./accounts/accounts.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -176,6 +177,7 @@ exports.AppModule = AppModule = __decorate([
             dispatch_planning_module_1.DispatchPlanningModule,
             dispatch_module_1.DispatchModule,
             delivery_confirmation_module_1.DeliveryConfirmationModule,
+            accounts_module_1.AccountsModule,
         ],
     })
 ], AppModule);
