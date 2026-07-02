@@ -81,6 +81,7 @@ import { CustomerPoModule } from './customer-po/customer-po.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 import { DispatchPlanningModule } from './dispatch-planning/dispatch-planning.module';
 import { DispatchModule } from './dispatch/dispatch.module';
+import { DeliveryConfirmationModule } from './delivery-confirmation/delivery-confirmation.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -156,6 +157,7 @@ import configuration from './config/configuration';
     SalesOrdersModule,
     DispatchPlanningModule,
     DispatchModule,
+    DeliveryConfirmationModule,
   ],
 })
 export class AppModule implements NestModule {

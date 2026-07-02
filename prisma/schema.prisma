@@ -278,6 +278,7 @@ model Company {
   salesOrders        SalesOrder[]
   dispatchPlans      DispatchPlan[]
   dispatches         Dispatch[]
+  deliveryConfirmations DeliveryConfirmation[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3591,6 +3592,7 @@ model Dispatch {
 
   @@unique([companyId, dispatchNumber])
   @@index([companyId, status])
+  deliveryConfirmation DeliveryConfirmation?
   @@map("dispatches")
 }
 
@@ -3617,4 +3619,32 @@ model DispatchItem {
   updatedBy     String?
 
   @@map("dispatch_items")
+}
+
+// MODULE 102 — DELIVERY CONFIRMATION
+// ============================================================
+model DeliveryConfirmation {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  dcNumber          String
+  dispatchId        String    @unique
+  dispatch          Dispatch  @relation(fields: [dispatchId], references: [id])
+  deliveryDate      DateTime  @default(now())
+  receiverName      String
+  receiverPhone     String?
+  podNumber         String?
+  condition         String    @default("GOOD") // GOOD, DAMAGED, PARTIAL
+  shortageQty       Float     @default(0)
+  damageNotes       String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, dcNumber])
+  @@map("delivery_confirmations")
 }
