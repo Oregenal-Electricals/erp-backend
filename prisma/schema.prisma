@@ -273,6 +273,7 @@ model Company {
   supplierQualityRatings SupplierQualityRating[]
   customerComplaints CustomerComplaint[]
   leads              Lead[]
+  quotations         Quotation[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3286,5 +3287,77 @@ model Lead {
 
   @@unique([companyId, leadNumber])
   @@index([companyId, status])
+  quotations Quotation[]
   @@map("leads")
+}
+
+// MODULE 96 — QUOTATION
+// ============================================================
+model Quotation {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  quotationNumber   String
+  revision          Int       @default(0)
+  leadId            String?
+  lead              Lead?     @relation(fields: [leadId], references: [id])
+  customerName      String
+  customerEmail     String?
+  customerPhone     String?
+  customerAddress   String?
+  validUntil        DateTime
+  currency          String    @default("INR")
+  subtotal          Float     @default(0)
+  discountAmount    Float     @default(0)
+  taxableAmount     Float     @default(0)
+  totalGst          Float     @default(0)
+  totalAmount       Float     @default(0)
+  termsConditions   String?
+  notes             String?
+  status            String    @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED
+  sentDate          DateTime?
+  acceptedDate      DateTime?
+  rejectedDate      DateTime?
+  rejectedReason    String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  items             QuotationItem[]
+
+  @@unique([companyId, quotationNumber, revision])
+  @@index([companyId, status])
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id            String    @id @default(uuid())
+  quotationId   String
+  quotation     Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  itemCode      String
+  itemName      String
+  description   String?
+  qty           Float     @default(1)
+  uom           String    @default("PCS")
+  unitPrice     Float     @default(0)
+  discount      Float     @default(0)
+  discountAmt   Float     @default(0)
+  taxableAmt    Float     @default(0)
+  gstRate       Float     @default(18)
+  cgst          Float     @default(0)
+  sgst          Float     @default(0)
+  igst          Float     @default(0)
+  gstAmount     Float     @default(0)
+  totalAmount   Float     @default(0)
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("quotation_items")
 }

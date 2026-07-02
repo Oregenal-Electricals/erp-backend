@@ -76,6 +76,7 @@ import { ComplaintModule } from './customer-complaints/complaint.module';
 import { QualityDashboardModule } from './quality-dashboard/quality-dashboard.module';
 import { QualityReportsModule } from './quality-reports/quality-reports.module';
 import { LeadsModule } from './leads/leads.module';
+import { QuotationsModule } from './quotations/quotations.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -146,6 +147,7 @@ import configuration from './config/configuration';
     QualityDashboardModule,
     QualityReportsModule,
     LeadsModule,
+    QuotationsModule,
   ],
 })
 export class AppModule implements NestModule {
