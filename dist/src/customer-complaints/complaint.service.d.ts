@@ -17,6 +17,7 @@ export declare class ComplaintService {
         companyId: string;
         description: string;
         status: string;
+        customerPo: string | null;
         remarks: string | null;
         customerName: string;
         invoiceNumber: string | null;
@@ -32,7 +33,6 @@ export declare class ComplaintService {
         rootCause: string | null;
         assignedTo: string | null;
         customerId: string | null;
-        customerPo: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
@@ -51,6 +51,7 @@ export declare class ComplaintService {
         companyId: string;
         description: string;
         status: string;
+        customerPo: string | null;
         remarks: string | null;
         customerName: string;
         invoiceNumber: string | null;
@@ -66,7 +67,6 @@ export declare class ComplaintService {
         rootCause: string | null;
         assignedTo: string | null;
         customerId: string | null;
-        customerPo: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
@@ -85,6 +85,7 @@ export declare class ComplaintService {
         companyId: string;
         description: string;
         status: string;
+        customerPo: string | null;
         remarks: string | null;
         customerName: string;
         invoiceNumber: string | null;
@@ -100,7 +101,6 @@ export declare class ComplaintService {
         rootCause: string | null;
         assignedTo: string | null;
         customerId: string | null;
-        customerPo: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
@@ -119,6 +119,7 @@ export declare class ComplaintService {
         companyId: string;
         description: string;
         status: string;
+        customerPo: string | null;
         remarks: string | null;
         customerName: string;
         invoiceNumber: string | null;
@@ -134,7 +135,6 @@ export declare class ComplaintService {
         rootCause: string | null;
         assignedTo: string | null;
         customerId: string | null;
-        customerPo: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
@@ -154,6 +154,7 @@ export declare class ComplaintService {
             companyId: string;
             description: string;
             status: string;
+            customerPo: string | null;
             remarks: string | null;
             customerName: string;
             invoiceNumber: string | null;
@@ -169,7 +170,6 @@ export declare class ComplaintService {
             rootCause: string | null;
             assignedTo: string | null;
             customerId: string | null;
-            customerPo: string | null;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;
@@ -192,6 +192,7 @@ export declare class ComplaintService {
         companyId: string;
         description: string;
         status: string;
+        customerPo: string | null;
         remarks: string | null;
         customerName: string;
         invoiceNumber: string | null;
@@ -207,7 +208,6 @@ export declare class ComplaintService {
         rootCause: string | null;
         assignedTo: string | null;
         customerId: string | null;
-        customerPo: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;

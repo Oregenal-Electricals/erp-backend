@@ -274,6 +274,7 @@ model Company {
   customerComplaints CustomerComplaint[]
   leads              Lead[]
   quotations         Quotation[]
+  customerPos        CustomerPo[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3330,6 +3331,7 @@ model Quotation {
 
   @@unique([companyId, quotationNumber, revision])
   @@index([companyId, status])
+  customerPos CustomerPo[]
   @@map("quotations")
 }
 
@@ -3360,4 +3362,70 @@ model QuotationItem {
   updatedBy     String?
 
   @@map("quotation_items")
+}
+
+// MODULE 97 — CUSTOMER PO
+// ============================================================
+model CustomerPo {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  cpoNumber         String
+  customerPoNumber  String
+  quotationId       String?
+  quotation         Quotation? @relation(fields: [quotationId], references: [id])
+  customerName      String
+  customerEmail     String?
+  customerPhone     String?
+  deliveryAddress   String?
+  poDate            DateTime  @default(now())
+  deliveryDate      DateTime
+  currency          String    @default("INR")
+  subtotal          Float     @default(0)
+  totalGst          Float     @default(0)
+  totalAmount       Float     @default(0)
+  status            String    @default("RECEIVED") // RECEIVED, ACKNOWLEDGED, IN_PROGRESS, COMPLETED, CANCELLED
+  acknowledgedDate  DateTime?
+  cancelledDate     DateTime?
+  cancelReason      String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  items             CustomerPoItem[]
+
+  @@unique([companyId, cpoNumber])
+  @@index([companyId, status])
+  @@map("customer_pos")
+}
+
+model CustomerPoItem {
+  id            String     @id @default(uuid())
+  cpoId         String
+  cpo           CustomerPo @relation(fields: [cpoId], references: [id], onDelete: Cascade)
+  itemCode      String
+  itemName      String
+  description   String?
+  qty           Float      @default(1)
+  uom           String     @default("PCS")
+  unitPrice     Float      @default(0)
+  discount      Float      @default(0)
+  gstRate       Float      @default(18)
+  gstAmount     Float      @default(0)
+  taxableAmt    Float      @default(0)
+  totalAmount   Float      @default(0)
+  deliveredQty  Float      @default(0)
+  pendingQty    Float      @default(0)
+  isActive      Boolean    @default(true)
+  isTestData    Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("customer_po_items")
 }
