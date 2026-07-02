@@ -277,6 +277,7 @@ model Company {
   customerPos        CustomerPo[]
   salesOrders        SalesOrder[]
   dispatchPlans      DispatchPlan[]
+  dispatches         Dispatch[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3466,6 +3467,7 @@ model SalesOrder {
   @@unique([companyId, soNumber])
   @@index([companyId, status])
   dispatchPlans DispatchPlan[]
+  dispatches Dispatch[]
   @@map("sales_orders")
 }
 
@@ -3495,6 +3497,7 @@ model SalesOrderItem {
   updatedBy     String?
 
   dispatchPlanItems DispatchPlanItem[]
+  dispatchItems DispatchItem[]
   @@map("sales_order_items")
 }
 
@@ -3531,6 +3534,7 @@ model DispatchPlan {
 
   @@unique([companyId, planNumber])
   @@index([companyId, status])
+  dispatches Dispatch[]
   @@map("dispatch_plans")
 }
 
@@ -3552,4 +3556,65 @@ model DispatchPlanItem {
   updatedBy     String?
 
   @@map("dispatch_plan_items")
+}
+
+// MODULE 101 — DISPATCH
+// ============================================================
+model Dispatch {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  dispatchNumber    String
+  planId            String
+  dispatchPlan      DispatchPlan @relation(fields: [planId], references: [id])
+  soId              String
+  salesOrder        SalesOrder @relation(fields: [soId], references: [id])
+  customerName      String
+  deliveryAddress   String?
+  dispatchDate      DateTime  @default(now())
+  vehicleNumber     String?
+  transporterName   String?
+  driverName        String?
+  driverPhone       String?
+  lrNumber          String?
+  ewayBillNumber    String?
+  status            String    @default("DISPATCHED") // DISPATCHED, DELIVERED, CANCELLED
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  items             DispatchItem[]
+
+  @@unique([companyId, dispatchNumber])
+  @@index([companyId, status])
+  @@map("dispatches")
+}
+
+model DispatchItem {
+  id            String    @id @default(uuid())
+  dispatchId    String
+  dispatch      Dispatch  @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  planItemId    String?
+  soItemId      String
+  soItem        SalesOrderItem @relation(fields: [soItemId], references: [id])
+  itemCode      String
+  itemName      String
+  dispatchedQty Float     @default(0)
+  uom           String    @default("PCS")
+  unitPrice     Float     @default(0)
+  gstRate       Float     @default(18)
+  gstAmount     Float     @default(0)
+  totalAmount   Float     @default(0)
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@map("dispatch_items")
 }
