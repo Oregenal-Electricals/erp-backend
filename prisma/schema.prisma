@@ -283,6 +283,8 @@ model Company {
   vouchers           Voucher[]
   arInvoices         ArInvoice[]
   arPayments         ArPayment[]
+  apBills            ApBill[]
+  apPayments         ApPayment[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -1142,6 +1144,7 @@ model Vendor {
 
   @@unique([companyId, code])
   qualityRatings SupplierQualityRating[]
+  apBills        ApBill[] @relation("ApBillVendor")
   supplierCars   SupplierCar[] @relation("SupplierCarVendor")
   @@map("vendors")
 }
@@ -1737,6 +1740,7 @@ model PurchaseOrder {
 
   grnHeaders    GrnHeader[]
   @@unique([companyId, poNumber])
+  apBills ApBill[]
   @@map("purchase_orders")
 }
 
@@ -3805,4 +3809,67 @@ model ArPayment {
 
   @@unique([companyId, paymentNumber])
   @@map("ar_payments")
+}
+
+// MODULE 106 — ACCOUNTS PAYABLE
+// ============================================================
+model ApBill {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  billNumber        String
+  vendorBillNumber  String
+  vendorId          String?
+  vendor            Vendor?   @relation("ApBillVendor", fields: [vendorId], references: [id])
+  vendorName        String
+  poId              String?
+  po                PurchaseOrder? @relation(fields: [poId], references: [id])
+  billDate          DateTime  @default(now())
+  dueDate           DateTime
+  paymentTerms      String    @default("NET_30")
+  subtotal          Float     @default(0)
+  totalGst          Float     @default(0)
+  totalAmount       Float     @default(0)
+  paidAmount        Float     @default(0)
+  outstandingAmount Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, APPROVED, PARTIAL, PAID, OVERDUE, CANCELLED
+  voucherId         String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  payments          ApPayment[]
+
+  @@unique([companyId, billNumber])
+  @@index([companyId, status])
+  @@map("ap_bills")
+}
+
+model ApPayment {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  paymentNumber   String
+  billId          String
+  bill            ApBill    @relation(fields: [billId], references: [id])
+  paymentDate     DateTime  @default(now())
+  amount          Float     @default(0)
+  paymentMode     String    @default("BANK_TRANSFER")
+  referenceNumber String?
+  bankAccountId   String?
+  voucherId       String?
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, paymentNumber])
+  @@map("ap_payments")
 }

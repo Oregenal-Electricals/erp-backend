@@ -85,6 +85,7 @@ import { DeliveryConfirmationModule } from './delivery-confirmation/delivery-con
 import { AccountsModule } from './accounts/accounts.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { ArModule } from './accounts-receivable/ar.module';
+import { ApModule } from './accounts-payable/ap.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -164,6 +165,7 @@ import configuration from './config/configuration';
     AccountsModule,
     VouchersModule,
     ArModule,
+    ApModule,
   ],
 })
 export class AppModule implements NestModule {
