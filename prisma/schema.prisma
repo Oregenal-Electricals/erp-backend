@@ -295,6 +295,7 @@ model Company {
   workflowDefinitions WorkflowDefinition[]
   approvalRequests   ApprovalRequest[]
   tasks              Task[]
+  documents          Document[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4262,4 +4263,41 @@ model TaskComment {
 
   @@index([taskId])
   @@map("task_comments")
+}
+
+// PHASE 15 — DOCUMENT CENTER
+// MODULE 114 — DOCUMENT MANAGEMENT
+// ============================================================
+model Document {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  documentNumber  String
+  title           String
+  category        String    @default("GENERAL") // PURCHASE, QUALITY, SALES, FINANCE, HR, PRODUCTION, GENERAL
+  fileType        String    @default("PDF") // PDF, IMAGE, EXCEL, WORD, OTHER
+  fileName        String
+  fileSize        Int       @default(0)
+  fileData        String    // base64 encoded
+  mimeType        String    @default("application/pdf")
+  version         Int       @default(1)
+  parentDocId     String?
+  parent          Document? @relation("DocumentVersions", fields: [parentDocId], references: [id])
+  versions        Document[] @relation("DocumentVersions")
+  referenceType   String?
+  referenceId     String?
+  referenceNumber String?
+  tags            String?
+  description     String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, documentNumber])
+  @@index([companyId, category])
+  @@index([companyId, referenceType, referenceId])
+  @@map("documents")
 }

@@ -94,6 +94,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { TasksModule } from './tasks/tasks.module';
+import { DocumentsModule } from './documents/documents.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -182,6 +183,7 @@ import configuration from './config/configuration';
     AlertsModule,
     WorkflowsModule,
     TasksModule,
+    DocumentsModule,
   ],
 })
 export class AppModule implements NestModule {
