@@ -97,6 +97,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { DocumentsModule } from './documents/documents.module';
 import { PdfEngineModule } from './pdf-engine/pdf-engine.module';
 import { ExcelExportModule } from './excel-export/excel-export.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -188,6 +189,7 @@ import configuration from './config/configuration';
     DocumentsModule,
     PdfEngineModule,
     ExcelExportModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule implements NestModule {
