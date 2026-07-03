@@ -287,6 +287,8 @@ model Company {
   apPayments         ApPayment[]
   gstReturns         GstReturn[]
   bankStatements     BankStatement[]
+  customerCreditLimits CustomerCreditLimit[]
+  creditHolds        CreditHold[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3968,4 +3970,57 @@ model BankStatementLine {
 
   @@index([statementId, isReconciled])
   @@map("bank_statement_lines")
+}
+
+// MODULE 99 — CREDIT CONTROL
+// ============================================================
+model CustomerCreditLimit {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  customerName  String
+  creditLimit   Float     @default(0)
+  creditDays    Int       @default(30)
+  notes         String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  creditHolds   CreditHold[]
+
+  @@unique([companyId, customerName])
+  @@index([companyId])
+  @@map("customer_credit_limits")
+}
+
+model CreditHold {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  customerName        String
+  creditLimitId       String?
+  creditLimit         CustomerCreditLimit? @relation(fields: [creditLimitId], references: [id])
+  referenceType       String    // CUSTOMER_PO, SALES_ORDER
+  referenceId         String
+  referenceNumber     String
+  holdReason          String
+  holdAmount          Float     @default(0)
+  outstandingAtHold   Float     @default(0)
+  creditLimitAtHold   Float     @default(0)
+  status              String    @default("HELD") // HELD, RELEASED, AUTO_RELEASED
+  releasedBy          String?
+  releaseReason       String?
+  releasedDate        DateTime?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@index([companyId, customerName, status])
+  @@map("credit_holds")
 }

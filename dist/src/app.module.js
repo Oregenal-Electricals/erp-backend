@@ -101,6 +101,7 @@ const ap_module_1 = require("./accounts-payable/ap.module");
 const gst_module_1 = require("./gst/gst.module");
 const bank_recon_module_1 = require("./bank-reconciliation/bank-recon.module");
 const financial_reports_module_1 = require("./financial-reports/financial-reports.module");
+const credit_control_module_1 = require("./credit-control/credit-control.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -190,6 +191,7 @@ exports.AppModule = AppModule = __decorate([
             gst_module_1.GstModule,
             bank_recon_module_1.BankReconModule,
             financial_reports_module_1.FinancialReportsModule,
+            credit_control_module_1.CreditControlModule,
         ],
     })
 ], AppModule);
