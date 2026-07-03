@@ -290,6 +290,8 @@ model Company {
   customerCreditLimits CustomerCreditLimit[]
   creditHolds        CreditHold[]
   notifications      Notification[]
+  alertTemplates     AlertTemplate[]
+  alertLogs          AlertLog[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4053,4 +4055,59 @@ model Notification {
   @@index([companyId, userId, isRead])
   @@index([companyId, userId, createdAt])
   @@map("notifications")
+}
+
+// MODULE 111 — EMAIL/SMS ALERTS
+// ============================================================
+model AlertTemplate {
+  id               String    @id @default(uuid())
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id])
+  eventType        String    // INVOICE_OVERDUE, DISPATCH_CREATED, PAYMENT_RECEIVED, CREDIT_HOLD, LOW_STOCK, PO_APPROVED, SO_CONFIRMED
+  channel          String    @default("EMAIL") // EMAIL, SMS, BOTH
+  subject          String
+  bodyTemplate     String
+  recipients       String    @default("INTERNAL") // CUSTOMER, INTERNAL, BOTH
+  recipientEmails  String?   // comma-separated for internal
+  isActive         Boolean   @default(true)
+  isTestData       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  logs             AlertLog[]
+
+  @@unique([companyId, eventType, channel])
+  @@index([companyId, eventType])
+  @@map("alert_templates")
+}
+
+model AlertLog {
+  id              String        @id @default(uuid())
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id])
+  templateId      String?
+  template        AlertTemplate? @relation(fields: [templateId], references: [id])
+  eventType       String
+  channel         String
+  recipient       String
+  subject         String?
+  body            String
+  status          String        @default("PENDING") // PENDING, SENT, FAILED
+  errorMessage    String?
+  sentAt          DateTime?
+  referenceType   String?
+  referenceId     String?
+  referenceNumber String?
+  isActive        Boolean       @default(true)
+  isTestData      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@index([companyId, status])
+  @@index([companyId, eventType])
+  @@map("alert_logs")
 }
