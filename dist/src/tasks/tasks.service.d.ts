@@ -1,0 +1,217 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, AddCommentDto } from './dto/task.dto';
+export declare class TasksService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    private generateNumber;
+    private includes;
+    create(dto: CreateTaskDto, user: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    update(id: string, dto: UpdateTaskDto, user: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    updateStatus(id: string, dto: UpdateTaskStatusDto, user: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    addComment(id: string, dto: AddCommentDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        comment: string;
+        commentBy: string;
+        taskId: string;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: ({
+            _count: {
+                comments: number;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string | null;
+            status: string;
+            category: string;
+            title: string;
+            priority: string;
+            dueDate: Date;
+            referenceType: string | null;
+            referenceId: string | null;
+            referenceNumber: string | null;
+            assignedTo: string;
+            completedDate: Date | null;
+            completionNote: string | null;
+            taskNumber: string;
+            assignedBy: string;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        open: number;
+        inProgress: number;
+        completed: number;
+        cancelled: number;
+        myOpen: number;
+        overdue: number;
+    }>;
+}

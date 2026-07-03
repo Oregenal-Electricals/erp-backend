@@ -1,0 +1,213 @@
+import { TasksService } from './tasks.service';
+import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, AddCommentDto } from './dto/task.dto';
+export declare class TasksController {
+    private readonly tasksService;
+    constructor(tasksService: TasksService);
+    getStats(req: any): Promise<{
+        total: number;
+        open: number;
+        inProgress: number;
+        completed: number;
+        cancelled: number;
+        myOpen: number;
+        overdue: number;
+    }>;
+    findAll(req: any, query: any): Promise<{
+        data: ({
+            _count: {
+                comments: number;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string | null;
+            status: string;
+            category: string;
+            title: string;
+            priority: string;
+            dueDate: Date;
+            referenceType: string | null;
+            referenceId: string | null;
+            referenceNumber: string | null;
+            assignedTo: string;
+            completedDate: Date | null;
+            completionNote: string | null;
+            taskNumber: string;
+            assignedBy: string;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, req: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    create(dto: CreateTaskDto, req: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    update(id: string, dto: UpdateTaskDto, req: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    updateStatus(id: string, dto: UpdateTaskStatusDto, req: any): Promise<{
+        comments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comment: string;
+            commentBy: string;
+            taskId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        status: string;
+        category: string;
+        title: string;
+        priority: string;
+        dueDate: Date;
+        referenceType: string | null;
+        referenceId: string | null;
+        referenceNumber: string | null;
+        assignedTo: string;
+        completedDate: Date | null;
+        completionNote: string | null;
+        taskNumber: string;
+        assignedBy: string;
+    }>;
+    addComment(id: string, dto: AddCommentDto, req: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        comment: string;
+        commentBy: string;
+        taskId: string;
+    }>;
+}
