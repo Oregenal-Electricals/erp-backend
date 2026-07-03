@@ -286,6 +286,7 @@ model Company {
   apBills            ApBill[]
   apPayments         ApPayment[]
   gstReturns         GstReturn[]
+  bankStatements     BankStatement[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3910,4 +3911,61 @@ model GstReturn {
   @@unique([companyId, returnType, period])
   @@index([companyId, period])
   @@map("gst_returns")
+}
+
+// MODULE 108 — BANK RECONCILIATION
+// ============================================================
+model BankStatement {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  bankAccountId     String
+  bankAccountName   String
+  period            String    // YYYY-MM
+  openingBalance    Float     @default(0)
+  closingBalance    Float     @default(0)
+  totalCredits      Float     @default(0)
+  totalDebits       Float     @default(0)
+  reconciledCount   Int       @default(0)
+  unreconciledCount Int       @default(0)
+  status            String    @default("DRAFT") // DRAFT, RECONCILED
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  lines             BankStatementLine[]
+
+  @@unique([companyId, bankAccountId, period])
+  @@index([companyId, period])
+  @@map("bank_statements")
+}
+
+model BankStatementLine {
+  id                String        @id @default(uuid())
+  companyId         String
+  statementId       String
+  statement         BankStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  transactionDate   DateTime
+  description       String
+  referenceNumber   String?
+  debitAmount       Float         @default(0)
+  creditAmount      Float         @default(0)
+  balance           Float         @default(0)
+  isReconciled      Boolean       @default(false)
+  voucherEntryId    String?
+  reconciledDate    DateTime?
+  reconciledBy      String?
+  isActive          Boolean       @default(true)
+  isTestData        Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@index([statementId, isReconciled])
+  @@map("bank_statement_lines")
 }
