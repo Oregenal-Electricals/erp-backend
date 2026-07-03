@@ -92,6 +92,7 @@ import { FinancialReportsModule } from './financial-reports/financial-reports.mo
 import { CreditControlModule } from './credit-control/credit-control.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { WorkflowsModule } from './workflows/workflows.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -178,6 +179,7 @@ import configuration from './config/configuration';
     CreditControlModule,
     NotificationsModule,
     AlertsModule,
+    WorkflowsModule,
   ],
 })
 export class AppModule implements NestModule {

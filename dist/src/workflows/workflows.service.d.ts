@@ -1,0 +1,326 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
+export declare class WorkflowsService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    seedDefaults(companyId: string, userId: string): Promise<{
+        message: string;
+        count: number;
+    }>;
+    create(dto: CreateWorkflowDto, user: any): Promise<{
+        steps: {
+            level: number;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            stepName: string;
+            approverUserId: string | null;
+            timeoutHours: number | null;
+            workflowId: string;
+        }[];
+    } & {
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        documentType: string;
+        triggerCondition: string;
+        triggerAmount: number | null;
+        levels: number;
+    }>;
+    submit(dto: SubmitForApprovalDto, user: any): Promise<{
+        requiresApproval: boolean;
+        message: string;
+        autoApproved: boolean;
+        request?: undefined;
+    } | {
+        requiresApproval: boolean;
+        request: {
+            workflow: {
+                name: string;
+                steps: {
+                    level: number;
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    createdBy: string | null;
+                    updatedBy: string | null;
+                    isActive: boolean;
+                    isTestData: boolean;
+                    companyId: string;
+                    stepName: string;
+                    approverUserId: string | null;
+                    timeoutHours: number | null;
+                    workflowId: string;
+                }[];
+            };
+            actions: {
+                level: number;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                isActive: boolean;
+                isTestData: boolean;
+                companyId: string;
+                comments: string | null;
+                action: string;
+                actionBy: string;
+                actionDate: Date;
+                requestId: string;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            documentType: string;
+            requestedBy: string;
+            remarks: string | null;
+            amount: number | null;
+            documentNumber: string;
+            documentId: string;
+            workflowId: string | null;
+            currentLevel: number;
+            totalLevels: number;
+        };
+        message?: undefined;
+        autoApproved?: undefined;
+    }>;
+    act(requestId: string, dto: ApproveRejectDto, user: any): Promise<{
+        workflow: {
+            name: string;
+        };
+        actions: {
+            level: number;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comments: string | null;
+            action: string;
+            actionBy: string;
+            actionDate: Date;
+            requestId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
+    }>;
+    cancel(requestId: string, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
+    }>;
+    findAllWorkflows(user: any): Promise<({
+        _count: {
+            requests: number;
+        };
+        steps: {
+            level: number;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            stepName: string;
+            approverUserId: string | null;
+            timeoutHours: number | null;
+            workflowId: string;
+        }[];
+    } & {
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string | null;
+        documentType: string;
+        triggerCondition: string;
+        triggerAmount: number | null;
+        levels: number;
+    })[]>;
+    findAllRequests(user: any, query: any): Promise<{
+        data: ({
+            workflow: {
+                name: string;
+            };
+            actions: {
+                level: number;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                isActive: boolean;
+                isTestData: boolean;
+                companyId: string;
+                comments: string | null;
+                action: string;
+                actionBy: string;
+                actionDate: Date;
+                requestId: string;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            documentType: string;
+            requestedBy: string;
+            remarks: string | null;
+            amount: number | null;
+            documentNumber: string;
+            documentId: string;
+            workflowId: string | null;
+            currentLevel: number;
+            totalLevels: number;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    findOneRequest(id: string, user: any): Promise<{
+        workflow: {
+            steps: {
+                level: number;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                isActive: boolean;
+                isTestData: boolean;
+                companyId: string;
+                stepName: string;
+                approverUserId: string | null;
+                timeoutHours: number | null;
+                workflowId: string;
+            }[];
+        } & {
+            id: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string | null;
+            documentType: string;
+            triggerCondition: string;
+            triggerAmount: number | null;
+            levels: number;
+        };
+        actions: {
+            level: number;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            comments: string | null;
+            action: string;
+            actionBy: string;
+            actionDate: Date;
+            requestId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        pending: number;
+        approved: number;
+        rejected: number;
+        cancelled: number;
+        activeWorkflows: number;
+    }>;
+}

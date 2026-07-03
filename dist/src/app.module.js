@@ -104,6 +104,7 @@ const financial_reports_module_1 = require("./financial-reports/financial-report
 const credit_control_module_1 = require("./credit-control/credit-control.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const alerts_module_1 = require("./alerts/alerts.module");
+const workflows_module_1 = require("./workflows/workflows.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -196,6 +197,7 @@ exports.AppModule = AppModule = __decorate([
             credit_control_module_1.CreditControlModule,
             notifications_module_1.NotificationsModule,
             alerts_module_1.AlertsModule,
+            workflows_module_1.WorkflowsModule,
         ],
     })
 ], AppModule);
