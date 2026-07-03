@@ -1,0 +1,188 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { GenerateGstReturnDto, FileGstReturnDto } from './dto/gst.dto';
+export declare class GstService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    private getPeriodDates;
+    getDashboard(user: any, period?: string): Promise<{
+        period: string;
+        fromDate: Date;
+        toDate: Date;
+        sales: {
+            totalSales: number;
+            totalOutputGst: number;
+            totalOutputCgst: number;
+            totalOutputSgst: number;
+            invoiceCount: number;
+        };
+        purchases: {
+            totalPurchases: number;
+            totalInputGst: number;
+            totalInputCgst: number;
+            totalInputSgst: number;
+            billCount: number;
+        };
+        netGstLiability: number;
+        inputCredit: number;
+        monthly: any[];
+    }>;
+    getGstr1(user: any, period: string): Promise<{
+        period: string;
+        fromDate: Date;
+        toDate: Date;
+        summary: {
+            totalInvoices: number;
+            totalSales: number;
+            totalCgst: number;
+            totalSgst: number;
+            totalGst: number;
+            totalValue: number;
+        };
+        invoices: ({
+            salesOrder: {
+                soNumber: string;
+            };
+            dispatch: {
+                dispatchNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            dueDate: Date;
+            customerName: string;
+            invoiceNumber: string;
+            invoiceDate: Date;
+            customerAddress: string | null;
+            paymentTerms: string;
+            notes: string | null;
+            totalAmount: number;
+            subtotal: number;
+            totalGst: number;
+            soId: string | null;
+            dispatchId: string | null;
+            voucherId: string | null;
+            paidAmount: number;
+            outstandingAmount: number;
+        })[];
+    }>;
+    getGstr3b(user: any, period: string): Promise<{
+        period: string;
+        fromDate: Date;
+        toDate: Date;
+        outwardSupplies: {
+            taxableValue: number;
+            cgst: number;
+            sgst: number;
+            igst: number;
+            totalTax: number;
+            invoiceCount: number;
+        };
+        inputTaxCredit: {
+            taxableValue: number;
+            cgst: number;
+            sgst: number;
+            igst: number;
+            totalCredit: number;
+            billCount: number;
+        };
+        netTaxLiability: number;
+        taxPayable: number;
+        excessCredit: number;
+    }>;
+    generateReturn(dto: GenerateGstReturnDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        fromDate: Date;
+        toDate: Date;
+        period: string;
+        returnType: string;
+        totalSales: number;
+        totalOutputCgst: number;
+        totalOutputSgst: number;
+        totalOutputIgst: number;
+        totalOutputGst: number;
+        totalPurchases: number;
+        totalInputCgst: number;
+        totalInputSgst: number;
+        totalInputIgst: number;
+        totalInputGst: number;
+        netGstLiability: number;
+        filedDate: Date | null;
+        filedBy: string | null;
+    }>;
+    fileReturn(id: string, dto: FileGstReturnDto, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        fromDate: Date;
+        toDate: Date;
+        period: string;
+        returnType: string;
+        totalSales: number;
+        totalOutputCgst: number;
+        totalOutputSgst: number;
+        totalOutputIgst: number;
+        totalOutputGst: number;
+        totalPurchases: number;
+        totalInputCgst: number;
+        totalInputSgst: number;
+        totalInputIgst: number;
+        totalInputGst: number;
+        netGstLiability: number;
+        filedDate: Date | null;
+        filedBy: string | null;
+    }>;
+    findAll(user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        fromDate: Date;
+        toDate: Date;
+        period: string;
+        returnType: string;
+        totalSales: number;
+        totalOutputCgst: number;
+        totalOutputSgst: number;
+        totalOutputIgst: number;
+        totalOutputGst: number;
+        totalPurchases: number;
+        totalInputCgst: number;
+        totalInputSgst: number;
+        totalInputIgst: number;
+        totalInputGst: number;
+        netGstLiability: number;
+        filedDate: Date | null;
+        filedBy: string | null;
+    }[]>;
+}

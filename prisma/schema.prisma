@@ -285,6 +285,7 @@ model Company {
   arPayments         ArPayment[]
   apBills            ApBill[]
   apPayments         ApPayment[]
+  gstReturns         GstReturn[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -3872,4 +3873,41 @@ model ApPayment {
 
   @@unique([companyId, paymentNumber])
   @@map("ap_payments")
+}
+
+// MODULE 107 — GST MANAGEMENT
+// ============================================================
+model GstReturn {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  returnType        String    // GSTR1, GSTR3B
+  period            String    // YYYY-MM e.g. 2026-07
+  fromDate          DateTime
+  toDate            DateTime
+  totalSales        Float     @default(0)
+  totalOutputCgst   Float     @default(0)
+  totalOutputSgst   Float     @default(0)
+  totalOutputIgst   Float     @default(0)
+  totalOutputGst    Float     @default(0)
+  totalPurchases    Float     @default(0)
+  totalInputCgst    Float     @default(0)
+  totalInputSgst    Float     @default(0)
+  totalInputIgst    Float     @default(0)
+  totalInputGst     Float     @default(0)
+  netGstLiability   Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, FILED
+  filedDate         DateTime?
+  filedBy           String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, returnType, period])
+  @@index([companyId, period])
+  @@map("gst_returns")
 }
