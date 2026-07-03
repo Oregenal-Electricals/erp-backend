@@ -107,6 +107,7 @@ const alerts_module_1 = require("./alerts/alerts.module");
 const workflows_module_1 = require("./workflows/workflows.module");
 const tasks_module_1 = require("./tasks/tasks.module");
 const documents_module_1 = require("./documents/documents.module");
+const pdf_engine_module_1 = require("./pdf-engine/pdf-engine.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -202,6 +203,7 @@ exports.AppModule = AppModule = __decorate([
             workflows_module_1.WorkflowsModule,
             tasks_module_1.TasksModule,
             documents_module_1.DocumentsModule,
+            pdf_engine_module_1.PdfEngineModule,
         ],
     })
 ], AppModule);
