@@ -96,6 +96,7 @@ import { WorkflowsModule } from './workflows/workflows.module';
 import { TasksModule } from './tasks/tasks.module';
 import { DocumentsModule } from './documents/documents.module';
 import { PdfEngineModule } from './pdf-engine/pdf-engine.module';
+import { ExcelExportModule } from './excel-export/excel-export.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -186,6 +187,7 @@ import configuration from './config/configuration';
     TasksModule,
     DocumentsModule,
     PdfEngineModule,
+    ExcelExportModule,
   ],
 })
 export class AppModule implements NestModule {
