@@ -90,6 +90,7 @@ import { GstModule } from './gst/gst.module';
 import { BankReconModule } from './bank-reconciliation/bank-recon.module';
 import { FinancialReportsModule } from './financial-reports/financial-reports.module';
 import { CreditControlModule } from './credit-control/credit-control.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -174,6 +175,7 @@ import configuration from './config/configuration';
     BankReconModule,
     FinancialReportsModule,
     CreditControlModule,
+    NotificationsModule,
   ],
 })
 export class AppModule implements NestModule {
