@@ -485,6 +485,57 @@ let AnalyticsService = class AnalyticsService {
             overdueWos,
         };
     }
+    async getQualityDeep(companyId) {
+        const now = new Date();
+        const [ncrTotal, ncrOpen, ncrClosed, ncrCritical] = await Promise.all([
+            this.prisma.ncrRecord.count({ where: { companyId } }),
+            this.prisma.ncrRecord.count({ where: { companyId, status: { in: ['OPEN', 'UNDER_REVIEW', 'CAPA_PENDING'] } } }),
+            this.prisma.ncrRecord.count({ where: { companyId, status: 'CLOSED' } }),
+            this.prisma.ncrRecord.count({ where: { companyId, severity: 'CRITICAL' } }),
+        ]);
+        const [capaTotal, capaCompleted, capaOverdue] = await Promise.all([
+            this.prisma.capaRecord.count({ where: { companyId } }),
+            this.prisma.capaRecord.count({ where: { companyId, status: { in: ['COMPLETED', 'VERIFIED'] } } }),
+            this.prisma.capaRecord.count({ where: { companyId, status: { notIn: ['COMPLETED', 'VERIFIED'] }, dueDate: { lt: now } } }),
+        ]);
+        const capaCompletionRate = capaTotal > 0 ? Math.round(capaCompleted / capaTotal * 100) : 0;
+        const ncrTrend = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const from = new Date(d.getFullYear(), d.getMonth(), 1);
+            const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+            const count = await this.prisma.ncrRecord.count({ where: { companyId, detectedDate: { gte: from, lte: to } } });
+            ncrTrend.push({ month: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }), ncrs: count });
+        }
+        const [bySource, bySeverity, byStatus] = await Promise.all([
+            this.prisma.ncrRecord.groupBy({ by: ['source'], where: { companyId }, _count: { id: true } }).then(r => Object.fromEntries(r.map(x => [x.source, x._count.id]))),
+            this.prisma.ncrRecord.groupBy({ by: ['severity'], where: { companyId }, _count: { id: true } }).then(r => Object.fromEntries(r.map(x => [x.severity, x._count.id]))),
+            this.prisma.ncrRecord.groupBy({ by: ['status'], where: { companyId }, _count: { id: true } }).then(r => Object.fromEntries(r.map(x => [x.status, x._count.id]))),
+        ]);
+        const topDefectItems = await this.prisma.ncrRecord.groupBy({
+            by: ['itemName'], where: { companyId, itemName: { not: null } },
+            _count: { id: true }, orderBy: { _count: { id: 'desc' } }, take: 8,
+        });
+        const capaByStatus = await this.prisma.capaRecord.groupBy({
+            by: ['status'], where: { companyId }, _count: { id: true },
+        }).then(r => Object.fromEntries(r.map(x => [x.status, x._count.id])));
+        const [oqcTotal, oqcPassed, oqcFailed] = await Promise.all([
+            this.prisma.oqcInspection.count({ where: { companyId } }),
+            this.prisma.oqcInspection.count({ where: { companyId, result: 'PASS' } }),
+            this.prisma.oqcInspection.count({ where: { companyId, result: 'FAIL' } }),
+        ]);
+        const oqcPassRate = oqcTotal > 0 ? Math.round(oqcPassed / oqcTotal * 100) : 0;
+        const qualityScore = Math.round((capaCompletionRate * 0.4 + oqcPassRate * 0.4 + (ncrTotal > 0 ? Math.max(0, 100 - ncrCritical / ncrTotal * 100) : 100) * 0.2));
+        return {
+            kpis: { ncrTotal, ncrOpen, ncrClosed, ncrCritical, capaTotal, capaCompleted, capaOverdue, capaCompletionRate, oqcTotal, oqcPassed, oqcFailed, oqcPassRate, qualityScore },
+            ncrTrend,
+            bySource,
+            bySeverity,
+            byStatus,
+            capaByStatus,
+            topDefectItems: topDefectItems.map(i => ({ itemName: i.itemName || 'Unknown', count: i._count.id })),
+        };
+    }
 };
 exports.AnalyticsService = AnalyticsService;
 exports.AnalyticsService = AnalyticsService = __decorate([

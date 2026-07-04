@@ -82,6 +82,40 @@ export declare class AnalyticsController {
             overdue: number;
         };
     }>;
+    getQualityDeep(req: any): Promise<{
+        kpis: {
+            ncrTotal: number;
+            ncrOpen: number;
+            ncrClosed: number;
+            ncrCritical: number;
+            capaTotal: number;
+            capaCompleted: number;
+            capaOverdue: number;
+            capaCompletionRate: number;
+            oqcTotal: number;
+            oqcPassed: number;
+            oqcFailed: number;
+            oqcPassRate: number;
+            qualityScore: number;
+        };
+        ncrTrend: any[];
+        bySource: {
+            [k: string]: number;
+        };
+        bySeverity: {
+            [k: string]: number;
+        };
+        byStatus: {
+            [k: string]: number;
+        };
+        capaByStatus: {
+            [k: string]: number;
+        };
+        topDefectItems: {
+            itemName: string;
+            count: number;
+        }[];
+    }>;
     getProductionDeep(req: any): Promise<{
         kpis: {
             total: number;
