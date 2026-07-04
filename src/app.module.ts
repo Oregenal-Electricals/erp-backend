@@ -98,6 +98,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { PdfEngineModule } from './pdf-engine/pdf-engine.module';
 import { ExcelExportModule } from './excel-export/excel-export.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { MisReportsModule } from './mis-reports/mis-reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -129,6 +130,7 @@ import configuration from './config/configuration';
     PoApprovalModule,
     PoAmendmentModule,
     PurchaseAnalyticsModule,
+    MisReportsModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -190,6 +192,7 @@ import configuration from './config/configuration';
     PdfEngineModule,
     ExcelExportModule,
     AnalyticsModule,
+    MisReportsModule,
   ],
 })
 export class AppModule implements NestModule {
