@@ -238,6 +238,74 @@ let AnalyticsService = class AnalyticsService {
             ],
         };
     }
+    async getSalesDeep(companyId, query) {
+        const { period = '12' } = query;
+        const months = parseInt(period) || 12;
+        const now = new Date();
+        const salesTrend = [];
+        for (let i = months - 1; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const from = new Date(d.getFullYear(), d.getMonth(), 1);
+            const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+            const [rev, orders] = await Promise.all([
+                this.prisma.arInvoice.aggregate({ where: { companyId, invoiceDate: { gte: from, lte: to }, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+                this.prisma.salesOrder.count({ where: { companyId, createdAt: { gte: from, lte: to } } }),
+            ]);
+            salesTrend.push({ month: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }), revenue: rev._sum.totalAmount || 0, orders });
+        }
+        const [leads, quotes, cpos, sos, dispatches, deliveries] = await Promise.all([
+            this.prisma.lead.count({ where: { companyId } }),
+            this.prisma.quotation.count({ where: { companyId } }),
+            this.prisma.customerPo.count({ where: { companyId } }),
+            this.prisma.salesOrder.count({ where: { companyId } }),
+            this.prisma.dispatch.count({ where: { companyId } }),
+            this.prisma.dispatch.count({ where: { companyId, status: 'DELIVERED' } }),
+        ]);
+        const topCustomers = await this.prisma.arInvoice.groupBy({
+            by: ['customerName'], where: { companyId, status: { notIn: ['CANCELLED'] } },
+            _sum: { totalAmount: true, outstandingAmount: true }, _count: { id: true },
+            orderBy: { _sum: { totalAmount: 'desc' } }, take: 10,
+        });
+        const invoices = await this.prisma.arInvoice.findMany({
+            where: { companyId, status: { in: ['SENT', 'PARTIAL', 'OVERDUE'] } },
+            select: { dueDate: true, outstandingAmount: true, customerName: true },
+        });
+        const aging = { current: 0, days1_30: 0, days31_60: 0, days61_90: 0, over90: 0 };
+        invoices.forEach(inv => {
+            const days = Math.floor((now.getTime() - new Date(inv.dueDate).getTime()) / 86400000);
+            if (days <= 0)
+                aging.current += inv.outstandingAmount;
+            else if (days <= 30)
+                aging.days1_30 += inv.outstandingAmount;
+            else if (days <= 60)
+                aging.days31_60 += inv.outstandingAmount;
+            else if (days <= 90)
+                aging.days61_90 += inv.outstandingAmount;
+            else
+                aging.over90 += inv.outstandingAmount;
+        });
+        const [totalRevenue, totalOrders, totalCollected] = await Promise.all([
+            this.prisma.arInvoice.aggregate({ where: { companyId, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+            this.prisma.salesOrder.count({ where: { companyId } }),
+            this.prisma.arInvoice.aggregate({ where: { companyId, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true, outstandingAmount: true } }),
+        ]);
+        const collected = (totalCollected._sum.totalAmount || 0) - (totalCollected._sum.outstandingAmount || 0);
+        const collectionRate = totalCollected._sum.totalAmount > 0 ? Math.round(collected / totalCollected._sum.totalAmount * 100) : 0;
+        return {
+            kpis: {
+                totalRevenue: totalRevenue._sum.totalAmount || 0,
+                totalOrders,
+                avgOrderValue: totalOrders > 0 ? Math.round((totalRevenue._sum.totalAmount || 0) / totalOrders) : 0,
+                collectionRate,
+                dispatchRate: sos > 0 ? Math.round(dispatches / sos * 100) : 0,
+            },
+            salesTrend,
+            funnel: { leads, quotes, cpos, sos, dispatches, deliveries },
+            topCustomers: topCustomers.map(c => ({ name: c.customerName, revenue: c._sum.totalAmount || 0, outstanding: c._sum.outstandingAmount || 0, invoices: c._count.id })),
+            aging,
+            soByStatus: await this.prisma.salesOrder.groupBy({ by: ['status'], where: { companyId }, _count: { id: true } }).then(r => Object.fromEntries(r.map(x => [x.status, x._count.id]))),
+        };
+    }
 };
 exports.AnalyticsService = AnalyticsService;
 exports.AnalyticsService = AnalyticsService = __decorate([

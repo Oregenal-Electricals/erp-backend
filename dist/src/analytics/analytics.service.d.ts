@@ -92,4 +92,38 @@ export declare class AnalyticsService {
             count: number;
         }[];
     }>;
+    getSalesDeep(companyId: string, query: any): Promise<{
+        kpis: {
+            totalRevenue: number;
+            totalOrders: number;
+            avgOrderValue: number;
+            collectionRate: number;
+            dispatchRate: number;
+        };
+        salesTrend: any[];
+        funnel: {
+            leads: number;
+            quotes: number;
+            cpos: number;
+            sos: number;
+            dispatches: number;
+            deliveries: number;
+        };
+        topCustomers: {
+            name: string;
+            revenue: number;
+            outstanding: number;
+            invoices: number;
+        }[];
+        aging: {
+            current: number;
+            days1_30: number;
+            days31_60: number;
+            days61_90: number;
+            over90: number;
+        };
+        soByStatus: {
+            [k: string]: number;
+        };
+    }>;
 }

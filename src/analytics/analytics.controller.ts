@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -29,6 +29,10 @@ export class AnalyticsController {
   @Get('quality')
   @RequirePermissions(Permission.INVENTORY_VIEW)
   getQuality(@Request() req: any) { return this.analyticsService.getQualityAnalytics(req.user.companyId); }
+
+  @Get('sales-deep')
+  @RequirePermissions(Permission.INVENTORY_VIEW)
+  getSalesDeep(@Request() req: any, @Query() query: any) { return this.analyticsService.getSalesDeep(req.user.companyId, query); }
 
   @Get('finance')
   @RequirePermissions(Permission.INVENTORY_VIEW)
