@@ -126,4 +126,32 @@ export declare class AnalyticsService {
             [k: string]: number;
         };
     }>;
+    getPurchaseDeep(companyId: string, query: any): Promise<{
+        kpis: {
+            totalSpend: number;
+            totalPos: number;
+            avgPoValue: number;
+            paymentRate: number;
+            apOutstanding: number;
+            totalGrns: number;
+            pendingGrns: number;
+        };
+        purchaseTrend: any[];
+        topVendors: {
+            name: string;
+            code: string;
+            spend: number;
+            pos: number;
+        }[];
+        poByStatus: {
+            [k: string]: number;
+        };
+        apAging: {
+            current: number;
+            days1_30: number;
+            days31_60: number;
+            days61_90: number;
+            over90: number;
+        };
+    }>;
 }

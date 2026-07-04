@@ -306,6 +306,77 @@ let AnalyticsService = class AnalyticsService {
             soByStatus: await this.prisma.salesOrder.groupBy({ by: ['status'], where: { companyId }, _count: { id: true } }).then(r => Object.fromEntries(r.map(x => [x.status, x._count.id]))),
         };
     }
+    async getPurchaseDeep(companyId, query) {
+        const { period = '12' } = query;
+        const months = parseInt(period) || 12;
+        const now = new Date();
+        const purchaseTrend = [];
+        for (let i = months - 1; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const from = new Date(d.getFullYear(), d.getMonth(), 1);
+            const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+            const [spend, pos] = await Promise.all([
+                this.prisma.apBill.aggregate({ where: { companyId, billDate: { gte: from, lte: to }, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+                this.prisma.purchaseOrder.count({ where: { companyId, poDate: { gte: from, lte: to } } }),
+            ]);
+            purchaseTrend.push({ month: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }), spend: spend._sum.totalAmount || 0, pos });
+        }
+        const topVendors = await this.prisma.purchaseOrder.groupBy({
+            by: ['vendorId'], where: { companyId, status: { notIn: ['CANCELLED'] } },
+            _sum: { totalAmount: true }, _count: { id: true },
+            orderBy: { _sum: { totalAmount: 'desc' } }, take: 10,
+        });
+        const vendorIds = topVendors.map(v => v.vendorId);
+        const vendors = await this.prisma.vendor.findMany({ where: { id: { in: vendorIds } }, select: { id: true, name: true, code: true } });
+        const vendorMap = Object.fromEntries(vendors.map(v => [v.id, v]));
+        const bills = await this.prisma.apBill.findMany({
+            where: { companyId, status: { in: ['APPROVED', 'PARTIAL', 'OVERDUE'] } },
+            select: { dueDate: true, outstandingAmount: true },
+        });
+        const apAging = { current: 0, days1_30: 0, days31_60: 0, days61_90: 0, over90: 0 };
+        bills.forEach(b => {
+            const days = Math.floor((now.getTime() - new Date(b.dueDate).getTime()) / 86400000);
+            if (days <= 0)
+                apAging.current += b.outstandingAmount;
+            else if (days <= 30)
+                apAging.days1_30 += b.outstandingAmount;
+            else if (days <= 60)
+                apAging.days31_60 += b.outstandingAmount;
+            else if (days <= 90)
+                apAging.days61_90 += b.outstandingAmount;
+            else
+                apAging.over90 += b.outstandingAmount;
+        });
+        const [totalSpend, totalPos, apData] = await Promise.all([
+            this.prisma.apBill.aggregate({ where: { companyId, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+            this.prisma.purchaseOrder.count({ where: { companyId } }),
+            this.prisma.apBill.aggregate({ where: { companyId, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true, outstandingAmount: true } }),
+        ]);
+        const paid = (apData._sum.totalAmount || 0) - (apData._sum.outstandingAmount || 0);
+        const paymentRate = apData._sum.totalAmount > 0 ? Math.round(paid / apData._sum.totalAmount * 100) : 0;
+        const poByStatus = await this.prisma.purchaseOrder.groupBy({
+            by: ['status'], where: { companyId }, _count: { id: true },
+        }).then(r => Object.fromEntries(r.map(x => [x.status, x._count.id])));
+        const [totalGrns, pendingGrns] = await Promise.all([
+            this.prisma.grnHeader.count({ where: { companyId } }),
+            this.prisma.grnHeader.count({ where: { companyId, status: 'PENDING' } }),
+        ]);
+        return {
+            kpis: {
+                totalSpend: totalSpend._sum.totalAmount || 0,
+                totalPos,
+                avgPoValue: totalPos > 0 ? Math.round((totalSpend._sum.totalAmount || 0) / totalPos) : 0,
+                paymentRate,
+                apOutstanding: apData._sum.outstandingAmount || 0,
+                totalGrns,
+                pendingGrns,
+            },
+            purchaseTrend,
+            topVendors: topVendors.map(v => { var _a, _b; return ({ name: ((_a = vendorMap[v.vendorId]) === null || _a === void 0 ? void 0 : _a.name) || v.vendorId, code: ((_b = vendorMap[v.vendorId]) === null || _b === void 0 ? void 0 : _b.code) || '', spend: v._sum.totalAmount || 0, pos: v._count.id }); }),
+            poByStatus,
+            apAging,
+        };
+    }
 };
 exports.AnalyticsService = AnalyticsService;
 exports.AnalyticsService = AnalyticsService = __decorate([
