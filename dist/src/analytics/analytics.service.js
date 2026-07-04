@@ -377,6 +377,56 @@ let AnalyticsService = class AnalyticsService {
             apAging,
         };
     }
+    async getInventoryDeep(companyId) {
+        const now = new Date();
+        const stocks = await this.prisma.stockBalance.findMany({
+            where: { companyId, isActive: true },
+            include: { warehouse: { select: { name: true } } },
+            orderBy: { totalValue: 'desc' },
+        });
+        const totalItems = stocks.length;
+        const totalValue = stocks.reduce((s, i) => s + i.totalValue, 0);
+        const totalQty = stocks.reduce((s, i) => s + i.availableQty, 0);
+        const lowStock = stocks.filter(s => s.availableQty > 0 && s.availableQty < 10);
+        const zeroStock = stocks.filter(s => s.availableQty === 0);
+        const topByValue = stocks.slice(0, 10).map(s => {
+            var _a;
+            return ({
+                itemCode: s.itemCode, itemName: s.itemName,
+                warehouse: ((_a = s.warehouse) === null || _a === void 0 ? void 0 : _a.name) || '—',
+                availableQty: s.availableQty, unitCost: s.unitCost, totalValue: s.totalValue,
+            });
+        });
+        const warehouseMap = {};
+        stocks.forEach(s => {
+            var _a;
+            const wName = ((_a = s.warehouse) === null || _a === void 0 ? void 0 : _a.name) || 'Unknown';
+            if (!warehouseMap[wName])
+                warehouseMap[wName] = { name: wName, value: 0, qty: 0, items: 0 };
+            warehouseMap[wName].value += s.totalValue;
+            warehouseMap[wName].qty += s.availableQty;
+            warehouseMap[wName].items += 1;
+        });
+        const movementTrend = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const from = new Date(d.getFullYear(), d.getMonth(), 1);
+            const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+            const [inQty, outQty] = await Promise.all([
+                this.prisma.stockLedger.aggregate({ where: { companyId, transactionDate: { gte: from, lte: to }, transactionType: { in: ['GRN', 'PRODUCTION_IN', 'TRANSFER_IN'] } }, _sum: { inQty: true } }),
+                this.prisma.stockLedger.aggregate({ where: { companyId, transactionDate: { gte: from, lte: to }, transactionType: { in: ['DISPATCH', 'ISSUE', 'TRANSFER_OUT'] } }, _sum: { outQty: true } }),
+            ]);
+            movementTrend.push({ month: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }), inQty: inQty._sum.inQty || 0, outQty: Math.abs(outQty._sum.outQty || 0) });
+        }
+        return {
+            kpis: { totalItems, totalValue, totalQty, lowStockCount: lowStock.length, zeroStockCount: zeroStock.length },
+            topByValue,
+            byWarehouse: Object.values(warehouseMap),
+            lowStockItems: lowStock.map(s => { var _a; return ({ itemCode: s.itemCode, itemName: s.itemName, availableQty: s.availableQty, warehouse: ((_a = s.warehouse) === null || _a === void 0 ? void 0 : _a.name) || '—', unitCost: s.unitCost }); }),
+            zeroStockItems: zeroStock.slice(0, 10).map(s => { var _a; return ({ itemCode: s.itemCode, itemName: s.itemName, warehouse: ((_a = s.warehouse) === null || _a === void 0 ? void 0 : _a.name) || '—' }); }),
+            movementTrend,
+        };
+    }
 };
 exports.AnalyticsService = AnalyticsService;
 exports.AnalyticsService = AnalyticsService = __decorate([

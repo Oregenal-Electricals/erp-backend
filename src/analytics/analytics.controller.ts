@@ -30,6 +30,10 @@ export class AnalyticsController {
   @RequirePermissions(Permission.INVENTORY_VIEW)
   getQuality(@Request() req: any) { return this.analyticsService.getQualityAnalytics(req.user.companyId); }
 
+  @Get('inventory-deep')
+  @RequirePermissions(Permission.INVENTORY_VIEW)
+  getInventoryDeep(@Request() req: any) { return this.analyticsService.getInventoryDeep(req.user.companyId); }
+
   @Get('purchase-deep')
   @RequirePermissions(Permission.INVENTORY_VIEW)
   getPurchaseDeep(@Request() req: any, @Query() query: any) { return this.analyticsService.getPurchaseDeep(req.user.companyId, query); }

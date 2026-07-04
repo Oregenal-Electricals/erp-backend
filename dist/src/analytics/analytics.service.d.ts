@@ -154,4 +154,40 @@ export declare class AnalyticsService {
             over90: number;
         };
     }>;
+    getInventoryDeep(companyId: string): Promise<{
+        kpis: {
+            totalItems: number;
+            totalValue: number;
+            totalQty: number;
+            lowStockCount: number;
+            zeroStockCount: number;
+        };
+        topByValue: {
+            itemCode: string;
+            itemName: string;
+            warehouse: any;
+            availableQty: number;
+            unitCost: number;
+            totalValue: number;
+        }[];
+        byWarehouse: {
+            name: string;
+            value: number;
+            qty: number;
+            items: number;
+        }[];
+        lowStockItems: {
+            itemCode: string;
+            itemName: string;
+            availableQty: number;
+            warehouse: any;
+            unitCost: number;
+        }[];
+        zeroStockItems: {
+            itemCode: string;
+            itemName: string;
+            warehouse: any;
+        }[];
+        movementTrend: any[];
+    }>;
 }
