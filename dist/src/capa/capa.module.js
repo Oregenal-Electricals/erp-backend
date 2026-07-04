@@ -9,6 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CapaModule = void 0;
 const common_1 = require("@nestjs/common");
 const capa_controller_1 = require("./capa.controller");
+const capa_automation_controller_1 = require("./capa-automation.controller");
+const capa_automation_service_1 = require("./capa-automation.service");
 const capa_service_1 = require("./capa.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
@@ -18,9 +20,9 @@ exports.CapaModule = CapaModule;
 exports.CapaModule = CapaModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
-        controllers: [capa_controller_1.CapaController],
-        providers: [capa_service_1.CapaService],
-        exports: [capa_service_1.CapaService],
+        controllers: [capa_controller_1.CapaController, capa_automation_controller_1.CapaAutomationController],
+        providers: [capa_service_1.CapaService, capa_automation_service_1.CapaAutomationService],
+        exports: [capa_service_1.CapaService, capa_automation_service_1.CapaAutomationService],
     })
 ], CapaModule);
 //# sourceMappingURL=capa.module.js.map
