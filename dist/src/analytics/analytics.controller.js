@@ -28,6 +28,7 @@ let AnalyticsController = class AnalyticsController {
     getPurchase(req) { return this.analyticsService.getPurchaseAnalytics(req.user.companyId); }
     getInventory(req) { return this.analyticsService.getInventoryAnalytics(req.user.companyId); }
     getQuality(req) { return this.analyticsService.getQualityAnalytics(req.user.companyId); }
+    getProductionDeep(req) { return this.analyticsService.getProductionDeep(req.user.companyId); }
     getInventoryDeep(req) { return this.analyticsService.getInventoryDeep(req.user.companyId); }
     getPurchaseDeep(req, query) { return this.analyticsService.getPurchaseDeep(req.user.companyId, query); }
     getSalesDeep(req, query) { return this.analyticsService.getSalesDeep(req.user.companyId, query); }
@@ -74,6 +75,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AnalyticsController.prototype, "getQuality", null);
+__decorate([
+    (0, common_1.Get)('production-deep'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AnalyticsController.prototype, "getProductionDeep", null);
 __decorate([
     (0, common_1.Get)('inventory-deep'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),

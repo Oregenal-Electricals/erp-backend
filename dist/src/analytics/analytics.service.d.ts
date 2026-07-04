@@ -190,4 +190,38 @@ export declare class AnalyticsService {
         }[];
         movementTrend: any[];
     }>;
+    getProductionDeep(companyId: string): Promise<{
+        kpis: {
+            total: number;
+            completed: number;
+            inProgress: number;
+            cancelled: number;
+            draft: number;
+            completionRate: number;
+            rejectionRate: number;
+            avgCycleHours: number;
+            totalPlanned: number;
+            totalCompleted: number;
+            totalRejected: number;
+        };
+        productionTrend: any[];
+        woByStatus: {
+            [k: string]: number;
+        };
+        topProducts: {
+            productCode: string;
+            productName: string;
+            completedQty: number;
+            wos: number;
+        }[];
+        overdueWos: {
+            status: string;
+            priority: string;
+            productName: string;
+            plannedQty: number;
+            plannedEndDate: Date;
+            completedQty: number;
+            woNumber: string;
+        }[];
+    }>;
 }

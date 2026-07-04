@@ -427,6 +427,64 @@ let AnalyticsService = class AnalyticsService {
             movementTrend,
         };
     }
+    async getProductionDeep(companyId) {
+        const now = new Date();
+        const [total, completed, inProgress, cancelled, draft] = await Promise.all([
+            this.prisma.workOrder.count({ where: { companyId } }),
+            this.prisma.workOrder.count({ where: { companyId, status: 'COMPLETED' } }),
+            this.prisma.workOrder.count({ where: { companyId, status: 'IN_PROGRESS' } }),
+            this.prisma.workOrder.count({ where: { companyId, status: 'CANCELLED' } }),
+            this.prisma.workOrder.count({ where: { companyId, status: { in: ['DRAFT', 'RELEASED'] } } }),
+        ]);
+        const qtyData = await this.prisma.workOrder.aggregate({
+            where: { companyId },
+            _sum: { plannedQty: true, completedQty: true, rejectedQty: true },
+        });
+        const totalPlanned = qtyData._sum.plannedQty || 0;
+        const totalCompleted = qtyData._sum.completedQty || 0;
+        const totalRejected = qtyData._sum.rejectedQty || 0;
+        const completionRate = totalPlanned > 0 ? Math.round(totalCompleted / totalPlanned * 100) : 0;
+        const rejectionRate = totalCompleted > 0 ? Math.round(totalRejected / (totalCompleted + totalRejected) * 100 * 100) / 100 : 0;
+        const productionTrend = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const from = new Date(d.getFullYear(), d.getMonth(), 1);
+            const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+            const [wos, qty] = await Promise.all([
+                this.prisma.workOrder.count({ where: { companyId, createdAt: { gte: from, lte: to } } }),
+                this.prisma.workOrder.aggregate({ where: { companyId, status: 'COMPLETED', actualEndDate: { gte: from, lte: to } }, _sum: { completedQty: true } }),
+            ]);
+            productionTrend.push({ month: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }), wos, completedQty: qty._sum.completedQty || 0 });
+        }
+        const woByStatus = await this.prisma.workOrder.groupBy({
+            by: ['status'], where: { companyId }, _count: { id: true },
+        }).then(r => Object.fromEntries(r.map(x => [x.status, x._count.id])));
+        const topProducts = await this.prisma.workOrder.groupBy({
+            by: ['productCode', 'productName'], where: { companyId, status: 'COMPLETED' },
+            _sum: { completedQty: true }, _count: { id: true },
+            orderBy: { _sum: { completedQty: 'desc' } }, take: 10,
+        });
+        const overdueWos = await this.prisma.workOrder.findMany({
+            where: { companyId, status: { in: ['RELEASED', 'IN_PROGRESS'] }, plannedEndDate: { lt: now } },
+            select: { woNumber: true, productName: true, plannedEndDate: true, status: true, priority: true, plannedQty: true, completedQty: true },
+            orderBy: { plannedEndDate: 'asc' }, take: 10,
+        });
+        const completedWos = await this.prisma.workOrder.findMany({
+            where: { companyId, status: 'COMPLETED', actualStartDate: { not: null }, actualEndDate: { not: null } },
+            select: { actualStartDate: true, actualEndDate: true },
+            take: 100,
+        });
+        const avgCycleHours = completedWos.length > 0
+            ? Math.round(completedWos.reduce((s, wo) => s + (new Date(wo.actualEndDate).getTime() - new Date(wo.actualStartDate).getTime()) / 3600000, 0) / completedWos.length * 10) / 10
+            : 0;
+        return {
+            kpis: { total, completed, inProgress, cancelled, draft, completionRate, rejectionRate, avgCycleHours, totalPlanned, totalCompleted, totalRejected },
+            productionTrend,
+            woByStatus,
+            topProducts: topProducts.map(p => ({ productCode: p.productCode, productName: p.productName, completedQty: p._sum.completedQty || 0, wos: p._count.id })),
+            overdueWos,
+        };
+    }
 };
 exports.AnalyticsService = AnalyticsService;
 exports.AnalyticsService = AnalyticsService = __decorate([
