@@ -258,4 +258,37 @@ export declare class AnalyticsService {
             count: number;
         }[];
     }>;
+    getFinanceDeep(companyId: string): Promise<{
+        kpis: {
+            totalRevenue: number;
+            totalExpense: number;
+            grossProfit: number;
+            profitMargin: number;
+            arOutstanding: number;
+            arCount: number;
+            apOutstanding: number;
+            apCount: number;
+            bankBalance: number;
+            outputGst: number;
+            inputGst: number;
+            netGst: number;
+            totalVouchers: number;
+            postedVouchers: number;
+        };
+        plTrend: any[];
+        arAging: {
+            current: number;
+            days1_30: number;
+            days31_60: number;
+            days61_90: number;
+            over90: number;
+        };
+        apAging: {
+            current: number;
+            days1_30: number;
+            days31_60: number;
+            days61_90: number;
+            over90: number;
+        };
+    }>;
 }

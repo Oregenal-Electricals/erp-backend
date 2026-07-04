@@ -536,6 +536,93 @@ let AnalyticsService = class AnalyticsService {
             topDefectItems: topDefectItems.map(i => ({ itemName: i.itemName || 'Unknown', count: i._count.id })),
         };
     }
+    async getFinanceDeep(companyId) {
+        const now = new Date();
+        const plTrend = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const from = new Date(d.getFullYear(), d.getMonth(), 1);
+            const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+            const [rev, exp] = await Promise.all([
+                this.prisma.arInvoice.aggregate({ where: { companyId, invoiceDate: { gte: from, lte: to }, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+                this.prisma.apBill.aggregate({ where: { companyId, billDate: { gte: from, lte: to }, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+            ]);
+            const revenue = rev._sum.totalAmount || 0;
+            const expense = exp._sum.totalAmount || 0;
+            plTrend.push({ month: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }), revenue, expense, profit: revenue - expense });
+        }
+        const [totalRevenue, totalExpense, arOutstanding, apOutstanding, bankBalance] = await Promise.all([
+            this.prisma.arInvoice.aggregate({ where: { companyId, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+            this.prisma.apBill.aggregate({ where: { companyId, status: { notIn: ['CANCELLED'] } }, _sum: { totalAmount: true } }),
+            this.prisma.arInvoice.aggregate({ where: { companyId, status: { in: ['SENT', 'PARTIAL', 'OVERDUE'] } }, _sum: { outstandingAmount: true }, _count: { id: true } }),
+            this.prisma.apBill.aggregate({ where: { companyId, status: { in: ['APPROVED', 'PARTIAL', 'OVERDUE'] } }, _sum: { outstandingAmount: true }, _count: { id: true } }),
+            this.prisma.account.aggregate({ where: { companyId, accountSubType: 'BANK', isActive: true }, _sum: { currentBalance: true } }),
+        ]);
+        const revenue = totalRevenue._sum.totalAmount || 0;
+        const expense = totalExpense._sum.totalAmount || 0;
+        const grossProfit = revenue - expense;
+        const profitMargin = revenue > 0 ? Math.round(grossProfit / revenue * 100 * 100) / 100 : 0;
+        const arInvoices = await this.prisma.arInvoice.findMany({
+            where: { companyId, status: { in: ['SENT', 'PARTIAL', 'OVERDUE'] } },
+            select: { dueDate: true, outstandingAmount: true },
+        });
+        const arAging = { current: 0, days1_30: 0, days31_60: 0, days61_90: 0, over90: 0 };
+        arInvoices.forEach(inv => {
+            const days = Math.floor((now.getTime() - new Date(inv.dueDate).getTime()) / 86400000);
+            if (days <= 0)
+                arAging.current += inv.outstandingAmount;
+            else if (days <= 30)
+                arAging.days1_30 += inv.outstandingAmount;
+            else if (days <= 60)
+                arAging.days31_60 += inv.outstandingAmount;
+            else if (days <= 90)
+                arAging.days61_90 += inv.outstandingAmount;
+            else
+                arAging.over90 += inv.outstandingAmount;
+        });
+        const apBills = await this.prisma.apBill.findMany({
+            where: { companyId, status: { in: ['APPROVED', 'PARTIAL', 'OVERDUE'] } },
+            select: { dueDate: true, outstandingAmount: true },
+        });
+        const apAging = { current: 0, days1_30: 0, days31_60: 0, days61_90: 0, over90: 0 };
+        apBills.forEach(b => {
+            const days = Math.floor((now.getTime() - new Date(b.dueDate).getTime()) / 86400000);
+            if (days <= 0)
+                apAging.current += b.outstandingAmount;
+            else if (days <= 30)
+                apAging.days1_30 += b.outstandingAmount;
+            else if (days <= 60)
+                apAging.days31_60 += b.outstandingAmount;
+            else if (days <= 90)
+                apAging.days61_90 += b.outstandingAmount;
+            else
+                apAging.over90 += b.outstandingAmount;
+        });
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const [outputGst, inputGst] = await Promise.all([
+            this.prisma.arInvoice.aggregate({ where: { companyId, invoiceDate: { gte: monthStart }, status: { notIn: ['CANCELLED'] } }, _sum: { totalGst: true } }),
+            this.prisma.apBill.aggregate({ where: { companyId, billDate: { gte: monthStart }, status: { notIn: ['CANCELLED'] } }, _sum: { totalGst: true } }),
+        ]);
+        const outputGstAmt = outputGst._sum.totalGst || 0;
+        const inputGstAmt = inputGst._sum.totalGst || 0;
+        const [totalVouchers, postedVouchers] = await Promise.all([
+            this.prisma.voucher.count({ where: { companyId } }),
+            this.prisma.voucher.count({ where: { companyId, status: 'POSTED' } }),
+        ]);
+        return {
+            kpis: {
+                totalRevenue: revenue, totalExpense: expense, grossProfit, profitMargin,
+                arOutstanding: arOutstanding._sum.outstandingAmount || 0, arCount: arOutstanding._count.id,
+                apOutstanding: apOutstanding._sum.outstandingAmount || 0, apCount: apOutstanding._count.id,
+                bankBalance: bankBalance._sum.currentBalance || 0,
+                outputGst: outputGstAmt, inputGst: inputGstAmt, netGst: Math.max(0, outputGstAmt - inputGstAmt),
+                totalVouchers, postedVouchers,
+            },
+            plTrend,
+            arAging,
+            apAging,
+        };
+    }
 };
 exports.AnalyticsService = AnalyticsService;
 exports.AnalyticsService = AnalyticsService = __decorate([
