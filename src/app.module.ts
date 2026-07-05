@@ -100,6 +100,7 @@ import { ExcelExportModule } from './excel-export/excel-export.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MisReportsModule } from './mis-reports/mis-reports.module';
 import { EmployeesModule } from './employees/employees.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -133,6 +134,7 @@ import configuration from './config/configuration';
     PurchaseAnalyticsModule,
     MisReportsModule,
     EmployeesModule,
+    AttendanceModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -196,6 +198,7 @@ import configuration from './config/configuration';
     AnalyticsModule,
     MisReportsModule,
     EmployeesModule,
+    AttendanceModule,
   ],
 })
 export class AppModule implements NestModule {

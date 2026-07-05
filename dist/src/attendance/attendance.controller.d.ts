@@ -1,0 +1,260 @@
+import { AttendanceService } from './attendance.service';
+import { CreateShiftDto, MarkAttendanceDto, UpdateAttendanceDto, BulkAttendanceDto } from './dto/attendance.dto';
+export declare class AttendanceController {
+    private readonly attService;
+    constructor(attService: AttendanceService);
+    getShifts(req: any): Promise<{
+        id: string;
+        code: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        startTime: string;
+        endTime: string;
+        shiftHours: number;
+        lunchStartTime: string | null;
+        lunchEndTime: string | null;
+        lunchMinutes: number;
+        weeklyOff: string;
+        otMultiplier: number;
+        holidayMultiplier: number;
+    }[]>;
+    createShift(dto: CreateShiftDto, req: any): Promise<{
+        id: string;
+        code: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        startTime: string;
+        endTime: string;
+        shiftHours: number;
+        lunchStartTime: string | null;
+        lunchEndTime: string | null;
+        lunchMinutes: number;
+        weeklyOff: string;
+        otMultiplier: number;
+        holidayMultiplier: number;
+    }>;
+    updateShift(id: string, dto: any, req: any): Promise<{
+        id: string;
+        code: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        startTime: string;
+        endTime: string;
+        shiftHours: number;
+        lunchStartTime: string | null;
+        lunchEndTime: string | null;
+        lunchMinutes: number;
+        weeklyOff: string;
+        otMultiplier: number;
+        holidayMultiplier: number;
+    }>;
+    getStats(req: any, query: any): Promise<{
+        month: number;
+        year: number;
+        total: number;
+        present: number;
+        absent: number;
+        onLeave: number;
+        halfDay: number;
+        totalOtHours: number;
+        totalOtAmount: number;
+    }>;
+    findAll(req: any, query: any): Promise<{
+        data: ({
+            employee: {
+                department: {
+                    name: string;
+                };
+                firstName: string;
+                lastName: string;
+                employeeNumber: string;
+            };
+            shift: {
+                name: string;
+                startTime: string;
+                endTime: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            checkIn: Date | null;
+            checkOut: Date | null;
+            employeeId: string;
+            lunchMinutes: number;
+            attendanceDate: Date;
+            shiftId: string | null;
+            lunchOut: Date | null;
+            lunchIn: Date | null;
+            isHoliday: boolean;
+            grossWorkedMinutes: number;
+            netWorkedMinutes: number;
+            netWorkedRounded: number;
+            workedHours: number;
+            otHours: number;
+            otRate: number;
+            otAmount: number;
+            markedBy: string | null;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    getMonthlySummary(empId: string, query: any, req: any): Promise<{
+        employeeId: string;
+        month: number;
+        year: number;
+        summary: {
+            present: number;
+            absent: number;
+            halfDay: number;
+            holiday: number;
+            weekOff: number;
+            leave: number;
+            totalWorkedHours: number;
+            totalOtHours: number;
+            totalOtAmount: number;
+        };
+        records: ({
+            shift: {
+                name: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            checkIn: Date | null;
+            checkOut: Date | null;
+            employeeId: string;
+            lunchMinutes: number;
+            attendanceDate: Date;
+            shiftId: string | null;
+            lunchOut: Date | null;
+            lunchIn: Date | null;
+            isHoliday: boolean;
+            grossWorkedMinutes: number;
+            netWorkedMinutes: number;
+            netWorkedRounded: number;
+            workedHours: number;
+            otHours: number;
+            otRate: number;
+            otAmount: number;
+            markedBy: string | null;
+        })[];
+    }>;
+    mark(dto: MarkAttendanceDto, req: any): Promise<{
+        employee: {
+            firstName: string;
+            lastName: string;
+            employeeNumber: string;
+        };
+        shift: {
+            name: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        checkIn: Date | null;
+        checkOut: Date | null;
+        employeeId: string;
+        lunchMinutes: number;
+        attendanceDate: Date;
+        shiftId: string | null;
+        lunchOut: Date | null;
+        lunchIn: Date | null;
+        isHoliday: boolean;
+        grossWorkedMinutes: number;
+        netWorkedMinutes: number;
+        netWorkedRounded: number;
+        workedHours: number;
+        otHours: number;
+        otRate: number;
+        otAmount: number;
+        markedBy: string | null;
+    }>;
+    bulkMark(dto: BulkAttendanceDto, req: any): Promise<{
+        date: string;
+        total: number;
+        success: number;
+        failed: number;
+        results: any[];
+    }>;
+    update(id: string, dto: UpdateAttendanceDto, req: any): Promise<{
+        employee: {
+            firstName: string;
+            lastName: string;
+            employeeNumber: string;
+        };
+        shift: {
+            name: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        checkIn: Date | null;
+        checkOut: Date | null;
+        employeeId: string;
+        lunchMinutes: number;
+        attendanceDate: Date;
+        shiftId: string | null;
+        lunchOut: Date | null;
+        lunchIn: Date | null;
+        isHoliday: boolean;
+        grossWorkedMinutes: number;
+        netWorkedMinutes: number;
+        netWorkedRounded: number;
+        workedHours: number;
+        otHours: number;
+        otRate: number;
+        otAmount: number;
+        markedBy: string | null;
+    }>;
+}
