@@ -137,6 +137,15 @@ let EmployeesService = class EmployeesService {
             throw new common_1.NotFoundException('Employee not found');
         return emp;
     }
+    async findMe(user) {
+        const emp = await this.prisma.employee.findFirst({
+            where: { userId: user.id, companyId: user.companyId },
+            include: { department: true, designation: true, documents: { where: { isActive: true }, select: { id: true, documentType: true, fileName: true, createdAt: true } } },
+        });
+        if (!emp)
+            return null;
+        return emp;
+    }
     async getStats(user) {
         const where = { companyId: user.companyId, isActive: true };
         const [total, active, onProbation, contract, resigned] = await Promise.all([

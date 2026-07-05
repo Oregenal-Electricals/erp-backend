@@ -24,6 +24,7 @@ let EmployeesController = class EmployeesController {
     constructor(empService) {
         this.empService = empService;
     }
+    findMe(req) { return this.empService.findMe(req.user); }
     getStats(req) { return this.empService.getStats(req.user); }
     getDepts(req) { return this.empService.findAllDepartments(req.user); }
     createDept(dto, req) { return this.empService.createDepartment(dto, req.user); }
@@ -45,6 +46,14 @@ let EmployeesController = class EmployeesController {
     }
 };
 exports.EmployeesController = EmployeesController;
+__decorate([
+    (0, common_1.Get)('me'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], EmployeesController.prototype, "findMe", null);
 __decorate([
     (0, common_1.Get)('stats'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),

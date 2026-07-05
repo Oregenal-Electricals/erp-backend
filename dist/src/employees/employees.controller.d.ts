@@ -4,6 +4,85 @@ import { CreateDepartmentDto, CreateDesignationDto, CreateEmployeeDto, UpdateEmp
 export declare class EmployeesController {
     private readonly empService;
     constructor(empService: EmployeesService);
+    findMe(req: any): Promise<{
+        documents: {
+            id: string;
+            createdAt: Date;
+            documentType: string;
+            fileName: string;
+        }[];
+        department: {
+            id: string;
+            code: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string | null;
+            headUserId: string | null;
+        };
+        designation: {
+            id: string;
+            code: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            description: string | null;
+            grade: string | null;
+        };
+    } & {
+        id: string;
+        address: string | null;
+        city: string | null;
+        state: string | null;
+        pincode: string | null;
+        phone: string;
+        email: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        firstName: string;
+        lastName: string;
+        remarks: string | null;
+        bankName: string | null;
+        userId: string | null;
+        dateOfBirth: Date | null;
+        dateOfJoining: Date;
+        departmentId: string;
+        designationId: string;
+        reportingManagerId: string | null;
+        employmentType: string;
+        gender: string;
+        panNumber: string | null;
+        aadharNumber: string | null;
+        pfNumber: string | null;
+        esiNumber: string | null;
+        bankAccountNumber: string | null;
+        bankIfscCode: string | null;
+        basicSalary: number;
+        hraAmount: number;
+        conveyanceAmount: number;
+        otherAllowances: number;
+        emergencyContact: string | null;
+        emergencyPhone: string | null;
+        dateOfLeaving: Date | null;
+        employeeNumber: string;
+        profilePhoto: string | null;
+    }>;
     getStats(req: any): Promise<{
         total: number;
         active: number;

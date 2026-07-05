@@ -68,5 +68,6 @@ export declare class UpdateEmployeeDto {
     bankName?: string;
     emergencyContact?: string;
     emergencyPhone?: string;
+    userId?: string;
     remarks?: string;
 }

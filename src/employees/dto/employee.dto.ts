@@ -77,5 +77,6 @@ export class UpdateEmployeeDto {
   @IsOptional() @IsString() bankName?: string;
   @IsOptional() @IsString() emergencyContact?: string;
   @IsOptional() @IsString() emergencyPhone?: string;
+  @IsOptional() @IsString() userId?: string;
   @IsOptional() @IsString() remarks?: string;
 }

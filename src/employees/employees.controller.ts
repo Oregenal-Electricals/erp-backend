@@ -12,6 +12,10 @@ import { Permission } from '../common/permissions/permissions.enum';
 export class EmployeesController {
   constructor(private readonly empService: EmployeesService) {}
 
+  @Get('me')
+  @RequirePermissions(Permission.INVENTORY_VIEW)
+  findMe(@Request() req: any) { return this.empService.findMe(req.user); }
+
   @Get('stats')
   @RequirePermissions(Permission.INVENTORY_VIEW)
   getStats(@Request() req: any) { return this.empService.getStats(req.user); }
