@@ -304,6 +304,8 @@ model Company {
   leaveTypes         LeaveType[]
   leaveBalances      LeaveBalance[]
   leaveApplications  LeaveApplication[]
+  payrollRuns        PayrollRun[]
+  payrollEntries     PayrollEntry[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4406,6 +4408,7 @@ model Employee {
   attendance          Attendance[]
   leaveBalances       LeaveBalance[]
   leaveApplications   LeaveApplication[]
+  payrollEntries      PayrollEntry[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -4588,4 +4591,85 @@ model LeaveApplication {
   @@index([companyId, employeeId])
   @@index([companyId, status])
   @@map("leave_applications")
+}
+
+// MODULE 76 — PAYROLL ENGINE
+// ============================================================
+model PayrollRun {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  runNumber         String
+  month             Int
+  year              Int
+  status            String    @default("DRAFT") // DRAFT, APPROVED, PAID
+  totalEmployees    Int       @default(0)
+  totalGross        Float     @default(0)
+  totalDeductions   Float     @default(0)
+  totalNetPay       Float     @default(0)
+  totalPf           Float     @default(0)
+  totalEsi          Float     @default(0)
+  totalTds          Float     @default(0)
+  totalOt           Float     @default(0)
+  processedAt       DateTime?
+  approvedBy        String?
+  approvedAt        DateTime?
+  paidAt            DateTime?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  entries           PayrollEntry[]
+
+  @@unique([companyId, month, year])
+  @@index([companyId, status])
+  @@map("payroll_runs")
+}
+
+model PayrollEntry {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  payrollRunId      String
+  payrollRun        PayrollRun @relation(fields: [payrollRunId], references: [id])
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  month             Int
+  year              Int
+  workingDays       Int       @default(26)
+  presentDays       Float     @default(0)
+  absentDays        Float     @default(0)
+  lopDays           Float     @default(0)
+  basicSalary       Float     @default(0)
+  hraAmount         Float     @default(0)
+  conveyanceAmount  Float     @default(0)
+  otherAllowances   Float     @default(0)
+  otHours           Float     @default(0)
+  otAmount          Float     @default(0)
+  grossEarnings     Float     @default(0)
+  pfEmployee        Float     @default(0)
+  pfEmployer        Float     @default(0)
+  esiEmployee       Float     @default(0)
+  esiEmployer       Float     @default(0)
+  tdsAmount         Float     @default(0)
+  lopAmount         Float     @default(0)
+  otherDeductions   Float     @default(0)
+  totalDeductions   Float     @default(0)
+  netPay            Float     @default(0)
+  status            String    @default("DRAFT")
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, payrollRunId, employeeId])
+  @@index([companyId, employeeId])
+  @@map("payroll_entries")
 }

@@ -102,6 +102,7 @@ import { MisReportsModule } from './mis-reports/mis-reports.module';
 import { EmployeesModule } from './employees/employees.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { LeaveManagementModule } from './leave-management/leave-management.module';
+import { PayrollModule } from './payroll/payroll.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -137,6 +138,7 @@ import configuration from './config/configuration';
     EmployeesModule,
     AttendanceModule,
     LeaveManagementModule,
+    PayrollModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -202,6 +204,7 @@ import configuration from './config/configuration';
     EmployeesModule,
     AttendanceModule,
     LeaveManagementModule,
+    PayrollModule,
   ],
 })
 export class AppModule implements NestModule {
