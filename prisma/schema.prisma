@@ -306,6 +306,7 @@ model Company {
   leaveApplications  LeaveApplication[]
   payrollRuns        PayrollRun[]
   payrollEntries     PayrollEntry[]
+  tdsDeclarations    TdsDeclaration[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4409,6 +4410,7 @@ model Employee {
   leaveBalances       LeaveBalance[]
   leaveApplications   LeaveApplication[]
   payrollEntries      PayrollEntry[]
+  tdsDeclarations     TdsDeclaration[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -4672,4 +4674,39 @@ model PayrollEntry {
   @@unique([companyId, payrollRunId, employeeId])
   @@index([companyId, employeeId])
   @@map("payroll_entries")
+}
+
+// MODULE 78 — TDS MANAGEMENT
+// ============================================================
+model TdsDeclaration {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  financialYear     String    // "2025-26"
+  section80C        Float     @default(0)
+  section80D        Float     @default(0)
+  section80G        Float     @default(0)
+  section80E        Float     @default(0)
+  otherDeductions   Float     @default(0)
+  rentPaid          Float     @default(0)
+  isMetroCity       Boolean   @default(false)
+  hraExemption      Float     @default(0)
+  standardDeduction Float     @default(50000)
+  taxableIncome     Float     @default(0)
+  annualTax         Float     @default(0)
+  monthlyTds        Float     @default(0)
+  regime            String    @default("NEW") // OLD, NEW
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, employeeId, financialYear])
+  @@index([companyId, financialYear])
+  @@map("tds_declarations")
 }

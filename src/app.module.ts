@@ -104,6 +104,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { LeaveManagementModule } from './leave-management/leave-management.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { PfEsiModule } from './pf-esi/pf-esi.module';
+import { TdsModule } from './tds/tds.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -141,6 +142,7 @@ import configuration from './config/configuration';
     LeaveManagementModule,
     PayrollModule,
     PfEsiModule,
+    TdsModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -208,6 +210,7 @@ import configuration from './config/configuration';
     LeaveManagementModule,
     PayrollModule,
     PfEsiModule,
+    TdsModule,
   ],
 })
 export class AppModule implements NestModule {
