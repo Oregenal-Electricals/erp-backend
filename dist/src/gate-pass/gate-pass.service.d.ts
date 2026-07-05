@@ -14,6 +14,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -23,13 +30,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -92,6 +92,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -101,13 +108,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -165,6 +165,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -174,13 +181,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -238,6 +238,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -247,13 +254,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -311,6 +311,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -320,13 +327,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -384,6 +384,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -393,13 +400,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -457,6 +457,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -466,13 +473,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;
@@ -530,6 +530,13 @@ export declare class GatePassService {
             code: string;
             name: string;
         };
+        employee: {
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
+            role: import(".prisma/client").$Enums.UserRole;
+        };
         requestedBy: {
             id: string;
             firstName: string;
@@ -539,13 +546,6 @@ export declare class GatePassService {
             id: string;
             firstName: string;
             lastName: string;
-        };
-        employee: {
-            id: string;
-            employeeCode: string;
-            firstName: string;
-            lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
         };
         issuedBy: {
             id: string;

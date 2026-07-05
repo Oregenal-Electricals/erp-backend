@@ -111,6 +111,7 @@ const pdf_engine_module_1 = require("./pdf-engine/pdf-engine.module");
 const excel_export_module_1 = require("./excel-export/excel-export.module");
 const analytics_module_1 = require("./analytics/analytics.module");
 const mis_reports_module_1 = require("./mis-reports/mis-reports.module");
+const employees_module_1 = require("./employees/employees.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -149,6 +150,7 @@ exports.AppModule = AppModule = __decorate([
             po_amendment_module_1.PoAmendmentModule,
             purchase_analytics_module_1.PurchaseAnalyticsModule,
             mis_reports_module_1.MisReportsModule,
+            employees_module_1.EmployeesModule,
             import_order_module_1.ImportOrderModule,
             proforma_invoice_module_1.ProformaInvoiceModule,
             payment_instrument_module_1.PaymentInstrumentModule,
@@ -211,6 +213,7 @@ exports.AppModule = AppModule = __decorate([
             excel_export_module_1.ExcelExportModule,
             analytics_module_1.AnalyticsModule,
             mis_reports_module_1.MisReportsModule,
+            employees_module_1.EmployeesModule,
         ],
     })
 ], AppModule);

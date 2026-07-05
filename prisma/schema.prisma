@@ -296,6 +296,9 @@ model Company {
   approvalRequests   ApprovalRequest[]
   tasks              Task[]
   documents          Document[]
+  hrDepartments      HrDepartment[]
+  hrDesignations     HrDesignation[]
+  employees          Employee[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4300,4 +4303,127 @@ model Document {
   @@index([companyId, category])
   @@index([companyId, referenceType, referenceId])
   @@map("documents")
+}
+
+// PHASE 10 — HR & PAYROLL
+// MODULE 73 — EMPLOYEE MANAGEMENT
+// ============================================================
+model HrDepartment {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  code          String
+  name          String
+  description   String?
+  headUserId    String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  employees     Employee[]
+
+  @@unique([companyId, code])
+  @@map("hr_departments")
+}
+
+model HrDesignation {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  code          String
+  name          String
+  grade         String?
+  description   String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  employees     Employee[]
+
+  @@unique([companyId, code])
+  @@map("hr_designations")
+}
+
+model Employee {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  employeeNumber      String
+  userId              String?
+  firstName           String
+  lastName            String
+  email               String
+  phone               String
+  dateOfBirth         DateTime?
+  dateOfJoining       DateTime
+  dateOfLeaving       DateTime?
+  departmentId        String
+  department          HrDepartment @relation(fields: [departmentId], references: [id])
+  designationId       String
+  designation         HrDesignation @relation(fields: [designationId], references: [id])
+  reportingManagerId  String?
+  employmentType      String    @default("PERMANENT") // PERMANENT, CONTRACT, PROBATION, INTERN
+  gender              String    @default("MALE") // MALE, FEMALE, OTHER
+  panNumber           String?
+  aadharNumber        String?
+  pfNumber            String?
+  esiNumber           String?
+  bankAccountNumber   String?
+  bankIfscCode        String?
+  bankName            String?
+  basicSalary         Float     @default(0)
+  hraAmount           Float     @default(0)
+  conveyanceAmount    Float     @default(0)
+  otherAllowances     Float     @default(0)
+  address             String?
+  city                String?
+  state               String?
+  pincode             String?
+  emergencyContact    String?
+  emergencyPhone      String?
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, RESIGNED, TERMINATED
+  profilePhoto        String?
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  documents           EmployeeDocument[]
+
+  @@unique([companyId, employeeNumber])
+  @@unique([companyId, email])
+  @@index([companyId, departmentId])
+  @@index([companyId, status])
+  @@map("employees")
+}
+
+model EmployeeDocument {
+  id            String    @id @default(uuid())
+  companyId     String
+  employeeId    String
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  documentType  String    // AADHAR, PAN, OFFER_LETTER, EXPERIENCE_CERT, EDUCATION, OTHER
+  fileName      String
+  fileSize      Int       @default(0)
+  fileData      String
+  mimeType      String    @default("application/pdf")
+  remarks       String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@index([employeeId])
+  @@map("employee_documents")
 }

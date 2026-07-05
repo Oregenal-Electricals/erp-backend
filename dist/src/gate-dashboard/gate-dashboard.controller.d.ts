@@ -175,11 +175,11 @@ export declare class GateDashboardController {
             plant: {
                 name: string;
             };
-            requestedBy: {
+            employee: {
                 firstName: string;
                 lastName: string;
             };
-            employee: {
+            requestedBy: {
                 firstName: string;
                 lastName: string;
             };
