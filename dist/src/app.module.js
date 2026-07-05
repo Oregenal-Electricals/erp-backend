@@ -115,6 +115,7 @@ const employees_module_1 = require("./employees/employees.module");
 const attendance_module_1 = require("./attendance/attendance.module");
 const leave_management_module_1 = require("./leave-management/leave-management.module");
 const payroll_module_1 = require("./payroll/payroll.module");
+const pf_esi_module_1 = require("./pf-esi/pf-esi.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -157,6 +158,7 @@ exports.AppModule = AppModule = __decorate([
             attendance_module_1.AttendanceModule,
             leave_management_module_1.LeaveManagementModule,
             payroll_module_1.PayrollModule,
+            pf_esi_module_1.PfEsiModule,
             import_order_module_1.ImportOrderModule,
             proforma_invoice_module_1.ProformaInvoiceModule,
             payment_instrument_module_1.PaymentInstrumentModule,
@@ -223,6 +225,7 @@ exports.AppModule = AppModule = __decorate([
             attendance_module_1.AttendanceModule,
             leave_management_module_1.LeaveManagementModule,
             payroll_module_1.PayrollModule,
+            pf_esi_module_1.PfEsiModule,
         ],
     })
 ], AppModule);
