@@ -101,6 +101,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { MisReportsModule } from './mis-reports/mis-reports.module';
 import { EmployeesModule } from './employees/employees.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { LeaveManagementModule } from './leave-management/leave-management.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -135,6 +136,7 @@ import configuration from './config/configuration';
     MisReportsModule,
     EmployeesModule,
     AttendanceModule,
+    LeaveManagementModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -199,6 +201,7 @@ import configuration from './config/configuration';
     MisReportsModule,
     EmployeesModule,
     AttendanceModule,
+    LeaveManagementModule,
   ],
 })
 export class AppModule implements NestModule {

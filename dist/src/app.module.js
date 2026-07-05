@@ -113,6 +113,7 @@ const analytics_module_1 = require("./analytics/analytics.module");
 const mis_reports_module_1 = require("./mis-reports/mis-reports.module");
 const employees_module_1 = require("./employees/employees.module");
 const attendance_module_1 = require("./attendance/attendance.module");
+const leave_management_module_1 = require("./leave-management/leave-management.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -153,6 +154,7 @@ exports.AppModule = AppModule = __decorate([
             mis_reports_module_1.MisReportsModule,
             employees_module_1.EmployeesModule,
             attendance_module_1.AttendanceModule,
+            leave_management_module_1.LeaveManagementModule,
             import_order_module_1.ImportOrderModule,
             proforma_invoice_module_1.ProformaInvoiceModule,
             payment_instrument_module_1.PaymentInstrumentModule,
@@ -217,6 +219,7 @@ exports.AppModule = AppModule = __decorate([
             mis_reports_module_1.MisReportsModule,
             employees_module_1.EmployeesModule,
             attendance_module_1.AttendanceModule,
+            leave_management_module_1.LeaveManagementModule,
         ],
     })
 ], AppModule);

@@ -301,6 +301,9 @@ model Company {
   employees          Employee[]
   shifts             Shift[]
   attendance         Attendance[]
+  leaveTypes         LeaveType[]
+  leaveBalances      LeaveBalance[]
+  leaveApplications  LeaveApplication[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4401,6 +4404,8 @@ model Employee {
 
   documents           EmployeeDocument[]
   attendance          Attendance[]
+  leaveBalances       LeaveBalance[]
+  leaveApplications   LeaveApplication[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -4497,4 +4502,90 @@ model Attendance {
   @@index([companyId, attendanceDate])
   @@index([companyId, employeeId])
   @@map("attendance")
+}
+
+// MODULE 75 — LEAVE MANAGEMENT
+// ============================================================
+model LeaveType {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  code                String
+  name                String
+  daysAllowed         Float     @default(0)
+  isPaid              Boolean   @default(true)
+  carryForward        Boolean   @default(false)
+  maxCarryForward     Float     @default(0)
+  applicableGender    String    @default("ALL") // ALL, MALE, FEMALE
+  requiresApproval    Boolean   @default(true)
+  description         String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  balances            LeaveBalance[]
+  applications        LeaveApplication[]
+
+  @@unique([companyId, code])
+  @@map("leave_types")
+}
+
+model LeaveBalance {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  employeeId          String
+  employee            Employee  @relation(fields: [employeeId], references: [id])
+  leaveTypeId         String
+  leaveType           LeaveType @relation(fields: [leaveTypeId], references: [id])
+  year                Int
+  allocated           Float     @default(0)
+  used                Float     @default(0)
+  pending             Float     @default(0)
+  available           Float     @default(0)
+  carryForward        Float     @default(0)
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, employeeId, leaveTypeId, year])
+  @@index([companyId, employeeId])
+  @@map("leave_balances")
+}
+
+model LeaveApplication {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  applicationNumber   String
+  employeeId          String
+  employee            Employee  @relation(fields: [employeeId], references: [id])
+  leaveTypeId         String
+  leaveType           LeaveType @relation(fields: [leaveTypeId], references: [id])
+  fromDate            DateTime
+  toDate              DateTime
+  days                Float
+  reason              String
+  status              String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  approvedBy          String?
+  approvedAt          DateTime?
+  rejectionReason     String?
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, applicationNumber])
+  @@index([companyId, employeeId])
+  @@index([companyId, status])
+  @@map("leave_applications")
 }
