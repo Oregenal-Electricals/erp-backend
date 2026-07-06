@@ -281,6 +281,37 @@ model Company {
   deliveryConfirmations DeliveryConfirmation[]
   accounts           Account[]
   vouchers           Voucher[]
+  arInvoices         ArInvoice[]
+  arPayments         ArPayment[]
+  apBills            ApBill[]
+  apPayments         ApPayment[]
+  gstReturns         GstReturn[]
+  bankStatements     BankStatement[]
+  customerCreditLimits CustomerCreditLimit[]
+  creditHolds        CreditHold[]
+  notifications      Notification[]
+  alertTemplates     AlertTemplate[]
+  alertLogs          AlertLog[]
+  workflowDefinitions WorkflowDefinition[]
+  approvalRequests   ApprovalRequest[]
+  tasks              Task[]
+  documents          Document[]
+  hrDepartments      HrDepartment[]
+  hrDesignations     HrDesignation[]
+  employees          Employee[]
+  shifts             Shift[]
+  attendance         Attendance[]
+  leaveTypes         LeaveType[]
+  leaveBalances      LeaveBalance[]
+  leaveApplications  LeaveApplication[]
+  payrollRuns        PayrollRun[]
+  payrollEntries     PayrollEntry[]
+  tdsDeclarations    TdsDeclaration[]
+  trainingSessions   TrainingSession[]
+  trainingPrograms   TrainingProgram[]
+  trainingEnrollments TrainingEnrollment[]
+  accountGroups       AccountGroup[]
+  accountHeads        AccountHead[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -1140,6 +1171,7 @@ model Vendor {
 
   @@unique([companyId, code])
   qualityRatings SupplierQualityRating[]
+  apBills        ApBill[] @relation("ApBillVendor")
   supplierCars   SupplierCar[] @relation("SupplierCarVendor")
   @@map("vendors")
 }
@@ -1735,6 +1767,7 @@ model PurchaseOrder {
 
   grnHeaders    GrnHeader[]
   @@unique([companyId, poNumber])
+  apBills ApBill[]
   @@map("purchase_orders")
 }
 
@@ -3471,6 +3504,7 @@ model SalesOrder {
   @@index([companyId, status])
   dispatchPlans DispatchPlan[]
   dispatches Dispatch[]
+  arInvoices ArInvoice[]
   @@map("sales_orders")
 }
 
@@ -3595,6 +3629,7 @@ model Dispatch {
   @@unique([companyId, dispatchNumber])
   @@index([companyId, status])
   deliveryConfirmation DeliveryConfirmation?
+  arInvoices ArInvoice[]
   @@map("dispatches")
 }
 
@@ -3738,4 +3773,1096 @@ model VoucherEntry {
   @@index([voucherId])
   @@index([accountId])
   @@map("voucher_entries")
+}
+
+// MODULE 105 — ACCOUNTS RECEIVABLE
+// ============================================================
+model ArInvoice {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  invoiceNumber     String
+  dispatchId        String?
+  dispatch          Dispatch? @relation(fields: [dispatchId], references: [id])
+  soId              String?
+  salesOrder        SalesOrder? @relation(fields: [soId], references: [id])
+  customerName      String
+  customerAddress   String?
+  invoiceDate       DateTime  @default(now())
+  dueDate           DateTime
+  paymentTerms      String    @default("NET_30") // NET_30, NET_45, NET_60, IMMEDIATE
+  subtotal          Float     @default(0)
+  totalGst          Float     @default(0)
+  totalAmount       Float     @default(0)
+  paidAmount        Float     @default(0)
+  outstandingAmount Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, SENT, PARTIAL, PAID, OVERDUE, CANCELLED
+  voucherId         String?
+  notes             String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  payments          ArPayment[]
+
+  @@unique([companyId, invoiceNumber])
+  @@index([companyId, status])
+  @@map("ar_invoices")
+}
+
+model ArPayment {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  paymentNumber   String
+  invoiceId       String
+  invoice         ArInvoice @relation(fields: [invoiceId], references: [id])
+  paymentDate     DateTime  @default(now())
+  amount          Float     @default(0)
+  paymentMode     String    @default("BANK_TRANSFER") // BANK_TRANSFER, CHEQUE, CASH, UPI, NEFT, RTGS
+  referenceNumber String?
+  bankAccountId   String?
+  voucherId       String?
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, paymentNumber])
+  @@map("ar_payments")
+}
+
+// MODULE 106 — ACCOUNTS PAYABLE
+// ============================================================
+model ApBill {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  billNumber        String
+  vendorBillNumber  String
+  vendorId          String?
+  vendor            Vendor?   @relation("ApBillVendor", fields: [vendorId], references: [id])
+  vendorName        String
+  poId              String?
+  po                PurchaseOrder? @relation(fields: [poId], references: [id])
+  billDate          DateTime  @default(now())
+  dueDate           DateTime
+  paymentTerms      String    @default("NET_30")
+  subtotal          Float     @default(0)
+  totalGst          Float     @default(0)
+  totalAmount       Float     @default(0)
+  paidAmount        Float     @default(0)
+  outstandingAmount Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, APPROVED, PARTIAL, PAID, OVERDUE, CANCELLED
+  voucherId         String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  payments          ApPayment[]
+
+  @@unique([companyId, billNumber])
+  @@index([companyId, status])
+  @@map("ap_bills")
+}
+
+model ApPayment {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  paymentNumber   String
+  billId          String
+  bill            ApBill    @relation(fields: [billId], references: [id])
+  paymentDate     DateTime  @default(now())
+  amount          Float     @default(0)
+  paymentMode     String    @default("BANK_TRANSFER")
+  referenceNumber String?
+  bankAccountId   String?
+  voucherId       String?
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, paymentNumber])
+  @@map("ap_payments")
+}
+
+// MODULE 107 — GST MANAGEMENT
+// ============================================================
+model GstReturn {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  returnType        String    // GSTR1, GSTR3B
+  period            String    // YYYY-MM e.g. 2026-07
+  fromDate          DateTime
+  toDate            DateTime
+  totalSales        Float     @default(0)
+  totalOutputCgst   Float     @default(0)
+  totalOutputSgst   Float     @default(0)
+  totalOutputIgst   Float     @default(0)
+  totalOutputGst    Float     @default(0)
+  totalPurchases    Float     @default(0)
+  totalInputCgst    Float     @default(0)
+  totalInputSgst    Float     @default(0)
+  totalInputIgst    Float     @default(0)
+  totalInputGst     Float     @default(0)
+  netGstLiability   Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, FILED
+  filedDate         DateTime?
+  filedBy           String?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, returnType, period])
+  @@index([companyId, period])
+  @@map("gst_returns")
+}
+
+// MODULE 108 — BANK RECONCILIATION
+// ============================================================
+model BankStatement {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  bankAccountId     String
+  bankAccountName   String
+  period            String    // YYYY-MM
+  openingBalance    Float     @default(0)
+  closingBalance    Float     @default(0)
+  totalCredits      Float     @default(0)
+  totalDebits       Float     @default(0)
+  reconciledCount   Int       @default(0)
+  unreconciledCount Int       @default(0)
+  status            String    @default("DRAFT") // DRAFT, RECONCILED
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  lines             BankStatementLine[]
+
+  @@unique([companyId, bankAccountId, period])
+  @@index([companyId, period])
+  @@map("bank_statements")
+}
+
+model BankStatementLine {
+  id                String        @id @default(uuid())
+  companyId         String
+  statementId       String
+  statement         BankStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  transactionDate   DateTime
+  description       String
+  referenceNumber   String?
+  debitAmount       Float         @default(0)
+  creditAmount      Float         @default(0)
+  balance           Float         @default(0)
+  isReconciled      Boolean       @default(false)
+  voucherEntryId    String?
+  reconciledDate    DateTime?
+  reconciledBy      String?
+  isActive          Boolean       @default(true)
+  isTestData        Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@index([statementId, isReconciled])
+  @@map("bank_statement_lines")
+}
+
+// MODULE 99 — CREDIT CONTROL
+// ============================================================
+model CustomerCreditLimit {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  customerName  String
+  creditLimit   Float     @default(0)
+  creditDays    Int       @default(30)
+  notes         String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  creditHolds   CreditHold[]
+
+  @@unique([companyId, customerName])
+  @@index([companyId])
+  @@map("customer_credit_limits")
+}
+
+model CreditHold {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  customerName        String
+  creditLimitId       String?
+  creditLimit         CustomerCreditLimit? @relation(fields: [creditLimitId], references: [id])
+  referenceType       String    // CUSTOMER_PO, SALES_ORDER
+  referenceId         String
+  referenceNumber     String
+  holdReason          String
+  holdAmount          Float     @default(0)
+  outstandingAtHold   Float     @default(0)
+  creditLimitAtHold   Float     @default(0)
+  status              String    @default("HELD") // HELD, RELEASED, AUTO_RELEASED
+  releasedBy          String?
+  releaseReason       String?
+  releasedDate        DateTime?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@index([companyId, customerName, status])
+  @@map("credit_holds")
+}
+
+// PHASE 14 — COMMUNICATION & WORKFLOW
+// MODULE 110 — NOTIFICATION ENGINE
+// ============================================================
+model Notification {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  userId          String
+  type            String    // SO_CREATED, PO_APPROVED, INVOICE_OVERDUE, CREDIT_HOLD, STOCK_LOW, DISPATCH_DONE, PAYMENT_RECEIVED, QUALITY_ALERT, TASK_ASSIGNED
+  title           String
+  message         String
+  referenceType   String?
+  referenceId     String?
+  referenceNumber String?
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  isRead          Boolean   @default(false)
+  readAt          DateTime?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@index([companyId, userId, isRead])
+  @@index([companyId, userId, createdAt])
+  @@map("notifications")
+}
+
+// MODULE 111 — EMAIL/SMS ALERTS
+// ============================================================
+model AlertTemplate {
+  id               String    @id @default(uuid())
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id])
+  eventType        String    // INVOICE_OVERDUE, DISPATCH_CREATED, PAYMENT_RECEIVED, CREDIT_HOLD, LOW_STOCK, PO_APPROVED, SO_CONFIRMED
+  channel          String    @default("EMAIL") // EMAIL, SMS, BOTH
+  subject          String
+  bodyTemplate     String
+  recipients       String    @default("INTERNAL") // CUSTOMER, INTERNAL, BOTH
+  recipientEmails  String?   // comma-separated for internal
+  isActive         Boolean   @default(true)
+  isTestData       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?
+  updatedBy        String?
+
+  logs             AlertLog[]
+
+  @@unique([companyId, eventType, channel])
+  @@index([companyId, eventType])
+  @@map("alert_templates")
+}
+
+model AlertLog {
+  id              String        @id @default(uuid())
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id])
+  templateId      String?
+  template        AlertTemplate? @relation(fields: [templateId], references: [id])
+  eventType       String
+  channel         String
+  recipient       String
+  subject         String?
+  body            String
+  status          String        @default("PENDING") // PENDING, SENT, FAILED
+  errorMessage    String?
+  sentAt          DateTime?
+  referenceType   String?
+  referenceId     String?
+  referenceNumber String?
+  isActive        Boolean       @default(true)
+  isTestData      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@index([companyId, status])
+  @@index([companyId, eventType])
+  @@map("alert_logs")
+}
+
+// MODULE 112 — APPROVAL WORKFLOWS
+// ============================================================
+model WorkflowDefinition {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  name              String
+  documentType      String    // PURCHASE_ORDER, SALES_ORDER, VOUCHER, CREDIT_OVERRIDE, AP_BILL
+  triggerCondition  String    @default("ALWAYS") // ALWAYS, ABOVE_AMOUNT
+  triggerAmount     Float?
+  levels            Int       @default(1)
+  description       String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  steps             WorkflowStep[]
+  requests          ApprovalRequest[]
+
+  @@unique([companyId, documentType])
+  @@index([companyId])
+  @@map("workflow_definitions")
+}
+
+model WorkflowStep {
+  id              String              @id @default(uuid())
+  companyId       String
+  workflowId      String
+  workflow        WorkflowDefinition  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  level           Int
+  stepName        String
+  approverUserId  String?
+  timeoutHours    Int?                @default(48)
+  isActive        Boolean             @default(true)
+  isTestData      Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([workflowId, level])
+  @@map("workflow_steps")
+}
+
+model ApprovalRequest {
+  id              String              @id @default(uuid())
+  companyId       String
+  company         Company             @relation(fields: [companyId], references: [id])
+  workflowId      String?
+  workflow        WorkflowDefinition? @relation(fields: [workflowId], references: [id])
+  documentType    String
+  documentId      String
+  documentNumber  String
+  requestedBy     String
+  currentLevel    Int                 @default(1)
+  totalLevels     Int                 @default(1)
+  status          String              @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  amount          Float?
+  remarks         String?
+  isActive        Boolean             @default(true)
+  isTestData      Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  actions         ApprovalAction[]
+
+  @@index([companyId, status])
+  @@index([companyId, documentType])
+  @@map("approval_requests")
+}
+
+model ApprovalAction {
+  id          String          @id @default(uuid())
+  companyId   String
+  requestId   String
+  request     ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  level       Int
+  action      String          // APPROVED, REJECTED, DELEGATED
+  actionBy    String
+  comments    String?
+  actionDate  DateTime        @default(now())
+  isActive    Boolean         @default(true)
+  isTestData  Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("approval_actions")
+}
+
+// MODULE 113 — TASK MANAGEMENT
+// ============================================================
+model Task {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  taskNumber      String
+  title           String
+  description     String?
+  assignedTo      String
+  assignedBy      String
+  dueDate         DateTime
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status          String    @default("OPEN") // OPEN, IN_PROGRESS, COMPLETED, CANCELLED
+  category        String    @default("GENERAL") // QUALITY, PURCHASE, SALES, FINANCE, PRODUCTION, GENERAL
+  referenceType   String?
+  referenceId     String?
+  referenceNumber String?
+  completedDate   DateTime?
+  completionNote  String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  comments        TaskComment[]
+
+  @@unique([companyId, taskNumber])
+  @@index([companyId, assignedTo, status])
+  @@index([companyId, status, dueDate])
+  @@map("tasks")
+}
+
+model TaskComment {
+  id          String    @id @default(uuid())
+  companyId   String
+  taskId      String
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  comment     String
+  commentBy   String
+  isActive    Boolean   @default(true)
+  isTestData  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@index([taskId])
+  @@map("task_comments")
+}
+
+// PHASE 15 — DOCUMENT CENTER
+// MODULE 114 — DOCUMENT MANAGEMENT
+// ============================================================
+model Document {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  documentNumber  String
+  title           String
+  category        String    @default("GENERAL") // PURCHASE, QUALITY, SALES, FINANCE, HR, PRODUCTION, GENERAL
+  fileType        String    @default("PDF") // PDF, IMAGE, EXCEL, WORD, OTHER
+  fileName        String
+  fileSize        Int       @default(0)
+  fileData        String    // base64 encoded
+  mimeType        String    @default("application/pdf")
+  version         Int       @default(1)
+  parentDocId     String?
+  parent          Document? @relation("DocumentVersions", fields: [parentDocId], references: [id])
+  versions        Document[] @relation("DocumentVersions")
+  referenceType   String?
+  referenceId     String?
+  referenceNumber String?
+  tags            String?
+  description     String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([companyId, documentNumber])
+  @@index([companyId, category])
+  @@index([companyId, referenceType, referenceId])
+  @@map("documents")
+}
+
+// PHASE 10 — HR & PAYROLL
+// MODULE 73 — EMPLOYEE MANAGEMENT
+// ============================================================
+model HrDepartment {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  code          String
+  name          String
+  description   String?
+  headUserId    String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  employees     Employee[]
+
+  @@unique([companyId, code])
+  @@map("hr_departments")
+}
+
+model HrDesignation {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  code          String
+  name          String
+  grade         String?
+  description   String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  employees     Employee[]
+
+  @@unique([companyId, code])
+  @@map("hr_designations")
+}
+
+model Employee {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  employeeNumber      String
+  userId              String?
+  firstName           String
+  lastName            String
+  email               String
+  phone               String
+  dateOfBirth         DateTime?
+  dateOfJoining       DateTime
+  dateOfLeaving       DateTime?
+  departmentId        String
+  department          HrDepartment @relation(fields: [departmentId], references: [id])
+  designationId       String
+  designation         HrDesignation @relation(fields: [designationId], references: [id])
+  reportingManagerId  String?
+  employmentType      String    @default("PERMANENT") // PERMANENT, CONTRACT, PROBATION, INTERN
+  gender              String    @default("MALE") // MALE, FEMALE, OTHER
+  panNumber           String?
+  aadharNumber        String?
+  pfNumber            String?
+  esiNumber           String?
+  bankAccountNumber   String?
+  bankIfscCode        String?
+  bankName            String?
+  basicSalary         Float     @default(0)
+  hraAmount           Float     @default(0)
+  conveyanceAmount    Float     @default(0)
+  otherAllowances     Float     @default(0)
+  address             String?
+  city                String?
+  state               String?
+  pincode             String?
+  emergencyContact    String?
+  emergencyPhone      String?
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, RESIGNED, TERMINATED
+  profilePhoto        String?
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  documents           EmployeeDocument[]
+  attendance          Attendance[]
+  leaveBalances       LeaveBalance[]
+  leaveApplications   LeaveApplication[]
+  payrollEntries      PayrollEntry[]
+  tdsDeclarations     TdsDeclaration[]
+  trainingEnrollments TrainingEnrollment[]
+
+  @@unique([companyId, employeeNumber])
+  @@unique([companyId, email])
+  @@index([companyId, departmentId])
+  @@index([companyId, status])
+  @@map("employees")
+}
+
+model EmployeeDocument {
+  id            String    @id @default(uuid())
+  companyId     String
+  employeeId    String
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  documentType  String    // AADHAR, PAN, OFFER_LETTER, EXPERIENCE_CERT, EDUCATION, OTHER
+  fileName      String
+  fileSize      Int       @default(0)
+  fileData      String
+  mimeType      String    @default("application/pdf")
+  remarks       String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  @@index([employeeId])
+  @@map("employee_documents")
+}
+
+// MODULE 74 — ATTENDANCE MANAGEMENT
+// ============================================================
+model Shift {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  code                String
+  name                String
+  startTime           String    // "08:00"
+  endTime             String    // "16:00"
+  shiftHours          Float     @default(8.0)
+  lunchStartTime      String?   // "12:45"
+  lunchEndTime        String?   // "13:15"
+  lunchMinutes        Float     @default(30)
+  weeklyOff           String    @default("SUNDAY")
+  otMultiplier        Float     @default(1.5)
+  holidayMultiplier   Float     @default(2.0)
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  attendance          Attendance[]
+
+  @@unique([companyId, code])
+  @@map("shifts")
+}
+
+model Attendance {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  employeeId          String
+  employee            Employee  @relation(fields: [employeeId], references: [id])
+  shiftId             String?
+  shift               Shift?    @relation(fields: [shiftId], references: [id])
+  attendanceDate      DateTime
+  checkIn             DateTime?
+  checkOut            DateTime?
+  lunchOut            DateTime?
+  lunchIn             DateTime?
+  lunchMinutes        Float     @default(0)
+  grossWorkedMinutes  Float     @default(0)
+  netWorkedMinutes    Float     @default(0)
+  netWorkedRounded    Float     @default(0)
+  workedHours         Float     @default(0)
+  otHours             Float     @default(0)
+  otRate              Float     @default(1.5)
+  otAmount            Float     @default(0)
+  status              String    @default("PRESENT") // PRESENT, ABSENT, HALF_DAY, HOLIDAY, WEEK_OFF, LEAVE
+  isHoliday           Boolean   @default(false)
+  markedBy            String?
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, employeeId, attendanceDate])
+  @@index([companyId, attendanceDate])
+  @@index([companyId, employeeId])
+  @@map("attendance")
+}
+
+// MODULE 75 — LEAVE MANAGEMENT
+// ============================================================
+model LeaveType {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  code                String
+  name                String
+  daysAllowed         Float     @default(0)
+  isPaid              Boolean   @default(true)
+  carryForward        Boolean   @default(false)
+  maxCarryForward     Float     @default(0)
+  applicableGender    String    @default("ALL") // ALL, MALE, FEMALE
+  requiresApproval    Boolean   @default(true)
+  description         String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  balances            LeaveBalance[]
+  applications        LeaveApplication[]
+
+  @@unique([companyId, code])
+  @@map("leave_types")
+}
+
+model LeaveBalance {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  employeeId          String
+  employee            Employee  @relation(fields: [employeeId], references: [id])
+  leaveTypeId         String
+  leaveType           LeaveType @relation(fields: [leaveTypeId], references: [id])
+  year                Int
+  allocated           Float     @default(0)
+  used                Float     @default(0)
+  pending             Float     @default(0)
+  available           Float     @default(0)
+  carryForward        Float     @default(0)
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, employeeId, leaveTypeId, year])
+  @@index([companyId, employeeId])
+  @@map("leave_balances")
+}
+
+model LeaveApplication {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  applicationNumber   String
+  employeeId          String
+  employee            Employee  @relation(fields: [employeeId], references: [id])
+  leaveTypeId         String
+  leaveType           LeaveType @relation(fields: [leaveTypeId], references: [id])
+  fromDate            DateTime
+  toDate              DateTime
+  days                Float
+  reason              String
+  status              String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  approvedBy          String?
+  approvedAt          DateTime?
+  rejectionReason     String?
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, applicationNumber])
+  @@index([companyId, employeeId])
+  @@index([companyId, status])
+  @@map("leave_applications")
+}
+
+// MODULE 76 — PAYROLL ENGINE
+// ============================================================
+model PayrollRun {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  runNumber         String
+  month             Int
+  year              Int
+  status            String    @default("DRAFT") // DRAFT, APPROVED, PAID
+  totalEmployees    Int       @default(0)
+  totalGross        Float     @default(0)
+  totalDeductions   Float     @default(0)
+  totalNetPay       Float     @default(0)
+  totalPf           Float     @default(0)
+  totalEsi          Float     @default(0)
+  totalTds          Float     @default(0)
+  totalOt           Float     @default(0)
+  processedAt       DateTime?
+  approvedBy        String?
+  approvedAt        DateTime?
+  paidAt            DateTime?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  entries           PayrollEntry[]
+
+  @@unique([companyId, month, year])
+  @@index([companyId, status])
+  @@map("payroll_runs")
+}
+
+model PayrollEntry {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  payrollRunId      String
+  payrollRun        PayrollRun @relation(fields: [payrollRunId], references: [id])
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  month             Int
+  year              Int
+  workingDays       Int       @default(26)
+  presentDays       Float     @default(0)
+  absentDays        Float     @default(0)
+  lopDays           Float     @default(0)
+  basicSalary       Float     @default(0)
+  hraAmount         Float     @default(0)
+  conveyanceAmount  Float     @default(0)
+  otherAllowances   Float     @default(0)
+  otHours           Float     @default(0)
+  otAmount          Float     @default(0)
+  grossEarnings     Float     @default(0)
+  pfEmployee        Float     @default(0)
+  pfEmployer        Float     @default(0)
+  esiEmployee       Float     @default(0)
+  esiEmployer       Float     @default(0)
+  tdsAmount         Float     @default(0)
+  lopAmount         Float     @default(0)
+  otherDeductions   Float     @default(0)
+  totalDeductions   Float     @default(0)
+  netPay            Float     @default(0)
+  status            String    @default("DRAFT")
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, payrollRunId, employeeId])
+  @@index([companyId, employeeId])
+  @@map("payroll_entries")
+}
+
+// MODULE 78 — TDS MANAGEMENT
+// ============================================================
+model TdsDeclaration {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  financialYear     String    // "2025-26"
+  section80C        Float     @default(0)
+  section80D        Float     @default(0)
+  section80G        Float     @default(0)
+  section80E        Float     @default(0)
+  otherDeductions   Float     @default(0)
+  rentPaid          Float     @default(0)
+  isMetroCity       Boolean   @default(false)
+  hraExemption      Float     @default(0)
+  standardDeduction Float     @default(50000)
+  taxableIncome     Float     @default(0)
+  annualTax         Float     @default(0)
+  monthlyTds        Float     @default(0)
+  regime            String    @default("NEW") // OLD, NEW
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, employeeId, financialYear])
+  @@index([companyId, financialYear])
+  @@map("tds_declarations")
+}
+
+// MODULE 82 — TRAINING MANAGEMENT
+// ============================================================
+model TrainingProgram {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  code              String
+  name              String
+  category          String    @default("TECHNICAL") // SAFETY, TECHNICAL, SOFT_SKILLS, COMPLIANCE, INDUCTION
+  description       String?
+  durationHours     Float     @default(8)
+  isMandatory       Boolean   @default(false)
+  validityMonths    Int?
+  targetDesignation String?
+  targetDepartment  String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  sessions          TrainingSession[]
+
+  @@unique([companyId, code])
+  @@map("training_programs")
+}
+
+model TrainingSession {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  sessionNumber       String
+  trainingProgramId   String
+  trainingProgram     TrainingProgram @relation(fields: [trainingProgramId], references: [id])
+  title               String
+  startDate           DateTime
+  endDate             DateTime
+  venue               String?
+  trainer             String?
+  maxParticipants     Int       @default(20)
+  status              String    @default("SCHEDULED") // SCHEDULED, ONGOING, COMPLETED, CANCELLED
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  enrollments         TrainingEnrollment[]
+
+  @@unique([companyId, sessionNumber])
+  @@index([companyId, status])
+  @@map("training_sessions")
+}
+
+model TrainingEnrollment {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  sessionId         String
+  session           TrainingSession @relation(fields: [sessionId], references: [id])
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  status            String    @default("ENROLLED") // ENROLLED, ATTENDED, COMPLETED, FAILED, CANCELLED
+  attendanceMarked  Boolean   @default(false)
+  score             Float?
+  passed            Boolean?
+  certificateNumber String?
+  certificateDate   DateTime?
+  expiryDate        DateTime?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, sessionId, employeeId])
+  @@index([companyId, employeeId])
+  @@map("training_enrollments")
+}
+
+// PHASE 11 — ACCOUNTING & FINANCE
+// MODULE 83 — CHART OF ACCOUNTS
+// ============================================================
+model AccountGroup {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  code            String
+  name            String
+  type            String    // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  nature          String    // DEBIT, CREDIT
+  parentGroupId   String?
+  parentGroup     AccountGroup?  @relation("GroupHierarchy", fields: [parentGroupId], references: [id])
+  childGroups     AccountGroup[] @relation("GroupHierarchy")
+  description     String?
+  isSystemGroup   Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  accounts        AccountHead[]
+
+  @@unique([companyId, code])
+  @@index([companyId, type])
+  @@map("account_groups")
+}
+
+model AccountHead {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  code              String
+  name              String
+  groupId           String
+  group             AccountGroup @relation(fields: [groupId], references: [id])
+  type              String    // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  nature            String    // DEBIT, CREDIT
+  openingBalance    Float     @default(0)
+  openingBalanceType String   @default("DEBIT") // DEBIT or CREDIT
+  currentBalance    Float     @default(0)
+  description       String?
+  isBankAccount     Boolean   @default(false)
+  isCashAccount     Boolean   @default(false)
+  isSystemAccount   Boolean   @default(false)
+  gstApplicable     Boolean   @default(false)
+  taxRate           Float?
+  bankName          String?
+  bankAccountNumber String?
+  bankIfscCode      String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, code])
+  @@index([companyId, type])
+  @@index([companyId, groupId])
+  @@map("account_heads")
 }
