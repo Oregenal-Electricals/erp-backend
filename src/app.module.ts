@@ -110,6 +110,7 @@ import { HrReportsModule } from './hr-reports/hr-reports.module';
 import { TrainingModule } from './training/training.module';
 import { VendorPortalModule } from './vendor-portal/vendor-portal.module';
 import { CustomerPortalModule } from './customer-portal/customer-portal.module';
+import { IotModule } from './iot/iot.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
@@ -154,6 +155,7 @@ import configuration from './config/configuration';
     TrainingModule,
     VendorPortalModule,
     CustomerPortalModule,
+    IotModule,
     AccountingModule,
     ImportOrderModule,
     ProformaInvoiceModule,
@@ -228,6 +230,7 @@ import configuration from './config/configuration';
     TrainingModule,
     VendorPortalModule,
     CustomerPortalModule,
+    IotModule,
     AccountingModule,
   ],
 })

@@ -122,6 +122,7 @@ const hr_reports_module_1 = require("./hr-reports/hr-reports.module");
 const training_module_1 = require("./training/training.module");
 const vendor_portal_module_1 = require("./vendor-portal/vendor-portal.module");
 const customer_portal_module_1 = require("./customer-portal/customer-portal.module");
+const iot_module_1 = require("./iot/iot.module");
 const accounting_module_1 = require("./accounting/accounting.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
@@ -172,6 +173,7 @@ exports.AppModule = AppModule = __decorate([
             training_module_1.TrainingModule,
             vendor_portal_module_1.VendorPortalModule,
             customer_portal_module_1.CustomerPortalModule,
+            iot_module_1.IotModule,
             accounting_module_1.AccountingModule,
             import_order_module_1.ImportOrderModule,
             proforma_invoice_module_1.ProformaInvoiceModule,
@@ -246,6 +248,7 @@ exports.AppModule = AppModule = __decorate([
             training_module_1.TrainingModule,
             vendor_portal_module_1.VendorPortalModule,
             customer_portal_module_1.CustomerPortalModule,
+            iot_module_1.IotModule,
             accounting_module_1.AccountingModule,
         ],
     })

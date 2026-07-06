@@ -281,6 +281,9 @@ model Company {
   deliveryConfirmations DeliveryConfirmation[]
   accounts           Account[]
   vouchers           Voucher[]
+  iotMachines         IotMachine[]
+  machineReadings     MachineReading[]
+  iotAlerts           IotAlert[]
   arInvoices         ArInvoice[]
   arPayments         ArPayment[]
   apBills            ApBill[]
@@ -4865,4 +4868,86 @@ model AccountHead {
   @@index([companyId, type])
   @@index([companyId, groupId])
   @@map("account_heads")
+}
+
+// PHASE 18 — INDUSTRY 4.0
+// ============================================================
+model IotMachine {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  machineCode       String
+  machineName       String
+  machineType       String    // CNC, SMT, ASSEMBLY, TESTING, CONVEYOR
+  location          String?
+  manufacturer      String?
+  modelNumber       String?
+  ipAddress         String?
+  apiEndpoint       String?
+  status            String    @default("OFFLINE") // ONLINE, OFFLINE, IDLE, RUNNING, ERROR, MAINTENANCE
+  lastPingAt        DateTime?
+  parameters        Json?     // configurable thresholds
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String
+  updatedBy         String
+
+  readings          MachineReading[]
+  iotAlerts         IotAlert[]
+
+  @@unique([companyId, machineCode])
+  @@index([companyId, status])
+  @@map("iot_machines")
+}
+
+model MachineReading {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  machineId     String
+  machine       IotMachine @relation(fields: [machineId], references: [id])
+  readingType   String    // TEMPERATURE, SPEED, VIBRATION, CURRENT, PRESSURE, OUTPUT_COUNT, CYCLE_TIME
+  value         Float
+  unit          String?   // °C, RPM, mm/s, A, bar, pcs, sec
+  recordedAt    DateTime  @default(now())
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String    @default("system")
+  updatedBy     String    @default("system")
+
+  @@index([companyId, machineId])
+  @@index([companyId, readingType])
+  @@index([companyId, recordedAt])
+  @@map("machine_readings")
+}
+
+model IotAlert {
+  id            String    @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  machineId     String
+  machine       IotMachine @relation(fields: [machineId], references: [id])
+  alertType     String    // THRESHOLD_BREACH, MACHINE_DOWN, MAINTENANCE_DUE
+  severity      String    @default("WARNING") // INFO, WARNING, CRITICAL
+  parameter     String?   // which parameter triggered
+  value         Float?    // actual value
+  threshold     Float?    // threshold value
+  message       String
+  status        String    @default("OPEN") // OPEN, ACKNOWLEDGED, RESOLVED
+  resolvedAt    DateTime?
+  resolvedBy    String?
+  isActive      Boolean   @default(true)
+  isTestData    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String    @default("system")
+  updatedBy     String    @default("system")
+
+  @@index([companyId, status])
+  @@index([companyId, machineId])
+  @@map("iot_alerts")
 }
