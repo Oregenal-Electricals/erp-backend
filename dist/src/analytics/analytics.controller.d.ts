@@ -24,10 +24,10 @@ export declare class AnalyticsController {
             revenue: number;
         }[];
         recentOrders: {
-            createdAt: Date;
             status: string;
-            customerName: string;
+            createdAt: Date;
             totalAmount: number;
+            customerName: string;
             soNumber: string;
         }[];
     }>;
@@ -175,12 +175,12 @@ export declare class AnalyticsController {
         }[];
         overdueWos: {
             status: string;
-            priority: string;
+            woNumber: string;
             productName: string;
             plannedQty: number;
-            plannedEndDate: Date;
             completedQty: number;
-            woNumber: string;
+            plannedEndDate: Date;
+            priority: string;
         }[];
     }>;
     getInventoryDeep(req: any): Promise<{

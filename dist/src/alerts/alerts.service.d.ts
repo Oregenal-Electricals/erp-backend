@@ -23,13 +23,13 @@ export declare class AlertsService {
     }>;
     createTemplate(dto: CreateAlertTemplateDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         eventType: string;
         channel: string;
         subject: string;
@@ -39,13 +39,13 @@ export declare class AlertsService {
     }>;
     updateTemplate(id: string, dto: UpdateAlertTemplateDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         eventType: string;
         channel: string;
         subject: string;
@@ -55,13 +55,13 @@ export declare class AlertsService {
     }>;
     findAllTemplates(user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         eventType: string;
         channel: string;
         subject: string;
@@ -72,25 +72,25 @@ export declare class AlertsService {
     findAllLogs(user: any, query: any): Promise<{
         data: {
             id: string;
+            companyId: string;
+            status: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            status: string;
-            referenceType: string | null;
-            referenceId: string | null;
             referenceNumber: string | null;
+            referenceId: string | null;
+            referenceType: string | null;
             eventType: string;
             channel: string;
             subject: string | null;
+            templateId: string | null;
             recipient: string;
             body: string;
             errorMessage: string | null;
             sentAt: Date | null;
-            templateId: string | null;
         }[];
         total: number;
         page: number;

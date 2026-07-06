@@ -41,37 +41,37 @@ export declare class GstService {
             totalValue: number;
         };
         invoices: ({
-            salesOrder: {
-                soNumber: string;
-            };
             dispatch: {
                 dispatchNumber: string;
             };
+            salesOrder: {
+                soNumber: string;
+            };
         } & {
             id: string;
+            companyId: string;
+            dueDate: Date;
+            status: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            status: string;
-            dueDate: Date;
-            customerName: string;
-            invoiceNumber: string;
-            invoiceDate: Date;
-            customerAddress: string | null;
-            paymentTerms: string;
-            notes: string | null;
-            totalAmount: number;
+            outstandingAmount: number;
             subtotal: number;
             totalGst: number;
-            soId: string | null;
-            dispatchId: string | null;
-            voucherId: string | null;
+            totalAmount: number;
             paidAmount: number;
-            outstandingAmount: number;
+            invoiceNumber: string;
+            dispatchId: string | null;
+            soId: string | null;
+            customerName: string;
+            customerAddress: string | null;
+            invoiceDate: Date;
+            paymentTerms: string;
+            voucherId: string | null;
+            notes: string | null;
         })[];
     }>;
     getGstr3b(user: any, period: string): Promise<{
@@ -100,19 +100,19 @@ export declare class GstService {
     }>;
     generateReturn(dto: GenerateGstReturnDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        status: string;
-        remarks: string | null;
         fromDate: Date;
         toDate: Date;
-        period: string;
         returnType: string;
+        period: string;
         totalSales: number;
         totalOutputCgst: number;
         totalOutputSgst: number;
@@ -129,19 +129,19 @@ export declare class GstService {
     }>;
     fileReturn(id: string, dto: FileGstReturnDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        status: string;
-        remarks: string | null;
         fromDate: Date;
         toDate: Date;
-        period: string;
         returnType: string;
+        period: string;
         totalSales: number;
         totalOutputCgst: number;
         totalOutputSgst: number;
@@ -158,19 +158,19 @@ export declare class GstService {
     }>;
     findAll(user: any): Promise<{
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        status: string;
-        remarks: string | null;
         fromDate: Date;
         toDate: Date;
-        period: string;
         returnType: string;
+        period: string;
         totalSales: number;
         totalOutputCgst: number;
         totalOutputSgst: number;

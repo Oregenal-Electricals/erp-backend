@@ -9,20 +9,20 @@ export declare class NotificationsController {
     findAll(req: any, query: any): Promise<{
         data: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            priority: string;
+            referenceNumber: string | null;
+            referenceId: string | null;
+            referenceType: string | null;
+            userId: string;
             type: string;
             title: string;
-            priority: string;
-            referenceType: string | null;
-            referenceId: string | null;
-            referenceNumber: string | null;
-            userId: string;
             message: string;
             isRead: boolean;
             readAt: Date | null;

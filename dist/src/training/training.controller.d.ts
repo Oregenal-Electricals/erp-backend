@@ -17,16 +17,16 @@ export declare class TrainingController {
         };
     } & {
         id: string;
-        code: string;
-        name: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        name: string;
         description: string | null;
+        code: string;
         category: string;
         durationHours: number;
         isMandatory: boolean;
@@ -36,16 +36,16 @@ export declare class TrainingController {
     })[]>;
     createProgram(dto: CreateProgramDto, req: any): Promise<{
         id: string;
-        code: string;
-        name: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        name: string;
         description: string | null;
+        code: string;
         category: string;
         durationHours: number;
         isMandatory: boolean;
@@ -55,16 +55,16 @@ export declare class TrainingController {
     }>;
     updateProgram(id: string, dto: any, req: any): Promise<{
         id: string;
-        code: string;
-        name: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        name: string;
         description: string | null;
+        code: string;
         category: string;
         durationHours: number;
         isMandatory: boolean;
@@ -74,33 +74,33 @@ export declare class TrainingController {
     }>;
     getSessions(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                enrollments: number;
+            };
             trainingProgram: {
                 name: string;
                 category: string;
                 durationHours: number;
             };
-            _count: {
-                enrollments: number;
-            };
         } & {
             id: string;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            title: string;
+            sessionNumber: string;
+            trainingProgramId: string;
             startDate: Date;
             endDate: Date;
-            status: string;
-            title: string;
-            remarks: string | null;
-            trainingProgramId: string;
             venue: string | null;
             trainer: string | null;
             maxParticipants: number;
-            sessionNumber: string;
         })[];
         total: number;
         page: number;
@@ -109,16 +109,16 @@ export declare class TrainingController {
     getSession(id: string, req: any): Promise<{
         trainingProgram: {
             id: string;
-            code: string;
-            name: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            name: string;
             description: string | null;
+            code: string;
             category: string;
             durationHours: number;
             isMandatory: boolean;
@@ -128,55 +128,55 @@ export declare class TrainingController {
         };
         enrollments: ({
             employee: {
+                firstName: string;
+                lastName: string;
+                employeeNumber: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 designation: {
                     name: string;
                 };
-                employeeNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            status: string;
-            remarks: string | null;
             employeeId: string;
-            expiryDate: Date | null;
-            passed: boolean | null;
-            score: number | null;
             sessionId: string;
             attendanceMarked: boolean;
+            score: number | null;
+            passed: boolean | null;
             certificateNumber: string | null;
             certificateDate: Date | null;
+            expiryDate: Date | null;
         })[];
     } & {
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        title: string;
+        sessionNumber: string;
+        trainingProgramId: string;
         startDate: Date;
         endDate: Date;
-        status: string;
-        title: string;
-        remarks: string | null;
-        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        sessionNumber: string;
     }>;
     createSession(dto: CreateSessionDto, req: any): Promise<{
         trainingProgram: {
@@ -185,23 +185,23 @@ export declare class TrainingController {
         };
     } & {
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        title: string;
+        sessionNumber: string;
+        trainingProgramId: string;
         startDate: Date;
         endDate: Date;
-        status: string;
-        title: string;
-        remarks: string | null;
-        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        sessionNumber: string;
     }>;
     updateSession(id: string, dto: any, req: any): Promise<{
         trainingProgram: {
@@ -209,43 +209,43 @@ export declare class TrainingController {
         };
     } & {
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        title: string;
+        sessionNumber: string;
+        trainingProgramId: string;
         startDate: Date;
         endDate: Date;
-        status: string;
-        title: string;
-        remarks: string | null;
-        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        sessionNumber: string;
     }>;
     completeSession(id: string, req: any): Promise<{
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        title: string;
+        sessionNumber: string;
+        trainingProgramId: string;
         startDate: Date;
         endDate: Date;
-        status: string;
-        title: string;
-        remarks: string | null;
-        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        sessionNumber: string;
     }>;
     enroll(dto: EnrollDto, req: any): Promise<{
         sessionId: string;
@@ -257,23 +257,23 @@ export declare class TrainingController {
     }>;
     completeEnrollment(id: string, dto: UpdateEnrollmentDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        status: string;
-        remarks: string | null;
         employeeId: string;
-        expiryDate: Date | null;
-        passed: boolean | null;
-        score: number | null;
         sessionId: string;
         attendanceMarked: boolean;
+        score: number | null;
+        passed: boolean | null;
         certificateNumber: string | null;
         certificateDate: Date | null;
+        expiryDate: Date | null;
     }>;
     getEmployeeHistory(empId: string, req: any): Promise<({
         session: {
@@ -284,42 +284,42 @@ export declare class TrainingController {
             };
         } & {
             id: string;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            title: string;
+            sessionNumber: string;
+            trainingProgramId: string;
             startDate: Date;
             endDate: Date;
-            status: string;
-            title: string;
-            remarks: string | null;
-            trainingProgramId: string;
             venue: string | null;
             trainer: string | null;
             maxParticipants: number;
-            sessionNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        status: string;
-        remarks: string | null;
         employeeId: string;
-        expiryDate: Date | null;
-        passed: boolean | null;
-        score: number | null;
         sessionId: string;
         attendanceMarked: boolean;
+        score: number | null;
+        passed: boolean | null;
         certificateNumber: string | null;
         certificateDate: Date | null;
+        expiryDate: Date | null;
     })[]>;
 }
