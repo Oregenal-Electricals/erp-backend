@@ -118,6 +118,7 @@ const payroll_module_1 = require("./payroll/payroll.module");
 const pf_esi_module_1 = require("./pf-esi/pf-esi.module");
 const tds_module_1 = require("./tds/tds.module");
 const salary_slip_module_1 = require("./salary-slip/salary-slip.module");
+const hr_reports_module_1 = require("./hr-reports/hr-reports.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
@@ -163,6 +164,7 @@ exports.AppModule = AppModule = __decorate([
             pf_esi_module_1.PfEsiModule,
             tds_module_1.TdsModule,
             salary_slip_module_1.SalarySlipModule,
+            hr_reports_module_1.HrReportsModule,
             import_order_module_1.ImportOrderModule,
             proforma_invoice_module_1.ProformaInvoiceModule,
             payment_instrument_module_1.PaymentInstrumentModule,
@@ -232,6 +234,7 @@ exports.AppModule = AppModule = __decorate([
             pf_esi_module_1.PfEsiModule,
             tds_module_1.TdsModule,
             salary_slip_module_1.SalarySlipModule,
+            hr_reports_module_1.HrReportsModule,
         ],
     })
 ], AppModule);
