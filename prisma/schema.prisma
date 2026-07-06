@@ -310,6 +310,8 @@ model Company {
   trainingSessions   TrainingSession[]
   trainingPrograms   TrainingProgram[]
   trainingEnrollments TrainingEnrollment[]
+  accountGroups       AccountGroup[]
+  accountHeads        AccountHead[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4798,4 +4800,69 @@ model TrainingEnrollment {
   @@unique([companyId, sessionId, employeeId])
   @@index([companyId, employeeId])
   @@map("training_enrollments")
+}
+
+// PHASE 11 — ACCOUNTING & FINANCE
+// MODULE 83 — CHART OF ACCOUNTS
+// ============================================================
+model AccountGroup {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  code            String
+  name            String
+  type            String    // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  nature          String    // DEBIT, CREDIT
+  parentGroupId   String?
+  parentGroup     AccountGroup?  @relation("GroupHierarchy", fields: [parentGroupId], references: [id])
+  childGroups     AccountGroup[] @relation("GroupHierarchy")
+  description     String?
+  isSystemGroup   Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  accounts        AccountHead[]
+
+  @@unique([companyId, code])
+  @@index([companyId, type])
+  @@map("account_groups")
+}
+
+model AccountHead {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  code              String
+  name              String
+  groupId           String
+  group             AccountGroup @relation(fields: [groupId], references: [id])
+  type              String    // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  nature            String    // DEBIT, CREDIT
+  openingBalance    Float     @default(0)
+  openingBalanceType String   @default("DEBIT") // DEBIT or CREDIT
+  currentBalance    Float     @default(0)
+  description       String?
+  isBankAccount     Boolean   @default(false)
+  isCashAccount     Boolean   @default(false)
+  isSystemAccount   Boolean   @default(false)
+  gstApplicable     Boolean   @default(false)
+  taxRate           Float?
+  bankName          String?
+  bankAccountNumber String?
+  bankIfscCode      String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, code])
+  @@index([companyId, type])
+  @@index([companyId, groupId])
+  @@map("account_heads")
 }

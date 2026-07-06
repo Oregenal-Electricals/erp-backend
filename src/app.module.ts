@@ -108,6 +108,7 @@ import { TdsModule } from './tds/tds.module';
 import { SalarySlipModule } from './salary-slip/salary-slip.module';
 import { HrReportsModule } from './hr-reports/hr-reports.module';
 import { TrainingModule } from './training/training.module';
+import { AccountingModule } from './accounting/accounting.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -149,6 +150,7 @@ import configuration from './config/configuration';
     SalarySlipModule,
     HrReportsModule,
     TrainingModule,
+    AccountingModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -220,6 +222,7 @@ import configuration from './config/configuration';
     SalarySlipModule,
     HrReportsModule,
     TrainingModule,
+    AccountingModule,
   ],
 })
 export class AppModule implements NestModule {
