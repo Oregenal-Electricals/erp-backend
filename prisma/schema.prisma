@@ -307,6 +307,9 @@ model Company {
   payrollRuns        PayrollRun[]
   payrollEntries     PayrollEntry[]
   tdsDeclarations    TdsDeclaration[]
+  trainingSessions   TrainingSession[]
+  trainingPrograms   TrainingProgram[]
+  trainingEnrollments TrainingEnrollment[]
   supplierCars       SupplierCar[]
   warehouseZones     WarehouseZone[]
   warehouseRacks     WarehouseRack[]
@@ -4411,6 +4414,7 @@ model Employee {
   leaveApplications   LeaveApplication[]
   payrollEntries      PayrollEntry[]
   tdsDeclarations     TdsDeclaration[]
+  trainingEnrollments TrainingEnrollment[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
@@ -4709,4 +4713,89 @@ model TdsDeclaration {
   @@unique([companyId, employeeId, financialYear])
   @@index([companyId, financialYear])
   @@map("tds_declarations")
+}
+
+// MODULE 82 — TRAINING MANAGEMENT
+// ============================================================
+model TrainingProgram {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  code              String
+  name              String
+  category          String    @default("TECHNICAL") // SAFETY, TECHNICAL, SOFT_SKILLS, COMPLIANCE, INDUCTION
+  description       String?
+  durationHours     Float     @default(8)
+  isMandatory       Boolean   @default(false)
+  validityMonths    Int?
+  targetDesignation String?
+  targetDepartment  String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  sessions          TrainingSession[]
+
+  @@unique([companyId, code])
+  @@map("training_programs")
+}
+
+model TrainingSession {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  sessionNumber       String
+  trainingProgramId   String
+  trainingProgram     TrainingProgram @relation(fields: [trainingProgramId], references: [id])
+  title               String
+  startDate           DateTime
+  endDate             DateTime
+  venue               String?
+  trainer             String?
+  maxParticipants     Int       @default(20)
+  status              String    @default("SCHEDULED") // SCHEDULED, ONGOING, COMPLETED, CANCELLED
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  enrollments         TrainingEnrollment[]
+
+  @@unique([companyId, sessionNumber])
+  @@index([companyId, status])
+  @@map("training_sessions")
+}
+
+model TrainingEnrollment {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  sessionId         String
+  session           TrainingSession @relation(fields: [sessionId], references: [id])
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  status            String    @default("ENROLLED") // ENROLLED, ATTENDED, COMPLETED, FAILED, CANCELLED
+  attendanceMarked  Boolean   @default(false)
+  score             Float?
+  passed            Boolean?
+  certificateNumber String?
+  certificateDate   DateTime?
+  expiryDate        DateTime?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@unique([companyId, sessionId, employeeId])
+  @@index([companyId, employeeId])
+  @@map("training_enrollments")
 }

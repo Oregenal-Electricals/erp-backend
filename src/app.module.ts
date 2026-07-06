@@ -107,6 +107,7 @@ import { PfEsiModule } from './pf-esi/pf-esi.module';
 import { TdsModule } from './tds/tds.module';
 import { SalarySlipModule } from './salary-slip/salary-slip.module';
 import { HrReportsModule } from './hr-reports/hr-reports.module';
+import { TrainingModule } from './training/training.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
 
@@ -147,6 +148,7 @@ import configuration from './config/configuration';
     TdsModule,
     SalarySlipModule,
     HrReportsModule,
+    TrainingModule,
     ImportOrderModule,
     ProformaInvoiceModule,
     PaymentInstrumentModule,
@@ -217,6 +219,7 @@ import configuration from './config/configuration';
     TdsModule,
     SalarySlipModule,
     HrReportsModule,
+    TrainingModule,
   ],
 })
 export class AppModule implements NestModule {
