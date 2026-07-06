@@ -12,35 +12,35 @@ export declare class TdsService {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             basicSalary: number;
             hraAmount: number;
+            employeeNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        financialYear: string;
+        remarks: string | null;
         employeeId: string;
         otherDeductions: number;
-        financialYear: string;
         section80C: number;
         section80D: number;
         section80G: number;
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     }>;
     getTdsChallan(month: number, year: number, user: any): Promise<{
         reportType: string;
@@ -74,12 +74,12 @@ export declare class TdsService {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             panNumber: string;
             basicSalary: number;
             hraAmount: number;
             conveyanceAmount: number;
             otherAllowances: number;
+            employeeNumber: string;
         };
         grossSalary: number;
         standardDeduction: number;
@@ -105,33 +105,33 @@ export declare class TdsService {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             panNumber: string;
+            employeeNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        financialYear: string;
+        remarks: string | null;
         employeeId: string;
         otherDeductions: number;
-        financialYear: string;
         section80C: number;
         section80D: number;
         section80G: number;
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     })[]>;
 }

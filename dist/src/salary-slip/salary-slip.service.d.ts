@@ -11,8 +11,8 @@ export declare class SalarySlipService {
         status: string;
         year: number;
         month: number;
-        payrollRunId: string;
         grossEarnings: number;
         netPay: number;
+        payrollRunId: string;
     }[]>;
 }

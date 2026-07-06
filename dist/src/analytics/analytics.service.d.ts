@@ -26,10 +26,10 @@ export declare class AnalyticsService {
             revenue: number;
         }[];
         recentOrders: {
-            status: string;
             createdAt: Date;
-            totalAmount: number;
+            status: string;
             customerName: string;
+            totalAmount: number;
             soNumber: string;
         }[];
     }>;
@@ -216,12 +216,12 @@ export declare class AnalyticsService {
         }[];
         overdueWos: {
             status: string;
-            woNumber: string;
+            priority: string;
             productName: string;
             plannedQty: number;
-            completedQty: number;
             plannedEndDate: Date;
-            priority: string;
+            completedQty: number;
+            woNumber: string;
         }[];
     }>;
     getQualityDeep(companyId: string): Promise<{

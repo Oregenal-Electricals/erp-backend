@@ -8,9 +8,9 @@ export declare class SalarySlipController {
         status: string;
         year: number;
         month: number;
-        payrollRunId: string;
         grossEarnings: number;
         netPay: number;
+        payrollRunId: string;
     }[]>;
     downloadSlip(empId: string, month: string, year: string, req: any, res: Response): Promise<void>;
     downloadBulk(runId: string, req: any, res: Response): Promise<void>;

@@ -17,21 +17,21 @@ export declare class MisReportsService {
             totalDispatches: number;
         };
         salesOrders: {
-            status: string;
             createdAt: Date;
-            totalAmount: number;
+            status: string;
             customerName: string;
+            totalAmount: number;
             soNumber: string;
         }[];
         invoices: {
             status: string;
-            outstandingAmount: number;
+            customerName: string;
+            invoiceNumber: string;
+            invoiceDate: Date;
+            totalAmount: number;
             subtotal: number;
             totalGst: number;
-            totalAmount: number;
-            invoiceNumber: string;
-            customerName: string;
-            invoiceDate: Date;
+            outstandingAmount: number;
         }[];
     }>;
     getPurchaseSummary(companyId: string, query: any): Promise<{
@@ -50,23 +50,23 @@ export declare class MisReportsService {
         purchaseOrders: {
             vendorName: string;
             status: string;
-            totalAmount: number;
-            deliveryDate: Date;
-            poDate: Date;
             vendor: {
                 name: string;
             };
             poNumber: string;
+            totalAmount: number;
+            deliveryDate: Date;
+            poDate: Date;
         }[];
         bills: {
             status: string;
-            outstandingAmount: number;
+            totalAmount: number;
+            vendorName: string;
             subtotal: number;
             totalGst: number;
-            totalAmount: number;
-            billNumber: string;
-            vendorName: string;
+            outstandingAmount: number;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
     getStockPosition(companyId: string, query: any): Promise<{
@@ -101,13 +101,13 @@ export declare class MisReportsService {
         items: {
             daysOverdue: number;
             isOverdue: boolean;
-            dueDate: Date;
             status: string;
-            outstandingAmount: number;
-            totalAmount: number;
-            invoiceNumber: string;
+            dueDate: Date;
             customerName: string;
+            invoiceNumber: string;
             invoiceDate: Date;
+            totalAmount: number;
+            outstandingAmount: number;
         }[];
     }>;
     getOutstandingAp(companyId: string, query: any): Promise<{
@@ -121,13 +121,13 @@ export declare class MisReportsService {
         items: {
             daysOverdue: number;
             isOverdue: boolean;
-            dueDate: Date;
             status: string;
-            outstandingAmount: number;
+            dueDate: Date;
             totalAmount: number;
-            billNumber: string;
             vendorName: string;
+            outstandingAmount: number;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
     getNcrSummary(companyId: string, query: any): Promise<{
@@ -142,14 +142,14 @@ export declare class MisReportsService {
             byStatus: {};
         };
         items: {
+            description: string;
             status: string;
-            ncrNumber: string;
-            source: string;
             itemCode: string;
             itemName: string;
-            description: string;
+            source: string;
             severity: string;
             detectedDate: Date;
+            ncrNumber: string;
         }[];
     }>;
     getProductionSummary(companyId: string, query: any): Promise<{
@@ -168,16 +168,16 @@ export declare class MisReportsService {
         };
         items: {
             status: string;
-            woNumber: string;
+            rejectedQty: number;
             productCode: string;
             productName: string;
             plannedQty: number;
-            completedQty: number;
-            rejectedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
+            completedQty: number;
             actualStartDate: Date;
             actualEndDate: Date;
+            woNumber: string;
         }[];
     }>;
     getGstSummary(companyId: string, query: any): Promise<{
@@ -196,18 +196,18 @@ export declare class MisReportsService {
             purchaseCount: number;
         };
         salesData: {
+            customerName: string;
+            invoiceNumber: string;
+            invoiceDate: Date;
             subtotal: number;
             totalGst: number;
-            invoiceNumber: string;
-            customerName: string;
-            invoiceDate: Date;
         }[];
         purchaseData: {
+            vendorName: string;
             subtotal: number;
             totalGst: number;
-            billNumber: string;
-            vendorName: string;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
 }

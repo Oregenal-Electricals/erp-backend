@@ -20,20 +20,20 @@ export declare class DocumentsController {
             createdAt: Date;
             createdBy: string;
             description: string;
+            category: string;
+            tags: string;
+            title: string;
             _count: {
                 versions: number;
             };
-            tags: string;
-            referenceNumber: string;
-            referenceType: string;
-            title: string;
+            version: number;
             documentNumber: string;
-            category: string;
+            referenceType: string;
+            referenceNumber: string;
             fileType: string;
             fileName: string;
             fileSize: number;
             mimeType: string;
-            version: number;
         }[];
         total: number;
         page: number;

@@ -108,6 +108,8 @@ import { TdsModule } from './tds/tds.module';
 import { SalarySlipModule } from './salary-slip/salary-slip.module';
 import { HrReportsModule } from './hr-reports/hr-reports.module';
 import { TrainingModule } from './training/training.module';
+import { VendorPortalModule } from './vendor-portal/vendor-portal.module';
+import { CustomerPortalModule } from './customer-portal/customer-portal.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import configuration from './config/configuration';
@@ -150,6 +152,8 @@ import configuration from './config/configuration';
     SalarySlipModule,
     HrReportsModule,
     TrainingModule,
+    VendorPortalModule,
+    CustomerPortalModule,
     AccountingModule,
     ImportOrderModule,
     ProformaInvoiceModule,
@@ -222,6 +226,8 @@ import configuration from './config/configuration';
     SalarySlipModule,
     HrReportsModule,
     TrainingModule,
+    VendorPortalModule,
+    CustomerPortalModule,
     AccountingModule,
   ],
 })

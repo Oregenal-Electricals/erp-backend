@@ -10,15 +10,15 @@ export declare class AttendanceService {
     private calculateAttendance;
     createShift(dto: CreateShiftDto, user: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
+        code: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        name: string;
-        code: string;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         startTime: string;
         endTime: string;
         shiftHours: number;
@@ -31,15 +31,15 @@ export declare class AttendanceService {
     }>;
     updateShift(id: string, dto: any, user: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
+        code: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        name: string;
-        code: string;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         startTime: string;
         endTime: string;
         shiftHours: number;
@@ -52,15 +52,15 @@ export declare class AttendanceService {
     }>;
     findAllShifts(user: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
+        code: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        name: string;
-        code: string;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         startTime: string;
         endTime: string;
         shiftHours: number;
@@ -72,79 +72,79 @@ export declare class AttendanceService {
         holidayMultiplier: number;
     }[]>;
     markAttendance(dto: MarkAttendanceDto, user: any): Promise<{
-        shift: {
-            name: string;
-        };
         employee: {
             firstName: string;
             lastName: string;
             employeeNumber: string;
         };
+        shift: {
+            name: string;
+        };
     } & {
         id: string;
-        companyId: string;
-        status: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        checkIn: Date | null;
+        checkOut: Date | null;
         employeeId: string;
         lunchMinutes: number;
-        otHours: number;
+        attendanceDate: Date;
+        shiftId: string | null;
+        lunchOut: Date | null;
+        lunchIn: Date | null;
+        isHoliday: boolean;
         grossWorkedMinutes: number;
         netWorkedMinutes: number;
         netWorkedRounded: number;
         workedHours: number;
+        otHours: number;
         otRate: number;
         otAmount: number;
-        shiftId: string | null;
-        attendanceDate: Date;
-        checkIn: Date | null;
-        checkOut: Date | null;
-        lunchOut: Date | null;
-        lunchIn: Date | null;
-        isHoliday: boolean;
         markedBy: string | null;
     }>;
     updateAttendance(id: string, dto: UpdateAttendanceDto, user: any): Promise<{
-        shift: {
-            name: string;
-        };
         employee: {
             firstName: string;
             lastName: string;
             employeeNumber: string;
         };
+        shift: {
+            name: string;
+        };
     } & {
         id: string;
-        companyId: string;
-        status: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        checkIn: Date | null;
+        checkOut: Date | null;
         employeeId: string;
         lunchMinutes: number;
-        otHours: number;
+        attendanceDate: Date;
+        shiftId: string | null;
+        lunchOut: Date | null;
+        lunchIn: Date | null;
+        isHoliday: boolean;
         grossWorkedMinutes: number;
         netWorkedMinutes: number;
         netWorkedRounded: number;
         workedHours: number;
+        otHours: number;
         otRate: number;
         otAmount: number;
-        shiftId: string | null;
-        attendanceDate: Date;
-        checkIn: Date | null;
-        checkOut: Date | null;
-        lunchOut: Date | null;
-        lunchIn: Date | null;
-        isHoliday: boolean;
         markedBy: string | null;
     }>;
     bulkMarkAttendance(dto: BulkAttendanceDto, user: any): Promise<{
@@ -156,46 +156,46 @@ export declare class AttendanceService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            employee: {
+                department: {
+                    name: string;
+                };
+                firstName: string;
+                lastName: string;
+                employeeNumber: string;
+            };
             shift: {
                 name: string;
                 startTime: string;
                 endTime: string;
             };
-            employee: {
-                firstName: string;
-                lastName: string;
-                employeeNumber: string;
-                department: {
-                    name: string;
-                };
-            };
         } & {
             id: string;
-            companyId: string;
-            status: string;
-            remarks: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            checkIn: Date | null;
+            checkOut: Date | null;
             employeeId: string;
             lunchMinutes: number;
-            otHours: number;
+            attendanceDate: Date;
+            shiftId: string | null;
+            lunchOut: Date | null;
+            lunchIn: Date | null;
+            isHoliday: boolean;
             grossWorkedMinutes: number;
             netWorkedMinutes: number;
             netWorkedRounded: number;
             workedHours: number;
+            otHours: number;
             otRate: number;
             otAmount: number;
-            shiftId: string | null;
-            attendanceDate: Date;
-            checkIn: Date | null;
-            checkOut: Date | null;
-            lunchOut: Date | null;
-            lunchIn: Date | null;
-            isHoliday: boolean;
             markedBy: string | null;
         })[];
         total: number;
@@ -223,31 +223,31 @@ export declare class AttendanceService {
             };
         } & {
             id: string;
-            companyId: string;
-            status: string;
-            remarks: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            checkIn: Date | null;
+            checkOut: Date | null;
             employeeId: string;
             lunchMinutes: number;
-            otHours: number;
+            attendanceDate: Date;
+            shiftId: string | null;
+            lunchOut: Date | null;
+            lunchIn: Date | null;
+            isHoliday: boolean;
             grossWorkedMinutes: number;
             netWorkedMinutes: number;
             netWorkedRounded: number;
             workedHours: number;
+            otHours: number;
             otRate: number;
             otAmount: number;
-            shiftId: string | null;
-            attendanceDate: Date;
-            checkIn: Date | null;
-            checkOut: Date | null;
-            lunchOut: Date | null;
-            lunchIn: Date | null;
-            isHoliday: boolean;
             markedBy: string | null;
         })[];
     }>;

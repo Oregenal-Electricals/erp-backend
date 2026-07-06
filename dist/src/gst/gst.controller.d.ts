@@ -38,37 +38,37 @@ export declare class GstController {
             totalValue: number;
         };
         invoices: ({
-            dispatch: {
-                dispatchNumber: string;
-            };
             salesOrder: {
                 soNumber: string;
             };
+            dispatch: {
+                dispatchNumber: string;
+            };
         } & {
             id: string;
-            companyId: string;
-            dueDate: Date;
-            status: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            outstandingAmount: number;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            dueDate: Date;
+            customerName: string;
+            invoiceNumber: string;
+            invoiceDate: Date;
+            customerAddress: string | null;
+            paymentTerms: string;
+            notes: string | null;
+            totalAmount: number;
             subtotal: number;
             totalGst: number;
-            totalAmount: number;
-            paidAmount: number;
-            invoiceNumber: string;
-            dispatchId: string | null;
             soId: string | null;
-            customerName: string;
-            customerAddress: string | null;
-            invoiceDate: Date;
-            paymentTerms: string;
+            dispatchId: string | null;
             voucherId: string | null;
-            notes: string | null;
+            paidAmount: number;
+            outstandingAmount: number;
         })[];
     }>;
     getGstr3b(req: any, period: string): Promise<{
@@ -97,19 +97,19 @@ export declare class GstController {
     }>;
     findAll(req: any): Promise<{
         id: string;
-        companyId: string;
-        status: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
         fromDate: Date;
         toDate: Date;
-        returnType: string;
         period: string;
+        returnType: string;
         totalSales: number;
         totalOutputCgst: number;
         totalOutputSgst: number;
@@ -126,19 +126,19 @@ export declare class GstController {
     }[]>;
     generate(dto: GenerateGstReturnDto, req: any): Promise<{
         id: string;
-        companyId: string;
-        status: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
         fromDate: Date;
         toDate: Date;
-        returnType: string;
         period: string;
+        returnType: string;
         totalSales: number;
         totalOutputCgst: number;
         totalOutputSgst: number;
@@ -155,19 +155,19 @@ export declare class GstController {
     }>;
     file(id: string, dto: FileGstReturnDto, req: any): Promise<{
         id: string;
-        companyId: string;
-        status: string;
-        remarks: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
         fromDate: Date;
         toDate: Date;
-        returnType: string;
         period: string;
+        returnType: string;
         totalSales: number;
         totalOutputCgst: number;
         totalOutputSgst: number;

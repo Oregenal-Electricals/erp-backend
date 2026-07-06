@@ -1,0 +1,136 @@
+import { PrismaService } from '../prisma/prisma.service';
+export declare class CustomerPortalService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    getCustomerDashboard(customerId: string, companyId: string): Promise<{
+        customer: {
+            name: string;
+            code: string;
+            email: string;
+        };
+        stats: {
+            openOrders: number;
+            pendingDeliveries: number;
+            totalOrders: number;
+        };
+        recentOrders: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            soNumber: string;
+        }[];
+    }>;
+    getCustomerOrders(customerId: string, companyId: string, query: any): Promise<{
+        data: ({
+            items: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                isActive: boolean;
+                isTestData: boolean;
+                description: string | null;
+                itemCode: string;
+                itemName: string;
+                gstRate: number;
+                uom: string;
+                totalAmount: number;
+                unitPrice: number;
+                discount: number;
+                pendingQty: number;
+                qty: number;
+                taxableAmt: number;
+                gstAmount: number;
+                cpoItemId: string | null;
+                dispatchedQty: number;
+                soId: string;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            remarks: string | null;
+            customerName: string;
+            cancelReason: string | null;
+            currency: string;
+            totalAmount: number;
+            deliveryDate: Date;
+            subtotal: number;
+            totalGst: number;
+            cancelledDate: Date | null;
+            cpoId: string;
+            soNumber: string;
+            confirmedDate: Date | null;
+            confirmedBy: string | null;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    getCustomerDispatches(customerId: string, companyId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        deliveryAddress: string | null;
+        soId: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planId: string;
+        dispatchDate: Date;
+        lrNumber: string | null;
+        ewayBillNumber: string | null;
+        dispatchNumber: string;
+    }[]>;
+    getCustomerComplaints(customerId: string, companyId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        description: string;
+        status: string;
+        customerPo: string | null;
+        remarks: string | null;
+        customerName: string;
+        invoiceNumber: string | null;
+        closedBy: string | null;
+        itemCode: string;
+        itemName: string;
+        receivedDate: Date;
+        batchNumber: string | null;
+        correctiveAction: string | null;
+        severity: string;
+        qtyAffected: number;
+        closedDate: Date | null;
+        rootCause: string | null;
+        assignedTo: string | null;
+        customerId: string | null;
+        complaintDate: Date;
+        complaintType: string;
+        customerRequest: string | null;
+        eighthDNumber: string | null;
+        complaintNumber: string;
+        responseDate: Date | null;
+    }[]>;
+}
