@@ -35,7 +35,7 @@ let VouchersController = class VouchersController {
 exports.VouchersController = VouchersController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -43,7 +43,7 @@ __decorate([
 ], VouchersController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -52,7 +52,7 @@ __decorate([
 ], VouchersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -61,7 +61,7 @@ __decorate([
 ], VouchersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -70,7 +70,7 @@ __decorate([
 ], VouchersController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)(':id/post'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -79,7 +79,7 @@ __decorate([
 ], VouchersController.prototype, "post", null);
 __decorate([
     (0, common_1.Post)(':id/cancel'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -89,7 +89,7 @@ __decorate([
 ], VouchersController.prototype, "cancel", null);
 __decorate([
     (0, common_1.Post)('from-delivery/:deliveryId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_CREATE),
     __param(0, (0, common_1.Param)('deliveryId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

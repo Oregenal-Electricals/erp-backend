@@ -8,29 +8,29 @@ export declare class SettingsController {
     }>;
     getAllSettings(category?: string): Promise<{
         id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
-        key: string;
         value: string;
         category: string;
+        key: string;
     }[]>;
     getSetting(key: string): Promise<{
         id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
-        key: string;
         value: string;
         category: string;
+        key: string;
     }>;
     bulkUpdateSettings(dto: BulkUpdateSettingsDto, user: any): Promise<{
         updated: number;
@@ -38,16 +38,16 @@ export declare class SettingsController {
     }>;
     updateSetting(key: string, dto: UpdateSystemSettingDto, user: any): Promise<{
         id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
-        key: string;
         value: string;
         category: string;
+        key: string;
     }>;
     initializeSeries(companyId: string, user: any): Promise<{
         message: string;
@@ -60,14 +60,13 @@ export declare class SettingsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        isLocked: boolean;
         documentType: string;
         prefix: string;
         separator: string;
@@ -76,6 +75,7 @@ export declare class SettingsController {
         padding: number;
         currentNumber: number;
         lastGenerated: string | null;
+        isLocked: boolean;
     })[]>;
     getNextNumber(companyId: string, documentType: string): Promise<{
         number: string;
@@ -93,14 +93,13 @@ export declare class SettingsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        isLocked: boolean;
         documentType: string;
         prefix: string;
         separator: string;
@@ -109,17 +108,17 @@ export declare class SettingsController {
         padding: number;
         currentNumber: number;
         lastGenerated: string | null;
+        isLocked: boolean;
     }>;
     createSeries(dto: CreateNumberingSeriesDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        isLocked: boolean;
         documentType: string;
         prefix: string;
         separator: string;
@@ -128,17 +127,17 @@ export declare class SettingsController {
         padding: number;
         currentNumber: number;
         lastGenerated: string | null;
+        isLocked: boolean;
     }>;
     updateSeries(id: string, dto: UpdateNumberingSeriesDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        isLocked: boolean;
         documentType: string;
         prefix: string;
         separator: string;
@@ -147,5 +146,6 @@ export declare class SettingsController {
         padding: number;
         currentNumber: number;
         lastGenerated: string | null;
+        isLocked: boolean;
     }>;
 }

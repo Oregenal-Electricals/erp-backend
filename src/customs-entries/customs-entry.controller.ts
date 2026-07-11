@@ -12,42 +12,42 @@ export class CustomsEntryController {
   constructor(private readonly ceService: CustomsEntryService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getStats(@Request() req: any) { return this.ceService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.ceService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findByIpo(@Param('ipoId') ipoId: string, @Request() req: any) { return this.ceService.findByIpo(ipoId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.ceService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PURCHASE_CREATE)
   create(@Body() dto: CreateCustomsEntryDto, @Request() req: any) { return this.ceService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateCustomsEntryDto, @Request() req: any) { return this.ceService.update(id, dto, req.user); }
 
   @Post(':id/file')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   file(@Param('id') id: string, @Request() req: any) { return this.ceService.file(id, req.user); }
 
   @Post(':id/assess')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   assess(@Param('id') id: string, @Body() dto: AssessCustomsEntryDto, @Request() req: any) { return this.ceService.assess(id, dto, req.user); }
 
   @Post(':id/pay-duty')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   payDuty(@Param('id') id: string, @Request() req: any) { return this.ceService.payDuty(id, req.user); }
 
   @Post(':id/out-of-charge')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   outOfCharge(@Param('id') id: string, @Request() req: any) { return this.ceService.outOfCharge(id, req.user); }
 }

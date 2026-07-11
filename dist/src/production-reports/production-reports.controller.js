@@ -32,7 +32,7 @@ let ProductionReportsController = class ProductionReportsController {
 exports.ProductionReportsController = ProductionReportsController;
 __decorate([
     (0, common_1.Get)('wo-completion'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -41,7 +41,7 @@ __decorate([
 ], ProductionReportsController.prototype, "getWoCompletion", null);
 __decorate([
     (0, common_1.Get)('shift-production'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -50,7 +50,7 @@ __decorate([
 ], ProductionReportsController.prototype, "getShiftProduction", null);
 __decorate([
     (0, common_1.Get)('material-consumption'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -59,7 +59,7 @@ __decorate([
 ], ProductionReportsController.prototype, "getMaterialConsumption", null);
 __decorate([
     (0, common_1.Get)('scrap-analysis'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -68,7 +68,7 @@ __decorate([
 ], ProductionReportsController.prototype, "getScrapAnalysis", null);
 __decorate([
     (0, common_1.Get)('quality-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

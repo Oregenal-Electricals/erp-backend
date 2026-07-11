@@ -11,22 +11,22 @@ export class FinancialReportsController {
   constructor(private readonly frService: FinancialReportsService) {}
 
   @Get('summary')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getSummary(@Request() req: any) { return this.frService.getSummary(req.user); }
 
   @Get('trial-balance')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getTrialBalance(@Request() req: any, @Query() query: any) { return this.frService.getTrialBalance(req.user, query); }
 
   @Get('profit-and-loss')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getProfitAndLoss(@Request() req: any, @Query() query: any) { return this.frService.getProfitAndLoss(req.user, query); }
 
   @Get('balance-sheet')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getBalanceSheet(@Request() req: any, @Query() query: any) { return this.frService.getBalanceSheet(req.user, query); }
 
   @Get('cash-flow')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getCashFlow(@Request() req: any, @Query() query: any) { return this.frService.getCashFlow(req.user, query); }
 }

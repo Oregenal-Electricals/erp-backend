@@ -29,29 +29,29 @@ export declare class ProductionReportsController {
     getShiftProduction(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            status: string;
             shift: string;
+            machineName: string | null;
+            status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
-            machineName: string | null;
             goodQty: number;
             scrapQty: number;
-            entryNumber: string;
+            totalQty: number;
         })[];
         totalEntries: number;
         byShift: any[];
@@ -67,30 +67,30 @@ export declare class ProductionReportsController {
     getScrapAnalysis(req: any, query: any): Promise<{
         data: ({
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
-                woNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            status: string;
             shift: string;
+            machineName: string | null;
+            status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
-            machineName: string | null;
             goodQty: number;
             scrapQty: number;
-            entryNumber: string;
+            totalQty: number;
         })[];
         byProduct: any[];
         totalScrap: number;
@@ -100,33 +100,33 @@ export declare class ProductionReportsController {
     getQualitySummary(req: any, query: any): Promise<{
         data: ({
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
-                woNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             result: string;
-            companyId: string;
             status: string;
             remarks: string | null;
-            inspectionDate: Date;
+            correctiveAction: string | null;
             workOrderId: string;
-            productionEntryId: string | null;
-            inspectionStage: string;
+            inspectionDate: Date;
             inspectorName: string | null;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            defectDescription: string | null;
-            correctiveAction: string | null;
             qcNumber: string;
+            productionEntryId: string | null;
+            inspectionStage: string;
+            defectDescription: string | null;
         })[];
         byStage: any[];
         totalInspections: number;

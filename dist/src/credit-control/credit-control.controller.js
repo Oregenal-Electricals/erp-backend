@@ -37,7 +37,7 @@ let CreditControlController = class CreditControlController {
 exports.CreditControlController = CreditControlController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -45,7 +45,7 @@ __decorate([
 ], CreditControlController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('dashboard'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -53,7 +53,7 @@ __decorate([
 ], CreditControlController.prototype, "getDashboard", null);
 __decorate([
     (0, common_1.Get)('position/:customerName'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Param)('customerName')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -62,7 +62,7 @@ __decorate([
 ], CreditControlController.prototype, "getPosition", null);
 __decorate([
     (0, common_1.Get)('limits'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -70,7 +70,7 @@ __decorate([
 ], CreditControlController.prototype, "findAllLimits", null);
 __decorate([
     (0, common_1.Get)('holds'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -79,7 +79,7 @@ __decorate([
 ], CreditControlController.prototype, "findAllHolds", null);
 __decorate([
     (0, common_1.Post)('check'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -88,7 +88,7 @@ __decorate([
 ], CreditControlController.prototype, "checkCredit", null);
 __decorate([
     (0, common_1.Post)('limits'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -97,7 +97,7 @@ __decorate([
 ], CreditControlController.prototype, "createLimit", null);
 __decorate([
     (0, common_1.Put)('limits/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -107,7 +107,7 @@ __decorate([
 ], CreditControlController.prototype, "updateLimit", null);
 __decorate([
     (0, common_1.Post)('holds/:id/release'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),

@@ -12,30 +12,30 @@ export class IqcController {
   constructor(private readonly iqcService: IqcService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.iqcService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.iqcService.findAll(req.user, query); }
 
   @Get('grn/:grnId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findByGrn(@Param('grnId') grnId: string, @Request() req: any) { return this.iqcService.findByGrn(grnId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.iqcService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.QUALITY_CREATE)
   create(@Body() dto: CreateIqcDto, @Request() req: any) { return this.iqcService.create(dto, req.user); }
 
   @Put(':id/items')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   updateItems(@Param('id') id: string, @Body() dto: UpdateIqcItemsDto, @Request() req: any) { return this.iqcService.updateItems(id, dto, req.user); }
 
   @Post(':id/approve')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   approve(@Param('id') id: string, @Request() req: any) { return this.iqcService.approve(id, req.user); }
 }

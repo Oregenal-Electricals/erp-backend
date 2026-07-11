@@ -12,38 +12,38 @@ export class CreditControlController {
   constructor(private readonly ccService: CreditControlService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.ccService.getStats(req.user); }
 
   @Get('dashboard')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getDashboard(@Request() req: any) { return this.ccService.getDashboard(req.user); }
 
   @Get('position/:customerName')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getPosition(@Param('customerName') customerName: string, @Request() req: any) { return this.ccService.getCustomerPosition(customerName, req.user.companyId); }
 
   @Get('limits')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAllLimits(@Request() req: any) { return this.ccService.findAllLimits(req.user); }
 
   @Get('holds')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAllHolds(@Request() req: any, @Query() query: any) { return this.ccService.findAllHolds(req.user, query); }
 
   @Post('check')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   checkCredit(@Body() dto: CheckCreditDto, @Request() req: any) { return this.ccService.checkCredit(dto, req.user); }
 
   @Post('limits')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   createLimit(@Body() dto: CreateCreditLimitDto, @Request() req: any) { return this.ccService.createCreditLimit(dto, req.user); }
 
   @Put('limits/:id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   updateLimit(@Param('id') id: string, @Body() dto: UpdateCreditLimitDto, @Request() req: any) { return this.ccService.updateCreditLimit(id, dto, req.user); }
 
   @Post('holds/:id/release')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   releaseHold(@Param('id') id: string, @Body() dto: ReleaseCreditHoldDto, @Request() req: any) { return this.ccService.releaseHold(id, dto, req.user); }
 }

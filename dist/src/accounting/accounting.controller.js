@@ -37,7 +37,7 @@ let AccountingController = class AccountingController {
 exports.AccountingController = AccountingController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -45,7 +45,7 @@ __decorate([
 ], AccountingController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Post)('seed-coa'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_CREATE),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -53,7 +53,7 @@ __decorate([
 ], AccountingController.prototype, "seedCoa", null);
 __decorate([
     (0, common_1.Get)('groups'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -61,7 +61,7 @@ __decorate([
 ], AccountingController.prototype, "getGroups", null);
 __decorate([
     (0, common_1.Post)('groups'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -70,7 +70,7 @@ __decorate([
 ], AccountingController.prototype, "createGroup", null);
 __decorate([
     (0, common_1.Put)('groups/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -80,7 +80,7 @@ __decorate([
 ], AccountingController.prototype, "updateGroup", null);
 __decorate([
     (0, common_1.Get)('accounts'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -89,7 +89,7 @@ __decorate([
 ], AccountingController.prototype, "getAccounts", null);
 __decorate([
     (0, common_1.Get)('accounts/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -98,7 +98,7 @@ __decorate([
 ], AccountingController.prototype, "getAccount", null);
 __decorate([
     (0, common_1.Post)('accounts'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -107,7 +107,7 @@ __decorate([
 ], AccountingController.prototype, "createAccount", null);
 __decorate([
     (0, common_1.Put)('accounts/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),

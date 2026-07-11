@@ -39,7 +39,7 @@ let AttendanceController = class AttendanceController {
 exports.AttendanceController = AttendanceController;
 __decorate([
     (0, common_1.Get)('shifts'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -47,7 +47,7 @@ __decorate([
 ], AttendanceController.prototype, "getShifts", null);
 __decorate([
     (0, common_1.Post)('shifts'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -56,7 +56,7 @@ __decorate([
 ], AttendanceController.prototype, "createShift", null);
 __decorate([
     (0, common_1.Put)('shifts/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -66,7 +66,7 @@ __decorate([
 ], AttendanceController.prototype, "updateShift", null);
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -75,7 +75,7 @@ __decorate([
 ], AttendanceController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -84,7 +84,7 @@ __decorate([
 ], AttendanceController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('summary/:employeeId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('employeeId')),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Request)()),
@@ -94,7 +94,7 @@ __decorate([
 ], AttendanceController.prototype, "getMonthlySummary", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -103,7 +103,7 @@ __decorate([
 ], AttendanceController.prototype, "mark", null);
 __decorate([
     (0, common_1.Post)('bulk'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -112,7 +112,7 @@ __decorate([
 ], AttendanceController.prototype, "bulkMark", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),

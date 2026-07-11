@@ -12,38 +12,38 @@ export class WorkOrderController {
   constructor(private readonly woService: WorkOrderService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getStats(@Request() req: any) { return this.woService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.woService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.woService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
   create(@Body() dto: CreateWorkOrderDto, @Request() req: any) { return this.woService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateWorkOrderDto, @Request() req: any) { return this.woService.update(id, dto, req.user); }
 
   @Post(':id/release')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   release(@Param('id') id: string, @Request() req: any) { return this.woService.release(id, req.user); }
 
   @Post(':id/start')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   start(@Param('id') id: string, @Request() req: any) { return this.woService.start(id, req.user); }
 
   @Post(':id/complete')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   complete(@Param('id') id: string, @Body() dto: any, @Request() req: any) { return this.woService.complete(id, dto, req.user); }
 
   @Post(':id/cancel')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   cancel(@Param('id') id: string, @Request() req: any) { return this.woService.cancel(id, req.user); }
 }

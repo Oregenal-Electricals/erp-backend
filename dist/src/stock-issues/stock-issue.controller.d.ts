@@ -26,29 +26,29 @@ export declare class StockIssueController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
-            warehouse: {
-                name: string;
-            };
             _count: {
                 items: number;
             };
+            warehouse: {
+                name: string;
+            };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             warehouseId: string;
             referenceType: string;
             referenceId: string | null;
-            issuedTo: string;
-            issueMethod: string;
             issueNumber: string;
+            issueMethod: string;
+            issuedTo: string;
         })[];
         total: number;
         page: number;
@@ -56,139 +56,139 @@ export declare class StockIssueController {
         totalPages: number;
     }>;
     findOne(id: string, req: any): Promise<{
+        warehouse: {
+            name: string;
+        };
         items: ({
             batch: {
+                batchNumber: string;
                 receivedDate: Date;
                 lotNumber: string;
-                batchNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
-            uom: string;
             unitCost: number;
-            requestedQty: number;
-            issuedQty: number;
+            uom: string;
             batchId: string | null;
+            issuedQty: number;
             issueId: string;
+            requestedQty: number;
         })[];
-        warehouse: {
-            name: string;
-        };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
-        issuedTo: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
+        issuedTo: string;
     }>;
     create(dto: CreateStockIssueDto, req: any): Promise<{
+        warehouse: {
+            name: string;
+        };
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
-            uom: string;
             unitCost: number;
-            requestedQty: number;
-            issuedQty: number;
+            uom: string;
             batchId: string | null;
+            issuedQty: number;
             issueId: string;
+            requestedQty: number;
         })[];
-        warehouse: {
-            name: string;
-        };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
-        issuedTo: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
+        issuedTo: string;
     }>;
     confirm(id: string, req: any): Promise<{
+        warehouse: {
+            name: string;
+        };
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
-            uom: string;
             unitCost: number;
-            requestedQty: number;
-            issuedQty: number;
+            uom: string;
             batchId: string | null;
+            issuedQty: number;
             issueId: string;
+            requestedQty: number;
         })[];
-        warehouse: {
-            name: string;
-        };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
-        issuedTo: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
+        issuedTo: string;
     }>;
 }

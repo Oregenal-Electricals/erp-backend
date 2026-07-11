@@ -42,7 +42,7 @@ let SalarySlipController = class SalarySlipController {
 exports.SalarySlipController = SalarySlipController;
 __decorate([
     (0, common_1.Get)('history/:employeeId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('employeeId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -51,7 +51,7 @@ __decorate([
 ], SalarySlipController.prototype, "getHistory", null);
 __decorate([
     (0, common_1.Get)('download/:employeeId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('employeeId')),
     __param(1, (0, common_1.Query)('month')),
     __param(2, (0, common_1.Query)('year')),
@@ -63,7 +63,7 @@ __decorate([
 ], SalarySlipController.prototype, "downloadSlip", null);
 __decorate([
     (0, common_1.Get)('bulk/:payrollRunId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('payrollRunId')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Res)()),

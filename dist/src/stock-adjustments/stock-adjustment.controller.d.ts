@@ -17,27 +17,27 @@ export declare class StockAdjustmentController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
-            warehouse: {
-                name: string;
-            };
             _count: {
                 items: number;
             };
+            warehouse: {
+                name: string;
+            };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
-            reason: string;
             remarks: string | null;
             warehouseId: string;
-            adjustmentType: string;
+            reason: string;
             adjustmentNumber: string;
+            adjustmentType: string;
         })[];
         total: number;
         page: number;
@@ -45,159 +45,159 @@ export declare class StockAdjustmentController {
         totalPages: number;
     }>;
     findOne(id: string, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitCost: number;
-            systemQty: number;
-            physicalQty: number;
-            adjustmentQty: number;
-            adjustmentId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            unitCost: number;
+            uom: string;
+            adjustmentId: string;
+            systemQty: number;
+            physicalQty: number;
+            adjustmentQty: number;
+        }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
+        reason: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
     create(dto: CreateAdjustmentDto, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitCost: number;
-            systemQty: number;
-            physicalQty: number;
-            adjustmentQty: number;
-            adjustmentId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            unitCost: number;
+            uom: string;
+            adjustmentId: string;
+            systemQty: number;
+            physicalQty: number;
+            adjustmentQty: number;
+        }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
+        reason: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
     approve(id: string, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitCost: number;
-            systemQty: number;
-            physicalQty: number;
-            adjustmentQty: number;
-            adjustmentId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            unitCost: number;
+            uom: string;
+            adjustmentId: string;
+            systemQty: number;
+            physicalQty: number;
+            adjustmentQty: number;
+        }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
+        reason: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
     cancel(id: string, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitCost: number;
-            systemQty: number;
-            physicalQty: number;
-            adjustmentQty: number;
-            adjustmentId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            unitCost: number;
+            uom: string;
+            adjustmentId: string;
+            systemQty: number;
+            physicalQty: number;
+            adjustmentQty: number;
+        }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
+        reason: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
 }

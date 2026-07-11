@@ -12,34 +12,34 @@ export class TdsController {
   constructor(private readonly tdsService: TdsService) {}
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getAll(@Request() req: any, @Query() query: any) { return this.tdsService.getAllDeclarations(req.user, query); }
 
   @Get('challan')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getChallan(@Query('month') month: string, @Query('year') year: string, @Request() req: any) {
     return this.tdsService.getTdsChallan(Number(month), Number(year), req.user);
   }
 
   @Get('register')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getRegister(@Query('financialYear') fy: string, @Request() req: any) {
     return this.tdsService.getTdsRegister(req.user.companyId, fy || `${new Date().getFullYear()-1}-${String(new Date().getFullYear()).slice(-2)}`);
   }
 
   @Get('form16/:employeeId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getForm16(@Param('employeeId') empId: string, @Query('financialYear') fy: string, @Request() req: any) {
     return this.tdsService.getForm16Summary(empId, fy, req.user);
   }
 
   @Get(':employeeId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getDeclaration(@Param('employeeId') empId: string, @Query('financialYear') fy: string, @Request() req: any) {
     return this.tdsService.getDeclaration(empId, fy, req.user);
   }
 
   @Post('declaration')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.FINANCE_CREATE)
   saveDeclaration(@Body() dto: SaveDeclarationDto, @Request() req: any) { return this.tdsService.saveDeclaration(dto, req.user); }
 }

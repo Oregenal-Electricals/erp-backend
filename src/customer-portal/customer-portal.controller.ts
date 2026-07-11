@@ -11,25 +11,25 @@ export class CustomerPortalController {
   constructor(private readonly cpService: CustomerPortalService) {}
 
   @Get('dashboard/:customerId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getDashboard(@Param('customerId') customerId: string, @Request() req: any) {
     return this.cpService.getCustomerDashboard(customerId, req.user.companyId);
   }
 
   @Get('orders/:customerId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getOrders(@Param('customerId') customerId: string, @Query() query: any, @Request() req: any) {
     return this.cpService.getCustomerOrders(customerId, req.user.companyId, query);
   }
 
   @Get('dispatches/:customerId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getDispatches(@Param('customerId') customerId: string, @Request() req: any) {
     return this.cpService.getCustomerDispatches(customerId, req.user.companyId);
   }
 
   @Get('complaints/:customerId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getComplaints(@Param('customerId') customerId: string, @Request() req: any) {
     return this.cpService.getCustomerComplaints(customerId, req.user.companyId);
   }

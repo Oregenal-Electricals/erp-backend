@@ -12,34 +12,34 @@ export class ShippingDocumentController {
   constructor(private readonly sdService: ShippingDocumentService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.sdService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.sdService.findAll(req.user, query); }
 
   @Get('shipment/:shipmentId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findByShipment(@Param('shipmentId') shipmentId: string, @Request() req: any) { return this.sdService.findByShipment(shipmentId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.sdService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateShippingDocumentDto, @Request() req: any) { return this.sdService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateShippingDocumentDto, @Request() req: any) { return this.sdService.update(id, dto, req.user); }
 
   @Post(':id/verify')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   verify(@Param('id') id: string, @Request() req: any) { return this.sdService.verify(id, req.user); }
 
   @Post(':id/surrender')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   surrender(@Param('id') id: string, @Request() req: any) { return this.sdService.surrender(id, req.user); }
 }

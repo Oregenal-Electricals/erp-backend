@@ -12,30 +12,30 @@ export class PayrollController {
   constructor(private readonly payrollService: PayrollService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.HR_VIEW)
   getStats(@Request() req: any) { return this.payrollService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.HR_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.payrollService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.HR_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.payrollService.findOne(id, req.user); }
 
   @Post('run')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.HR_CREATE)
   run(@Body() dto: RunPayrollDto, @Request() req: any) { return this.payrollService.runPayroll(dto, req.user); }
 
   @Post(':id/recalculate')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.HR_EDIT)
   recalculate(@Param('id') id: string, @Request() req: any) { return this.payrollService.recalculate(id, req.user); }
 
   @Put('entries/:id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.HR_EDIT)
   updateEntry(@Param('id') id: string, @Body() dto: UpdatePayrollEntryDto, @Request() req: any) { return this.payrollService.updateEntry(id, dto, req.user); }
 
   @Put(':id/approve')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.HR_APPROVE)
   approve(@Param('id') id: string, @Body() dto: ApprovePayrollDto, @Request() req: any) { return this.payrollService.approvePayroll(id, dto, req.user); }
 }

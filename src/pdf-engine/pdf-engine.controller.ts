@@ -12,7 +12,7 @@ export class PdfEngineController {
   constructor(private readonly pdfService: PdfEngineService) {}
 
   @Get('purchase-order/:id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.REPORTS_VIEW)
   async poPdf(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
     const pdf = await this.pdfService.generatePurchaseOrderPdf(id, req.user.companyId);
     res.setHeader('Content-Type', 'application/pdf');
@@ -21,7 +21,7 @@ export class PdfEngineController {
   }
 
   @Get('invoice/:id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.REPORTS_VIEW)
   async invoicePdf(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
     const pdf = await this.pdfService.generateArInvoicePdf(id, req.user.companyId);
     res.setHeader('Content-Type', 'application/pdf');
@@ -30,7 +30,7 @@ export class PdfEngineController {
   }
 
   @Get('dispatch/:id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.REPORTS_VIEW)
   async dispatchPdf(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
     const pdf = await this.pdfService.generateDispatchPdf(id, req.user.companyId);
     res.setHeader('Content-Type', 'application/pdf');
@@ -39,7 +39,7 @@ export class PdfEngineController {
   }
 
   @Get('ncr/:id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.REPORTS_VIEW)
   async ncrPdf(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
     const pdf = await this.pdfService.generateNcrPdf(id, req.user.companyId);
     res.setHeader('Content-Type', 'application/pdf');

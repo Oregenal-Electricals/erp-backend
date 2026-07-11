@@ -39,7 +39,7 @@ let VendorPortalController = class VendorPortalController {
 exports.VendorPortalController = VendorPortalController;
 __decorate([
     (0, common_1.Get)('dashboard/:vendorId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
     __param(0, (0, common_1.Param)('vendorId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -48,7 +48,7 @@ __decorate([
 ], VendorPortalController.prototype, "getDashboard", null);
 __decorate([
     (0, common_1.Get)('purchase-orders/:vendorId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
     __param(0, (0, common_1.Param)('vendorId')),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Request)()),
@@ -58,7 +58,7 @@ __decorate([
 ], VendorPortalController.prototype, "getPOs", null);
 __decorate([
     (0, common_1.Get)('rfqs/:vendorId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
     __param(0, (0, common_1.Param)('vendorId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
 ], VendorPortalController.prototype, "getRFQs", null);
 __decorate([
     (0, common_1.Get)('quotations/:vendorId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
     __param(0, (0, common_1.Param)('vendorId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

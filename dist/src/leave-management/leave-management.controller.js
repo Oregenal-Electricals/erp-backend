@@ -39,7 +39,7 @@ let LeaveManagementController = class LeaveManagementController {
 exports.LeaveManagementController = LeaveManagementController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -47,7 +47,7 @@ __decorate([
 ], LeaveManagementController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('types'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -55,7 +55,7 @@ __decorate([
 ], LeaveManagementController.prototype, "getTypes", null);
 __decorate([
     (0, common_1.Post)('types'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -64,7 +64,7 @@ __decorate([
 ], LeaveManagementController.prototype, "createType", null);
 __decorate([
     (0, common_1.Put)('types/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -74,7 +74,7 @@ __decorate([
 ], LeaveManagementController.prototype, "updateType", null);
 __decorate([
     (0, common_1.Post)('allocate'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -83,7 +83,7 @@ __decorate([
 ], LeaveManagementController.prototype, "allocate", null);
 __decorate([
     (0, common_1.Post)('bulk-allocate'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -92,7 +92,7 @@ __decorate([
 ], LeaveManagementController.prototype, "bulkAllocate", null);
 __decorate([
     (0, common_1.Get)('balance/:employeeId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('employeeId')),
     __param(1, (0, common_1.Query)('year')),
     __param(2, (0, common_1.Request)()),
@@ -102,7 +102,7 @@ __decorate([
 ], LeaveManagementController.prototype, "getBalance", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -111,7 +111,7 @@ __decorate([
 ], LeaveManagementController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)('apply'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -120,7 +120,7 @@ __decorate([
 ], LeaveManagementController.prototype, "apply", null);
 __decorate([
     (0, common_1.Put)(':id/approve'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_APPROVE),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -130,7 +130,7 @@ __decorate([
 ], LeaveManagementController.prototype, "approve", null);
 __decorate([
     (0, common_1.Put)(':id/cancel'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

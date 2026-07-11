@@ -12,34 +12,34 @@ export class QuotationsController {
   constructor(private readonly qtService: QuotationsService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.qtService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.qtService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.qtService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateQuotationDto, @Request() req: any) { return this.qtService.create(dto, req.user); }
 
   @Post(':id/revise')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   revise(@Param('id') id: string, @Body() dto: CreateQuotationDto, @Request() req: any) { return this.qtService.revise(id, dto, req.user); }
 
   @Post(':id/send')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   send(@Param('id') id: string, @Request() req: any) { return this.qtService.send(id, req.user); }
 
   @Post(':id/accept')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   accept(@Param('id') id: string, @Request() req: any) { return this.qtService.accept(id, req.user); }
 
   @Post(':id/reject')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_APPROVE)
   reject(@Param('id') id: string, @Body() dto: RejectQuotationDto, @Request() req: any) { return this.qtService.reject(id, dto, req.user); }
 }

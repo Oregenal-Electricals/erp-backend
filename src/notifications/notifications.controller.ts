@@ -12,18 +12,18 @@ export class NotificationsController {
   constructor(private readonly notifService: NotificationsService) {}
 
   @Get('unread-count')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getUnreadCount(@Request() req: any) { return this.notifService.getUnreadCount(req.user.id, req.user.companyId); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.notifService.findAll(req.user.id, req.user.companyId, query); }
 
   @Post('mark-read')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   markRead(@Request() req: any, @Body() dto: MarkReadDto) { return this.notifService.markRead(req.user.id, req.user.companyId, dto.ids); }
 
   @Post('clear-old')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   clearOld(@Request() req: any) { return this.notifService.deleteOld(req.user.id, req.user.companyId); }
 }

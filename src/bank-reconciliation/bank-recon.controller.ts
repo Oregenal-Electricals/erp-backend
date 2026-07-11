@@ -12,34 +12,34 @@ export class BankReconController {
   constructor(private readonly bankReconService: BankReconService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getStats(@Request() req: any) { return this.bankReconService.getStats(req.user); }
 
   @Get('bank-accounts')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getBankAccounts(@Request() req: any) { return this.bankReconService.getBankAccounts(req.user); }
 
   @Get('suggestions/:lineId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getSuggestions(@Param('lineId') lineId: string, @Request() req: any) { return this.bankReconService.getSuggestions(lineId, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.bankReconService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.bankReconService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.FINANCE_CREATE)
   create(@Body() dto: CreateBankStatementDto, @Request() req: any) { return this.bankReconService.create(dto, req.user); }
 
   @Post('reconcile')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   reconcile(@Body() dto: ReconcileLineDto, @Request() req: any) { return this.bankReconService.reconcileLine(dto, req.user); }
 
   @Post('unreconcile/:lineId')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   unreconcile(@Param('lineId') lineId: string, @Request() req: any) { return this.bankReconService.unreconcileLine(lineId, req.user); }
 }

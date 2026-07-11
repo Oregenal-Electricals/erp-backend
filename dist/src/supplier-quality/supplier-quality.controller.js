@@ -37,7 +37,7 @@ let SupplierQualityController = class SupplierQualityController {
 exports.SupplierQualityController = SupplierQualityController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -45,7 +45,7 @@ __decorate([
 ], SupplierQualityController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('ratings'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -54,7 +54,7 @@ __decorate([
 ], SupplierQualityController.prototype, "getRatings", null);
 __decorate([
     (0, common_1.Get)('scorecard/:vendorId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Param)('vendorId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -63,7 +63,7 @@ __decorate([
 ], SupplierQualityController.prototype, "getScorecard", null);
 __decorate([
     (0, common_1.Post)('ratings'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -72,7 +72,7 @@ __decorate([
 ], SupplierQualityController.prototype, "generateRating", null);
 __decorate([
     (0, common_1.Get)('cars'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -81,7 +81,7 @@ __decorate([
 ], SupplierQualityController.prototype, "getCars", null);
 __decorate([
     (0, common_1.Post)('cars'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -90,7 +90,7 @@ __decorate([
 ], SupplierQualityController.prototype, "createCar", null);
 __decorate([
     (0, common_1.Post)('cars/:id/respond'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -100,7 +100,7 @@ __decorate([
 ], SupplierQualityController.prototype, "respondCar", null);
 __decorate([
     (0, common_1.Post)('cars/:id/verify'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -110,7 +110,7 @@ __decorate([
 ], SupplierQualityController.prototype, "verifyCar", null);
 __decorate([
     (0, common_1.Post)('cars/:id/close'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

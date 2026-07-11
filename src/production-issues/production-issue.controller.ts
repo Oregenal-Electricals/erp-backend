@@ -12,26 +12,26 @@ export class ProductionIssueController {
   constructor(private readonly piService: ProductionIssueService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getStats(@Request() req: any) { return this.piService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.piService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.piService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
   create(@Body() dto: CreateProductionIssueDto, @Request() req: any) { return this.piService.create(dto, req.user); }
 
   @Post('from-mrp/:woId')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
   createFromMrp(@Param('woId') woId: string, @Request() req: any) { return this.piService.createFromMrp(woId, req.user); }
 
   @Post(':id/confirm')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   confirm(@Param('id') id: string, @Request() req: any) { return this.piService.confirm(id, req.user); }
 }

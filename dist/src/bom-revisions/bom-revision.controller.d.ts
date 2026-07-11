@@ -13,14 +13,14 @@ export declare class BomRevisionController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
-            product: {
-                code: string;
-                name: string;
-            };
             bom: {
                 status: string;
                 version: string;
                 bomNumber: string;
+            };
+            product: {
+                code: string;
+                name: string;
             };
             previousBom: {
                 version: string;
@@ -28,24 +28,24 @@ export declare class BomRevisionController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
-            productId: string;
-            revisionNumber: string;
-            changeDescription: string;
-            changeType: string;
-            effectiveDate: Date;
+            bomId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
-            bomId: string;
+            productId: string;
             previousBomId: string | null;
+            revisionNumber: string;
+            changeType: string;
+            changeDescription: string;
             ecnNumber: string | null;
+            effectiveDate: Date;
         })[];
         total: number;
         page: number;
@@ -53,14 +53,14 @@ export declare class BomRevisionController {
         totalPages: number;
     }>;
     findByProduct(productId: string, req: any): Promise<({
-        product: {
-            code: string;
-            name: string;
-        };
         bom: {
             status: string;
             version: string;
             bomNumber: string;
+        };
+        product: {
+            code: string;
+            name: string;
         };
         previousBom: {
             version: string;
@@ -68,152 +68,152 @@ export declare class BomRevisionController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        productId: string;
-        revisionNumber: string;
-        changeDescription: string;
-        changeType: string;
-        effectiveDate: Date;
+        bomId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomId: string;
+        productId: string;
         previousBomId: string | null;
+        revisionNumber: string;
+        changeType: string;
+        changeDescription: string;
         ecnNumber: string | null;
+        effectiveDate: Date;
     })[]>;
     findOne(id: string, req: any): Promise<{
+        bom: {
+            items: {
+                id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                itemCode: string;
+                itemName: string;
+                unitCost: number | null;
+                notes: string | null;
+                uom: string;
+                bomId: string;
+                sequence: number;
+                rawMaterialId: string | null;
+                totalCost: number | null;
+                itemType: string;
+                quantity: number;
+                wastagePercent: number | null;
+                effectiveQty: number;
+                isCritical: boolean;
+            }[];
+        } & {
+            id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            approvedBy: string | null;
+            approvedAt: Date | null;
+            version: string;
+            totalCost: number | null;
+            productId: string;
+            revisionId: string | null;
+            bomNumber: string;
+            effectiveFrom: Date;
+            effectiveTo: Date | null;
+        };
         product: {
             code: string;
             name: string;
         };
-        bom: {
-            items: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                createdBy: string | null;
-                updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
-                quantity: number;
-                itemCode: string;
-                itemName: string;
-                itemType: string;
-                uom: string;
-                notes: string | null;
-                sequence: number;
-                rawMaterialId: string | null;
-                wastagePercent: number | null;
-                unitCost: number | null;
-                isCritical: boolean;
-                totalCost: number | null;
-                bomId: string;
-                effectiveQty: number;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
-            status: string;
-            productId: string;
-            approvedBy: string | null;
-            approvedAt: Date | null;
-            revisionId: string | null;
-            version: string;
-            effectiveFrom: Date;
-            effectiveTo: Date | null;
-            bomNumber: string;
-            totalCost: number | null;
-        };
         previousBom: {
             items: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
-                quantity: number;
                 itemCode: string;
                 itemName: string;
-                itemType: string;
-                uom: string;
+                unitCost: number | null;
                 notes: string | null;
+                uom: string;
+                bomId: string;
                 sequence: number;
                 rawMaterialId: string | null;
-                wastagePercent: number | null;
-                unitCost: number | null;
-                isCritical: boolean;
                 totalCost: number | null;
-                bomId: string;
+                itemType: string;
+                quantity: number;
+                wastagePercent: number | null;
                 effectiveQty: number;
+                isCritical: boolean;
             }[];
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
-            productId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
-            revisionId: string | null;
             version: string;
+            totalCost: number | null;
+            productId: string;
+            revisionId: string | null;
+            bomNumber: string;
             effectiveFrom: Date;
             effectiveTo: Date | null;
-            bomNumber: string;
-            totalCost: number | null;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        productId: string;
-        revisionNumber: string;
-        changeDescription: string;
-        changeType: string;
-        effectiveDate: Date;
+        bomId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomId: string;
+        productId: string;
         previousBomId: string | null;
+        revisionNumber: string;
+        changeType: string;
+        changeDescription: string;
         ecnNumber: string | null;
+        effectiveDate: Date;
     }>;
     create(dto: CreateBomRevisionDto, req: any): Promise<{
-        product: {
-            code: string;
-            name: string;
-        };
         bom: {
             status: string;
             version: string;
             bomNumber: string;
+        };
+        product: {
+            code: string;
+            name: string;
         };
         previousBom: {
             version: string;
@@ -221,54 +221,54 @@ export declare class BomRevisionController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        productId: string;
-        revisionNumber: string;
-        changeDescription: string;
-        changeType: string;
-        effectiveDate: Date;
+        bomId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomId: string;
+        productId: string;
         previousBomId: string | null;
+        revisionNumber: string;
+        changeType: string;
+        changeDescription: string;
         ecnNumber: string | null;
+        effectiveDate: Date;
     }>;
     approve(id: string, req: any): Promise<{
-        product: {
-            code: string;
-            name: string;
-        };
         bom: {
             status: string;
             version: string;
             bomNumber: string;
         };
+        product: {
+            code: string;
+            name: string;
+        };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        productId: string;
-        revisionNumber: string;
-        changeDescription: string;
-        changeType: string;
-        effectiveDate: Date;
+        bomId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomId: string;
+        productId: string;
         previousBomId: string | null;
+        revisionNumber: string;
+        changeType: string;
+        changeDescription: string;
         ecnNumber: string | null;
+        effectiveDate: Date;
     }>;
 }

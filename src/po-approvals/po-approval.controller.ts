@@ -12,7 +12,7 @@ export class PoApprovalController {
   constructor(private readonly poApprovalService: PoApprovalService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getStats(@Request() req: any) { return this.poApprovalService.getStats(req.user); }
 
   @Get('settings')
@@ -28,18 +28,18 @@ export class PoApprovalController {
   updateSetting(@Param('id') id: string, @Body() dto: UpdateApprovalSettingDto, @Request() req: any) { return this.poApprovalService.updateSetting(id, dto, req.user); }
 
   @Get('pending')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getPending(@Request() req: any) { return this.poApprovalService.getPending(req.user); }
 
   @Get(':poId/history')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getHistory(@Param('poId') poId: string, @Request() req: any) { return this.poApprovalService.getHistory(poId, req.user); }
 
   @Post(':poId/approve')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   approve(@Param('poId') poId: string, @Body() dto: ApprovePoDto, @Request() req: any) { return this.poApprovalService.approve(poId, dto, req.user); }
 
   @Post(':poId/reject')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   reject(@Param('poId') poId: string, @Body() dto: RejectPoDto, @Request() req: any) { return this.poApprovalService.reject(poId, dto, req.user); }
 }

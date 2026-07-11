@@ -59,9 +59,24 @@ class CreateCpoDto {
 }
 exports.CreateCpoDto = CreateCpoDto;
 __decorate([
+    (0, class_validator_1.IsIn)(['WRITTEN', 'VERBAL']),
+    __metadata("design:type", String)
+], CreateCpoDto.prototype, "poType", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'WRITTEN'),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCpoDto.prototype, "customerPoNumber", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'VERBAL'),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCpoDto.prototype, "verbalConfirmedBy", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'VERBAL'),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateCpoDto.prototype, "verbalConfirmedDate", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

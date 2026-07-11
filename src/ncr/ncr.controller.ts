@@ -12,26 +12,26 @@ export class NcrController {
   constructor(private readonly ncrService: NcrService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.ncrService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.ncrService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.ncrService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.QUALITY_CREATE)
   create(@Body() dto: CreateNcrDto, @Request() req: any) { return this.ncrService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateNcrDto, @Request() req: any) { return this.ncrService.update(id, dto, req.user); }
 
   @Post(':id/close')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   close(@Param('id') id: string, @Request() req: any) { return this.ncrService.close(id, req.user); }
 }

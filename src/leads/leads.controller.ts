@@ -12,26 +12,26 @@ export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.leadsService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.leadsService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.leadsService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateLeadDto, @Request() req: any) { return this.leadsService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateLeadDto, @Request() req: any) { return this.leadsService.update(id, dto, req.user); }
 
   @Post(':id/convert')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   convert(@Param('id') id: string, @Request() req: any) { return this.leadsService.convert(id, req.user); }
 }

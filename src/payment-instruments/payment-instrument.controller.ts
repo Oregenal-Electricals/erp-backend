@@ -12,38 +12,38 @@ export class PaymentInstrumentController {
   constructor(private readonly piService: PaymentInstrumentService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getStats(@Request() req: any) { return this.piService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.piService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findByIpo(@Param('ipoId') ipoId: string, @Request() req: any) { return this.piService.findByIpo(ipoId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.piService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.FINANCE_CREATE)
   create(@Body() dto: CreatePaymentInstrumentDto, @Request() req: any) { return this.piService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdatePaymentInstrumentDto, @Request() req: any) { return this.piService.update(id, dto, req.user); }
 
   @Post(':id/open')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   open(@Param('id') id: string, @Request() req: any) { return this.piService.open(id, req.user); }
 
   @Post(':id/settle')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   settle(@Param('id') id: string, @Request() req: any) { return this.piService.settle(id, req.user); }
 
   @Post(':id/cancel')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   cancel(@Param('id') id: string, @Request() req: any) { return this.piService.cancel(id, req.user); }
 }

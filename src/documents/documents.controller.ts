@@ -13,19 +13,19 @@ export class DocumentsController {
   constructor(private readonly docsService: DocumentsService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getStats(@Request() req: any) { return this.docsService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.docsService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.docsService.findOne(id, req.user); }
 
   @Get(':id/download')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   async download(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
     const { fileData, fileName, mimeType } = await this.docsService.download(id, req.user);
     const buffer = Buffer.from(fileData, 'base64');
@@ -35,14 +35,14 @@ export class DocumentsController {
   }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SYSTEM_CREATE)
   create(@Body() dto: CreateDocumentDto, @Request() req: any) { return this.docsService.create(dto, req.user); }
 
   @Post('version')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SYSTEM_CREATE)
   createVersion(@Body() dto: NewVersionDto, @Request() req: any) { return this.docsService.createVersion(dto, req.user); }
 
   @Delete(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   delete(@Param('id') id: string, @Request() req: any) { return this.docsService.delete(id, req.user); }
 }

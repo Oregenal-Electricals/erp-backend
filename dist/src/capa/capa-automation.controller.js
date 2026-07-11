@@ -31,7 +31,7 @@ let CapaAutomationController = class CapaAutomationController {
 exports.CapaAutomationController = CapaAutomationController;
 __decorate([
     (0, common_1.Post)('auto-create/:ncrId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
     __param(0, (0, common_1.Param)('ncrId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -40,7 +40,7 @@ __decorate([
 ], CapaAutomationController.prototype, "autoCreate", null);
 __decorate([
     (0, common_1.Get)('escalations'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -48,7 +48,7 @@ __decorate([
 ], CapaAutomationController.prototype, "checkEscalations", null);
 __decorate([
     (0, common_1.Get)('effectiveness/:capaId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Param)('capaId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -57,7 +57,7 @@ __decorate([
 ], CapaAutomationController.prototype, "checkEffectiveness", null);
 __decorate([
     (0, common_1.Get)('health-score'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

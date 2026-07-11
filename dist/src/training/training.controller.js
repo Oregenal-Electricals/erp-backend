@@ -41,7 +41,7 @@ let TrainingController = class TrainingController {
 exports.TrainingController = TrainingController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -49,7 +49,7 @@ __decorate([
 ], TrainingController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('programs'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -58,7 +58,7 @@ __decorate([
 ], TrainingController.prototype, "getPrograms", null);
 __decorate([
     (0, common_1.Post)('programs'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
 ], TrainingController.prototype, "createProgram", null);
 __decorate([
     (0, common_1.Put)('programs/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -77,7 +77,7 @@ __decorate([
 ], TrainingController.prototype, "updateProgram", null);
 __decorate([
     (0, common_1.Get)('sessions'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -86,7 +86,7 @@ __decorate([
 ], TrainingController.prototype, "getSessions", null);
 __decorate([
     (0, common_1.Get)('sessions/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -95,7 +95,7 @@ __decorate([
 ], TrainingController.prototype, "getSession", null);
 __decorate([
     (0, common_1.Post)('sessions'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -104,7 +104,7 @@ __decorate([
 ], TrainingController.prototype, "createSession", null);
 __decorate([
     (0, common_1.Put)('sessions/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -114,7 +114,7 @@ __decorate([
 ], TrainingController.prototype, "updateSession", null);
 __decorate([
     (0, common_1.Put)('sessions/:id/complete'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -123,7 +123,7 @@ __decorate([
 ], TrainingController.prototype, "completeSession", null);
 __decorate([
     (0, common_1.Post)('enroll'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -132,7 +132,7 @@ __decorate([
 ], TrainingController.prototype, "enroll", null);
 __decorate([
     (0, common_1.Post)('sessions/:id/attendance'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -142,7 +142,7 @@ __decorate([
 ], TrainingController.prototype, "markAttendance", null);
 __decorate([
     (0, common_1.Put)('enrollments/:id/complete'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
@@ -152,7 +152,7 @@ __decorate([
 ], TrainingController.prototype, "completeEnrollment", null);
 __decorate([
     (0, common_1.Get)('employee/:employeeId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Param)('employeeId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

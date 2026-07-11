@@ -34,7 +34,7 @@ let PurchaseAnalyticsController = class PurchaseAnalyticsController {
 exports.PurchaseAnalyticsController = PurchaseAnalyticsController;
 __decorate([
     (0, common_1.Get)('overview'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -42,7 +42,7 @@ __decorate([
 ], PurchaseAnalyticsController.prototype, "getOverview", null);
 __decorate([
     (0, common_1.Get)('spend-by-vendor'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
@@ -51,7 +51,7 @@ __decorate([
 ], PurchaseAnalyticsController.prototype, "getSpendByVendor", null);
 __decorate([
     (0, common_1.Get)('spend-by-month'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -59,7 +59,7 @@ __decorate([
 ], PurchaseAnalyticsController.prototype, "getSpendByMonth", null);
 __decorate([
     (0, common_1.Get)('po-status'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -67,7 +67,7 @@ __decorate([
 ], PurchaseAnalyticsController.prototype, "getPoStatusDistribution", null);
 __decorate([
     (0, common_1.Get)('pr-to-po-time'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -75,7 +75,7 @@ __decorate([
 ], PurchaseAnalyticsController.prototype, "getPrToPoTime", null);
 __decorate([
     (0, common_1.Get)('rfq-conversion'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -83,7 +83,7 @@ __decorate([
 ], PurchaseAnalyticsController.prototype, "getRfqConversion", null);
 __decorate([
     (0, common_1.Get)('top-items'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),

@@ -32,7 +32,7 @@ let PriceHistoryController = class PriceHistoryController {
 exports.PriceHistoryController = PriceHistoryController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -40,7 +40,7 @@ __decorate([
 ], PriceHistoryController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('search'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -49,7 +49,7 @@ __decorate([
 ], PriceHistoryController.prototype, "search", null);
 __decorate([
     (0, common_1.Get)('item/:itemCode'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Param)('itemCode')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -58,7 +58,7 @@ __decorate([
 ], PriceHistoryController.prototype, "getItemHistory", null);
 __decorate([
     (0, common_1.Get)('effective/:itemCode'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Param)('itemCode')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
 ], PriceHistoryController.prototype, "getEffectivePrice", null);
 __decorate([
     (0, common_1.Get)('list/:priceListId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Param)('priceListId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

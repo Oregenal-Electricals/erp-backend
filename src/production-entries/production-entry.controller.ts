@@ -12,26 +12,26 @@ export class ProductionEntryController {
   constructor(private readonly peService: ProductionEntryService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getStats(@Request() req: any) { return this.peService.getStats(req.user); }
 
   @Get('wo-progress/:woId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getWoProgress(@Param('woId') woId: string, @Request() req: any) { return this.peService.getWoProgress(woId, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.peService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.peService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
   create(@Body() dto: CreateProductionEntryDto, @Request() req: any) { return this.peService.create(dto, req.user); }
 
   @Post(':id/confirm')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   confirm(@Param('id') id: string, @Request() req: any) { return this.peService.confirm(id, req.user); }
 }

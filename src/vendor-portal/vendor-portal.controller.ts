@@ -11,25 +11,25 @@ export class VendorPortalController {
   constructor(private readonly vpService: VendorPortalService) {}
 
   @Get('dashboard/:vendorId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getDashboard(@Param('vendorId') vendorId: string, @Request() req: any) {
     return this.vpService.getVendorDashboard(vendorId, req.user.companyId);
   }
 
   @Get('purchase-orders/:vendorId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getPOs(@Param('vendorId') vendorId: string, @Query() query: any, @Request() req: any) {
     return this.vpService.getVendorPOs(vendorId, req.user.companyId, query);
   }
 
   @Get('rfqs/:vendorId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getRFQs(@Param('vendorId') vendorId: string, @Request() req: any) {
     return this.vpService.getVendorRFQs(vendorId, req.user.companyId);
   }
 
   @Get('quotations/:vendorId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getQuotations(@Param('vendorId') vendorId: string, @Request() req: any) {
     return this.vpService.getVendorQuotations(vendorId, req.user.companyId);
   }

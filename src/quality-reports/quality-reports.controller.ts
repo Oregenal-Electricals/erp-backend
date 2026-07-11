@@ -11,26 +11,26 @@ export class QualityReportsController {
   constructor(private readonly qrService: QualityReportsService) {}
 
   @Get('ncr-report')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getNcrReport(@Request() req: any, @Query() query: any) { return this.qrService.getNcrReport(req.user, query); }
 
   @Get('capa-report')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getCapaReport(@Request() req: any, @Query() query: any) { return this.qrService.getCapaReport(req.user, query); }
 
   @Get('oqc-report')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getOqcReport(@Request() req: any, @Query() query: any) { return this.qrService.getOqcReport(req.user, query); }
 
   @Get('supplier-report')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getSupplierReport(@Request() req: any, @Query() query: any) { return this.qrService.getSupplierReport(req.user, query); }
 
   @Get('complaint-report')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getComplaintReport(@Request() req: any, @Query() query: any) { return this.qrService.getComplaintReport(req.user, query); }
 
   @Get('kpi-summary')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getKpiSummary(@Request() req: any) { return this.qrService.getKpiSummary(req.user); }
 }

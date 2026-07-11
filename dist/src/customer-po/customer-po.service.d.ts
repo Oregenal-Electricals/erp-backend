@@ -60,8 +60,13 @@ export declare class CustomerPoService {
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
+        poType: string;
         customerPoNumber: string;
+        verbalConfirmedBy: string | null;
+        verbalConfirmedDate: Date | null;
         cpoNumber: string;
+        mrpRunAt: Date | null;
+        mrpRunBy: string | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -117,8 +122,13 @@ export declare class CustomerPoService {
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
+        poType: string;
         customerPoNumber: string;
+        verbalConfirmedBy: string | null;
+        verbalConfirmedDate: Date | null;
         cpoNumber: string;
+        mrpRunAt: Date | null;
+        mrpRunBy: string | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -174,8 +184,13 @@ export declare class CustomerPoService {
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
+        poType: string;
         customerPoNumber: string;
+        verbalConfirmedBy: string | null;
+        verbalConfirmedDate: Date | null;
         cpoNumber: string;
+        mrpRunAt: Date | null;
+        mrpRunBy: string | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -214,8 +229,13 @@ export declare class CustomerPoService {
             customerEmail: string | null;
             customerPhone: string | null;
             totalGst: number;
+            poType: string;
             customerPoNumber: string;
+            verbalConfirmedBy: string | null;
+            verbalConfirmedDate: Date | null;
             cpoNumber: string;
+            mrpRunAt: Date | null;
+            mrpRunBy: string | null;
             acknowledgedDate: Date | null;
             cancelledDate: Date | null;
         })[];
@@ -275,8 +295,13 @@ export declare class CustomerPoService {
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
+        poType: string;
         customerPoNumber: string;
+        verbalConfirmedBy: string | null;
+        verbalConfirmedDate: Date | null;
         cpoNumber: string;
+        mrpRunAt: Date | null;
+        mrpRunBy: string | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -287,7 +312,48 @@ export declare class CustomerPoService {
         inProgress: number;
         completed: number;
         cancelled: number;
+        written: number;
+        verbal: number;
         overdueCount: number;
         totalOrderValue: number;
+    }>;
+    runShortageCheck(cpoId: string, user: any): Promise<{
+        cpoNumber: string;
+        itemResults: any[];
+        summary: {
+            totalItems: number;
+            itemsChecked: number;
+            itemsMissingBom: number;
+            itemsMissingProduct: number;
+            shortageCount: number;
+            hasShortage: boolean;
+            canFulfillFromStock: boolean;
+        };
+    }>;
+    getShortages(cpoId: string, user: any): Promise<{
+        cpoNumber: string;
+        mrpRunAt: Date;
+        mrpRunBy: string;
+        data: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string;
+            updatedBy: string;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            status: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            rawMaterialId: string | null;
+            requiredQty: number;
+            prId: string | null;
+            availableQty: number;
+            customerPoId: string;
+            shortageQty: number;
+        }[];
+        openCount: number;
     }>;
 }

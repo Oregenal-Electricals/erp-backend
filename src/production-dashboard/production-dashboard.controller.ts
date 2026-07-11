@@ -11,22 +11,22 @@ export class ProductionDashboardController {
   constructor(private readonly pdService: ProductionDashboardService) {}
 
   @Get('overview')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getOverview(@Request() req: any) { return this.pdService.getOverview(req.user); }
 
   @Get('active-wos')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getActiveWos(@Request() req: any) { return this.pdService.getActiveWos(req.user); }
 
   @Get('today')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getToday(@Request() req: any) { return this.pdService.getToday(req.user); }
 
   @Get('alerts')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getAlerts(@Request() req: any) { return this.pdService.getAlerts(req.user); }
 
   @Get('quality')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getQuality(@Request() req: any) { return this.pdService.getQualityMetrics(req.user); }
 }

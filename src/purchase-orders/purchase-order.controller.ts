@@ -12,50 +12,50 @@ export class PurchaseOrderController {
   constructor(private readonly poService: PurchaseOrderService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getStats(@Request() req: any) { return this.poService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.poService.findAll(req.user, query); }
 
   @Get('vendor/:vendorId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findByVendor(@Param('vendorId') vendorId: string, @Request() req: any) { return this.poService.findByVendor(vendorId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.poService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PURCHASE_CREATE)
   create(@Body() dto: CreatePurchaseOrderDto, @Request() req: any) { return this.poService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdatePurchaseOrderDto, @Request() req: any) { return this.poService.update(id, dto, req.user); }
 
   @Post(':id/approve')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_APPROVE)
   approve(@Param('id') id: string, @Request() req: any) { return this.poService.approve(id, req.user); }
 
   @Post(':id/send')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   send(@Param('id') id: string, @Request() req: any) { return this.poService.send(id, req.user); }
 
   @Post(':id/cancel')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   cancel(@Param('id') id: string, @Request() req: any) { return this.poService.cancel(id, req.user); }
 
   @Post(':id/items')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PURCHASE_CREATE)
   addItem(@Param('id') id: string, @Body() dto: PoItemDto, @Request() req: any) { return this.poService.addItem(id, dto, req.user); }
 
   @Put(':id/items/:itemId')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   updateItem(@Param('id') id: string, @Param('itemId') itemId: string, @Body() dto: UpdatePoItemDto, @Request() req: any) { return this.poService.updateItem(id, itemId, dto, req.user); }
 
   @Delete(':id/items/:itemId')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   removeItem(@Param('id') id: string, @Param('itemId') itemId: string, @Request() req: any) { return this.poService.removeItem(id, itemId, req.user); }
 }

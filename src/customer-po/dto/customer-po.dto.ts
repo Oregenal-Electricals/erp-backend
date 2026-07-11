@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString, IsArray, ValidateNested, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, IsArray, ValidateNested, Min, IsIn, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CpoItemDto {
@@ -13,7 +13,22 @@ export class CpoItemDto {
 }
 
 export class CreateCpoDto {
-  @IsString() customerPoNumber: string;
+  @IsIn(['WRITTEN', 'VERBAL']) poType: string;
+
+  // Required only for WRITTEN orders (the actual customer PO document number)
+  @ValidateIf(o => o.poType === 'WRITTEN')
+  @IsString()
+  customerPoNumber?: string;
+
+  // Required only for VERBAL orders
+  @ValidateIf(o => o.poType === 'VERBAL')
+  @IsString()
+  verbalConfirmedBy?: string;
+
+  @ValidateIf(o => o.poType === 'VERBAL')
+  @IsDateString()
+  verbalConfirmedDate?: string;
+
   @IsOptional() @IsString() quotationId?: string;
   @IsString() customerName: string;
   @IsOptional() @IsString() customerEmail?: string;

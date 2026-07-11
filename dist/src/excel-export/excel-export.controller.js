@@ -64,7 +64,7 @@ let ExcelExportController = class ExcelExportController {
 exports.ExcelExportController = ExcelExportController;
 __decorate([
     (0, common_1.Get)('ar-invoices'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
@@ -74,7 +74,7 @@ __decorate([
 ], ExcelExportController.prototype, "arInvoices", null);
 __decorate([
     (0, common_1.Get)('ap-bills'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
@@ -84,7 +84,7 @@ __decorate([
 ], ExcelExportController.prototype, "apBills", null);
 __decorate([
     (0, common_1.Get)('purchase-orders'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
@@ -94,7 +94,7 @@ __decorate([
 ], ExcelExportController.prototype, "purchaseOrders", null);
 __decorate([
     (0, common_1.Get)('sales-orders'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
@@ -104,7 +104,7 @@ __decorate([
 ], ExcelExportController.prototype, "salesOrders", null);
 __decorate([
     (0, common_1.Get)('stock'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
@@ -113,7 +113,7 @@ __decorate([
 ], ExcelExportController.prototype, "stock", null);
 __decorate([
     (0, common_1.Get)('ncr'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
@@ -123,7 +123,7 @@ __decorate([
 ], ExcelExportController.prototype, "ncr", null);
 __decorate([
     (0, common_1.Get)('tasks'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
@@ -133,7 +133,7 @@ __decorate([
 ], ExcelExportController.prototype, "tasks", null);
 __decorate([
     (0, common_1.Get)('trial-balance'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),

@@ -11,18 +11,18 @@ export class QualityDashboardController {
   constructor(private readonly qdService: QualityDashboardService) {}
 
   @Get('overview')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getOverview(@Request() req: any) { return this.qdService.getOverview(req.user); }
 
   @Get('ncr-summary')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getNcrSummary(@Request() req: any) { return this.qdService.getNcrSummary(req.user); }
 
   @Get('oqc-trend')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getOqcTrend(@Request() req: any) { return this.qdService.getOqcTrend(req.user); }
 
   @Get('alerts')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getAlerts(@Request() req: any) { return this.qdService.getAlerts(req.user); }
 }

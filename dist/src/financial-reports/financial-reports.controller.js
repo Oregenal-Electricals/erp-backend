@@ -32,7 +32,7 @@ let FinancialReportsController = class FinancialReportsController {
 exports.FinancialReportsController = FinancialReportsController;
 __decorate([
     (0, common_1.Get)('summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -40,7 +40,7 @@ __decorate([
 ], FinancialReportsController.prototype, "getSummary", null);
 __decorate([
     (0, common_1.Get)('trial-balance'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -49,7 +49,7 @@ __decorate([
 ], FinancialReportsController.prototype, "getTrialBalance", null);
 __decorate([
     (0, common_1.Get)('profit-and-loss'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -58,7 +58,7 @@ __decorate([
 ], FinancialReportsController.prototype, "getProfitAndLoss", null);
 __decorate([
     (0, common_1.Get)('balance-sheet'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
 ], FinancialReportsController.prototype, "getBalanceSheet", null);
 __decorate([
     (0, common_1.Get)('cash-flow'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

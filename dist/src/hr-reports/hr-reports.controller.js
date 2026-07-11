@@ -43,7 +43,7 @@ let HrReportsController = class HrReportsController {
 exports.HrReportsController = HrReportsController;
 __decorate([
     (0, common_1.Get)('headcount'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -51,7 +51,7 @@ __decorate([
 ], HrReportsController.prototype, "getHeadcount", null);
 __decorate([
     (0, common_1.Get)('attendance-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('month')),
     __param(1, (0, common_1.Query)('year')),
     __param(2, (0, common_1.Request)()),
@@ -61,7 +61,7 @@ __decorate([
 ], HrReportsController.prototype, "getAttendance", null);
 __decorate([
     (0, common_1.Get)('leave-utilization'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('year')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -70,7 +70,7 @@ __decorate([
 ], HrReportsController.prototype, "getLeave", null);
 __decorate([
     (0, common_1.Get)('payroll-cost'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('month')),
     __param(1, (0, common_1.Query)('year')),
     __param(2, (0, common_1.Request)()),
@@ -80,7 +80,7 @@ __decorate([
 ], HrReportsController.prototype, "getPayroll", null);
 __decorate([
     (0, common_1.Get)('attrition'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('year')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -89,7 +89,7 @@ __decorate([
 ], HrReportsController.prototype, "getAttrition", null);
 __decorate([
     (0, common_1.Get)('ot-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('month')),
     __param(1, (0, common_1.Query)('year')),
     __param(2, (0, common_1.Request)()),

@@ -12,34 +12,34 @@ export class ProformaInvoiceController {
   constructor(private readonly piService: ProformaInvoiceService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.piService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.piService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findByIpo(@Param('ipoId') ipoId: string, @Request() req: any) { return this.piService.findByIpo(ipoId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.piService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateProformaInvoiceDto, @Request() req: any) { return this.piService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateProformaInvoiceDto, @Request() req: any) { return this.piService.update(id, dto, req.user); }
 
   @Post(':id/accept')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   accept(@Param('id') id: string, @Request() req: any) { return this.piService.accept(id, req.user); }
 
   @Post(':id/reject')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_APPROVE)
   reject(@Param('id') id: string, @Body() dto: RejectPiDto, @Request() req: any) { return this.piService.reject(id, dto, req.user); }
 }

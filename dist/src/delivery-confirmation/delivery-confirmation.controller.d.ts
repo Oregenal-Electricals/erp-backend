@@ -16,22 +16,22 @@ export declare class DeliveryConfirmationController {
                     customerName: string;
                     soNumber: string;
                 };
-                vehicleNumber: string;
                 dispatchNumber: string;
+                vehicleNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             deliveryDate: Date;
-            dcNumber: string;
             dispatchId: string;
+            dcNumber: string;
             receiverName: string;
             receiverPhone: string | null;
             podNumber: string | null;
@@ -47,29 +47,29 @@ export declare class DeliveryConfirmationController {
         dispatch: {
             salesOrder: {
                 customerName: string;
-                cpo: {
-                    customerPoNumber: string;
-                    cpoNumber: string;
-                };
                 soNumber: string;
+                cpo: {
+                    cpoNumber: string;
+                    customerPoNumber: string;
+                };
             };
+            dispatchNumber: string;
             vehicleNumber: string;
             lrNumber: string;
-            dispatchNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         deliveryDate: Date;
-        dcNumber: string;
         dispatchId: string;
+        dcNumber: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
@@ -81,29 +81,29 @@ export declare class DeliveryConfirmationController {
         dispatch: {
             salesOrder: {
                 customerName: string;
-                cpo: {
-                    customerPoNumber: string;
-                    cpoNumber: string;
-                };
                 soNumber: string;
+                cpo: {
+                    cpoNumber: string;
+                    customerPoNumber: string;
+                };
             };
+            dispatchNumber: string;
             vehicleNumber: string;
             lrNumber: string;
-            dispatchNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         deliveryDate: Date;
-        dcNumber: string;
         dispatchId: string;
+        dcNumber: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;

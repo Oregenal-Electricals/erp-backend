@@ -9,7 +9,10 @@ export declare class CpoItemDto {
     gstRate?: number;
 }
 export declare class CreateCpoDto {
-    customerPoNumber: string;
+    poType: string;
+    customerPoNumber?: string;
+    verbalConfirmedBy?: string;
+    verbalConfirmedDate?: string;
     quotationId?: string;
     customerName: string;
     customerEmail?: string;

@@ -12,26 +12,26 @@ export class RcaController {
   constructor(private readonly rcaService: RcaService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.rcaService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.rcaService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.rcaService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.QUALITY_CREATE)
   create(@Body() dto: CreateRcaDto, @Request() req: any) { return this.rcaService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateRcaDto, @Request() req: any) { return this.rcaService.update(id, dto, req.user); }
 
   @Post(':id/complete')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   complete(@Param('id') id: string, @Request() req: any) { return this.rcaService.complete(id, req.user); }
 }

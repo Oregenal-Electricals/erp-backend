@@ -12,18 +12,18 @@ export class QuotationComparisonController {
   constructor(private readonly compService: QuotationComparisonService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getStats(@Request() req: any) { return this.compService.getStats(req.user); }
 
   @Get(':rfqId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getMatrix(@Param('rfqId') rfqId: string, @Request() req: any) { return this.compService.getMatrix(rfqId, req.user); }
 
   @Get(':rfqId/summary')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getSummary(@Param('rfqId') rfqId: string, @Request() req: any) { return this.compService.getSummary(rfqId, req.user); }
 
   @Post(':rfqId/select')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_EDIT)
   selectVendors(@Param('rfqId') rfqId: string, @Body() dto: SelectVendorsDto, @Request() req: any) { return this.compService.selectVendors(rfqId, dto, req.user); }
 }

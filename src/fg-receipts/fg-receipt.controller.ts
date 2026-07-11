@@ -12,30 +12,30 @@ export class FgReceiptController {
   constructor(private readonly fgrService: FgReceiptService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getStats(@Request() req: any) { return this.fgrService.getStats(req.user); }
 
   @Get('pending-wos')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   getPendingWos(@Request() req: any) { return this.fgrService.getCompletedWosWithoutFgr(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.fgrService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.fgrService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
   create(@Body() dto: CreateFgReceiptDto, @Request() req: any) { return this.fgrService.create(dto, req.user); }
 
   @Post('from-wo/:woId')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
   createFromWo(@Param('woId') woId: string, @Request() req: any) { return this.fgrService.createFromWo(woId, req.user); }
 
   @Post(':id/confirm')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
   confirm(@Param('id') id: string, @Request() req: any) { return this.fgrService.confirm(id, req.user); }
 }

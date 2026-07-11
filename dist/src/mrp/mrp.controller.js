@@ -30,7 +30,7 @@ let MrpController = class MrpController {
 exports.MrpController = MrpController;
 __decorate([
     (0, common_1.Get)('calculate/:woId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Param)('woId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -39,7 +39,7 @@ __decorate([
 ], MrpController.prototype, "calculate", null);
 __decorate([
     (0, common_1.Get)('shortage-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -47,7 +47,7 @@ __decorate([
 ], MrpController.prototype, "shortageReport", null);
 __decorate([
     (0, common_1.Get)('material-plan'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

@@ -33,12 +33,12 @@ export declare class DeliveryConfirmationService {
         remarks: string | null;
         deliveryDate: Date;
         dcNumber: string;
+        shortageQty: number;
         dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
         condition: string;
-        shortageQty: number;
         damageNotes: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -63,12 +63,12 @@ export declare class DeliveryConfirmationService {
             remarks: string | null;
             deliveryDate: Date;
             dcNumber: string;
+            shortageQty: number;
             dispatchId: string;
             receiverName: string;
             receiverPhone: string | null;
             podNumber: string | null;
             condition: string;
-            shortageQty: number;
             damageNotes: string | null;
         })[];
         total: number;
@@ -101,12 +101,12 @@ export declare class DeliveryConfirmationService {
         remarks: string | null;
         deliveryDate: Date;
         dcNumber: string;
+        shortageQty: number;
         dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
         condition: string;
-        shortageQty: number;
         damageNotes: string | null;
     }>;
     getStats(user: any): Promise<{

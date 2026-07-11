@@ -12,30 +12,30 @@ export class VouchersController {
   constructor(private readonly vouchersService: VouchersService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   getStats(@Request() req: any) { return this.vouchersService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.vouchersService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.FINANCE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.vouchersService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.FINANCE_CREATE)
   create(@Body() dto: CreateVoucherDto, @Request() req: any) { return this.vouchersService.create(dto, req.user); }
 
   @Post(':id/post')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   post(@Param('id') id: string, @Request() req: any) { return this.vouchersService.post(id, req.user); }
 
   @Post(':id/cancel')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.FINANCE_EDIT)
   cancel(@Param('id') id: string, @Body() dto: CancelVoucherDto, @Request() req: any) { return this.vouchersService.cancel(id, dto, req.user); }
 
   @Post('from-delivery/:deliveryId')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.FINANCE_CREATE)
   fromDelivery(@Param('deliveryId') deliveryId: string, @Request() req: any) { return this.vouchersService.createSalesInvoiceFromDelivery(deliveryId, req.user); }
 }

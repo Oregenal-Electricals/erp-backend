@@ -72,6 +72,21 @@ export enum Permission {
   SETTINGS_VIEW = 'SETTINGS_VIEW',
   SETTINGS_MANAGE = 'SETTINGS_MANAGE',
 
+  // ─── HR ─────────────────────────────────────
+  HR_VIEW = 'HR_VIEW',
+  HR_CREATE = 'HR_CREATE',
+  HR_EDIT = 'HR_EDIT',
+  HR_APPROVE = 'HR_APPROVE',
+  // ─── SALES ──────────────────────────────────
+  SALES_VIEW = 'SALES_VIEW',
+  SALES_CREATE = 'SALES_CREATE',
+  SALES_EDIT = 'SALES_EDIT',
+  SALES_APPROVE = 'SALES_APPROVE',
+  // ─── SYSTEM (tasks, notifications, documents, workflows, portals) ───
+  SYSTEM_VIEW = 'SYSTEM_VIEW',
+  SYSTEM_CREATE = 'SYSTEM_CREATE',
+  SYSTEM_EDIT = 'SYSTEM_EDIT',
+
   // ─── AUDIT ──────────────────────────────────
   AUDIT_VIEW = 'AUDIT_VIEW',
 }

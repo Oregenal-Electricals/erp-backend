@@ -12,13 +12,13 @@ export class SalarySlipController {
   constructor(private readonly slipService: SalarySlipService) {}
 
   @Get('history/:employeeId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.HR_VIEW)
   getHistory(@Param('employeeId') empId: string, @Request() req: any) {
     return this.slipService.getSlipHistory(req.user.companyId, empId);
   }
 
   @Get('download/:employeeId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.HR_VIEW)
   async downloadSlip(
     @Param('employeeId') empId: string,
     @Query('month') month: string,
@@ -33,7 +33,7 @@ export class SalarySlipController {
   }
 
   @Get('bulk/:payrollRunId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.HR_VIEW)
   async downloadBulk(
     @Param('payrollRunId') runId: string,
     @Request() req: any,

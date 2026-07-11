@@ -51,7 +51,7 @@ let PdfEngineController = class PdfEngineController {
 exports.PdfEngineController = PdfEngineController;
 __decorate([
     (0, common_1.Get)('purchase-order/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Res)()),
@@ -61,7 +61,7 @@ __decorate([
 ], PdfEngineController.prototype, "poPdf", null);
 __decorate([
     (0, common_1.Get)('invoice/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Res)()),
@@ -71,7 +71,7 @@ __decorate([
 ], PdfEngineController.prototype, "invoicePdf", null);
 __decorate([
     (0, common_1.Get)('dispatch/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Res)()),
@@ -81,7 +81,7 @@ __decorate([
 ], PdfEngineController.prototype, "dispatchPdf", null);
 __decorate([
     (0, common_1.Get)('ncr/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Res)()),

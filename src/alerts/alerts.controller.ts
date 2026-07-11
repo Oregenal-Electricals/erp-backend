@@ -12,30 +12,30 @@ export class AlertsController {
   constructor(private readonly alertsService: AlertsService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   getStats(@Request() req: any) { return this.alertsService.getStats(req.user); }
 
   @Get('templates')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   findAllTemplates(@Request() req: any) { return this.alertsService.findAllTemplates(req.user); }
 
   @Get('logs')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SYSTEM_VIEW)
   findAllLogs(@Request() req: any, @Query() query: any) { return this.alertsService.findAllLogs(req.user, query); }
 
   @Post('seed')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SYSTEM_CREATE)
   seed(@Request() req: any) { return this.alertsService.seedDefaultTemplates(req.user.companyId, req.user.id); }
 
   @Post('trigger')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SYSTEM_CREATE)
   trigger(@Body() dto: TriggerAlertDto, @Request() req: any) { return this.alertsService.trigger(dto, req.user.companyId, req.user.id); }
 
   @Post('templates')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SYSTEM_CREATE)
   createTemplate(@Body() dto: CreateAlertTemplateDto, @Request() req: any) { return this.alertsService.createTemplate(dto, req.user); }
 
   @Put('templates/:id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   updateTemplate(@Param('id') id: string, @Body() dto: UpdateAlertTemplateDto, @Request() req: any) { return this.alertsService.updateTemplate(id, dto, req.user); }
 }

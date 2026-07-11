@@ -282,6 +282,7 @@ model Company {
   accounts           Account[]
   vouchers           Voucher[]
   iotMachines         IotMachine[]
+  materialShortages   MaterialShortage[]
   machineReadings     MachineReading[]
   iotAlerts           IotAlert[]
   arInvoices         ArInvoice[]
@@ -3414,6 +3415,11 @@ model CustomerPo {
   company           Company   @relation(fields: [companyId], references: [id])
   cpoNumber         String
   customerPoNumber  String
+  poType            String    @default("WRITTEN") // WRITTEN, VERBAL
+  verbalConfirmedBy String?
+  verbalConfirmedDate DateTime?
+  mrpRunAt          DateTime?
+  mrpRunBy          String?
   quotationId       String?
   quotation         Quotation? @relation(fields: [quotationId], references: [id])
   customerName      String
@@ -3439,6 +3445,7 @@ model CustomerPo {
   updatedBy         String?
 
   items             CustomerPoItem[]
+  materialShortages MaterialShortage[]
 
   @@unique([companyId, cpoNumber])
   @@index([companyId, status])
@@ -4950,4 +4957,35 @@ model IotAlert {
   @@index([companyId, status])
   @@index([companyId, machineId])
   @@map("iot_alerts")
+}
+
+// CUSTOMER PO + MRP MODULE
+// ============================================================
+
+
+model MaterialShortage {
+  id               String        @id @default(uuid())
+  companyId        String
+  company          Company       @relation(fields: [companyId], references: [id])
+  customerPoId     String
+  customerPo       CustomerPo    @relation(fields: [customerPoId], references: [id])
+  rawMaterialId    String?
+  itemCode         String
+  itemName         String
+  requiredQty      Float
+  availableQty     Float
+  shortageQty      Float
+  uom              String
+  status           String        @default("OPEN") // OPEN, PR_RAISED, FULFILLED
+  prId             String?       // linked PR if raised
+  isActive         Boolean       @default(true)
+  isTestData       Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  createdBy        String
+  updatedBy        String
+
+  @@index([companyId, customerPoId])
+  @@index([companyId, status])
+  @@map("material_shortages")
 }

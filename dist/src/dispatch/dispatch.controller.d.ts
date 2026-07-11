@@ -25,27 +25,27 @@ export declare class DispatchController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
-            vehicleNumber: string | null;
             remarks: string | null;
-            driverName: string | null;
             customerName: string;
             deliveryAddress: string | null;
             soId: string;
-            transporterName: string | null;
-            driverPhone: string | null;
+            dispatchNumber: string;
             planId: string;
             dispatchDate: Date;
+            vehicleNumber: string | null;
+            transporterName: string | null;
+            driverName: string | null;
+            driverPhone: string | null;
             lrNumber: string | null;
             ewayBillNumber: string | null;
-            dispatchNumber: string;
         })[];
         total: number;
         page: number;
@@ -54,115 +54,115 @@ export declare class DispatchController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            gstRate: number;
             uom: string;
             totalAmount: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
-            soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
+            soItemId: string;
         }[];
         salesOrder: {
             customerName: string;
-            cpo: {
-                customerPoNumber: string;
-                cpoNumber: string;
-            };
             soNumber: string;
+            cpo: {
+                cpoNumber: string;
+                customerPoNumber: string;
+            };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        vehicleNumber: string | null;
         remarks: string | null;
-        driverName: string | null;
         customerName: string;
         deliveryAddress: string | null;
         soId: string;
-        transporterName: string | null;
-        driverPhone: string | null;
+        dispatchNumber: string;
         planId: string;
         dispatchDate: Date;
+        vehicleNumber: string | null;
+        transporterName: string | null;
+        driverName: string | null;
+        driverPhone: string | null;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     create(dto: CreateDispatchDto, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            gstRate: number;
             uom: string;
             totalAmount: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
-            soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
+            soItemId: string;
         }[];
         salesOrder: {
             customerName: string;
-            cpo: {
-                customerPoNumber: string;
-                cpoNumber: string;
-            };
             soNumber: string;
+            cpo: {
+                cpoNumber: string;
+                customerPoNumber: string;
+            };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        vehicleNumber: string | null;
         remarks: string | null;
-        driverName: string | null;
         customerName: string;
         deliveryAddress: string | null;
         soId: string;
-        transporterName: string | null;
-        driverPhone: string | null;
+        dispatchNumber: string;
         planId: string;
         dispatchDate: Date;
+        vehicleNumber: string | null;
+        transporterName: string | null;
+        driverName: string | null;
+        driverPhone: string | null;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
 }

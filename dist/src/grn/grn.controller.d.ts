@@ -16,12 +16,12 @@ export declare class GrnController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             warehouse: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
             po: {
                 vendor: {
@@ -37,26 +37,26 @@ export declare class GrnController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
-            vehicleNumber: string | null;
             remarks: string | null;
-            invoiceNumber: string | null;
-            invoiceDate: Date | null;
             warehouseId: string;
-            poId: string | null;
-            ipoId: string | null;
-            landedCostId: string | null;
-            grnType: string;
+            vehicleNumber: string | null;
+            invoiceNumber: string | null;
             receivedDate: Date;
+            poId: string | null;
+            invoiceDate: Date | null;
             dcNumber: string | null;
             grnNumber: string;
+            grnType: string;
+            ipoId: string | null;
+            landedCostId: string | null;
         })[];
         total: number;
         page: number;
@@ -64,34 +64,34 @@ export declare class GrnController {
         totalPages: number;
     }>;
     findOne(id: string, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitPrice: number;
-            orderedQty: number;
-            receivedQty: number;
-            ipoItemId: string | null;
-            landedCostPerUnit: number | null;
-            poItemId: string | null;
-            previouslyReceived: number;
-            acceptedQty: number;
-            rejectedQty: number;
-            totalValue: number;
-            grnId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            totalValue: number;
+            uom: string;
+            rejectedQty: number;
+            unitPrice: number;
+            orderedQty: number;
+            receivedQty: number;
+            grnId: string;
+            acceptedQty: number;
+            poItemId: string | null;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            landedCostPerUnit: number | null;
+        }[];
         po: {
             vendor: {
                 code: string;
@@ -108,56 +108,56 @@ export declare class GrnController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        vehicleNumber: string | null;
         remarks: string | null;
-        invoiceNumber: string | null;
-        invoiceDate: Date | null;
         warehouseId: string;
-        poId: string | null;
-        ipoId: string | null;
-        landedCostId: string | null;
-        grnType: string;
+        vehicleNumber: string | null;
+        invoiceNumber: string | null;
         receivedDate: Date;
+        poId: string | null;
+        invoiceDate: Date | null;
         dcNumber: string | null;
         grnNumber: string;
+        grnType: string;
+        ipoId: string | null;
+        landedCostId: string | null;
     }>;
     create(dto: CreateGrnDto, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitPrice: number;
-            orderedQty: number;
-            receivedQty: number;
-            ipoItemId: string | null;
-            landedCostPerUnit: number | null;
-            poItemId: string | null;
-            previouslyReceived: number;
-            acceptedQty: number;
-            rejectedQty: number;
-            totalValue: number;
-            grnId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            totalValue: number;
+            uom: string;
+            rejectedQty: number;
+            unitPrice: number;
+            orderedQty: number;
+            receivedQty: number;
+            grnId: string;
+            acceptedQty: number;
+            poItemId: string | null;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            landedCostPerUnit: number | null;
+        }[];
         po: {
             vendor: {
                 code: string;
@@ -174,56 +174,56 @@ export declare class GrnController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        vehicleNumber: string | null;
         remarks: string | null;
-        invoiceNumber: string | null;
-        invoiceDate: Date | null;
         warehouseId: string;
-        poId: string | null;
-        ipoId: string | null;
-        landedCostId: string | null;
-        grnType: string;
+        vehicleNumber: string | null;
+        invoiceNumber: string | null;
         receivedDate: Date;
+        poId: string | null;
+        invoiceDate: Date | null;
         dcNumber: string | null;
         grnNumber: string;
+        grnType: string;
+        ipoId: string | null;
+        landedCostId: string | null;
     }>;
     update(id: string, dto: UpdateGrnDto, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitPrice: number;
-            orderedQty: number;
-            receivedQty: number;
-            ipoItemId: string | null;
-            landedCostPerUnit: number | null;
-            poItemId: string | null;
-            previouslyReceived: number;
-            acceptedQty: number;
-            rejectedQty: number;
-            totalValue: number;
-            grnId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            totalValue: number;
+            uom: string;
+            rejectedQty: number;
+            unitPrice: number;
+            orderedQty: number;
+            receivedQty: number;
+            grnId: string;
+            acceptedQty: number;
+            poItemId: string | null;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            landedCostPerUnit: number | null;
+        }[];
         po: {
             vendor: {
                 code: string;
@@ -240,56 +240,56 @@ export declare class GrnController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        vehicleNumber: string | null;
         remarks: string | null;
-        invoiceNumber: string | null;
-        invoiceDate: Date | null;
         warehouseId: string;
-        poId: string | null;
-        ipoId: string | null;
-        landedCostId: string | null;
-        grnType: string;
+        vehicleNumber: string | null;
+        invoiceNumber: string | null;
         receivedDate: Date;
+        poId: string | null;
+        invoiceDate: Date | null;
         dcNumber: string | null;
         grnNumber: string;
+        grnType: string;
+        ipoId: string | null;
+        landedCostId: string | null;
     }>;
     submit(id: string, req: any): Promise<{
-        items: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            unitPrice: number;
-            orderedQty: number;
-            receivedQty: number;
-            ipoItemId: string | null;
-            landedCostPerUnit: number | null;
-            poItemId: string | null;
-            previouslyReceived: number;
-            acceptedQty: number;
-            rejectedQty: number;
-            totalValue: number;
-            grnId: string;
-        }[];
         warehouse: {
             code: string;
             name: string;
         };
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            totalValue: number;
+            uom: string;
+            rejectedQty: number;
+            unitPrice: number;
+            orderedQty: number;
+            receivedQty: number;
+            grnId: string;
+            acceptedQty: number;
+            poItemId: string | null;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            landedCostPerUnit: number | null;
+        }[];
         po: {
             vendor: {
                 code: string;
@@ -306,25 +306,25 @@ export declare class GrnController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
-        vehicleNumber: string | null;
         remarks: string | null;
-        invoiceNumber: string | null;
-        invoiceDate: Date | null;
         warehouseId: string;
-        poId: string | null;
-        ipoId: string | null;
-        landedCostId: string | null;
-        grnType: string;
+        vehicleNumber: string | null;
+        invoiceNumber: string | null;
         receivedDate: Date;
+        poId: string | null;
+        invoiceDate: Date | null;
         dcNumber: string | null;
         grnNumber: string;
+        grnType: string;
+        ipoId: string | null;
+        landedCostId: string | null;
     }>;
 }

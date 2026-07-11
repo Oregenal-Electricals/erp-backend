@@ -12,38 +12,38 @@ export class SupplierQualityController {
   constructor(private readonly sqService: SupplierQualityService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.sqService.getStats(req.user); }
 
   @Get('ratings')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getRatings(@Request() req: any, @Query() query: any) { return this.sqService.getRatings(req.user, query); }
 
   @Get('scorecard/:vendorId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getScorecard(@Param('vendorId') vendorId: string, @Request() req: any) { return this.sqService.getVendorScorecard(vendorId, req.user); }
 
   @Post('ratings')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.QUALITY_CREATE)
   generateRating(@Body() dto: CreateSupplierRatingDto, @Request() req: any) { return this.sqService.generateRating(dto, req.user); }
 
   @Get('cars')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getCars(@Request() req: any, @Query() query: any) { return this.sqService.getCars(req.user, query); }
 
   @Post('cars')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.QUALITY_CREATE)
   createCar(@Body() dto: CreateCarDto, @Request() req: any) { return this.sqService.createCar(dto, req.user); }
 
   @Post('cars/:id/respond')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   respondCar(@Param('id') id: string, @Body() dto: RespondCarDto, @Request() req: any) { return this.sqService.respondCar(id, dto, req.user); }
 
   @Post('cars/:id/verify')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   verifyCar(@Param('id') id: string, @Body() dto: VerifyCarDto, @Request() req: any) { return this.sqService.verifyCar(id, dto, req.user); }
 
   @Post('cars/:id/close')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   closeCar(@Param('id') id: string, @Request() req: any) { return this.sqService.closeCar(id, req.user); }
 }

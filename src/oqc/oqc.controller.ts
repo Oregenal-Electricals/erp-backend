@@ -12,26 +12,26 @@ export class OqcController {
   constructor(private readonly oqcService: OqcService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.oqcService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.oqcService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.QUALITY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.oqcService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.QUALITY_CREATE)
   create(@Body() dto: CreateOqcDto, @Request() req: any) { return this.oqcService.create(dto, req.user); }
 
   @Post(':id/complete')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   complete(@Param('id') id: string, @Body() dto: CompleteOqcDto, @Request() req: any) { return this.oqcService.complete(id, dto, req.user); }
 
   @Post(':id/release')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.QUALITY_EDIT)
   release(@Param('id') id: string, @Request() req: any) { return this.oqcService.release(id, req.user); }
 }

@@ -12,34 +12,34 @@ export class PoAmendmentController {
   constructor(private readonly poAmendmentService: PoAmendmentService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getStats(@Request() req: any) { return this.poAmendmentService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.poAmendmentService.findAll(req.user, query); }
 
   @Get('po/:poId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findByPo(@Param('poId') poId: string, @Request() req: any) { return this.poAmendmentService.findByPo(poId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.poAmendmentService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.PURCHASE_CREATE)
   create(@Body() dto: CreatePoAmendmentDto, @Request() req: any) { return this.poAmendmentService.create(dto, req.user); }
 
   @Post(':id/submit')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_APPROVE)
   submit(@Param('id') id: string, @Request() req: any) { return this.poAmendmentService.submit(id, req.user); }
 
   @Post(':id/approve')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_APPROVE)
   approve(@Param('id') id: string, @Request() req: any) { return this.poAmendmentService.approve(id, req.user); }
 
   @Post(':id/reject')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.PURCHASE_APPROVE)
   reject(@Param('id') id: string, @Body() dto: RejectAmendmentDto, @Request() req: any) { return this.poAmendmentService.reject(id, dto, req.user); }
 }

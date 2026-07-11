@@ -34,7 +34,7 @@ let GstController = class GstController {
 exports.GstController = GstController;
 __decorate([
     (0, common_1.Get)('dashboard'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('period')),
     __metadata("design:type", Function),
@@ -43,7 +43,7 @@ __decorate([
 ], GstController.prototype, "getDashboard", null);
 __decorate([
     (0, common_1.Get)('gstr1'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('period')),
     __metadata("design:type", Function),
@@ -52,7 +52,7 @@ __decorate([
 ], GstController.prototype, "getGstr1", null);
 __decorate([
     (0, common_1.Get)('gstr3b'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('period')),
     __metadata("design:type", Function),
@@ -61,7 +61,7 @@ __decorate([
 ], GstController.prototype, "getGstr3b", null);
 __decorate([
     (0, common_1.Get)('returns'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -69,7 +69,7 @@ __decorate([
 ], GstController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)('returns/generate'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -78,7 +78,7 @@ __decorate([
 ], GstController.prototype, "generate", null);
 __decorate([
     (0, common_1.Post)('returns/:id/file'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_EDIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),

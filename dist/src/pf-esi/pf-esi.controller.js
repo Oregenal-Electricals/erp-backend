@@ -40,14 +40,14 @@ let PfEsiController = class PfEsiController {
 exports.PfEsiController = PfEsiController;
 __decorate([
     (0, common_1.Get)('rates'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PfEsiController.prototype, "getRates", null);
 __decorate([
     (0, common_1.Get)('pf-challan'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('month')),
     __param(1, (0, common_1.Query)('year')),
     __param(2, (0, common_1.Request)()),
@@ -57,7 +57,7 @@ __decorate([
 ], PfEsiController.prototype, "getPfChallan", null);
 __decorate([
     (0, common_1.Get)('esi-challan'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('month')),
     __param(1, (0, common_1.Query)('year')),
     __param(2, (0, common_1.Request)()),
@@ -67,7 +67,7 @@ __decorate([
 ], PfEsiController.prototype, "getEsiChallan", null);
 __decorate([
     (0, common_1.Get)('pf-register'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('year')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -76,7 +76,7 @@ __decorate([
 ], PfEsiController.prototype, "getPfRegister", null);
 __decorate([
     (0, common_1.Get)('esi-register'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.HR_VIEW),
     __param(0, (0, common_1.Query)('year')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

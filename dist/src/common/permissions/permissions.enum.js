@@ -52,6 +52,17 @@ var Permission;
     Permission["REPORTS_EXPORT"] = "REPORTS_EXPORT";
     Permission["SETTINGS_VIEW"] = "SETTINGS_VIEW";
     Permission["SETTINGS_MANAGE"] = "SETTINGS_MANAGE";
+    Permission["HR_VIEW"] = "HR_VIEW";
+    Permission["HR_CREATE"] = "HR_CREATE";
+    Permission["HR_EDIT"] = "HR_EDIT";
+    Permission["HR_APPROVE"] = "HR_APPROVE";
+    Permission["SALES_VIEW"] = "SALES_VIEW";
+    Permission["SALES_CREATE"] = "SALES_CREATE";
+    Permission["SALES_EDIT"] = "SALES_EDIT";
+    Permission["SALES_APPROVE"] = "SALES_APPROVE";
+    Permission["SYSTEM_VIEW"] = "SYSTEM_VIEW";
+    Permission["SYSTEM_CREATE"] = "SYSTEM_CREATE";
+    Permission["SYSTEM_EDIT"] = "SYSTEM_EDIT";
     Permission["AUDIT_VIEW"] = "AUDIT_VIEW";
 })(Permission || (exports.Permission = Permission = {}));
 //# sourceMappingURL=permissions.enum.js.map

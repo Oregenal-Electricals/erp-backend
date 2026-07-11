@@ -12,46 +12,46 @@ export class ShipmentController {
   constructor(private readonly shipmentService: ShipmentService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.shipmentService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.shipmentService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findByIpo(@Param('ipoId') ipoId: string, @Request() req: any) { return this.shipmentService.findByIpo(ipoId, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.shipmentService.findOne(id, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateShipmentDto, @Request() req: any) { return this.shipmentService.create(dto, req.user); }
 
   @Put(':id')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateShipmentDto, @Request() req: any) { return this.shipmentService.update(id, dto, req.user); }
 
   @Post(':id/depart')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   depart(@Param('id') id: string, @Request() req: any) { return this.shipmentService.depart(id, req.user); }
 
   @Post(':id/arrive')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   arrive(@Param('id') id: string, @Request() req: any) { return this.shipmentService.arrive(id, req.user); }
 
   @Post(':id/deliver')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   deliver(@Param('id') id: string, @Request() req: any) { return this.shipmentService.deliver(id, req.user); }
 
   @Post(':id/cancel')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.SALES_EDIT)
   cancel(@Param('id') id: string, @Request() req: any) { return this.shipmentService.cancel(id, req.user); }
 
   @Post(':id/containers')
-  @RequirePermissions(Permission.INVENTORY_CREATE)
+  @RequirePermissions(Permission.SALES_CREATE)
   addContainer(@Param('id') id: string, @Body() dto: AddContainerDto, @Request() req: any) { return this.shipmentService.addContainer(id, dto, req.user); }
 }

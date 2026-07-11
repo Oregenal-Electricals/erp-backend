@@ -11,30 +11,30 @@ export class PurchaseAnalyticsController {
   constructor(private readonly analyticsService: PurchaseAnalyticsService) {}
 
   @Get('overview')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getOverview(@Request() req: any) { return this.analyticsService.getOverview(req.user); }
 
   @Get('spend-by-vendor')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getSpendByVendor(@Request() req: any, @Query('limit') limit?: string) { return this.analyticsService.getSpendByVendor(req.user, limit ? parseInt(limit) : 10); }
 
   @Get('spend-by-month')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getSpendByMonth(@Request() req: any) { return this.analyticsService.getSpendByMonth(req.user); }
 
   @Get('po-status')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getPoStatusDistribution(@Request() req: any) { return this.analyticsService.getPoStatusDistribution(req.user); }
 
   @Get('pr-to-po-time')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getPrToPoTime(@Request() req: any) { return this.analyticsService.getPrToPoTime(req.user); }
 
   @Get('rfq-conversion')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getRfqConversion(@Request() req: any) { return this.analyticsService.getRfqConversion(req.user); }
 
   @Get('top-items')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getTopItems(@Request() req: any, @Query('limit') limit?: string) { return this.analyticsService.getTopItems(req.user, limit ? parseInt(limit) : 10); }
 }

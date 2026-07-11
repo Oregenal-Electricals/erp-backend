@@ -16,23 +16,24 @@ export declare class RcaController {
             ncr: {
                 description: string;
                 itemCode: string;
-                source: string;
                 severity: string;
                 ncrNumber: string;
+                source: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
-            ncrId: string;
             rootCause: string | null;
+            ncrId: string;
+            rcaNumber: string;
             method: string;
             problem: string;
             why1: string | null;
@@ -48,7 +49,6 @@ export declare class RcaController {
             fishboneMeasurement: string | null;
             conclusion: string | null;
             conductedBy: string | null;
-            rcaNumber: string;
             conductedDate: Date;
         })[];
         total: number;
@@ -59,23 +59,24 @@ export declare class RcaController {
         ncr: {
             description: string;
             itemCode: string;
-            source: string;
             severity: string;
             ncrNumber: string;
+            source: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
-        ncrId: string;
         rootCause: string | null;
+        ncrId: string;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -91,30 +92,30 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
     create(dto: CreateRcaDto, req: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
-            source: string;
             severity: string;
             ncrNumber: string;
+            source: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
-        ncrId: string;
         rootCause: string | null;
+        ncrId: string;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -130,30 +131,30 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
     update(id: string, dto: UpdateRcaDto, req: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
-            source: string;
             severity: string;
             ncrNumber: string;
+            source: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
-        ncrId: string;
         rootCause: string | null;
+        ncrId: string;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -169,30 +170,30 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
     complete(id: string, req: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
-            source: string;
             severity: string;
             ncrNumber: string;
+            source: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
-        ncrId: string;
         rootCause: string | null;
+        ncrId: string;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -208,7 +209,6 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
 }

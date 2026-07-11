@@ -32,7 +32,7 @@ let QuotationComparisonController = class QuotationComparisonController {
 exports.QuotationComparisonController = QuotationComparisonController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -40,7 +40,7 @@ __decorate([
 ], QuotationComparisonController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':rfqId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Param)('rfqId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -49,7 +49,7 @@ __decorate([
 ], QuotationComparisonController.prototype, "getMatrix", null);
 __decorate([
     (0, common_1.Get)(':rfqId/summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
     __param(0, (0, common_1.Param)('rfqId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -58,7 +58,7 @@ __decorate([
 ], QuotationComparisonController.prototype, "getSummary", null);
 __decorate([
     (0, common_1.Post)(':rfqId/select'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_EDIT),
     __param(0, (0, common_1.Param)('rfqId')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),

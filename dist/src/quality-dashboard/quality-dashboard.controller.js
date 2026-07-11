@@ -31,7 +31,7 @@ let QualityDashboardController = class QualityDashboardController {
 exports.QualityDashboardController = QualityDashboardController;
 __decorate([
     (0, common_1.Get)('overview'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -39,7 +39,7 @@ __decorate([
 ], QualityDashboardController.prototype, "getOverview", null);
 __decorate([
     (0, common_1.Get)('ncr-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -47,7 +47,7 @@ __decorate([
 ], QualityDashboardController.prototype, "getNcrSummary", null);
 __decorate([
     (0, common_1.Get)('oqc-trend'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -55,7 +55,7 @@ __decorate([
 ], QualityDashboardController.prototype, "getOqcTrend", null);
 __decorate([
     (0, common_1.Get)('alerts'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
