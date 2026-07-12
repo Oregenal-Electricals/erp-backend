@@ -54,6 +54,6 @@ jobs:
 
       - name: Wait and verify health
         run: |
-          sleep 60
-          curl -f https://erp-backend.onrender.com/api/v1/health/ping || exit 1
+          sleep 90
+          curl -f https://erp-backend-ry5v.onrender.com/api/v1/health || exit 1
           echo "Health check passed"
