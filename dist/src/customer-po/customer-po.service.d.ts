@@ -528,6 +528,7 @@ export declare class CustomerPoService {
         overdueCount: number;
         totalOrderValue: number;
     }>;
+    private getRawMaterialDemand;
     runShortageCheck(cpoId: string, user: any): Promise<{
         cpoNumber: string;
         itemResults: any[];

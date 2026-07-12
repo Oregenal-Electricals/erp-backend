@@ -326,7 +326,68 @@ export class CustomerPoService {
    *    raw material's own stock directly against the ordered quantity.
    * 4. If neither a Product nor a RawMaterial matches the item code ->
    *    flag as unknown/unmapped item code.
+   *
+   * Stock allocation is FIFO across ALL open Customer POs (not just this
+   * one) that need the same raw material - whichever PO was created
+   * first gets first claim on available stock; later POs see only what's
+   * left. Without this, two POs needing the same limited material would
+   * each independently see the same "available" stock and both report a
+   * smaller shortage than the true combined shortfall. Only RECEIVED,
+   * ACKNOWLEDGED, and IN_PROGRESS POs compete for stock this way -
+   * CANCELLED POs make no claim, and COMPLETED POs are assumed to have
+   * already had their material physically issued (already reflected in
+   * the live stock balance), so including them again here would
+   * double-count their consumption.
    */
+
+  /**
+   * Explodes a single CPO's items into total raw-material demand
+   * (summed across all its line items), with NO side effects - used
+   * purely for computing how much of each material this order is
+   * claiming, when building the cross-order FIFO queue. Items with a
+   * missing BOM or unmapped item code are silently skipped here (they
+   * contribute no calculable raw-material demand); the BOM_MISSING /
+   * NO_PRODUCT_MASTER flagging and Task creation only happen in the
+   * main runShortageCheck pass, for the specific CPO being checked.
+   */
+  private async getRawMaterialDemand(companyId: string, cpo: any): Promise<Map<string, { requiredQty: number; uom: string; itemName: string; rawMaterialId: string | null }>> {
+    const demand = new Map<string, { requiredQty: number; uom: string; itemName: string; rawMaterialId: string | null }>();
+
+    for (const cpoItem of cpo.items) {
+      const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+
+      if (product) {
+        const bom = await this.prisma.bom.findFirst({
+          where: { companyId, productId: product.id, status: 'APPROVED' },
+          include: { items: { where: { isActive: true } } },
+          orderBy: { effectiveFrom: 'desc' },
+        });
+        if (!bom) continue;
+
+        for (const bomItem of bom.items) {
+          const grossQty = bomItem.effectiveQty * cpoItem.qty;
+          const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
+          const netRequired = grossQty + wasteQty;
+
+          const existing = demand.get(bomItem.itemCode);
+          if (existing) existing.requiredQty += netRequired;
+          else demand.set(bomItem.itemCode, { requiredQty: netRequired, uom: bomItem.uom, itemName: bomItem.itemName, rawMaterialId: bomItem.rawMaterialId || null });
+        }
+        continue;
+      }
+
+      const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+      if (rawMaterial) {
+        const existing = demand.get(cpoItem.itemCode);
+        if (existing) existing.requiredQty += cpoItem.qty;
+        else demand.set(cpoItem.itemCode, { requiredQty: cpoItem.qty, uom: cpoItem.uom, itemName: cpoItem.itemName, rawMaterialId: rawMaterial.id });
+      }
+      // Neither Product nor RawMaterial matched - contributes no demand.
+    }
+
+    return demand;
+  }
+
   async runShortageCheck(cpoId: string, user: any) {
     const companyId = user.companyId;
 
@@ -342,6 +403,46 @@ export class CustomerPoService {
     await this.prisma.materialShortage.deleteMany({
       where: { companyId, customerPoId: cpoId, status: 'OPEN' },
     });
+
+    // Build the FIFO demand queue: every open CPO (including this one),
+    // oldest first, and how much of each raw material each one needs.
+    const openCpos = await this.prisma.customerPo.findMany({
+      where: { companyId, status: { in: ['RECEIVED', 'ACKNOWLEDGED', 'IN_PROGRESS'] } },
+      include: { items: { where: { isActive: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const demandQueue = new Map<string, Array<{ cpoId: string; requiredQty: number }>>();
+    for (const otherCpo of openCpos) {
+      const demand = await this.getRawMaterialDemand(companyId, otherCpo);
+      for (const [itemCode, info] of demand.entries()) {
+        if (!demandQueue.has(itemCode)) demandQueue.set(itemCode, []);
+        demandQueue.get(itemCode)!.push({ cpoId: otherCpo.id, requiredQty: info.requiredQty });
+      }
+    }
+
+    // FIFO-allocate on-hand stock across the queue for each raw material,
+    // producing this CPO's true share of shortage/allocation.
+    const allocationForThisCpo = new Map<string, { netRequired: number; availableQty: number; shortage: number }>();
+    for (const [itemCode, queue] of demandQueue.entries()) {
+      const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
+      let runningStock = balance?.availableQty || 0;
+      const totalStock = runningStock;
+
+      for (const entry of queue) {
+        const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
+        const shortage = Math.max(0, entry.requiredQty - allocated);
+        runningStock -= allocated;
+
+        if (entry.cpoId === cpoId) {
+          allocationForThisCpo.set(itemCode, {
+            netRequired: entry.requiredQty,
+            availableQty: totalStock,
+            shortage,
+          });
+        }
+      }
+    }
 
     const shortageRows: any[] = [];
     const itemResults: any[] = [];
@@ -393,16 +494,11 @@ export class CustomerPoService {
 
         const componentResults = [];
         for (const bomItem of bom.items) {
-          const grossQty = bomItem.effectiveQty * cpoItem.qty;
-          const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
-          const netRequired = grossQty + wasteQty;
+          const alloc = allocationForThisCpo.get(bomItem.itemCode);
+          const netRequired = alloc ? alloc.netRequired : (bomItem.effectiveQty * cpoItem.qty);
+          const availableQty = alloc ? alloc.availableQty : 0;
+          const shortage = alloc ? alloc.shortage : netRequired;
 
-          const balance = await this.prisma.stockBalance.findFirst({
-            where: { companyId, itemCode: bomItem.itemCode },
-          });
-          const availableQty = balance?.availableQty || 0;
-
-          const shortage = Math.max(0, netRequired - availableQty);
           if (shortage > 0) {
             hasShortage = true;
             shortageRows.push({
@@ -442,11 +538,9 @@ export class CustomerPoService {
       });
 
       if (rawMaterial) {
-        const balance = await this.prisma.stockBalance.findFirst({
-          where: { companyId, itemCode: cpoItem.itemCode },
-        });
-        const availableQty = balance?.availableQty || 0;
-        const shortage = Math.max(0, cpoItem.qty - availableQty);
+        const alloc = allocationForThisCpo.get(cpoItem.itemCode);
+        const availableQty = alloc ? alloc.availableQty : 0;
+        const shortage = alloc ? alloc.shortage : cpoItem.qty;
 
         if (shortage > 0) {
           hasShortage = true;
@@ -517,6 +611,7 @@ export class CustomerPoService {
       },
     };
   }
+
 
   async getShortages(cpoId: string, user: any) {
     const cpo = await this.prisma.customerPo.findFirst({ where: { id: cpoId, companyId: user.companyId } });

@@ -266,6 +266,41 @@ let CustomerPoService = class CustomerPoService {
         });
         return { total, received, acknowledged, inProgress, completed, cancelled, written, verbal, overdueCount, totalOrderValue: valueAgg._sum.totalAmount || 0 };
     }
+    async getRawMaterialDemand(companyId, cpo) {
+        const demand = new Map();
+        for (const cpoItem of cpo.items) {
+            const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+            if (product) {
+                const bom = await this.prisma.bom.findFirst({
+                    where: { companyId, productId: product.id, status: 'APPROVED' },
+                    include: { items: { where: { isActive: true } } },
+                    orderBy: { effectiveFrom: 'desc' },
+                });
+                if (!bom)
+                    continue;
+                for (const bomItem of bom.items) {
+                    const grossQty = bomItem.effectiveQty * cpoItem.qty;
+                    const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
+                    const netRequired = grossQty + wasteQty;
+                    const existing = demand.get(bomItem.itemCode);
+                    if (existing)
+                        existing.requiredQty += netRequired;
+                    else
+                        demand.set(bomItem.itemCode, { requiredQty: netRequired, uom: bomItem.uom, itemName: bomItem.itemName, rawMaterialId: bomItem.rawMaterialId || null });
+                }
+                continue;
+            }
+            const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+            if (rawMaterial) {
+                const existing = demand.get(cpoItem.itemCode);
+                if (existing)
+                    existing.requiredQty += cpoItem.qty;
+                else
+                    demand.set(cpoItem.itemCode, { requiredQty: cpoItem.qty, uom: cpoItem.uom, itemName: cpoItem.itemName, rawMaterialId: rawMaterial.id });
+            }
+        }
+        return demand;
+    }
     async runShortageCheck(cpoId, user) {
         const companyId = user.companyId;
         const cpo = await this.prisma.customerPo.findFirst({
@@ -280,6 +315,38 @@ let CustomerPoService = class CustomerPoService {
         await this.prisma.materialShortage.deleteMany({
             where: { companyId, customerPoId: cpoId, status: 'OPEN' },
         });
+        const openCpos = await this.prisma.customerPo.findMany({
+            where: { companyId, status: { in: ['RECEIVED', 'ACKNOWLEDGED', 'IN_PROGRESS'] } },
+            include: { items: { where: { isActive: true } } },
+            orderBy: { createdAt: 'asc' },
+        });
+        const demandQueue = new Map();
+        for (const otherCpo of openCpos) {
+            const demand = await this.getRawMaterialDemand(companyId, otherCpo);
+            for (const [itemCode, info] of demand.entries()) {
+                if (!demandQueue.has(itemCode))
+                    demandQueue.set(itemCode, []);
+                demandQueue.get(itemCode).push({ cpoId: otherCpo.id, requiredQty: info.requiredQty });
+            }
+        }
+        const allocationForThisCpo = new Map();
+        for (const [itemCode, queue] of demandQueue.entries()) {
+            const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
+            let runningStock = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
+            const totalStock = runningStock;
+            for (const entry of queue) {
+                const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
+                const shortage = Math.max(0, entry.requiredQty - allocated);
+                runningStock -= allocated;
+                if (entry.cpoId === cpoId) {
+                    allocationForThisCpo.set(itemCode, {
+                        netRequired: entry.requiredQty,
+                        availableQty: totalStock,
+                        shortage,
+                    });
+                }
+            }
+        }
         const shortageRows = [];
         const itemResults = [];
         const bomTasksCreated = [];
@@ -325,14 +392,10 @@ let CustomerPoService = class CustomerPoService {
                 }
                 const componentResults = [];
                 for (const bomItem of bom.items) {
-                    const grossQty = bomItem.effectiveQty * cpoItem.qty;
-                    const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
-                    const netRequired = grossQty + wasteQty;
-                    const balance = await this.prisma.stockBalance.findFirst({
-                        where: { companyId, itemCode: bomItem.itemCode },
-                    });
-                    const availableQty = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
-                    const shortage = Math.max(0, netRequired - availableQty);
+                    const alloc = allocationForThisCpo.get(bomItem.itemCode);
+                    const netRequired = alloc ? alloc.netRequired : (bomItem.effectiveQty * cpoItem.qty);
+                    const availableQty = alloc ? alloc.availableQty : 0;
+                    const shortage = alloc ? alloc.shortage : netRequired;
                     if (shortage > 0) {
                         hasShortage = true;
                         shortageRows.push({
@@ -368,11 +431,9 @@ let CustomerPoService = class CustomerPoService {
                 where: { companyId, code: cpoItem.itemCode },
             });
             if (rawMaterial) {
-                const balance = await this.prisma.stockBalance.findFirst({
-                    where: { companyId, itemCode: cpoItem.itemCode },
-                });
-                const availableQty = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
-                const shortage = Math.max(0, cpoItem.qty - availableQty);
+                const alloc = allocationForThisCpo.get(cpoItem.itemCode);
+                const availableQty = alloc ? alloc.availableQty : 0;
+                const shortage = alloc ? alloc.shortage : cpoItem.qty;
                 if (shortage > 0) {
                     hasShortage = true;
                     shortageRows.push({
