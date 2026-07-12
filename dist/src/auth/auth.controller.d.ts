@@ -11,9 +11,9 @@ export declare class AuthController {
             email: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
-            additionalRoles: import(".prisma/client").$Enums.UserRole[];
-            allRoles: import(".prisma/client").$Enums.UserRole[];
+            role: import("@prisma/client").$Enums.UserRole;
+            additionalRoles: import("@prisma/client").$Enums.UserRole[];
+            allRoles: import("@prisma/client").$Enums.UserRole[];
             companyId: string;
             company: {
                 id: string;
@@ -24,7 +24,7 @@ export declare class AuthController {
         };
     }>;
     me(user: any): Promise<{
-        allRoles: import(".prisma/client").$Enums.UserRole[];
+        allRoles: import("@prisma/client").$Enums.UserRole[];
         id: string;
         email: string;
         company: {
@@ -35,8 +35,8 @@ export declare class AuthController {
         companyId: string;
         firstName: string;
         lastName: string;
-        role: import(".prisma/client").$Enums.UserRole;
-        additionalRoles: import(".prisma/client").$Enums.UserRole[];
+        role: import("@prisma/client").$Enums.UserRole;
+        additionalRoles: import("@prisma/client").$Enums.UserRole[];
         mustChangePwd: boolean;
         lastLoginAt: Date;
     }>;

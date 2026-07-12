@@ -5,36 +5,36 @@ export declare class TdsController {
     constructor(tdsService: TdsService);
     getAll(req: any, query: any): Promise<({
         employee: {
-            employeeNumber: string;
             firstName: string;
             lastName: string;
             panNumber: string;
+            employeeNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        financialYear: string;
+        remarks: string | null;
         employeeId: string;
         otherDeductions: number;
-        remarks: string | null;
-        financialYear: string;
         section80C: number;
         section80D: number;
         section80G: number;
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     })[]>;
     getChallan(month: string, year: string, req: any): Promise<{
         reportType: string;
@@ -66,14 +66,14 @@ export declare class TdsController {
         financialYear: string;
         employeeId: string;
         employee: {
+            firstName: string;
+            lastName: string;
+            panNumber: string;
             basicSalary: number;
             hraAmount: number;
             conveyanceAmount: number;
             otherAllowances: number;
             employeeNumber: string;
-            firstName: string;
-            lastName: string;
-            panNumber: string;
         };
         grossSalary: number;
         standardDeduction: number;
@@ -97,37 +97,37 @@ export declare class TdsController {
     }>;
     getDeclaration(empId: string, fy: string, req: any): Promise<{
         employee: {
+            firstName: string;
+            lastName: string;
             basicSalary: number;
             hraAmount: number;
             employeeNumber: string;
-            firstName: string;
-            lastName: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        financialYear: string;
+        remarks: string | null;
         employeeId: string;
         otherDeductions: number;
-        remarks: string | null;
-        financialYear: string;
         section80C: number;
         section80D: number;
         section80G: number;
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     }>;
     saveDeclaration(dto: SaveDeclarationDto, req: any): Promise<any>;
 }

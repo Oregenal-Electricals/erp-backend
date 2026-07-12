@@ -8,7 +8,7 @@ export declare class StockTransferController {
         draft: number;
         confirmed: number;
         cancelled: number;
-        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.StockTransferGroupByOutputType, "transferType"[]> & {
+        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.StockTransferGroupByOutputType, "transferType"[]> & {
             _count: number;
         })[];
     }>;
@@ -25,21 +25,21 @@ export declare class StockTransferController {
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             status: string;
             remarks: string | null;
-            transferNumber: string;
             transferType: string;
             fromWarehouseId: string;
             toWarehouseId: string;
             fromBinId: string | null;
             toBinId: string | null;
+            transferNumber: string;
         })[];
         total: number;
         page: number;
@@ -49,22 +49,22 @@ export declare class StockTransferController {
     findOne(id: string, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
             batchId: string | null;
             transferId: string;
@@ -79,41 +79,41 @@ export declare class StockTransferController {
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
         fromWarehouseId: string;
         toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
+        transferNumber: string;
     }>;
     create(dto: CreateTransferDto, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
             batchId: string | null;
             transferId: string;
@@ -128,41 +128,41 @@ export declare class StockTransferController {
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
         fromWarehouseId: string;
         toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
+        transferNumber: string;
     }>;
     confirm(id: string, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
             batchId: string | null;
             transferId: string;
@@ -177,41 +177,41 @@ export declare class StockTransferController {
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
         fromWarehouseId: string;
         toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
+        transferNumber: string;
     }>;
     cancel(id: string, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
             batchId: string | null;
             transferId: string;
@@ -226,20 +226,20 @@ export declare class StockTransferController {
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
         fromWarehouseId: string;
         toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
+        transferNumber: string;
     }>;
 }

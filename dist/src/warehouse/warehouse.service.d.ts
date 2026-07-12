@@ -25,7 +25,7 @@ export declare class WarehouseService {
         companyId: string;
         description: string | null;
         plantId: string;
-        type: import(".prisma/client").$Enums.WarehouseType;
+        type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
         isDefault: boolean;
     }>;
@@ -52,7 +52,7 @@ export declare class WarehouseService {
         companyId: string;
         description: string | null;
         plantId: string;
-        type: import(".prisma/client").$Enums.WarehouseType;
+        type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
         isDefault: boolean;
     })[]>;
@@ -129,7 +129,7 @@ export declare class WarehouseService {
         companyId: string;
         description: string | null;
         plantId: string;
-        type: import(".prisma/client").$Enums.WarehouseType;
+        type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
         isDefault: boolean;
     }>;
@@ -153,7 +153,7 @@ export declare class WarehouseService {
         companyId: string;
         description: string | null;
         plantId: string;
-        type: import(".prisma/client").$Enums.WarehouseType;
+        type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
         isDefault: boolean;
     }>;

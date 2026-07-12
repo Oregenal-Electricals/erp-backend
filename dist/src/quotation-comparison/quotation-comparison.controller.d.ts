@@ -55,19 +55,19 @@ export declare class QuotationComparisonController {
         selections: {
             [k: string]: {
                 id: string;
-                companyId: string;
-                isActive: boolean;
-                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
+                isActive: boolean;
+                isTestData: boolean;
+                companyId: string;
                 rfqId: string;
-                rfqItemId: string;
-                selectedVendorId: string;
-                selectedQuotationId: string;
                 selectedItemId: string;
                 selectionReason: string | null;
+                selectedVendorId: string;
+                selectedQuotationId: string;
+                rfqItemId: string;
             };
         };
     }>;

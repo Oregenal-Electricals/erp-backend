@@ -18,13 +18,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -36,8 +36,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -63,13 +63,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -81,8 +81,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -104,7 +104,7 @@ export declare class ChangeRequestsService {
                 id: string;
                 firstName: string;
                 lastName: string;
-                role: import(".prisma/client").$Enums.UserRole;
+                role: import("@prisma/client").$Enums.UserRole;
             };
         } & {
             id: string;
@@ -122,13 +122,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -140,8 +140,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -162,13 +162,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -180,8 +180,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -202,13 +202,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -220,8 +220,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -242,13 +242,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -260,8 +260,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -282,13 +282,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -300,8 +300,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -322,13 +322,13 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -340,8 +340,8 @@ export declare class ChangeRequestsService {
         isTestData: boolean;
         companyId: string;
         description: string;
-        status: import(".prisma/client").$Enums.ChangeRequestStatus;
-        type: import(".prisma/client").$Enums.ChangeRequestType;
+        status: import("@prisma/client").$Enums.ChangeRequestStatus;
+        type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -357,7 +357,7 @@ export declare class ChangeRequestsService {
             id: string;
             firstName: string;
             lastName: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;

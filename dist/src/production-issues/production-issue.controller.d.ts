@@ -11,31 +11,31 @@ export declare class ProductionIssueController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
-            _count: {
-                items: number;
-            };
             warehouse: {
                 name: string;
             };
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
+            };
+            _count: {
+                items: number;
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             status: string;
             remarks: string | null;
             warehouseId: string;
-            workOrderId: string;
-            issueNumber: string;
             issueMethod: string;
+            issueNumber: string;
+            workOrderId: string;
         })[];
         total: number;
         page: number;
@@ -43,203 +43,203 @@ export declare class ProductionIssueController {
         totalPages: number;
     }>;
     findOne(id: string, req: any): Promise<{
+        items: ({
+            batch: {
+                lotNumber: string;
+                batchNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            unitCost: number;
+            requiredQty: number;
+            issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
+        })[];
         warehouse: {
             code: string;
             name: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            woNumber: string;
         };
-        items: ({
-            batch: {
-                batchNumber: string;
-                lotNumber: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            itemCode: string;
-            itemName: string;
-            unitCost: number;
-            uom: string;
-            requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
-            issuedQty: number;
-        })[];
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        workOrderId: string;
-        issueNumber: string;
         issueMethod: string;
+        issueNumber: string;
+        workOrderId: string;
     }>;
     create(dto: CreateProductionIssueDto, req: any): Promise<{
+        items: ({
+            batch: {
+                lotNumber: string;
+                batchNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            unitCost: number;
+            requiredQty: number;
+            issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
+        })[];
         warehouse: {
             code: string;
             name: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            woNumber: string;
         };
-        items: ({
-            batch: {
-                batchNumber: string;
-                lotNumber: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            itemCode: string;
-            itemName: string;
-            unitCost: number;
-            uom: string;
-            requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
-            issuedQty: number;
-        })[];
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        workOrderId: string;
-        issueNumber: string;
         issueMethod: string;
+        issueNumber: string;
+        workOrderId: string;
     }>;
     createFromMrp(woId: string, req: any): Promise<{
+        items: ({
+            batch: {
+                lotNumber: string;
+                batchNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            unitCost: number;
+            requiredQty: number;
+            issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
+        })[];
         warehouse: {
             code: string;
             name: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            woNumber: string;
         };
-        items: ({
-            batch: {
-                batchNumber: string;
-                lotNumber: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            itemCode: string;
-            itemName: string;
-            unitCost: number;
-            uom: string;
-            requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
-            issuedQty: number;
-        })[];
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        workOrderId: string;
-        issueNumber: string;
         issueMethod: string;
+        issueNumber: string;
+        workOrderId: string;
     }>;
     confirm(id: string, req: any): Promise<{
+        items: ({
+            batch: {
+                lotNumber: string;
+                batchNumber: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            unitCost: number;
+            requiredQty: number;
+            issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
+        })[];
         warehouse: {
             code: string;
             name: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            woNumber: string;
         };
-        items: ({
-            batch: {
-                batchNumber: string;
-                lotNumber: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            itemCode: string;
-            itemName: string;
-            unitCost: number;
-            uom: string;
-            requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
-            issuedQty: number;
-        })[];
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        workOrderId: string;
-        issueNumber: string;
         issueMethod: string;
+        issueNumber: string;
+        workOrderId: string;
     }>;
 }

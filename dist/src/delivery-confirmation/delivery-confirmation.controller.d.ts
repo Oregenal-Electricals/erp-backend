@@ -16,27 +16,27 @@ export declare class DeliveryConfirmationController {
                     customerName: string;
                     soNumber: string;
                 };
-                dispatchNumber: string;
                 vehicleNumber: string;
+                dispatchNumber: string;
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             remarks: string | null;
             deliveryDate: Date;
-            dispatchId: string;
             dcNumber: string;
+            shortageQty: number;
+            dispatchId: string;
             receiverName: string;
             receiverPhone: string | null;
             podNumber: string | null;
             condition: string;
-            shortageQty: number;
             damageNotes: string | null;
         })[];
         total: number;
@@ -47,68 +47,68 @@ export declare class DeliveryConfirmationController {
         dispatch: {
             salesOrder: {
                 customerName: string;
-                soNumber: string;
                 cpo: {
-                    cpoNumber: string;
                     customerPoNumber: string;
+                    cpoNumber: string;
                 };
+                soNumber: string;
             };
-            dispatchNumber: string;
             vehicleNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         remarks: string | null;
         deliveryDate: Date;
-        dispatchId: string;
         dcNumber: string;
+        shortageQty: number;
+        dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
         condition: string;
-        shortageQty: number;
         damageNotes: string | null;
     }>;
     create(dto: CreateDeliveryConfirmationDto, req: any): Promise<{
         dispatch: {
             salesOrder: {
                 customerName: string;
-                soNumber: string;
                 cpo: {
-                    cpoNumber: string;
                     customerPoNumber: string;
+                    cpoNumber: string;
                 };
+                soNumber: string;
             };
-            dispatchNumber: string;
             vehicleNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         remarks: string | null;
         deliveryDate: Date;
-        dispatchId: string;
         dcNumber: string;
+        shortageQty: number;
+        dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
         condition: string;
-        shortageQty: number;
         damageNotes: string | null;
     }>;
 }

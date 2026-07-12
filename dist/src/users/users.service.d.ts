@@ -21,8 +21,8 @@ export declare class UsersService {
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import(".prisma/client").$Enums.UserRole;
-        additionalRoles: import(".prisma/client").$Enums.UserRole[];
+        role: import("@prisma/client").$Enums.UserRole;
+        additionalRoles: import("@prisma/client").$Enums.UserRole[];
         mustChangePwd: boolean;
         isLocked: boolean;
     }>;
@@ -46,7 +46,7 @@ export declare class UsersService {
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import(".prisma/client").$Enums.UserRole;
+        role: import("@prisma/client").$Enums.UserRole;
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
@@ -68,7 +68,7 @@ export declare class UsersService {
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import(".prisma/client").$Enums.UserRole;
+        role: import("@prisma/client").$Enums.UserRole;
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
@@ -86,7 +86,7 @@ export declare class UsersService {
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import(".prisma/client").$Enums.UserRole;
+        role: import("@prisma/client").$Enums.UserRole;
     }>;
     toggleUserStatus(id: string, requestingUser: any): Promise<{
         id: string;
@@ -94,7 +94,7 @@ export declare class UsersService {
         isActive: boolean;
         firstName: string;
         lastName: string;
-        role: import(".prisma/client").$Enums.UserRole;
+        role: import("@prisma/client").$Enums.UserRole;
     }>;
     unlockUser(id: string, requestingUser: any): Promise<{
         id: string;

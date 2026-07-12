@@ -7,12 +7,12 @@ export declare class StockLedgerController {
         totalItems: number;
         totalMovements: number;
         totalValue: number;
-        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.StockLedgerGroupByOutputType, "transactionType"[]> & {
+        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.StockLedgerGroupByOutputType, "transactionType"[]> & {
+            _count: number;
             _sum: {
                 inQty: number;
                 outQty: number;
             };
-            _count: number;
         })[];
     }>;
     findBalance(req: any, query: any): Promise<{
@@ -23,21 +23,21 @@ export declare class StockLedgerController {
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             itemCode: string;
             itemName: string;
             warehouseId: string;
+            unitCost: number;
+            totalValue: number;
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
-            unitCost: number;
-            totalValue: number;
             lastUpdated: Date;
         })[];
         total: number;
@@ -51,27 +51,27 @@ export declare class StockLedgerController {
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
         warehouseId: string;
         unitCost: number;
+        totalCost: number;
+        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        transactionDate: Date;
-        totalCost: number;
         inQty: number;
         outQty: number;
         balanceQty: number;
-        transactionType: string;
+        transactionDate: Date;
     })[]>;
     findLedger(req: any, query: any): Promise<{
         data: ({
@@ -81,27 +81,27 @@ export declare class StockLedgerController {
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             remarks: string | null;
             itemCode: string;
             itemName: string;
             warehouseId: string;
             unitCost: number;
+            totalCost: number;
+            transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            transactionDate: Date;
-            totalCost: number;
             inQty: number;
             outQty: number;
             balanceQty: number;
-            transactionType: string;
+            transactionDate: Date;
         })[];
         total: number;
         page: number;
@@ -114,26 +114,26 @@ export declare class StockLedgerController {
     }>;
     adjust(dto: AdjustStockDto, req: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
         warehouseId: string;
         unitCost: number;
+        totalCost: number;
+        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        transactionDate: Date;
-        totalCost: number;
         inQty: number;
         outQty: number;
         balanceQty: number;
-        transactionType: string;
+        transactionDate: Date;
     }>;
 }

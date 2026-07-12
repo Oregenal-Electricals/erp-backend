@@ -175,12 +175,12 @@ export declare class AnalyticsController {
         }[];
         overdueWos: {
             status: string;
-            woNumber: string;
+            priority: string;
             productName: string;
             plannedQty: number;
-            completedQty: number;
             plannedEndDate: Date;
-            priority: string;
+            completedQty: number;
+            woNumber: string;
         }[];
     }>;
     getInventoryDeep(req: any): Promise<{

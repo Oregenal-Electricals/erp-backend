@@ -14,6 +14,11 @@ export declare class CustomsEntryController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            shipment: {
+                portOfDischarge: string;
+                shipmentMode: string;
+                shipmentNumber: string;
+            };
             ipo: {
                 status: string;
                 vendor: {
@@ -23,36 +28,31 @@ export declare class CustomsEntryController {
                 currency: string;
                 ipoNumber: string;
             };
-            shipment: {
-                portOfDischarge: string;
-                shipmentNumber: string;
-                shipmentMode: string;
-            };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             status: string;
             notes: string | null;
             igstRate: number;
-            ipoId: string;
-            totalDuty: number;
-            cifValue: number;
             bcdRate: number;
-            bcdAmount: number;
-            swsAmount: number;
-            igstAmount: number;
-            aidcAmount: number | null;
+            ipoId: string;
             shipmentId: string;
-            boeNumber: string;
             customsBoeNumber: string | null;
             chaName: string | null;
             portOfEntry: string | null;
+            cifValue: number;
+            aidcAmount: number | null;
+            bcdAmount: number;
+            swsAmount: number;
+            igstAmount: number;
+            totalDuty: number;
+            boeNumber: string;
             dutyPaidDate: Date | null;
             outOfChargeDate: Date | null;
         })[];
@@ -62,6 +62,11 @@ export declare class CustomsEntryController {
         totalPages: number;
     }>;
     findByIpo(ipoId: string, req: any): Promise<({
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -71,40 +76,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -114,40 +119,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     create(dto: CreateCustomsEntryDto, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -157,40 +162,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     update(id: string, dto: UpdateCustomsEntryDto, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -200,40 +205,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     file(id: string, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -243,40 +248,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     assess(id: string, dto: AssessCustomsEntryDto, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -286,40 +291,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     payDuty(id: string, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -329,40 +334,40 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     outOfCharge(id: string, req: any): Promise<{
+        shipment: {
+            portOfDischarge: string;
+            shipmentMode: string;
+            shipmentNumber: string;
+        };
         ipo: {
             status: string;
             vendor: {
@@ -372,36 +377,31 @@ export declare class CustomsEntryController {
             currency: string;
             ipoNumber: string;
         };
-        shipment: {
-            portOfDischarge: string;
-            shipmentNumber: string;
-            shipmentMode: string;
-        };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         notes: string | null;
         igstRate: number;
-        ipoId: string;
-        totalDuty: number;
-        cifValue: number;
         bcdRate: number;
-        bcdAmount: number;
-        swsAmount: number;
-        igstAmount: number;
-        aidcAmount: number | null;
+        ipoId: string;
         shipmentId: string;
-        boeNumber: string;
         customsBoeNumber: string | null;
         chaName: string | null;
         portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
+        bcdAmount: number;
+        swsAmount: number;
+        igstAmount: number;
+        totalDuty: number;
+        boeNumber: string;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;

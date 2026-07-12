@@ -6,7 +6,7 @@ export declare class DocumentsController {
     constructor(docsService: DocumentsService);
     getStats(req: any): Promise<{
         total: number;
-        byCategory: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.DocumentGroupByOutputType, "category"[]> & {
+        byCategory: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.DocumentGroupByOutputType, "category"[]> & {
             _count: {
                 id: number;
             };
@@ -16,24 +16,24 @@ export declare class DocumentsController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: {
+            id: string;
+            createdAt: Date;
+            createdBy: string;
+            description: string;
+            category: string;
+            tags: string;
+            title: string;
             _count: {
                 versions: number;
             };
-            id: string;
-            description: string;
-            createdAt: Date;
-            createdBy: string;
-            title: string;
-            category: string;
+            version: number;
+            documentNumber: string;
+            referenceType: string;
+            referenceNumber: string;
+            fileType: string;
             fileName: string;
             fileSize: number;
             mimeType: string;
-            documentNumber: string;
-            fileType: string;
-            version: number;
-            referenceType: string;
-            referenceNumber: string;
-            tags: string;
         }[];
         total: number;
         page: number;

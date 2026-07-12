@@ -12,13 +12,13 @@ export declare class AlertsController {
     }>;
     findAllTemplates(req: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         eventType: string;
         channel: string;
         subject: string;
@@ -29,13 +29,13 @@ export declare class AlertsController {
     findAllLogs(req: any, query: any): Promise<{
         data: {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             status: string;
             referenceType: string | null;
             referenceId: string | null;
@@ -43,11 +43,11 @@ export declare class AlertsController {
             eventType: string;
             channel: string;
             subject: string | null;
-            templateId: string | null;
             recipient: string;
             body: string;
             errorMessage: string | null;
             sentAt: Date | null;
+            templateId: string | null;
         }[];
         total: number;
         page: number;
@@ -70,13 +70,13 @@ export declare class AlertsController {
     }>;
     createTemplate(dto: CreateAlertTemplateDto, req: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         eventType: string;
         channel: string;
         subject: string;
@@ -86,13 +86,13 @@ export declare class AlertsController {
     }>;
     updateTemplate(id: string, dto: UpdateAlertTemplateDto, req: any): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         eventType: string;
         channel: string;
         subject: string;

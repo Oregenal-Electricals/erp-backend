@@ -19,7 +19,7 @@ export declare class VehicleManagementService {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -39,7 +39,7 @@ export declare class VehicleManagementService {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -66,8 +66,8 @@ export declare class VehicleManagementService {
             isTestData: boolean;
             companyId: string;
             plantId: string;
-            status: import(".prisma/client").$Enums.VehicleLogStatus;
-            purpose: import(".prisma/client").$Enums.VehiclePurpose;
+            status: import("@prisma/client").$Enums.VehicleLogStatus;
+            purpose: import("@prisma/client").$Enums.VehiclePurpose;
             remarks: string | null;
             logNumber: string;
             vehicleId: string;
@@ -98,7 +98,7 @@ export declare class VehicleManagementService {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -114,7 +114,7 @@ export declare class VehicleManagementService {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -128,7 +128,7 @@ export declare class VehicleManagementService {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
             ownerName: string;
         };
         entryBy: {
@@ -151,8 +151,8 @@ export declare class VehicleManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VehicleLogStatus;
-        purpose: import(".prisma/client").$Enums.VehiclePurpose;
+        status: import("@prisma/client").$Enums.VehicleLogStatus;
+        purpose: import("@prisma/client").$Enums.VehiclePurpose;
         remarks: string | null;
         logNumber: string;
         vehicleId: string;
@@ -181,7 +181,7 @@ export declare class VehicleManagementService {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
             ownerName: string;
         };
         entryBy: {
@@ -204,8 +204,8 @@ export declare class VehicleManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VehicleLogStatus;
-        purpose: import(".prisma/client").$Enums.VehiclePurpose;
+        status: import("@prisma/client").$Enums.VehicleLogStatus;
+        purpose: import("@prisma/client").$Enums.VehiclePurpose;
         remarks: string | null;
         logNumber: string;
         vehicleId: string;
@@ -239,7 +239,7 @@ export declare class VehicleManagementService {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
             ownerName: string;
         };
         entryBy: {
@@ -262,8 +262,8 @@ export declare class VehicleManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VehicleLogStatus;
-        purpose: import(".prisma/client").$Enums.VehiclePurpose;
+        status: import("@prisma/client").$Enums.VehicleLogStatus;
+        purpose: import("@prisma/client").$Enums.VehiclePurpose;
         remarks: string | null;
         logNumber: string;
         vehicleId: string;
@@ -292,7 +292,7 @@ export declare class VehicleManagementService {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
             ownerName: string;
         };
         entryBy: {
@@ -315,8 +315,8 @@ export declare class VehicleManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VehicleLogStatus;
-        purpose: import(".prisma/client").$Enums.VehiclePurpose;
+        status: import("@prisma/client").$Enums.VehicleLogStatus;
+        purpose: import("@prisma/client").$Enums.VehiclePurpose;
         remarks: string | null;
         logNumber: string;
         vehicleId: string;

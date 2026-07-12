@@ -248,7 +248,7 @@ export declare class RejectedStockService {
         quarantined: number;
         closed: number;
         totalRejectedQty: number;
-        byDisposition: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.RejectedStockItemGroupByOutputType, "disposition"[]> & {
+        byDisposition: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.RejectedStockItemGroupByOutputType, "disposition"[]> & {
             _count: number;
             _sum: {
                 rejectedQty: number;

@@ -23,7 +23,7 @@ export declare class VisitorManagementService {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -48,7 +48,7 @@ export declare class VisitorManagementService {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -81,7 +81,7 @@ export declare class VisitorManagementService {
             isTestData: boolean;
             companyId: string;
             plantId: string;
-            status: import(".prisma/client").$Enums.VisitorStatus;
+            status: import("@prisma/client").$Enums.VisitorStatus;
             visitorId: string;
             hostEmployeeId: string | null;
             purpose: string;
@@ -112,7 +112,7 @@ export declare class VisitorManagementService {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -133,7 +133,7 @@ export declare class VisitorManagementService {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -154,7 +154,7 @@ export declare class VisitorManagementService {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -172,7 +172,7 @@ export declare class VisitorManagementService {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -199,7 +199,7 @@ export declare class VisitorManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
         hostEmployeeId: string | null;
         purpose: string;
@@ -227,7 +227,7 @@ export declare class VisitorManagementService {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -254,7 +254,7 @@ export declare class VisitorManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
         hostEmployeeId: string | null;
         purpose: string;
@@ -286,7 +286,7 @@ export declare class VisitorManagementService {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -313,7 +313,7 @@ export declare class VisitorManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
         hostEmployeeId: string | null;
         purpose: string;
@@ -341,7 +341,7 @@ export declare class VisitorManagementService {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -368,7 +368,7 @@ export declare class VisitorManagementService {
         isTestData: boolean;
         companyId: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
         hostEmployeeId: string | null;
         purpose: string;

@@ -14,7 +14,7 @@ export declare class VehicleManagementController {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -34,7 +34,7 @@ export declare class VehicleManagementController {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -68,8 +68,8 @@ export declare class VehicleManagementController {
             isTestData: boolean;
             companyId: string;
             plantId: string;
-            status: import(".prisma/client").$Enums.VehicleLogStatus;
-            purpose: import(".prisma/client").$Enums.VehiclePurpose;
+            status: import("@prisma/client").$Enums.VehicleLogStatus;
+            purpose: import("@prisma/client").$Enums.VehiclePurpose;
             remarks: string | null;
             logNumber: string;
             vehicleId: string;
@@ -100,7 +100,7 @@ export declare class VehicleManagementController {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
@@ -116,7 +116,7 @@ export declare class VehicleManagementController {
         companyId: string;
         vehicleNumber: string;
         remarks: string | null;
-        vehicleType: import(".prisma/client").$Enums.VehicleType;
+        vehicleType: import("@prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;

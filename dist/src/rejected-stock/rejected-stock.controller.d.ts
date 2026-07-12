@@ -8,20 +8,20 @@ export declare class RejectedStockController {
         quarantined: number;
         closed: number;
         totalRejectedQty: number;
-        byDisposition: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.RejectedStockItemGroupByOutputType, "disposition"[]> & {
+        byDisposition: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.RejectedStockItemGroupByOutputType, "disposition"[]> & {
+            _count: number;
             _sum: {
                 rejectedQty: number;
             };
-            _count: number;
         })[];
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
-            _count: {
-                items: number;
-            };
             warehouse: {
                 name: string;
+            };
+            _count: {
+                items: number;
             };
             grn: {
                 grnNumber: string;
@@ -31,20 +31,20 @@ export declare class RejectedStockController {
             };
         } & {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
             status: string;
             remarks: string | null;
             warehouseId: string;
             grnId: string;
-            totalRejectedQty: number;
             iqcId: string;
             rejectionNumber: string;
+            totalRejectedQty: number;
         })[];
         total: number;
         page: number;
@@ -52,203 +52,203 @@ export declare class RejectedStockController {
         totalPages: number;
     }>;
     findOne(id: string, req: any): Promise<{
-        warehouse: {
-            code: string;
-            name: string;
-        };
         items: {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
             rejectedQty: number;
-            rejectionReason: string | null;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
+        warehouse: {
+            code: string;
+            name: string;
+        };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
     createFromIqc(iqcId: string, req: any): Promise<{
-        warehouse: {
-            code: string;
-            name: string;
-        };
         items: {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
             rejectedQty: number;
-            rejectionReason: string | null;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
+        warehouse: {
+            code: string;
+            name: string;
+        };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
     disposeItem(id: string, itemId: string, dto: DisposeItemDto, req: any): Promise<{
-        warehouse: {
-            code: string;
-            name: string;
-        };
         items: {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
             rejectedQty: number;
-            rejectionReason: string | null;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
+        warehouse: {
+            code: string;
+            name: string;
+        };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
     close(id: string, req: any): Promise<{
-        warehouse: {
-            code: string;
-            name: string;
-        };
         items: {
             id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            companyId: string;
+            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
             rejectedQty: number;
-            rejectionReason: string | null;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
+        warehouse: {
+            code: string;
+            name: string;
+        };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
         };
     } & {
         id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
 }

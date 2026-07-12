@@ -138,7 +138,7 @@ export declare class MastersService {
             label: string;
             startDate: Date;
             endDate: Date;
-            status: import(".prisma/client").$Enums.FinancialYearStatus;
+            status: import("@prisma/client").$Enums.FinancialYearStatus;
         }[];
     } & {
         id: string;
@@ -675,7 +675,7 @@ export declare class MastersService {
         label: string;
         startDate: Date;
         endDate: Date;
-        status: import(".prisma/client").$Enums.FinancialYearStatus;
+        status: import("@prisma/client").$Enums.FinancialYearStatus;
     }>;
     findAllFinancialYears(companyId?: string, user?: any): Promise<({
         company: {
@@ -696,7 +696,7 @@ export declare class MastersService {
         label: string;
         startDate: Date;
         endDate: Date;
-        status: import(".prisma/client").$Enums.FinancialYearStatus;
+        status: import("@prisma/client").$Enums.FinancialYearStatus;
     })[]>;
     findOneFinancialYear(id: string): Promise<{
         company: {
@@ -716,7 +716,7 @@ export declare class MastersService {
         label: string;
         startDate: Date;
         endDate: Date;
-        status: import(".prisma/client").$Enums.FinancialYearStatus;
+        status: import("@prisma/client").$Enums.FinancialYearStatus;
     }>;
     getCurrentFinancialYear(companyId: string): Promise<{
         id: string;
@@ -731,7 +731,7 @@ export declare class MastersService {
         label: string;
         startDate: Date;
         endDate: Date;
-        status: import(".prisma/client").$Enums.FinancialYearStatus;
+        status: import("@prisma/client").$Enums.FinancialYearStatus;
     }>;
     setCurrentFinancialYear(id: string, userId: string): Promise<{
         id: string;
@@ -746,7 +746,7 @@ export declare class MastersService {
         label: string;
         startDate: Date;
         endDate: Date;
-        status: import(".prisma/client").$Enums.FinancialYearStatus;
+        status: import("@prisma/client").$Enums.FinancialYearStatus;
     }>;
     closeFinancialYear(id: string, userId: string): Promise<{
         id: string;
@@ -761,6 +761,6 @@ export declare class MastersService {
         label: string;
         startDate: Date;
         endDate: Date;
-        status: import(".prisma/client").$Enums.FinancialYearStatus;
+        status: import("@prisma/client").$Enums.FinancialYearStatus;
     }>;
 }

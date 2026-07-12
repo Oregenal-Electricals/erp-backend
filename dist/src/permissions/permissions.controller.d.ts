@@ -7,7 +7,7 @@ export declare class PermissionsController {
         total: number;
     };
     getPermissionsForRole(role: UserRole): {
-        role: import(".prisma/client").$Enums.UserRole;
+        role: import("@prisma/client").$Enums.UserRole;
         permissions: Permission[];
         total: number;
     };

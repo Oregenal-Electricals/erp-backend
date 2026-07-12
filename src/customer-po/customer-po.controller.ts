@@ -12,19 +12,19 @@ export class CustomerPoController {
   constructor(private readonly cpoService: CustomerPoService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getStats(@Request() req: any) { return this.cpoService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.cpoService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.cpoService.findOne(id, req.user); }
 
   @Get(':id/shortages')
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.PURCHASE_VIEW)
   getShortages(@Param('id') id: string, @Request() req: any) { return this.cpoService.getShortages(id, req.user); }
 
   @Post()
