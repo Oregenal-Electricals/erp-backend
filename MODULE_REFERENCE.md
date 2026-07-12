@@ -24,13 +24,13 @@ Living reference for each completed requirement — what it does, how it works, 
 2. **Create the Customer PO** via `POST /api/v1/customer-po`:
    - `poType: "WRITTEN"` → requires a real `customerPoNumber`.
    - `poType: "VERBAL"` → requires `verbalConfirmedBy` (who took the call) and `verbalConfirmedDate`; the system auto-generates a placeholder PO number (`VERBAL-CPO-YYYY-NNNN`) since there's no real document number.
-3. **Run the shortage check** via `POST /api/v1/customer-po/:id/run-shortage-check`. For each item ordered, the system determines what it actually is:
+3. **Shortage check runs automatically** the moment the PO is created — no manual trigger needed. For each item ordered, the system determines what it actually is:
    - **It's a Product with an approved BOM** → explode the BOM (quantity × BOM ratio + wastage%), compare each raw material's requirement against `StockBalance.availableQty`. Any shortfall is written to `MaterialShortage` with status `OPEN`.
    - **It's a Product with NO approved BOM** → do not guess at stock. Instead, auto-create a `Task` (category `BOM_CREATION`, priority `HIGH`, due in 3 days) linking back to the PO, so someone is assigned to create the missing BOM.
    - **It's a raw material sold directly** (matches `RawMaterial.code`, not `Product.code`) → skip BOM entirely, check that raw material's own stock directly against the ordered quantity.
    - **Item code matches neither** → flagged `NO_PRODUCT_MASTER` (data-entry issue, needs investigation).
 4. **Purchase department views open shortages** via `GET /api/v1/customer-po/:id/shortages` — shows item, required qty, available qty, shortage qty, status. (Endpoint is permissioned `PURCHASE_VIEW`, so Purchase and Sales/Unit Head can both see it; other departments cannot.)
-5. Re-running the shortage check on the same PO clears previous `OPEN` shortages first, so numbers stay current as stock changes — safe to re-run any time.
+5. The `POST /run-shortage-check` endpoint still exists and can be called manually to re-check a PO if stock changes later (e.g. after a GRN or stock adjustment) — it clears previous `OPEN` shortages first, so re-running is always safe. But this is no longer required for the initial check; that happens automatically on creation.
 
 ### 3. Key Business Rules Encoded
 
@@ -104,12 +104,9 @@ curl -X POST {BASE_URL}/api/v1/customer-po ... -d '{
 1. Log in as any role with `SALES_VIEW`/`SALES_CREATE` (e.g. `admin@oregenalelectrical.com` or `sales.manager@oregenalelectrical.com`).
 2. Click **Customer PO** in the sidebar (under the Sales section).
 3. Click **+ New Customer PO** — toggle between **Written** and **Verbal**; form fields change accordingly (real PO number vs. confirmed-by/date).
-4. Fill in customer details and at least one line item, submit.
-5. Click the new PO in the list to open its detail view.
-6. Click **Run Shortage Check** — results render inline, color-coded:
-   - Gray = checked, available
-   - Orange = BOM missing (a Task was auto-created — check `/tasks` to confirm)
-   - Red = shortage found or unmapped item code
+4. Fill in customer details and at least one line item, submit. **The shortage check runs automatically at this point** — no button to click.
+5. Click the new PO in the list to open its detail view — the **Material Shortage Check** panel already shows results (either a green "no shortages" message, or red shortage line items).
+6. Results are color-coded and self-explanatory. If a BOM was missing for any item, a Task was auto-created — check `/tasks` to confirm.
 7. Log in as `purchase.manager@oregenalelectrical.com` — confirm they can also open the same PO's shortage results (via the API; no dedicated Purchase-side UI page yet — see Known Limitations).
 8. Log in as `gate.security@oregenalelectrical.com` — confirm **Customer PO does not appear in their sidebar at all** (role should not have `SALES_VIEW`).
 
