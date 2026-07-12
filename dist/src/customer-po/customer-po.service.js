@@ -93,6 +93,11 @@ let CustomerPoService = class CustomerPoService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'customer_pos', recordId: cpo.id, action: 'CREATE', newValues: cpo, changedBy: user.id });
+        try {
+            await this.runShortageCheck(cpo.id, user);
+        }
+        catch (e) {
+        }
         return cpo;
     }
     async acknowledge(id, user) {

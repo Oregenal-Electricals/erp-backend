@@ -93,6 +93,18 @@ export class CustomerPoService {
     });
 
     await this.audit.log({ tableName: 'customer_pos', recordId: cpo.id, action: 'CREATE', newValues: cpo, changedBy: user.id });
+
+    // Automatically run the shortage check right after creation - no
+    // manual trigger needed. If this fails for any reason, don't block
+    // the PO from being created; the check can still be re-run manually
+    // via the API later if needed.
+    try {
+      await this.runShortageCheck(cpo.id, user);
+    } catch (e) {
+      // swallow - PO creation should still succeed even if the shortage
+      // check has an issue (e.g. transient DB error); it can be re-run.
+    }
+
     return cpo;
   }
 
