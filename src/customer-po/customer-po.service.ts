@@ -359,7 +359,12 @@ export class CustomerPoService {
 
     const updated = await this.prisma.customerPo.update({
       where: { id: cpoId },
-      data: { mrpRunAt: new Date(), mrpRunBy: user.id, updatedBy: user.id },
+      data: {
+        mrpRunAt: new Date(),
+        mrpRunBy: user.id,
+        lastShortageCheckResult: itemResults,
+        updatedBy: user.id,
+      },
     });
 
     await this.audit.log({
@@ -397,6 +402,7 @@ export class CustomerPoService {
       cpoNumber: cpo.cpoNumber,
       mrpRunAt: cpo.mrpRunAt,
       mrpRunBy: cpo.mrpRunBy,
+      itemResults: cpo.lastShortageCheckResult || null,
       data: shortages,
       openCount: shortages.filter(s => s.status === 'OPEN').length,
     };

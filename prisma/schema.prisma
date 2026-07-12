@@ -3420,6 +3420,7 @@ model CustomerPo {
   verbalConfirmedDate DateTime?
   mrpRunAt          DateTime?
   mrpRunBy          String?
+  lastShortageCheckResult Json?
   quotationId       String?
   quotation         Quotation? @relation(fields: [quotationId], references: [id])
   customerName      String

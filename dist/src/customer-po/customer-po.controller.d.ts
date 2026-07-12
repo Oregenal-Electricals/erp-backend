@@ -57,6 +57,7 @@ export declare class CustomerPoController {
             cpoNumber: string;
             mrpRunAt: Date | null;
             mrpRunBy: string | null;
+            lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
             acknowledgedDate: Date | null;
             cancelledDate: Date | null;
         })[];
@@ -123,6 +124,7 @@ export declare class CustomerPoController {
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
+        lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -130,6 +132,7 @@ export declare class CustomerPoController {
         cpoNumber: string;
         mrpRunAt: Date;
         mrpRunBy: string;
+        itemResults: string | number | true | import("@prisma/client/runtime/library").JsonObject | import("@prisma/client/runtime/library").JsonArray;
         data: {
             id: string;
             createdAt: Date;
@@ -211,6 +214,7 @@ export declare class CustomerPoController {
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
+        lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -273,6 +277,7 @@ export declare class CustomerPoController {
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
+        lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
@@ -335,6 +340,7 @@ export declare class CustomerPoController {
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
+        lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
     }>;
