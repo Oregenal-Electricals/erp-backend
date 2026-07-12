@@ -38,18 +38,21 @@ Living reference for each completed requirement — what it does, how it works, 
 - BOM explosion only happens for Products; raw materials sold directly skip BOM checking entirely.
 - Missing BOM is never silently ignored — it always produces a traceable Task.
 - Shortage records are always scoped to the specific Customer PO that triggered them (`MaterialShortage.customerPoId`).
+- **A PO can only be edited while its status is `RECEIVED`** (i.e. before it's acknowledged). Once acknowledged, cancelled, or completed, it is permanently locked — the only way to change something is Cancel + create a new PO. This preserves the order record once work has actually started against it.
+- **Editing fully replaces the item list** (not a merge) — the frontend always resubmits every line item. If quantity changes, the shortage check automatically re-runs afterward so Purchase always sees numbers reflecting the current order, not stale ones from before the edit.
 
 ### 4. API Reference
 
 | Method | Endpoint | Permission | Purpose |
 |---|---|---|---|
-| `POST` | `/customer-po` | `SALES_CREATE` | Create a written or verbal PO |
+| `POST` | `/customer-po` | `SALES_CREATE` | Create a written or verbal PO (auto-runs shortage check) |
 | `GET` | `/customer-po` | `SALES_VIEW` | List all customer POs |
 | `GET` | `/customer-po/:id` | `SALES_VIEW` | View one PO with items |
 | `GET` | `/customer-po/stats` | `SALES_VIEW` | Dashboard counts (written/verbal/status) |
-| `POST` | `/customer-po/:id/acknowledge` | `SALES_EDIT` | Mark PO as acknowledged |
+| `PUT` | `/customer-po/:id` | `SALES_EDIT` | Edit PO — only while status is `RECEIVED`; re-runs shortage check |
+| `POST` | `/customer-po/:id/acknowledge` | `SALES_EDIT` | Mark PO as acknowledged (locks it from further editing) |
 | `POST` | `/customer-po/:id/cancel` | `SALES_EDIT` | Cancel a PO |
-| `POST` | `/customer-po/:id/run-shortage-check` | `SALES_EDIT` | Run the BOM/RM shortage check |
+| `POST` | `/customer-po/:id/run-shortage-check` | `SALES_EDIT` | Manually re-run the BOM/RM shortage check (e.g. after a stock update) |
 | `GET` | `/customer-po/:id/shortages` | `PURCHASE_VIEW` | View shortage results (Purchase-facing) |
 
 ### 5. How To Test This (step by step, reusable)
@@ -68,8 +71,7 @@ curl -X POST {BASE_URL}/api/v1/customer-po -H "Authorization: Bearer {TOKEN}" -H
   "poDate": "2026-07-12", "deliveryDate": "2026-08-12",
   "items": [{ "itemCode": "<product-code-with-bom>", "itemName": "...", "qty": 2, "unitPrice": 15000 }]
 }'
-# -> then POST /customer-po/{id}/run-shortage-check
-# Expect: hasShortage: true if BOM requirement exceeds stock, false otherwise.
+# Expect: hasShortage true if BOM requirement exceeds stock, false otherwise (check runs automatically)
 ```
 
 **Test 2 — Verbal PO:**
@@ -105,17 +107,18 @@ curl -X POST {BASE_URL}/api/v1/customer-po ... -d '{
 2. Click **Customer PO** in the sidebar (under the Sales section).
 3. Click **+ New Customer PO** — toggle between **Written** and **Verbal**; form fields change accordingly (real PO number vs. confirmed-by/date).
 4. Fill in customer details and at least one line item, submit. **The shortage check runs automatically at this point** — no button to click.
-5. Click the new PO in the list to open its detail view — the **Material Shortage Check** panel already shows results (either a green "no shortages" message, or red shortage line items).
+5. Click the new PO in the list to open its detail view — the **Material Shortage Check** panel already shows results.
 6. Results are color-coded and self-explanatory. If a BOM was missing for any item, a Task was auto-created — check `/tasks` to confirm.
-7. Log in as `purchase.manager@oregenalelectrical.com` — confirm they can also open the same PO's shortage results (via the API; no dedicated Purchase-side UI page yet — see Known Limitations).
-8. Log in as `gate.security@oregenalelectrical.com` — confirm **Customer PO does not appear in their sidebar at all** (role should not have `SALES_VIEW`).
+7. Log in as `purchase.manager@oregenalelectrical.com` — confirm they can also open the same PO's shortage results.
+8. Log in as `gate.security@oregenalelectrical.com` — confirm **Customer PO does not appear in their sidebar at all**.
+9. **Test the edit lock:** while a PO is still `RECEIVED`, open it — an **Edit** button appears. Click it, change the quantity on an item, save — shortage numbers update. Then click **Acknowledge**. Reopen the PO — **Edit** should now be gone.
 
 ### 7. Known Limitations / Follow-ups (not yet built)
 
-- **No dedicated Purchase-department UI page for shortages yet** — Purchase can currently view shortages only via the API (`GET /customer-po/:id/shortages`) or by opening the same Customer PO detail page a Sales user would use. A standalone "Open Shortages" dashboard for Purchase (aggregating across all POs, not just one at a time) is a good next follow-up.
-- **Shortage stock check is single-warehouse** (`StockBalance.findFirst`, not summed across all warehouses) — matches existing MRP module's behavior for consistency, but if a company splits stock across multiple warehouses, this could undercount total availability. Tracked as a shared follow-up affecting both this module and `mrp.service.ts`.
-- **`SUPERVISOR`/`OPERATOR` shared-role architecture gap** — these two `UserRole` enum values each cover 6+ distinct job functions with no `department` field to distinguish them, so permission grants for these roles are broader than ideal. Tracked separately; requires a `User.department` field + `PermissionsGuard` update to resolve properly.
-- **BOM-missing Task is always assigned to whoever ran the shortage check** — there's no dedicated "BOM owner" role yet, so the task isn't auto-routed to Production/Planning. Reassign manually for now.
+- **No dedicated Purchase-department UI page for shortages yet** — Purchase can currently view shortages only via the API or by opening the same Customer PO detail page a Sales user would use. A standalone "Open Shortages" dashboard for Purchase is a good next follow-up.
+- **Shortage stock check is single-warehouse** (`StockBalance.findFirst`, not summed across all warehouses) — matches existing MRP module's behavior for consistency. Tracked as a shared follow-up affecting both this module and `mrp.service.ts`.
+- **`SUPERVISOR`/`OPERATOR` shared-role architecture gap** — these two `UserRole` enum values each cover 6+ distinct job functions with no `department` field to distinguish them. Tracked separately; requires a `User.department` field + `PermissionsGuard` update.
+- **BOM-missing Task is always assigned to whoever ran the shortage check** — there's no dedicated "BOM owner" role yet. Reassign manually for now.
 
 ---
 
