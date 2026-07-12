@@ -37,9 +37,9 @@ export declare class TasksController {
             referenceNumber: string | null;
             assignedTo: string;
             completedDate: Date | null;
-            completionNote: string | null;
             taskNumber: string;
             assignedBy: string;
+            completionNote: string | null;
         })[];
         total: number;
         page: number;
@@ -79,9 +79,9 @@ export declare class TasksController {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     create(dto: CreateTaskDto, req: any): Promise<{
         comments: {
@@ -117,9 +117,9 @@ export declare class TasksController {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     update(id: string, dto: UpdateTaskDto, req: any): Promise<{
         comments: {
@@ -155,9 +155,9 @@ export declare class TasksController {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     updateStatus(id: string, dto: UpdateTaskStatusDto, req: any): Promise<{
         comments: {
@@ -193,9 +193,9 @@ export declare class TasksController {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     addComment(id: string, dto: AddCommentDto, req: any): Promise<{
         id: string;

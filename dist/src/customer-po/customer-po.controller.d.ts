@@ -347,6 +347,7 @@ export declare class CustomerPoController {
             itemsMissingBom: number;
             itemsMissingProduct: number;
             shortageCount: number;
+            bomTasksCreated: string[];
             hasShortage: boolean;
             canFulfillFromStock: boolean;
         };

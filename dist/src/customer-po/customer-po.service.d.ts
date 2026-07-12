@@ -6,6 +6,7 @@ export declare class CustomerPoService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     private generateNumber;
+    private generateTaskNumber;
     private calcItem;
     private includes;
     create(dto: CreateCpoDto, user: any): Promise<{
@@ -326,6 +327,7 @@ export declare class CustomerPoService {
             itemsMissingBom: number;
             itemsMissingProduct: number;
             shortageCount: number;
+            bomTasksCreated: string[];
             hasShortage: boolean;
             canFulfillFromStock: boolean;
         };

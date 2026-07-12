@@ -41,9 +41,9 @@ export declare class TasksService {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     update(id: string, dto: UpdateTaskDto, user: any): Promise<{
         comments: {
@@ -79,9 +79,9 @@ export declare class TasksService {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     updateStatus(id: string, dto: UpdateTaskStatusDto, user: any): Promise<{
         comments: {
@@ -117,9 +117,9 @@ export declare class TasksService {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     addComment(id: string, dto: AddCommentDto, user: any): Promise<{
         id: string;
@@ -159,9 +159,9 @@ export declare class TasksService {
             referenceNumber: string | null;
             assignedTo: string;
             completedDate: Date | null;
-            completionNote: string | null;
             taskNumber: string;
             assignedBy: string;
+            completionNote: string | null;
         })[];
         total: number;
         page: number;
@@ -201,9 +201,9 @@ export declare class TasksService {
         referenceNumber: string | null;
         assignedTo: string;
         completedDate: Date | null;
-        completionNote: string | null;
         taskNumber: string;
         assignedBy: string;
+        completionNote: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

@@ -23,6 +23,11 @@ let CustomerPoService = class CustomerPoService {
         const year = new Date().getFullYear();
         return `CPO-${year}-${String(count + 1).padStart(4, '0')}`;
     }
+    async generateTaskNumber(companyId) {
+        const count = await this.prisma.task.count({ where: { companyId } });
+        const year = new Date().getFullYear();
+        return `TSK-${year}-${String(count + 1).padStart(4, '0')}`;
+    }
     calcItem(item) {
         var _a;
         const qty = item.qty || 0;
@@ -183,68 +188,126 @@ let CustomerPoService = class CustomerPoService {
         });
         const shortageRows = [];
         const itemResults = [];
+        const bomTasksCreated = [];
         let hasShortage = false;
         for (const cpoItem of cpo.items) {
             const product = await this.prisma.product.findFirst({
                 where: { companyId, code: cpoItem.itemCode },
             });
-            if (!product) {
+            if (product) {
+                const bom = await this.prisma.bom.findFirst({
+                    where: { companyId, productId: product.id, status: 'APPROVED' },
+                    include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
+                    orderBy: { effectiveFrom: 'desc' },
+                });
+                if (!bom) {
+                    const taskNumber = await this.generateTaskNumber(companyId);
+                    const task = await this.prisma.task.create({
+                        data: {
+                            companyId,
+                            taskNumber,
+                            title: `Create BOM for product ${cpoItem.itemCode} (${cpoItem.itemName})`,
+                            description: `Customer PO ${cpo.cpoNumber} ordered "${cpoItem.itemName}" (${cpoItem.qty} ${cpoItem.uom}) but no approved BOM exists for this product. A BOM must be created before a material shortage check can be run for this item.`,
+                            assignedTo: user.id,
+                            assignedBy: user.id,
+                            dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+                            priority: 'HIGH',
+                            category: 'BOM_CREATION',
+                            referenceType: 'CustomerPo',
+                            referenceId: cpoId,
+                            referenceNumber: cpo.cpoNumber,
+                            createdBy: user.id,
+                            updatedBy: user.id,
+                        },
+                    });
+                    bomTasksCreated.push(task.taskNumber);
+                    itemResults.push({
+                        itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
+                        status: 'BOM_MISSING',
+                        message: `No approved BOM found. Task ${task.taskNumber} created to request BOM creation.`,
+                        taskNumber: task.taskNumber,
+                    });
+                    continue;
+                }
+                const componentResults = [];
+                for (const bomItem of bom.items) {
+                    const grossQty = bomItem.effectiveQty * cpoItem.qty;
+                    const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
+                    const netRequired = grossQty + wasteQty;
+                    const balance = await this.prisma.stockBalance.findFirst({
+                        where: { companyId, itemCode: bomItem.itemCode },
+                    });
+                    const availableQty = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
+                    const shortage = Math.max(0, netRequired - availableQty);
+                    if (shortage > 0) {
+                        hasShortage = true;
+                        shortageRows.push({
+                            companyId,
+                            customerPoId: cpoId,
+                            rawMaterialId: bomItem.rawMaterialId || null,
+                            itemCode: bomItem.itemCode,
+                            itemName: bomItem.itemName,
+                            requiredQty: Math.round(netRequired * 1000) / 1000,
+                            availableQty,
+                            shortageQty: Math.round(shortage * 1000) / 1000,
+                            uom: bomItem.uom,
+                            status: 'OPEN',
+                            createdBy: user.id,
+                            updatedBy: user.id,
+                        });
+                    }
+                    componentResults.push({
+                        itemCode: bomItem.itemCode, itemName: bomItem.itemName, uom: bomItem.uom,
+                        netRequired: Math.round(netRequired * 1000) / 1000,
+                        availableQty,
+                        shortage: Math.round(shortage * 1000) / 1000,
+                        status: shortage > 0 ? 'SHORTAGE' : 'AVAILABLE',
+                    });
+                }
                 itemResults.push({
                     itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
-                    status: 'NO_PRODUCT_MASTER', message: 'No matching Product master found for this item code',
+                    status: 'CHECKED', bomNumber: bom.bomNumber, components: componentResults,
                 });
                 continue;
             }
-            const bom = await this.prisma.bom.findFirst({
-                where: { companyId, productId: product.id, status: 'APPROVED' },
-                include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
-                orderBy: { effectiveFrom: 'desc' },
+            const rawMaterial = await this.prisma.rawMaterial.findFirst({
+                where: { companyId, code: cpoItem.itemCode },
             });
-            if (!bom) {
-                itemResults.push({
-                    itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
-                    status: 'NO_BOM', message: 'No approved BOM found for this product',
-                });
-                continue;
-            }
-            const componentResults = [];
-            for (const bomItem of bom.items) {
-                const grossQty = bomItem.effectiveQty * cpoItem.qty;
-                const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
-                const netRequired = grossQty + wasteQty;
+            if (rawMaterial) {
                 const balance = await this.prisma.stockBalance.findFirst({
-                    where: { companyId, itemCode: bomItem.itemCode },
+                    where: { companyId, itemCode: cpoItem.itemCode },
                 });
                 const availableQty = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
-                const shortage = Math.max(0, netRequired - availableQty);
+                const shortage = Math.max(0, cpoItem.qty - availableQty);
                 if (shortage > 0) {
                     hasShortage = true;
                     shortageRows.push({
                         companyId,
                         customerPoId: cpoId,
-                        rawMaterialId: bomItem.rawMaterialId || null,
-                        itemCode: bomItem.itemCode,
-                        itemName: bomItem.itemName,
-                        requiredQty: Math.round(netRequired * 1000) / 1000,
+                        rawMaterialId: rawMaterial.id,
+                        itemCode: cpoItem.itemCode,
+                        itemName: cpoItem.itemName,
+                        requiredQty: cpoItem.qty,
                         availableQty,
                         shortageQty: Math.round(shortage * 1000) / 1000,
-                        uom: bomItem.uom,
+                        uom: cpoItem.uom,
                         status: 'OPEN',
                         createdBy: user.id,
                         updatedBy: user.id,
                     });
                 }
-                componentResults.push({
-                    itemCode: bomItem.itemCode, itemName: bomItem.itemName, uom: bomItem.uom,
-                    netRequired: Math.round(netRequired * 1000) / 1000,
-                    availableQty,
-                    shortage: Math.round(shortage * 1000) / 1000,
-                    status: shortage > 0 ? 'SHORTAGE' : 'AVAILABLE',
+                itemResults.push({
+                    itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
+                    status: 'CHECKED_DIRECT_STOCK',
+                    message: 'Item is a raw material sold directly - checked store stock, no BOM applicable.',
+                    availableQty, requiredQty: cpoItem.qty, shortage: Math.round(shortage * 1000) / 1000,
                 });
+                continue;
             }
             itemResults.push({
                 itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
-                status: 'CHECKED', bomNumber: bom.bomNumber, components: componentResults,
+                status: 'NO_PRODUCT_MASTER',
+                message: 'No matching Product or Raw Material master found for this item code.',
             });
         }
         if (shortageRows.length > 0) {
@@ -256,7 +319,7 @@ let CustomerPoService = class CustomerPoService {
         });
         await this.audit.log({
             tableName: 'customer_pos', recordId: cpoId, action: 'UPDATE',
-            newValues: { mrpRunAt: updated.mrpRunAt, shortageCount: shortageRows.length },
+            newValues: { mrpRunAt: updated.mrpRunAt, shortageCount: shortageRows.length, bomTasksCreated },
             changedBy: user.id,
         });
         return {
@@ -264,10 +327,11 @@ let CustomerPoService = class CustomerPoService {
             itemResults,
             summary: {
                 totalItems: cpo.items.length,
-                itemsChecked: itemResults.filter(i => i.status === 'CHECKED').length,
-                itemsMissingBom: itemResults.filter(i => i.status === 'NO_BOM').length,
+                itemsChecked: itemResults.filter(i => i.status === 'CHECKED' || i.status === 'CHECKED_DIRECT_STOCK').length,
+                itemsMissingBom: itemResults.filter(i => i.status === 'BOM_MISSING').length,
                 itemsMissingProduct: itemResults.filter(i => i.status === 'NO_PRODUCT_MASTER').length,
                 shortageCount: shortageRows.length,
+                bomTasksCreated,
                 hasShortage,
                 canFulfillFromStock: !hasShortage,
             },
