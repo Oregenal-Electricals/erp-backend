@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { AdjustStockDto } from './dto/stock-ledger.dto';
+import { CustomerPoService } from '../customer-po/customer-po.service';
 export declare class StockLedgerService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private customerPoService;
+    constructor(prisma: PrismaService, audit: AuditService, customerPoService: CustomerPoService);
     postTransaction(data: {
         companyId: string;
         itemCode: string;
@@ -34,10 +36,10 @@ export declare class StockLedgerService {
         warehouseId: string;
         unitCost: number;
         totalCost: number;
-        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
+        transactionType: string;
         inQty: number;
         outQty: number;
         balanceQty: number;
@@ -68,10 +70,10 @@ export declare class StockLedgerService {
             warehouseId: string;
             unitCost: number;
             totalCost: number;
-            transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
+            transactionType: string;
             inQty: number;
             outQty: number;
             balanceQty: number;
@@ -131,10 +133,10 @@ export declare class StockLedgerService {
         warehouseId: string;
         unitCost: number;
         totalCost: number;
-        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
+        transactionType: string;
         inQty: number;
         outQty: number;
         balanceQty: number;
@@ -155,10 +157,10 @@ export declare class StockLedgerService {
         warehouseId: string;
         unitCost: number;
         totalCost: number;
-        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
+        transactionType: string;
         inQty: number;
         outQty: number;
         balanceQty: number;

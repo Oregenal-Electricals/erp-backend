@@ -32,13 +32,13 @@ export declare class TasksController {
             title: string;
             priority: string;
             dueDate: Date;
+            taskNumber: string;
+            assignedTo: string;
+            assignedBy: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            assignedTo: string;
             completedDate: Date | null;
-            taskNumber: string;
-            assignedBy: string;
             completionNote: string | null;
         })[];
         total: number;
@@ -74,13 +74,13 @@ export declare class TasksController {
         title: string;
         priority: string;
         dueDate: Date;
+        taskNumber: string;
+        assignedTo: string;
+        assignedBy: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        assignedTo: string;
         completedDate: Date | null;
-        taskNumber: string;
-        assignedBy: string;
         completionNote: string | null;
     }>;
     create(dto: CreateTaskDto, req: any): Promise<{
@@ -112,13 +112,13 @@ export declare class TasksController {
         title: string;
         priority: string;
         dueDate: Date;
+        taskNumber: string;
+        assignedTo: string;
+        assignedBy: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        assignedTo: string;
         completedDate: Date | null;
-        taskNumber: string;
-        assignedBy: string;
         completionNote: string | null;
     }>;
     update(id: string, dto: UpdateTaskDto, req: any): Promise<{
@@ -150,13 +150,13 @@ export declare class TasksController {
         title: string;
         priority: string;
         dueDate: Date;
+        taskNumber: string;
+        assignedTo: string;
+        assignedBy: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        assignedTo: string;
         completedDate: Date | null;
-        taskNumber: string;
-        assignedBy: string;
         completionNote: string | null;
     }>;
     updateStatus(id: string, dto: UpdateTaskStatusDto, req: any): Promise<{
@@ -188,13 +188,13 @@ export declare class TasksController {
         title: string;
         priority: string;
         dueDate: Date;
+        taskNumber: string;
+        assignedTo: string;
+        assignedBy: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        assignedTo: string;
         completedDate: Date | null;
-        taskNumber: string;
-        assignedBy: string;
         completionNote: string | null;
     }>;
     addComment(id: string, dto: AddCommentDto, req: any): Promise<{

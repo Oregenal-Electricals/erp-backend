@@ -262,7 +262,42 @@ export class CustomerPoService {
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+
+    try {
+      await this.recheckAllOpenPos(user.companyId, user.id);
+    } catch (e) {
+      // swallow - cancellation should still succeed even if the recheck sweep has an issue
+    }
+
     return updated;
+  }
+
+  /**
+   * Re-runs the shortage check for every currently open Customer PO in
+   * the company. Called automatically whenever something changes that
+   * could affect FIFO stock allocation across orders: a PO gets
+   * cancelled (freeing its claim), or new stock arrives via the stock
+   * ledger (postTransaction in stock-ledger.service.ts calls this after
+   * any inward stock movement). triggeredByUserId is used only for
+   * audit attribution on the resulting shortage-check records.
+   */
+  async recheckAllOpenPos(companyId: string, triggeredByUserId: string) {
+    const pseudoUser = { companyId, id: triggeredByUserId };
+    const openCpos = await this.prisma.customerPo.findMany({
+      where: { companyId, status: { in: ['RECEIVED', 'ACKNOWLEDGED', 'IN_PROGRESS'] } },
+      select: { id: true },
+    });
+
+    const results: Array<{ cpoId: string; ok: boolean; error?: string }> = [];
+    for (const cpo of openCpos) {
+      try {
+        await this.runShortageCheck(cpo.id, pseudoUser);
+        results.push({ cpoId: cpo.id, ok: true });
+      } catch (e: any) {
+        results.push({ cpoId: cpo.id, ok: false, error: e?.message });
+      }
+    }
+    return results;
   }
 
   async findAll(user: any, query: any) {

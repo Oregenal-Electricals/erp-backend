@@ -13,10 +13,12 @@ exports.StockLedgerService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const customer_po_service_1 = require("../customer-po/customer-po.service");
 let StockLedgerService = class StockLedgerService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, customerPoService) {
         this.prisma = prisma;
         this.audit = audit;
+        this.customerPoService = customerPoService;
     }
     async postTransaction(data) {
         const { companyId, itemCode, itemName, warehouseId, transactionType, referenceType, referenceId, referenceNumber, inQty = 0, outQty = 0, unitCost = 0, remarks, userId } = data;
@@ -63,6 +65,13 @@ let StockLedgerService = class StockLedgerService {
                 updatedBy: userId,
             },
         });
+        if (inQty > 0) {
+            try {
+                await this.customerPoService.recheckAllOpenPos(companyId, userId);
+            }
+            catch (e) {
+            }
+        }
         return ledgerEntry;
     }
     async receiveFromIqc(iqcId, user) {
@@ -186,6 +195,6 @@ let StockLedgerService = class StockLedgerService {
 exports.StockLedgerService = StockLedgerService;
 exports.StockLedgerService = StockLedgerService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, customer_po_service_1.CustomerPoService])
 ], StockLedgerService);
 //# sourceMappingURL=stock-ledger.service.js.map

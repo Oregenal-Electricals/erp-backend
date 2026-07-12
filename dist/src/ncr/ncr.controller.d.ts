@@ -57,8 +57,8 @@ export declare class NcrController {
             id: string;
             status: string;
             dueDate: Date;
-            capaNumber: string;
             assignedTo: string;
+            capaNumber: string;
         }[];
         workOrder: {
             productName: string;
@@ -96,8 +96,8 @@ export declare class NcrController {
             id: string;
             status: string;
             dueDate: Date;
-            capaNumber: string;
             assignedTo: string;
+            capaNumber: string;
         }[];
         workOrder: {
             productName: string;
@@ -135,8 +135,8 @@ export declare class NcrController {
             id: string;
             status: string;
             dueDate: Date;
-            capaNumber: string;
             assignedTo: string;
+            capaNumber: string;
         }[];
         workOrder: {
             productName: string;
@@ -174,8 +174,8 @@ export declare class NcrController {
             id: string;
             status: string;
             dueDate: Date;
-            capaNumber: string;
             assignedTo: string;
+            capaNumber: string;
         }[];
         workOrder: {
             productName: string;

@@ -41,8 +41,8 @@ export declare class CustomerPortalService {
                 discount: number;
                 pendingQty: number;
                 qty: number;
-                taxableAmt: number;
                 gstAmount: number;
+                taxableAmt: number;
                 cpoItemId: string | null;
                 dispatchedQty: number;
                 soId: string;
@@ -118,13 +118,13 @@ export declare class CustomerPortalService {
         itemCode: string;
         itemName: string;
         receivedDate: Date;
+        assignedTo: string | null;
         batchNumber: string | null;
         correctiveAction: string | null;
         severity: string;
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        assignedTo: string | null;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;

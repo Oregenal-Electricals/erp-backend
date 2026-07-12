@@ -12,12 +12,13 @@ const stock_ledger_controller_1 = require("./stock-ledger.controller");
 const stock_ledger_service_1 = require("./stock-ledger.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const customer_po_module_1 = require("../customer-po/customer-po.module");
 let StockLedgerModule = class StockLedgerModule {
 };
 exports.StockLedgerModule = StockLedgerModule;
 exports.StockLedgerModule = StockLedgerModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, customer_po_module_1.CustomerPoModule],
         controllers: [stock_ledger_controller_1.StockLedgerController],
         providers: [stock_ledger_service_1.StockLedgerService],
         exports: [stock_ledger_service_1.StockLedgerService],

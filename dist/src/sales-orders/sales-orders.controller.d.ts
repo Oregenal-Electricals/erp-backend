@@ -33,8 +33,8 @@ export declare class SalesOrdersController {
             discount: number;
             pendingQty: number;
             qty: number;
-            taxableAmt: number;
             gstAmount: number;
+            taxableAmt: number;
             cpoItemId: string | null;
             dispatchedQty: number;
             soId: string;
@@ -129,8 +129,8 @@ export declare class SalesOrdersController {
             discount: number;
             pendingQty: number;
             qty: number;
-            taxableAmt: number;
             gstAmount: number;
+            taxableAmt: number;
             cpoItemId: string | null;
             dispatchedQty: number;
             soId: string;
@@ -184,8 +184,8 @@ export declare class SalesOrdersController {
             discount: number;
             pendingQty: number;
             qty: number;
-            taxableAmt: number;
             gstAmount: number;
+            taxableAmt: number;
             cpoItemId: string | null;
             dispatchedQty: number;
             soId: string;
@@ -239,8 +239,8 @@ export declare class SalesOrdersController {
             discount: number;
             pendingQty: number;
             qty: number;
-            taxableAmt: number;
             gstAmount: number;
+            taxableAmt: number;
             cpoItemId: string | null;
             dispatchedQty: number;
             soId: string;
@@ -294,8 +294,8 @@ export declare class SalesOrdersController {
             discount: number;
             pendingQty: number;
             qty: number;
-            taxableAmt: number;
             gstAmount: number;
+            taxableAmt: number;
             cpoItemId: string | null;
             dispatchedQty: number;
             soId: string;

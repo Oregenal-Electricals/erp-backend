@@ -28,12 +28,12 @@ export declare class QuotationsService {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -59,16 +59,16 @@ export declare class QuotationsService {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     revise(id: string, dto: CreateQuotationDto, user: any): Promise<{
         items: {
@@ -89,12 +89,12 @@ export declare class QuotationsService {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -120,16 +120,16 @@ export declare class QuotationsService {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     send(id: string, user: any): Promise<{
         items: {
@@ -150,12 +150,12 @@ export declare class QuotationsService {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -181,16 +181,16 @@ export declare class QuotationsService {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     accept(id: string, user: any): Promise<{
         items: {
@@ -211,12 +211,12 @@ export declare class QuotationsService {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -242,16 +242,16 @@ export declare class QuotationsService {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     reject(id: string, dto: RejectQuotationDto, user: any): Promise<{
         items: {
@@ -272,12 +272,12 @@ export declare class QuotationsService {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -303,16 +303,16 @@ export declare class QuotationsService {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -342,16 +342,16 @@ export declare class QuotationsService {
             quotationNumber: string;
             termsConditions: string | null;
             subtotal: number;
-            leadId: string | null;
             customerEmail: string | null;
             customerPhone: string | null;
-            rejectedReason: string | null;
+            leadId: string | null;
             discountAmount: number;
             taxableAmount: number;
             totalGst: number;
             sentDate: Date | null;
             acceptedDate: Date | null;
             rejectedDate: Date | null;
+            rejectedReason: string | null;
         })[];
         total: number;
         page: number;
@@ -376,12 +376,12 @@ export declare class QuotationsService {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -407,16 +407,16 @@ export declare class QuotationsService {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

@@ -2,10 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { AdjustStockDto } from './dto/stock-ledger.dto';
+import { CustomerPoService } from '../customer-po/customer-po.service';
 
 @Injectable()
 export class StockLedgerService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private customerPoService: CustomerPoService) {}
 
   // Core method: update stock balance and create ledger entry
   async postTransaction(data: {
@@ -73,6 +74,16 @@ export class StockLedgerService {
         updatedBy: userId,
       },
     });
+
+    // Stock genuinely increased - re-check every open Customer PO so
+    // shortage numbers stay live without needing a manual re-check.
+    if (inQty > 0) {
+      try {
+        await this.customerPoService.recheckAllOpenPos(companyId, userId);
+      } catch (e) {
+        // swallow - the stock posting itself must still succeed
+      }
+    }
 
     return ledgerEntry;
   }

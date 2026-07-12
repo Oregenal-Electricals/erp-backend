@@ -215,7 +215,30 @@ let CustomerPoService = class CustomerPoService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        try {
+            await this.recheckAllOpenPos(user.companyId, user.id);
+        }
+        catch (e) {
+        }
         return updated;
+    }
+    async recheckAllOpenPos(companyId, triggeredByUserId) {
+        const pseudoUser = { companyId, id: triggeredByUserId };
+        const openCpos = await this.prisma.customerPo.findMany({
+            where: { companyId, status: { in: ['RECEIVED', 'ACKNOWLEDGED', 'IN_PROGRESS'] } },
+            select: { id: true },
+        });
+        const results = [];
+        for (const cpo of openCpos) {
+            try {
+                await this.runShortageCheck(cpo.id, pseudoUser);
+                results.push({ cpoId: cpo.id, ok: true });
+            }
+            catch (e) {
+                results.push({ cpoId: cpo.id, ok: false, error: e === null || e === void 0 ? void 0 : e.message });
+            }
+        }
+        return results;
     }
     async findAll(user, query) {
         const { page = 1, limit = 20, search, status, poType } = query;

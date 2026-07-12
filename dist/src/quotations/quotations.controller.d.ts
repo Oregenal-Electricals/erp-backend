@@ -40,16 +40,16 @@ export declare class QuotationsController {
             quotationNumber: string;
             termsConditions: string | null;
             subtotal: number;
-            leadId: string | null;
             customerEmail: string | null;
             customerPhone: string | null;
-            rejectedReason: string | null;
+            leadId: string | null;
             discountAmount: number;
             taxableAmount: number;
             totalGst: number;
             sentDate: Date | null;
             acceptedDate: Date | null;
             rejectedDate: Date | null;
+            rejectedReason: string | null;
         })[];
         total: number;
         page: number;
@@ -74,12 +74,12 @@ export declare class QuotationsController {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -105,16 +105,16 @@ export declare class QuotationsController {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     create(dto: CreateQuotationDto, req: any): Promise<{
         items: {
@@ -135,12 +135,12 @@ export declare class QuotationsController {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -166,16 +166,16 @@ export declare class QuotationsController {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     revise(id: string, dto: CreateQuotationDto, req: any): Promise<{
         items: {
@@ -196,12 +196,12 @@ export declare class QuotationsController {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -227,16 +227,16 @@ export declare class QuotationsController {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     send(id: string, req: any): Promise<{
         items: {
@@ -257,12 +257,12 @@ export declare class QuotationsController {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -288,16 +288,16 @@ export declare class QuotationsController {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     accept(id: string, req: any): Promise<{
         items: {
@@ -318,12 +318,12 @@ export declare class QuotationsController {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -349,16 +349,16 @@ export declare class QuotationsController {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
     reject(id: string, dto: RejectQuotationDto, req: any): Promise<{
         items: {
@@ -379,12 +379,12 @@ export declare class QuotationsController {
             discount: number;
             quotationId: string;
             qty: number;
-            discountAmt: number;
+            gstAmount: number;
             taxableAmt: number;
+            discountAmt: number;
             cgst: number;
             sgst: number;
             igst: number;
-            gstAmount: number;
         }[];
         lead: {
             companyName: string;
@@ -410,15 +410,15 @@ export declare class QuotationsController {
         quotationNumber: string;
         termsConditions: string | null;
         subtotal: number;
-        leadId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        rejectedReason: string | null;
+        leadId: string | null;
         discountAmount: number;
         taxableAmount: number;
         totalGst: number;
         sentDate: Date | null;
         acceptedDate: Date | null;
         rejectedDate: Date | null;
+        rejectedReason: string | null;
     }>;
 }
