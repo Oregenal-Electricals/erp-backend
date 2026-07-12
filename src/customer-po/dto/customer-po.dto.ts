@@ -71,3 +71,23 @@ export class UpdateCpoDto {
 export class CancelCpoDto {
   @IsString() cancelReason: string;
 }
+
+export class CreateQuantityIncreaseDto {
+  @IsIn(['WRITTEN', 'VERBAL']) poType: string;
+
+  @ValidateIf(o => o.poType === 'WRITTEN')
+  @IsString()
+  customerPoNumber?: string;
+
+  @ValidateIf(o => o.poType === 'VERBAL')
+  @IsString()
+  verbalConfirmedBy?: string;
+
+  @ValidateIf(o => o.poType === 'VERBAL')
+  @IsDateString()
+  verbalConfirmedDate?: string;
+
+  @IsDateString() deliveryDate: string;
+  @IsOptional() @IsString() remarks?: string;
+  @IsArray() @ValidateNested({ each: true }) @Type(() => CpoItemDto) items: CpoItemDto[];
+}

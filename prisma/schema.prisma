@@ -3447,6 +3447,9 @@ model CustomerPo {
 
   items             CustomerPoItem[]
   materialShortages MaterialShortage[]
+  amendmentOfId     String?
+  amendmentOf       CustomerPo?  @relation("CpoQtyIncrease", fields: [amendmentOfId], references: [id])
+  amendmentChildren CustomerPo[] @relation("CpoQtyIncrease")
 
   @@unique([companyId, cpoNumber])
   @@index([companyId, status])

@@ -31,6 +31,7 @@ let CustomerPoController = class CustomerPoController {
     create(dto, req) { return this.cpoService.create(dto, req.user); }
     update(id, dto, req) { return this.cpoService.update(id, dto, req.user); }
     acknowledge(id, req) { return this.cpoService.acknowledge(id, req.user); }
+    createQuantityIncrease(id, dto, req) { return this.cpoService.createQuantityIncrease(id, dto, req.user); }
     cancel(id, dto, req) { return this.cpoService.cancel(id, dto, req.user); }
     runShortageCheck(id, req) { return this.cpoService.runShortageCheck(id, req.user); }
 };
@@ -98,6 +99,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], CustomerPoController.prototype, "acknowledge", null);
+__decorate([
+    (0, common_1.Post)(':id/increase-quantity'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_CREATE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, customer_po_dto_1.CreateQuantityIncreaseDto, Object]),
+    __metadata("design:returntype", void 0)
+], CustomerPoController.prototype, "createQuantityIncrease", null);
 __decorate([
     (0, common_1.Post)(':id/cancel'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),

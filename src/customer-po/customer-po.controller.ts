@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -38,6 +38,10 @@ export class CustomerPoController {
   @Post(':id/acknowledge')
   @RequirePermissions(Permission.SALES_EDIT)
   acknowledge(@Param('id') id: string, @Request() req: any) { return this.cpoService.acknowledge(id, req.user); }
+
+  @Post(':id/increase-quantity')
+  @RequirePermissions(Permission.SALES_CREATE)
+  createQuantityIncrease(@Param('id') id: string, @Body() dto: CreateQuantityIncreaseDto, @Request() req: any) { return this.cpoService.createQuantityIncrease(id, dto, req.user); }
 
   @Post(':id/cancel')
   @RequirePermissions(Permission.SALES_EDIT)

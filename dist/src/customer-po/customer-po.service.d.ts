@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 export declare class CustomerPoService {
     private prisma;
     private audit;
@@ -38,6 +38,18 @@ export declare class CustomerPoService {
             totalAmount: number;
             quotationNumber: string;
         };
+        amendmentOf: {
+            id: string;
+            customerPoNumber: string;
+            cpoNumber: string;
+        };
+        amendmentChildren: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            cpoNumber: string;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -71,6 +83,7 @@ export declare class CustomerPoService {
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
+        amendmentOfId: string | null;
     }>;
     acknowledge(id: string, user: any): Promise<{
         items: {
@@ -101,6 +114,18 @@ export declare class CustomerPoService {
             totalAmount: number;
             quotationNumber: string;
         };
+        amendmentOf: {
+            id: string;
+            customerPoNumber: string;
+            cpoNumber: string;
+        };
+        amendmentChildren: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            cpoNumber: string;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -134,6 +159,7 @@ export declare class CustomerPoService {
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
+        amendmentOfId: string | null;
     }>;
     update(id: string, dto: UpdateCpoDto, user: any): Promise<{
         items: {
@@ -164,6 +190,18 @@ export declare class CustomerPoService {
             totalAmount: number;
             quotationNumber: string;
         };
+        amendmentOf: {
+            id: string;
+            customerPoNumber: string;
+            cpoNumber: string;
+        };
+        amendmentChildren: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            cpoNumber: string;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -197,6 +235,83 @@ export declare class CustomerPoService {
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
+        amendmentOfId: string | null;
+    }>;
+    createQuantityIncrease(originalId: string, dto: CreateQuantityIncreaseDto, user: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            description: string | null;
+            itemCode: string;
+            itemName: string;
+            gstRate: number;
+            uom: string;
+            totalAmount: number;
+            unitPrice: number;
+            discount: number;
+            pendingQty: number;
+            qty: number;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
+            cpoId: string;
+        }[];
+        quotation: {
+            revision: number;
+            totalAmount: number;
+            quotationNumber: string;
+        };
+        amendmentOf: {
+            id: string;
+            customerPoNumber: string;
+            cpoNumber: string;
+        };
+        amendmentChildren: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            cpoNumber: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        customerName: string;
+        cancelReason: string | null;
+        currency: string;
+        totalAmount: number;
+        quotationId: string | null;
+        deliveryDate: Date;
+        deliveryAddress: string | null;
+        poDate: Date;
+        subtotal: number;
+        customerEmail: string | null;
+        customerPhone: string | null;
+        totalGst: number;
+        poType: string;
+        customerPoNumber: string;
+        verbalConfirmedBy: string | null;
+        verbalConfirmedDate: Date | null;
+        cpoNumber: string;
+        mrpRunAt: Date | null;
+        mrpRunBy: string | null;
+        lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        acknowledgedDate: Date | null;
+        cancelledDate: Date | null;
+        amendmentOfId: string | null;
     }>;
     cancel(id: string, dto: CancelCpoDto, user: any): Promise<{
         items: {
@@ -227,6 +342,18 @@ export declare class CustomerPoService {
             totalAmount: number;
             quotationNumber: string;
         };
+        amendmentOf: {
+            id: string;
+            customerPoNumber: string;
+            cpoNumber: string;
+        };
+        amendmentChildren: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            cpoNumber: string;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -260,6 +387,7 @@ export declare class CustomerPoService {
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
+        amendmentOfId: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -306,6 +434,7 @@ export declare class CustomerPoService {
             lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
             acknowledgedDate: Date | null;
             cancelledDate: Date | null;
+            amendmentOfId: string | null;
         })[];
         total: number;
         page: number;
@@ -340,6 +469,18 @@ export declare class CustomerPoService {
             totalAmount: number;
             quotationNumber: string;
         };
+        amendmentOf: {
+            id: string;
+            customerPoNumber: string;
+            cpoNumber: string;
+        };
+        amendmentChildren: {
+            id: string;
+            createdAt: Date;
+            status: string;
+            totalAmount: number;
+            cpoNumber: string;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -373,6 +514,7 @@ export declare class CustomerPoService {
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
+        amendmentOfId: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

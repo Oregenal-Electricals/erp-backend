@@ -43,3 +43,12 @@ export declare class UpdateCpoDto {
 export declare class CancelCpoDto {
     cancelReason: string;
 }
+export declare class CreateQuantityIncreaseDto {
+    poType: string;
+    customerPoNumber?: string;
+    verbalConfirmedBy?: string;
+    verbalConfirmedDate?: string;
+    deliveryDate: string;
+    remarks?: string;
+    items: CpoItemDto[];
+}

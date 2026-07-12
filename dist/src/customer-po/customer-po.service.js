@@ -45,6 +45,8 @@ let CustomerPoService = class CustomerPoService {
         return {
             items: true,
             quotation: { select: { quotationNumber: true, revision: true, totalAmount: true } },
+            amendmentOf: { select: { id: true, cpoNumber: true, customerPoNumber: true } },
+            amendmentChildren: { select: { id: true, cpoNumber: true, status: true, totalAmount: true, createdAt: true } },
         };
     }
     async create(dto, user) {
@@ -165,6 +167,41 @@ let CustomerPoService = class CustomerPoService {
         catch (e) {
         }
         return updated;
+    }
+    async createQuantityIncrease(originalId, dto, user) {
+        const original = await this.prisma.customerPo.findFirst({ where: { id: originalId, companyId: user.companyId } });
+        if (!original)
+            throw new common_1.NotFoundException('Original CPO not found');
+        if (original.status === 'RECEIVED') {
+            throw new common_1.BadRequestException('This PO has not been acknowledged yet - use Edit instead of Increase Quantity.');
+        }
+        if (original.status === 'CANCELLED') {
+            throw new common_1.BadRequestException('Cannot increase quantity on a cancelled PO.');
+        }
+        const note = `Quantity increase against PO ${original.cpoNumber} (Customer PO: ${original.customerPoNumber}).${dto.remarks ? ' ' + dto.remarks : ''}`;
+        const createDto = {
+            poType: dto.poType,
+            customerPoNumber: dto.poType === 'WRITTEN' ? dto.customerPoNumber : undefined,
+            verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : undefined,
+            verbalConfirmedDate: dto.poType === 'VERBAL' ? dto.verbalConfirmedDate : undefined,
+            quotationId: undefined,
+            customerName: original.customerName,
+            customerEmail: original.customerEmail || undefined,
+            customerPhone: original.customerPhone || undefined,
+            deliveryAddress: original.deliveryAddress || undefined,
+            poDate: new Date().toISOString(),
+            deliveryDate: dto.deliveryDate,
+            currency: original.currency,
+            remarks: note,
+            items: dto.items,
+        };
+        const newCpo = await this.create(createDto, user);
+        const linked = await this.prisma.customerPo.update({
+            where: { id: newCpo.id },
+            data: { amendmentOfId: original.id },
+            include: this.includes(),
+        });
+        return linked;
     }
     async cancel(id, dto, user) {
         const cpo = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });

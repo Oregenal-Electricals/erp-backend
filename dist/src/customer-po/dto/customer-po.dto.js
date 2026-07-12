@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CancelCpoDto = exports.UpdateCpoDto = exports.CreateCpoDto = exports.CpoItemDto = void 0;
+exports.CreateQuantityIncreaseDto = exports.CancelCpoDto = exports.UpdateCpoDto = exports.CreateCpoDto = exports.CpoItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class CpoItemDto {
@@ -202,4 +202,41 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CancelCpoDto.prototype, "cancelReason", void 0);
+class CreateQuantityIncreaseDto {
+}
+exports.CreateQuantityIncreaseDto = CreateQuantityIncreaseDto;
+__decorate([
+    (0, class_validator_1.IsIn)(['WRITTEN', 'VERBAL']),
+    __metadata("design:type", String)
+], CreateQuantityIncreaseDto.prototype, "poType", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'WRITTEN'),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateQuantityIncreaseDto.prototype, "customerPoNumber", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'VERBAL'),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateQuantityIncreaseDto.prototype, "verbalConfirmedBy", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'VERBAL'),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateQuantityIncreaseDto.prototype, "verbalConfirmedDate", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateQuantityIncreaseDto.prototype, "deliveryDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateQuantityIncreaseDto.prototype, "remarks", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CpoItemDto),
+    __metadata("design:type", Array)
+], CreateQuantityIncreaseDto.prototype, "items", void 0);
 //# sourceMappingURL=customer-po.dto.js.map

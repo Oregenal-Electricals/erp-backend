@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 
 @Injectable()
 export class CustomerPoService {
@@ -36,6 +36,8 @@ export class CustomerPoService {
     return {
       items: true,
       quotation: { select: { quotationNumber: true, revision: true, totalAmount: true } },
+      amendmentOf: { select: { id: true, cpoNumber: true, customerPoNumber: true } },
+      amendmentChildren: { select: { id: true, cpoNumber: true, status: true, totalAmount: true, createdAt: true } },
     };
   }
 
@@ -197,6 +199,56 @@ export class CustomerPoService {
     }
 
     return updated;
+  }
+
+  /**
+   * When a customer wants to increase quantity on a PO that's already
+   * been acknowledged (locked from direct editing), this creates a
+   * brand-new Customer PO for just the extra quantity - reusing
+   * create() in full, so it gets its own number, its own automatic
+   * shortage check, and goes through the exact same lifecycle as any
+   * other PO. It's linked back to the original via amendmentOfId so
+   * the relationship is traceable, but the system otherwise treats it
+   * as a completely normal, independent PO from this point on.
+   */
+  async createQuantityIncrease(originalId: string, dto: CreateQuantityIncreaseDto, user: any) {
+    const original = await this.prisma.customerPo.findFirst({ where: { id: originalId, companyId: user.companyId } });
+    if (!original) throw new NotFoundException('Original CPO not found');
+    if (original.status === 'RECEIVED') {
+      throw new BadRequestException('This PO has not been acknowledged yet - use Edit instead of Increase Quantity.');
+    }
+    if (original.status === 'CANCELLED') {
+      throw new BadRequestException('Cannot increase quantity on a cancelled PO.');
+    }
+
+    const note = `Quantity increase against PO ${original.cpoNumber} (Customer PO: ${original.customerPoNumber}).${dto.remarks ? ' ' + dto.remarks : ''}`;
+
+    const createDto: CreateCpoDto = {
+      poType: dto.poType,
+      customerPoNumber: dto.poType === 'WRITTEN' ? dto.customerPoNumber : undefined,
+      verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : undefined,
+      verbalConfirmedDate: dto.poType === 'VERBAL' ? dto.verbalConfirmedDate : undefined,
+      quotationId: undefined,
+      customerName: original.customerName,
+      customerEmail: original.customerEmail || undefined,
+      customerPhone: original.customerPhone || undefined,
+      deliveryAddress: original.deliveryAddress || undefined,
+      poDate: new Date().toISOString(),
+      deliveryDate: dto.deliveryDate,
+      currency: original.currency,
+      remarks: note,
+      items: dto.items,
+    } as any;
+
+    const newCpo = await this.create(createDto, user);
+
+    const linked = await this.prisma.customerPo.update({
+      where: { id: newCpo.id },
+      data: { amendmentOfId: original.id },
+      include: this.includes(),
+    });
+
+    return linked;
   }
 
   async cancel(id: string, dto: CancelCpoDto, user: any) {
