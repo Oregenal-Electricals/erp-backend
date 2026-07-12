@@ -19,6 +19,7 @@ export declare class ProductionQcService {
             goodQty: number;
             entryNumber: string;
         };
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -26,7 +27,6 @@ export declare class ProductionQcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -54,6 +54,7 @@ export declare class ProductionQcService {
             entryNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -61,7 +62,6 @@ export declare class ProductionQcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -90,6 +90,7 @@ export declare class ProductionQcService {
                 entryNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -97,7 +98,6 @@ export declare class ProductionQcService {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;
@@ -130,6 +130,7 @@ export declare class ProductionQcService {
             entryNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -137,7 +138,6 @@ export declare class ProductionQcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;

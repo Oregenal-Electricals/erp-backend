@@ -59,11 +59,11 @@ export declare class RejectedStockService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
-            warehouse: {
-                name: string;
-            };
             _count: {
                 items: number;
+            };
+            warehouse: {
+                name: string;
             };
             grn: {
                 grnNumber: string;

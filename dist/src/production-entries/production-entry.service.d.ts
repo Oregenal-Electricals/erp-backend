@@ -17,6 +17,7 @@ export declare class ProductionEntryService {
             woNumber: string;
         };
     } & {
+        shift: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -26,7 +27,6 @@ export declare class ProductionEntryService {
         isTestData: boolean;
         companyId: string;
         status: string;
-        shift: string;
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
@@ -47,6 +47,7 @@ export declare class ProductionEntryService {
             woNumber: string;
         };
     } & {
+        shift: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -56,7 +57,6 @@ export declare class ProductionEntryService {
         isTestData: boolean;
         companyId: string;
         status: string;
-        shift: string;
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
@@ -78,6 +78,7 @@ export declare class ProductionEntryService {
                 woNumber: string;
             };
         } & {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -87,7 +88,6 @@ export declare class ProductionEntryService {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
@@ -113,6 +113,7 @@ export declare class ProductionEntryService {
             woNumber: string;
         };
     } & {
+        shift: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -122,7 +123,6 @@ export declare class ProductionEntryService {
         isTestData: boolean;
         companyId: string;
         status: string;
-        shift: string;
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
@@ -169,6 +169,7 @@ export declare class ProductionEntryService {
             woNumber: string;
         };
         entries: {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -178,7 +179,6 @@ export declare class ProductionEntryService {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;

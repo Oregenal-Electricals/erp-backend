@@ -11,15 +11,15 @@ export declare class ProductionIssueController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             warehouse: {
                 name: string;
             };
             workOrder: {
                 productName: string;
                 woNumber: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;

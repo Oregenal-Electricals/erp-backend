@@ -72,13 +72,13 @@ export declare class AttendanceService {
         holidayMultiplier: number;
     }[]>;
     markAttendance(dto: MarkAttendanceDto, user: any): Promise<{
+        shift: {
+            name: string;
+        };
         employee: {
             firstName: string;
             lastName: string;
             employeeNumber: string;
-        };
-        shift: {
-            name: string;
         };
     } & {
         id: string;
@@ -110,13 +110,13 @@ export declare class AttendanceService {
         markedBy: string | null;
     }>;
     updateAttendance(id: string, dto: UpdateAttendanceDto, user: any): Promise<{
+        shift: {
+            name: string;
+        };
         employee: {
             firstName: string;
             lastName: string;
             employeeNumber: string;
-        };
-        shift: {
-            name: string;
         };
     } & {
         id: string;
@@ -156,6 +156,11 @@ export declare class AttendanceService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            shift: {
+                name: string;
+                startTime: string;
+                endTime: string;
+            };
             employee: {
                 department: {
                     name: string;
@@ -163,11 +168,6 @@ export declare class AttendanceService {
                 firstName: string;
                 lastName: string;
                 employeeNumber: string;
-            };
-            shift: {
-                name: string;
-                startTime: string;
-                endTime: string;
             };
         } & {
             id: string;

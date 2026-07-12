@@ -79,6 +79,11 @@ export declare class AttendanceController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            shift: {
+                name: string;
+                startTime: string;
+                endTime: string;
+            };
             employee: {
                 department: {
                     name: string;
@@ -86,11 +91,6 @@ export declare class AttendanceController {
                 firstName: string;
                 lastName: string;
                 employeeNumber: string;
-            };
-            shift: {
-                name: string;
-                startTime: string;
-                endTime: string;
             };
         } & {
             id: string;
@@ -175,13 +175,13 @@ export declare class AttendanceController {
         })[];
     }>;
     mark(dto: MarkAttendanceDto, req: any): Promise<{
+        shift: {
+            name: string;
+        };
         employee: {
             firstName: string;
             lastName: string;
             employeeNumber: string;
-        };
-        shift: {
-            name: string;
         };
     } & {
         id: string;
@@ -220,13 +220,13 @@ export declare class AttendanceController {
         results: any[];
     }>;
     update(id: string, dto: UpdateAttendanceDto, req: any): Promise<{
+        shift: {
+            name: string;
+        };
         employee: {
             firstName: string;
             lastName: string;
             employeeNumber: string;
-        };
-        shift: {
-            name: string;
         };
     } & {
         id: string;

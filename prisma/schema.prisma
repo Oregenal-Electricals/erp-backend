@@ -463,8 +463,8 @@ model User {
   email         String   @unique
   phone         String?
   passwordHash  String
-  role          UserRole @default(VIEWER)
-  additionalRoles UserRole[]
+  role          String   @default("VIEWER")
+  additionalRoles String[]
   mustChangePwd Boolean  @default(true)
   companyId     String
   company       Company  @relation(fields: [companyId], references: [id])
@@ -4992,4 +4992,43 @@ model MaterialShortage {
   @@index([companyId, customerPoId])
   @@index([companyId, status])
   @@map("material_shortages")
+}
+
+model Role {
+  id             String    @id @default(uuid())
+  companyId      String
+  name           String
+  label          String
+  description    String?
+  isSystemRole   Boolean   @default(false)
+  isProtected    Boolean   @default(false)
+  isActive       Boolean   @default(true)
+  isTestData     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdBy      String?
+  updatedBy      String?
+  permissions    RolePermission[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@map("roles")
+}
+
+model RolePermission {
+  id          String    @id @default(uuid())
+  companyId   String
+  roleId      String
+  role        Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission  String
+  isActive    Boolean   @default(true)
+  isTestData  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([roleId, permission])
+  @@index([companyId, roleId])
+  @@map("role_permissions")
 }

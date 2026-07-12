@@ -82,12 +82,12 @@ export declare class ImportOrderService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             vendor: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;

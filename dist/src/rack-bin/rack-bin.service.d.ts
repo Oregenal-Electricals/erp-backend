@@ -59,12 +59,12 @@ export declare class RackBinService {
         totalBins: number;
     }>;
     findRacks(warehouseId: string, user: any, zoneId?: string): Promise<({
+        _count: {
+            bins: number;
+        };
         zone: {
             code: string;
             name: string;
-        };
-        _count: {
-            bins: number;
         };
     } & {
         id: string;

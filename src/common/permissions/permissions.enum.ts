@@ -86,6 +86,7 @@ export enum Permission {
   SYSTEM_VIEW = 'SYSTEM_VIEW',
   SYSTEM_CREATE = 'SYSTEM_CREATE',
   SYSTEM_EDIT = 'SYSTEM_EDIT',
+  SYSTEM_MANAGE_ROLES = 'SYSTEM_MANAGE_ROLES',
 
   // ─── AUDIT ──────────────────────────────────
   AUDIT_VIEW = 'AUDIT_VIEW',

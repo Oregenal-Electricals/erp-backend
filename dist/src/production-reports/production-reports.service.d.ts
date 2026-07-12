@@ -34,6 +34,7 @@ export declare class ProductionReportsService {
                 woNumber: string;
             };
         } & {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -43,7 +44,6 @@ export declare class ProductionReportsService {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
@@ -73,6 +73,7 @@ export declare class ProductionReportsService {
                 woNumber: string;
             };
         } & {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -82,7 +83,6 @@ export declare class ProductionReportsService {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
@@ -106,6 +106,7 @@ export declare class ProductionReportsService {
                 woNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -113,7 +114,6 @@ export declare class ProductionReportsService {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;

@@ -74,13 +74,13 @@ export declare class TrainingController {
     }>;
     getSessions(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                enrollments: number;
+            };
             trainingProgram: {
                 name: string;
                 category: string;
                 durationHours: number;
-            };
-            _count: {
-                enrollments: number;
             };
         } & {
             id: string;

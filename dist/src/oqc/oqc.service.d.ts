@@ -17,6 +17,7 @@ export declare class OqcService {
             receivedQty: number;
             receiptNumber: string;
         };
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -24,7 +25,6 @@ export declare class OqcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -62,6 +62,7 @@ export declare class OqcService {
             receiptNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -69,7 +70,6 @@ export declare class OqcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -107,6 +107,7 @@ export declare class OqcService {
             receiptNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -114,7 +115,6 @@ export declare class OqcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -153,6 +153,7 @@ export declare class OqcService {
                 receiptNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -160,7 +161,6 @@ export declare class OqcService {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;
@@ -202,6 +202,7 @@ export declare class OqcService {
             receiptNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -209,7 +210,6 @@ export declare class OqcService {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;

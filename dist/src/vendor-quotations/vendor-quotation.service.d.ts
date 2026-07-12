@@ -65,6 +65,9 @@ export declare class VendorQuotationService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             vendor: {
                 code: string;
                 name: string;
@@ -72,9 +75,6 @@ export declare class VendorQuotationService {
             rfq: {
                 title: string;
                 rfqNumber: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;

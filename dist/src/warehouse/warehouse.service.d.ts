@@ -30,13 +30,13 @@ export declare class WarehouseService {
         isDefault: boolean;
     }>;
     findAllWarehouses(user: any, plantId?: string): Promise<({
+        _count: {
+            zones: number;
+        };
         plant: {
             id: string;
             code: string;
             name: string;
-        };
-        _count: {
-            zones: number;
         };
     } & {
         id: string;

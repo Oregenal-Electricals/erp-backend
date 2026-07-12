@@ -21,12 +21,12 @@ export declare class ImportOrderController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             vendor: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;

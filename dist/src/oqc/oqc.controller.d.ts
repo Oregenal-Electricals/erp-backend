@@ -25,6 +25,7 @@ export declare class OqcController {
                 receiptNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -32,7 +33,6 @@ export declare class OqcController {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;
@@ -74,6 +74,7 @@ export declare class OqcController {
             receiptNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -81,7 +82,6 @@ export declare class OqcController {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -119,6 +119,7 @@ export declare class OqcController {
             receivedQty: number;
             receiptNumber: string;
         };
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -126,7 +127,6 @@ export declare class OqcController {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -164,6 +164,7 @@ export declare class OqcController {
             receiptNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -171,7 +172,6 @@ export declare class OqcController {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;
@@ -209,6 +209,7 @@ export declare class OqcController {
             receiptNumber: string;
         };
     } & {
+        result: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -216,7 +217,6 @@ export declare class OqcController {
         updatedBy: string | null;
         isActive: boolean;
         isTestData: boolean;
-        result: string;
         companyId: string;
         status: string;
         remarks: string | null;

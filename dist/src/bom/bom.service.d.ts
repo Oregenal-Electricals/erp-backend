@@ -59,12 +59,12 @@ export declare class BomService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             product: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;
@@ -146,12 +146,12 @@ export declare class BomService {
         totalCost: number | null;
     }>;
     findByProduct(productId: string, user: any): Promise<({
+        _count: {
+            items: number;
+        };
         product: {
             code: string;
             name: string;
-        };
-        _count: {
-            items: number;
         };
     } & {
         id: string;

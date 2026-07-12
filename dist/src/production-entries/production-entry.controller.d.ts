@@ -39,6 +39,7 @@ export declare class ProductionEntryController {
             woNumber: string;
         };
         entries: {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -48,7 +49,6 @@ export declare class ProductionEntryController {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
@@ -79,6 +79,7 @@ export declare class ProductionEntryController {
                 woNumber: string;
             };
         } & {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -88,7 +89,6 @@ export declare class ProductionEntryController {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
@@ -114,6 +114,7 @@ export declare class ProductionEntryController {
             woNumber: string;
         };
     } & {
+        shift: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -123,7 +124,6 @@ export declare class ProductionEntryController {
         isTestData: boolean;
         companyId: string;
         status: string;
-        shift: string;
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
@@ -144,6 +144,7 @@ export declare class ProductionEntryController {
             woNumber: string;
         };
     } & {
+        shift: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -153,7 +154,6 @@ export declare class ProductionEntryController {
         isTestData: boolean;
         companyId: string;
         status: string;
-        shift: string;
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
@@ -174,6 +174,7 @@ export declare class ProductionEntryController {
             woNumber: string;
         };
     } & {
+        shift: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -183,7 +184,6 @@ export declare class ProductionEntryController {
         isTestData: boolean;
         companyId: string;
         status: string;
-        shift: string;
         remarks: string | null;
         totalQty: number;
         workOrderId: string;

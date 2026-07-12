@@ -19,13 +19,13 @@ export declare class DocumentsController {
             id: string;
             createdAt: Date;
             createdBy: string;
+            _count: {
+                versions: number;
+            };
             description: string;
             category: string;
             tags: string;
             title: string;
-            _count: {
-                versions: number;
-            };
             version: number;
             documentNumber: string;
             referenceType: string;

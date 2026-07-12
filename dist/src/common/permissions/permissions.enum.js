@@ -63,6 +63,7 @@ var Permission;
     Permission["SYSTEM_VIEW"] = "SYSTEM_VIEW";
     Permission["SYSTEM_CREATE"] = "SYSTEM_CREATE";
     Permission["SYSTEM_EDIT"] = "SYSTEM_EDIT";
+    Permission["SYSTEM_MANAGE_ROLES"] = "SYSTEM_MANAGE_ROLES";
     Permission["AUDIT_VIEW"] = "AUDIT_VIEW";
 })(Permission || (exports.Permission = Permission = {}));
 //# sourceMappingURL=permissions.enum.js.map

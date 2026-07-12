@@ -75,12 +75,12 @@ export declare class GrnService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             warehouse: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
             po: {
                 vendor: {

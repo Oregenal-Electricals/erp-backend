@@ -78,6 +78,7 @@ import { QualityReportsModule } from './quality-reports/quality-reports.module';
 import { LeadsModule } from './leads/leads.module';
 import { QuotationsModule } from './quotations/quotations.module';
 import { CustomerPoModule } from './customer-po/customer-po.module';
+import { RolesModule } from './roles/roles.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 import { DispatchPlanningModule } from './dispatch-planning/dispatch-planning.module';
 import { DispatchModule } from './dispatch/dispatch.module';
@@ -198,6 +199,7 @@ import configuration from './config/configuration';
     LeadsModule,
     QuotationsModule,
     CustomerPoModule,
+    RolesModule,
     SalesOrdersModule,
     DispatchPlanningModule,
     DispatchModule,

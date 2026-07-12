@@ -99,6 +99,7 @@ export declare class QualityReportsController {
                 woNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -106,7 +107,6 @@ export declare class QualityReportsController {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;

@@ -26,11 +26,11 @@ export declare class StockIssueController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
-            warehouse: {
-                name: string;
-            };
             _count: {
                 items: number;
+            };
+            warehouse: {
+                name: string;
             };
         } & {
             id: string;

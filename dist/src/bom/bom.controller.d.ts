@@ -12,12 +12,12 @@ export declare class BomController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             product: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;
@@ -46,12 +46,12 @@ export declare class BomController {
         totalPages: number;
     }>;
     findByProduct(productId: string, req: any): Promise<({
+        _count: {
+            items: number;
+        };
         product: {
             code: string;
             name: string;
-        };
-        _count: {
-            items: number;
         };
     } & {
         id: string;

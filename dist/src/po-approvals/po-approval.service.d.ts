@@ -52,12 +52,12 @@ export declare class PoApprovalService {
         lastApprovalAction: string;
         lastApprovalBy: string;
         lastRemarks: string;
+        _count: {
+            items: number;
+        };
         vendor: {
             code: string;
             name: string;
-        };
-        _count: {
-            items: number;
         };
         approvals: {
             id: string;

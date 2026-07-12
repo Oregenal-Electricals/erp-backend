@@ -16,15 +16,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -61,15 +61,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -102,9 +102,9 @@ export declare class ChangeRequestsService {
         comments: ({
             commenter: {
                 id: string;
+                role: string;
                 firstName: string;
                 lastName: string;
-                role: import("@prisma/client").$Enums.UserRole;
             };
         } & {
             id: string;
@@ -120,15 +120,15 @@ export declare class ChangeRequestsService {
         })[];
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -160,15 +160,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -200,15 +200,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -240,15 +240,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -280,15 +280,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -320,15 +320,15 @@ export declare class ChangeRequestsService {
         };
         requestedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
         reviewedBy: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -355,9 +355,9 @@ export declare class ChangeRequestsService {
     addComment(id: string, dto: AddCommentDto, user: any): Promise<{
         commenter: {
             id: string;
+            role: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;

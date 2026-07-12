@@ -7,22 +7,22 @@ export declare class UsersService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     createUser(dto: CreateUserDto, requestingUser: any): Promise<{
-        id: string;
-        phone: string;
-        email: string;
-        createdAt: Date;
-        isActive: boolean;
         company: {
             id: string;
             code: string;
             name: string;
         };
+        id: string;
+        phone: string;
+        email: string;
+        createdAt: Date;
+        isActive: boolean;
+        role: string;
         companyId: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import("@prisma/client").$Enums.UserRole;
-        additionalRoles: import("@prisma/client").$Enums.UserRole[];
+        additionalRoles: string[];
         mustChangePwd: boolean;
         isLocked: boolean;
     }>;
@@ -32,26 +32,31 @@ export declare class UsersService {
         isActive?: boolean;
         search?: string;
     }): Promise<{
-        id: string;
-        phone: string;
-        email: string;
-        createdAt: Date;
-        isActive: boolean;
         company: {
             id: string;
             code: string;
             name: string;
         };
+        id: string;
+        phone: string;
+        email: string;
+        createdAt: Date;
+        isActive: boolean;
+        role: string;
         companyId: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import("@prisma/client").$Enums.UserRole;
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
     }[]>;
     findOneUser(id: string): Promise<{
+        company: {
+            id: string;
+            code: string;
+            name: string;
+        };
         id: string;
         phone: string;
         email: string;
@@ -59,42 +64,37 @@ export declare class UsersService {
         updatedAt: Date;
         createdBy: string;
         isActive: boolean;
-        company: {
-            id: string;
-            code: string;
-            name: string;
-        };
+        role: string;
         companyId: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import("@prisma/client").$Enums.UserRole;
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
         loginAttempts: number;
     }>;
     updateUser(id: string, dto: UpdateUserDto, requestingUser: any): Promise<{
-        id: string;
-        phone: string;
-        email: string;
-        isActive: boolean;
         company: {
             id: string;
             name: string;
         };
+        id: string;
+        phone: string;
+        email: string;
+        isActive: boolean;
+        role: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
-        role: import("@prisma/client").$Enums.UserRole;
     }>;
     toggleUserStatus(id: string, requestingUser: any): Promise<{
         id: string;
         email: string;
         isActive: boolean;
+        role: string;
         firstName: string;
         lastName: string;
-        role: import("@prisma/client").$Enums.UserRole;
     }>;
     unlockUser(id: string, requestingUser: any): Promise<{
         id: string;

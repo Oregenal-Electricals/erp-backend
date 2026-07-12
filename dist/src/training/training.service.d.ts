@@ -119,13 +119,13 @@ export declare class TrainingService {
     }>;
     findAllSessions(user: any, query: any): Promise<{
         data: ({
+            _count: {
+                enrollments: number;
+            };
             trainingProgram: {
                 name: string;
                 category: string;
                 durationHours: number;
-            };
-            _count: {
-                enrollments: number;
             };
         } & {
             id: string;

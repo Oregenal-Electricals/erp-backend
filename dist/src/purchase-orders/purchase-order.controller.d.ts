@@ -15,12 +15,12 @@ export declare class PurchaseOrderController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             vendor: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;
@@ -55,12 +55,12 @@ export declare class PurchaseOrderController {
         totalPages: number;
     }>;
     findByVendor(vendorId: string, req: any): Promise<({
+        _count: {
+            items: number;
+        };
         vendor: {
             code: string;
             name: string;
-        };
-        _count: {
-            items: number;
         };
     } & {
         id: string;

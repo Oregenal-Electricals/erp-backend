@@ -53,6 +53,7 @@ export declare class ProductionDashboardController {
                 woNumber: string;
             };
         } & {
+            shift: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -62,7 +63,6 @@ export declare class ProductionDashboardController {
             isTestData: boolean;
             companyId: string;
             status: string;
-            shift: string;
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
@@ -100,6 +100,7 @@ export declare class ProductionDashboardController {
                 woNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -107,7 +108,6 @@ export declare class ProductionDashboardController {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;
@@ -137,6 +137,7 @@ export declare class ProductionDashboardController {
                 woNumber: string;
             };
         } & {
+            result: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -144,7 +145,6 @@ export declare class ProductionDashboardController {
             updatedBy: string | null;
             isActive: boolean;
             isTestData: boolean;
-            result: string;
             companyId: string;
             status: string;
             remarks: string | null;

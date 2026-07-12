@@ -85,8 +85,8 @@ export declare class MastersController {
             updatedBy: string;
             isActive: boolean;
             isTestData: boolean;
-            plantType: string;
             companyId: string;
+            plantType: string;
         }[];
         branches: {
             id: string;
@@ -243,8 +243,8 @@ export declare class MastersController {
         updatedBy: string;
         isActive: boolean;
         isTestData: boolean;
-        plantType: string;
         companyId: string;
+        plantType: string;
     }>;
     findAllPlants(companyId?: string, includeInactive?: string, user?: any): Promise<({
         company: {
@@ -270,8 +270,8 @@ export declare class MastersController {
         updatedBy: string;
         isActive: boolean;
         isTestData: boolean;
-        plantType: string;
         companyId: string;
+        plantType: string;
     })[]>;
     findOnePlant(id: string): Promise<{
         company: {
@@ -311,8 +311,8 @@ export declare class MastersController {
         updatedBy: string;
         isActive: boolean;
         isTestData: boolean;
-        plantType: string;
         companyId: string;
+        plantType: string;
     }>;
     updatePlant(id: string, dto: UpdatePlantDto, user: any): Promise<{
         id: string;
@@ -332,8 +332,8 @@ export declare class MastersController {
         updatedBy: string;
         isActive: boolean;
         isTestData: boolean;
-        plantType: string;
         companyId: string;
+        plantType: string;
     }>;
     togglePlantStatus(id: string, user: any): Promise<{
         id: string;
@@ -353,8 +353,8 @@ export declare class MastersController {
         updatedBy: string;
         isActive: boolean;
         isTestData: boolean;
-        plantType: string;
         companyId: string;
+        plantType: string;
     }>;
     createUnit(dto: CreateUnitDto, user: any): Promise<{
         id: string;
@@ -372,13 +372,13 @@ export declare class MastersController {
     }>;
     findAllUnits(plantId?: string, includeInactive?: string, user?: any): Promise<({
         plant: {
-            id: string;
-            code: string;
-            name: string;
             company: {
                 id: string;
                 name: string;
             };
+            id: string;
+            code: string;
+            name: string;
         };
     } & {
         id: string;
@@ -418,8 +418,8 @@ export declare class MastersController {
             updatedBy: string;
             isActive: boolean;
             isTestData: boolean;
-            plantType: string;
             companyId: string;
+            plantType: string;
         };
     } & {
         id: string;

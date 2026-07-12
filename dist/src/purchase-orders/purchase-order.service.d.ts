@@ -84,12 +84,12 @@ export declare class PurchaseOrderService {
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
+            _count: {
+                items: number;
+            };
             vendor: {
                 code: string;
                 name: string;
-            };
-            _count: {
-                items: number;
             };
         } & {
             id: string;
@@ -197,12 +197,12 @@ export declare class PurchaseOrderService {
         totalTax: number;
     }>;
     findByVendor(vendorId: string, user: any): Promise<({
+        _count: {
+            items: number;
+        };
         vendor: {
             code: string;
             name: string;
-        };
-        _count: {
-            items: number;
         };
     } & {
         id: string;

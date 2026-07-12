@@ -17,10 +17,10 @@ export declare class JwtStrategy extends JwtStrategy_base {
         id: string;
         email: string;
         isActive: boolean;
+        role: string;
         companyId: string;
         firstName: string;
         lastName: string;
-        role: import("@prisma/client").$Enums.UserRole;
         isLocked: boolean;
     }>;
 }
