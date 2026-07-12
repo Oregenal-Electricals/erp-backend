@@ -1,22 +1,23 @@
-import { UserRole } from '@prisma/client';
-import { Permission } from '../common/permissions/permissions.enum';
+import { PrismaService } from '../prisma/prisma.service';
 export declare class PermissionsController {
-    getMyPermissions(user: any): {
+    private prisma;
+    constructor(prisma: PrismaService);
+    private getPermissionsForRoleName;
+    getMyPermissions(user: any): Promise<{
         role: any;
-        permissions: Permission[];
+        permissions: string[];
         total: number;
-    };
-    getPermissionsForRole(role: UserRole): {
-        role: import("@prisma/client").$Enums.UserRole;
-        permissions: Permission[];
+    }>;
+    getPermissionsForRole(role: string, user: any): Promise<{
+        role: string;
+        permissions: string[];
         total: number;
-    };
-    getAllPermissions(): {
-        permissions: Permission[];
+    }>;
+    getAllPermissions(user: any): Promise<{
         rolePermissions: {
             role: string;
-            permissions: Permission[];
+            permissions: string[];
             total: number;
         }[];
-    };
+    }>;
 }
