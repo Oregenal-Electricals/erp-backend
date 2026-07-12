@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -12,15 +12,15 @@ export class CustomerPoController {
   constructor(private readonly cpoService: CustomerPoService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.cpoService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.cpoService.findAll(req.user, query); }
 
   @Get(':id')
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.cpoService.findOne(id, req.user); }
 
   @Get(':id/shortages')
@@ -30,6 +30,10 @@ export class CustomerPoController {
   @Post()
   @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateCpoDto, @Request() req: any) { return this.cpoService.create(dto, req.user); }
+
+  @Put(':id')
+  @RequirePermissions(Permission.SALES_EDIT)
+  update(@Param('id') id: string, @Body() dto: UpdateCpoDto, @Request() req: any) { return this.cpoService.update(id, dto, req.user); }
 
   @Post(':id/acknowledge')
   @RequirePermissions(Permission.SALES_EDIT)

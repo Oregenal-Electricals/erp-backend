@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
 
 @Injectable()
 export class CustomerPoService {
@@ -119,6 +119,83 @@ export class CustomerPoService {
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
+  /**
+   * Edit is only allowed while status is RECEIVED (before Acknowledge).
+   * Once acknowledged, cancelled, or completed, the PO is locked and
+   * must be cancelled + recreated if something needs to change.
+   * Items are fully replaced (not merged) since the frontend always
+   * resubmits the complete item list. If quantities changed, the
+   * shortage check is automatically re-run afterward so Purchase
+   * always sees numbers that reflect the current order.
+   */
+  async update(id: string, dto: UpdateCpoDto, user: any) {
+    const existing = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });
+    if (!existing) throw new NotFoundException('CPO not found');
+    if (existing.status !== 'RECEIVED') {
+      throw new BadRequestException(`Cannot edit a CPO once it is ${existing.status}. Cancel and create a new one instead.`);
+    }
+
+    const customerPoNumber = dto.poType === 'VERBAL'
+      ? existing.customerPoNumber.startsWith('VERBAL-') ? existing.customerPoNumber : `VERBAL-${existing.cpoNumber}`
+      : dto.customerPoNumber;
+
+    if (dto.poType === 'WRITTEN' && !dto.customerPoNumber) {
+      throw new BadRequestException('customerPoNumber is required for WRITTEN orders');
+    }
+    if (dto.poType === 'VERBAL' && !dto.verbalConfirmedBy) {
+      throw new BadRequestException('verbalConfirmedBy is required for VERBAL orders');
+    }
+
+    const calcItems = dto.items.map(item => ({
+      itemCode: item.itemCode, itemName: item.itemName, description: item.description,
+      qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice,
+      discount: item.discount || 0, gstRate: item.gstRate ?? 18,
+      ...this.calcItem(item),
+      createdBy: user.id, updatedBy: user.id,
+    }));
+
+    const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
+    const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
+    const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
+
+    // Full replace of items - delete existing, insert the resubmitted set.
+    await this.prisma.customerPoItem.deleteMany({ where: { cpoId: id } });
+
+    const updated = await this.prisma.customerPo.update({
+      where: { id },
+      data: {
+        customerPoNumber,
+        poType: dto.poType,
+        verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : null,
+        verbalConfirmedDate: dto.poType === 'VERBAL' && dto.verbalConfirmedDate ? new Date(dto.verbalConfirmedDate) : null,
+        quotationId: dto.quotationId,
+        customerName: dto.customerName, customerEmail: dto.customerEmail,
+        customerPhone: dto.customerPhone, deliveryAddress: dto.deliveryAddress,
+        poDate: new Date(dto.poDate), deliveryDate: new Date(dto.deliveryDate),
+        currency: dto.currency || 'INR', remarks: dto.remarks,
+        subtotal: Math.round(subtotal * 100) / 100,
+        totalGst: Math.round(totalGst * 100) / 100,
+        totalAmount: Math.round(totalAmount * 100) / 100,
+        updatedBy: user.id,
+        items: { create: calcItems },
+      },
+      include: this.includes(),
+    });
+
+    await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+
+    // Items may have changed (e.g. increased quantity) - re-run the
+    // shortage check so stock requirements reflect the current order.
+    try {
+      await this.runShortageCheck(id, user);
+    } catch (e) {
+      // swallow - edit should still succeed even if the shortage check
+      // has an issue; it can be re-run.
+    }
+
     return updated;
   }
 

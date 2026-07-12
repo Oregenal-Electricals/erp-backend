@@ -1,5 +1,5 @@
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto } from './dto/customer-po.dto';
 export declare class CustomerPoController {
     private readonly cpoService;
     constructor(cpoService: CustomerPoService);
@@ -156,6 +156,69 @@ export declare class CustomerPoController {
         openCount: number;
     }>;
     create(dto: CreateCpoDto, req: any): Promise<{
+        items: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            description: string | null;
+            itemCode: string;
+            itemName: string;
+            gstRate: number;
+            uom: string;
+            totalAmount: number;
+            unitPrice: number;
+            discount: number;
+            pendingQty: number;
+            qty: number;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
+            cpoId: string;
+        }[];
+        quotation: {
+            revision: number;
+            totalAmount: number;
+            quotationNumber: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        companyId: string;
+        status: string;
+        remarks: string | null;
+        customerName: string;
+        cancelReason: string | null;
+        currency: string;
+        totalAmount: number;
+        quotationId: string | null;
+        deliveryDate: Date;
+        deliveryAddress: string | null;
+        poDate: Date;
+        subtotal: number;
+        customerEmail: string | null;
+        customerPhone: string | null;
+        totalGst: number;
+        poType: string;
+        customerPoNumber: string;
+        verbalConfirmedBy: string | null;
+        verbalConfirmedDate: Date | null;
+        cpoNumber: string;
+        mrpRunAt: Date | null;
+        mrpRunBy: string | null;
+        lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        acknowledgedDate: Date | null;
+        cancelledDate: Date | null;
+    }>;
+    update(id: string, dto: UpdateCpoDto, req: any): Promise<{
         items: {
             id: string;
             createdAt: Date;

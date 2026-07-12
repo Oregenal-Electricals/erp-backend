@@ -29,6 +29,7 @@ let CustomerPoController = class CustomerPoController {
     findOne(id, req) { return this.cpoService.findOne(id, req.user); }
     getShortages(id, req) { return this.cpoService.getShortages(id, req.user); }
     create(dto, req) { return this.cpoService.create(dto, req.user); }
+    update(id, dto, req) { return this.cpoService.update(id, dto, req.user); }
     acknowledge(id, req) { return this.cpoService.acknowledge(id, req.user); }
     cancel(id, dto, req) { return this.cpoService.cancel(id, dto, req.user); }
     runShortageCheck(id, req) { return this.cpoService.runShortageCheck(id, req.user); }
@@ -36,7 +37,7 @@ let CustomerPoController = class CustomerPoController {
 exports.CustomerPoController = CustomerPoController;
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -44,7 +45,7 @@ __decorate([
 ], CustomerPoController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -53,7 +54,7 @@ __decorate([
 ], CustomerPoController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -78,6 +79,16 @@ __decorate([
     __metadata("design:paramtypes", [customer_po_dto_1.CreateCpoDto, Object]),
     __metadata("design:returntype", void 0)
 ], CustomerPoController.prototype, "create", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, customer_po_dto_1.UpdateCpoDto, Object]),
+    __metadata("design:returntype", void 0)
+], CustomerPoController.prototype, "update", null);
 __decorate([
     (0, common_1.Post)(':id/acknowledge'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),

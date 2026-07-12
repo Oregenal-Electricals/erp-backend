@@ -41,6 +41,33 @@ export class CreateCpoDto {
   @IsArray() @ValidateNested({ each: true }) @Type(() => CpoItemDto) items: CpoItemDto[];
 }
 
+export class UpdateCpoDto {
+  @IsIn(['WRITTEN', 'VERBAL']) poType: string;
+
+  @ValidateIf(o => o.poType === 'WRITTEN')
+  @IsString()
+  customerPoNumber?: string;
+
+  @ValidateIf(o => o.poType === 'VERBAL')
+  @IsString()
+  verbalConfirmedBy?: string;
+
+  @ValidateIf(o => o.poType === 'VERBAL')
+  @IsDateString()
+  verbalConfirmedDate?: string;
+
+  @IsOptional() @IsString() quotationId?: string;
+  @IsString() customerName: string;
+  @IsOptional() @IsString() customerEmail?: string;
+  @IsOptional() @IsString() customerPhone?: string;
+  @IsOptional() @IsString() deliveryAddress?: string;
+  @IsDateString() poDate: string;
+  @IsDateString() deliveryDate: string;
+  @IsOptional() @IsString() currency?: string;
+  @IsOptional() @IsString() remarks?: string;
+  @IsArray() @ValidateNested({ each: true }) @Type(() => CpoItemDto) items: CpoItemDto[];
+}
+
 export class CancelCpoDto {
   @IsString() cancelReason: string;
 }

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CancelCpoDto = exports.CreateCpoDto = exports.CpoItemDto = void 0;
+exports.CancelCpoDto = exports.UpdateCpoDto = exports.CreateCpoDto = exports.CpoItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class CpoItemDto {
@@ -125,6 +125,76 @@ __decorate([
     (0, class_transformer_1.Type)(() => CpoItemDto),
     __metadata("design:type", Array)
 ], CreateCpoDto.prototype, "items", void 0);
+class UpdateCpoDto {
+}
+exports.UpdateCpoDto = UpdateCpoDto;
+__decorate([
+    (0, class_validator_1.IsIn)(['WRITTEN', 'VERBAL']),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "poType", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'WRITTEN'),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "customerPoNumber", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'VERBAL'),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "verbalConfirmedBy", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.poType === 'VERBAL'),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "verbalConfirmedDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "quotationId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "customerName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "customerEmail", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "customerPhone", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "deliveryAddress", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "poDate", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "deliveryDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "currency", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCpoDto.prototype, "remarks", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CpoItemDto),
+    __metadata("design:type", Array)
+], UpdateCpoDto.prototype, "items", void 0);
 class CancelCpoDto {
 }
 exports.CancelCpoDto = CancelCpoDto;

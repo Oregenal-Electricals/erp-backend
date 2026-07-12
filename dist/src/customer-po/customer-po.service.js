@@ -114,6 +114,58 @@ let CustomerPoService = class CustomerPoService {
         await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }
+    async update(id, dto, user) {
+        const existing = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });
+        if (!existing)
+            throw new common_1.NotFoundException('CPO not found');
+        if (existing.status !== 'RECEIVED') {
+            throw new common_1.BadRequestException(`Cannot edit a CPO once it is ${existing.status}. Cancel and create a new one instead.`);
+        }
+        const customerPoNumber = dto.poType === 'VERBAL'
+            ? existing.customerPoNumber.startsWith('VERBAL-') ? existing.customerPoNumber : `VERBAL-${existing.cpoNumber}`
+            : dto.customerPoNumber;
+        if (dto.poType === 'WRITTEN' && !dto.customerPoNumber) {
+            throw new common_1.BadRequestException('customerPoNumber is required for WRITTEN orders');
+        }
+        if (dto.poType === 'VERBAL' && !dto.verbalConfirmedBy) {
+            throw new common_1.BadRequestException('verbalConfirmedBy is required for VERBAL orders');
+        }
+        const calcItems = dto.items.map(item => {
+            var _a;
+            return (Object.assign(Object.assign({ itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id }));
+        });
+        const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
+        const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
+        const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
+        await this.prisma.customerPoItem.deleteMany({ where: { cpoId: id } });
+        const updated = await this.prisma.customerPo.update({
+            where: { id },
+            data: {
+                customerPoNumber,
+                poType: dto.poType,
+                verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : null,
+                verbalConfirmedDate: dto.poType === 'VERBAL' && dto.verbalConfirmedDate ? new Date(dto.verbalConfirmedDate) : null,
+                quotationId: dto.quotationId,
+                customerName: dto.customerName, customerEmail: dto.customerEmail,
+                customerPhone: dto.customerPhone, deliveryAddress: dto.deliveryAddress,
+                poDate: new Date(dto.poDate), deliveryDate: new Date(dto.deliveryDate),
+                currency: dto.currency || 'INR', remarks: dto.remarks,
+                subtotal: Math.round(subtotal * 100) / 100,
+                totalGst: Math.round(totalGst * 100) / 100,
+                totalAmount: Math.round(totalAmount * 100) / 100,
+                updatedBy: user.id,
+                items: { create: calcItems },
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        try {
+            await this.runShortageCheck(id, user);
+        }
+        catch (e) {
+        }
+        return updated;
+    }
     async cancel(id, dto, user) {
         const cpo = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });
         if (!cpo)
