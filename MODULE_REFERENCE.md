@@ -6,9 +6,13 @@ Living reference for each completed requirement — what it does, how it works, 
 
 ## Module 97 — Customer PO (Written/Verbal) + BOM Material Shortage Check
 
-**Status:** Backend complete and deployed to staging. Frontend not yet built.
+**Status:** Backend and frontend complete, deployed to staging/production.
 **Date completed (backend):** 2026-07-12
-**Related files:** `src/customer-po/*`, `prisma/schema.prisma` (`CustomerPo`, `CustomerPoItem`, `MaterialShortage` models)
+**Date completed (frontend):** 2026-07-12
+**Related files:**
+- Backend: `src/customer-po/*` (erp-backend repo)
+- Frontend: `src/app/(app)/customer-po/page.jsx` (erp-frontend repo)
+- Schema: `prisma/schema.prisma` (`CustomerPo`, `CustomerPoItem`, `MaterialShortage` models)
 
 ### 1. Business Requirement
 
@@ -95,9 +99,23 @@ curl -X POST {BASE_URL}/api/v1/customer-po ... -d '{
 # HR Manager / Gate Security / Production Operator -> same endpoint -> expect 403
 ```
 
-### 6. Known Limitations / Follow-ups (not yet built)
+### 6. How To Test The Frontend
 
-- **No frontend yet** — this module is API-only right now. Frontend build is next.
+1. Log in as any role with `SALES_VIEW`/`SALES_CREATE` (e.g. `admin@oregenalelectrical.com` or `sales.manager@oregenalelectrical.com`).
+2. Click **Customer PO** in the sidebar (under the Sales section).
+3. Click **+ New Customer PO** — toggle between **Written** and **Verbal**; form fields change accordingly (real PO number vs. confirmed-by/date).
+4. Fill in customer details and at least one line item, submit.
+5. Click the new PO in the list to open its detail view.
+6. Click **Run Shortage Check** — results render inline, color-coded:
+   - Gray = checked, available
+   - Orange = BOM missing (a Task was auto-created — check `/tasks` to confirm)
+   - Red = shortage found or unmapped item code
+7. Log in as `purchase.manager@oregenalelectrical.com` — confirm they can also open the same PO's shortage results (via the API; no dedicated Purchase-side UI page yet — see Known Limitations).
+8. Log in as `gate.security@oregenalelectrical.com` — confirm **Customer PO does not appear in their sidebar at all** (role should not have `SALES_VIEW`).
+
+### 7. Known Limitations / Follow-ups (not yet built)
+
+- **No dedicated Purchase-department UI page for shortages yet** — Purchase can currently view shortages only via the API (`GET /customer-po/:id/shortages`) or by opening the same Customer PO detail page a Sales user would use. A standalone "Open Shortages" dashboard for Purchase (aggregating across all POs, not just one at a time) is a good next follow-up.
 - **Shortage stock check is single-warehouse** (`StockBalance.findFirst`, not summed across all warehouses) — matches existing MRP module's behavior for consistency, but if a company splits stock across multiple warehouses, this could undercount total availability. Tracked as a shared follow-up affecting both this module and `mrp.service.ts`.
 - **`SUPERVISOR`/`OPERATOR` shared-role architecture gap** — these two `UserRole` enum values each cover 6+ distinct job functions with no `department` field to distinguish them, so permission grants for these roles are broader than ideal. Tracked separately; requires a `User.department` field + `PermissionsGuard` update to resolve properly.
 - **BOM-missing Task is always assigned to whoever ran the shortage check** — there's no dedicated "BOM owner" role yet, so the task isn't auto-routed to Production/Planning. Reassign manually for now.
