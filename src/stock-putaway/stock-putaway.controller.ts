@@ -16,7 +16,7 @@ export class StockPutawayController {
   getStats(@Request() req: any) { return this.spService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.STOCK_PUTAWAY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.spService.findAll(req.user, query); }
 
   @Get(':id')

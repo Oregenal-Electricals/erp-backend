@@ -41,7 +41,7 @@ let IotController = class IotController {
 exports.IotController = IotController;
 __decorate([
     (0, common_1.Get)('dashboard'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -49,7 +49,7 @@ __decorate([
 ], IotController.prototype, "getDashboard", null);
 __decorate([
     (0, common_1.Get)('ai-insights'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -57,7 +57,7 @@ __decorate([
 ], IotController.prototype, "getAiInsights", null);
 __decorate([
     (0, common_1.Get)('predictive'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -65,7 +65,7 @@ __decorate([
 ], IotController.prototype, "getPredictive", null);
 __decorate([
     (0, common_1.Get)('machines'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -74,7 +74,7 @@ __decorate([
 ], IotController.prototype, "getMachines", null);
 __decorate([
     (0, common_1.Get)('machines/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -130,7 +130,7 @@ __decorate([
 ], IotController.prototype, "bulkReadings", null);
 __decorate([
     (0, common_1.Get)('readings/:machineId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Param)('machineId')),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Request)()),
@@ -140,7 +140,7 @@ __decorate([
 ], IotController.prototype, "getReadings", null);
 __decorate([
     (0, common_1.Get)('alerts'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.IOT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

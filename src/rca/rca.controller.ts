@@ -16,7 +16,7 @@ export class RcaController {
   getStats(@Request() req: any) { return this.rcaService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.QUALITY_VIEW)
+  @RequirePermissions(Permission.RCA_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.rcaService.findAll(req.user, query); }
 
   @Get(':id')

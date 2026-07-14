@@ -16,7 +16,7 @@ export class PurchaseRequisitionController {
   getStats(@Request() req: any) { return this.prService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.PURCHASE_REQUISITION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.prService.findAll(req.user, query); }
 
   @Get(':id')

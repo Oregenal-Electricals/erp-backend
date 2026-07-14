@@ -16,7 +16,7 @@ export class PurchaseOrderController {
   getStats(@Request() req: any) { return this.poService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.PURCHASE_ORDER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.poService.findAll(req.user, query); }
 
   @Get('vendor/:vendorId')

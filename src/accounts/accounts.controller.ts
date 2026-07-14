@@ -24,7 +24,7 @@ export class AccountsController {
   seed(@Request() req: any) { return this.accountsService.seedDefaultAccounts(req.user.companyId, req.user.id); }
 
   @Get()
-  @RequirePermissions(Permission.FINANCE_VIEW)
+  @RequirePermissions(Permission.CHART_OF_ACCOUNTS_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.accountsService.findAll(req.user, query); }
 
   @Get(':id')

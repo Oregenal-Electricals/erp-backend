@@ -32,7 +32,7 @@ let InventoryReportsController = class InventoryReportsController {
 exports.InventoryReportsController = InventoryReportsController;
 __decorate([
     (0, common_1.Get)('stock-register'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -41,7 +41,7 @@ __decorate([
 ], InventoryReportsController.prototype, "getStockRegister", null);
 __decorate([
     (0, common_1.Get)('grn-register'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -50,7 +50,7 @@ __decorate([
 ], InventoryReportsController.prototype, "getGrnRegister", null);
 __decorate([
     (0, common_1.Get)('issue-register'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -59,7 +59,7 @@ __decorate([
 ], InventoryReportsController.prototype, "getIssueRegister", null);
 __decorate([
     (0, common_1.Get)('transfer-register'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -68,7 +68,7 @@ __decorate([
 ], InventoryReportsController.prototype, "getTransferRegister", null);
 __decorate([
     (0, common_1.Get)('abc-analysis'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

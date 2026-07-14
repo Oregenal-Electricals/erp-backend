@@ -38,7 +38,7 @@ let RackBinController = class RackBinController {
 exports.RackBinController = RackBinController;
 __decorate([
     (0, common_1.Get)('stats/:warehouseId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.RACK_BIN_VIEW),
     __param(0, (0, common_1.Param)('warehouseId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -47,7 +47,7 @@ __decorate([
 ], RackBinController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('zones/:warehouseId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.RACK_BIN_VIEW),
     __param(0, (0, common_1.Param)('warehouseId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -65,7 +65,7 @@ __decorate([
 ], RackBinController.prototype, "createZone", null);
 __decorate([
     (0, common_1.Get)('racks/:warehouseId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.RACK_BIN_VIEW),
     __param(0, (0, common_1.Param)('warehouseId')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Query)('zoneId')),
@@ -84,7 +84,7 @@ __decorate([
 ], RackBinController.prototype, "createRack", null);
 __decorate([
     (0, common_1.Get)('bins/rack/:rackId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.RACK_BIN_VIEW),
     __param(0, (0, common_1.Param)('rackId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -93,7 +93,7 @@ __decorate([
 ], RackBinController.prototype, "findBins", null);
 __decorate([
     (0, common_1.Get)('bins/empty/:warehouseId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.RACK_BIN_VIEW),
     __param(0, (0, common_1.Param)('warehouseId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

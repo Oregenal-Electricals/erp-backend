@@ -16,7 +16,7 @@ export class PaymentInstrumentController {
   getStats(@Request() req: any) { return this.piService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.FINANCE_VIEW)
+  @RequirePermissions(Permission.PAYMENT_INSTRUMENT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.piService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')

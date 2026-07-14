@@ -16,7 +16,7 @@ export class VendorQuotationController {
   getStats(@Request() req: any) { return this.vqService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.QUOTATION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.vqService.findAll(req.user, query); }
 
   @Get('rfq/:rfqId')

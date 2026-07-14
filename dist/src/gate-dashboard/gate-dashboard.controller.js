@@ -17,6 +17,9 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const gate_dashboard_service_1 = require("./gate-dashboard.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
+const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 let GateDashboardController = class GateDashboardController {
     constructor(service) {
@@ -29,6 +32,7 @@ let GateDashboardController = class GateDashboardController {
 exports.GateDashboardController = GateDashboardController;
 __decorate([
     (0, common_1.Get)('summary'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_DASHBOARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get full gate security dashboard summary' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -38,7 +42,7 @@ __decorate([
 exports.GateDashboardController = GateDashboardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Dashboard'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, common_1.Controller)('gate-dashboard'),
     __metadata("design:paramtypes", [gate_dashboard_service_1.GateDashboardService])
 ], GateDashboardController);

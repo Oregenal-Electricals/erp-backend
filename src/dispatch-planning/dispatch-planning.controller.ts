@@ -20,7 +20,7 @@ export class DispatchPlanningController {
   getPendingSoItems(@Param('soId') soId: string, @Request() req: any) { return this.dpService.getPendingSoItems(soId, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.DISPATCH_PLAN_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.dpService.findAll(req.user, query); }
 
   @Get(':id')

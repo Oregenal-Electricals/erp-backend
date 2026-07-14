@@ -16,7 +16,7 @@ export class PayrollController {
   getStats(@Request() req: any) { return this.payrollService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.HR_VIEW)
+  @RequirePermissions(Permission.PAYROLL_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.payrollService.findAll(req.user, query); }
 
   @Get(':id')

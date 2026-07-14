@@ -11,50 +11,50 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Get('executive')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getExecutive(@Request() req: any) { return this.analyticsService.getExecutiveDashboard(req.user.companyId); }
 
   @Get('sales')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getSales(@Request() req: any) { return this.analyticsService.getSalesAnalytics(req.user.companyId); }
 
   @Get('purchase')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getPurchase(@Request() req: any) { return this.analyticsService.getPurchaseAnalytics(req.user.companyId); }
 
   @Get('inventory')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getInventory(@Request() req: any) { return this.analyticsService.getInventoryAnalytics(req.user.companyId); }
 
   @Get('quality')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getQuality(@Request() req: any) { return this.analyticsService.getQualityAnalytics(req.user.companyId); }
 
   @Get('finance-deep')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getFinanceDeep(@Request() req: any) { return this.analyticsService.getFinanceDeep(req.user.companyId); }
 
   @Get('quality-deep')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getQualityDeep(@Request() req: any) { return this.analyticsService.getQualityDeep(req.user.companyId); }
 
   @Get('production-deep')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getProductionDeep(@Request() req: any) { return this.analyticsService.getProductionDeep(req.user.companyId); }
 
   @Get('inventory-deep')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getInventoryDeep(@Request() req: any) { return this.analyticsService.getInventoryDeep(req.user.companyId); }
 
   @Get('purchase-deep')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getPurchaseDeep(@Request() req: any, @Query() query: any) { return this.analyticsService.getPurchaseDeep(req.user.companyId, query); }
 
   @Get('sales-deep')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getSalesDeep(@Request() req: any, @Query() query: any) { return this.analyticsService.getSalesDeep(req.user.companyId, query); }
 
   @Get('finance')
-  @RequirePermissions(Permission.REPORTS_VIEW)
+  @RequirePermissions(Permission.ANALYTICS_TAB_VIEW)
   getFinance(@Request() req: any) { return this.analyticsService.getFinanceAnalytics(req.user.companyId); }
 }

@@ -24,7 +24,7 @@ export class StockLedgerController {
   getItemLedger(@Param('code') code: string, @Request() req: any) { return this.slService.getItemLedger(code, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.STOCK_LEDGER_VIEW)
   findLedger(@Request() req: any, @Query() query: any) { return this.slService.findLedger(req.user, query); }
 
   @Post('receive/:iqcId')

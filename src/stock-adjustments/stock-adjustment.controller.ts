@@ -16,7 +16,7 @@ export class StockAdjustmentController {
   getStats(@Request() req: any) { return this.saService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.STOCK_ADJUSTMENT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.saService.findAll(req.user, query); }
 
   @Get(':id')

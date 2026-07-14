@@ -42,7 +42,7 @@ __decorate([
 ], NcrController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.NCR_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

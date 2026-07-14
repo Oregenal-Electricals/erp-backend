@@ -39,7 +39,7 @@ let AnalyticsController = class AnalyticsController {
 exports.AnalyticsController = AnalyticsController;
 __decorate([
     (0, common_1.Get)('executive'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -47,7 +47,7 @@ __decorate([
 ], AnalyticsController.prototype, "getExecutive", null);
 __decorate([
     (0, common_1.Get)('sales'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -55,7 +55,7 @@ __decorate([
 ], AnalyticsController.prototype, "getSales", null);
 __decorate([
     (0, common_1.Get)('purchase'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -63,7 +63,7 @@ __decorate([
 ], AnalyticsController.prototype, "getPurchase", null);
 __decorate([
     (0, common_1.Get)('inventory'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -71,7 +71,7 @@ __decorate([
 ], AnalyticsController.prototype, "getInventory", null);
 __decorate([
     (0, common_1.Get)('quality'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -79,7 +79,7 @@ __decorate([
 ], AnalyticsController.prototype, "getQuality", null);
 __decorate([
     (0, common_1.Get)('finance-deep'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -87,7 +87,7 @@ __decorate([
 ], AnalyticsController.prototype, "getFinanceDeep", null);
 __decorate([
     (0, common_1.Get)('quality-deep'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -95,7 +95,7 @@ __decorate([
 ], AnalyticsController.prototype, "getQualityDeep", null);
 __decorate([
     (0, common_1.Get)('production-deep'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -103,7 +103,7 @@ __decorate([
 ], AnalyticsController.prototype, "getProductionDeep", null);
 __decorate([
     (0, common_1.Get)('inventory-deep'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -111,7 +111,7 @@ __decorate([
 ], AnalyticsController.prototype, "getInventoryDeep", null);
 __decorate([
     (0, common_1.Get)('purchase-deep'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -120,7 +120,7 @@ __decorate([
 ], AnalyticsController.prototype, "getPurchaseDeep", null);
 __decorate([
     (0, common_1.Get)('sales-deep'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -129,7 +129,7 @@ __decorate([
 ], AnalyticsController.prototype, "getSalesDeep", null);
 __decorate([
     (0, common_1.Get)('finance'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.ANALYTICS_TAB_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

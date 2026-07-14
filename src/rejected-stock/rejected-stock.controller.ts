@@ -16,7 +16,7 @@ export class RejectedStockController {
   getStats(@Request() req: any) { return this.rsService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.REJECTED_STOCK_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.rsService.findAll(req.user, query); }
 
   @Get(':id')

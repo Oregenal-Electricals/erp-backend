@@ -12,15 +12,15 @@ export class QuotationComparisonController {
   constructor(private readonly compService: QuotationComparisonService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.QUOTATION_COMPARISON_VIEW)
   getStats(@Request() req: any) { return this.compService.getStats(req.user); }
 
   @Get(':rfqId')
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.QUOTATION_COMPARISON_VIEW)
   getMatrix(@Param('rfqId') rfqId: string, @Request() req: any) { return this.compService.getMatrix(rfqId, req.user); }
 
   @Get(':rfqId/summary')
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.QUOTATION_COMPARISON_VIEW)
   getSummary(@Param('rfqId') rfqId: string, @Request() req: any) { return this.compService.getSummary(rfqId, req.user); }
 
   @Post(':rfqId/select')

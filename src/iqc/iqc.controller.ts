@@ -16,7 +16,7 @@ export class IqcController {
   getStats(@Request() req: any) { return this.iqcService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.QUALITY_VIEW)
+  @RequirePermissions(Permission.IQC_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.iqcService.findAll(req.user, query); }
 
   @Get('grn/:grnId')

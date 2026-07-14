@@ -16,7 +16,7 @@ export class WorkOrderController {
   getStats(@Request() req: any) { return this.woService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.WORK_ORDER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.woService.findAll(req.user, query); }
 
   @Get(':id')

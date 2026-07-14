@@ -16,7 +16,7 @@ export class LeadsController {
   getStats(@Request() req: any) { return this.leadsService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.LEAD_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.leadsService.findAll(req.user, query); }
 
   @Get(':id')

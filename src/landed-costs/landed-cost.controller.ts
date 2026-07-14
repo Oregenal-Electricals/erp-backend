@@ -16,7 +16,7 @@ export class LandedCostController {
   getStats(@Request() req: any) { return this.lcService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.LANDED_COST_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.lcService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')

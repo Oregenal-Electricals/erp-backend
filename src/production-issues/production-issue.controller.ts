@@ -16,7 +16,7 @@ export class ProductionIssueController {
   getStats(@Request() req: any) { return this.piService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_ISSUE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.piService.findAll(req.user, query); }
 
   @Get(':id')

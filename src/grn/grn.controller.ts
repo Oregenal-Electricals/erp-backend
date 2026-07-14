@@ -16,7 +16,7 @@ export class GrnController {
   getStats(@Request() req: any) { return this.grnService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.GRN_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.grnService.findAll(req.user, query); }
 
   @Get(':id')

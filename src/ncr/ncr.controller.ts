@@ -16,7 +16,7 @@ export class NcrController {
   getStats(@Request() req: any) { return this.ncrService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.QUALITY_VIEW)
+  @RequirePermissions(Permission.NCR_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.ncrService.findAll(req.user, query); }
 
   @Get(':id')

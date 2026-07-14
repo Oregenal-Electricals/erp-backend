@@ -16,7 +16,7 @@ export class NotificationsController {
   getUnreadCount(@Request() req: any) { return this.notifService.getUnreadCount(req.user.id, req.user.companyId); }
 
   @Get()
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.NOTIFICATION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.notifService.findAll(req.user.id, req.user.companyId, query); }
 
   @Post('mark-read')

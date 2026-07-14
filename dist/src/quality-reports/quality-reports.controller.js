@@ -33,7 +33,7 @@ let QualityReportsController = class QualityReportsController {
 exports.QualityReportsController = QualityReportsController;
 __decorate([
     (0, common_1.Get)('ncr-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -42,7 +42,7 @@ __decorate([
 ], QualityReportsController.prototype, "getNcrReport", null);
 __decorate([
     (0, common_1.Get)('capa-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -51,7 +51,7 @@ __decorate([
 ], QualityReportsController.prototype, "getCapaReport", null);
 __decorate([
     (0, common_1.Get)('oqc-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -60,7 +60,7 @@ __decorate([
 ], QualityReportsController.prototype, "getOqcReport", null);
 __decorate([
     (0, common_1.Get)('supplier-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -69,7 +69,7 @@ __decorate([
 ], QualityReportsController.prototype, "getSupplierReport", null);
 __decorate([
     (0, common_1.Get)('complaint-report'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -78,7 +78,7 @@ __decorate([
 ], QualityReportsController.prototype, "getComplaintReport", null);
 __decorate([
     (0, common_1.Get)('kpi-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

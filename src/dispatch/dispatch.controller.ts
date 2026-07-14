@@ -16,7 +16,7 @@ export class DispatchController {
   getStats(@Request() req: any) { return this.dispatchService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.DISPATCH_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.dispatchService.findAll(req.user, query); }
 
   @Get(':id')

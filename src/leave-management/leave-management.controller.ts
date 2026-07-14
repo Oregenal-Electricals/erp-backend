@@ -40,7 +40,7 @@ export class LeaveManagementController {
   getBalance(@Param('employeeId') empId: string, @Query('year') year: string, @Request() req: any) { return this.leaveService.getEmployeeBalances(empId, Number(year) || new Date().getFullYear(), req.user); }
 
   @Get()
-  @RequirePermissions(Permission.HR_VIEW)
+  @RequirePermissions(Permission.LEAVE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.leaveService.findAllApplications(req.user, query); }
 
   @Post('apply')

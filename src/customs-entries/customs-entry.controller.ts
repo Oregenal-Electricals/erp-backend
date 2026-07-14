@@ -16,7 +16,7 @@ export class CustomsEntryController {
   getStats(@Request() req: any) { return this.ceService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.CUSTOMS_ENTRY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.ceService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')

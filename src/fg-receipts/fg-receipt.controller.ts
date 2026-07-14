@@ -20,7 +20,7 @@ export class FgReceiptController {
   getPendingWos(@Request() req: any) { return this.fgrService.getCompletedWosWithoutFgr(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.FG_RECEIPT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.fgrService.findAll(req.user, query); }
 
   @Get(':id')

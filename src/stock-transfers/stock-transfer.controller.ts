@@ -16,7 +16,7 @@ export class StockTransferController {
   getStats(@Request() req: any) { return this.stService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.STOCK_TRANSFER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.stService.findAll(req.user, query); }
 
   @Get(':id')

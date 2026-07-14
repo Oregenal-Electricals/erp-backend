@@ -20,7 +20,7 @@ export class SalesOrdersController {
   getByCpo(@Param('cpoId') cpoId: string, @Request() req: any) { return this.soService.getByCpo(cpoId, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.SALES_ORDER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.soService.findAll(req.user, query); }
 
   @Get(':id')

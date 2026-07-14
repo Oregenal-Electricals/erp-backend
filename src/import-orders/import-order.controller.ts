@@ -16,7 +16,7 @@ export class ImportOrderController {
   getStats(@Request() req: any) { return this.importOrderService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.IMPORT_ORDER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.importOrderService.findAll(req.user, query); }
 
   @Get(':id')

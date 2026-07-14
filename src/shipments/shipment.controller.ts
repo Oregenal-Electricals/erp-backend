@@ -16,7 +16,7 @@ export class ShipmentController {
   getStats(@Request() req: any) { return this.shipmentService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.SHIPMENT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.shipmentService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')

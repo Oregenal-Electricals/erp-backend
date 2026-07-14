@@ -16,7 +16,7 @@ export class PoAmendmentController {
   getStats(@Request() req: any) { return this.poAmendmentService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.PO_AMENDMENT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.poAmendmentService.findAll(req.user, query); }
 
   @Get('po/:poId')

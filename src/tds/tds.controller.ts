@@ -12,7 +12,7 @@ export class TdsController {
   constructor(private readonly tdsService: TdsService) {}
 
   @Get()
-  @RequirePermissions(Permission.FINANCE_VIEW)
+  @RequirePermissions(Permission.TDS_VIEW)
   getAll(@Request() req: any, @Query() query: any) { return this.tdsService.getAllDeclarations(req.user, query); }
 
   @Get('challan')

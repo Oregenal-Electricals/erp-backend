@@ -16,7 +16,7 @@ export class CustomerPoController {
   getStats(@Request() req: any) { return this.cpoService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.CUSTOMER_PO_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.cpoService.findAll(req.user, query); }
 
   @Get(':id')

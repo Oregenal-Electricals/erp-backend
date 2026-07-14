@@ -16,7 +16,7 @@ export class DeliveryConfirmationController {
   getStats(@Request() req: any) { return this.dcService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.DELIVERY_CONFIRMATION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.dcService.findAll(req.user, query); }
 
   @Get(':id')

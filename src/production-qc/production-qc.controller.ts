@@ -16,7 +16,7 @@ export class ProductionQcController {
   getStats(@Request() req: any) { return this.pqcService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.QUALITY_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_QC_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.pqcService.findAll(req.user, query); }
 
   @Get(':id')

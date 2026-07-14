@@ -16,7 +16,7 @@ export class RfqController {
   getStats(@Request() req: any) { return this.rfqService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.RFQ_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.rfqService.findAll(req.user, query); }
 
   @Get(':id')

@@ -16,7 +16,7 @@ export class VouchersController {
   getStats(@Request() req: any) { return this.vouchersService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.FINANCE_VIEW)
+  @RequirePermissions(Permission.VOUCHER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.vouchersService.findAll(req.user, query); }
 
   @Get(':id')

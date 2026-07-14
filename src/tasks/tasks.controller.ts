@@ -16,7 +16,7 @@ export class TasksController {
   getStats(@Request() req: any) { return this.tasksService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.TASK_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.tasksService.findAll(req.user, query); }
 
   @Get(':id')

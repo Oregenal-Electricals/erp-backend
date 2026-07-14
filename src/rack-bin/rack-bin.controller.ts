@@ -12,11 +12,11 @@ export class RackBinController {
   constructor(private readonly rbService: RackBinService) {}
 
   @Get('stats/:warehouseId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.RACK_BIN_VIEW)
   getStats(@Param('warehouseId') wId: string, @Request() req: any) { return this.rbService.getWarehouseStats(wId, req.user); }
 
   @Get('zones/:warehouseId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.RACK_BIN_VIEW)
   findZones(@Param('warehouseId') wId: string, @Request() req: any) { return this.rbService.findZones(wId, req.user); }
 
   @Post('zones')
@@ -24,7 +24,7 @@ export class RackBinController {
   createZone(@Body() dto: CreateZoneDto, @Request() req: any) { return this.rbService.createZone(dto, req.user); }
 
   @Get('racks/:warehouseId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.RACK_BIN_VIEW)
   findRacks(@Param('warehouseId') wId: string, @Request() req: any, @Query('zoneId') zoneId?: string) { return this.rbService.findRacks(wId, req.user, zoneId); }
 
   @Post('racks')
@@ -32,11 +32,11 @@ export class RackBinController {
   createRack(@Body() dto: CreateRackDto, @Request() req: any) { return this.rbService.createRack(dto, req.user); }
 
   @Get('bins/rack/:rackId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.RACK_BIN_VIEW)
   findBins(@Param('rackId') rackId: string, @Request() req: any) { return this.rbService.findBins(rackId, req.user); }
 
   @Get('bins/empty/:warehouseId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.RACK_BIN_VIEW)
   findEmptyBins(@Param('warehouseId') wId: string, @Request() req: any) { return this.rbService.findEmptyBins(wId, req.user); }
 
   @Post('bins')

@@ -16,7 +16,7 @@ export class PriceListController {
   getStats(@Request() req: any) { return this.priceListService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PURCHASE_VIEW)
+  @RequirePermissions(Permission.PRICE_LIST_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.priceListService.findAll(req.user, query); }
 
   @Get(':id')

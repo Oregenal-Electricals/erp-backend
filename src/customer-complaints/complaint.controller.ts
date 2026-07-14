@@ -16,7 +16,7 @@ export class ComplaintController {
   getStats(@Request() req: any) { return this.complaintService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.CUSTOMER_COMPLAINT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.complaintService.findAll(req.user, query); }
 
   @Get(':id')

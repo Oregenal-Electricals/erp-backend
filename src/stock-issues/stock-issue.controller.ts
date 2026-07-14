@@ -22,7 +22,7 @@ export class StockIssueController {
   }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.STOCK_ISSUE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.siService.findAll(req.user, query); }
 
   @Get(':id')

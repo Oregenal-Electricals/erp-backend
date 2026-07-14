@@ -45,7 +45,7 @@ export class EmployeesController {
   updateDesig(@Param('id') id: string, @Body() dto: any, @Request() req: any) { return this.empService.updateDesignation(id, dto, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.HR_VIEW)
+  @RequirePermissions(Permission.EMPLOYEE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.empService.findAll(req.user, query); }
 
   @Get(':id')

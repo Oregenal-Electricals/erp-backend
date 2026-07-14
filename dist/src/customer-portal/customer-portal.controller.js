@@ -39,7 +39,7 @@ let CustomerPortalController = class CustomerPortalController {
 exports.CustomerPortalController = CustomerPortalController;
 __decorate([
     (0, common_1.Get)('dashboard/:customerId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.CUSTOMER_PORTAL_VIEW),
     __param(0, (0, common_1.Param)('customerId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -48,7 +48,7 @@ __decorate([
 ], CustomerPortalController.prototype, "getDashboard", null);
 __decorate([
     (0, common_1.Get)('orders/:customerId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.CUSTOMER_PORTAL_VIEW),
     __param(0, (0, common_1.Param)('customerId')),
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Request)()),
@@ -58,7 +58,7 @@ __decorate([
 ], CustomerPortalController.prototype, "getOrders", null);
 __decorate([
     (0, common_1.Get)('dispatches/:customerId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.CUSTOMER_PORTAL_VIEW),
     __param(0, (0, common_1.Param)('customerId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
 ], CustomerPortalController.prototype, "getDispatches", null);
 __decorate([
     (0, common_1.Get)('complaints/:customerId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.CUSTOMER_PORTAL_VIEW),
     __param(0, (0, common_1.Param)('customerId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

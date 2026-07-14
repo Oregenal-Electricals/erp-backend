@@ -16,7 +16,7 @@ export class BomController {
   getStats(@Request() req: any) { return this.bomService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.BOM_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.bomService.findAll(req.user, query); }
 
   @Get('product/:productId')

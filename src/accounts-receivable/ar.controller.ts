@@ -20,7 +20,7 @@ export class ArController {
   getAging(@Request() req: any) { return this.arService.getAgingReport(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.FINANCE_VIEW)
+  @RequirePermissions(Permission.AR_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.arService.findAll(req.user, query); }
 
   @Get(':id')

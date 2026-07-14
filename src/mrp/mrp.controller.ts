@@ -11,14 +11,14 @@ export class MrpController {
   constructor(private readonly mrpService: MrpService) {}
 
   @Get('calculate/:woId')
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.MRP_VIEW)
   calculate(@Param('woId') woId: string, @Request() req: any) { return this.mrpService.calculateMrp(woId, req.user); }
 
   @Get('shortage-report')
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.MRP_VIEW)
   shortageReport(@Request() req: any) { return this.mrpService.getShortageReport(req.user); }
 
   @Get('material-plan')
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.MRP_VIEW)
   materialPlan(@Request() req: any, @Query() query: any) { return this.mrpService.getMaterialPlan(req.user, query); }
 }

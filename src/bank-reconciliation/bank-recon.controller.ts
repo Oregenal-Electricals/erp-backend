@@ -24,7 +24,7 @@ export class BankReconController {
   getSuggestions(@Param('lineId') lineId: string, @Request() req: any) { return this.bankReconService.getSuggestions(lineId, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.FINANCE_VIEW)
+  @RequirePermissions(Permission.BANK_RECONCILIATION_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.bankReconService.findAll(req.user, query); }
 
   @Get(':id')

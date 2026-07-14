@@ -16,7 +16,7 @@ export class ShippingDocumentController {
   getStats(@Request() req: any) { return this.sdService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.DOCUMENT_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.sdService.findAll(req.user, query); }
 
   @Get('shipment/:shipmentId')

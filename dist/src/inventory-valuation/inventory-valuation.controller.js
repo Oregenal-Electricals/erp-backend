@@ -31,7 +31,7 @@ let InventoryValuationController = class InventoryValuationController {
 exports.InventoryValuationController = InventoryValuationController;
 __decorate([
     (0, common_1.Get)('summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VALUATION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -40,7 +40,7 @@ __decorate([
 ], InventoryValuationController.prototype, "getSummary", null);
 __decorate([
     (0, common_1.Get)('aging'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VALUATION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -49,7 +49,7 @@ __decorate([
 ], InventoryValuationController.prototype, "getAging", null);
 __decorate([
     (0, common_1.Get)('slow-moving'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VALUATION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -58,7 +58,7 @@ __decorate([
 ], InventoryValuationController.prototype, "getSlowMoving", null);
 __decorate([
     (0, common_1.Get)('fifo-value'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VALUATION_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

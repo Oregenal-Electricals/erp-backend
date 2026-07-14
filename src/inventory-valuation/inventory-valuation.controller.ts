@@ -11,18 +11,18 @@ export class InventoryValuationController {
   constructor(private readonly ivService: InventoryValuationService) {}
 
   @Get('summary')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_VALUATION_VIEW)
   getSummary(@Request() req: any, @Query() query: any) { return this.ivService.getSummary(req.user, query); }
 
   @Get('aging')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_VALUATION_VIEW)
   getAging(@Request() req: any, @Query() query: any) { return this.ivService.getAging(req.user, query); }
 
   @Get('slow-moving')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_VALUATION_VIEW)
   getSlowMoving(@Request() req: any, @Query() query: any) { return this.ivService.getSlowMoving(req.user, query); }
 
   @Get('fifo-value')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_VALUATION_VIEW)
   getFifoValue(@Request() req: any, @Query() query: any) { return this.ivService.getFifoValue(req.user, query); }
 }

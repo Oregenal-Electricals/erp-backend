@@ -35,7 +35,7 @@ let MisReportsController = class MisReportsController {
 exports.MisReportsController = MisReportsController;
 __decorate([
     (0, common_1.Get)('sales-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -44,7 +44,7 @@ __decorate([
 ], MisReportsController.prototype, "getSalesSummary", null);
 __decorate([
     (0, common_1.Get)('purchase-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -53,7 +53,7 @@ __decorate([
 ], MisReportsController.prototype, "getPurchaseSummary", null);
 __decorate([
     (0, common_1.Get)('stock-position'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -62,7 +62,7 @@ __decorate([
 ], MisReportsController.prototype, "getStockPosition", null);
 __decorate([
     (0, common_1.Get)('outstanding-ar'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -71,7 +71,7 @@ __decorate([
 ], MisReportsController.prototype, "getOutstandingAr", null);
 __decorate([
     (0, common_1.Get)('outstanding-ap'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -80,7 +80,7 @@ __decorate([
 ], MisReportsController.prototype, "getOutstandingAp", null);
 __decorate([
     (0, common_1.Get)('ncr-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -89,7 +89,7 @@ __decorate([
 ], MisReportsController.prototype, "getNcrSummary", null);
 __decorate([
     (0, common_1.Get)('production-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -98,7 +98,7 @@ __decorate([
 ], MisReportsController.prototype, "getProductionSummary", null);
 __decorate([
     (0, common_1.Get)('gst-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MIS_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

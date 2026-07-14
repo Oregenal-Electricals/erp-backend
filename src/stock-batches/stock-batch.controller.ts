@@ -16,7 +16,7 @@ export class StockBatchController {
   getStats(@Request() req: any) { return this.sbService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.STOCK_BATCH_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.sbService.findAll(req.user, query); }
 
   @Get('item/:itemCode')

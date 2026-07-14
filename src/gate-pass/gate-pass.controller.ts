@@ -6,6 +6,9 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { GatePassStatus, GatePassType } from '@prisma/client';
 import { GatePassService } from './gate-pass.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { Permission } from '../common/permissions/permissions.enum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   CreateGatePassDto, ApproveGatePassDto,
@@ -14,18 +17,20 @@ import {
 
 @ApiTags('Gate Pass')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('gate-passes')
 export class GatePassController {
   constructor(private readonly service: GatePassService) {}
 
   @Post()
+  @RequirePermissions(Permission.SYSTEM_CREATE)
   @ApiOperation({ summary: 'Create Gate Pass request' })
   create(@Body() dto: CreateGatePassDto, @CurrentUser() user: any) {
     return this.service.create(dto, user);
   }
 
   @Get()
+  @RequirePermissions(Permission.GATE_PASS_VIEW)
   @ApiOperation({ summary: 'List all Gate Passes' })
   @ApiQuery({ name: 'status',  required: false, enum: GatePassStatus })
   @ApiQuery({ name: 'type',    required: false, enum: GatePassType })
@@ -42,18 +47,21 @@ export class GatePassController {
   }
 
   @Get('stats')
+  @RequirePermissions(Permission.GATE_PASS_VIEW)
   @ApiOperation({ summary: 'Get Gate Pass statistics' })
   getStats(@CurrentUser() user: any) {
     return this.service.getStats(user);
   }
 
   @Get(':id')
+  @RequirePermissions(Permission.GATE_PASS_VIEW)
   @ApiOperation({ summary: 'Get Gate Pass by ID' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);
   }
 
   @Patch(':id/approve')
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   @ApiOperation({ summary: 'Approve Gate Pass' })
   approve(
     @Param('id', ParseUUIDPipe) id: string,
@@ -64,12 +72,14 @@ export class GatePassController {
   }
 
   @Patch(':id/issue')
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   @ApiOperation({ summary: 'Issue Gate Pass (security)' })
   issue(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.service.issue(id, user);
   }
 
   @Patch(':id/return')
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   @ApiOperation({ summary: 'Mark items returned (RETURNABLE only)' })
   markReturned(
     @Param('id', ParseUUIDPipe) id: string,
@@ -80,12 +90,14 @@ export class GatePassController {
   }
 
   @Patch(':id/close')
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   @ApiOperation({ summary: 'Close Gate Pass' })
   close(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.service.close(id, user);
   }
 
   @Patch(':id/cancel')
+  @RequirePermissions(Permission.SYSTEM_EDIT)
   @ApiOperation({ summary: 'Cancel Gate Pass' })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,

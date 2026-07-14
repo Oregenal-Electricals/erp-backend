@@ -16,7 +16,7 @@ export class CostSheetController {
   getStats(@Request() req: any) { return this.csService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_COST_SHEET_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.csService.findAll(req.user, query); }
 
   @Get(':id')

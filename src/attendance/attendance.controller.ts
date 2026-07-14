@@ -31,7 +31,7 @@ export class AttendanceController {
 
   // Attendance list
   @Get()
-  @RequirePermissions(Permission.HR_VIEW)
+  @RequirePermissions(Permission.ATTENDANCE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.attService.findAll(req.user, query); }
 
   // Monthly summary per employee

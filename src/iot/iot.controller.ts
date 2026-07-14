@@ -12,23 +12,23 @@ export class IotController {
   constructor(private readonly iotService: IotService) {}
 
   @Get('dashboard')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getDashboard(@Request() req: any) { return this.iotService.getDashboard(req.user); }
 
   @Get('ai-insights')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getAiInsights(@Request() req: any) { return this.iotService.getAiInsights(req.user); }
 
   @Get('predictive')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getPredictive(@Request() req: any) { return this.iotService.getPredictiveInsights(req.user); }
 
   @Get('machines')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getMachines(@Request() req: any, @Query() query: any) { return this.iotService.findAllMachines(req.user, query); }
 
   @Get('machines/:id')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getMachine(@Param('id') id: string, @Request() req: any) { return this.iotService.getMachine(id, req.user); }
 
   @Post('machines')
@@ -52,11 +52,11 @@ export class IotController {
   bulkReadings(@Body() dto: BulkReadingDto, @Request() req: any) { return this.iotService.bulkPostReadings(dto, req.user); }
 
   @Get('readings/:machineId')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getReadings(@Param('machineId') id: string, @Query() query: any, @Request() req: any) { return this.iotService.getReadings(id, req.user, query); }
 
   @Get('alerts')
-  @RequirePermissions(Permission.SYSTEM_VIEW)
+  @RequirePermissions(Permission.IOT_VIEW)
   getAlerts(@Request() req: any, @Query() query: any) { return this.iotService.getAlerts(req.user, query); }
 
   @Put('alerts/:id')

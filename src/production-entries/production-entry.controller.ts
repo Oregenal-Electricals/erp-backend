@@ -20,7 +20,7 @@ export class ProductionEntryController {
   getWoProgress(@Param('woId') woId: string, @Request() req: any) { return this.peService.getWoProgress(woId, req.user); }
 
   @Get()
-  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  @RequirePermissions(Permission.PRODUCTION_ENTRY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.peService.findAll(req.user, query); }
 
   @Get(':id')

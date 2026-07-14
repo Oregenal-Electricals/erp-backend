@@ -17,6 +17,9 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const warehouse_service_1 = require("./warehouse.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
+const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const warehouse_dto_1 = require("./dto/warehouse.dto");
 let WarehouseController = class WarehouseController {
@@ -60,6 +63,7 @@ let WarehouseController = class WarehouseController {
 exports.WarehouseController = WarehouseController;
 __decorate([
     (0, common_1.Post)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -68,6 +72,7 @@ __decorate([
 ], WarehouseController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WAREHOUSE_VIEW),
     (0, swagger_1.ApiQuery)({ name: 'plantId', required: false }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Query)('plantId')),
@@ -77,6 +82,7 @@ __decorate([
 ], WarehouseController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('stats'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WAREHOUSE_VIEW),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -84,6 +90,7 @@ __decorate([
 ], WarehouseController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WAREHOUSE_VIEW),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -91,6 +98,7 @@ __decorate([
 ], WarehouseController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
@@ -100,6 +108,7 @@ __decorate([
 ], WarehouseController.prototype, "update", null);
 __decorate([
     (0, common_1.Post)('zones'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -108,6 +117,7 @@ __decorate([
 ], WarehouseController.prototype, "createZone", null);
 __decorate([
     (0, common_1.Get)(':warehouseId/zones'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WAREHOUSE_VIEW),
     __param(0, (0, common_1.Param)('warehouseId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -115,6 +125,7 @@ __decorate([
 ], WarehouseController.prototype, "findZones", null);
 __decorate([
     (0, common_1.Post)('racks'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -123,6 +134,7 @@ __decorate([
 ], WarehouseController.prototype, "createRack", null);
 __decorate([
     (0, common_1.Get)('zones/:zoneId/racks'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WAREHOUSE_VIEW),
     __param(0, (0, common_1.Param)('zoneId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -130,6 +142,7 @@ __decorate([
 ], WarehouseController.prototype, "findRacks", null);
 __decorate([
     (0, common_1.Post)('bins'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -138,6 +151,7 @@ __decorate([
 ], WarehouseController.prototype, "createBin", null);
 __decorate([
     (0, common_1.Get)('racks/:rackId/bins'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WAREHOUSE_VIEW),
     __param(0, (0, common_1.Param)('rackId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -146,7 +160,7 @@ __decorate([
 exports.WarehouseController = WarehouseController = __decorate([
     (0, swagger_1.ApiTags)('Warehouse'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, common_1.Controller)('warehouses'),
     __metadata("design:paramtypes", [warehouse_service_1.WarehouseService])
 ], WarehouseController);

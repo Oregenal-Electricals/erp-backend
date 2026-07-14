@@ -11,18 +11,18 @@ export class InventoryDashboardController {
   constructor(private readonly idService: InventoryDashboardService) {}
 
   @Get('overview')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
   getOverview(@Request() req: any) { return this.idService.getOverview(req.user); }
 
   @Get('alerts')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
   getAlerts(@Request() req: any) { return this.idService.getAlerts(req.user); }
 
   @Get('activity')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
   getActivity(@Request() req: any) { return this.idService.getActivity(req.user); }
 
   @Get('top-items')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
   getTopItems(@Request() req: any) { return this.idService.getTopItems(req.user); }
 }

@@ -32,7 +32,7 @@ let StockReportsController = class StockReportsController {
 exports.StockReportsController = StockReportsController;
 __decorate([
     (0, common_1.Get)('ledger'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STOCK_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -41,7 +41,7 @@ __decorate([
 ], StockReportsController.prototype, "getLedger", null);
 __decorate([
     (0, common_1.Get)('balance-summary'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STOCK_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -50,7 +50,7 @@ __decorate([
 ], StockReportsController.prototype, "getBalanceSummary", null);
 __decorate([
     (0, common_1.Get)('item-card/:itemCode'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STOCK_REPORT_VIEW),
     __param(0, (0, common_1.Param)('itemCode')),
     __param(1, (0, common_1.Request)()),
     __param(2, (0, common_1.Query)()),
@@ -60,7 +60,7 @@ __decorate([
 ], StockReportsController.prototype, "getItemCard", null);
 __decorate([
     (0, common_1.Get)('batch-movements'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STOCK_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -69,7 +69,7 @@ __decorate([
 ], StockReportsController.prototype, "getBatchMovements", null);
 __decorate([
     (0, common_1.Get)('consumption'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STOCK_REPORT_VIEW),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

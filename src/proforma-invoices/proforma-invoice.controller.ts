@@ -16,7 +16,7 @@ export class ProformaInvoiceController {
   getStats(@Request() req: any) { return this.piService.getStats(req.user); }
 
   @Get()
-  @RequirePermissions(Permission.SALES_VIEW)
+  @RequirePermissions(Permission.PROFORMA_INVOICE_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.piService.findAll(req.user, query); }
 
   @Get('ipo/:ipoId')
