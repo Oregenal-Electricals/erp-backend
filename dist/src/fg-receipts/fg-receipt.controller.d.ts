@@ -17,8 +17,8 @@ export declare class FgReceiptController {
     findAll(req: any, query: any): Promise<{
         data: ({
             warehouse: {
-                code: string;
                 name: string;
+                code: string;
             };
             workOrder: {
                 productCode: string;
@@ -29,13 +29,13 @@ export declare class FgReceiptController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             itemCode: string;
@@ -58,8 +58,8 @@ export declare class FgReceiptController {
     }>;
     findOne(id: string, req: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -70,13 +70,13 @@ export declare class FgReceiptController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         itemCode: string;
@@ -94,8 +94,8 @@ export declare class FgReceiptController {
     }>;
     create(dto: CreateFgReceiptDto, req: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -106,13 +106,13 @@ export declare class FgReceiptController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         itemCode: string;
@@ -130,8 +130,8 @@ export declare class FgReceiptController {
     }>;
     createFromWo(woId: string, req: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -142,13 +142,13 @@ export declare class FgReceiptController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         itemCode: string;
@@ -166,8 +166,8 @@ export declare class FgReceiptController {
     }>;
     confirm(id: string, req: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -178,13 +178,13 @@ export declare class FgReceiptController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         itemCode: string;

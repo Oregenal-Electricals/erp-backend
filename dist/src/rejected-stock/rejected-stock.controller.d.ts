@@ -31,13 +31,13 @@ export declare class RejectedStockController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             warehouseId: string;
@@ -54,13 +54,13 @@ export declare class RejectedStockController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -74,8 +74,8 @@ export declare class RejectedStockController {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -86,13 +86,13 @@ export declare class RejectedStockController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -104,13 +104,13 @@ export declare class RejectedStockController {
     createFromIqc(iqcId: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -124,8 +124,8 @@ export declare class RejectedStockController {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -136,13 +136,13 @@ export declare class RejectedStockController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -154,13 +154,13 @@ export declare class RejectedStockController {
     disposeItem(id: string, itemId: string, dto: DisposeItemDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -174,8 +174,8 @@ export declare class RejectedStockController {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -186,13 +186,13 @@ export declare class RejectedStockController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -204,13 +204,13 @@ export declare class RejectedStockController {
     close(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -224,8 +224,8 @@ export declare class RejectedStockController {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -236,13 +236,13 @@ export declare class RejectedStockController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;

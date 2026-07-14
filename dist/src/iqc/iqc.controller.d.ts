@@ -23,13 +23,13 @@ export declare class IqcController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             grnId: string;
@@ -45,13 +45,13 @@ export declare class IqcController {
     findByGrn(grnId: string, req: any): Promise<({
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -72,13 +72,13 @@ export declare class IqcController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         grnId: string;
@@ -89,13 +89,13 @@ export declare class IqcController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -116,13 +116,13 @@ export declare class IqcController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         grnId: string;
@@ -133,13 +133,13 @@ export declare class IqcController {
     create(dto: CreateIqcDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -160,13 +160,13 @@ export declare class IqcController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         grnId: string;
@@ -177,13 +177,13 @@ export declare class IqcController {
     updateItems(id: string, dto: UpdateIqcItemsDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -204,13 +204,13 @@ export declare class IqcController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         grnId: string;
@@ -221,13 +221,13 @@ export declare class IqcController {
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -248,13 +248,13 @@ export declare class IqcController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         grnId: string;

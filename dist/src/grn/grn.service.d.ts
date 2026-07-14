@@ -10,13 +10,13 @@ export declare class GrnService {
     create(dto: CreateGrnDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -33,32 +33,32 @@ export declare class GrnService {
             grnId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         po: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             poNumber: string;
         };
         ipo: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             ipoNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -79,8 +79,8 @@ export declare class GrnService {
                 items: number;
             };
             warehouse: {
-                code: string;
                 name: string;
+                code: string;
             };
             po: {
                 vendor: {
@@ -96,13 +96,13 @@ export declare class GrnService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             vehicleNumber: string | null;
             remarks: string | null;
@@ -125,13 +125,13 @@ export declare class GrnService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -148,32 +148,32 @@ export declare class GrnService {
             grnId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         po: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             poNumber: string;
         };
         ipo: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             ipoNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -191,13 +191,13 @@ export declare class GrnService {
     update(id: string, dto: UpdateGrnDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -214,32 +214,32 @@ export declare class GrnService {
             grnId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         po: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             poNumber: string;
         };
         ipo: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             ipoNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -257,13 +257,13 @@ export declare class GrnService {
     submit(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -280,32 +280,32 @@ export declare class GrnService {
             grnId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         po: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             poNumber: string;
         };
         ipo: {
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             ipoNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;

@@ -17,13 +17,13 @@ export declare class StockTransferService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -33,22 +33,22 @@ export declare class StockTransferService {
             transferId: string;
         })[];
         fromWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         toWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         transferType: string;
@@ -66,13 +66,13 @@ export declare class StockTransferService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -82,22 +82,22 @@ export declare class StockTransferService {
             transferId: string;
         })[];
         fromWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         toWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         transferType: string;
@@ -115,13 +115,13 @@ export declare class StockTransferService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -131,22 +131,22 @@ export declare class StockTransferService {
             transferId: string;
         })[];
         fromWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         toWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         transferType: string;
@@ -169,13 +169,13 @@ export declare class StockTransferService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             transferType: string;
@@ -198,13 +198,13 @@ export declare class StockTransferService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -214,22 +214,22 @@ export declare class StockTransferService {
             transferId: string;
         })[];
         fromWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         toWarehouse: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         transferType: string;

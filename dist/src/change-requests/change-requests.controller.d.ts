@@ -7,31 +7,31 @@ export declare class ChangeRequestsController {
     create(dto: CreateChangeRequestDto, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -47,31 +47,31 @@ export declare class ChangeRequestsController {
     findAll(user: any, status?: ChangeRequestStatus, type?: string, myRequests?: string, pendingApproval?: string): Promise<({
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -97,50 +97,50 @@ export declare class ChangeRequestsController {
     findOne(id: string, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         comments: ({
             commenter: {
-                id: string;
                 role: string;
+                id: string;
                 firstName: string;
                 lastName: string;
             };
         } & {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
             comment: string;
             changeRequestId: string;
             commentBy: string;
         })[];
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -156,31 +156,31 @@ export declare class ChangeRequestsController {
     update(id: string, dto: UpdateChangeRequestDto, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -196,31 +196,31 @@ export declare class ChangeRequestsController {
     submit(id: string, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -236,31 +236,31 @@ export declare class ChangeRequestsController {
     approve(id: string, dto: ReviewChangeRequestDto, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -276,31 +276,31 @@ export declare class ChangeRequestsController {
     reject(id: string, dto: ReviewChangeRequestDto, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -316,31 +316,31 @@ export declare class ChangeRequestsController {
     cancel(id: string, user: any): Promise<{
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         requestedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
         reviewedBy: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: import("@prisma/client").$Enums.ChangeRequestStatus;
         type: import("@prisma/client").$Enums.ChangeRequestType;
         title: string;
@@ -355,19 +355,19 @@ export declare class ChangeRequestsController {
     }>;
     addComment(id: string, dto: AddCommentDto, user: any): Promise<{
         commenter: {
-            id: string;
             role: string;
+            id: string;
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
         comment: string;
         changeRequestId: string;
         commentBy: string;

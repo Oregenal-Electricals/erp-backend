@@ -29,13 +29,13 @@ export declare class BankReconController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         amount: number;
         accountId: string;
         entryType: string;
@@ -51,13 +51,13 @@ export declare class BankReconController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         period: string;
@@ -73,14 +73,14 @@ export declare class BankReconController {
     findOne(id: string, req: any): Promise<{
         lines: {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             referenceNumber: string | null;
             transactionDate: Date;
             balance: number;
@@ -94,13 +94,13 @@ export declare class BankReconController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         period: string;
@@ -116,14 +116,14 @@ export declare class BankReconController {
     create(dto: CreateBankStatementDto, req: any): Promise<{
         lines: {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             referenceNumber: string | null;
             transactionDate: Date;
             balance: number;
@@ -137,13 +137,13 @@ export declare class BankReconController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         period: string;

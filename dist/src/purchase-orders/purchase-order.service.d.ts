@@ -12,13 +12,13 @@ export declare class PurchaseOrderService {
     create(dto: CreatePurchaseOrderDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -41,8 +41,8 @@ export declare class PurchaseOrderService {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -57,13 +57,13 @@ export declare class PurchaseOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -88,18 +88,18 @@ export declare class PurchaseOrderService {
                 items: number;
             };
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             poNumber: string;
             paymentTerms: string | null;
@@ -126,13 +126,13 @@ export declare class PurchaseOrderService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -155,8 +155,8 @@ export declare class PurchaseOrderService {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -171,13 +171,13 @@ export declare class PurchaseOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -201,18 +201,18 @@ export declare class PurchaseOrderService {
             items: number;
         };
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -234,13 +234,13 @@ export declare class PurchaseOrderService {
     update(id: string, dto: UpdatePurchaseOrderDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -263,8 +263,8 @@ export declare class PurchaseOrderService {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -279,13 +279,13 @@ export declare class PurchaseOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -307,13 +307,13 @@ export declare class PurchaseOrderService {
     approve(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -336,8 +336,8 @@ export declare class PurchaseOrderService {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -352,13 +352,13 @@ export declare class PurchaseOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -380,13 +380,13 @@ export declare class PurchaseOrderService {
     send(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -409,8 +409,8 @@ export declare class PurchaseOrderService {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -425,13 +425,13 @@ export declare class PurchaseOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -453,13 +453,13 @@ export declare class PurchaseOrderService {
     cancel(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -482,8 +482,8 @@ export declare class PurchaseOrderService {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -498,13 +498,13 @@ export declare class PurchaseOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -525,13 +525,13 @@ export declare class PurchaseOrderService {
     }>;
     addItem(id: string, dto: PoItemDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         itemCode: string;
         itemName: string;
@@ -555,13 +555,13 @@ export declare class PurchaseOrderService {
     }>;
     updateItem(id: string, itemId: string, dto: UpdatePoItemDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         itemCode: string;
         itemName: string;

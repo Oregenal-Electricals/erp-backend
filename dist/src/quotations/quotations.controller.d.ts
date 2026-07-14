@@ -22,13 +22,13 @@ export declare class QuotationsController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             customerName: string;
             customerAddress: string | null;
@@ -58,13 +58,13 @@ export declare class QuotationsController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -87,13 +87,13 @@ export declare class QuotationsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -119,13 +119,13 @@ export declare class QuotationsController {
     create(dto: CreateQuotationDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -148,13 +148,13 @@ export declare class QuotationsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -180,13 +180,13 @@ export declare class QuotationsController {
     revise(id: string, dto: CreateQuotationDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -209,13 +209,13 @@ export declare class QuotationsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -241,13 +241,13 @@ export declare class QuotationsController {
     send(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -270,13 +270,13 @@ export declare class QuotationsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -302,13 +302,13 @@ export declare class QuotationsController {
     accept(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -331,13 +331,13 @@ export declare class QuotationsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -363,13 +363,13 @@ export declare class QuotationsController {
     reject(id: string, dto: RejectQuotationDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -392,13 +392,13 @@ export declare class QuotationsController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;

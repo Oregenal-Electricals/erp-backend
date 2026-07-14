@@ -8,13 +8,13 @@ export declare class PoApprovalService {
     getSettings(user: any): Promise<{
         level: number;
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         levelName: string;
         minAmount: number;
         maxAmount: number | null;
@@ -22,13 +22,13 @@ export declare class PoApprovalService {
     createSetting(dto: CreateApprovalSettingDto, user: any): Promise<{
         level: number;
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         levelName: string;
         minAmount: number;
         maxAmount: number | null;
@@ -36,13 +36,13 @@ export declare class PoApprovalService {
     updateSetting(id: string, dto: UpdateApprovalSettingDto, user: any): Promise<{
         level: number;
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         levelName: string;
         minAmount: number;
         maxAmount: number | null;
@@ -56,18 +56,18 @@ export declare class PoApprovalService {
             items: number;
         };
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
         approvals: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             action: string;
             remarks: string | null;
             approvedBy: string;
@@ -75,13 +75,13 @@ export declare class PoApprovalService {
             approvalLevel: number;
         }[];
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -102,13 +102,13 @@ export declare class PoApprovalService {
     }[]>;
     getHistory(poId: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         action: string;
         remarks: string | null;
         approvedBy: string;
@@ -118,13 +118,13 @@ export declare class PoApprovalService {
     approve(poId: string, dto: ApprovePoDto, user: any): Promise<{
         approval: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             action: string;
             remarks: string | null;
             approvedBy: string;
@@ -140,13 +140,13 @@ export declare class PoApprovalService {
     reject(poId: string, dto: RejectPoDto, user: any): Promise<{
         approval: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             action: string;
             remarks: string | null;
             approvedBy: string;

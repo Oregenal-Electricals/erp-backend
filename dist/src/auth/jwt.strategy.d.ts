@@ -14,11 +14,11 @@ export declare class JwtStrategy extends JwtStrategy_base {
         role: string;
         companyId: string;
     }): Promise<{
-        id: string;
-        email: string;
-        isActive: boolean;
         role: string;
+        id: string;
         companyId: string;
+        isActive: boolean;
+        email: string;
         firstName: string;
         lastName: string;
         isLocked: boolean;

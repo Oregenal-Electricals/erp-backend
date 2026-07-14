@@ -17,12 +17,12 @@ export declare class DocumentsController {
     findAll(req: any, query: any): Promise<{
         data: {
             id: string;
+            description: string;
             createdAt: Date;
             createdBy: string;
             _count: {
                 versions: number;
             };
-            description: string;
             category: string;
             tags: string;
             title: string;

@@ -17,13 +17,13 @@ export declare class SalesOrdersController {
     getByCpo(cpoId: string, req: any): Promise<({
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -47,13 +47,13 @@ export declare class SalesOrdersController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -84,13 +84,13 @@ export declare class SalesOrdersController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             customerName: string;
@@ -113,13 +113,13 @@ export declare class SalesOrdersController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -143,13 +143,13 @@ export declare class SalesOrdersController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -168,13 +168,13 @@ export declare class SalesOrdersController {
     create(dto: CreateSoDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -198,13 +198,13 @@ export declare class SalesOrdersController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -223,13 +223,13 @@ export declare class SalesOrdersController {
     confirm(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -253,13 +253,13 @@ export declare class SalesOrdersController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -278,13 +278,13 @@ export declare class SalesOrdersController {
     cancel(id: string, dto: CancelSoDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -308,13 +308,13 @@ export declare class SalesOrdersController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;

@@ -9,16 +9,16 @@ export declare class TrainingService {
     private generateCertNumber;
     createProgram(dto: CreateProgramDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         category: string;
         durationHours: number;
         isMandatory: boolean;
@@ -28,16 +28,16 @@ export declare class TrainingService {
     }>;
     updateProgram(id: string, dto: any, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         category: string;
         durationHours: number;
         isMandatory: boolean;
@@ -51,16 +51,16 @@ export declare class TrainingService {
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         category: string;
         durationHours: number;
         isMandatory: boolean;
@@ -75,13 +75,13 @@ export declare class TrainingService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         startDate: Date;
         endDate: Date;
         status: string;
@@ -99,13 +99,13 @@ export declare class TrainingService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         startDate: Date;
         endDate: Date;
         status: string;
@@ -129,13 +129,13 @@ export declare class TrainingService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             startDate: Date;
             endDate: Date;
             status: string;
@@ -154,16 +154,16 @@ export declare class TrainingService {
     getSession(id: string, user: any): Promise<{
         trainingProgram: {
             id: string;
-            code: string;
+            companyId: string;
             name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
+            code: string;
             category: string;
             durationHours: number;
             isMandatory: boolean;
@@ -185,13 +185,13 @@ export declare class TrainingService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             employeeId: string;
@@ -205,13 +205,13 @@ export declare class TrainingService {
         })[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         startDate: Date;
         endDate: Date;
         status: string;
@@ -233,13 +233,13 @@ export declare class TrainingService {
     }>;
     completeEnrollment(enrollmentId: string, dto: UpdateEnrollmentDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         employeeId: string;
@@ -253,13 +253,13 @@ export declare class TrainingService {
     }>;
     completeSession(id: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         startDate: Date;
         endDate: Date;
         status: string;
@@ -288,13 +288,13 @@ export declare class TrainingService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             startDate: Date;
             endDate: Date;
             status: string;
@@ -308,13 +308,13 @@ export declare class TrainingService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         employeeId: string;

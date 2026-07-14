@@ -7,8 +7,8 @@ export declare class BomRevisionService {
     constructor(prisma: PrismaService, audit: AuditService);
     create(dto: CreateBomRevisionDto, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -21,13 +21,13 @@ export declare class BomRevisionService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         productId: string;
         revisionNumber: string;
@@ -43,8 +43,8 @@ export declare class BomRevisionService {
     findAll(user: any, query: any): Promise<{
         data: ({
             product: {
-                code: string;
                 name: string;
+                code: string;
             };
             bom: {
                 status: string;
@@ -57,13 +57,13 @@ export declare class BomRevisionService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             productId: string;
             revisionNumber: string;
@@ -83,19 +83,19 @@ export declare class BomRevisionService {
     }>;
     findOne(id: string, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             items: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 quantity: number;
                 itemCode: string;
                 itemName: string;
@@ -113,14 +113,14 @@ export declare class BomRevisionService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             productId: string;
             approvedBy: string | null;
@@ -135,13 +135,13 @@ export declare class BomRevisionService {
         previousBom: {
             items: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 quantity: number;
                 itemCode: string;
                 itemName: string;
@@ -159,14 +159,14 @@ export declare class BomRevisionService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             productId: string;
             approvedBy: string | null;
@@ -180,13 +180,13 @@ export declare class BomRevisionService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         productId: string;
         revisionNumber: string;
@@ -201,8 +201,8 @@ export declare class BomRevisionService {
     }>;
     findByProduct(productId: string, user: any): Promise<({
         product: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -215,13 +215,13 @@ export declare class BomRevisionService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         productId: string;
         revisionNumber: string;
@@ -236,8 +236,8 @@ export declare class BomRevisionService {
     })[]>;
     approve(id: string, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -246,13 +246,13 @@ export declare class BomRevisionService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         productId: string;
         revisionNumber: string;

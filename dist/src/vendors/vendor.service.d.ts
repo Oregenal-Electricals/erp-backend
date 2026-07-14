@@ -7,8 +7,15 @@ export declare class VendorService {
     constructor(prisma: PrismaService, audit: AuditService);
     create(dto: CreateVendorDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
         legalName: string | null;
         pan: string | null;
         gstin: string | null;
@@ -20,13 +27,6 @@ export declare class VendorService {
         phone: string | null;
         email: string | null;
         website: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -49,8 +49,15 @@ export declare class VendorService {
     findAll(user: any, query: any): Promise<{
         data: {
             id: string;
-            code: string;
+            companyId: string;
             name: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            code: string;
             legalName: string | null;
             pan: string | null;
             gstin: string | null;
@@ -62,13 +69,6 @@ export declare class VendorService {
             phone: string | null;
             email: string | null;
             website: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             vendorType: string;
             isMsme: boolean;
             alternatePhone: string | null;
@@ -95,8 +95,15 @@ export declare class VendorService {
     }>;
     findOne(id: string, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
         legalName: string | null;
         pan: string | null;
         gstin: string | null;
@@ -108,13 +115,6 @@ export declare class VendorService {
         phone: string | null;
         email: string | null;
         website: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -136,8 +136,15 @@ export declare class VendorService {
     }>;
     update(id: string, dto: UpdateVendorDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
         legalName: string | null;
         pan: string | null;
         gstin: string | null;
@@ -149,13 +156,6 @@ export declare class VendorService {
         phone: string | null;
         email: string | null;
         website: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;

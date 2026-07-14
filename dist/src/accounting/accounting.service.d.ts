@@ -16,16 +16,16 @@ export declare class AccountingService {
     }>;
     createGroup(dto: CreateGroupDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         type: string;
         nature: string;
         parentGroupId: string | null;
@@ -33,16 +33,16 @@ export declare class AccountingService {
     }>;
     updateGroup(id: string, dto: any, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         type: string;
         nature: string;
         parentGroupId: string | null;
@@ -54,21 +54,21 @@ export declare class AccountingService {
             childGroups: number;
         };
         parentGroup: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         type: string;
         nature: string;
         parentGroupId: string | null;
@@ -76,22 +76,22 @@ export declare class AccountingService {
     })[]>;
     createAccount(dto: CreateAccountDto, user: any): Promise<{
         group: {
-            code: string;
             name: string;
+            code: string;
             type: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         type: string;
         bankName: string | null;
         taxRate: number | null;
@@ -113,16 +113,16 @@ export declare class AccountingService {
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         type: string;
         bankName: string | null;
         taxRate: number | null;
@@ -141,22 +141,22 @@ export declare class AccountingService {
     findAllAccounts(user: any, query: any): Promise<{
         data: ({
             group: {
-                code: string;
                 name: string;
+                code: string;
                 type: string;
             };
         } & {
             id: string;
-            code: string;
+            companyId: string;
             name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
+            code: string;
             type: string;
             bankName: string | null;
             taxRate: number | null;
@@ -178,23 +178,23 @@ export declare class AccountingService {
     }>;
     getAccount(id: string, user: any): Promise<{
         group: {
-            code: string;
             name: string;
+            code: string;
             type: string;
             nature: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         type: string;
         bankName: string | null;
         taxRate: number | null;

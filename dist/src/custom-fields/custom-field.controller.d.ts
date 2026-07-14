@@ -11,13 +11,13 @@ export declare class CustomFieldController {
     }>;
     getDefinitions(req: any, module: string): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -30,13 +30,13 @@ export declare class CustomFieldController {
     }[]>;
     getAllDefinitions(req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -49,13 +49,13 @@ export declare class CustomFieldController {
     }[]>;
     createDefinition(dto: CreateCustomFieldDefinitionDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -68,13 +68,13 @@ export declare class CustomFieldController {
     }>;
     updateDefinition(id: string, dto: UpdateCustomFieldDefinitionDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -91,13 +91,13 @@ export declare class CustomFieldController {
     getValues(module: string, recordId: string, req: any): Promise<{
         value: string;
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;

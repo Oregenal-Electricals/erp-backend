@@ -17,23 +17,23 @@ export declare class AuthController {
             companyId: string;
             company: {
                 id: string;
-                code: string;
                 name: string;
+                code: string;
             };
             mustChangePwd: boolean;
         };
     }>;
     me(user: any): Promise<{
         allRoles: string[];
+        role: string;
+        id: string;
+        companyId: string;
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
-        id: string;
         email: string;
-        role: string;
-        companyId: string;
         firstName: string;
         lastName: string;
         additionalRoles: string[];

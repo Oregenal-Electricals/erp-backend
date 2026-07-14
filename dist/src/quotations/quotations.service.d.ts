@@ -12,13 +12,13 @@ export declare class QuotationsService {
     create(dto: CreateQuotationDto, user: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -41,13 +41,13 @@ export declare class QuotationsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -73,13 +73,13 @@ export declare class QuotationsService {
     revise(id: string, dto: CreateQuotationDto, user: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -102,13 +102,13 @@ export declare class QuotationsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -134,13 +134,13 @@ export declare class QuotationsService {
     send(id: string, user: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -163,13 +163,13 @@ export declare class QuotationsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -195,13 +195,13 @@ export declare class QuotationsService {
     accept(id: string, user: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -224,13 +224,13 @@ export declare class QuotationsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -256,13 +256,13 @@ export declare class QuotationsService {
     reject(id: string, dto: RejectQuotationDto, user: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -285,13 +285,13 @@ export declare class QuotationsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;
@@ -324,13 +324,13 @@ export declare class QuotationsService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             customerName: string;
             customerAddress: string | null;
@@ -360,13 +360,13 @@ export declare class QuotationsService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -389,13 +389,13 @@ export declare class QuotationsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         customerAddress: string | null;

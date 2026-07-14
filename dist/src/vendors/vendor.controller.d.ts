@@ -14,8 +14,15 @@ export declare class VendorController {
     findAll(req: any, query: any): Promise<{
         data: {
             id: string;
-            code: string;
+            companyId: string;
             name: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            code: string;
             legalName: string | null;
             pan: string | null;
             gstin: string | null;
@@ -27,13 +34,6 @@ export declare class VendorController {
             phone: string | null;
             email: string | null;
             website: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             vendorType: string;
             isMsme: boolean;
             alternatePhone: string | null;
@@ -60,8 +60,15 @@ export declare class VendorController {
     }>;
     findOne(id: string, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
         legalName: string | null;
         pan: string | null;
         gstin: string | null;
@@ -73,13 +80,6 @@ export declare class VendorController {
         phone: string | null;
         email: string | null;
         website: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -101,8 +101,15 @@ export declare class VendorController {
     }>;
     create(dto: CreateVendorDto, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
         legalName: string | null;
         pan: string | null;
         gstin: string | null;
@@ -114,13 +121,6 @@ export declare class VendorController {
         phone: string | null;
         email: string | null;
         website: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -142,8 +142,15 @@ export declare class VendorController {
     }>;
     update(id: string, dto: UpdateVendorDto, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
         legalName: string | null;
         pan: string | null;
         gstin: string | null;
@@ -155,13 +162,6 @@ export declare class VendorController {
         phone: string | null;
         email: string | null;
         website: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;

@@ -25,18 +25,18 @@ export declare class ImportOrderController {
                 items: number;
             };
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             paymentTerms: string | null;
             currency: string;
@@ -67,13 +67,13 @@ export declare class ImportOrderController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -95,8 +95,8 @@ export declare class ImportOrderController {
             ipoId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             phone: string;
             email: string;
@@ -107,13 +107,13 @@ export declare class ImportOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -139,13 +139,13 @@ export declare class ImportOrderController {
     create(dto: CreateImportPoDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -167,8 +167,8 @@ export declare class ImportOrderController {
             ipoId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             phone: string;
             email: string;
@@ -179,13 +179,13 @@ export declare class ImportOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -211,13 +211,13 @@ export declare class ImportOrderController {
     update(id: string, dto: UpdateImportPoDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -239,8 +239,8 @@ export declare class ImportOrderController {
             ipoId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             phone: string;
             email: string;
@@ -251,13 +251,13 @@ export declare class ImportOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -283,13 +283,13 @@ export declare class ImportOrderController {
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -311,8 +311,8 @@ export declare class ImportOrderController {
             ipoId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             phone: string;
             email: string;
@@ -323,13 +323,13 @@ export declare class ImportOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -355,13 +355,13 @@ export declare class ImportOrderController {
     updateStatus(id: string, status: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -383,8 +383,8 @@ export declare class ImportOrderController {
             ipoId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             phone: string;
             email: string;
@@ -395,13 +395,13 @@ export declare class ImportOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -427,13 +427,13 @@ export declare class ImportOrderController {
     cancel(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -455,8 +455,8 @@ export declare class ImportOrderController {
             ipoId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             phone: string;
             email: string;
@@ -467,13 +467,13 @@ export declare class ImportOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -498,13 +498,13 @@ export declare class ImportOrderController {
     }>;
     addItem(id: string, dto: ImportPoItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         itemCode: string;
         itemName: string;

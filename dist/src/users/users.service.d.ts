@@ -7,18 +7,18 @@ export declare class UsersService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     createUser(dto: CreateUserDto, requestingUser: any): Promise<{
+        role: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        createdAt: Date;
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
-        id: string;
         phone: string;
         email: string;
-        createdAt: Date;
-        isActive: boolean;
-        role: string;
-        companyId: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
@@ -32,18 +32,18 @@ export declare class UsersService {
         isActive?: boolean;
         search?: string;
     }): Promise<{
+        role: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        createdAt: Date;
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
-        id: string;
         phone: string;
         email: string;
-        createdAt: Date;
-        isActive: boolean;
-        role: string;
-        companyId: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
@@ -52,20 +52,20 @@ export declare class UsersService {
         isLocked: boolean;
     }[]>;
     findOneUser(id: string): Promise<{
-        company: {
-            id: string;
-            code: string;
-            name: string;
-        };
+        role: string;
         id: string;
-        phone: string;
-        email: string;
+        companyId: string;
+        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
-        isActive: boolean;
-        role: string;
-        companyId: string;
+        company: {
+            id: string;
+            name: string;
+            code: string;
+        };
+        phone: string;
+        email: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
@@ -75,24 +75,24 @@ export declare class UsersService {
         loginAttempts: number;
     }>;
     updateUser(id: string, dto: UpdateUserDto, requestingUser: any): Promise<{
+        role: string;
+        id: string;
+        isActive: boolean;
         company: {
             id: string;
             name: string;
         };
-        id: string;
         phone: string;
         email: string;
-        isActive: boolean;
-        role: string;
         employeeCode: string;
         firstName: string;
         lastName: string;
     }>;
     toggleUserStatus(id: string, requestingUser: any): Promise<{
-        id: string;
-        email: string;
-        isActive: boolean;
         role: string;
+        id: string;
+        isActive: boolean;
+        email: string;
         firstName: string;
         lastName: string;
     }>;

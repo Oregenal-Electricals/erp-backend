@@ -9,8 +9,8 @@ export declare class WorkOrderService {
     private includes;
     create(dto: CreateWorkOrderDto, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -19,13 +19,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;
@@ -46,8 +46,8 @@ export declare class WorkOrderService {
     findAll(user: any, query: any): Promise<{
         data: ({
             warehouse: {
-                code: string;
                 name: string;
+                code: string;
             };
             bom: {
                 status: string;
@@ -56,13 +56,13 @@ export declare class WorkOrderService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             priority: string;
             remarks: string | null;
@@ -87,19 +87,19 @@ export declare class WorkOrderService {
     }>;
     findOne(id: string, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             items: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 quantity: number;
                 itemCode: string;
                 itemName: string;
@@ -117,14 +117,14 @@ export declare class WorkOrderService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             productId: string;
             approvedBy: string | null;
@@ -138,13 +138,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;
@@ -164,8 +164,8 @@ export declare class WorkOrderService {
     }>;
     update(id: string, dto: UpdateWorkOrderDto, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -174,13 +174,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;
@@ -200,8 +200,8 @@ export declare class WorkOrderService {
     }>;
     release(id: string, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -210,13 +210,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;
@@ -236,8 +236,8 @@ export declare class WorkOrderService {
     }>;
     start(id: string, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -246,13 +246,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;
@@ -275,8 +275,8 @@ export declare class WorkOrderService {
         rejectedQty?: number;
     }, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -285,13 +285,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;
@@ -311,8 +311,8 @@ export declare class WorkOrderService {
     }>;
     cancel(id: string, user: any): Promise<{
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         bom: {
             status: string;
@@ -321,13 +321,13 @@ export declare class WorkOrderService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         priority: string;
         remarks: string | null;

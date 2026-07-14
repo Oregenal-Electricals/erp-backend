@@ -16,13 +16,13 @@ export declare class DispatchPlanningController {
         customerName: string;
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -52,13 +52,13 @@ export declare class DispatchPlanningController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             vehicleNumber: string | null;
             remarks: string | null;
@@ -82,12 +82,12 @@ export declare class DispatchPlanningController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -103,13 +103,13 @@ export declare class DispatchPlanningController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -129,12 +129,12 @@ export declare class DispatchPlanningController {
     create(dto: CreateDispatchPlanDto, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -150,13 +150,13 @@ export declare class DispatchPlanningController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -176,12 +176,12 @@ export declare class DispatchPlanningController {
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -197,13 +197,13 @@ export declare class DispatchPlanningController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -223,12 +223,12 @@ export declare class DispatchPlanningController {
     cancel(id: string, dto: CancelPlanDto, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -244,13 +244,13 @@ export declare class DispatchPlanningController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;

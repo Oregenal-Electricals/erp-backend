@@ -10,13 +10,13 @@ export declare class VehicleManagementService {
     constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService);
     createVehicle(dto: CreateVehicleDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vehicleNumber: string;
         remarks: string | null;
         vehicleType: import("@prisma/client").$Enums.VehicleType;
@@ -30,13 +30,13 @@ export declare class VehicleManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vehicleNumber: string;
         remarks: string | null;
         vehicleType: import("@prisma/client").$Enums.VehicleType;
@@ -48,8 +48,8 @@ export declare class VehicleManagementService {
         logs: ({
             plant: {
                 id: string;
-                code: string;
                 name: string;
+                code: string;
             };
             entryBy: {
                 id: string;
@@ -58,13 +58,13 @@ export declare class VehicleManagementService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             status: import("@prisma/client").$Enums.VehicleLogStatus;
             purpose: import("@prisma/client").$Enums.VehiclePurpose;
@@ -89,13 +89,13 @@ export declare class VehicleManagementService {
         })[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vehicleNumber: string;
         remarks: string | null;
         vehicleType: import("@prisma/client").$Enums.VehicleType;
@@ -105,13 +105,13 @@ export declare class VehicleManagementService {
     }>;
     updateVehicle(id: string, dto: UpdateVehicleDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         vehicleNumber: string;
         remarks: string | null;
         vehicleType: import("@prisma/client").$Enums.VehicleType;
@@ -122,8 +122,8 @@ export declare class VehicleManagementService {
     logEntry(dto: LogVehicleEntryDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicle: {
             id: string;
@@ -143,13 +143,13 @@ export declare class VehicleManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VehicleLogStatus;
         purpose: import("@prisma/client").$Enums.VehiclePurpose;
@@ -175,8 +175,8 @@ export declare class VehicleManagementService {
     logExit(id: string, dto: LogVehicleExitDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicle: {
             id: string;
@@ -196,13 +196,13 @@ export declare class VehicleManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VehicleLogStatus;
         purpose: import("@prisma/client").$Enums.VehiclePurpose;
@@ -233,8 +233,8 @@ export declare class VehicleManagementService {
     }): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicle: {
             id: string;
@@ -254,13 +254,13 @@ export declare class VehicleManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VehicleLogStatus;
         purpose: import("@prisma/client").$Enums.VehiclePurpose;
@@ -286,8 +286,8 @@ export declare class VehicleManagementService {
     getActiveVehicles(user: any): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicle: {
             id: string;
@@ -307,13 +307,13 @@ export declare class VehicleManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VehicleLogStatus;
         purpose: import("@prisma/client").$Enums.VehiclePurpose;

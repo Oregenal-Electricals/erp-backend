@@ -11,8 +11,8 @@ export declare class GateOutwardService {
     create(dto: CreateGateOutwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -38,13 +38,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -79,8 +79,8 @@ export declare class GateOutwardService {
     }): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -106,13 +106,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -142,8 +142,8 @@ export declare class GateOutwardService {
     findOne(id: string): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -169,13 +169,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -205,8 +205,8 @@ export declare class GateOutwardService {
     update(id: string, dto: UpdateGateOutwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -232,13 +232,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -268,8 +268,8 @@ export declare class GateOutwardService {
     approve(id: string, dto: ApproveGateOutwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -295,13 +295,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -331,8 +331,8 @@ export declare class GateOutwardService {
     dispatch(id: string, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -358,13 +358,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -394,8 +394,8 @@ export declare class GateOutwardService {
     markDelivered(id: string, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -421,13 +421,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -457,8 +457,8 @@ export declare class GateOutwardService {
     cancel(id: string, dto: CancelGateOutwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -484,13 +484,13 @@ export declare class GateOutwardService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateOutwardStatus;

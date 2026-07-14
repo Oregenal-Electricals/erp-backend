@@ -10,13 +10,13 @@ export declare class ProformaInvoiceService {
     create(dto: CreateProformaInvoiceDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -32,8 +32,8 @@ export declare class ProformaInvoiceService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -41,13 +41,13 @@ export declare class ProformaInvoiceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         rejectionReason: string | null;
         bankName: string | null;
@@ -71,21 +71,21 @@ export declare class ProformaInvoiceService {
             };
             ipo: {
                 vendor: {
-                    code: string;
                     name: string;
+                    code: string;
                 };
                 currency: string;
                 ipoNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             rejectionReason: string | null;
             bankName: string | null;
@@ -110,13 +110,13 @@ export declare class ProformaInvoiceService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -132,8 +132,8 @@ export declare class ProformaInvoiceService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -141,13 +141,13 @@ export declare class ProformaInvoiceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         rejectionReason: string | null;
         bankName: string | null;
@@ -167,13 +167,13 @@ export declare class ProformaInvoiceService {
     findByIpo(ipoId: string, user: any): Promise<({
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -189,8 +189,8 @@ export declare class ProformaInvoiceService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -198,13 +198,13 @@ export declare class ProformaInvoiceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         rejectionReason: string | null;
         bankName: string | null;
@@ -224,13 +224,13 @@ export declare class ProformaInvoiceService {
     update(id: string, dto: UpdateProformaInvoiceDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -246,8 +246,8 @@ export declare class ProformaInvoiceService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -255,13 +255,13 @@ export declare class ProformaInvoiceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         rejectionReason: string | null;
         bankName: string | null;
@@ -281,13 +281,13 @@ export declare class ProformaInvoiceService {
     accept(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -303,8 +303,8 @@ export declare class ProformaInvoiceService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -312,13 +312,13 @@ export declare class ProformaInvoiceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         rejectionReason: string | null;
         bankName: string | null;
@@ -338,13 +338,13 @@ export declare class ProformaInvoiceService {
     reject(id: string, dto: RejectPiDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -360,8 +360,8 @@ export declare class ProformaInvoiceService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -369,13 +369,13 @@ export declare class ProformaInvoiceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         rejectionReason: string | null;
         bankName: string | null;

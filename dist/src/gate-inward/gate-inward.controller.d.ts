@@ -7,8 +7,8 @@ export declare class GateInwardController {
     create(dto: CreateGateInwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -29,13 +29,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -63,8 +63,8 @@ export declare class GateInwardController {
     findAll(user: any, status?: GateInwardStatus, plantId?: string, date?: string, search?: string): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -85,13 +85,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -128,8 +128,8 @@ export declare class GateInwardController {
     findOne(id: string): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -150,13 +150,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -184,8 +184,8 @@ export declare class GateInwardController {
     update(id: string, dto: UpdateGateInwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -206,13 +206,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -240,8 +240,8 @@ export declare class GateInwardController {
     verify(id: string, dto: VerifyGateInwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -262,13 +262,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -296,8 +296,8 @@ export declare class GateInwardController {
     sendToStores(id: string, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -318,13 +318,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -352,8 +352,8 @@ export declare class GateInwardController {
     complete(id: string, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -374,13 +374,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -408,8 +408,8 @@ export declare class GateInwardController {
     reject(id: string, dto: RejectGateInwardDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         vehicleLog: {
             id: string;
@@ -430,13 +430,13 @@ export declare class GateInwardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GateInwardStatus;

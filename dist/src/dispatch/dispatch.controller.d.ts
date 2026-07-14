@@ -25,13 +25,13 @@ export declare class DispatchController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             vehicleNumber: string | null;
             remarks: string | null;
@@ -54,12 +54,12 @@ export declare class DispatchController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -86,13 +86,13 @@ export declare class DispatchController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -111,12 +111,12 @@ export declare class DispatchController {
     create(dto: CreateDispatchDto, req: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -143,13 +143,13 @@ export declare class DispatchController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;

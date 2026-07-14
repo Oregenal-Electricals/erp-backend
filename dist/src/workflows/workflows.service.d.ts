@@ -13,13 +13,13 @@ export declare class WorkflowsService {
         steps: {
             level: number;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             stepName: string;
             approverUserId: string | null;
             timeoutHours: number | null;
@@ -27,15 +27,15 @@ export declare class WorkflowsService {
         }[];
     } & {
         id: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         documentType: string;
         triggerCondition: string;
         triggerAmount: number | null;
@@ -54,13 +54,13 @@ export declare class WorkflowsService {
                 steps: {
                     level: number;
                     id: string;
+                    companyId: string;
+                    isActive: boolean;
+                    isTestData: boolean;
                     createdAt: Date;
                     updatedAt: Date;
                     createdBy: string | null;
                     updatedBy: string | null;
-                    isActive: boolean;
-                    isTestData: boolean;
-                    companyId: string;
                     stepName: string;
                     approverUserId: string | null;
                     timeoutHours: number | null;
@@ -70,13 +70,13 @@ export declare class WorkflowsService {
             actions: {
                 level: number;
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 comments: string | null;
                 action: string;
                 actionBy: string;
@@ -85,13 +85,13 @@ export declare class WorkflowsService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             documentType: string;
             requestedBy: string;
@@ -113,13 +113,13 @@ export declare class WorkflowsService {
         actions: {
             level: number;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             comments: string | null;
             action: string;
             actionBy: string;
@@ -128,13 +128,13 @@ export declare class WorkflowsService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         documentType: string;
         requestedBy: string;
@@ -148,13 +148,13 @@ export declare class WorkflowsService {
     }>;
     cancel(requestId: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         documentType: string;
         requestedBy: string;
@@ -173,13 +173,13 @@ export declare class WorkflowsService {
         steps: {
             level: number;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             stepName: string;
             approverUserId: string | null;
             timeoutHours: number | null;
@@ -187,15 +187,15 @@ export declare class WorkflowsService {
         }[];
     } & {
         id: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         documentType: string;
         triggerCondition: string;
         triggerAmount: number | null;
@@ -209,13 +209,13 @@ export declare class WorkflowsService {
             actions: {
                 level: number;
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 comments: string | null;
                 action: string;
                 actionBy: string;
@@ -224,13 +224,13 @@ export declare class WorkflowsService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             documentType: string;
             requestedBy: string;
@@ -251,13 +251,13 @@ export declare class WorkflowsService {
             steps: {
                 level: number;
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 stepName: string;
                 approverUserId: string | null;
                 timeoutHours: number | null;
@@ -265,15 +265,15 @@ export declare class WorkflowsService {
             }[];
         } & {
             id: string;
+            companyId: string;
             name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             documentType: string;
             triggerCondition: string;
             triggerAmount: number | null;
@@ -282,13 +282,13 @@ export declare class WorkflowsService {
         actions: {
             level: number;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             comments: string | null;
             action: string;
             actionBy: string;
@@ -297,13 +297,13 @@ export declare class WorkflowsService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         documentType: string;
         requestedBy: string;

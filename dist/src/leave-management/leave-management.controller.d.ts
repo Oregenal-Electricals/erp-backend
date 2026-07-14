@@ -12,16 +12,16 @@ export declare class LeaveManagementController {
     }>;
     getTypes(req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -31,16 +31,16 @@ export declare class LeaveManagementController {
     }[]>;
     createType(dto: CreateLeaveTypeDto, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -50,16 +50,16 @@ export declare class LeaveManagementController {
     }>;
     updateType(id: string, dto: any, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -69,13 +69,13 @@ export declare class LeaveManagementController {
     }>;
     allocate(dto: AllocateLeaveDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         year: number;
         pending: number;
         employeeId: string;
@@ -93,19 +93,19 @@ export declare class LeaveManagementController {
     }>;
     getBalance(empId: string, year: string, req: any): Promise<({
         leaveType: {
-            code: string;
             name: string;
+            code: string;
             isPaid: boolean;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         year: number;
         pending: number;
         employeeId: string;
@@ -126,19 +126,19 @@ export declare class LeaveManagementController {
                 employeeNumber: string;
             };
             leaveType: {
-                code: string;
                 name: string;
+                code: string;
                 isPaid: boolean;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             reason: string;
             days: number;
@@ -166,13 +166,13 @@ export declare class LeaveManagementController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         days: number;
@@ -197,13 +197,13 @@ export declare class LeaveManagementController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         days: number;

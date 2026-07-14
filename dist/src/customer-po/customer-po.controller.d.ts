@@ -29,13 +29,13 @@ export declare class CustomerPoController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             customerName: string;
@@ -69,13 +69,13 @@ export declare class CustomerPoController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -109,13 +109,13 @@ export declare class CustomerPoController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -149,13 +149,13 @@ export declare class CustomerPoController {
         itemResults: string | number | true | import("@prisma/client/runtime/library").JsonObject | import("@prisma/client/runtime/library").JsonArray;
         data: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -172,13 +172,13 @@ export declare class CustomerPoController {
     create(dto: CreateCpoDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -212,13 +212,13 @@ export declare class CustomerPoController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -248,13 +248,13 @@ export declare class CustomerPoController {
     update(id: string, dto: UpdateCpoDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -288,13 +288,13 @@ export declare class CustomerPoController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -324,13 +324,13 @@ export declare class CustomerPoController {
     acknowledge(id: string, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -364,13 +364,13 @@ export declare class CustomerPoController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -400,13 +400,13 @@ export declare class CustomerPoController {
     createQuantityIncrease(id: string, dto: CreateQuantityIncreaseDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -440,13 +440,13 @@ export declare class CustomerPoController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;
@@ -476,13 +476,13 @@ export declare class CustomerPoController {
     cancel(id: string, dto: CancelCpoDto, req: any): Promise<{
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;
@@ -516,13 +516,13 @@ export declare class CustomerPoController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         customerName: string;

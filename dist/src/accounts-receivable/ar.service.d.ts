@@ -23,13 +23,13 @@ export declare class ArService {
         };
         payments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             amount: number;
             paymentMode: string;
@@ -42,13 +42,13 @@ export declare class ArService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         dueDate: Date;
         customerName: string;
@@ -80,13 +80,13 @@ export declare class ArService {
         };
         payments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             amount: number;
             paymentMode: string;
@@ -99,13 +99,13 @@ export declare class ArService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         dueDate: Date;
         customerName: string;
@@ -126,13 +126,13 @@ export declare class ArService {
     private createInvoiceVoucher;
     recordPayment(dto: CreateArPaymentDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         amount: number;
         paymentMode: string;
@@ -159,13 +159,13 @@ export declare class ArService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             dueDate: Date;
             customerName: string;
@@ -201,13 +201,13 @@ export declare class ArService {
         };
         payments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             amount: number;
             paymentMode: string;
@@ -220,13 +220,13 @@ export declare class ArService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         dueDate: Date;
         customerName: string;
@@ -265,13 +265,13 @@ export declare class ArService {
             agingDays: number;
             agingBucket: string;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             dueDate: Date;
             customerName: string;

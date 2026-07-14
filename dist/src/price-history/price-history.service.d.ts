@@ -4,20 +4,20 @@ export declare class PriceHistoryService {
     constructor(prisma: PrismaService);
     getItemHistory(itemCode: string, user: any): Promise<({
         priceList: {
-            code: string;
             name: string;
+            code: string;
             currency: string;
             listType: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -32,20 +32,20 @@ export declare class PriceHistoryService {
     })[]>;
     getEffectivePrice(itemCode: string, user: any): Promise<({
         priceList: {
-            code: string;
             name: string;
+            code: string;
             currency: string;
             listType: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -60,13 +60,13 @@ export declare class PriceHistoryService {
     })[]>;
     getListHistory(priceListId: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -89,20 +89,20 @@ export declare class PriceHistoryService {
     search(user: any, query: any): Promise<{
         data: ({
             priceList: {
-                code: string;
                 name: string;
+                code: string;
                 currency: string;
                 listType: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             validFrom: Date;
             validTo: Date | null;
             itemCode: string;

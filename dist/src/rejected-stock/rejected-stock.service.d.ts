@@ -10,13 +10,13 @@ export declare class RejectedStockService {
     createFromIqc(iqcId: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -30,8 +30,8 @@ export declare class RejectedStockService {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -42,13 +42,13 @@ export declare class RejectedStockService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -73,13 +73,13 @@ export declare class RejectedStockService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             warehouseId: string;
@@ -96,13 +96,13 @@ export declare class RejectedStockService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -116,8 +116,8 @@ export declare class RejectedStockService {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -128,13 +128,13 @@ export declare class RejectedStockService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -146,13 +146,13 @@ export declare class RejectedStockService {
     disposeItem(id: string, itemId: string, dto: DisposeItemDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -166,8 +166,8 @@ export declare class RejectedStockService {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -178,13 +178,13 @@ export declare class RejectedStockService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -196,13 +196,13 @@ export declare class RejectedStockService {
     close(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             rejectionReason: string | null;
             itemCode: string;
             itemName: string;
@@ -216,8 +216,8 @@ export declare class RejectedStockService {
             rejectedStockId: string;
         }[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         grn: {
             grnType: string;
@@ -228,13 +228,13 @@ export declare class RejectedStockService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;

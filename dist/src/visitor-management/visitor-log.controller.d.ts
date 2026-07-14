@@ -7,8 +7,8 @@ export declare class VisitorLogController {
     checkIn(dto: CheckInVisitorDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -35,13 +35,13 @@ export declare class VisitorLogController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
@@ -62,8 +62,8 @@ export declare class VisitorLogController {
     findAllLogs(user: any, plantId?: string, status?: VisitorStatus, date?: string): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -90,13 +90,13 @@ export declare class VisitorLogController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
@@ -117,8 +117,8 @@ export declare class VisitorLogController {
     getActiveVisitors(user: any): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -145,13 +145,13 @@ export declare class VisitorLogController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
@@ -172,8 +172,8 @@ export declare class VisitorLogController {
     checkOut(id: string, dto: CheckOutVisitorDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -200,13 +200,13 @@ export declare class VisitorLogController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;

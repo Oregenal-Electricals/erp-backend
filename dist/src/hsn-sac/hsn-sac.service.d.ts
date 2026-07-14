@@ -7,15 +7,15 @@ export declare class HsnSacService {
     constructor(prisma: PrismaService, audit: AuditService);
     create(dto: CreateHsnSacDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
+        code: string;
         gstRate: number;
         codeType: string;
         cessRate: number | null;
@@ -26,15 +26,15 @@ export declare class HsnSacService {
     findAll(user: any, query: any): Promise<{
         data: {
             id: string;
-            code: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
+            code: string;
             gstRate: number;
             codeType: string;
             cessRate: number | null;
@@ -49,15 +49,15 @@ export declare class HsnSacService {
     }>;
     findOne(id: string, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
+        code: string;
         gstRate: number;
         codeType: string;
         cessRate: number | null;
@@ -67,15 +67,15 @@ export declare class HsnSacService {
     }>;
     update(id: string, dto: UpdateHsnSacDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
+        code: string;
         gstRate: number;
         codeType: string;
         cessRate: number | null;

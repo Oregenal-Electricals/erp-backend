@@ -26,13 +26,13 @@ export declare class ApController {
                 name: string;
             };
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             dueDate: Date;
             remarks: string | null;
@@ -54,8 +54,8 @@ export declare class ApController {
     findAll(req: any, query: any): Promise<{
         data: ({
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             po: {
                 poNumber: string;
@@ -67,13 +67,13 @@ export declare class ApController {
             }[];
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             dueDate: Date;
             remarks: string | null;
@@ -97,21 +97,21 @@ export declare class ApController {
     }>;
     findOne(id: string, req: any): Promise<{
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
         po: {
             poNumber: string;
         };
         payments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             amount: number;
             paymentMode: string;
@@ -124,13 +124,13 @@ export declare class ApController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         dueDate: Date;
         remarks: string | null;
@@ -150,21 +150,21 @@ export declare class ApController {
     }>;
     create(dto: CreateApBillDto, req: any): Promise<{
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
         po: {
             poNumber: string;
         };
         payments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             amount: number;
             paymentMode: string;
@@ -177,13 +177,13 @@ export declare class ApController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         dueDate: Date;
         remarks: string | null;
@@ -203,13 +203,13 @@ export declare class ApController {
     }>;
     recordPayment(dto: CreateApPaymentDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         amount: number;
         paymentMode: string;

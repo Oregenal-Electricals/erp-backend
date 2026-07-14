@@ -10,18 +10,18 @@ export declare class SupplierQualityService {
     getRatings(user: any, query: any): Promise<{
         data: ({
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             rating: string;
             vendorId: string;
@@ -40,18 +40,18 @@ export declare class SupplierQualityService {
     }>;
     getVendorScorecard(vendorId: string, user: any): Promise<{
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
         ratings: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             rating: string;
             vendorId: string;
@@ -73,14 +73,14 @@ export declare class SupplierQualityService {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             dueDate: Date;
             remarks: string | null;
@@ -101,22 +101,22 @@ export declare class SupplierQualityService {
     }>;
     createCar(dto: CreateCarDto, user: any): Promise<{
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
         ncr: {
             ncrNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         dueDate: Date;
         remarks: string | null;
@@ -138,14 +138,14 @@ export declare class SupplierQualityService {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         dueDate: Date;
         remarks: string | null;
@@ -167,14 +167,14 @@ export declare class SupplierQualityService {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         dueDate: Date;
         remarks: string | null;
@@ -196,14 +196,14 @@ export declare class SupplierQualityService {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         dueDate: Date;
         remarks: string | null;
@@ -222,8 +222,8 @@ export declare class SupplierQualityService {
     getCars(user: any, query: any): Promise<{
         data: ({
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             ncr: {
                 severity: string;
@@ -231,14 +231,14 @@ export declare class SupplierQualityService {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             dueDate: Date;
             remarks: string | null;

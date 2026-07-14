@@ -51,13 +51,13 @@ export declare class InventoryDashboardController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
@@ -80,13 +80,13 @@ export declare class InventoryDashboardController {
                 name: string;
             };
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             warehouseId: string;

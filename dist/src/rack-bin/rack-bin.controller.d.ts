@@ -18,30 +18,30 @@ export declare class RackBinController {
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
     })[]>;
     createZone(dto: CreateZoneDto, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
     }>;
     findRacks(wId: string, req: any, zoneId?: string): Promise<({
@@ -49,62 +49,62 @@ export declare class RackBinController {
             bins: number;
         };
         zone: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
         zoneId: string | null;
         totalBins: number;
     })[]>;
     createRack(dto: CreateRackDto, req: any): Promise<{
         zone: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
         zoneId: string | null;
         totalBins: number;
     }>;
     findBins(rackId: string, req: any): Promise<({
         rack: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;
@@ -115,20 +115,20 @@ export declare class RackBinController {
     })[]>;
     findEmptyBins(wId: string, req: any): Promise<({
         rack: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;
@@ -139,20 +139,20 @@ export declare class RackBinController {
     })[]>;
     createBin(dto: CreateBinDto, req: any): Promise<{
         rack: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;
@@ -167,15 +167,15 @@ export declare class RackBinController {
     }>;
     updateStatus(id: string, dto: UpdateBinStatusDto, req: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;

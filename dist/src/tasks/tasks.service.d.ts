@@ -10,27 +10,27 @@ export declare class TasksService {
     create(dto: CreateTaskDto, user: any): Promise<{
         comments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             comment: string;
             commentBy: string;
             taskId: string;
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         category: string;
         title: string;
@@ -48,27 +48,27 @@ export declare class TasksService {
     update(id: string, dto: UpdateTaskDto, user: any): Promise<{
         comments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             comment: string;
             commentBy: string;
             taskId: string;
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         category: string;
         title: string;
@@ -86,27 +86,27 @@ export declare class TasksService {
     updateStatus(id: string, dto: UpdateTaskStatusDto, user: any): Promise<{
         comments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             comment: string;
             commentBy: string;
             taskId: string;
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         category: string;
         title: string;
@@ -123,13 +123,13 @@ export declare class TasksService {
     }>;
     addComment(id: string, dto: AddCommentDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         comment: string;
         commentBy: string;
         taskId: string;
@@ -141,14 +141,14 @@ export declare class TasksService {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             category: string;
             title: string;
@@ -170,27 +170,27 @@ export declare class TasksService {
     findOne(id: string, user: any): Promise<{
         comments: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             comment: string;
             commentBy: string;
             taskId: string;
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         category: string;
         title: string;

@@ -7,16 +7,16 @@ export declare class RackBinService {
     constructor(prisma: PrismaService, audit: AuditService);
     createZone(dto: CreateZoneDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
     }>;
     findZones(warehouseId: string, user: any): Promise<({
@@ -25,35 +25,35 @@ export declare class RackBinService {
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
     })[]>;
     createRack(dto: CreateRackDto, user: any): Promise<{
         zone: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
         zoneId: string | null;
         totalBins: number;
@@ -63,41 +63,41 @@ export declare class RackBinService {
             bins: number;
         };
         zone: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         warehouseId: string;
         zoneId: string | null;
         totalBins: number;
     })[]>;
     createBin(dto: CreateBinDto, user: any): Promise<{
         rack: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;
@@ -112,20 +112,20 @@ export declare class RackBinService {
     }>;
     findBins(rackId: string, user: any): Promise<({
         rack: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;
@@ -136,20 +136,20 @@ export declare class RackBinService {
     })[]>;
     findEmptyBins(warehouseId: string, user: any): Promise<({
         rack: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;
@@ -160,15 +160,15 @@ export declare class RackBinService {
     })[]>;
     updateBinStatus(id: string, dto: UpdateBinStatusDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         status: string;
         itemCode: string | null;
         warehouseId: string;

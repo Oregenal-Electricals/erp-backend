@@ -10,14 +10,14 @@ export declare class PurchaseRequisitionService {
     create(dto: CreatePurchaseRequisitionDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -35,14 +35,14 @@ export declare class PurchaseRequisitionService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -66,14 +66,14 @@ export declare class PurchaseRequisitionService {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             department: string | null;
             status: string;
             title: string;
@@ -98,14 +98,14 @@ export declare class PurchaseRequisitionService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -123,14 +123,14 @@ export declare class PurchaseRequisitionService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -150,14 +150,14 @@ export declare class PurchaseRequisitionService {
     update(id: string, dto: UpdatePurchaseRequisitionDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -175,14 +175,14 @@ export declare class PurchaseRequisitionService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -202,14 +202,14 @@ export declare class PurchaseRequisitionService {
     submit(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -227,14 +227,14 @@ export declare class PurchaseRequisitionService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -254,14 +254,14 @@ export declare class PurchaseRequisitionService {
     approve(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -279,14 +279,14 @@ export declare class PurchaseRequisitionService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -306,14 +306,14 @@ export declare class PurchaseRequisitionService {
     reject(id: string, dto: RejectPrDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -331,14 +331,14 @@ export declare class PurchaseRequisitionService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -357,14 +357,14 @@ export declare class PurchaseRequisitionService {
     }>;
     addItem(id: string, item: any, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         itemCode: string;
         itemName: string;

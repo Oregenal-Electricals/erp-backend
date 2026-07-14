@@ -21,13 +21,13 @@ export declare class CreditControlController {
             activeHolds: number;
             holds: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 status: string;
                 customerName: string;
                 referenceType: string;
@@ -45,13 +45,13 @@ export declare class CreditControlController {
             isOverLimit: boolean;
             hasLimit: boolean;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             notes: string | null;
         }[];
         overLimit: {
@@ -65,13 +65,13 @@ export declare class CreditControlController {
             activeHolds: number;
             holds: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 status: string;
                 customerName: string;
                 referenceType: string;
@@ -89,13 +89,13 @@ export declare class CreditControlController {
             isOverLimit: boolean;
             hasLimit: boolean;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             notes: string | null;
         }[];
         atRisk: {
@@ -109,13 +109,13 @@ export declare class CreditControlController {
             activeHolds: number;
             holds: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 status: string;
                 customerName: string;
                 referenceType: string;
@@ -133,13 +133,13 @@ export declare class CreditControlController {
             isOverLimit: boolean;
             hasLimit: boolean;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             notes: string | null;
         }[];
         healthy: {
@@ -153,13 +153,13 @@ export declare class CreditControlController {
             activeHolds: number;
             holds: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 status: string;
                 customerName: string;
                 referenceType: string;
@@ -177,13 +177,13 @@ export declare class CreditControlController {
             isOverLimit: boolean;
             hasLimit: boolean;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             notes: string | null;
         }[];
         totalExposure: number;
@@ -201,13 +201,13 @@ export declare class CreditControlController {
         activeHolds: number;
         holds: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             customerName: string;
             referenceType: string;
@@ -236,13 +236,13 @@ export declare class CreditControlController {
         activeHolds: number;
         holds: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             customerName: string;
             referenceType: string;
@@ -260,24 +260,24 @@ export declare class CreditControlController {
         isOverLimit: boolean;
         hasLimit: boolean;
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         notes: string | null;
     }[]>;
     findAllHolds(req: any, query: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         referenceType: string;
@@ -306,13 +306,13 @@ export declare class CreditControlController {
             activeHolds: number;
             holds: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 status: string;
                 customerName: string;
                 referenceType: string;
@@ -346,13 +346,13 @@ export declare class CreditControlController {
             activeHolds: number;
             holds: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 status: string;
                 customerName: string;
                 referenceType: string;
@@ -375,13 +375,13 @@ export declare class CreditControlController {
     }>;
     createLimit(dto: CreateCreditLimitDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         customerName: string;
         creditLimit: number;
         notes: string | null;
@@ -389,13 +389,13 @@ export declare class CreditControlController {
     }>;
     updateLimit(id: string, dto: UpdateCreditLimitDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         customerName: string;
         creditLimit: number;
         notes: string | null;
@@ -403,13 +403,13 @@ export declare class CreditControlController {
     }>;
     releaseHold(id: string, dto: ReleaseCreditHoldDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         customerName: string;
         referenceType: string;

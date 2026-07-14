@@ -33,15 +33,15 @@ export declare class ProductionReportsController {
                 woNumber: string;
             };
         } & {
-            shift: string;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            shift: string;
             status: string;
             remarks: string | null;
             totalQty: number;
@@ -72,15 +72,15 @@ export declare class ProductionReportsController {
                 woNumber: string;
             };
         } & {
-            shift: string;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            shift: string;
             status: string;
             remarks: string | null;
             totalQty: number;
@@ -107,13 +107,13 @@ export declare class ProductionReportsController {
         } & {
             result: string;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             inspectionDate: Date;

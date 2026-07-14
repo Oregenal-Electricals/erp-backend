@@ -14,14 +14,14 @@ export declare class QualityReportsService {
                 status: string;
             }[];
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             remarks: string | null;
             closedBy: string | null;
@@ -64,13 +64,13 @@ export declare class QualityReportsService {
                 ncrNumber: string;
             };
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             dueDate: Date;
             remarks: string | null;
@@ -102,13 +102,13 @@ export declare class QualityReportsService {
         } & {
             result: string;
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             customerName: string | null;
@@ -149,18 +149,18 @@ export declare class QualityReportsService {
     getSupplierReport(user: any, query: any): Promise<{
         ratings: ({
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             rating: string;
             vendorId: string;
@@ -181,19 +181,19 @@ export declare class QualityReportsService {
         avgScore: number;
         cars: ({
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             dueDate: Date;
             remarks: string | null;
@@ -216,14 +216,14 @@ export declare class QualityReportsService {
         data: {
             responseDays: number;
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             customerPo: string | null;
             remarks: string | null;

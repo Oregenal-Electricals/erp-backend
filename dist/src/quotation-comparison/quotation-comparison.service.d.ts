@@ -53,13 +53,13 @@ export declare class QuotationComparisonService {
         selections: {
             [k: string]: {
                 id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                companyId: string;
                 rfqId: string;
                 selectedItemId: string;
                 selectionReason: string | null;

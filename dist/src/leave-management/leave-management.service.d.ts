@@ -9,16 +9,16 @@ export declare class LeaveManagementService {
     private calculateDays;
     createLeaveType(dto: CreateLeaveTypeDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -28,16 +28,16 @@ export declare class LeaveManagementService {
     }>;
     updateLeaveType(id: string, dto: any, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -47,16 +47,16 @@ export declare class LeaveManagementService {
     }>;
     findAllLeaveTypes(user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -66,13 +66,13 @@ export declare class LeaveManagementService {
     }[]>;
     allocateLeave(dto: AllocateLeaveDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         year: number;
         pending: number;
         employeeId: string;
@@ -90,19 +90,19 @@ export declare class LeaveManagementService {
     }>;
     getEmployeeBalances(employeeId: string, year: number, user: any): Promise<({
         leaveType: {
-            code: string;
             name: string;
+            code: string;
             isPaid: boolean;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         year: number;
         pending: number;
         employeeId: string;
@@ -122,13 +122,13 @@ export declare class LeaveManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         days: number;
@@ -153,13 +153,13 @@ export declare class LeaveManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         days: number;
@@ -187,19 +187,19 @@ export declare class LeaveManagementService {
                 employeeNumber: string;
             };
             leaveType: {
-                code: string;
                 name: string;
+                code: string;
                 isPaid: boolean;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             reason: string;
             days: number;

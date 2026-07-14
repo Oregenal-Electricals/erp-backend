@@ -7,16 +7,16 @@ export declare class PriceListService {
     constructor(prisma: PrismaService, audit: AuditService);
     create(dto: CreatePriceListDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isDefault: boolean;
         currency: string;
         listType: string;
@@ -28,16 +28,16 @@ export declare class PriceListService {
             };
         } & {
             id: string;
-            code: string;
+            companyId: string;
             name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
+            code: string;
             isDefault: boolean;
             currency: string;
             listType: string;
@@ -50,13 +50,13 @@ export declare class PriceListService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             validFrom: Date;
             validTo: Date | null;
             itemCode: string;
@@ -71,32 +71,32 @@ export declare class PriceListService {
         }[];
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isDefault: boolean;
         currency: string;
         listType: string;
     }>;
     update(id: string, dto: UpdatePriceListDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isDefault: boolean;
         currency: string;
         listType: string;
@@ -114,13 +114,13 @@ export declare class PriceListService {
     }>;
     addItem(priceListId: string, dto: CreatePriceListItemDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -135,13 +135,13 @@ export declare class PriceListService {
     }>;
     updateItem(priceListId: string, itemId: string, dto: UpdatePriceListItemDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -156,13 +156,13 @@ export declare class PriceListService {
     }>;
     approveItem(priceListId: string, itemId: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;

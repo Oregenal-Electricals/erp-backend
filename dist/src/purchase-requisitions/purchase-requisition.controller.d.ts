@@ -18,14 +18,14 @@ export declare class PurchaseRequisitionController {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             department: string | null;
             status: string;
             title: string;
@@ -50,14 +50,14 @@ export declare class PurchaseRequisitionController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -75,14 +75,14 @@ export declare class PurchaseRequisitionController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -102,14 +102,14 @@ export declare class PurchaseRequisitionController {
     create(dto: CreatePurchaseRequisitionDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -127,14 +127,14 @@ export declare class PurchaseRequisitionController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -154,14 +154,14 @@ export declare class PurchaseRequisitionController {
     update(id: string, dto: UpdatePurchaseRequisitionDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -179,14 +179,14 @@ export declare class PurchaseRequisitionController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -206,14 +206,14 @@ export declare class PurchaseRequisitionController {
     submit(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -231,14 +231,14 @@ export declare class PurchaseRequisitionController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -258,14 +258,14 @@ export declare class PurchaseRequisitionController {
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -283,14 +283,14 @@ export declare class PurchaseRequisitionController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -310,14 +310,14 @@ export declare class PurchaseRequisitionController {
     reject(id: string, dto: RejectPrDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             itemCode: string;
             itemName: string;
@@ -335,14 +335,14 @@ export declare class PurchaseRequisitionController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         department: string | null;
         status: string;
         title: string;
@@ -361,14 +361,14 @@ export declare class PurchaseRequisitionController {
     }>;
     addItem(id: string, dto: PrItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         itemCode: string;
         itemName: string;

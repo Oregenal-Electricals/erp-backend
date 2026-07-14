@@ -8,15 +8,15 @@ export declare class LeadsService {
     private generateNumber;
     create(dto: CreateLeadDto, user: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;
@@ -34,15 +34,15 @@ export declare class LeadsService {
     }>;
     update(id: string, dto: UpdateLeadDto, user: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;
@@ -60,15 +60,15 @@ export declare class LeadsService {
     }>;
     convert(id: string, user: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;
@@ -87,15 +87,15 @@ export declare class LeadsService {
     findAll(user: any, query: any): Promise<{
         data: {
             id: string;
-            phone: string | null;
-            email: string | null;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            phone: string | null;
+            email: string | null;
             status: string;
             remarks: string | null;
             estimatedValue: number | null;
@@ -117,15 +117,15 @@ export declare class LeadsService {
     }>;
     findOne(id: string, user: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;

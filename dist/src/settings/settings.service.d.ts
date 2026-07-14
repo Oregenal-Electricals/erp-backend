@@ -10,26 +10,26 @@ export declare class SettingsService {
     }>;
     getAllSettings(category?: string): Promise<{
         id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
         key: string;
         value: string;
         category: string;
     }[]>;
     getSetting(key: string): Promise<{
         id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
         key: string;
         value: string;
         category: string;
@@ -37,13 +37,13 @@ export declare class SettingsService {
     getSettingValue(key: string, defaultValue?: string): Promise<string>;
     updateSetting(key: string, dto: UpdateSystemSettingDto, userId: string): Promise<{
         id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
         key: string;
         value: string;
         category: string;
@@ -58,18 +58,18 @@ export declare class SettingsService {
     getAllSeries(companyId?: string): Promise<({
         company: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         isLocked: boolean;
         documentType: string;
         prefix: string;
@@ -87,13 +87,13 @@ export declare class SettingsService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         isLocked: boolean;
         documentType: string;
         prefix: string;
@@ -106,13 +106,13 @@ export declare class SettingsService {
     }>;
     createSeries(dto: CreateNumberingSeriesDto, userId: string): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         isLocked: boolean;
         documentType: string;
         prefix: string;
@@ -125,13 +125,13 @@ export declare class SettingsService {
     }>;
     updateSeries(id: string, dto: UpdateNumberingSeriesDto, userId: string): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         isLocked: boolean;
         documentType: string;
         prefix: string;

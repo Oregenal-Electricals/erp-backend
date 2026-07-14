@@ -23,14 +23,14 @@ export declare class NcrController {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             remarks: string | null;
             closedBy: string | null;
@@ -66,14 +66,14 @@ export declare class NcrController {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         remarks: string | null;
         closedBy: string | null;
@@ -105,14 +105,14 @@ export declare class NcrController {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         remarks: string | null;
         closedBy: string | null;
@@ -144,14 +144,14 @@ export declare class NcrController {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         remarks: string | null;
         closedBy: string | null;
@@ -183,14 +183,14 @@ export declare class NcrController {
         };
     } & {
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         remarks: string | null;
         closedBy: string | null;

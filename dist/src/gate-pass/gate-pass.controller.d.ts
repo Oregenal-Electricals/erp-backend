@@ -7,12 +7,12 @@ export declare class GatePassController {
     create(dto: CreateGatePassDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -39,13 +39,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -80,12 +80,12 @@ export declare class GatePassController {
     findAll(user: any, status?: GatePassStatus, type?: string, plantId?: string, search?: string): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -112,13 +112,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -165,12 +165,12 @@ export declare class GatePassController {
     findOne(id: string): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -197,13 +197,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -238,12 +238,12 @@ export declare class GatePassController {
     approve(id: string, dto: ApproveGatePassDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -270,13 +270,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -311,12 +311,12 @@ export declare class GatePassController {
     issue(id: string, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -343,13 +343,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -384,12 +384,12 @@ export declare class GatePassController {
     markReturned(id: string, dto: ReturnGatePassDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -416,13 +416,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -457,12 +457,12 @@ export declare class GatePassController {
     close(id: string, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -489,13 +489,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;
@@ -530,12 +530,12 @@ export declare class GatePassController {
     cancel(id: string, dto: CancelGatePassDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         employee: {
-            id: string;
             role: string;
+            id: string;
             employeeCode: string;
             firstName: string;
             lastName: string;
@@ -562,13 +562,13 @@ export declare class GatePassController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         unit: string;
         status: import("@prisma/client").$Enums.GatePassStatus;

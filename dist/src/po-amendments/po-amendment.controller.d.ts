@@ -17,20 +17,20 @@ export declare class PoAmendmentController {
         data: ({
             po: {
                 vendor: {
-                    code: string;
                     name: string;
+                    code: string;
                 };
                 poNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             reason: string;
             requestedBy: string;
@@ -54,13 +54,13 @@ export declare class PoAmendmentController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         requestedBy: string;
@@ -77,21 +77,21 @@ export declare class PoAmendmentController {
         po: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             poNumber: string;
             totalAmount: number;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         requestedBy: string;
@@ -108,21 +108,21 @@ export declare class PoAmendmentController {
         po: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             poNumber: string;
             totalAmount: number;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         requestedBy: string;
@@ -144,13 +144,13 @@ export declare class PoAmendmentController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         requestedBy: string;
@@ -172,13 +172,13 @@ export declare class PoAmendmentController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         requestedBy: string;
@@ -197,13 +197,13 @@ export declare class PoAmendmentController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         reason: string;
         requestedBy: string;

@@ -25,13 +25,13 @@ export declare class CustomerPortalService {
         data: ({
             items: {
                 id: string;
+                description: string | null;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
-                description: string | null;
                 itemCode: string;
                 itemName: string;
                 gstRate: number;
@@ -49,13 +49,13 @@ export declare class CustomerPortalService {
             }[];
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             customerName: string;
@@ -77,13 +77,13 @@ export declare class CustomerPortalService {
     }>;
     getCustomerDispatches(customerId: string, companyId: string): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -101,14 +101,14 @@ export declare class CustomerPortalService {
     }[]>;
     getCustomerComplaints(customerId: string, companyId: string): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;

@@ -7,13 +7,13 @@ export declare class CustomFieldService {
     constructor(prisma: PrismaService, audit: AuditService);
     createDefinition(dto: CreateCustomFieldDefinitionDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -26,13 +26,13 @@ export declare class CustomFieldService {
     }>;
     getDefinitions(module: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -45,13 +45,13 @@ export declare class CustomFieldService {
     }[]>;
     getAllDefinitions(user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -64,13 +64,13 @@ export declare class CustomFieldService {
     }[]>;
     updateDefinition(id: string, dto: UpdateCustomFieldDefinitionDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;
@@ -87,13 +87,13 @@ export declare class CustomFieldService {
     getValues(module: string, recordId: string, user: any): Promise<{
         value: string;
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         module: string;
         fieldKey: string;
         fieldLabel: string;

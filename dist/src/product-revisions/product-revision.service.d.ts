@@ -7,18 +7,18 @@ export declare class ProductRevisionService {
     constructor(prisma: PrismaService, audit: AuditService);
     create(dto: CreateProductRevisionDto, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
@@ -34,18 +34,18 @@ export declare class ProductRevisionService {
     findAll(user: any, query: any): Promise<{
         data: ({
             product: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             specifications: import("@prisma/client/runtime/library").JsonValue | null;
             drawingNumber: string | null;
@@ -65,18 +65,18 @@ export declare class ProductRevisionService {
     }>;
     findOne(id: string, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
@@ -91,18 +91,18 @@ export declare class ProductRevisionService {
     }>;
     findByProduct(productId: string, user: any): Promise<({
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
@@ -117,18 +117,18 @@ export declare class ProductRevisionService {
     })[]>;
     update(id: string, dto: UpdateProductRevisionDto, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
@@ -143,18 +143,18 @@ export declare class ProductRevisionService {
     }>;
     approve(id: string, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
@@ -169,18 +169,18 @@ export declare class ProductRevisionService {
     }>;
     obsolete(id: string, user: any): Promise<{
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;

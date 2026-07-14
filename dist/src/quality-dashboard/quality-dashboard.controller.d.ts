@@ -50,8 +50,8 @@ export declare class QualityDashboardController {
             count: number;
         }[];
         recent: {
-            createdAt: Date;
             description: string;
+            createdAt: Date;
             status: string;
             source: string;
             severity: string;

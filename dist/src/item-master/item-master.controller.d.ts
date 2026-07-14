@@ -5,16 +5,16 @@ export declare class ItemMasterController {
     constructor(service: ItemMasterService);
     createUom(dto: CreateUomDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isBase: boolean;
     }>;
     findAllUoms(user: any): Promise<({
@@ -23,64 +23,64 @@ export declare class ItemMasterController {
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isBase: boolean;
     })[]>;
     updateUom(id: string, dto: UpdateUomDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isBase: boolean;
     }>;
     toggleUom(id: string, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         isBase: boolean;
     }>;
     createCategory(dto: CreateCategoryDto, user: any): Promise<{
         parent: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         parentId: string | null;
     }>;
     findAllCategories(user: any): Promise<({
@@ -89,26 +89,26 @@ export declare class ItemMasterController {
         };
         parent: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         children: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         }[];
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         parentId: string | null;
     })[]>;
     updateCategory(id: string, dto: UpdateCategoryDto, user: any): Promise<{
@@ -118,49 +118,49 @@ export declare class ItemMasterController {
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
         parentId: string | null;
     }>;
     createItem(dto: CreateItemDto, user: any): Promise<{
         category: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         uom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         purchaseUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         salesUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: import("@prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
@@ -196,34 +196,34 @@ export declare class ItemMasterController {
     findAllItems(user: any, itemType?: string, categoryId?: string, status?: string, search?: string): Promise<({
         category: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         uom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         purchaseUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         salesUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: import("@prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
@@ -268,34 +268,34 @@ export declare class ItemMasterController {
     findOneItem(id: string): Promise<{
         category: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         uom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         purchaseUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         salesUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: import("@prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
@@ -331,34 +331,34 @@ export declare class ItemMasterController {
     updateItem(id: string, dto: UpdateItemDto, user: any): Promise<{
         category: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         uom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         purchaseUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         salesUom: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: import("@prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
@@ -393,14 +393,14 @@ export declare class ItemMasterController {
     }>;
     toggleItem(id: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: import("@prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;

@@ -19,18 +19,18 @@ export declare class PurchaseOrderController {
                 items: number;
             };
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             poNumber: string;
             paymentTerms: string | null;
@@ -59,18 +59,18 @@ export declare class PurchaseOrderController {
             items: number;
         };
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -92,13 +92,13 @@ export declare class PurchaseOrderController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -121,8 +121,8 @@ export declare class PurchaseOrderController {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -137,13 +137,13 @@ export declare class PurchaseOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -165,13 +165,13 @@ export declare class PurchaseOrderController {
     create(dto: CreatePurchaseOrderDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -194,8 +194,8 @@ export declare class PurchaseOrderController {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -210,13 +210,13 @@ export declare class PurchaseOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -238,13 +238,13 @@ export declare class PurchaseOrderController {
     update(id: string, dto: UpdatePurchaseOrderDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -267,8 +267,8 @@ export declare class PurchaseOrderController {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -283,13 +283,13 @@ export declare class PurchaseOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -311,13 +311,13 @@ export declare class PurchaseOrderController {
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -340,8 +340,8 @@ export declare class PurchaseOrderController {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -356,13 +356,13 @@ export declare class PurchaseOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -384,13 +384,13 @@ export declare class PurchaseOrderController {
     send(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -413,8 +413,8 @@ export declare class PurchaseOrderController {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -429,13 +429,13 @@ export declare class PurchaseOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -457,13 +457,13 @@ export declare class PurchaseOrderController {
     cancel(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             itemCode: string;
             itemName: string;
@@ -486,8 +486,8 @@ export declare class PurchaseOrderController {
             poId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             gstin: string;
             state: string;
             phone: string;
@@ -502,13 +502,13 @@ export declare class PurchaseOrderController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         poNumber: string;
         paymentTerms: string | null;
@@ -529,13 +529,13 @@ export declare class PurchaseOrderController {
     }>;
     addItem(id: string, dto: PoItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         itemCode: string;
         itemName: string;
@@ -559,13 +559,13 @@ export declare class PurchaseOrderController {
     }>;
     updateItem(id: string, itemId: string, dto: UpdatePoItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         itemCode: string;
         itemName: string;

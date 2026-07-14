@@ -10,12 +10,12 @@ export declare class DispatchPlanningService {
     create(dto: CreateDispatchPlanDto, user: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -31,13 +31,13 @@ export declare class DispatchPlanningService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -57,12 +57,12 @@ export declare class DispatchPlanningService {
     approve(id: string, user: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -78,13 +78,13 @@ export declare class DispatchPlanningService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -104,12 +104,12 @@ export declare class DispatchPlanningService {
     cancel(id: string, dto: CancelPlanDto, user: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -125,13 +125,13 @@ export declare class DispatchPlanningService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -161,13 +161,13 @@ export declare class DispatchPlanningService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             vehicleNumber: string | null;
             remarks: string | null;
@@ -191,12 +191,12 @@ export declare class DispatchPlanningService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -212,13 +212,13 @@ export declare class DispatchPlanningService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -248,13 +248,13 @@ export declare class DispatchPlanningService {
         customerName: string;
         items: {
             id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
             itemCode: string;
             itemName: string;
             gstRate: number;

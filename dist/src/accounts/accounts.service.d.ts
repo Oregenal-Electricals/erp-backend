@@ -11,14 +11,14 @@ export declare class AccountsService {
     }>;
     create(dto: CreateAccountDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         parentId: string | null;
         currency: string;
         accountCode: string;
@@ -31,14 +31,14 @@ export declare class AccountsService {
     }>;
     update(id: string, dto: UpdateAccountDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         parentId: string | null;
         currency: string;
         accountCode: string;
@@ -60,14 +60,14 @@ export declare class AccountsService {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             parentId: string | null;
             currency: string;
             accountCode: string;
@@ -96,14 +96,14 @@ export declare class AccountsService {
         };
         children: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             parentId: string | null;
             currency: string;
             accountCode: string;
@@ -116,14 +116,14 @@ export declare class AccountsService {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         parentId: string | null;
         currency: string;
         accountCode: string;

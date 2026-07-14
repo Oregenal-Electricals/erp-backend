@@ -5,14 +5,14 @@ export declare class VisitorManagementController {
     constructor(service: VisitorManagementService);
     createVisitor(dto: CreateVisitorDto, user: any): Promise<{
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -30,14 +30,14 @@ export declare class VisitorManagementController {
         };
     } & {
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -61,8 +61,8 @@ export declare class VisitorManagementController {
         logs: ({
             plant: {
                 id: string;
-                code: string;
                 name: string;
+                code: string;
             };
             hostEmployee: {
                 id: string;
@@ -76,13 +76,13 @@ export declare class VisitorManagementController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             status: import("@prisma/client").$Enums.VisitorStatus;
             visitorId: string;
@@ -102,14 +102,14 @@ export declare class VisitorManagementController {
         })[];
     } & {
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -123,14 +123,14 @@ export declare class VisitorManagementController {
     }>;
     updateVisitor(id: string, dto: UpdateVisitorDto, user: any): Promise<{
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -144,14 +144,14 @@ export declare class VisitorManagementController {
     }>;
     blacklistVisitor(id: string, reason: string, user: any): Promise<{
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;

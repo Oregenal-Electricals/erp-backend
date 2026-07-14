@@ -20,14 +20,14 @@ export declare class ComplaintController {
     findAll(req: any, query: any): Promise<{
         data: {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             customerPo: string | null;
             remarks: string | null;
@@ -58,14 +58,14 @@ export declare class ComplaintController {
     }>;
     findOne(id: string, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -92,14 +92,14 @@ export declare class ComplaintController {
     }>;
     create(dto: CreateComplaintDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -126,14 +126,14 @@ export declare class ComplaintController {
     }>;
     update(id: string, dto: UpdateComplaintDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -160,14 +160,14 @@ export declare class ComplaintController {
     }>;
     respond(id: string, dto: RespondComplaintDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -194,14 +194,14 @@ export declare class ComplaintController {
     }>;
     close(id: string, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;

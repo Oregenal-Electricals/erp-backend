@@ -12,12 +12,12 @@ export declare class DocumentsService {
     findAll(user: any, query: any): Promise<{
         data: {
             id: string;
+            description: string;
             createdAt: Date;
             createdBy: string;
             _count: {
                 versions: number;
             };
-            description: string;
             category: string;
             tags: string;
             title: string;

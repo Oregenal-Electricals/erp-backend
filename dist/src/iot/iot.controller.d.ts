@@ -12,13 +12,13 @@ export declare class IotController {
         criticalAlerts: number;
         machines: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             ipAddress: string | null;
             parameters: import("@prisma/client/runtime/library").JsonValue | null;
@@ -75,13 +75,13 @@ export declare class IotController {
     }>;
     getMachines(req: any, query: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
@@ -97,13 +97,13 @@ export declare class IotController {
     getMachine(id: string, req: any): Promise<{
         latestReadings: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             unit: string | null;
             value: number;
             machineId: string;
@@ -112,13 +112,13 @@ export declare class IotController {
         }[];
         openAlerts: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             value: number | null;
             severity: string;
@@ -131,13 +131,13 @@ export declare class IotController {
             resolvedBy: string | null;
         }[];
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
@@ -152,13 +152,13 @@ export declare class IotController {
     }>;
     createMachine(dto: CreateMachineDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
@@ -173,13 +173,13 @@ export declare class IotController {
     }>;
     updateMachine(id: string, dto: any, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
@@ -194,13 +194,13 @@ export declare class IotController {
     }>;
     updateStatus(id: string, status: string, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
@@ -215,13 +215,13 @@ export declare class IotController {
     }>;
     postReading(dto: PostReadingDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         unit: string | null;
         value: number;
         machineId: string;
@@ -236,13 +236,13 @@ export declare class IotController {
     }>;
     getReadings(id: string, query: any, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         unit: string | null;
         value: number;
         machineId: string;
@@ -257,13 +257,13 @@ export declare class IotController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         value: number | null;
         severity: string;
@@ -277,13 +277,13 @@ export declare class IotController {
     })[]>;
     updateAlert(id: string, dto: UpdateAlertDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         value: number | null;
         severity: string;

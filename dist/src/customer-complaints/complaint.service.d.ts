@@ -8,14 +8,14 @@ export declare class ComplaintService {
     private generateNumber;
     create(dto: CreateComplaintDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -42,14 +42,14 @@ export declare class ComplaintService {
     }>;
     update(id: string, dto: UpdateComplaintDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -76,14 +76,14 @@ export declare class ComplaintService {
     }>;
     respond(id: string, dto: RespondComplaintDto, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -110,14 +110,14 @@ export declare class ComplaintService {
     }>;
     close(id: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;
@@ -145,14 +145,14 @@ export declare class ComplaintService {
     findAll(user: any, query: any): Promise<{
         data: {
             id: string;
+            companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string;
             status: string;
             customerPo: string | null;
             remarks: string | null;
@@ -183,14 +183,14 @@ export declare class ComplaintService {
     }>;
     findOne(id: string, user: any): Promise<{
         id: string;
+        companyId: string;
+        description: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string;
         status: string;
         customerPo: string | null;
         remarks: string | null;

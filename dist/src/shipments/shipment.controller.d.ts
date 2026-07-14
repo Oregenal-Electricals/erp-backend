@@ -21,21 +21,21 @@ export declare class ShipmentController {
             };
             ipo: {
                 vendor: {
-                    code: string;
                     name: string;
+                    code: string;
                 };
                 currency: string;
                 ipoNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             carrierName: string;
             notes: string | null;
@@ -67,21 +67,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -89,13 +89,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -122,21 +122,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -144,13 +144,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -177,21 +177,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -199,13 +199,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -232,21 +232,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -254,13 +254,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -287,21 +287,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -309,13 +309,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -342,21 +342,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -364,13 +364,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -397,21 +397,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -419,13 +419,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -452,21 +452,21 @@ export declare class ShipmentController {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
         };
         containers: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             containerNumber: string;
             containerType: string;
             sealNumber: string | null;
@@ -474,13 +474,13 @@ export declare class ShipmentController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         carrierName: string;
         notes: string | null;
@@ -505,13 +505,13 @@ export declare class ShipmentController {
     }>;
     addContainer(id: string, dto: AddContainerDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         containerNumber: string;
         containerType: string;
         sealNumber: string | null;

@@ -8,22 +8,22 @@ export declare class WarehouseService {
     createWarehouse(dto: CreateWarehouseDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
-        address: string | null;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
+        address: string | null;
         plantId: string;
         type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
@@ -35,22 +35,22 @@ export declare class WarehouseService {
         };
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
-        address: string | null;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
+        address: string | null;
         plantId: string;
         type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
@@ -59,8 +59,8 @@ export declare class WarehouseService {
     findOneWarehouse(id: string): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         zones: ({
             _count: {
@@ -72,62 +72,62 @@ export declare class WarehouseService {
                 };
                 bins: {
                     id: string;
-                    code: string;
                     name: string;
+                    description: string | null;
+                    isActive: boolean;
+                    isTestData: boolean;
                     createdAt: Date;
                     updatedAt: Date;
                     createdBy: string;
                     updatedBy: string;
-                    isActive: boolean;
-                    isTestData: boolean;
-                    description: string | null;
+                    code: string;
                     rackId: string;
                     binType: string;
                     maxQty: number | null;
                 }[];
             } & {
                 id: string;
-                code: string;
                 name: string;
+                description: string | null;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string;
                 updatedBy: string;
-                isActive: boolean;
-                isTestData: boolean;
-                description: string | null;
+                code: string;
                 zoneId: string;
                 maxWeight: number | null;
                 maxVolume: number | null;
             })[];
         } & {
             id: string;
-            code: string;
             name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string | null;
+            code: string;
             warehouseId: string;
             temperature: string | null;
             isHazmat: boolean;
         })[];
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
-        address: string | null;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
+        address: string | null;
         plantId: string;
         type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
@@ -136,22 +136,22 @@ export declare class WarehouseService {
     updateWarehouse(id: string, dto: UpdateWarehouseDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
-        code: string;
+        companyId: string;
         name: string;
-        address: string | null;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
+        code: string;
+        address: string | null;
         plantId: string;
         type: import("@prisma/client").$Enums.WarehouseType;
         capacity: number | null;
@@ -170,15 +170,15 @@ export declare class WarehouseService {
         };
     } & {
         id: string;
-        code: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
+        code: string;
         warehouseId: string;
         temperature: string | null;
         isHazmat: boolean;
@@ -189,15 +189,15 @@ export declare class WarehouseService {
         };
     } & {
         id: string;
-        code: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
+        code: string;
         warehouseId: string;
         temperature: string | null;
         isHazmat: boolean;
@@ -209,15 +209,15 @@ export declare class WarehouseService {
         };
     } & {
         id: string;
-        code: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
+        code: string;
         zoneId: string;
         maxWeight: number | null;
         maxVolume: number | null;
@@ -228,15 +228,15 @@ export declare class WarehouseService {
         };
     } & {
         id: string;
-        code: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
+        code: string;
         zoneId: string;
         maxWeight: number | null;
         maxVolume: number | null;
@@ -248,30 +248,30 @@ export declare class WarehouseService {
         };
     } & {
         id: string;
-        code: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
+        code: string;
         rackId: string;
         binType: string;
         maxQty: number | null;
     }>;
     findBinsByRack(rackId: string): Promise<{
         id: string;
-        code: string;
         name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        description: string | null;
+        code: string;
         rackId: string;
         binType: string;
         maxQty: number | null;

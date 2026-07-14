@@ -19,13 +19,13 @@ export declare class ProductionIssueService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -36,8 +36,8 @@ export declare class ProductionIssueService {
             productionIssueId: string;
         })[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -47,13 +47,13 @@ export declare class ProductionIssueService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -69,13 +69,13 @@ export declare class ProductionIssueService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -86,8 +86,8 @@ export declare class ProductionIssueService {
             productionIssueId: string;
         })[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -97,13 +97,13 @@ export declare class ProductionIssueService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -119,13 +119,13 @@ export declare class ProductionIssueService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -136,8 +136,8 @@ export declare class ProductionIssueService {
             productionIssueId: string;
         })[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -147,13 +147,13 @@ export declare class ProductionIssueService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -175,13 +175,13 @@ export declare class ProductionIssueService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             warehouseId: string;
@@ -202,13 +202,13 @@ export declare class ProductionIssueService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -219,8 +219,8 @@ export declare class ProductionIssueService {
             productionIssueId: string;
         })[];
         warehouse: {
-            code: string;
             name: string;
+            code: string;
         };
         workOrder: {
             productCode: string;
@@ -230,13 +230,13 @@ export declare class ProductionIssueService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         warehouseId: string;

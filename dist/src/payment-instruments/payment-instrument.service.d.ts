@@ -11,8 +11,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -23,13 +23,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;
@@ -52,21 +52,21 @@ export declare class PaymentInstrumentService {
         data: ({
             ipo: {
                 vendor: {
-                    code: string;
                     name: string;
+                    code: string;
                 };
                 currency: string;
                 ipoNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             bankName: string;
             currency: string;
@@ -94,8 +94,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -106,13 +106,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;
@@ -135,8 +135,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -147,13 +147,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;
@@ -176,8 +176,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -188,13 +188,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;
@@ -217,8 +217,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -229,13 +229,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;
@@ -258,8 +258,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -270,13 +270,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;
@@ -299,8 +299,8 @@ export declare class PaymentInstrumentService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             ipoNumber: string;
@@ -311,13 +311,13 @@ export declare class PaymentInstrumentService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         bankName: string;
         currency: string;

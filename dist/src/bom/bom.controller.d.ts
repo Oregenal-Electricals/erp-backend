@@ -16,19 +16,19 @@ export declare class BomController {
                 items: number;
             };
             product: {
-                code: string;
                 name: string;
+                code: string;
             };
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             status: string;
             productId: string;
             approvedBy: string | null;
@@ -50,19 +50,19 @@ export declare class BomController {
             items: number;
         };
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -77,13 +77,13 @@ export declare class BomController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             quantity: number;
             itemCode: string;
             itemName: string;
@@ -100,22 +100,22 @@ export declare class BomController {
             effectiveQty: number;
         }[];
         product: {
-            code: string;
             name: string;
+            code: string;
         };
         revision: {
             revisionNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -130,13 +130,13 @@ export declare class BomController {
     create(dto: CreateBomDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             quantity: number;
             itemCode: string;
             itemName: string;
@@ -153,19 +153,19 @@ export declare class BomController {
             effectiveQty: number;
         }[];
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -180,13 +180,13 @@ export declare class BomController {
     update(id: string, dto: UpdateBomDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             quantity: number;
             itemCode: string;
             itemName: string;
@@ -203,19 +203,19 @@ export declare class BomController {
             effectiveQty: number;
         }[];
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -233,13 +233,13 @@ export declare class BomController {
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             quantity: number;
             itemCode: string;
             itemName: string;
@@ -256,19 +256,19 @@ export declare class BomController {
             effectiveQty: number;
         }[];
         product: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -282,14 +282,14 @@ export declare class BomController {
     }>;
     obsolete(id: string, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -304,13 +304,13 @@ export declare class BomController {
     clone(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             quantity: number;
             itemCode: string;
             itemName: string;
@@ -327,22 +327,22 @@ export declare class BomController {
             effectiveQty: number;
         }[];
         product: {
-            code: string;
             name: string;
+            code: string;
         };
         revision: {
             revisionNumber: string;
         };
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         status: string;
         productId: string;
         approvedBy: string | null;
@@ -356,13 +356,13 @@ export declare class BomController {
     }>;
     addItem(id: string, dto: CreateBomItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         quantity: number;
         itemCode: string;
         itemName: string;
@@ -380,13 +380,13 @@ export declare class BomController {
     }>;
     updateItem(id: string, itemId: string, dto: UpdateBomItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         quantity: number;
         itemCode: string;
         itemName: string;

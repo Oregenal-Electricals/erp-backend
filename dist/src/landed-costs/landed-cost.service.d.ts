@@ -12,13 +12,13 @@ export declare class LandedCostService {
     create(dto: CreateLandedCostDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -35,8 +35,8 @@ export declare class LandedCostService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -44,13 +44,13 @@ export declare class LandedCostService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         notes: string | null;
         ipoId: string;
@@ -73,21 +73,21 @@ export declare class LandedCostService {
             };
             ipo: {
                 vendor: {
-                    code: string;
                     name: string;
+                    code: string;
                 };
                 currency: string;
                 ipoNumber: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             notes: string | null;
             ipoId: string;
@@ -111,13 +111,13 @@ export declare class LandedCostService {
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -134,8 +134,8 @@ export declare class LandedCostService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -143,13 +143,13 @@ export declare class LandedCostService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         notes: string | null;
         ipoId: string;
@@ -168,13 +168,13 @@ export declare class LandedCostService {
     findByIpo(ipoId: string, user: any): Promise<({
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -191,8 +191,8 @@ export declare class LandedCostService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -200,13 +200,13 @@ export declare class LandedCostService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         notes: string | null;
         ipoId: string;
@@ -225,13 +225,13 @@ export declare class LandedCostService {
     update(id: string, dto: UpdateLandedCostDto, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -248,8 +248,8 @@ export declare class LandedCostService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -257,13 +257,13 @@ export declare class LandedCostService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         notes: string | null;
         ipoId: string;
@@ -282,13 +282,13 @@ export declare class LandedCostService {
     calculate(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -305,8 +305,8 @@ export declare class LandedCostService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -314,13 +314,13 @@ export declare class LandedCostService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         notes: string | null;
         ipoId: string;
@@ -339,13 +339,13 @@ export declare class LandedCostService {
     finalize(id: string, user: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -362,8 +362,8 @@ export declare class LandedCostService {
         ipo: {
             status: string;
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             currency: string;
             exchangeRate: number;
@@ -371,13 +371,13 @@ export declare class LandedCostService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         notes: string | null;
         ipoId: string;

@@ -5,13 +5,13 @@ export declare class NotificationsService {
     constructor(prisma: PrismaService);
     create(dto: CreateNotificationDto, companyId: string, createdBy: string): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         type: string;
         title: string;
         priority: string;
@@ -28,13 +28,13 @@ export declare class NotificationsService {
     findAll(userId: string, companyId: string, query: any): Promise<{
         data: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             type: string;
             title: string;
             priority: string;

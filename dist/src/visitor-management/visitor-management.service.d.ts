@@ -10,14 +10,14 @@ export declare class VisitorManagementService {
     constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService);
     createVisitor(dto: CreateVisitorDto, user: any): Promise<{
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -35,14 +35,14 @@ export declare class VisitorManagementService {
         };
     } & {
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -58,8 +58,8 @@ export declare class VisitorManagementService {
         logs: ({
             plant: {
                 id: string;
-                code: string;
                 name: string;
+                code: string;
             };
             hostEmployee: {
                 id: string;
@@ -73,13 +73,13 @@ export declare class VisitorManagementService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             status: import("@prisma/client").$Enums.VisitorStatus;
             visitorId: string;
@@ -99,14 +99,14 @@ export declare class VisitorManagementService {
         })[];
     } & {
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -120,14 +120,14 @@ export declare class VisitorManagementService {
     }>;
     updateVisitor(id: string, dto: UpdateVisitorDto, user: any): Promise<{
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -141,14 +141,14 @@ export declare class VisitorManagementService {
     }>;
     blacklistVisitor(id: string, reason: string, user: any): Promise<{
         id: string;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         mobile: string;
@@ -163,8 +163,8 @@ export declare class VisitorManagementService {
     checkIn(dto: CheckInVisitorDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -191,13 +191,13 @@ export declare class VisitorManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
@@ -218,8 +218,8 @@ export declare class VisitorManagementService {
     checkOut(id: string, dto: CheckOutVisitorDto, user: any): Promise<{
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -246,13 +246,13 @@ export declare class VisitorManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
@@ -277,8 +277,8 @@ export declare class VisitorManagementService {
     }): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -305,13 +305,13 @@ export declare class VisitorManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;
@@ -332,8 +332,8 @@ export declare class VisitorManagementService {
     getActiveVisitors(user: any): Promise<({
         plant: {
             id: string;
-            code: string;
             name: string;
+            code: string;
         };
         visitor: {
             id: string;
@@ -360,13 +360,13 @@ export declare class VisitorManagementService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         plantId: string;
         status: import("@prisma/client").$Enums.VisitorStatus;
         visitorId: string;

@@ -21,13 +21,13 @@ export declare class DeliveryConfirmationController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             remarks: string | null;
             deliveryDate: Date;
             dcNumber: string;
@@ -59,13 +59,13 @@ export declare class DeliveryConfirmationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         deliveryDate: Date;
         dcNumber: string;
@@ -93,13 +93,13 @@ export declare class DeliveryConfirmationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         remarks: string | null;
         deliveryDate: Date;
         dcNumber: string;

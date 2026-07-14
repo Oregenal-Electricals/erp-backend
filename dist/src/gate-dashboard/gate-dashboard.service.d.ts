@@ -32,13 +32,13 @@ export declare class GateDashboardService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             status: import("@prisma/client").$Enums.VisitorStatus;
             visitorId: string;
@@ -66,13 +66,13 @@ export declare class GateDashboardService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             status: import("@prisma/client").$Enums.VehicleLogStatus;
             purpose: import("@prisma/client").$Enums.VehiclePurpose;
@@ -101,13 +101,13 @@ export declare class GateDashboardService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             unit: string;
             status: import("@prisma/client").$Enums.GateInwardStatus;
@@ -138,13 +138,13 @@ export declare class GateDashboardService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             unit: string;
             status: import("@prisma/client").$Enums.GateOutwardStatus;
@@ -185,13 +185,13 @@ export declare class GateDashboardService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             plantId: string;
             unit: string;
             status: import("@prisma/client").$Enums.GatePassStatus;

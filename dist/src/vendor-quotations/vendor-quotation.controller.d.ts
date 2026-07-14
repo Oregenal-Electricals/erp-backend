@@ -16,8 +16,8 @@ export declare class VendorQuotationController {
                 items: number;
             };
             vendor: {
-                code: string;
                 name: string;
+                code: string;
             };
             rfq: {
                 title: string;
@@ -25,13 +25,13 @@ export declare class VendorQuotationController {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             paymentTerms: string | null;
             currency: string;
@@ -51,13 +51,13 @@ export declare class VendorQuotationController {
     findByRfq(rfqId: string, req: any): Promise<({
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -73,18 +73,18 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -99,13 +99,13 @@ export declare class VendorQuotationController {
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -121,8 +121,8 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             phone: string;
             email: string;
         };
@@ -133,13 +133,13 @@ export declare class VendorQuotationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -154,13 +154,13 @@ export declare class VendorQuotationController {
     create(dto: CreateVendorQuotationDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -176,8 +176,8 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             phone: string;
             email: string;
         };
@@ -188,13 +188,13 @@ export declare class VendorQuotationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -209,13 +209,13 @@ export declare class VendorQuotationController {
     update(id: string, dto: UpdateVendorQuotationDto, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -231,8 +231,8 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             phone: string;
             email: string;
         };
@@ -243,13 +243,13 @@ export declare class VendorQuotationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -264,13 +264,13 @@ export declare class VendorQuotationController {
     submit(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -286,8 +286,8 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             phone: string;
             email: string;
         };
@@ -298,13 +298,13 @@ export declare class VendorQuotationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -319,13 +319,13 @@ export declare class VendorQuotationController {
     finalize(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -341,8 +341,8 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             phone: string;
             email: string;
         };
@@ -353,13 +353,13 @@ export declare class VendorQuotationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -374,13 +374,13 @@ export declare class VendorQuotationController {
     reject(id: string, req: any): Promise<{
         items: {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -396,8 +396,8 @@ export declare class VendorQuotationController {
             quotationId: string;
         }[];
         vendor: {
-            code: string;
             name: string;
+            code: string;
             phone: string;
             email: string;
         };
@@ -408,13 +408,13 @@ export declare class VendorQuotationController {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         paymentTerms: string | null;
         currency: string;
@@ -428,13 +428,13 @@ export declare class VendorQuotationController {
     }>;
     updateItem(id: string, itemId: string, dto: UpdateQuotationItemDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         itemCode: string;
         itemName: string;
         uom: string;

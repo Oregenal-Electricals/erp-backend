@@ -16,15 +16,15 @@ export declare class LeadsController {
     findAll(req: any, query: any): Promise<{
         data: {
             id: string;
-            phone: string | null;
-            email: string | null;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
+            phone: string | null;
+            email: string | null;
             status: string;
             remarks: string | null;
             estimatedValue: number | null;
@@ -46,15 +46,15 @@ export declare class LeadsController {
     }>;
     findOne(id: string, req: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;
@@ -72,15 +72,15 @@ export declare class LeadsController {
     }>;
     create(dto: CreateLeadDto, req: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;
@@ -98,15 +98,15 @@ export declare class LeadsController {
     }>;
     update(id: string, dto: UpdateLeadDto, req: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;
@@ -124,15 +124,15 @@ export declare class LeadsController {
     }>;
     convert(id: string, req: any): Promise<{
         id: string;
-        phone: string | null;
-        email: string | null;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        phone: string | null;
+        email: string | null;
         status: string;
         remarks: string | null;
         estimatedValue: number | null;

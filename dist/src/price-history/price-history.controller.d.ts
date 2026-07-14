@@ -12,20 +12,20 @@ export declare class PriceHistoryController {
     search(req: any, query: any): Promise<{
         data: ({
             priceList: {
-                code: string;
                 name: string;
+                code: string;
                 currency: string;
                 listType: string;
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             validFrom: Date;
             validTo: Date | null;
             itemCode: string;
@@ -45,20 +45,20 @@ export declare class PriceHistoryController {
     }>;
     getItemHistory(itemCode: string, req: any): Promise<({
         priceList: {
-            code: string;
             name: string;
+            code: string;
             currency: string;
             listType: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -73,20 +73,20 @@ export declare class PriceHistoryController {
     })[]>;
     getEffectivePrice(itemCode: string, req: any): Promise<({
         priceList: {
-            code: string;
             name: string;
+            code: string;
             currency: string;
             listType: string;
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;
@@ -101,13 +101,13 @@ export declare class PriceHistoryController {
     })[]>;
     getListHistory(priceListId: string, req: any): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         validFrom: Date;
         validTo: Date | null;
         itemCode: string;

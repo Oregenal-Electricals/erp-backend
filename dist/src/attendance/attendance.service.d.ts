@@ -10,15 +10,15 @@ export declare class AttendanceService {
     private calculateAttendance;
     createShift(dto: CreateShiftDto, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         startTime: string;
         endTime: string;
         shiftHours: number;
@@ -31,15 +31,15 @@ export declare class AttendanceService {
     }>;
     updateShift(id: string, dto: any, user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         startTime: string;
         endTime: string;
         shiftHours: number;
@@ -52,15 +52,15 @@ export declare class AttendanceService {
     }>;
     findAllShifts(user: any): Promise<{
         id: string;
-        code: string;
+        companyId: string;
         name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
+        code: string;
         startTime: string;
         endTime: string;
         shiftHours: number;
@@ -82,13 +82,13 @@ export declare class AttendanceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         checkIn: Date | null;
@@ -120,13 +120,13 @@ export declare class AttendanceService {
         };
     } & {
         id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
         status: string;
         remarks: string | null;
         checkIn: Date | null;
@@ -171,13 +171,13 @@ export declare class AttendanceService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             checkIn: Date | null;
@@ -223,13 +223,13 @@ export declare class AttendanceService {
             };
         } & {
             id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
             status: string;
             remarks: string | null;
             checkIn: Date | null;

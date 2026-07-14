@@ -27,14 +27,14 @@ export declare class AccountsController {
             };
         } & {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             parentId: string | null;
             currency: string;
             accountCode: string;
@@ -54,14 +54,14 @@ export declare class AccountsController {
         };
         children: {
             id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            companyId: string;
-            description: string | null;
             parentId: string | null;
             currency: string;
             accountCode: string;
@@ -74,14 +74,14 @@ export declare class AccountsController {
         }[];
     } & {
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         parentId: string | null;
         currency: string;
         accountCode: string;
@@ -94,14 +94,14 @@ export declare class AccountsController {
     }>;
     create(dto: CreateAccountDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         parentId: string | null;
         currency: string;
         accountCode: string;
@@ -114,14 +114,14 @@ export declare class AccountsController {
     }>;
     update(id: string, dto: UpdateAccountDto, req: any): Promise<{
         id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        companyId: string;
-        description: string | null;
         parentId: string | null;
         currency: string;
         accountCode: string;
