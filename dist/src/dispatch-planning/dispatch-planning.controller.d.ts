@@ -32,9 +32,9 @@ export declare class DispatchPlanningController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
             cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
             dispatchedQty: number;
             soId: string;
         }[];

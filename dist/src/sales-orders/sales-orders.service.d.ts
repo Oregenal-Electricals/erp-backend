@@ -6,6 +6,7 @@ export declare class SalesOrdersService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     private generateNumber;
+    createFromCpo(cpo: any, cpoItems: any[], user: any, tx?: any): Promise<any>;
     private calcItem;
     private includes;
     create(dto: CreateSoDto, user: any): Promise<{
@@ -27,9 +28,9 @@ export declare class SalesOrdersService {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
             cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
             dispatchedQty: number;
             soId: string;
         }[];
@@ -56,9 +57,9 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
-        cpoId: string;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -82,9 +83,9 @@ export declare class SalesOrdersService {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
             cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
             dispatchedQty: number;
             soId: string;
         }[];
@@ -111,9 +112,9 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
-        cpoId: string;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -137,9 +138,9 @@ export declare class SalesOrdersService {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
             cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
             dispatchedQty: number;
             soId: string;
         }[];
@@ -166,9 +167,9 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
-        cpoId: string;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -203,9 +204,9 @@ export declare class SalesOrdersService {
             totalAmount: number;
             deliveryDate: Date;
             subtotal: number;
+            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
-            cpoId: string;
             soNumber: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
@@ -233,9 +234,9 @@ export declare class SalesOrdersService {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
             cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
             dispatchedQty: number;
             soId: string;
         }[];
@@ -262,9 +263,9 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
-        cpoId: string;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -288,9 +289,9 @@ export declare class SalesOrdersService {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
             cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
             dispatchedQty: number;
             soId: string;
         }[];
@@ -317,9 +318,9 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
-        cpoId: string;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;

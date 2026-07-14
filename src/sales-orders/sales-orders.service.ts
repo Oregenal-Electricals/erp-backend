@@ -7,10 +7,54 @@ import { CreateSoDto, CancelSoDto } from './dto/sales-order.dto';
 export class SalesOrdersService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
-  private async generateNumber(companyId: string): Promise<string> {
-    const count = await this.prisma.salesOrder.count({ where: { companyId } });
+  private async generateNumber(companyId: string, client: any = this.prisma): Promise<string> {
+    const count = await client.salesOrder.count({ where: { companyId } });
     const year = new Date().getFullYear();
     return `SO-${year}-${String(count + 1).padStart(4, '0')}`;
+  }
+
+  /**
+   * Automatically creates a Sales Order from an acknowledged Customer PO,
+   * mirroring the CPO's own items exactly (no re-entry needed). Called by
+   * CustomerPoService.acknowledge() inside a single database transaction,
+   * so the CPO's ACKNOWLEDGED status and the new SO are created atomically
+   * - if SO creation fails for any reason, the whole acknowledgment rolls
+   * back rather than leaving the CPO acknowledged with no linked SO.
+   *
+   * Accepts an optional transaction client (`tx`); defaults to the normal
+   * prisma client so this method also works standalone if ever needed.
+   */
+  async createFromCpo(cpo: any, cpoItems: any[], user: any, tx: any = this.prisma) {
+    const soNumber = await this.generateNumber(user.companyId, tx);
+
+    const calcItems = cpoItems.map(item => ({
+      cpoItemId: item.id, itemCode: item.itemCode, itemName: item.itemName,
+      description: item.description, qty: item.qty, uom: item.uom || 'PCS',
+      unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: item.gstRate ?? 18,
+      ...this.calcItem(item),
+      createdBy: user.id, updatedBy: user.id,
+    }));
+
+    const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
+    const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
+    const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
+
+    const so = await tx.salesOrder.create({
+      data: {
+        soNumber, cpoId: cpo.id, customerName: cpo.customerName,
+        deliveryDate: cpo.deliveryDate,
+        currency: cpo.currency, remarks: `Auto-created on acknowledgment of ${cpo.cpoNumber}`,
+        subtotal: Math.round(subtotal * 100) / 100,
+        totalGst: Math.round(totalGst * 100) / 100,
+        totalAmount: Math.round(totalAmount * 100) / 100,
+        companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+        items: { create: calcItems },
+      },
+      include: this.includes(),
+    });
+
+    await this.audit.log({ tableName: 'sales_orders', recordId: so.id, action: 'CREATE', newValues: so, changedBy: user.id });
+    return so;
   }
 
   private calcItem(item: any) {

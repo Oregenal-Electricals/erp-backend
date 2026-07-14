@@ -18,10 +18,35 @@ let SalesOrdersService = class SalesOrdersService {
         this.prisma = prisma;
         this.audit = audit;
     }
-    async generateNumber(companyId) {
-        const count = await this.prisma.salesOrder.count({ where: { companyId } });
+    async generateNumber(companyId, client = this.prisma) {
+        const count = await client.salesOrder.count({ where: { companyId } });
         const year = new Date().getFullYear();
         return `SO-${year}-${String(count + 1).padStart(4, '0')}`;
+    }
+    async createFromCpo(cpo, cpoItems, user, tx = this.prisma) {
+        const soNumber = await this.generateNumber(user.companyId, tx);
+        const calcItems = cpoItems.map(item => {
+            var _a;
+            return (Object.assign(Object.assign({ cpoItemId: item.id, itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id }));
+        });
+        const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
+        const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
+        const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
+        const so = await tx.salesOrder.create({
+            data: {
+                soNumber, cpoId: cpo.id, customerName: cpo.customerName,
+                deliveryDate: cpo.deliveryDate,
+                currency: cpo.currency, remarks: `Auto-created on acknowledgment of ${cpo.cpoNumber}`,
+                subtotal: Math.round(subtotal * 100) / 100,
+                totalGst: Math.round(totalGst * 100) / 100,
+                totalAmount: Math.round(totalAmount * 100) / 100,
+                companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+                items: { create: calcItems },
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'sales_orders', recordId: so.id, action: 'CREATE', newValues: so, changedBy: user.id });
+        return so;
     }
     calcItem(item) {
         var _a;

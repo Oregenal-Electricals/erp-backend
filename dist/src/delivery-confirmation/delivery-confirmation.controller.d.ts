@@ -47,11 +47,11 @@ export declare class DeliveryConfirmationController {
         dispatch: {
             salesOrder: {
                 customerName: string;
+                soNumber: string;
                 cpo: {
                     customerPoNumber: string;
                     cpoNumber: string;
                 };
-                soNumber: string;
             };
             vehicleNumber: string;
             lrNumber: string;
@@ -81,11 +81,11 @@ export declare class DeliveryConfirmationController {
         dispatch: {
             salesOrder: {
                 customerName: string;
+                soNumber: string;
                 cpo: {
                     customerPoNumber: string;
                     cpoNumber: string;
                 };
-                soNumber: string;
             };
             vehicleNumber: string;
             lrNumber: string;

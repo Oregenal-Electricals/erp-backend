@@ -41,9 +41,9 @@ export declare class CustomerPortalController {
                 discount: number;
                 pendingQty: number;
                 qty: number;
-                gstAmount: number;
-                taxableAmt: number;
                 cpoItemId: string | null;
+                taxableAmt: number;
+                gstAmount: number;
                 dispatchedQty: number;
                 soId: string;
             }[];
@@ -64,9 +64,9 @@ export declare class CustomerPortalController {
             totalAmount: number;
             deliveryDate: Date;
             subtotal: number;
+            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
-            cpoId: string;
             soNumber: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;

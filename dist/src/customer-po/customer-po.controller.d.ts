@@ -53,11 +53,11 @@ export declare class CustomerPoController {
             verbalConfirmedDate: Date | null;
             customerEmail: string | null;
             customerPhone: string | null;
-            totalGst: number;
             cpoNumber: string;
             mrpRunAt: Date | null;
             mrpRunBy: string | null;
             lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+            totalGst: number;
             acknowledgedDate: Date | null;
             cancelledDate: Date | null;
             amendmentOfId: string | null;
@@ -85,10 +85,10 @@ export declare class CustomerPoController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
-            deliveredQty: number;
             cpoId: string;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
         }[];
         quotation: {
             revision: number;
@@ -133,11 +133,11 @@ export declare class CustomerPoController {
         verbalConfirmedDate: Date | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        totalGst: number;
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
         amendmentOfId: string | null;
@@ -188,10 +188,10 @@ export declare class CustomerPoController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
-            deliveredQty: number;
             cpoId: string;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
         }[];
         quotation: {
             revision: number;
@@ -236,11 +236,11 @@ export declare class CustomerPoController {
         verbalConfirmedDate: Date | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        totalGst: number;
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
         amendmentOfId: string | null;
@@ -264,10 +264,10 @@ export declare class CustomerPoController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
-            deliveredQty: number;
             cpoId: string;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
         }[];
         quotation: {
             revision: number;
@@ -312,11 +312,11 @@ export declare class CustomerPoController {
         verbalConfirmedDate: Date | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        totalGst: number;
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
         amendmentOfId: string | null;
@@ -340,10 +340,10 @@ export declare class CustomerPoController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
-            deliveredQty: number;
             cpoId: string;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
         }[];
         quotation: {
             revision: number;
@@ -388,11 +388,11 @@ export declare class CustomerPoController {
         verbalConfirmedDate: Date | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        totalGst: number;
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
         amendmentOfId: string | null;
@@ -416,10 +416,10 @@ export declare class CustomerPoController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
-            deliveredQty: number;
             cpoId: string;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
         }[];
         quotation: {
             revision: number;
@@ -464,11 +464,11 @@ export declare class CustomerPoController {
         verbalConfirmedDate: Date | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        totalGst: number;
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
         amendmentOfId: string | null;
@@ -492,10 +492,10 @@ export declare class CustomerPoController {
             discount: number;
             pendingQty: number;
             qty: number;
-            gstAmount: number;
-            taxableAmt: number;
-            deliveredQty: number;
             cpoId: string;
+            taxableAmt: number;
+            gstAmount: number;
+            deliveredQty: number;
         }[];
         quotation: {
             revision: number;
@@ -540,11 +540,11 @@ export declare class CustomerPoController {
         verbalConfirmedDate: Date | null;
         customerEmail: string | null;
         customerPhone: string | null;
-        totalGst: number;
         cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
         amendmentOfId: string | null;

@@ -2,10 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
+import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 
 @Injectable()
 export class CustomerPoService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -110,18 +111,34 @@ export class CustomerPoService {
     return cpo;
   }
 
+  /**
+   * Acknowledging a CPO now also automatically creates its linked Sales
+   * Order in the same database transaction - if SO creation fails for
+   * any reason, the acknowledgment itself rolls back too, so a CPO can
+   * never end up ACKNOWLEDGED without a corresponding SO.
+   */
   async acknowledge(id: string, user: any) {
-    const cpo = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });
-    if (!cpo) throw new NotFoundException('CPO not found');
-    if (cpo.status !== 'RECEIVED') throw new BadRequestException('Only RECEIVED CPOs can be acknowledged');
-
-    const updated = await this.prisma.customerPo.update({
-      where: { id },
-      data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), updatedBy: user.id },
-      include: this.includes(),
+    const existing = await this.prisma.customerPo.findFirst({
+      where: { id, companyId: user.companyId },
+      include: { items: true },
     });
-    await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
-    return updated;
+    if (!existing) throw new NotFoundException('CPO not found');
+    if (existing.status !== 'RECEIVED') throw new BadRequestException('Only RECEIVED CPOs can be acknowledged');
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.customerPo.update({
+        where: { id },
+        data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), updatedBy: user.id },
+        include: this.includes(),
+      });
+
+      const so = await this.salesOrders.createFromCpo(updated, existing.items, user, tx);
+
+      return { cpo: updated, salesOrder: so };
+    });
+
+    await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: result.cpo, changedBy: user.id });
+    return result.cpo;
   }
 
   /**

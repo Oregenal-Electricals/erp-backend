@@ -94,11 +94,11 @@ export declare class ArController {
     }>;
     findOne(id: string, req: any): Promise<{
         salesOrder: {
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatch: {
             lrNumber: string;
@@ -151,11 +151,11 @@ export declare class ArController {
     }>;
     create(dto: CreateArInvoiceDto, req: any): Promise<{
         salesOrder: {
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatch: {
             lrNumber: string;
@@ -208,11 +208,11 @@ export declare class ArController {
     }>;
     createFromDispatch(dispatchId: string, req: any): Promise<{
         salesOrder: {
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatch: {
             lrNumber: string;

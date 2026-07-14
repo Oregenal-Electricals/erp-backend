@@ -13,10 +13,12 @@ exports.CustomerPoService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const sales_orders_service_1 = require("../sales-orders/sales-orders.service");
 let CustomerPoService = class CustomerPoService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, salesOrders) {
         this.prisma = prisma;
         this.audit = audit;
+        this.salesOrders = salesOrders;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -103,18 +105,25 @@ let CustomerPoService = class CustomerPoService {
         return cpo;
     }
     async acknowledge(id, user) {
-        const cpo = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });
-        if (!cpo)
-            throw new common_1.NotFoundException('CPO not found');
-        if (cpo.status !== 'RECEIVED')
-            throw new common_1.BadRequestException('Only RECEIVED CPOs can be acknowledged');
-        const updated = await this.prisma.customerPo.update({
-            where: { id },
-            data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), updatedBy: user.id },
-            include: this.includes(),
+        const existing = await this.prisma.customerPo.findFirst({
+            where: { id, companyId: user.companyId },
+            include: { items: true },
         });
-        await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
-        return updated;
+        if (!existing)
+            throw new common_1.NotFoundException('CPO not found');
+        if (existing.status !== 'RECEIVED')
+            throw new common_1.BadRequestException('Only RECEIVED CPOs can be acknowledged');
+        const result = await this.prisma.$transaction(async (tx) => {
+            const updated = await tx.customerPo.update({
+                where: { id },
+                data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), updatedBy: user.id },
+                include: this.includes(),
+            });
+            const so = await this.salesOrders.createFromCpo(updated, existing.items, user, tx);
+            return { cpo: updated, salesOrder: so };
+        });
+        await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: result.cpo, changedBy: user.id });
+        return result.cpo;
     }
     async update(id, dto, user) {
         const existing = await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId } });
@@ -541,6 +550,6 @@ let CustomerPoService = class CustomerPoService {
 exports.CustomerPoService = CustomerPoService;
 exports.CustomerPoService = CustomerPoService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService])
 ], CustomerPoService);
 //# sourceMappingURL=customer-po.service.js.map

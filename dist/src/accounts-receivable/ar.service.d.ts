@@ -11,11 +11,11 @@ export declare class ArService {
     private includes;
     createFromDispatch(dispatchId: string, user: any): Promise<{
         salesOrder: {
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatch: {
             lrNumber: string;
@@ -68,11 +68,11 @@ export declare class ArService {
     }>;
     create(dto: CreateArInvoiceDto, user: any): Promise<{
         salesOrder: {
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatch: {
             lrNumber: string;
@@ -189,11 +189,11 @@ export declare class ArService {
     }>;
     findOne(id: string, user: any): Promise<{
         salesOrder: {
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatch: {
             lrNumber: string;

@@ -30,11 +30,11 @@ export declare class DispatchService {
         }[];
         salesOrder: {
             customerName: string;
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatchPlan: {
             transportMode: string;
@@ -128,11 +128,11 @@ export declare class DispatchService {
         }[];
         salesOrder: {
             customerName: string;
+            soNumber: string;
             cpo: {
                 customerPoNumber: string;
                 cpoNumber: string;
             };
-            soNumber: string;
         };
         dispatchPlan: {
             transportMode: string;
