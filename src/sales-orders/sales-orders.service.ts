@@ -77,10 +77,23 @@ export class SalesOrdersService {
     };
   }
 
+  /**
+   * Manual SO creation is now a fallback path only - the normal flow is
+   * automatic, triggered when a CPO is acknowledged (see
+   * CustomerPoService.acknowledge() -> createFromCpo()). A CPO always
+   * maps to exactly one Sales Order; splitting a large order into
+   * multiple partial shipments happens downstream in Work Orders /
+   * Dispatch Planning (which already track pendingQty/dispatchedQty per
+   * item), never by creating a second SO for the same CPO. This guard
+   * exists to prevent that exact mistake.
+   */
   async create(dto: CreateSoDto, user: any) {
     const cpo = await this.prisma.customerPo.findFirst({ where: { id: dto.cpoId, companyId: user.companyId } });
     if (!cpo) throw new NotFoundException('Customer PO not found');
     if (!['ACKNOWLEDGED','IN_PROGRESS'].includes(cpo.status)) throw new BadRequestException('CPO must be ACKNOWLEDGED or IN_PROGRESS');
+
+    const existingSo = await this.prisma.salesOrder.findFirst({ where: { cpoId: dto.cpoId, isActive: true } });
+    if (existingSo) throw new BadRequestException(`This CPO already has Sales Order ${existingSo.soNumber}. A CPO can only have one Sales Order - split shipments in Work Orders / Dispatch Planning instead.`);
 
     const soNumber = await this.generateNumber(user.companyId);
 

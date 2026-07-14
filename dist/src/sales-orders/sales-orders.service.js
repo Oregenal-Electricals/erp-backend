@@ -73,6 +73,9 @@ let SalesOrdersService = class SalesOrdersService {
             throw new common_1.NotFoundException('Customer PO not found');
         if (!['ACKNOWLEDGED', 'IN_PROGRESS'].includes(cpo.status))
             throw new common_1.BadRequestException('CPO must be ACKNOWLEDGED or IN_PROGRESS');
+        const existingSo = await this.prisma.salesOrder.findFirst({ where: { cpoId: dto.cpoId, isActive: true } });
+        if (existingSo)
+            throw new common_1.BadRequestException(`This CPO already has Sales Order ${existingSo.soNumber}. A CPO can only have one Sales Order - split shipments in Work Orders / Dispatch Planning instead.`);
         const soNumber = await this.generateNumber(user.companyId);
         const calcItems = dto.items.map(item => {
             var _a;
