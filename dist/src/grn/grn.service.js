@@ -32,10 +32,6 @@ let GrnService = class GrnService {
         };
     }
     async create(dto, user) {
-        if (dto.grnType === 'DOMESTIC' && !dto.poId)
-            throw new common_1.BadRequestException('Domestic GRN requires a Purchase Order');
-        if (dto.grnType === 'IMPORT' && !dto.ipoId)
-            throw new common_1.BadRequestException('Import GRN requires an Import Purchase Order');
         if (!dto.items || dto.items.length === 0)
             throw new common_1.BadRequestException('GRN must have at least one item');
         for (const item of dto.items) {
@@ -45,20 +41,49 @@ let GrnService = class GrnService {
                 throw new common_1.BadRequestException(`Item ${item.itemCode}: received qty (${totalReceived}) exceeds ordered qty (${item.orderedQty}) by more than 5%`);
             }
         }
+        let resolvedPoId = dto.poId;
+        let resolvedInvoiceNumber = dto.invoiceNumber;
+        let resolvedInvoiceDate = dto.invoiceDate;
+        if (dto.gateInwardEntryId) {
+            const gin = await this.prisma.gateInwardEntry.findFirst({
+                where: { id: dto.gateInwardEntryId, companyId: user.companyId },
+            });
+            if (!gin)
+                throw new common_1.NotFoundException('Gate Inward entry not found');
+            if (gin.status === 'REJECTED')
+                throw new common_1.BadRequestException('Cannot create a GRN from a rejected Gate Inward entry');
+            const existingGrn = await this.prisma.grnHeader.findFirst({
+                where: { gateInwardEntryId: dto.gateInwardEntryId, isActive: true },
+            });
+            if (existingGrn) {
+                throw new common_1.BadRequestException(`This Gate Inward entry already has GRN ${existingGrn.grnNumber} - a gate entry can only be received into one GRN.`);
+            }
+            if (gin.poId)
+                resolvedPoId = gin.poId;
+            if (gin.invoiceNumber)
+                resolvedInvoiceNumber = gin.invoiceNumber;
+            if (gin.invoiceDate)
+                resolvedInvoiceDate = gin.invoiceDate.toISOString();
+        }
+        if (dto.grnType === 'DOMESTIC' && !resolvedPoId)
+            throw new common_1.BadRequestException('Domestic GRN requires a Purchase Order');
+        if (dto.grnType === 'IMPORT' && !dto.ipoId)
+            throw new common_1.BadRequestException('Import GRN requires an Import Purchase Order');
         const grnNumber = await this.generateGrnNumber(user.companyId);
         const grn = await this.prisma.grnHeader.create({
             data: {
                 grnNumber,
                 grnType: dto.grnType,
-                poId: dto.poId,
+                poId: resolvedPoId,
                 ipoId: dto.ipoId,
+                gateInwardEntryId: dto.gateInwardEntryId,
                 landedCostId: dto.landedCostId,
                 warehouseId: dto.warehouseId,
                 receivedDate: dto.receivedDate ? new Date(dto.receivedDate) : new Date(),
                 vehicleNumber: dto.vehicleNumber,
                 dcNumber: dto.dcNumber,
-                invoiceNumber: dto.invoiceNumber,
-                invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
+                invoiceNumber: resolvedInvoiceNumber,
+                invoiceDate: resolvedInvoiceDate ? new Date(resolvedInvoiceDate) : undefined,
                 remarks: dto.remarks,
                 companyId: user.companyId,
                 createdBy: user.id, updatedBy: user.id,

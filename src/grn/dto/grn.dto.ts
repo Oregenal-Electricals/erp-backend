@@ -18,6 +18,7 @@ export class CreateGrnDto {
   @IsString() @IsIn(['DOMESTIC', 'IMPORT']) grnType: string;
   @IsOptional() @IsString() poId?: string;
   @IsOptional() @IsString() ipoId?: string;
+  @IsOptional() @IsString() gateInwardEntryId?: string;
   @IsOptional() @IsString() landedCostId?: string;
   @IsString() warehouseId: string;
   @IsOptional() @IsDateString() receivedDate?: string;

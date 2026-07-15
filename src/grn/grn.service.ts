@@ -23,9 +23,6 @@ export class GrnService {
   }
 
   async create(dto: CreateGrnDto, user: any) {
-    // Validate source document
-    if (dto.grnType === 'DOMESTIC' && !dto.poId) throw new BadRequestException('Domestic GRN requires a Purchase Order');
-    if (dto.grnType === 'IMPORT' && !dto.ipoId) throw new BadRequestException('Import GRN requires an Import Purchase Order');
     if (!dto.items || dto.items.length === 0) throw new BadRequestException('GRN must have at least one item');
 
     // Validate received qty vs ordered qty (max 105% tolerance)
@@ -37,21 +34,48 @@ export class GrnService {
       }
     }
 
+    let resolvedPoId = dto.poId;
+    let resolvedInvoiceNumber = dto.invoiceNumber;
+    let resolvedInvoiceDate = dto.invoiceDate;
+    if (dto.gateInwardEntryId) {
+      const gin = await this.prisma.gateInwardEntry.findFirst({
+        where: { id: dto.gateInwardEntryId, companyId: user.companyId },
+      });
+      if (!gin) throw new NotFoundException('Gate Inward entry not found');
+      if (gin.status === 'REJECTED') throw new BadRequestException('Cannot create a GRN from a rejected Gate Inward entry');
+
+      const existingGrn = await this.prisma.grnHeader.findFirst({
+        where: { gateInwardEntryId: dto.gateInwardEntryId, isActive: true },
+      });
+      if (existingGrn) {
+        throw new BadRequestException(`This Gate Inward entry already has GRN ${existingGrn.grnNumber} - a gate entry can only be received into one GRN.`);
+      }
+
+      if (gin.poId) resolvedPoId = gin.poId;
+      if (gin.invoiceNumber) resolvedInvoiceNumber = gin.invoiceNumber;
+      if (gin.invoiceDate) resolvedInvoiceDate = gin.invoiceDate.toISOString();
+    }
+
+    // Validate source document (now that gate-inward-derived poId, if any, has already been resolved above)
+    if (dto.grnType === 'DOMESTIC' && !resolvedPoId) throw new BadRequestException('Domestic GRN requires a Purchase Order');
+    if (dto.grnType === 'IMPORT' && !dto.ipoId) throw new BadRequestException('Import GRN requires an Import Purchase Order');
+
     const grnNumber = await this.generateGrnNumber(user.companyId);
 
     const grn = await this.prisma.grnHeader.create({
       data: {
         grnNumber,
         grnType: dto.grnType,
-        poId: dto.poId,
+        poId: resolvedPoId,
         ipoId: dto.ipoId,
+        gateInwardEntryId: dto.gateInwardEntryId,
         landedCostId: dto.landedCostId,
         warehouseId: dto.warehouseId,
         receivedDate: dto.receivedDate ? new Date(dto.receivedDate) : new Date(),
         vehicleNumber: dto.vehicleNumber,
         dcNumber: dto.dcNumber,
-        invoiceNumber: dto.invoiceNumber,
-        invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
+        invoiceNumber: resolvedInvoiceNumber,
+        invoiceDate: resolvedInvoiceDate ? new Date(resolvedInvoiceDate) : undefined,
         remarks: dto.remarks,
         companyId: user.companyId,
         createdBy: user.id, updatedBy: user.id,

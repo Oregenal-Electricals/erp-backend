@@ -14,6 +14,7 @@ export declare class CreateGrnDto {
     grnType: string;
     poId?: string;
     ipoId?: string;
+    gateInwardEntryId?: string;
     landedCostId?: string;
     warehouseId: string;
     receivedDate?: string;

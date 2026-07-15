@@ -780,6 +780,7 @@ model GateInwardEntry {
   updatedBy  String
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
+  grnHeaders GrnHeader[]
 
   @@map("gate_inward_entries")
   @@index([companyId])
@@ -2293,6 +2294,8 @@ model GrnHeader {
   po              PurchaseOrder? @relation(fields: [poId], references: [id])
   ipoId           String?
   ipo             ImportPurchaseOrder? @relation(fields: [ipoId], references: [id])
+  gateInwardEntryId String?
+  gateInwardEntry GateInwardEntry? @relation(fields: [gateInwardEntryId], references: [id])
   landedCostId    String?
   warehouseId     String
   warehouse       Warehouse @relation(fields: [warehouseId], references: [id])

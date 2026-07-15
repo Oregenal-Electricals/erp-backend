@@ -54,6 +54,7 @@ export declare class GrnController {
             ipoId: string | null;
             landedCostId: string | null;
             grnType: string;
+            gateInwardEntryId: string | null;
             receivedDate: Date;
             dcNumber: string | null;
             grnNumber: string;
@@ -125,6 +126,7 @@ export declare class GrnController {
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
+        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
@@ -191,6 +193,7 @@ export declare class GrnController {
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
+        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
@@ -257,6 +260,7 @@ export declare class GrnController {
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
+        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
@@ -323,6 +327,7 @@ export declare class GrnController {
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
+        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
