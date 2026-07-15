@@ -22,6 +22,16 @@ export class BomService {
     const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
     if (!product) throw new NotFoundException('Product not found');
 
+    const existingActiveBom = await this.prisma.bom.findFirst({
+      where: { companyId: user.companyId, productId: dto.productId, status: { not: 'OBSOLETE' }, isActive: true },
+    });
+    if (existingActiveBom) {
+      throw new BadRequestException(
+        `This product already has an active BOM (${existingActiveBom.bomNumber}, ${existingActiveBom.status}). ` +
+        `Use that one, or create a proper revision via Bom Revisions instead of a new duplicate BOM.`
+      );
+    }
+
     const bomNumber = await this.generateBomNumber(user.companyId);
     const bom = await this.prisma.bom.create({
       data: { ...dto, bomNumber, companyId: user.companyId, createdBy: user.id, updatedBy: user.id },

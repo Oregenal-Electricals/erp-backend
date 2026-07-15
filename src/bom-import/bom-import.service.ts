@@ -237,6 +237,16 @@ export class BomImportService {
         productId = newProduct.id;
       }
 
+      const existingActiveBom = await tx.bom.findFirst({
+        where: { companyId: user.companyId, productId, status: { not: 'OBSOLETE' }, isActive: true },
+      });
+      if (existingActiveBom) {
+        throw new BadRequestException(
+          `This product already has an active BOM (${existingActiveBom.bomNumber}, ${existingActiveBom.status}). ` +
+          `Use Bom Revisions to update it instead of importing a duplicate.`
+        );
+      }
+
       const bom = await tx.bom.create({
         data: {
           companyId: user.companyId,
