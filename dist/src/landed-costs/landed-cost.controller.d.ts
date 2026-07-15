@@ -66,9 +66,9 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
-            qty: number;
             allocationRatio: number;
             allocatedCost: number;
             landedCostPerUnit: number;
@@ -123,9 +123,9 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
-            qty: number;
             allocationRatio: number;
             allocatedCost: number;
             landedCostPerUnit: number;
@@ -180,9 +180,9 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
-            qty: number;
             allocationRatio: number;
             allocatedCost: number;
             landedCostPerUnit: number;
@@ -237,9 +237,9 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
-            qty: number;
             allocationRatio: number;
             allocatedCost: number;
             landedCostPerUnit: number;
@@ -294,9 +294,9 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
-            qty: number;
             allocationRatio: number;
             allocatedCost: number;
             landedCostPerUnit: number;
@@ -351,9 +351,9 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
-            qty: number;
             allocationRatio: number;
             allocatedCost: number;
             landedCostPerUnit: number;

@@ -351,30 +351,12 @@ export declare class BomService {
         bomNumber: string;
         totalCost: number | null;
     }>;
-    addItem(bomId: string, dto: CreateBomItemDto, user: any): Promise<{
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        quantity: number;
-        itemCode: string;
-        itemName: string;
-        itemType: string;
-        uom: string;
-        notes: string | null;
-        sequence: number;
-        rawMaterialId: string | null;
-        wastagePercent: number | null;
-        unitCost: number | null;
-        isCritical: boolean;
-        totalCost: number | null;
-        bomId: string;
-        effectiveQty: number;
-    }>;
+    addItem(bomId: string, dto: CreateBomItemDto, user: any, client?: any, options?: {
+        skipCostRecalc?: boolean;
+        skipAudit?: boolean;
+        defaultWarehouseId?: string;
+    }): Promise<any>;
+    private ensureStockBalanceExists;
     updateItem(bomId: string, itemId: string, dto: UpdateBomItemDto, user: any): Promise<{
         id: string;
         companyId: string;

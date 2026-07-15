@@ -154,19 +154,55 @@ let BomService = class BomService {
         await this.audit.log({ tableName: 'boms', recordId: cloned.id, action: 'CREATE', newValues: cloned, changedBy: user.id });
         return this.findOne(cloned.id, user);
     }
-    async addItem(bomId, dto, user) {
-        const bom = await this.findOne(bomId, user);
+    async addItem(bomId, dto, user, client = this.prisma, options = {}) {
+        const bom = client === this.prisma ? await this.findOne(bomId, user) : await client.bom.findFirst({ where: { id: bomId, companyId: user.companyId } });
+        if (!bom)
+            throw new common_1.NotFoundException('BOM not found');
         if (bom.status !== 'DRAFT')
             throw new common_1.BadRequestException('Can only add items to DRAFT BOMs');
         const wastage = dto.wastagePercent || 0;
         const effectiveQty = dto.quantity * (1 + wastage / 100);
         const totalCost = dto.unitCost ? effectiveQty * dto.unitCost : null;
-        const item = await this.prisma.bomItem.create({
+        const item = await client.bomItem.create({
             data: Object.assign(Object.assign({}, dto), { bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id }),
         });
-        await this.recalculateBomCost(bomId);
-        await this.audit.log({ tableName: 'bom_items', recordId: item.id, action: 'CREATE', newValues: item, changedBy: user.id });
+        await this.ensureStockBalanceExists(item.itemCode, item.itemName, item.uom, user, client, options.defaultWarehouseId);
+        if (!options.skipCostRecalc)
+            await this.recalculateBomCost(bomId, client);
+        if (!options.skipAudit)
+            await this.audit.log({ tableName: 'bom_items', recordId: item.id, action: 'CREATE', newValues: item, changedBy: user.id });
         return item;
+    }
+    async ensureStockBalanceExists(itemCode, itemName, uom, user, client = this.prisma, knownDefaultWarehouseId) {
+        const existing = await client.stockBalance.findFirst({
+            where: { companyId: user.companyId, itemCode },
+        });
+        if (existing)
+            return;
+        let warehouseId = knownDefaultWarehouseId;
+        if (!warehouseId) {
+            const defaultWarehouse = await client.warehouse.findFirst({
+                where: { companyId: user.companyId, isDefault: true },
+            });
+            if (!defaultWarehouse)
+                return;
+            warehouseId = defaultWarehouse.id;
+        }
+        await client.stockBalance.create({
+            data: {
+                companyId: user.companyId,
+                itemCode,
+                itemName,
+                warehouseId,
+                availableQty: 0,
+                reservedQty: 0,
+                inQcQty: 0,
+                unitCost: 0,
+                totalValue: 0,
+                createdBy: user.id,
+                updatedBy: user.id,
+            },
+        });
     }
     async updateItem(bomId, itemId, dto, user) {
         var _a, _b, _c, _d;
@@ -200,10 +236,10 @@ let BomService = class BomService {
         await this.audit.log({ tableName: 'bom_items', recordId: itemId, action: 'DELETE', oldValues: item, newValues: updated, changedBy: user.id });
         return { message: 'BOM item removed' };
     }
-    async recalculateBomCost(bomId) {
-        const items = await this.prisma.bomItem.findMany({ where: { bomId, isActive: true } });
+    async recalculateBomCost(bomId, client = this.prisma) {
+        const items = await client.bomItem.findMany({ where: { bomId, isActive: true } });
         const totalCost = items.reduce((sum, i) => sum + (i.totalCost || 0), 0);
-        await this.prisma.bom.update({ where: { id: bomId }, data: { totalCost } });
+        await client.bom.update({ where: { id: bomId }, data: { totalCost } });
     }
     async getStats(user) {
         const where = {};

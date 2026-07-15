@@ -39,6 +39,7 @@ const price_list_module_1 = require("./price-lists/price-list.module");
 const price_history_module_1 = require("./price-history/price-history.module");
 const product_revision_module_1 = require("./product-revisions/product-revision.module");
 const bom_module_1 = require("./bom/bom.module");
+const bom_import_module_1 = require("./bom-import/bom-import.module");
 const bom_revision_module_1 = require("./bom-revisions/bom-revision.module");
 const custom_field_module_1 = require("./custom-fields/custom-field.module");
 const purchase_requisition_module_1 = require("./purchase-requisitions/purchase-requisition.module");
@@ -152,6 +153,7 @@ exports.AppModule = AppModule = __decorate([
             price_history_module_1.PriceHistoryModule,
             product_revision_module_1.ProductRevisionModule,
             bom_module_1.BomModule,
+            bom_import_module_1.BomImportModule,
             bom_revision_module_1.BomRevisionModule,
             custom_field_module_1.CustomFieldModule,
             purchase_requisition_module_1.PurchaseRequisitionModule,

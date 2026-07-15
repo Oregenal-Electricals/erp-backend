@@ -199,10 +199,10 @@ export declare class StockAdjustmentService {
         draft: number;
         approved: number;
         cancelled: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.StockAdjustmentGroupByOutputType, "adjustmentType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.StockAdjustmentGroupByOutputType, "adjustmentType"[]> & {
             _count: number;
         })[];
-        byReason: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.StockAdjustmentGroupByOutputType, "reason"[]> & {
+        byReason: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.StockAdjustmentGroupByOutputType, "reason"[]> & {
             _count: number;
         })[];
     }>;

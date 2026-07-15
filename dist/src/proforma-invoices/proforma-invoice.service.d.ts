@@ -22,11 +22,11 @@ export declare class ProformaInvoiceService {
             hsnCode: string | null;
             uom: string;
             sequence: number;
+            qty: number;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
             ipoItemId: string | null;
-            qty: number;
             piId: string;
         }[];
         ipo: {
@@ -122,11 +122,11 @@ export declare class ProformaInvoiceService {
             hsnCode: string | null;
             uom: string;
             sequence: number;
+            qty: number;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
             ipoItemId: string | null;
-            qty: number;
             piId: string;
         }[];
         ipo: {
@@ -179,11 +179,11 @@ export declare class ProformaInvoiceService {
             hsnCode: string | null;
             uom: string;
             sequence: number;
+            qty: number;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
             ipoItemId: string | null;
-            qty: number;
             piId: string;
         }[];
         ipo: {
@@ -236,11 +236,11 @@ export declare class ProformaInvoiceService {
             hsnCode: string | null;
             uom: string;
             sequence: number;
+            qty: number;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
             ipoItemId: string | null;
-            qty: number;
             piId: string;
         }[];
         ipo: {
@@ -293,11 +293,11 @@ export declare class ProformaInvoiceService {
             hsnCode: string | null;
             uom: string;
             sequence: number;
+            qty: number;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
             ipoItemId: string | null;
-            qty: number;
             piId: string;
         }[];
         ipo: {
@@ -350,11 +350,11 @@ export declare class ProformaInvoiceService {
             hsnCode: string | null;
             uom: string;
             sequence: number;
+            qty: number;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
             ipoItemId: string | null;
-            qty: number;
             piId: string;
         }[];
         ipo: {

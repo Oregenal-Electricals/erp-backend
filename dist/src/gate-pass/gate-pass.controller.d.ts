@@ -48,8 +48,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -121,8 +121,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -206,8 +206,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -279,8 +279,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -352,8 +352,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -425,8 +425,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -498,8 +498,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;
@@ -571,8 +571,8 @@ export declare class GatePassController {
         updatedBy: string;
         plantId: string;
         unit: string;
-        status: import("@prisma/client").$Enums.GatePassStatus;
-        type: import("@prisma/client").$Enums.GatePassType;
+        status: import(".prisma/client").$Enums.GatePassStatus;
+        type: import(".prisma/client").$Enums.GatePassType;
         requestedById: string;
         purpose: string;
         vehicleNumber: string | null;

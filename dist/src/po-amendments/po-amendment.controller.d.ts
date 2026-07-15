@@ -9,7 +9,7 @@ export declare class PoAmendmentController {
         submitted: number;
         approved: number;
         rejected: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.PoAmendmentGroupByOutputType, "amendmentType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.PoAmendmentGroupByOutputType, "amendmentType"[]> & {
             _count: number;
         })[];
     }>;

@@ -8,7 +8,7 @@ export declare class StockTransferController {
         draft: number;
         confirmed: number;
         cancelled: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.StockTransferGroupByOutputType, "transferType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.StockTransferGroupByOutputType, "transferType"[]> & {
             _count: number;
         })[];
     }>;

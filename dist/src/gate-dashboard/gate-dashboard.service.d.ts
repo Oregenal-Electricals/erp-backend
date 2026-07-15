@@ -40,7 +40,7 @@ export declare class GateDashboardService {
             createdBy: string;
             updatedBy: string;
             plantId: string;
-            status: import("@prisma/client").$Enums.VisitorStatus;
+            status: import(".prisma/client").$Enums.VisitorStatus;
             visitorId: string;
             hostEmployeeId: string | null;
             purpose: string;
@@ -62,7 +62,7 @@ export declare class GateDashboardService {
             };
             vehicle: {
                 vehicleNumber: string;
-                vehicleType: import("@prisma/client").$Enums.VehicleType;
+                vehicleType: import(".prisma/client").$Enums.VehicleType;
             };
         } & {
             id: string;
@@ -74,8 +74,8 @@ export declare class GateDashboardService {
             createdBy: string;
             updatedBy: string;
             plantId: string;
-            status: import("@prisma/client").$Enums.VehicleLogStatus;
-            purpose: import("@prisma/client").$Enums.VehiclePurpose;
+            status: import(".prisma/client").$Enums.VehicleLogStatus;
+            purpose: import(".prisma/client").$Enums.VehiclePurpose;
             remarks: string | null;
             logNumber: string;
             vehicleId: string;
@@ -110,7 +110,7 @@ export declare class GateDashboardService {
             updatedBy: string;
             plantId: string;
             unit: string;
-            status: import("@prisma/client").$Enums.GateInwardStatus;
+            status: import(".prisma/client").$Enums.GateInwardStatus;
             remarks: string | null;
             materialDescription: string;
             supplierName: string;
@@ -147,7 +147,7 @@ export declare class GateDashboardService {
             updatedBy: string;
             plantId: string;
             unit: string;
-            status: import("@prisma/client").$Enums.GateOutwardStatus;
+            status: import(".prisma/client").$Enums.GateOutwardStatus;
             remarks: string | null;
             materialDescription: string;
             customerName: string;
@@ -194,8 +194,8 @@ export declare class GateDashboardService {
             updatedBy: string;
             plantId: string;
             unit: string;
-            status: import("@prisma/client").$Enums.GatePassStatus;
-            type: import("@prisma/client").$Enums.GatePassType;
+            status: import(".prisma/client").$Enums.GatePassStatus;
+            type: import(".prisma/client").$Enums.GatePassType;
             requestedById: string;
             purpose: string;
             vehicleNumber: string | null;

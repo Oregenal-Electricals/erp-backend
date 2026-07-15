@@ -28,11 +28,11 @@ export declare class SalesOrdersController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoItemId: string | null;
             taxableAmt: number;
             gstAmount: number;
@@ -74,8 +74,8 @@ export declare class SalesOrdersController {
             items: {
                 id: string;
                 itemCode: string;
-                pendingQty: number;
                 qty: number;
+                pendingQty: number;
                 dispatchedQty: number;
             }[];
             cpo: {
@@ -124,11 +124,11 @@ export declare class SalesOrdersController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoItemId: string | null;
             taxableAmt: number;
             gstAmount: number;
@@ -179,11 +179,11 @@ export declare class SalesOrdersController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoItemId: string | null;
             taxableAmt: number;
             gstAmount: number;
@@ -234,11 +234,11 @@ export declare class SalesOrdersController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoItemId: string | null;
             taxableAmt: number;
             gstAmount: number;
@@ -289,11 +289,11 @@ export declare class SalesOrdersController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoItemId: string | null;
             taxableAmt: number;
             gstAmount: number;

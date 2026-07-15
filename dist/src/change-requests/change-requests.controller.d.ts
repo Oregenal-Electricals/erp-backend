@@ -32,8 +32,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -72,8 +72,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -141,8 +141,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -181,8 +181,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -221,8 +221,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -261,8 +261,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -301,8 +301,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;
@@ -341,8 +341,8 @@ export declare class ChangeRequestsController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ChangeRequestStatus;
-        type: import("@prisma/client").$Enums.ChangeRequestType;
+        status: import(".prisma/client").$Enums.ChangeRequestStatus;
+        type: import(".prisma/client").$Enums.ChangeRequestType;
         title: string;
         priority: string;
         dueDate: Date | null;

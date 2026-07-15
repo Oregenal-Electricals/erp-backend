@@ -45,7 +45,7 @@ export declare class DocumentsService {
     }>;
     getStats(user: any): Promise<{
         total: number;
-        byCategory: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.DocumentGroupByOutputType, "category"[]> & {
+        byCategory: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.DocumentGroupByOutputType, "category"[]> & {
             _count: {
                 id: number;
             };

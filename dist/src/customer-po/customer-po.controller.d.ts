@@ -20,8 +20,8 @@ export declare class CustomerPoController {
             items: {
                 id: string;
                 itemCode: string;
-                pendingQty: number;
                 qty: number;
+                pendingQty: number;
                 deliveredQty: number;
             }[];
             quotation: {
@@ -80,11 +80,11 @@ export declare class CustomerPoController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoId: string;
             taxableAmt: number;
             gstAmount: number;
@@ -183,11 +183,11 @@ export declare class CustomerPoController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoId: string;
             taxableAmt: number;
             gstAmount: number;
@@ -259,11 +259,11 @@ export declare class CustomerPoController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoId: string;
             taxableAmt: number;
             gstAmount: number;
@@ -335,11 +335,11 @@ export declare class CustomerPoController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoId: string;
             taxableAmt: number;
             gstAmount: number;
@@ -411,11 +411,11 @@ export declare class CustomerPoController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoId: string;
             taxableAmt: number;
             gstAmount: number;
@@ -487,11 +487,11 @@ export declare class CustomerPoController {
             itemName: string;
             gstRate: number;
             uom: string;
+            qty: number;
             totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
-            qty: number;
             cpoId: string;
             taxableAmt: number;
             gstAmount: number;

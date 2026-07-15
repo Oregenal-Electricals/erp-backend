@@ -147,20 +147,65 @@ export class BomService {
   }
 
   // ── BOM ITEMS ─────────────────────────────────────────────────
-  async addItem(bomId: string, dto: CreateBomItemDto, user: any) {
-    const bom = await this.findOne(bomId, user);
+  async addItem(bomId: string, dto: CreateBomItemDto, user: any, client: any = this.prisma, options: { skipCostRecalc?: boolean; skipAudit?: boolean; defaultWarehouseId?: string } = {}) {
+    const bom = client === this.prisma ? await this.findOne(bomId, user) : await client.bom.findFirst({ where: { id: bomId, companyId: user.companyId } });
+    if (!bom) throw new NotFoundException('BOM not found');
     if (bom.status !== 'DRAFT') throw new BadRequestException('Can only add items to DRAFT BOMs');
 
     const wastage = dto.wastagePercent || 0;
     const effectiveQty = dto.quantity * (1 + wastage / 100);
     const totalCost = dto.unitCost ? effectiveQty * dto.unitCost : null;
 
-    const item = await this.prisma.bomItem.create({
+    const item = await client.bomItem.create({
       data: { ...dto, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
     });
-    await this.recalculateBomCost(bomId);
-    await this.audit.log({ tableName: 'bom_items', recordId: item.id, action: 'CREATE', newValues: item, changedBy: user.id });
+
+    await this.ensureStockBalanceExists(item.itemCode, item.itemName, item.uom, user, client, options.defaultWarehouseId);
+
+    if (!options.skipCostRecalc) await this.recalculateBomCost(bomId, client);
+    if (!options.skipAudit) await this.audit.log({ tableName: 'bom_items', recordId: item.id, action: 'CREATE', newValues: item, changedBy: user.id });
     return item;
+  }
+
+  /**
+   * When a BOM references a raw material that has never been stocked
+   * before, this creates a zero-quantity StockBalance row for it in the
+   * company's default warehouse. Without this, a brand-new raw material
+   * referenced only in a BOM would be invisible everywhere else in the
+   * system (stock reports, shortage checks, etc.) until someone manually
+   * received it via GRN - this makes it show up immediately, correctly
+   * showing 0 on hand until real stock arrives.
+   */
+  private async ensureStockBalanceExists(itemCode: string, itemName: string, uom: string, user: any, client: any = this.prisma, knownDefaultWarehouseId?: string) {
+    const existing = await client.stockBalance.findFirst({
+      where: { companyId: user.companyId, itemCode },
+    });
+    if (existing) return;
+
+    let warehouseId = knownDefaultWarehouseId;
+    if (!warehouseId) {
+      const defaultWarehouse = await client.warehouse.findFirst({
+        where: { companyId: user.companyId, isDefault: true },
+      });
+      if (!defaultWarehouse) return; // no default warehouse configured yet - skip silently
+      warehouseId = defaultWarehouse.id;
+    }
+
+    await client.stockBalance.create({
+      data: {
+        companyId: user.companyId,
+        itemCode,
+        itemName,
+        warehouseId,
+        availableQty: 0,
+        reservedQty: 0,
+        inQcQty: 0,
+        unitCost: 0,
+        totalValue: 0,
+        createdBy: user.id,
+        updatedBy: user.id,
+      },
+    });
   }
 
   async updateItem(bomId: string, itemId: string, dto: UpdateBomItemDto, user: any) {
@@ -197,10 +242,10 @@ export class BomService {
     return { message: 'BOM item removed' };
   }
 
-  private async recalculateBomCost(bomId: string) {
-    const items = await this.prisma.bomItem.findMany({ where: { bomId, isActive: true } });
+  private async recalculateBomCost(bomId: string, client: any = this.prisma) {
+    const items = await client.bomItem.findMany({ where: { bomId, isActive: true } });
     const totalCost = items.reduce((sum, i) => sum + (i.totalCost || 0), 0);
-    await this.prisma.bom.update({ where: { id: bomId }, data: { totalCost } });
+    await client.bom.update({ where: { id: bomId }, data: { totalCost } });
   }
 
   async getStats(user: any) {

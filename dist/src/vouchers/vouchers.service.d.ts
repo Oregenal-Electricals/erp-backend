@@ -235,7 +235,7 @@ export declare class VouchersService {
         posted: number;
         cancelled: number;
         totalPostedValue: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.VoucherGroupByOutputType, "voucherType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.VoucherGroupByOutputType, "voucherType"[]> & {
             _count: {
                 id: number;
             };

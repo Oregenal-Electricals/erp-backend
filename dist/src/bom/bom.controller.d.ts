@@ -354,30 +354,7 @@ export declare class BomController {
         bomNumber: string;
         totalCost: number | null;
     }>;
-    addItem(id: string, dto: CreateBomItemDto, req: any): Promise<{
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        quantity: number;
-        itemCode: string;
-        itemName: string;
-        itemType: string;
-        uom: string;
-        notes: string | null;
-        sequence: number;
-        rawMaterialId: string | null;
-        wastagePercent: number | null;
-        unitCost: number | null;
-        isCritical: boolean;
-        totalCost: number | null;
-        bomId: string;
-        effectiveQty: number;
-    }>;
+    addItem(id: string, dto: CreateBomItemDto, req: any): Promise<any>;
     updateItem(id: string, itemId: string, dto: UpdateBomItemDto, req: any): Promise<{
         id: string;
         companyId: string;

@@ -23,7 +23,7 @@ export declare class NotificationsService {
         isRead: boolean;
         readAt: Date | null;
     }>;
-    createBulk(notifications: CreateNotificationDto[], companyId: string, createdBy: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    createBulk(notifications: CreateNotificationDto[], companyId: string, createdBy: string): Promise<import(".prisma/client").Prisma.BatchPayload>;
     notifyCompany(companyId: string, type: string, title: string, message: string, opts?: any): Promise<void>;
     findAll(userId: string, companyId: string, query: any): Promise<{
         data: {

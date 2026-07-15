@@ -170,7 +170,7 @@ export declare class StockLedgerService {
         totalItems: number;
         totalMovements: number;
         totalValue: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.StockLedgerGroupByOutputType, "transactionType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.StockLedgerGroupByOutputType, "transactionType"[]> & {
             _count: number;
             _sum: {
                 inQty: number;

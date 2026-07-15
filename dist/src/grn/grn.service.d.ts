@@ -326,7 +326,7 @@ export declare class GrnService {
         iqcPending: number;
         accepted: number;
         closed: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.GrnHeaderGroupByOutputType, "grnType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.GrnHeaderGroupByOutputType, "grnType"[]> & {
             _count: number;
         })[];
         totalValue: number;

@@ -8,7 +8,7 @@ export declare class ShippingDocumentController {
         received: number;
         verified: number;
         surrendered: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.ShippingDocumentGroupByOutputType, "documentType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.ShippingDocumentGroupByOutputType, "documentType"[]> & {
             _count: number;
         })[];
     }>;
