@@ -211,11 +211,13 @@ let BomImportService = class BomImportService {
             throw new common_1.BadRequestException('No items to import');
         return this.prisma.$transaction(async (tx) => {
             let productId;
+            let productBrand;
             if (dto.useExistingProductId) {
                 const existing = await tx.product.findFirst({ where: { id: dto.useExistingProductId, companyId: user.companyId } });
                 if (!existing)
                     throw new common_1.NotFoundException('Selected existing product not found');
                 productId = existing.id;
+                productBrand = existing.brand;
             }
             else {
                 if (!dto.product.code || !dto.product.name) {
@@ -233,6 +235,7 @@ let BomImportService = class BomImportService {
                     },
                 });
                 productId = newProduct.id;
+                productBrand = newProduct.brand;
             }
             const existingActiveBom = await tx.bom.findFirst({
                 where: { companyId: user.companyId, productId, status: { not: 'OBSOLETE' }, isActive: true },
@@ -245,7 +248,7 @@ let BomImportService = class BomImportService {
                 data: {
                     companyId: user.companyId,
                     productId,
-                    bomNumber: await this.generateBomNumberInTx(tx, user.companyId),
+                    bomNumber: await this.generateBomNumberInTx(tx, user.companyId, productBrand),
                     version: dto.bomVersion || 'v1',
                     description: `Imported from BOM upload`,
                     createdBy: user.id,
@@ -322,9 +325,16 @@ let BomImportService = class BomImportService {
             return { bomId: bom.id, bomNumber: bom.bomNumber, productId, itemsImported: itemsCreated };
         }, { timeout: 120000, maxWait: 15000 });
     }
-    async generateBomNumberInTx(tx, companyId) {
-        const count = await tx.bom.count({ where: { companyId } });
-        return `BOM-IMP-${String(count + 1).padStart(4, '0')}`;
+    sanitizeBrandPrefix(brand) {
+        if (!brand)
+            return 'GEN';
+        const cleaned = brand.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        return cleaned || 'GEN';
+    }
+    async generateBomNumberInTx(tx, companyId, brand) {
+        const prefix = this.sanitizeBrandPrefix(brand);
+        const count = await tx.bom.count({ where: { companyId, bomNumber: { startsWith: `${prefix}-` } } });
+        return `${prefix}-${String(count + 1).padStart(4, '0')}`;
     }
 };
 exports.BomImportService = BomImportService;

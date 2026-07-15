@@ -6,6 +6,7 @@ export declare class BomService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     private itemIncludes;
+    private sanitizeBrandPrefix;
     private generateBomNumber;
     create(dto: CreateBomDto, user: any): Promise<{
         items: {
@@ -120,6 +121,7 @@ export declare class BomService {
         product: {
             name: string;
             code: string;
+            brand: string;
         };
         revision: {
             revisionNumber: string;
@@ -326,6 +328,7 @@ export declare class BomService {
         product: {
             name: string;
             code: string;
+            brand: string;
         };
         revision: {
             revisionNumber: string;

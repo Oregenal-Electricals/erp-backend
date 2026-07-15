@@ -102,6 +102,7 @@ export declare class BomController {
         product: {
             name: string;
             code: string;
+            brand: string;
         };
         revision: {
             revisionNumber: string;
@@ -329,6 +330,7 @@ export declare class BomController {
         product: {
             name: string;
             code: string;
+            brand: string;
         };
         revision: {
             revisionNumber: string;

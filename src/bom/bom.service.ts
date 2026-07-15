@@ -12,9 +12,16 @@ export class BomService {
   }
 
   // ── BOM NUMBER GENERATOR ─────────────────────────────────────
-  private async generateBomNumber(companyId: string): Promise<string> {
-    const count = await this.prisma.bom.count({ where: { companyId } });
-    return `BOM-${String(count + 1).padStart(4, '0')}`;
+  private sanitizeBrandPrefix(brand?: string | null): string {
+    if (!brand) return 'GEN';
+    const cleaned = brand.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return cleaned || 'GEN';
+  }
+
+  private async generateBomNumber(companyId: string, brand?: string | null): Promise<string> {
+    const prefix = this.sanitizeBrandPrefix(brand);
+    const count = await this.prisma.bom.count({ where: { companyId, bomNumber: { startsWith: `${prefix}-` } } });
+    return `${prefix}-${String(count + 1).padStart(4, '0')}`;
   }
 
   // ── BOM CRUD ─────────────────────────────────────────────────
@@ -32,7 +39,7 @@ export class BomService {
       );
     }
 
-    const bomNumber = await this.generateBomNumber(user.companyId);
+    const bomNumber = await this.generateBomNumber(user.companyId, product.brand);
     const bom = await this.prisma.bom.create({
       data: { ...dto, bomNumber, companyId: user.companyId, createdBy: user.id, updatedBy: user.id },
       include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
@@ -69,7 +76,7 @@ export class BomService {
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     const bom = await this.prisma.bom.findFirst({
       where,
-      include: { product: { select: { code: true, name: true } }, revision: { select: { revisionNumber: true } }, ...this.itemIncludes() },
+      include: { product: { select: { code: true, name: true, brand: true } }, revision: { select: { revisionNumber: true } }, ...this.itemIncludes() },
     });
     if (!bom) throw new NotFoundException('BOM not found');
     return bom;
@@ -126,7 +133,7 @@ export class BomService {
 
   async clone(id: string, user: any) {
     const bom = await this.findOne(id, user);
-    const bomNumber = await this.generateBomNumber(user.companyId);
+    const bomNumber = await this.generateBomNumber(user.companyId, (bom as any).product?.brand);
     const versionNum = parseInt((bom.version || 'v1').replace(/[^0-9]/g, '') || '1') + 1;
     const cloned = await this.prisma.bom.create({
       data: {

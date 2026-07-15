@@ -21,9 +21,16 @@ let BomService = class BomService {
     itemIncludes() {
         return { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } };
     }
-    async generateBomNumber(companyId) {
-        const count = await this.prisma.bom.count({ where: { companyId } });
-        return `BOM-${String(count + 1).padStart(4, '0')}`;
+    sanitizeBrandPrefix(brand) {
+        if (!brand)
+            return 'GEN';
+        const cleaned = brand.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        return cleaned || 'GEN';
+    }
+    async generateBomNumber(companyId, brand) {
+        const prefix = this.sanitizeBrandPrefix(brand);
+        const count = await this.prisma.bom.count({ where: { companyId, bomNumber: { startsWith: `${prefix}-` } } });
+        return `${prefix}-${String(count + 1).padStart(4, '0')}`;
     }
     async create(dto, user) {
         const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
@@ -36,7 +43,7 @@ let BomService = class BomService {
             throw new common_1.BadRequestException(`This product already has an active BOM (${existingActiveBom.bomNumber}, ${existingActiveBom.status}). ` +
                 `Use that one, or create a proper revision via Bom Revisions instead of a new duplicate BOM.`);
         }
-        const bomNumber = await this.generateBomNumber(user.companyId);
+        const bomNumber = await this.generateBomNumber(user.companyId, product.brand);
         const bom = await this.prisma.bom.create({
             data: Object.assign(Object.assign({}, dto), { bomNumber, companyId: user.companyId, createdBy: user.id, updatedBy: user.id }),
             include: Object.assign({ product: { select: { code: true, name: true } } }, this.itemIncludes()),
@@ -75,7 +82,7 @@ let BomService = class BomService {
             where.companyId = user.companyId;
         const bom = await this.prisma.bom.findFirst({
             where,
-            include: Object.assign({ product: { select: { code: true, name: true } }, revision: { select: { revisionNumber: true } } }, this.itemIncludes()),
+            include: Object.assign({ product: { select: { code: true, name: true, brand: true } }, revision: { select: { revisionNumber: true } } }, this.itemIncludes()),
         });
         if (!bom)
             throw new common_1.NotFoundException('BOM not found');
@@ -132,8 +139,9 @@ let BomService = class BomService {
         return updated;
     }
     async clone(id, user) {
+        var _a;
         const bom = await this.findOne(id, user);
-        const bomNumber = await this.generateBomNumber(user.companyId);
+        const bomNumber = await this.generateBomNumber(user.companyId, (_a = bom.product) === null || _a === void 0 ? void 0 : _a.brand);
         const versionNum = parseInt((bom.version || 'v1').replace(/[^0-9]/g, '') || '1') + 1;
         const cloned = await this.prisma.bom.create({
             data: {

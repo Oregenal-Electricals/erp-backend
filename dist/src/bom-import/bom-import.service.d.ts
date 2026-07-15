@@ -42,6 +42,7 @@ export declare class BomImportService {
         productId: string;
         itemsImported: number;
     }>;
+    private sanitizeBrandPrefix;
     private generateBomNumberInTx;
 }
 export {};

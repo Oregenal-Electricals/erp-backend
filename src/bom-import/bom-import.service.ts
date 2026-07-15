@@ -214,11 +214,13 @@ export class BomImportService {
 
     return this.prisma.$transaction(async (tx) => {
       let productId: string;
+      let productBrand: string | null | undefined;
 
       if (dto.useExistingProductId) {
         const existing = await tx.product.findFirst({ where: { id: dto.useExistingProductId, companyId: user.companyId } });
         if (!existing) throw new NotFoundException('Selected existing product not found');
         productId = existing.id;
+        productBrand = existing.brand;
       } else {
         if (!dto.product.code || !dto.product.name) {
           throw new BadRequestException('Product code and name are required to create a new product');
@@ -235,6 +237,7 @@ export class BomImportService {
           },
         });
         productId = newProduct.id;
+        productBrand = newProduct.brand;
       }
 
       const existingActiveBom = await tx.bom.findFirst({
@@ -251,7 +254,7 @@ export class BomImportService {
         data: {
           companyId: user.companyId,
           productId,
-          bomNumber: await this.generateBomNumberInTx(tx, user.companyId),
+          bomNumber: await this.generateBomNumberInTx(tx, user.companyId, productBrand),
           version: dto.bomVersion || 'v1',
           description: `Imported from BOM upload`,
           createdBy: user.id,
@@ -349,8 +352,15 @@ export class BomImportService {
     }, { timeout: 120000, maxWait: 15000 });
   }
 
-  private async generateBomNumberInTx(tx: any, companyId: string): Promise<string> {
-    const count = await tx.bom.count({ where: { companyId } });
-    return `BOM-IMP-${String(count + 1).padStart(4, '0')}`;
+  private sanitizeBrandPrefix(brand?: string | null): string {
+    if (!brand) return 'GEN';
+    const cleaned = brand.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return cleaned || 'GEN';
+  }
+
+  private async generateBomNumberInTx(tx: any, companyId: string, brand?: string | null): Promise<string> {
+    const prefix = this.sanitizeBrandPrefix(brand);
+    const count = await tx.bom.count({ where: { companyId, bomNumber: { startsWith: `${prefix}-` } } });
+    return `${prefix}-${String(count + 1).padStart(4, '0')}`;
   }
 }
