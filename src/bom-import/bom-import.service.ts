@@ -159,6 +159,10 @@ export class BomImportService {
    * product itself already exists.
    */
   private async buildPreview(parsed: { product: any; docInfo: any; sections: ParsedSection[] }, companyId: string) {
+    if (!parsed.product.name && parsed.product.description) {
+      parsed.product.name = parsed.product.description;
+    }
+
     const allPartCodes = parsed.sections.flatMap((s) => s.items.map((i) => i.partCode)).filter(Boolean);
     const existingMaterials = allPartCodes.length
       ? await this.prisma.rawMaterial.findMany({

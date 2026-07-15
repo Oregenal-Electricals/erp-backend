@@ -166,6 +166,9 @@ let BomImportService = class BomImportService {
         return this.buildPreview(parsed, companyId);
     }
     async buildPreview(parsed, companyId) {
+        if (!parsed.product.name && parsed.product.description) {
+            parsed.product.name = parsed.product.description;
+        }
         const allPartCodes = parsed.sections.flatMap((s) => s.items.map((i) => i.partCode)).filter(Boolean);
         const existingMaterials = allPartCodes.length
             ? await this.prisma.rawMaterial.findMany({
