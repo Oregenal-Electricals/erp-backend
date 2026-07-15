@@ -44,12 +44,12 @@ export declare class ComplaintController {
             qtyAffected: number;
             closedDate: Date | null;
             rootCause: string | null;
-            complaintNumber: string;
             customerId: string | null;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;
             eighthDNumber: string | null;
+            complaintNumber: string;
             responseDate: Date | null;
         }[];
         total: number;
@@ -82,12 +82,12 @@ export declare class ComplaintController {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     create(dto: CreateComplaintDto, req: any): Promise<{
@@ -116,12 +116,12 @@ export declare class ComplaintController {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     update(id: string, dto: UpdateComplaintDto, req: any): Promise<{
@@ -150,12 +150,12 @@ export declare class ComplaintController {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     respond(id: string, dto: RespondComplaintDto, req: any): Promise<{
@@ -184,12 +184,12 @@ export declare class ComplaintController {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     close(id: string, req: any): Promise<{
@@ -218,12 +218,12 @@ export declare class ComplaintController {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
 }

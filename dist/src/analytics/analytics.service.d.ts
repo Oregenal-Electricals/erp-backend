@@ -217,11 +217,11 @@ export declare class AnalyticsService {
         overdueWos: {
             status: string;
             priority: string;
-            woNumber: string;
             productName: string;
             plannedQty: number;
-            completedQty: number;
             plannedEndDate: Date;
+            completedQty: number;
+            woNumber: string;
         }[];
     }>;
     getQualityDeep(companyId: string): Promise<{

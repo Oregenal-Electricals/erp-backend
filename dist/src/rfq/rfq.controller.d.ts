@@ -80,8 +80,8 @@ export declare class RfqController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            rfqId: string;
             vendorId: string;
+            rfqId: string;
         })[];
         pr: {
             status: string;
@@ -143,8 +143,8 @@ export declare class RfqController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            rfqId: string;
             vendorId: string;
+            rfqId: string;
         })[];
         pr: {
             status: string;
@@ -206,8 +206,8 @@ export declare class RfqController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            rfqId: string;
             vendorId: string;
+            rfqId: string;
         })[];
         pr: {
             status: string;
@@ -269,8 +269,8 @@ export declare class RfqController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            rfqId: string;
             vendorId: string;
+            rfqId: string;
         })[];
         pr: {
             status: string;
@@ -332,8 +332,8 @@ export declare class RfqController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            rfqId: string;
             vendorId: string;
+            rfqId: string;
         })[];
         pr: {
             status: string;
@@ -395,8 +395,8 @@ export declare class RfqController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            rfqId: string;
             vendorId: string;
+            rfqId: string;
         })[];
         pr: {
             status: string;
@@ -438,8 +438,8 @@ export declare class RfqController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        rfqId: string;
         vendorId: string;
+        rfqId: string;
     }>;
     removeVendor(id: string, vendorId: string, req: any): Promise<{
         message: string;

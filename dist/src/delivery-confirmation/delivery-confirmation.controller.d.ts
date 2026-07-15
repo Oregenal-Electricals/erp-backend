@@ -49,13 +49,13 @@ export declare class DeliveryConfirmationController {
                 customerName: string;
                 soNumber: string;
                 cpo: {
-                    cpoNumber: string;
                     customerPoNumber: string;
+                    cpoNumber: string;
                 };
             };
             vehicleNumber: string;
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
     } & {
         id: string;
@@ -83,13 +83,13 @@ export declare class DeliveryConfirmationController {
                 customerName: string;
                 soNumber: string;
                 cpo: {
-                    cpoNumber: string;
                     customerPoNumber: string;
+                    cpoNumber: string;
                 };
             };
             vehicleNumber: string;
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
     } & {
         id: string;

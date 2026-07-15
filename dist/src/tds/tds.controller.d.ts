@@ -7,8 +7,8 @@ export declare class TdsController {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             panNumber: string;
+            employeeNumber: string;
         };
     } & {
         id: string;
@@ -29,12 +29,12 @@ export declare class TdsController {
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     })[]>;
     getChallan(month: string, year: string, req: any): Promise<{
         reportType: string;
@@ -68,12 +68,12 @@ export declare class TdsController {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             panNumber: string;
             basicSalary: number;
             hraAmount: number;
             conveyanceAmount: number;
             otherAllowances: number;
+            employeeNumber: string;
         };
         grossSalary: number;
         standardDeduction: number;
@@ -99,9 +99,9 @@ export declare class TdsController {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             basicSalary: number;
             hraAmount: number;
+            employeeNumber: string;
         };
     } & {
         id: string;
@@ -122,12 +122,12 @@ export declare class TdsController {
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     }>;
     saveDeclaration(dto: SaveDeclarationDto, req: any): Promise<any>;
 }

@@ -41,11 +41,11 @@ export declare class VouchersController {
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            voucherNumber: string;
+            narration: string | null;
             voucherType: string;
             voucherDate: Date;
             partyName: string | null;
-            narration: string | null;
+            voucherNumber: string;
             postedDate: Date | null;
             postedBy: string | null;
         })[];
@@ -70,9 +70,9 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            narration: string | null;
-            entryType: string;
             accountId: string;
+            entryType: string;
+            narration: string | null;
             voucherId: string;
         })[];
     } & {
@@ -91,11 +91,11 @@ export declare class VouchersController {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        voucherNumber: string;
+        narration: string | null;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        narration: string | null;
+        voucherNumber: string;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -116,9 +116,9 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            narration: string | null;
-            entryType: string;
             accountId: string;
+            entryType: string;
+            narration: string | null;
             voucherId: string;
         })[];
     } & {
@@ -137,11 +137,11 @@ export declare class VouchersController {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        voucherNumber: string;
+        narration: string | null;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        narration: string | null;
+        voucherNumber: string;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -162,9 +162,9 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            narration: string | null;
-            entryType: string;
             accountId: string;
+            entryType: string;
+            narration: string | null;
             voucherId: string;
         })[];
     } & {
@@ -183,11 +183,11 @@ export declare class VouchersController {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        voucherNumber: string;
+        narration: string | null;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        narration: string | null;
+        voucherNumber: string;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -208,9 +208,9 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            narration: string | null;
-            entryType: string;
             accountId: string;
+            entryType: string;
+            narration: string | null;
             voucherId: string;
         })[];
     } & {
@@ -229,11 +229,11 @@ export declare class VouchersController {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        voucherNumber: string;
+        narration: string | null;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        narration: string | null;
+        voucherNumber: string;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -254,9 +254,9 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            narration: string | null;
-            entryType: string;
             accountId: string;
+            entryType: string;
+            narration: string | null;
             voucherId: string;
         })[];
     } & {
@@ -275,11 +275,11 @@ export declare class VouchersController {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        voucherNumber: string;
+        narration: string | null;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        narration: string | null;
+        voucherNumber: string;
         postedDate: Date | null;
         postedBy: string | null;
     }>;

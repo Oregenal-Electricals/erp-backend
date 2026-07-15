@@ -68,10 +68,10 @@ export declare class GrnService {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
-        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
+        grnNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -112,10 +112,10 @@ export declare class GrnService {
             poId: string | null;
             ipoId: string | null;
             landedCostId: string | null;
-            grnNumber: string;
             grnType: string;
             receivedDate: Date;
             dcNumber: string | null;
+            grnNumber: string;
         })[];
         total: number;
         page: number;
@@ -183,10 +183,10 @@ export declare class GrnService {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
-        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
+        grnNumber: string;
     }>;
     update(id: string, dto: UpdateGrnDto, user: any): Promise<{
         items: {
@@ -249,10 +249,10 @@ export declare class GrnService {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
-        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
+        grnNumber: string;
     }>;
     submit(id: string, user: any): Promise<{
         items: {
@@ -315,10 +315,10 @@ export declare class GrnService {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
-        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
+        grnNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

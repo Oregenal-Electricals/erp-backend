@@ -22,10 +22,10 @@ export declare class IotController {
             status: string;
             ipAddress: string | null;
             parameters: import("@prisma/client/runtime/library").JsonValue | null;
+            location: string | null;
             machineName: string;
             machineCode: string;
             machineType: string;
-            location: string | null;
             manufacturer: string | null;
             modelNumber: string | null;
             apiEndpoint: string | null;
@@ -85,10 +85,10 @@ export declare class IotController {
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
+        location: string | null;
         machineName: string;
         machineCode: string;
         machineType: string;
-        location: string | null;
         manufacturer: string | null;
         modelNumber: string | null;
         apiEndpoint: string | null;
@@ -141,10 +141,10 @@ export declare class IotController {
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
+        location: string | null;
         machineName: string;
         machineCode: string;
         machineType: string;
-        location: string | null;
         manufacturer: string | null;
         modelNumber: string | null;
         apiEndpoint: string | null;
@@ -162,10 +162,10 @@ export declare class IotController {
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
+        location: string | null;
         machineName: string;
         machineCode: string;
         machineType: string;
-        location: string | null;
         manufacturer: string | null;
         modelNumber: string | null;
         apiEndpoint: string | null;
@@ -183,10 +183,10 @@ export declare class IotController {
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
+        location: string | null;
         machineName: string;
         machineCode: string;
         machineType: string;
-        location: string | null;
         manufacturer: string | null;
         modelNumber: string | null;
         apiEndpoint: string | null;
@@ -204,10 +204,10 @@ export declare class IotController {
         status: string;
         ipAddress: string | null;
         parameters: import("@prisma/client/runtime/library").JsonValue | null;
+        location: string | null;
         machineName: string;
         machineCode: string;
         machineType: string;
-        location: string | null;
         manufacturer: string | null;
         modelNumber: string | null;
         apiEndpoint: string | null;
@@ -251,9 +251,9 @@ export declare class IotController {
     }[]>;
     getAlerts(req: any, query: any): Promise<({
         machine: {
+            location: string;
             machineName: string;
             machineCode: string;
-            location: string;
         };
     } & {
         id: string;

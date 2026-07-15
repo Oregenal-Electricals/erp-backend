@@ -12,8 +12,8 @@ export declare class StockTransferService {
     create(dto: CreateTransferDto, user: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -51,18 +51,18 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
-        fromBinId: string | null;
-        toBinId: string | null;
         fromWarehouseId: string;
         toWarehouseId: string;
+        fromBinId: string | null;
+        toBinId: string | null;
+        transferNumber: string;
     }>;
     confirm(id: string, user: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -100,18 +100,18 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
-        fromBinId: string | null;
-        toBinId: string | null;
         fromWarehouseId: string;
         toWarehouseId: string;
+        fromBinId: string | null;
+        toBinId: string | null;
+        transferNumber: string;
     }>;
     cancel(id: string, user: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -149,12 +149,12 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
-        fromBinId: string | null;
-        toBinId: string | null;
         fromWarehouseId: string;
         toWarehouseId: string;
+        fromBinId: string | null;
+        toBinId: string | null;
+        transferNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -178,12 +178,12 @@ export declare class StockTransferService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            transferNumber: string;
             transferType: string;
-            fromBinId: string | null;
-            toBinId: string | null;
             fromWarehouseId: string;
             toWarehouseId: string;
+            fromBinId: string | null;
+            toBinId: string | null;
+            transferNumber: string;
         })[];
         total: number;
         page: number;
@@ -193,8 +193,8 @@ export declare class StockTransferService {
     findOne(id: string, user: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -232,12 +232,12 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        transferNumber: string;
         transferType: string;
-        fromBinId: string | null;
-        toBinId: string | null;
         fromWarehouseId: string;
         toWarehouseId: string;
+        fromBinId: string | null;
+        toBinId: string | null;
+        transferNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

@@ -62,8 +62,8 @@ export declare class InventoryDashboardController {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;

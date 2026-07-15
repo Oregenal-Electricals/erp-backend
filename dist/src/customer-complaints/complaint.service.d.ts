@@ -32,12 +32,12 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     update(id: string, dto: UpdateComplaintDto, user: any): Promise<{
@@ -66,12 +66,12 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     respond(id: string, dto: RespondComplaintDto, user: any): Promise<{
@@ -100,12 +100,12 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     close(id: string, user: any): Promise<{
@@ -134,12 +134,12 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -169,12 +169,12 @@ export declare class ComplaintService {
             qtyAffected: number;
             closedDate: Date | null;
             rootCause: string | null;
-            complaintNumber: string;
             customerId: string | null;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;
             eighthDNumber: string | null;
+            complaintNumber: string;
             responseDate: Date | null;
         }[];
         total: number;
@@ -207,12 +207,12 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     getStats(user: any): Promise<{

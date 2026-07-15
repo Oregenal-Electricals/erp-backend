@@ -29,8 +29,8 @@ export declare class ProductionReportsController {
     getShiftProduction(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             id: string;
@@ -46,12 +46,12 @@ export declare class ProductionReportsController {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            goodQty: number;
-            scrapQty: number;
-            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
+            goodQty: number;
+            scrapQty: number;
+            entryNumber: string;
         })[];
         totalEntries: number;
         byShift: any[];
@@ -67,9 +67,9 @@ export declare class ProductionReportsController {
     getScrapAnalysis(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             id: string;
@@ -85,12 +85,12 @@ export declare class ProductionReportsController {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            goodQty: number;
-            scrapQty: number;
-            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
+            goodQty: number;
+            scrapQty: number;
+            entryNumber: string;
         })[];
         byProduct: any[];
         totalScrap: number;
@@ -100,9 +100,9 @@ export declare class ProductionReportsController {
     getQualitySummary(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             result: string;
@@ -118,7 +118,7 @@ export declare class ProductionReportsController {
             remarks: string | null;
             inspectionDate: Date;
             workOrderId: string;
-            qcNumber: string;
+            productionEntryId: string | null;
             inspectionStage: string;
             inspectorName: string | null;
             sampleSize: number;
@@ -126,7 +126,7 @@ export declare class ProductionReportsController {
             failQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
-            productionEntryId: string | null;
+            qcNumber: string;
         })[];
         byStage: any[];
         totalInspections: number;

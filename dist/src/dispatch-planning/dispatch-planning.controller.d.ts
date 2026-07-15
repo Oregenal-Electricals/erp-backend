@@ -68,11 +68,11 @@ export declare class DispatchPlanningController {
             approvedBy: string | null;
             deliveryAddress: string | null;
             soId: string;
-            planNumber: string;
             plannedDate: Date;
             transportMode: string;
             transporterName: string | null;
             driverPhone: string | null;
+            planNumber: string;
             approvedDate: Date | null;
         })[];
         total: number;
@@ -119,11 +119,11 @@ export declare class DispatchPlanningController {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
-        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
+        planNumber: string;
         approvedDate: Date | null;
     }>;
     create(dto: CreateDispatchPlanDto, req: any): Promise<{
@@ -166,11 +166,11 @@ export declare class DispatchPlanningController {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
-        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
+        planNumber: string;
         approvedDate: Date | null;
     }>;
     approve(id: string, req: any): Promise<{
@@ -213,11 +213,11 @@ export declare class DispatchPlanningController {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
-        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
+        planNumber: string;
         approvedDate: Date | null;
     }>;
     cancel(id: string, dto: CancelPlanDto, req: any): Promise<{
@@ -260,11 +260,11 @@ export declare class DispatchPlanningController {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
-        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
+        planNumber: string;
         approvedDate: Date | null;
     }>;
 }

@@ -32,13 +32,13 @@ export declare class DispatchService {
             customerName: string;
             soNumber: string;
             cpo: {
-                cpoNumber: string;
                 customerPoNumber: string;
+                cpoNumber: string;
             };
         };
         dispatchPlan: {
-            planNumber: string;
             transportMode: string;
+            planNumber: string;
         };
     } & {
         id: string;
@@ -59,10 +59,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
-        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
+        dispatchNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -96,10 +96,10 @@ export declare class DispatchService {
             transporterName: string | null;
             driverPhone: string | null;
             planId: string;
-            dispatchNumber: string;
             dispatchDate: Date;
             lrNumber: string | null;
             ewayBillNumber: string | null;
+            dispatchNumber: string;
         })[];
         total: number;
         page: number;
@@ -130,13 +130,13 @@ export declare class DispatchService {
             customerName: string;
             soNumber: string;
             cpo: {
-                cpoNumber: string;
                 customerPoNumber: string;
+                cpoNumber: string;
             };
         };
         dispatchPlan: {
-            planNumber: string;
             transportMode: string;
+            planNumber: string;
         };
     } & {
         id: string;
@@ -157,10 +157,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
-        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
+        dispatchNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

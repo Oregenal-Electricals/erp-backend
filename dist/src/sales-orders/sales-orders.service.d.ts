@@ -37,8 +37,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            cpoNumber: string;
             customerPoNumber: string;
+            cpoNumber: string;
         };
     } & {
         id: string;
@@ -57,10 +57,10 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
-        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -92,8 +92,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            cpoNumber: string;
             customerPoNumber: string;
+            cpoNumber: string;
         };
     } & {
         id: string;
@@ -112,10 +112,10 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
-        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -147,8 +147,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            cpoNumber: string;
             customerPoNumber: string;
+            cpoNumber: string;
         };
     } & {
         id: string;
@@ -167,10 +167,10 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
-        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -184,8 +184,8 @@ export declare class SalesOrdersService {
                 dispatchedQty: number;
             }[];
             cpo: {
-                cpoNumber: string;
                 customerPoNumber: string;
+                cpoNumber: string;
             };
         } & {
             id: string;
@@ -204,10 +204,10 @@ export declare class SalesOrdersService {
             totalAmount: number;
             deliveryDate: Date;
             subtotal: number;
+            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
             soNumber: string;
-            cpoId: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
         })[];
@@ -243,8 +243,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            cpoNumber: string;
             customerPoNumber: string;
+            cpoNumber: string;
         };
     } & {
         id: string;
@@ -263,10 +263,10 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
-        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -298,8 +298,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            cpoNumber: string;
             customerPoNumber: string;
+            cpoNumber: string;
         };
     } & {
         id: string;
@@ -318,10 +318,10 @@ export declare class SalesOrdersService {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
+        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
-        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     })[]>;

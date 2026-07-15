@@ -23,14 +23,14 @@ export declare class BomService {
             itemType: string;
             uom: string;
             notes: string | null;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            totalCost: number | null;
+            bomId: string;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -50,12 +50,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -80,12 +80,12 @@ export declare class BomService {
             productId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
-            bomNumber: string;
+            revisionId: string | null;
             version: string;
             effectiveFrom: Date;
             effectiveTo: Date | null;
+            bomNumber: string;
             totalCost: number | null;
-            revisionId: string | null;
         })[];
         total: number;
         page: number;
@@ -108,14 +108,14 @@ export declare class BomService {
             itemType: string;
             uom: string;
             notes: string | null;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            totalCost: number | null;
+            bomId: string;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -138,12 +138,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     }>;
     findByProduct(productId: string, user: any): Promise<({
         _count: {
@@ -167,12 +167,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     })[]>;
     update(id: string, dto: UpdateBomDto, user: any): Promise<{
         items: {
@@ -190,14 +190,14 @@ export declare class BomService {
             itemType: string;
             uom: string;
             notes: string | null;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            totalCost: number | null;
+            bomId: string;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -217,12 +217,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;
@@ -243,14 +243,14 @@ export declare class BomService {
             itemType: string;
             uom: string;
             notes: string | null;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            totalCost: number | null;
+            bomId: string;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -270,12 +270,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     }>;
     obsolete(id: string, user: any): Promise<{
         id: string;
@@ -291,12 +291,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     }>;
     clone(id: string, user: any): Promise<{
         items: {
@@ -314,14 +314,14 @@ export declare class BomService {
             itemType: string;
             uom: string;
             notes: string | null;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            totalCost: number | null;
+            bomId: string;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -344,12 +344,12 @@ export declare class BomService {
         productId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
-        bomNumber: string;
+        revisionId: string | null;
         version: string;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
         totalCost: number | null;
-        revisionId: string | null;
     }>;
     addItem(bomId: string, dto: CreateBomItemDto, user: any, client?: any, options?: {
         skipCostRecalc?: boolean;
@@ -372,14 +372,14 @@ export declare class BomService {
         itemType: string;
         uom: string;
         notes: string | null;
-        totalCost: number | null;
-        bomId: string;
         sequence: number;
         rawMaterialId: string | null;
         wastagePercent: number | null;
-        effectiveQty: number;
         unitCost: number | null;
         isCritical: boolean;
+        totalCost: number | null;
+        bomId: string;
+        effectiveQty: number;
     }>;
     removeItem(bomId: string, itemId: string, user: any): Promise<{
         message: string;

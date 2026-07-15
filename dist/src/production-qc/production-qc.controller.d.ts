@@ -16,9 +16,9 @@ export declare class ProductionQcController {
     findAll(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
             };
             productionEntry: {
                 shift: string;
@@ -39,7 +39,7 @@ export declare class ProductionQcController {
             remarks: string | null;
             inspectionDate: Date;
             workOrderId: string;
-            qcNumber: string;
+            productionEntryId: string | null;
             inspectionStage: string;
             inspectorName: string | null;
             sampleSize: number;
@@ -47,7 +47,7 @@ export declare class ProductionQcController {
             failQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
-            productionEntryId: string | null;
+            qcNumber: string;
         })[];
         total: number;
         page: number;
@@ -56,9 +56,9 @@ export declare class ProductionQcController {
     }>;
     findOne(id: string, req: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -79,7 +79,7 @@ export declare class ProductionQcController {
         remarks: string | null;
         inspectionDate: Date;
         workOrderId: string;
-        qcNumber: string;
+        productionEntryId: string | null;
         inspectionStage: string;
         inspectorName: string | null;
         sampleSize: number;
@@ -87,14 +87,14 @@ export declare class ProductionQcController {
         failQty: number;
         defectDescription: string | null;
         correctiveAction: string | null;
-        productionEntryId: string | null;
+        qcNumber: string;
     }>;
     create(dto: CreateProductionQcDto, req: any): Promise<{
         passRate: number;
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -114,7 +114,7 @@ export declare class ProductionQcController {
         remarks: string | null;
         inspectionDate: Date;
         workOrderId: string;
-        qcNumber: string;
+        productionEntryId: string | null;
         inspectionStage: string;
         inspectorName: string | null;
         sampleSize: number;
@@ -122,13 +122,13 @@ export declare class ProductionQcController {
         failQty: number;
         defectDescription: string | null;
         correctiveAction: string | null;
-        productionEntryId: string | null;
+        qcNumber: string;
     }>;
     complete(id: string, dto: CompleteQcDto, req: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -149,7 +149,7 @@ export declare class ProductionQcController {
         remarks: string | null;
         inspectionDate: Date;
         workOrderId: string;
-        qcNumber: string;
+        productionEntryId: string | null;
         inspectionStage: string;
         inspectorName: string | null;
         sampleSize: number;
@@ -157,6 +157,6 @@ export declare class ProductionQcController {
         failQty: number;
         defectDescription: string | null;
         correctiveAction: string | null;
-        productionEntryId: string | null;
+        qcNumber: string;
     }>;
 }

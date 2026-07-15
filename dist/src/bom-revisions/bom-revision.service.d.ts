@@ -12,12 +12,12 @@ export declare class BomRevisionService {
         };
         bom: {
             status: string;
-            bomNumber: string;
             version: string;
+            bomNumber: string;
         };
         previousBom: {
-            bomNumber: string;
             version: string;
+            bomNumber: string;
         };
     } & {
         id: string;
@@ -48,12 +48,12 @@ export declare class BomRevisionService {
             };
             bom: {
                 status: string;
-                bomNumber: string;
                 version: string;
+                bomNumber: string;
             };
             previousBom: {
-                bomNumber: string;
                 version: string;
+                bomNumber: string;
             };
         } & {
             id: string;
@@ -102,14 +102,14 @@ export declare class BomRevisionService {
                 itemType: string;
                 uom: string;
                 notes: string | null;
-                totalCost: number | null;
-                bomId: string;
                 sequence: number;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
-                effectiveQty: number;
                 unitCost: number | null;
                 isCritical: boolean;
+                totalCost: number | null;
+                bomId: string;
+                effectiveQty: number;
             }[];
         } & {
             id: string;
@@ -125,12 +125,12 @@ export declare class BomRevisionService {
             productId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
-            bomNumber: string;
+            revisionId: string | null;
             version: string;
             effectiveFrom: Date;
             effectiveTo: Date | null;
+            bomNumber: string;
             totalCost: number | null;
-            revisionId: string | null;
         };
         previousBom: {
             items: {
@@ -148,14 +148,14 @@ export declare class BomRevisionService {
                 itemType: string;
                 uom: string;
                 notes: string | null;
-                totalCost: number | null;
-                bomId: string;
                 sequence: number;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
-                effectiveQty: number;
                 unitCost: number | null;
                 isCritical: boolean;
+                totalCost: number | null;
+                bomId: string;
+                effectiveQty: number;
             }[];
         } & {
             id: string;
@@ -171,12 +171,12 @@ export declare class BomRevisionService {
             productId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
-            bomNumber: string;
+            revisionId: string | null;
             version: string;
             effectiveFrom: Date;
             effectiveTo: Date | null;
+            bomNumber: string;
             totalCost: number | null;
-            revisionId: string | null;
         };
     } & {
         id: string;
@@ -206,12 +206,12 @@ export declare class BomRevisionService {
         };
         bom: {
             status: string;
-            bomNumber: string;
             version: string;
+            bomNumber: string;
         };
         previousBom: {
-            bomNumber: string;
             version: string;
+            bomNumber: string;
         };
     } & {
         id: string;
@@ -241,8 +241,8 @@ export declare class BomRevisionService {
         };
         bom: {
             status: string;
-            bomNumber: string;
             version: string;
+            bomNumber: string;
         };
     } & {
         id: string;

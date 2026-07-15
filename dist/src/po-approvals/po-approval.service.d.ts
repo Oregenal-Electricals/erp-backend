@@ -91,8 +91,8 @@ export declare class PoApprovalService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;

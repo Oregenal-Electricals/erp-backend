@@ -96,11 +96,11 @@ export declare class TrainingController {
             status: string;
             title: string;
             remarks: string | null;
-            sessionNumber: string;
+            trainingProgramId: string;
             venue: string | null;
             trainer: string | null;
             maxParticipants: number;
-            trainingProgramId: string;
+            sessionNumber: string;
         })[];
         total: number;
         page: number;
@@ -172,11 +172,11 @@ export declare class TrainingController {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     createSession(dto: CreateSessionDto, req: any): Promise<{
         trainingProgram: {
@@ -197,11 +197,11 @@ export declare class TrainingController {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     updateSession(id: string, dto: any, req: any): Promise<{
         trainingProgram: {
@@ -221,11 +221,11 @@ export declare class TrainingController {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     completeSession(id: string, req: any): Promise<{
         id: string;
@@ -241,11 +241,11 @@ export declare class TrainingController {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     enroll(dto: EnrollDto, req: any): Promise<{
         sessionId: string;
@@ -296,11 +296,11 @@ export declare class TrainingController {
             status: string;
             title: string;
             remarks: string | null;
-            sessionNumber: string;
+            trainingProgramId: string;
             venue: string | null;
             trainer: string | null;
             maxParticipants: number;
-            trainingProgramId: string;
+            sessionNumber: string;
         };
     } & {
         id: string;

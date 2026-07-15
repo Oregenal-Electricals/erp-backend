@@ -40,8 +40,8 @@ export declare class PurchaseOrderController {
             approvedAt: Date | null;
             totalAmount: number;
             prId: string | null;
-            rfqId: string | null;
             vendorId: string;
+            rfqId: string | null;
             deliveryDate: Date;
             deliveryAddress: string | null;
             termsConditions: string | null;
@@ -80,8 +80,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -114,9 +114,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
+            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
-            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -153,8 +153,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -187,9 +187,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
+            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
-            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -226,8 +226,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -260,9 +260,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
+            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
-            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -299,8 +299,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -333,9 +333,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
+            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
-            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -372,8 +372,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -406,9 +406,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
+            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
-            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -445,8 +445,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -479,9 +479,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
+            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
-            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -518,8 +518,8 @@ export declare class PurchaseOrderController {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        rfqId: string | null;
         vendorId: string;
+        rfqId: string | null;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -551,9 +551,9 @@ export declare class PurchaseOrderController {
         taxRate: number;
         totalPrice: number;
         quotationItemId: string | null;
+        orderedQty: number;
         pendingQty: number;
         taxAmount: number;
-        orderedQty: number;
         receivedQty: number;
         poId: string;
     }>;
@@ -581,9 +581,9 @@ export declare class PurchaseOrderController {
         taxRate: number;
         totalPrice: number;
         quotationItemId: string | null;
+        orderedQty: number;
         pendingQty: number;
         taxAmount: number;
-        orderedQty: number;
         receivedQty: number;
         poId: string;
     }>;

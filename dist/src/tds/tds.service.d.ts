@@ -12,9 +12,9 @@ export declare class TdsService {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             basicSalary: number;
             hraAmount: number;
+            employeeNumber: string;
         };
     } & {
         id: string;
@@ -35,12 +35,12 @@ export declare class TdsService {
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     }>;
     getTdsChallan(month: number, year: number, user: any): Promise<{
         reportType: string;
@@ -74,12 +74,12 @@ export declare class TdsService {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             panNumber: string;
             basicSalary: number;
             hraAmount: number;
             conveyanceAmount: number;
             otherAllowances: number;
+            employeeNumber: string;
         };
         grossSalary: number;
         standardDeduction: number;
@@ -105,8 +105,8 @@ export declare class TdsService {
         employee: {
             firstName: string;
             lastName: string;
-            employeeNumber: string;
             panNumber: string;
+            employeeNumber: string;
         };
     } & {
         id: string;
@@ -127,11 +127,11 @@ export declare class TdsService {
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
+        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
-        regime: string;
     })[]>;
 }

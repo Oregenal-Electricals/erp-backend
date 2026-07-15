@@ -23,9 +23,9 @@ export declare class StockAdjustmentService {
             itemName: string;
             uom: string;
             unitCost: number;
-            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
+            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -45,8 +45,8 @@ export declare class StockAdjustmentService {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     approve(id: string, user: any): Promise<{
         items: {
@@ -62,9 +62,9 @@ export declare class StockAdjustmentService {
             itemName: string;
             uom: string;
             unitCost: number;
-            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
+            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -84,8 +84,8 @@ export declare class StockAdjustmentService {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     cancel(id: string, user: any): Promise<{
         items: {
@@ -101,9 +101,9 @@ export declare class StockAdjustmentService {
             itemName: string;
             uom: string;
             unitCost: number;
-            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
+            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -123,8 +123,8 @@ export declare class StockAdjustmentService {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -147,8 +147,8 @@ export declare class StockAdjustmentService {
             reason: string;
             remarks: string | null;
             warehouseId: string;
-            adjustmentNumber: string;
             adjustmentType: string;
+            adjustmentNumber: string;
         })[];
         total: number;
         page: number;
@@ -169,9 +169,9 @@ export declare class StockAdjustmentService {
             itemName: string;
             uom: string;
             unitCost: number;
-            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
+            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -191,8 +191,8 @@ export declare class StockAdjustmentService {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

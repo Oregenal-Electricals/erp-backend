@@ -37,8 +37,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -119,8 +119,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -169,8 +169,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -219,8 +219,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;

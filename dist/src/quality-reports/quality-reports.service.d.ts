@@ -29,7 +29,6 @@ export declare class QualityReportsService {
             itemName: string | null;
             disposition: string | null;
             workOrderId: string | null;
-            ncrNumber: string;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
@@ -37,6 +36,7 @@ export declare class QualityReportsService {
             qtyAffected: number;
             detectedBy: string | null;
             detectedDate: Date;
+            ncrNumber: string;
             closedDate: Date | null;
         }[];
         total: number;
@@ -59,9 +59,9 @@ export declare class QualityReportsService {
             isOverdue: boolean;
             daysToComplete: number;
             ncr: {
-                ncrNumber: string;
                 source: string;
                 severity: string;
+                ncrNumber: string;
             };
             id: string;
             companyId: string;
@@ -116,14 +116,14 @@ export declare class QualityReportsService {
             itemName: string;
             uom: string;
             inspectionDate: Date;
-            batchNumber: string | null;
             lotNumber: string | null;
+            batchNumber: string | null;
             workOrderId: string | null;
             inspectorName: string | null;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            oqcNumber: string;
+            fgReceiptId: string | null;
             visualCheck: string | null;
             dimensionalCheck: string | null;
             functionalCheck: string | null;
@@ -131,9 +131,9 @@ export declare class QualityReportsService {
             labellingCheck: string | null;
             defectsFound: string | null;
             cocNumber: string | null;
+            oqcNumber: string;
             releasedBy: string | null;
             releasedDate: Date | null;
-            fgReceiptId: string | null;
         })[];
         total: number;
         totalSampled: number;
@@ -168,10 +168,10 @@ export declare class QualityReportsService {
             periodType: string;
             totalReceived: number;
             totalRejected: number;
+            onTimeDelivery: number;
             defectRate: number;
             ncrCount: number;
             carCount: number;
-            onTimeDelivery: number;
             qualityScore: number;
             avlStatus: string;
         })[];
@@ -203,10 +203,10 @@ export declare class QualityReportsService {
             closedDate: Date | null;
             ncrId: string | null;
             verifiedDate: Date | null;
-            carNumber: string;
             supplierResponse: string | null;
             supplierRootCause: string | null;
             supplierAction: string | null;
+            carNumber: string;
             respondedDate: Date | null;
         })[];
         totalCars: number;
@@ -240,12 +240,12 @@ export declare class QualityReportsService {
             qtyAffected: number;
             closedDate: Date | null;
             rootCause: string | null;
-            complaintNumber: string;
             customerId: string | null;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;
             eighthDNumber: string | null;
+            complaintNumber: string;
             responseDate: Date | null;
         }[];
         total: number;

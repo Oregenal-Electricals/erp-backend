@@ -16,8 +16,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -36,7 +36,6 @@ export declare class NcrService {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
-        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -44,6 +43,7 @@ export declare class NcrService {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
+        ncrNumber: string;
         closedDate: Date | null;
     }>;
     update(id: string, dto: UpdateNcrDto, user: any): Promise<{
@@ -55,8 +55,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -75,7 +75,6 @@ export declare class NcrService {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
-        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -83,6 +82,7 @@ export declare class NcrService {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
+        ncrNumber: string;
         closedDate: Date | null;
     }>;
     close(id: string, user: any): Promise<{
@@ -94,8 +94,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -114,7 +114,6 @@ export declare class NcrService {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
-        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -122,6 +121,7 @@ export declare class NcrService {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
+        ncrNumber: string;
         closedDate: Date | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -150,7 +150,6 @@ export declare class NcrService {
             itemName: string | null;
             disposition: string | null;
             workOrderId: string | null;
-            ncrNumber: string;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
@@ -158,6 +157,7 @@ export declare class NcrService {
             qtyAffected: number;
             detectedBy: string | null;
             detectedDate: Date;
+            ncrNumber: string;
             closedDate: Date | null;
         })[];
         total: number;
@@ -173,8 +173,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -193,7 +193,6 @@ export declare class NcrService {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
-        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -201,6 +200,7 @@ export declare class NcrService {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
+        ncrNumber: string;
         closedDate: Date | null;
     }>;
     getStats(user: any): Promise<{

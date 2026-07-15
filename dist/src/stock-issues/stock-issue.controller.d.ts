@@ -46,9 +46,9 @@ export declare class StockIssueController {
             warehouseId: string;
             referenceType: string;
             referenceId: string | null;
-            issueNumber: string;
             issuedTo: string;
             issueMethod: string;
+            issueNumber: string;
         })[];
         total: number;
         page: number;
@@ -59,8 +59,8 @@ export declare class StockIssueController {
         items: ({
             batch: {
                 receivedDate: Date;
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -97,15 +97,15 @@ export declare class StockIssueController {
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
-        issueNumber: string;
         issuedTo: string;
         issueMethod: string;
+        issueNumber: string;
     }>;
     create(dto: CreateStockIssueDto, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -142,15 +142,15 @@ export declare class StockIssueController {
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
-        issueNumber: string;
         issuedTo: string;
         issueMethod: string;
+        issueNumber: string;
     }>;
     confirm(id: string, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 lotNumber: string;
+                batchNumber: string;
             };
         } & {
             id: string;
@@ -187,8 +187,8 @@ export declare class StockIssueController {
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
-        issueNumber: string;
         issuedTo: string;
         issueMethod: string;
+        issueNumber: string;
     }>;
 }

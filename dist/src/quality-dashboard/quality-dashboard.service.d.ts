@@ -53,9 +53,9 @@ export declare class QualityDashboardService {
             description: string;
             createdAt: Date;
             status: string;
-            ncrNumber: string;
             source: string;
             severity: string;
+            ncrNumber: string;
         }[];
     }>;
     getOqcTrend(user: any): Promise<{

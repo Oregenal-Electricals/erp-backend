@@ -87,11 +87,11 @@ export declare class TrainingService {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     updateSession(id: string, dto: any, user: any): Promise<{
         trainingProgram: {
@@ -111,11 +111,11 @@ export declare class TrainingService {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     findAllSessions(user: any, query: any): Promise<{
         data: ({
@@ -141,11 +141,11 @@ export declare class TrainingService {
             status: string;
             title: string;
             remarks: string | null;
-            sessionNumber: string;
+            trainingProgramId: string;
             venue: string | null;
             trainer: string | null;
             maxParticipants: number;
-            trainingProgramId: string;
+            sessionNumber: string;
         })[];
         total: number;
         page: number;
@@ -217,11 +217,11 @@ export declare class TrainingService {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     enrollEmployees(dto: EnrollDto, user: any): Promise<{
         sessionId: string;
@@ -265,11 +265,11 @@ export declare class TrainingService {
         status: string;
         title: string;
         remarks: string | null;
-        sessionNumber: string;
+        trainingProgramId: string;
         venue: string | null;
         trainer: string | null;
         maxParticipants: number;
-        trainingProgramId: string;
+        sessionNumber: string;
     }>;
     getStats(user: any): Promise<{
         programs: number;
@@ -300,11 +300,11 @@ export declare class TrainingService {
             status: string;
             title: string;
             remarks: string | null;
-            sessionNumber: string;
+            trainingProgramId: string;
             venue: string | null;
             trainer: string | null;
             maxParticipants: number;
-            trainingProgramId: string;
+            sessionNumber: string;
         };
     } & {
         id: string;

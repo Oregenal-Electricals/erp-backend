@@ -16,10 +16,10 @@ export declare class CostSheetController {
     findAll(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
                 completedQty: number;
+                woNumber: string;
             };
         } & {
             id: string;
@@ -32,13 +32,10 @@ export declare class CostSheetController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            totalCost: number;
             unitCost: number;
+            totalCost: number;
             completedQty: number;
             workOrderId: string;
-            costSheetNumber: string;
-            materialCost: number;
-            totalShifts: number;
             laborHours: number;
             laborRatePerHour: number;
             laborCost: number;
@@ -46,6 +43,9 @@ export declare class CostSheetController {
             overheadRemarks: string | null;
             otherCost: number;
             otherRemarks: string | null;
+            costSheetNumber: string;
+            materialCost: number;
+            totalShifts: number;
             plannedMaterialCost: number;
             varianceCost: number;
         })[];
@@ -74,11 +74,11 @@ export declare class CostSheetController {
         }[];
         workOrder: {
             bomId: string;
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
+            woNumber: string;
         };
         id: string;
         companyId: string;
@@ -90,13 +90,10 @@ export declare class CostSheetController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         completedQty: number;
         workOrderId: string;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -104,6 +101,9 @@ export declare class CostSheetController {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;
@@ -118,13 +118,10 @@ export declare class CostSheetController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         completedQty: number;
         workOrderId: string;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -132,14 +129,17 @@ export declare class CostSheetController {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;
     update(id: string, dto: UpdateCostSheetDto, req: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -152,13 +152,10 @@ export declare class CostSheetController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         completedQty: number;
         workOrderId: string;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -166,13 +163,16 @@ export declare class CostSheetController {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;
     finalize(id: string, req: any): Promise<{
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -185,13 +185,10 @@ export declare class CostSheetController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         completedQty: number;
         workOrderId: string;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -199,6 +196,9 @@ export declare class CostSheetController {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;

@@ -22,10 +22,10 @@ export declare class BankReconController {
         };
         voucher: {
             referenceNumber: string;
-            voucherNumber: string;
             voucherType: string;
             voucherDate: Date;
             partyName: string;
+            voucherNumber: string;
         };
     } & {
         id: string;
@@ -37,9 +37,9 @@ export declare class BankReconController {
         createdBy: string | null;
         updatedBy: string | null;
         amount: number;
-        narration: string | null;
-        entryType: string;
         accountId: string;
+        entryType: string;
+        narration: string | null;
         voucherId: string;
     })[]>;
     findAll(req: any, query: any): Promise<({
@@ -86,8 +86,8 @@ export declare class BankReconController {
             balance: number;
             debitAmount: number;
             creditAmount: number;
-            isReconciled: boolean;
             voucherEntryId: string | null;
+            isReconciled: boolean;
             reconciledDate: Date | null;
             reconciledBy: string | null;
             statementId: string;
@@ -129,8 +129,8 @@ export declare class BankReconController {
             balance: number;
             debitAmount: number;
             creditAmount: number;
-            isReconciled: boolean;
             voucherEntryId: string | null;
+            isReconciled: boolean;
             reconciledDate: Date | null;
             reconciledBy: string | null;
             statementId: string;

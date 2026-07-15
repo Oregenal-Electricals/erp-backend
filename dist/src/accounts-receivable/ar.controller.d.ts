@@ -96,13 +96,13 @@ export declare class ArController {
         salesOrder: {
             soNumber: string;
             cpo: {
-                cpoNumber: string;
                 customerPoNumber: string;
+                cpoNumber: string;
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -118,10 +118,10 @@ export declare class ArController {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
-            paymentNumber: string;
+            invoiceId: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            invoiceId: string;
+            paymentNumber: string;
         }[];
     } & {
         id: string;
@@ -153,13 +153,13 @@ export declare class ArController {
         salesOrder: {
             soNumber: string;
             cpo: {
-                cpoNumber: string;
                 customerPoNumber: string;
+                cpoNumber: string;
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -175,10 +175,10 @@ export declare class ArController {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
-            paymentNumber: string;
+            invoiceId: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            invoiceId: string;
+            paymentNumber: string;
         }[];
     } & {
         id: string;
@@ -210,13 +210,13 @@ export declare class ArController {
         salesOrder: {
             soNumber: string;
             cpo: {
-                cpoNumber: string;
                 customerPoNumber: string;
+                cpoNumber: string;
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -232,10 +232,10 @@ export declare class ArController {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
-            paymentNumber: string;
+            invoiceId: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            invoiceId: string;
+            paymentNumber: string;
         }[];
     } & {
         id: string;
@@ -277,9 +277,9 @@ export declare class ArController {
         paymentMode: string;
         referenceNumber: string | null;
         voucherId: string | null;
-        paymentNumber: string;
+        invoiceId: string;
         paymentDate: Date;
         bankAccountId: string | null;
-        invoiceId: string;
+        paymentNumber: string;
     }>;
 }

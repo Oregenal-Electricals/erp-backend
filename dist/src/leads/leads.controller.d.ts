@@ -31,13 +31,13 @@ export declare class LeadsController {
             currency: string;
             assignedTo: string | null;
             source: string;
-            leadNumber: string;
             companyName: string;
             contactPerson: string;
             productInterest: string | null;
             followUpDate: Date | null;
             followUpNotes: string | null;
             lostReason: string | null;
+            leadNumber: string;
             convertedToQuoteId: string | null;
         }[];
         total: number;
@@ -61,13 +61,13 @@ export declare class LeadsController {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     create(dto: CreateLeadDto, req: any): Promise<{
@@ -87,13 +87,13 @@ export declare class LeadsController {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     update(id: string, dto: UpdateLeadDto, req: any): Promise<{
@@ -113,13 +113,13 @@ export declare class LeadsController {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     convert(id: string, req: any): Promise<{
@@ -139,13 +139,13 @@ export declare class LeadsController {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
 }

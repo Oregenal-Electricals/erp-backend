@@ -62,8 +62,8 @@ export declare class StockLedgerController {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
@@ -92,8 +92,8 @@ export declare class StockLedgerController {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            totalCost: number;
             unitCost: number;
+            totalCost: number;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
@@ -125,8 +125,8 @@ export declare class StockLedgerController {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;

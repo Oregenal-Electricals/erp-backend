@@ -23,13 +23,13 @@ export declare class LeadsService {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     update(id: string, dto: UpdateLeadDto, user: any): Promise<{
@@ -49,13 +49,13 @@ export declare class LeadsService {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     convert(id: string, user: any): Promise<{
@@ -75,13 +75,13 @@ export declare class LeadsService {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -102,13 +102,13 @@ export declare class LeadsService {
             currency: string;
             assignedTo: string | null;
             source: string;
-            leadNumber: string;
             companyName: string;
             contactPerson: string;
             productInterest: string | null;
             followUpDate: Date | null;
             followUpNotes: string | null;
             lostReason: string | null;
+            leadNumber: string;
             convertedToQuoteId: string | null;
         }[];
         total: number;
@@ -132,13 +132,13 @@ export declare class LeadsService {
         currency: string;
         assignedTo: string | null;
         source: string;
-        leadNumber: string;
         companyName: string;
         contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
         lostReason: string | null;
+        leadNumber: string;
         convertedToQuoteId: string | null;
     }>;
     getStats(user: any): Promise<{

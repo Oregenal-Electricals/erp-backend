@@ -64,8 +64,8 @@ export declare class MisReportsController {
             subtotal: number;
             totalGst: number;
             outstandingAmount: number;
-            billNumber: string;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
     getStockPosition(req: any, query: any): Promise<{
@@ -125,8 +125,8 @@ export declare class MisReportsController {
             totalAmount: number;
             vendorName: string;
             outstandingAmount: number;
-            billNumber: string;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
     getNcrSummary(req: any, query: any): Promise<{
@@ -145,10 +145,10 @@ export declare class MisReportsController {
             status: string;
             itemCode: string;
             itemName: string;
-            ncrNumber: string;
             source: string;
             severity: string;
             detectedDate: Date;
+            ncrNumber: string;
         }[];
     }>;
     getProductionSummary(req: any, query: any): Promise<{
@@ -168,15 +168,15 @@ export declare class MisReportsController {
         items: {
             status: string;
             rejectedQty: number;
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
+            completedQty: number;
             actualStartDate: Date;
             actualEndDate: Date;
+            woNumber: string;
         }[];
     }>;
     getGstSummary(req: any, query: any): Promise<{
@@ -205,8 +205,8 @@ export declare class MisReportsController {
             vendorName: string;
             subtotal: number;
             totalGst: number;
-            billNumber: string;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
 }

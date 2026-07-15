@@ -47,7 +47,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -56,11 +55,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -91,7 +91,6 @@ export declare class ShipmentService {
             portOfDischarge: string | null;
             ipoId: string;
             paymentInstrumentId: string | null;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string | null;
             voyageNumber: string | null;
@@ -100,11 +99,12 @@ export declare class ShipmentService {
             awbNumber: string | null;
             etd: Date | null;
             eta: Date | null;
-            atd: Date | null;
-            ata: Date | null;
             totalPackages: number | null;
             totalWeight: number | null;
             totalVolume: number | null;
+            atd: Date | null;
+            ata: Date | null;
+            shipmentNumber: string;
         })[];
         total: number;
         page: number;
@@ -151,7 +151,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -160,11 +159,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     findByIpo(ipoId: string, user: any): Promise<({
         ipo: {
@@ -206,7 +206,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -215,11 +214,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     })[]>;
     update(id: string, dto: UpdateShipmentDto, user: any): Promise<{
         ipo: {
@@ -261,7 +261,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -270,11 +269,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     depart(id: string, user: any): Promise<{
         ipo: {
@@ -316,7 +316,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -325,11 +324,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     arrive(id: string, user: any): Promise<{
         ipo: {
@@ -371,7 +371,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -380,11 +379,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     deliver(id: string, user: any): Promise<{
         ipo: {
@@ -426,7 +426,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -435,11 +434,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     cancel(id: string, user: any): Promise<{
         ipo: {
@@ -481,7 +481,6 @@ export declare class ShipmentService {
         portOfDischarge: string | null;
         ipoId: string;
         paymentInstrumentId: string | null;
-        shipmentNumber: string;
         shipmentMode: string;
         vesselName: string | null;
         voyageNumber: string | null;
@@ -490,11 +489,12 @@ export declare class ShipmentService {
         awbNumber: string | null;
         etd: Date | null;
         eta: Date | null;
-        atd: Date | null;
-        ata: Date | null;
         totalPackages: number | null;
         totalWeight: number | null;
         totalVolume: number | null;
+        atd: Date | null;
+        ata: Date | null;
+        shipmentNumber: string;
     }>;
     addContainer(id: string, dto: AddContainerDto, user: any): Promise<{
         id: string;

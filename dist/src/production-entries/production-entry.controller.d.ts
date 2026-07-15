@@ -28,15 +28,15 @@ export declare class ProductionEntryController {
             warehouseId: string;
             bomId: string | null;
             rejectedQty: number;
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
+            completedQty: number;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
+            woNumber: string;
         };
         entries: {
             id: string;
@@ -52,12 +52,12 @@ export declare class ProductionEntryController {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            goodQty: number;
-            scrapQty: number;
-            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
+            goodQty: number;
+            scrapQty: number;
+            entryNumber: string;
         }[];
         summary: {
             plannedQty: number;
@@ -72,11 +72,11 @@ export declare class ProductionEntryController {
         data: ({
             workOrder: {
                 status: string;
-                woNumber: string;
                 productCode: string;
                 productName: string;
                 plannedQty: number;
                 completedQty: number;
+                woNumber: string;
             };
         } & {
             id: string;
@@ -92,12 +92,12 @@ export declare class ProductionEntryController {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            goodQty: number;
-            scrapQty: number;
-            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
+            goodQty: number;
+            scrapQty: number;
+            entryNumber: string;
         })[];
         total: number;
         page: number;
@@ -107,11 +107,11 @@ export declare class ProductionEntryController {
     findOne(id: string, req: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -127,21 +127,21 @@ export declare class ProductionEntryController {
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
-        goodQty: number;
-        scrapQty: number;
-        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
+        goodQty: number;
+        scrapQty: number;
+        entryNumber: string;
     }>;
     create(dto: CreateProductionEntryDto, req: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -157,21 +157,21 @@ export declare class ProductionEntryController {
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
-        goodQty: number;
-        scrapQty: number;
-        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
+        goodQty: number;
+        scrapQty: number;
+        entryNumber: string;
     }>;
     confirm(id: string, req: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -187,11 +187,11 @@ export declare class ProductionEntryController {
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
-        goodQty: number;
-        scrapQty: number;
-        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
+        goodQty: number;
+        scrapQty: number;
+        entryNumber: string;
     }>;
 }
