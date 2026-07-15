@@ -13,10 +13,12 @@ exports.IqcService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
 let IqcService = class IqcService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, stockLedger) {
         this.prisma = prisma;
         this.audit = audit;
+        this.stockLedger = stockLedger;
     }
     async generateIqcNumber(companyId) {
         const count = await this.prisma.iqcInspection.count({ where: { companyId } });
@@ -146,6 +148,7 @@ let IqcService = class IqcService {
         await this.prisma.iqcInspection.update({
             where: { id }, data: { status: 'APPROVED', updatedBy: user.id },
         });
+        await this.stockLedger.receiveFromIqc(id, user);
         for (const item of iqc.items) {
             await this.prisma.grnItem.update({
                 where: { id: item.grnItemId },
@@ -183,6 +186,6 @@ let IqcService = class IqcService {
 exports.IqcService = IqcService;
 exports.IqcService = IqcService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, stock_ledger_service_1.StockLedgerService])
 ], IqcService);
 //# sourceMappingURL=iqc.service.js.map

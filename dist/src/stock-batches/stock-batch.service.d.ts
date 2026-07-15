@@ -30,9 +30,9 @@ export declare class StockBatchService {
         expiryDate: Date | null;
         receivedDate: Date;
         grnId: string | null;
-        grnItemId: string | null;
         availableQty: number;
         reservedQty: number;
+        grnItemId: string | null;
         lotNumber: string | null;
         mfgDate: Date | null;
         originalQty: number;
@@ -67,9 +67,9 @@ export declare class StockBatchService {
             expiryDate: Date | null;
             receivedDate: Date;
             grnId: string | null;
-            grnItemId: string | null;
             availableQty: number;
             reservedQty: number;
+            grnItemId: string | null;
             lotNumber: string | null;
             mfgDate: Date | null;
             originalQty: number;
@@ -103,9 +103,9 @@ export declare class StockBatchService {
         expiryDate: Date | null;
         receivedDate: Date;
         grnId: string | null;
-        grnItemId: string | null;
         availableQty: number;
         reservedQty: number;
+        grnItemId: string | null;
         lotNumber: string | null;
         mfgDate: Date | null;
         originalQty: number;
@@ -134,9 +134,9 @@ export declare class StockBatchService {
         expiryDate: Date | null;
         receivedDate: Date;
         grnId: string | null;
-        grnItemId: string | null;
         availableQty: number;
         reservedQty: number;
+        grnItemId: string | null;
         lotNumber: string | null;
         mfgDate: Date | null;
         originalQty: number;
@@ -165,9 +165,9 @@ export declare class StockBatchService {
         expiryDate: Date | null;
         receivedDate: Date;
         grnId: string | null;
-        grnItemId: string | null;
         availableQty: number;
         reservedQty: number;
+        grnItemId: string | null;
         lotNumber: string | null;
         mfgDate: Date | null;
         originalQty: number;
@@ -192,9 +192,9 @@ export declare class StockBatchService {
         expiryDate: Date | null;
         receivedDate: Date;
         grnId: string | null;
-        grnItemId: string | null;
         availableQty: number;
         reservedQty: number;
+        grnItemId: string | null;
         lotNumber: string | null;
         mfgDate: Date | null;
         originalQty: number;

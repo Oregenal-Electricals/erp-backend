@@ -12,12 +12,13 @@ const iqc_controller_1 = require("./iqc.controller");
 const iqc_service_1 = require("./iqc.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
 let IqcModule = class IqcModule {
 };
 exports.IqcModule = IqcModule;
 exports.IqcModule = IqcModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule],
         controllers: [iqc_controller_1.IqcController],
         providers: [iqc_service_1.IqcService],
         exports: [iqc_service_1.IqcService],

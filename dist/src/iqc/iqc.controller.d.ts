@@ -59,8 +59,8 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -103,8 +103,8 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -147,8 +147,8 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -191,8 +191,8 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -235,8 +235,8 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {

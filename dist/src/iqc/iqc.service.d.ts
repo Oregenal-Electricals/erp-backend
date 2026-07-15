@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateIqcDto, UpdateIqcItemsDto } from './dto/iqc.dto';
+import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 export declare class IqcService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private stockLedger;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
     private generateIqcNumber;
     private includes;
     create(dto: CreateIqcDto, user: any): Promise<{
@@ -24,8 +26,8 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -101,8 +103,8 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -145,8 +147,8 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -189,8 +191,8 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {
@@ -233,8 +235,8 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
-            grnItemId: string;
             iqcId: string;
+            grnItemId: string;
         }[];
         grn: {
             warehouse: {

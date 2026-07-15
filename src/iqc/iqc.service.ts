@@ -2,10 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateIqcDto, UpdateIqcItemsDto } from './dto/iqc.dto';
+import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 
 @Injectable()
 export class IqcService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private stockLedger: StockLedgerService) {}
 
   private async generateIqcNumber(companyId: string): Promise<string> {
     const count = await this.prisma.iqcInspection.count({ where: { companyId } });
@@ -141,6 +142,11 @@ export class IqcService {
     await this.prisma.iqcInspection.update({
       where: { id }, data: { status: 'APPROVED', updatedBy: user.id },
     });
+
+    // Credit accepted stock into the real StockBalance/StockLedger -
+    // without this, materials could pass IQC and still be invisible to
+    // the rest of the system (shortage checks, dashboards, production).
+    await this.stockLedger.receiveFromIqc(id, user);
 
     // Update GRN items with accepted/rejected quantities
     for (const item of iqc.items as any[]) {
