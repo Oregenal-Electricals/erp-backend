@@ -279,6 +279,32 @@ export class BomImportService {
               },
             });
             rawMaterialId = newRm.id;
+
+            // Build the ranked brand-preference list: preferred make is
+            // rank 1, each alternate (slash-separated) fills the next
+            // ranks in order - so if the preferred brand is unavailable
+            // at purchase time, purchasing knows exactly which
+            // substitute to try next.
+            const brandNames: string[] = [];
+            if (item.preferredMake) brandNames.push(item.preferredMake.trim());
+            if (item.alternateMakes) {
+              for (const alt of item.alternateMakes.split('/')) {
+                const trimmed = alt.trim();
+                if (trimmed && !brandNames.includes(trimmed)) brandNames.push(trimmed);
+              }
+            }
+            if (brandNames.length > 0) {
+              await tx.rawMaterialBrand.createMany({
+                data: brandNames.map((brandName, idx) => ({
+                  companyId: user.companyId,
+                  rawMaterialId: newRm.id,
+                  brandName,
+                  preferenceOrder: idx + 1,
+                  createdBy: user.id,
+                  updatedBy: user.id,
+                })),
+              });
+            }
           }
         }
 

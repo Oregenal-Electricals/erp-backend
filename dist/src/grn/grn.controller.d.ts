@@ -53,10 +53,10 @@ export declare class GrnController {
             poId: string | null;
             ipoId: string | null;
             landedCostId: string | null;
+            grnNumber: string;
             grnType: string;
             receivedDate: Date;
             dcNumber: string | null;
-            grnNumber: string;
         })[];
         total: number;
         page: number;
@@ -124,10 +124,10 @@ export declare class GrnController {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
+        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
     create(dto: CreateGrnDto, req: any): Promise<{
         items: {
@@ -190,10 +190,10 @@ export declare class GrnController {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
+        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
     update(id: string, dto: UpdateGrnDto, req: any): Promise<{
         items: {
@@ -256,10 +256,10 @@ export declare class GrnController {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
+        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
     submit(id: string, req: any): Promise<{
         items: {
@@ -322,9 +322,9 @@ export declare class GrnController {
         poId: string | null;
         ipoId: string | null;
         landedCostId: string | null;
+        grnNumber: string;
         grnType: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
 }

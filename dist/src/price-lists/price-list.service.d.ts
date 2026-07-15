@@ -63,10 +63,10 @@ export declare class PriceListService {
             itemName: string;
             itemType: string;
             uom: string | null;
+            priceListId: string;
             itemId: string;
             price: number;
             minQty: number | null;
-            priceListId: string;
             isApproved: boolean;
         }[];
     } & {
@@ -127,10 +127,10 @@ export declare class PriceListService {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }>;
     updateItem(priceListId: string, itemId: string, dto: UpdatePriceListItemDto, user: any): Promise<{
@@ -148,10 +148,10 @@ export declare class PriceListService {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }>;
     approveItem(priceListId: string, itemId: string, user: any): Promise<{
@@ -169,10 +169,10 @@ export declare class PriceListService {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }>;
     removeItem(priceListId: string, itemId: string, user: any): Promise<{

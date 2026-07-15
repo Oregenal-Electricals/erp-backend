@@ -42,8 +42,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -140,8 +140,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -203,8 +203,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -266,8 +266,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -329,8 +329,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -392,8 +392,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -435,8 +435,8 @@ export declare class RfqService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
     }>;
     removeVendor(id: string, vendorId: string, user: any): Promise<{
         message: string;

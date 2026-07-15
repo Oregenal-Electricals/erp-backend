@@ -13,13 +13,13 @@ export declare class ArService {
         salesOrder: {
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -35,10 +35,10 @@ export declare class ArService {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
-            invoiceId: string;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
+            invoiceId: string;
         }[];
     } & {
         id: string;
@@ -70,13 +70,13 @@ export declare class ArService {
         salesOrder: {
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -92,10 +92,10 @@ export declare class ArService {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
-            invoiceId: string;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
+            invoiceId: string;
         }[];
     } & {
         id: string;
@@ -138,10 +138,10 @@ export declare class ArService {
         paymentMode: string;
         referenceNumber: string | null;
         voucherId: string | null;
-        invoiceId: string;
+        paymentNumber: string;
         paymentDate: Date;
         bankAccountId: string | null;
-        paymentNumber: string;
+        invoiceId: string;
     }>;
     private createReceiptVoucher;
     findAll(user: any, query: any): Promise<{
@@ -191,13 +191,13 @@ export declare class ArService {
         salesOrder: {
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -213,10 +213,10 @@ export declare class ArService {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
-            invoiceId: string;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
+            invoiceId: string;
         }[];
     } & {
         id: string;

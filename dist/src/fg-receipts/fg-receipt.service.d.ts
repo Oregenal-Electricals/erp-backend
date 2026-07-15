@@ -15,11 +15,11 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -36,8 +36,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         batchNumber: string | null;
@@ -51,11 +51,11 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -72,8 +72,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         batchNumber: string | null;
@@ -87,11 +87,11 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -108,8 +108,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         batchNumber: string | null;
@@ -124,11 +124,11 @@ export declare class FgReceiptService {
                 code: string;
             };
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
                 plannedQty: number;
                 completedQty: number;
-                woNumber: string;
             };
         } & {
             id: string;
@@ -145,8 +145,8 @@ export declare class FgReceiptService {
             itemName: string;
             uom: string;
             warehouseId: string;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             receivedQty: number;
             rejectedQty: number;
             batchNumber: string | null;
@@ -165,11 +165,11 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -186,8 +186,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         batchNumber: string | null;

@@ -11,8 +11,8 @@ export declare class CustomsEntryService {
     create(dto: CreateCustomsEntryDto, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -38,16 +38,16 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
@@ -55,8 +55,8 @@ export declare class CustomsEntryService {
         data: ({
             shipment: {
                 portOfDischarge: string;
-                shipmentMode: string;
                 shipmentNumber: string;
+                shipmentMode: string;
             };
             ipo: {
                 status: string;
@@ -82,16 +82,16 @@ export declare class CustomsEntryService {
             bcdRate: number;
             ipoId: string;
             shipmentId: string;
-            customsBoeNumber: string | null;
-            chaName: string | null;
-            portOfEntry: string | null;
-            cifValue: number;
-            aidcAmount: number | null;
             bcdAmount: number;
             swsAmount: number;
             igstAmount: number;
             totalDuty: number;
             boeNumber: string;
+            customsBoeNumber: string | null;
+            chaName: string | null;
+            portOfEntry: string | null;
+            cifValue: number;
+            aidcAmount: number | null;
             dutyPaidDate: Date | null;
             outOfChargeDate: Date | null;
         })[];
@@ -103,8 +103,8 @@ export declare class CustomsEntryService {
     findOne(id: string, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -130,24 +130,24 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     findByIpo(ipoId: string, user: any): Promise<({
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -173,24 +173,24 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     })[]>;
     update(id: string, dto: UpdateCustomsEntryDto, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -216,24 +216,24 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     file(id: string, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -259,24 +259,24 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     assess(id: string, dto: AssessCustomsEntryDto, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -302,24 +302,24 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     payDuty(id: string, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -345,24 +345,24 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;
     outOfCharge(id: string, user: any): Promise<{
         shipment: {
             portOfDischarge: string;
-            shipmentMode: string;
             shipmentNumber: string;
+            shipmentMode: string;
         };
         ipo: {
             status: string;
@@ -388,16 +388,16 @@ export declare class CustomsEntryService {
         bcdRate: number;
         ipoId: string;
         shipmentId: string;
-        customsBoeNumber: string | null;
-        chaName: string | null;
-        portOfEntry: string | null;
-        cifValue: number;
-        aidcAmount: number | null;
         bcdAmount: number;
         swsAmount: number;
         igstAmount: number;
         totalDuty: number;
         boeNumber: string;
+        customsBoeNumber: string | null;
+        chaName: string | null;
+        portOfEntry: string | null;
+        cifValue: number;
+        aidcAmount: number | null;
         dutyPaidDate: Date | null;
         outOfChargeDate: Date | null;
     }>;

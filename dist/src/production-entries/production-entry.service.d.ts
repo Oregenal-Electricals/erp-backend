@@ -10,11 +10,11 @@ export declare class ProductionEntryService {
     create(dto: CreateProductionEntryDto, user: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -30,21 +30,21 @@ export declare class ProductionEntryService {
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
-        entryDate: Date;
-        operatorName: string | null;
-        machineName: string | null;
         goodQty: number;
         scrapQty: number;
         entryNumber: string;
+        entryDate: Date;
+        operatorName: string | null;
+        machineName: string | null;
     }>;
     confirm(id: string, user: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -60,22 +60,22 @@ export declare class ProductionEntryService {
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
-        entryDate: Date;
-        operatorName: string | null;
-        machineName: string | null;
         goodQty: number;
         scrapQty: number;
         entryNumber: string;
+        entryDate: Date;
+        operatorName: string | null;
+        machineName: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
                 status: string;
+                woNumber: string;
                 productCode: string;
                 productName: string;
                 plannedQty: number;
                 completedQty: number;
-                woNumber: string;
             };
         } & {
             id: string;
@@ -91,12 +91,12 @@ export declare class ProductionEntryService {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            entryDate: Date;
-            operatorName: string | null;
-            machineName: string | null;
             goodQty: number;
             scrapQty: number;
             entryNumber: string;
+            entryDate: Date;
+            operatorName: string | null;
+            machineName: string | null;
         })[];
         total: number;
         page: number;
@@ -106,11 +106,11 @@ export declare class ProductionEntryService {
     findOne(id: string, user: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -126,12 +126,12 @@ export declare class ProductionEntryService {
         remarks: string | null;
         totalQty: number;
         workOrderId: string;
-        entryDate: Date;
-        operatorName: string | null;
-        machineName: string | null;
         goodQty: number;
         scrapQty: number;
         entryNumber: string;
+        entryDate: Date;
+        operatorName: string | null;
+        machineName: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;
@@ -158,15 +158,15 @@ export declare class ProductionEntryService {
             warehouseId: string;
             bomId: string | null;
             rejectedQty: number;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
-            completedQty: number;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
-            woNumber: string;
         };
         entries: {
             id: string;
@@ -182,12 +182,12 @@ export declare class ProductionEntryService {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            entryDate: Date;
-            operatorName: string | null;
-            machineName: string | null;
             goodQty: number;
             scrapQty: number;
             entryNumber: string;
+            entryDate: Date;
+            operatorName: string | null;
+            machineName: string | null;
         }[];
         summary: {
             plannedQty: number;

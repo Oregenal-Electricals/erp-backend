@@ -10,9 +10,9 @@ export declare class CapaService {
     create(dto: CreateCapaDto, user: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -40,9 +40,9 @@ export declare class CapaService {
     update(id: string, dto: UpdateCapaDto, user: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -70,9 +70,9 @@ export declare class CapaService {
     verify(id: string, dto: VerifyCapaDto, user: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -101,9 +101,9 @@ export declare class CapaService {
         data: ({
             ncr: {
                 description: string;
+                ncrNumber: string;
                 source: string;
                 severity: string;
-                ncrNumber: string;
             };
         } & {
             id: string;
@@ -135,9 +135,9 @@ export declare class CapaService {
     findOne(id: string, user: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;

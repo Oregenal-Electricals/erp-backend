@@ -46,9 +46,9 @@ export declare class ApController {
             voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            billNumber: string;
             vendorBillNumber: string;
             billDate: Date;
-            billNumber: string;
         }[];
     }>;
     findAll(req: any, query: any): Promise<{
@@ -87,9 +87,9 @@ export declare class ApController {
             voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            billNumber: string;
             vendorBillNumber: string;
             billDate: Date;
-            billNumber: string;
         })[];
         total: number;
         page: number;
@@ -117,9 +117,9 @@ export declare class ApController {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
             billId: string;
         }[];
     } & {
@@ -144,9 +144,9 @@ export declare class ApController {
         voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        billNumber: string;
         vendorBillNumber: string;
         billDate: Date;
-        billNumber: string;
     }>;
     create(dto: CreateApBillDto, req: any): Promise<{
         vendor: {
@@ -170,9 +170,9 @@ export declare class ApController {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
             billId: string;
         }[];
     } & {
@@ -197,9 +197,9 @@ export declare class ApController {
         voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        billNumber: string;
         vendorBillNumber: string;
         billDate: Date;
-        billNumber: string;
     }>;
     recordPayment(dto: CreateApPaymentDto, req: any): Promise<{
         id: string;
@@ -215,9 +215,9 @@ export declare class ApController {
         paymentMode: string;
         referenceNumber: string | null;
         voucherId: string | null;
+        paymentNumber: string;
         paymentDate: Date;
         bankAccountId: string | null;
-        paymentNumber: string;
         billId: string;
     }>;
 }

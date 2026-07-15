@@ -54,6 +54,7 @@ export declare class LandedCostService {
         status: string;
         notes: string | null;
         ipoId: string;
+        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -62,9 +63,8 @@ export declare class LandedCostService {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        allocationMethod: string;
-        lcNumber: string;
         totalLandedCost: number;
+        allocationMethod: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -91,6 +91,7 @@ export declare class LandedCostService {
             status: string;
             notes: string | null;
             ipoId: string;
+            lcNumber: string;
             invoiceValue: number;
             customsDuty: number;
             freightCharges: number;
@@ -99,9 +100,8 @@ export declare class LandedCostService {
             bankCharges: number;
             insuranceCharges: number;
             otherCharges: number;
-            allocationMethod: string;
-            lcNumber: string;
             totalLandedCost: number;
+            allocationMethod: string;
         })[];
         total: number;
         page: number;
@@ -153,6 +153,7 @@ export declare class LandedCostService {
         status: string;
         notes: string | null;
         ipoId: string;
+        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -161,9 +162,8 @@ export declare class LandedCostService {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        allocationMethod: string;
-        lcNumber: string;
         totalLandedCost: number;
+        allocationMethod: string;
     }>;
     findByIpo(ipoId: string, user: any): Promise<({
         items: {
@@ -210,6 +210,7 @@ export declare class LandedCostService {
         status: string;
         notes: string | null;
         ipoId: string;
+        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -218,9 +219,8 @@ export declare class LandedCostService {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        allocationMethod: string;
-        lcNumber: string;
         totalLandedCost: number;
+        allocationMethod: string;
     })[]>;
     update(id: string, dto: UpdateLandedCostDto, user: any): Promise<{
         items: {
@@ -267,6 +267,7 @@ export declare class LandedCostService {
         status: string;
         notes: string | null;
         ipoId: string;
+        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -275,9 +276,8 @@ export declare class LandedCostService {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        allocationMethod: string;
-        lcNumber: string;
         totalLandedCost: number;
+        allocationMethod: string;
     }>;
     calculate(id: string, user: any): Promise<{
         items: {
@@ -324,6 +324,7 @@ export declare class LandedCostService {
         status: string;
         notes: string | null;
         ipoId: string;
+        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -332,9 +333,8 @@ export declare class LandedCostService {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        allocationMethod: string;
-        lcNumber: string;
         totalLandedCost: number;
+        allocationMethod: string;
     }>;
     finalize(id: string, user: any): Promise<{
         items: {
@@ -381,6 +381,7 @@ export declare class LandedCostService {
         status: string;
         notes: string | null;
         ipoId: string;
+        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -389,9 +390,8 @@ export declare class LandedCostService {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        allocationMethod: string;
-        lcNumber: string;
         totalLandedCost: number;
+        allocationMethod: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

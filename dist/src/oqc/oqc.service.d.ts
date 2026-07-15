@@ -10,8 +10,8 @@ export declare class OqcService {
     create(dto: CreateOqcDto, user: any): Promise<{
         passRate: number;
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -33,14 +33,14 @@ export declare class OqcService {
         itemName: string;
         uom: string;
         inspectionDate: Date;
-        lotNumber: string | null;
         batchNumber: string | null;
+        lotNumber: string | null;
         workOrderId: string | null;
         inspectorName: string | null;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        fgReceiptId: string | null;
+        oqcNumber: string;
         visualCheck: string | null;
         dimensionalCheck: string | null;
         functionalCheck: string | null;
@@ -48,14 +48,14 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        oqcNumber: string;
         releasedBy: string | null;
         releasedDate: Date | null;
+        fgReceiptId: string | null;
     }>;
     complete(id: string, dto: CompleteOqcDto, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -78,14 +78,14 @@ export declare class OqcService {
         itemName: string;
         uom: string;
         inspectionDate: Date;
-        lotNumber: string | null;
         batchNumber: string | null;
+        lotNumber: string | null;
         workOrderId: string | null;
         inspectorName: string | null;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        fgReceiptId: string | null;
+        oqcNumber: string;
         visualCheck: string | null;
         dimensionalCheck: string | null;
         functionalCheck: string | null;
@@ -93,14 +93,14 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        oqcNumber: string;
         releasedBy: string | null;
         releasedDate: Date | null;
+        fgReceiptId: string | null;
     }>;
     release(id: string, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -123,14 +123,14 @@ export declare class OqcService {
         itemName: string;
         uom: string;
         inspectionDate: Date;
-        lotNumber: string | null;
         batchNumber: string | null;
+        lotNumber: string | null;
         workOrderId: string | null;
         inspectorName: string | null;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        fgReceiptId: string | null;
+        oqcNumber: string;
         visualCheck: string | null;
         dimensionalCheck: string | null;
         functionalCheck: string | null;
@@ -138,15 +138,15 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        oqcNumber: string;
         releasedBy: string | null;
         releasedDate: Date | null;
+        fgReceiptId: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
             fgReceipt: {
                 receivedQty: number;
@@ -169,14 +169,14 @@ export declare class OqcService {
             itemName: string;
             uom: string;
             inspectionDate: Date;
-            lotNumber: string | null;
             batchNumber: string | null;
+            lotNumber: string | null;
             workOrderId: string | null;
             inspectorName: string | null;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            fgReceiptId: string | null;
+            oqcNumber: string;
             visualCheck: string | null;
             dimensionalCheck: string | null;
             functionalCheck: string | null;
@@ -184,9 +184,9 @@ export declare class OqcService {
             labellingCheck: string | null;
             defectsFound: string | null;
             cocNumber: string | null;
-            oqcNumber: string;
             releasedBy: string | null;
             releasedDate: Date | null;
+            fgReceiptId: string | null;
         })[];
         total: number;
         page: number;
@@ -194,8 +194,8 @@ export declare class OqcService {
     }>;
     findOne(id: string, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -218,14 +218,14 @@ export declare class OqcService {
         itemName: string;
         uom: string;
         inspectionDate: Date;
-        lotNumber: string | null;
         batchNumber: string | null;
+        lotNumber: string | null;
         workOrderId: string | null;
         inspectorName: string | null;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        fgReceiptId: string | null;
+        oqcNumber: string;
         visualCheck: string | null;
         dimensionalCheck: string | null;
         functionalCheck: string | null;
@@ -233,9 +233,9 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        oqcNumber: string;
         releasedBy: string | null;
         releasedDate: Date | null;
+        fgReceiptId: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

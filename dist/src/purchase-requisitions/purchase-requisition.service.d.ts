@@ -28,8 +28,8 @@ export declare class PurchaseRequisitionService {
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
-            estimatedUnitPrice: number | null;
             approvedQty: number | null;
+            estimatedUnitPrice: number | null;
             estimatedTotal: number | null;
             prId: string;
         }[];
@@ -116,8 +116,8 @@ export declare class PurchaseRequisitionService {
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
-            estimatedUnitPrice: number | null;
             approvedQty: number | null;
+            estimatedUnitPrice: number | null;
             estimatedTotal: number | null;
             prId: string;
         }[];
@@ -168,8 +168,8 @@ export declare class PurchaseRequisitionService {
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
-            estimatedUnitPrice: number | null;
             approvedQty: number | null;
+            estimatedUnitPrice: number | null;
             estimatedTotal: number | null;
             prId: string;
         }[];
@@ -220,8 +220,8 @@ export declare class PurchaseRequisitionService {
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
-            estimatedUnitPrice: number | null;
             approvedQty: number | null;
+            estimatedUnitPrice: number | null;
             estimatedTotal: number | null;
             prId: string;
         }[];
@@ -272,8 +272,8 @@ export declare class PurchaseRequisitionService {
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
-            estimatedUnitPrice: number | null;
             approvedQty: number | null;
+            estimatedUnitPrice: number | null;
             estimatedTotal: number | null;
             prId: string;
         }[];
@@ -324,8 +324,8 @@ export declare class PurchaseRequisitionService {
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
-            estimatedUnitPrice: number | null;
             approvedQty: number | null;
+            estimatedUnitPrice: number | null;
             estimatedTotal: number | null;
             prId: string;
         }[];
@@ -375,8 +375,8 @@ export declare class PurchaseRequisitionService {
         sequence: number;
         rawMaterialId: string | null;
         requiredQty: number;
-        estimatedUnitPrice: number | null;
         approvedQty: number | null;
+        estimatedUnitPrice: number | null;
         estimatedTotal: number | null;
         prId: string;
     }>;

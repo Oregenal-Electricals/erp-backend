@@ -53,10 +53,10 @@ export declare class PriceListController {
             itemName: string;
             itemType: string;
             uom: string | null;
+            priceListId: string;
             itemId: string;
             price: number;
             minQty: number | null;
-            priceListId: string;
             isApproved: boolean;
         }[];
     } & {
@@ -125,10 +125,10 @@ export declare class PriceListController {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }>;
     updateItem(id: string, itemId: string, dto: UpdatePriceListItemDto, req: any): Promise<{
@@ -146,10 +146,10 @@ export declare class PriceListController {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }>;
     approveItem(id: string, itemId: string, req: any): Promise<{
@@ -167,10 +167,10 @@ export declare class PriceListController {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }>;
     removeItem(id: string, itemId: string, req: any): Promise<{

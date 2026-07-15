@@ -24,10 +24,10 @@ export declare class PriceHistoryService {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     })[]>;
     getEffectivePrice(itemCode: string, user: any): Promise<({
@@ -52,10 +52,10 @@ export declare class PriceHistoryService {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     })[]>;
     getListHistory(priceListId: string, user: any): Promise<{
@@ -73,10 +73,10 @@ export declare class PriceHistoryService {
         itemName: string;
         itemType: string;
         uom: string | null;
+        priceListId: string;
         itemId: string;
         price: number;
         minQty: number | null;
-        priceListId: string;
         isApproved: boolean;
     }[]>;
     getStats(user: any): Promise<{
@@ -109,10 +109,10 @@ export declare class PriceHistoryService {
             itemName: string;
             itemType: string;
             uom: string | null;
+            priceListId: string;
             itemId: string;
             price: number;
             minQty: number | null;
-            priceListId: string;
             isApproved: boolean;
         })[];
         total: number;

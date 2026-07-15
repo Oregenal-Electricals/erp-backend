@@ -42,8 +42,8 @@ export declare class SalesOrdersController {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -62,10 +62,10 @@ export declare class SalesOrdersController {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     })[]>;
@@ -79,8 +79,8 @@ export declare class SalesOrdersController {
                 dispatchedQty: number;
             }[];
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         } & {
             id: string;
@@ -99,10 +99,10 @@ export declare class SalesOrdersController {
             totalAmount: number;
             deliveryDate: Date;
             subtotal: number;
-            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
             soNumber: string;
+            cpoId: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
         })[];
@@ -138,8 +138,8 @@ export declare class SalesOrdersController {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -158,10 +158,10 @@ export declare class SalesOrdersController {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -193,8 +193,8 @@ export declare class SalesOrdersController {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -213,10 +213,10 @@ export declare class SalesOrdersController {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -248,8 +248,8 @@ export declare class SalesOrdersController {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -268,10 +268,10 @@ export declare class SalesOrdersController {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -303,8 +303,8 @@ export declare class SalesOrdersController {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -323,10 +323,10 @@ export declare class SalesOrdersController {
         totalAmount: number;
         deliveryDate: Date;
         subtotal: number;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;

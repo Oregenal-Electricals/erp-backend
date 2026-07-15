@@ -33,9 +33,9 @@ export declare class PoAmendmentService {
         approvedAt: Date | null;
         rejectedBy: string | null;
         poId: string;
+        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
-        amendmentNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -63,9 +63,9 @@ export declare class PoAmendmentService {
             approvedAt: Date | null;
             rejectedBy: string | null;
             poId: string;
+            amendmentNumber: string;
             amendmentType: string;
             changes: import("@prisma/client/runtime/library").JsonValue | null;
-            amendmentNumber: string;
         })[];
         total: number;
         page: number;
@@ -99,9 +99,9 @@ export declare class PoAmendmentService {
         approvedAt: Date | null;
         rejectedBy: string | null;
         poId: string;
+        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
-        amendmentNumber: string;
     }>;
     findByPo(poId: string, user: any): Promise<({
         po: {
@@ -124,9 +124,9 @@ export declare class PoAmendmentService {
         approvedAt: Date | null;
         rejectedBy: string | null;
         poId: string;
+        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
-        amendmentNumber: string;
     })[]>;
     submit(id: string, user: any): Promise<{
         po: {
@@ -152,9 +152,9 @@ export declare class PoAmendmentService {
         approvedAt: Date | null;
         rejectedBy: string | null;
         poId: string;
+        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
-        amendmentNumber: string;
     }>;
     approve(id: string, user: any): Promise<{
         po: {
@@ -180,9 +180,9 @@ export declare class PoAmendmentService {
         approvedAt: Date | null;
         rejectedBy: string | null;
         poId: string;
+        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
-        amendmentNumber: string;
     }>;
     reject(id: string, dto: RejectAmendmentDto, user: any): Promise<{
         po: {
@@ -205,9 +205,9 @@ export declare class PoAmendmentService {
         approvedAt: Date | null;
         rejectedBy: string | null;
         poId: string;
+        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
-        amendmentNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

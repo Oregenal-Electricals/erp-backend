@@ -57,11 +57,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -90,11 +90,11 @@ export declare class VendorQuotationService {
             currency: string;
             notes: string | null;
             totalAmount: number | null;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
+            quotationNumber: string;
             validUntil: Date;
             deliveryDays: number;
-            quotationNumber: string;
         })[];
         total: number;
         page: number;
@@ -150,11 +150,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     findByRfq(rfqId: string, user: any): Promise<({
         items: {
@@ -198,11 +198,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     })[]>;
     update(id: string, dto: UpdateVendorQuotationDto, user: any): Promise<{
         items: {
@@ -253,11 +253,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     submit(id: string, user: any): Promise<{
         items: {
@@ -308,11 +308,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     finalize(id: string, user: any): Promise<{
         items: {
@@ -363,11 +363,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     reject(id: string, user: any): Promise<{
         items: {
@@ -418,11 +418,11 @@ export declare class VendorQuotationService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     updateItem(id: string, itemId: string, dto: UpdateQuotationItemDto, user: any): Promise<{
         id: string;

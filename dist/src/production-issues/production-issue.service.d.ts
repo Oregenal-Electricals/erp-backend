@@ -14,8 +14,8 @@ export declare class ProductionIssueService {
     createFromMrp(workOrderId: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -40,10 +40,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -57,15 +57,15 @@ export declare class ProductionIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     create(dto: CreateProductionIssueDto, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -90,10 +90,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -107,15 +107,15 @@ export declare class ProductionIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     confirm(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -140,10 +140,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -157,8 +157,8 @@ export declare class ProductionIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -170,8 +170,8 @@ export declare class ProductionIssueService {
                 name: string;
             };
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
@@ -185,8 +185,8 @@ export declare class ProductionIssueService {
             status: string;
             remarks: string | null;
             warehouseId: string;
-            issueMethod: string;
             issueNumber: string;
+            issueMethod: string;
             workOrderId: string;
         })[];
         total: number;
@@ -197,8 +197,8 @@ export declare class ProductionIssueService {
     findOne(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -223,10 +223,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -240,8 +240,8 @@ export declare class ProductionIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     getStats(user: any): Promise<{

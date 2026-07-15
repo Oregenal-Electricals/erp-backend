@@ -87,10 +87,10 @@ export declare class CapaAutomationController {
         effective: boolean;
         recurringNcrs: number;
         recurringDetails: {
+            ncrNumber: string;
             source: string;
             severity: string;
             detectedDate: Date;
-            ncrNumber: string;
         }[];
         message: string;
         error?: undefined;

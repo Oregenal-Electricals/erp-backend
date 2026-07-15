@@ -47,16 +47,16 @@ export declare class CustomerPoController {
             deliveryAddress: string | null;
             poDate: Date;
             subtotal: number;
-            poType: string;
+            cpoNumber: string;
             customerPoNumber: string;
+            poType: string;
             verbalConfirmedBy: string | null;
             verbalConfirmedDate: Date | null;
-            customerEmail: string | null;
-            customerPhone: string | null;
-            cpoNumber: string;
             mrpRunAt: Date | null;
             mrpRunBy: string | null;
             lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+            customerEmail: string | null;
+            customerPhone: string | null;
             totalGst: number;
             acknowledgedDate: Date | null;
             cancelledDate: Date | null;
@@ -97,8 +97,8 @@ export declare class CustomerPoController {
         };
         amendmentOf: {
             id: string;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
         amendmentChildren: {
             id: string;
@@ -127,16 +127,16 @@ export declare class CustomerPoController {
         deliveryAddress: string | null;
         poDate: Date;
         subtotal: number;
-        poType: string;
+        cpoNumber: string;
         customerPoNumber: string;
+        poType: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
-        customerEmail: string | null;
-        customerPhone: string | null;
-        cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        customerEmail: string | null;
+        customerPhone: string | null;
         totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
@@ -200,8 +200,8 @@ export declare class CustomerPoController {
         };
         amendmentOf: {
             id: string;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
         amendmentChildren: {
             id: string;
@@ -230,16 +230,16 @@ export declare class CustomerPoController {
         deliveryAddress: string | null;
         poDate: Date;
         subtotal: number;
-        poType: string;
+        cpoNumber: string;
         customerPoNumber: string;
+        poType: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
-        customerEmail: string | null;
-        customerPhone: string | null;
-        cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        customerEmail: string | null;
+        customerPhone: string | null;
         totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
@@ -276,8 +276,8 @@ export declare class CustomerPoController {
         };
         amendmentOf: {
             id: string;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
         amendmentChildren: {
             id: string;
@@ -306,16 +306,16 @@ export declare class CustomerPoController {
         deliveryAddress: string | null;
         poDate: Date;
         subtotal: number;
-        poType: string;
+        cpoNumber: string;
         customerPoNumber: string;
+        poType: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
-        customerEmail: string | null;
-        customerPhone: string | null;
-        cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        customerEmail: string | null;
+        customerPhone: string | null;
         totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
@@ -352,8 +352,8 @@ export declare class CustomerPoController {
         };
         amendmentOf: {
             id: string;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
         amendmentChildren: {
             id: string;
@@ -382,16 +382,16 @@ export declare class CustomerPoController {
         deliveryAddress: string | null;
         poDate: Date;
         subtotal: number;
-        poType: string;
+        cpoNumber: string;
         customerPoNumber: string;
+        poType: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
-        customerEmail: string | null;
-        customerPhone: string | null;
-        cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        customerEmail: string | null;
+        customerPhone: string | null;
         totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
@@ -428,8 +428,8 @@ export declare class CustomerPoController {
         };
         amendmentOf: {
             id: string;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
         amendmentChildren: {
             id: string;
@@ -458,16 +458,16 @@ export declare class CustomerPoController {
         deliveryAddress: string | null;
         poDate: Date;
         subtotal: number;
-        poType: string;
+        cpoNumber: string;
         customerPoNumber: string;
+        poType: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
-        customerEmail: string | null;
-        customerPhone: string | null;
-        cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        customerEmail: string | null;
+        customerPhone: string | null;
         totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;
@@ -504,8 +504,8 @@ export declare class CustomerPoController {
         };
         amendmentOf: {
             id: string;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
         amendmentChildren: {
             id: string;
@@ -534,16 +534,16 @@ export declare class CustomerPoController {
         deliveryAddress: string | null;
         poDate: Date;
         subtotal: number;
-        poType: string;
+        cpoNumber: string;
         customerPoNumber: string;
+        poType: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
-        customerEmail: string | null;
-        customerPhone: string | null;
-        cpoNumber: string;
         mrpRunAt: Date | null;
         mrpRunBy: string | null;
         lastShortageCheckResult: import("@prisma/client/runtime/library").JsonValue | null;
+        customerEmail: string | null;
+        customerPhone: string | null;
         totalGst: number;
         acknowledgedDate: Date | null;
         cancelledDate: Date | null;

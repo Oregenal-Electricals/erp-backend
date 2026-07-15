@@ -34,9 +34,9 @@ export declare class PurchaseOrderService {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -73,8 +73,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -109,8 +109,8 @@ export declare class PurchaseOrderService {
             approvedAt: Date | null;
             totalAmount: number;
             prId: string | null;
-            vendorId: string;
             rfqId: string | null;
+            vendorId: string;
             deliveryDate: Date;
             deliveryAddress: string | null;
             termsConditions: string | null;
@@ -148,9 +148,9 @@ export declare class PurchaseOrderService {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -187,8 +187,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -222,8 +222,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -256,9 +256,9 @@ export declare class PurchaseOrderService {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -295,8 +295,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -329,9 +329,9 @@ export declare class PurchaseOrderService {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -368,8 +368,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -402,9 +402,9 @@ export declare class PurchaseOrderService {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -441,8 +441,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -475,9 +475,9 @@ export declare class PurchaseOrderService {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
             poId: string;
         }[];
@@ -514,8 +514,8 @@ export declare class PurchaseOrderService {
         approvedAt: Date | null;
         totalAmount: number;
         prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
         deliveryDate: Date;
         deliveryAddress: string | null;
         termsConditions: string | null;
@@ -547,9 +547,9 @@ export declare class PurchaseOrderService {
         taxRate: number;
         totalPrice: number;
         quotationItemId: string | null;
-        orderedQty: number;
         pendingQty: number;
         taxAmount: number;
+        orderedQty: number;
         receivedQty: number;
         poId: string;
     }>;
@@ -577,9 +577,9 @@ export declare class PurchaseOrderService {
         taxRate: number;
         totalPrice: number;
         quotationItemId: string | null;
-        orderedQty: number;
         pendingQty: number;
         taxAmount: number;
+        orderedQty: number;
         receivedQty: number;
         poId: string;
     }>;

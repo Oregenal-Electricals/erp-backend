@@ -42,10 +42,10 @@ export declare class DispatchController {
             transporterName: string | null;
             driverPhone: string | null;
             planId: string;
+            dispatchNumber: string;
             dispatchDate: Date;
             lrNumber: string | null;
             ewayBillNumber: string | null;
-            dispatchNumber: string;
         })[];
         total: number;
         page: number;
@@ -76,13 +76,13 @@ export declare class DispatchController {
             customerName: string;
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
@@ -103,10 +103,10 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     create(dto: CreateDispatchDto, req: any): Promise<{
         items: {
@@ -133,13 +133,13 @@ export declare class DispatchController {
             customerName: string;
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
@@ -160,9 +160,9 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
 }

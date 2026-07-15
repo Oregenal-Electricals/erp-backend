@@ -44,6 +44,7 @@ export declare class PaymentInstrumentController {
             amount: number;
             ipoId: string;
             piId: string | null;
+            instrumentNumber: string;
             instrumentType: string;
             bankReference: string | null;
             vendorBankName: string | null;
@@ -53,7 +54,6 @@ export declare class PaymentInstrumentController {
             expiryDate: Date | null;
             latestShipmentDate: Date | null;
             presentationDays: number | null;
-            instrumentNumber: string;
         })[];
         total: number;
         page: number;
@@ -90,6 +90,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -99,7 +100,6 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         ipo: {
@@ -131,6 +131,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -140,7 +141,6 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     }>;
     create(dto: CreatePaymentInstrumentDto, req: any): Promise<{
         ipo: {
@@ -172,6 +172,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -181,7 +182,6 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     }>;
     update(id: string, dto: UpdatePaymentInstrumentDto, req: any): Promise<{
         ipo: {
@@ -213,6 +213,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -222,7 +223,6 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     }>;
     open(id: string, req: any): Promise<{
         ipo: {
@@ -254,6 +254,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -263,7 +264,6 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     }>;
     settle(id: string, req: any): Promise<{
         ipo: {
@@ -295,6 +295,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -304,7 +305,6 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     }>;
     cancel(id: string, req: any): Promise<{
         ipo: {
@@ -336,6 +336,7 @@ export declare class PaymentInstrumentController {
         amount: number;
         ipoId: string;
         piId: string | null;
+        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
@@ -345,6 +346,5 @@ export declare class PaymentInstrumentController {
         expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
-        instrumentNumber: string;
     }>;
 }

@@ -148,8 +148,10 @@ export declare class EmployeesService {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -167,8 +169,6 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     update(id: string, dto: UpdateEmployeeDto, user: any): Promise<{
@@ -221,8 +221,10 @@ export declare class EmployeesService {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -240,8 +242,6 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -274,8 +274,10 @@ export declare class EmployeesService {
             remarks: string | null;
             bankName: string | null;
             userId: string | null;
+            employeeNumber: string;
             dateOfBirth: Date | null;
             dateOfJoining: Date;
+            dateOfLeaving: Date | null;
             departmentId: string;
             designationId: string;
             reportingManagerId: string | null;
@@ -293,8 +295,6 @@ export declare class EmployeesService {
             otherAllowances: number;
             emergencyContact: string | null;
             emergencyPhone: string | null;
-            dateOfLeaving: Date | null;
-            employeeNumber: string;
             profilePhoto: string | null;
         })[];
         total: number;
@@ -358,8 +358,10 @@ export declare class EmployeesService {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -377,8 +379,6 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     findMe(user: any): Promise<{
@@ -437,8 +437,10 @@ export declare class EmployeesService {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -456,8 +458,6 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     getStats(user: any): Promise<{

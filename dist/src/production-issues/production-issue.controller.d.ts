@@ -18,8 +18,8 @@ export declare class ProductionIssueController {
                 name: string;
             };
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
@@ -33,8 +33,8 @@ export declare class ProductionIssueController {
             status: string;
             remarks: string | null;
             warehouseId: string;
-            issueMethod: string;
             issueNumber: string;
+            issueMethod: string;
             workOrderId: string;
         })[];
         total: number;
@@ -45,8 +45,8 @@ export declare class ProductionIssueController {
     findOne(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -71,10 +71,10 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -88,15 +88,15 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     create(dto: CreateProductionIssueDto, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -121,10 +121,10 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -138,15 +138,15 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     createFromMrp(woId: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -171,10 +171,10 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -188,15 +188,15 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
     confirm(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -221,10 +221,10 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -238,8 +238,8 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
         issueNumber: string;
+        issueMethod: string;
         workOrderId: string;
     }>;
 }

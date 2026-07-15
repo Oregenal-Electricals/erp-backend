@@ -41,8 +41,8 @@ export declare class AccountsController {
             accountName: string;
             accountType: string;
             accountSubType: string | null;
-            openingBalance: number;
             isSystemAccount: boolean;
+            openingBalance: number;
             currentBalance: number;
         })[];
         total: number;
@@ -68,8 +68,8 @@ export declare class AccountsController {
             accountName: string;
             accountType: string;
             accountSubType: string | null;
-            openingBalance: number;
             isSystemAccount: boolean;
+            openingBalance: number;
             currentBalance: number;
         }[];
     } & {
@@ -88,8 +88,8 @@ export declare class AccountsController {
         accountName: string;
         accountType: string;
         accountSubType: string | null;
-        openingBalance: number;
         isSystemAccount: boolean;
+        openingBalance: number;
         currentBalance: number;
     }>;
     create(dto: CreateAccountDto, req: any): Promise<{
@@ -108,8 +108,8 @@ export declare class AccountsController {
         accountName: string;
         accountType: string;
         accountSubType: string | null;
-        openingBalance: number;
         isSystemAccount: boolean;
+        openingBalance: number;
         currentBalance: number;
     }>;
     update(id: string, dto: UpdateAccountDto, req: any): Promise<{
@@ -128,8 +128,8 @@ export declare class AccountsController {
         accountName: string;
         accountType: string;
         accountSubType: string | null;
-        openingBalance: number;
         isSystemAccount: boolean;
+        openingBalance: number;
         currentBalance: number;
     }>;
 }

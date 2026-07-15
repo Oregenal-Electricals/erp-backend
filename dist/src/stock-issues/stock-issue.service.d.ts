@@ -27,8 +27,8 @@ export declare class StockIssueService {
     create(dto: CreateStockIssueDto, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -65,15 +65,15 @@ export declare class StockIssueService {
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
+        issueNumber: string;
         issuedTo: string;
         issueMethod: string;
-        issueNumber: string;
     }>;
     confirm(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -110,9 +110,9 @@ export declare class StockIssueService {
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
+        issueNumber: string;
         issuedTo: string;
         issueMethod: string;
-        issueNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -136,9 +136,9 @@ export declare class StockIssueService {
             warehouseId: string;
             referenceType: string;
             referenceId: string | null;
+            issueNumber: string;
             issuedTo: string;
             issueMethod: string;
-            issueNumber: string;
         })[];
         total: number;
         page: number;
@@ -149,8 +149,8 @@ export declare class StockIssueService {
         items: ({
             batch: {
                 receivedDate: Date;
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -187,9 +187,9 @@ export declare class StockIssueService {
         warehouseId: string;
         referenceType: string;
         referenceId: string | null;
+        issueNumber: string;
         issuedTo: string;
         issueMethod: string;
-        issueNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

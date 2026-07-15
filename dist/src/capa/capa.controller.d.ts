@@ -15,9 +15,9 @@ export declare class CapaController {
         data: ({
             ncr: {
                 description: string;
+                ncrNumber: string;
                 source: string;
                 severity: string;
-                ncrNumber: string;
             };
         } & {
             id: string;
@@ -49,9 +49,9 @@ export declare class CapaController {
     findOne(id: string, req: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -79,9 +79,9 @@ export declare class CapaController {
     create(dto: CreateCapaDto, req: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -109,9 +109,9 @@ export declare class CapaController {
     update(id: string, dto: UpdateCapaDto, req: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -139,9 +139,9 @@ export declare class CapaController {
     verify(id: string, dto: VerifyCapaDto, req: any): Promise<{
         ncr: {
             description: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;

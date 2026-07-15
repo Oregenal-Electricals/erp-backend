@@ -49,8 +49,8 @@ export declare class ProductionDashboardController {
     getToday(req: any): Promise<{
         entries: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
@@ -66,12 +66,12 @@ export declare class ProductionDashboardController {
             remarks: string | null;
             totalQty: number;
             workOrderId: string;
-            entryDate: Date;
-            operatorName: string | null;
-            machineName: string | null;
             goodQty: number;
             scrapQty: number;
             entryNumber: string;
+            entryDate: Date;
+            operatorName: string | null;
+            machineName: string | null;
         })[];
         byShift: {
             shift: string;
@@ -85,19 +85,19 @@ export declare class ProductionDashboardController {
     getAlerts(req: any): Promise<{
         overdueWos: {
             status: string;
+            woNumber: string;
             productName: string;
             plannedEndDate: Date;
-            woNumber: string;
         }[];
         releasedNoIssue: {
+            woNumber: string;
             productName: string;
             plannedStartDate: Date;
-            woNumber: string;
         }[];
         failedQc: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             result: string;
@@ -113,7 +113,7 @@ export declare class ProductionDashboardController {
             remarks: string | null;
             inspectionDate: Date;
             workOrderId: string;
-            productionEntryId: string | null;
+            qcNumber: string;
             inspectionStage: string;
             inspectorName: string | null;
             sampleSize: number;
@@ -121,20 +121,20 @@ export declare class ProductionDashboardController {
             failQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
-            qcNumber: string;
+            productionEntryId: string | null;
         })[];
         pendingFgr: {
+            woNumber: string;
             productName: string;
             completedQty: number;
-            woNumber: string;
         }[];
         totalAlerts: number;
     }>;
     getQuality(req: any): Promise<{
         inspections: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             result: string;
@@ -150,7 +150,7 @@ export declare class ProductionDashboardController {
             remarks: string | null;
             inspectionDate: Date;
             workOrderId: string;
-            productionEntryId: string | null;
+            qcNumber: string;
             inspectionStage: string;
             inspectorName: string | null;
             sampleSize: number;
@@ -158,7 +158,7 @@ export declare class ProductionDashboardController {
             failQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
-            qcNumber: string;
+            productionEntryId: string | null;
         })[];
         byResult: {
             PASS: number;

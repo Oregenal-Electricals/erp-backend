@@ -34,8 +34,8 @@ export declare class StockLedgerService {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
@@ -68,8 +68,8 @@ export declare class StockLedgerService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
@@ -131,8 +131,8 @@ export declare class StockLedgerService {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
@@ -155,8 +155,8 @@ export declare class StockLedgerService {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;

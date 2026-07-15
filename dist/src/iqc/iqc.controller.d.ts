@@ -18,8 +18,8 @@ export declare class IqcController {
                 warehouse: {
                     name: string;
                 };
-                grnType: string;
                 grnNumber: string;
+                grnType: string;
             };
         } & {
             id: string;
@@ -33,8 +33,8 @@ export declare class IqcController {
             status: string;
             remarks: string | null;
             grnId: string;
-            inspectedBy: string | null;
             iqcNumber: string;
+            inspectedBy: string | null;
             inspectionDate: Date;
         })[];
         total: number;
@@ -67,8 +67,8 @@ export declare class IqcController {
                 name: string;
             };
             warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
     } & {
         id: string;
@@ -82,8 +82,8 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
-        inspectedBy: string | null;
         iqcNumber: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
     })[]>;
     findOne(id: string, req: any): Promise<{
@@ -111,8 +111,8 @@ export declare class IqcController {
                 name: string;
             };
             warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
     } & {
         id: string;
@@ -126,8 +126,8 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
-        inspectedBy: string | null;
         iqcNumber: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
     }>;
     create(dto: CreateIqcDto, req: any): Promise<{
@@ -155,8 +155,8 @@ export declare class IqcController {
                 name: string;
             };
             warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
     } & {
         id: string;
@@ -170,8 +170,8 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
-        inspectedBy: string | null;
         iqcNumber: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
     }>;
     updateItems(id: string, dto: UpdateIqcItemsDto, req: any): Promise<{
@@ -199,8 +199,8 @@ export declare class IqcController {
                 name: string;
             };
             warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
     } & {
         id: string;
@@ -214,8 +214,8 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
-        inspectedBy: string | null;
         iqcNumber: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
     }>;
     approve(id: string, req: any): Promise<{
@@ -243,8 +243,8 @@ export declare class IqcController {
                 name: string;
             };
             warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
     } & {
         id: string;
@@ -258,8 +258,8 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
-        inspectedBy: string | null;
         iqcNumber: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
     }>;
 }

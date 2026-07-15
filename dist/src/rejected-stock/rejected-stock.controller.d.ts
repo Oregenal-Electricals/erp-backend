@@ -66,11 +66,11 @@ export declare class RejectedStockController {
             itemName: string;
             uom: string;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -78,8 +78,8 @@ export declare class RejectedStockController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -116,11 +116,11 @@ export declare class RejectedStockController {
             itemName: string;
             uom: string;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -128,8 +128,8 @@ export declare class RejectedStockController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -166,11 +166,11 @@ export declare class RejectedStockController {
             itemName: string;
             uom: string;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -178,8 +178,8 @@ export declare class RejectedStockController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -216,11 +216,11 @@ export declare class RejectedStockController {
             itemName: string;
             uom: string;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -228,8 +228,8 @@ export declare class RejectedStockController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;

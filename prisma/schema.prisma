@@ -276,6 +276,7 @@ model Company {
   quotations         Quotation[]
   customerPos        CustomerPo[]
   salesOrders        SalesOrder[]
+  rawMaterialBrands  RawMaterialBrand[]
   dispatchPlans      DispatchPlan[]
   dispatches         Dispatch[]
   deliveryConfirmations DeliveryConfirmation[]
@@ -1250,9 +1251,34 @@ model RawMaterial {
 
   bomItems        BomItem[]
   prItems         PurchaseRequisitionItem[]
+  brands          RawMaterialBrand[]
 
   @@unique([companyId, code])
   @@map("raw_materials")
+}
+
+// Alternate/substitute brands for a raw material, ranked by preference.
+// preferenceOrder 1 = most preferred (usually the original design's
+// specified brand); 2, 3... = fallback substitutes to use if the
+// preferred brand is unavailable at the time of purchase.
+model RawMaterialBrand {
+  id              String       @id @default(uuid())
+  companyId       String
+  company         Company      @relation(fields: [companyId], references: [id])
+  rawMaterialId   String
+  rawMaterial     RawMaterial  @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
+  brandName       String
+  preferenceOrder Int          @default(1)
+  notes           String?
+  isActive        Boolean      @default(true)
+  isTestData      Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([rawMaterialId, preferenceOrder])
+  @@map("raw_material_brands")
 }
 
 // MODULE 17 — HSN/SAC MASTER

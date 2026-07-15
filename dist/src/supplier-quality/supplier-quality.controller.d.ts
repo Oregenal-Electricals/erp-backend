@@ -32,10 +32,10 @@ export declare class SupplierQualityController {
             periodType: string;
             totalReceived: number;
             totalRejected: number;
-            onTimeDelivery: number;
             defectRate: number;
             ncrCount: number;
             carCount: number;
+            onTimeDelivery: number;
             qualityScore: number;
             avlStatus: string;
         })[];
@@ -62,17 +62,17 @@ export declare class SupplierQualityController {
             periodType: string;
             totalReceived: number;
             totalRejected: number;
-            onTimeDelivery: number;
             defectRate: number;
             ncrCount: number;
             carCount: number;
+            onTimeDelivery: number;
             qualityScore: number;
             avlStatus: string;
         }[];
         cars: ({
             ncr: {
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -93,10 +93,10 @@ export declare class SupplierQualityController {
             closedDate: Date | null;
             ncrId: string | null;
             verifiedDate: Date | null;
+            carNumber: string;
             supplierResponse: string | null;
             supplierRootCause: string | null;
             supplierAction: string | null;
-            carNumber: string;
             respondedDate: Date | null;
         })[];
         totalCars: number;
@@ -110,8 +110,8 @@ export declare class SupplierQualityController {
                 code: string;
             };
             ncr: {
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -132,10 +132,10 @@ export declare class SupplierQualityController {
             closedDate: Date | null;
             ncrId: string | null;
             verifiedDate: Date | null;
+            carNumber: string;
             supplierResponse: string | null;
             supplierRootCause: string | null;
             supplierAction: string | null;
-            carNumber: string;
             respondedDate: Date | null;
         })[];
         total: number;
@@ -167,10 +167,10 @@ export declare class SupplierQualityController {
         closedDate: Date | null;
         ncrId: string | null;
         verifiedDate: Date | null;
+        carNumber: string;
         supplierResponse: string | null;
         supplierRootCause: string | null;
         supplierAction: string | null;
-        carNumber: string;
         respondedDate: Date | null;
     }>;
     respondCar(id: string, dto: RespondCarDto, req: any): Promise<{
@@ -196,10 +196,10 @@ export declare class SupplierQualityController {
         closedDate: Date | null;
         ncrId: string | null;
         verifiedDate: Date | null;
+        carNumber: string;
         supplierResponse: string | null;
         supplierRootCause: string | null;
         supplierAction: string | null;
-        carNumber: string;
         respondedDate: Date | null;
     }>;
     verifyCar(id: string, dto: VerifyCarDto, req: any): Promise<{
@@ -225,10 +225,10 @@ export declare class SupplierQualityController {
         closedDate: Date | null;
         ncrId: string | null;
         verifiedDate: Date | null;
+        carNumber: string;
         supplierResponse: string | null;
         supplierRootCause: string | null;
         supplierAction: string | null;
-        carNumber: string;
         respondedDate: Date | null;
     }>;
     closeCar(id: string, req: any): Promise<{
@@ -254,10 +254,10 @@ export declare class SupplierQualityController {
         closedDate: Date | null;
         ncrId: string | null;
         verifiedDate: Date | null;
+        carNumber: string;
         supplierResponse: string | null;
         supplierRootCause: string | null;
         supplierAction: string | null;
-        carNumber: string;
         respondedDate: Date | null;
     }>;
 }

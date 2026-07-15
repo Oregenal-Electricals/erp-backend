@@ -38,6 +38,7 @@ export declare class NcrController {
             itemName: string | null;
             disposition: string | null;
             workOrderId: string | null;
+            ncrNumber: string;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
@@ -45,7 +46,6 @@ export declare class NcrController {
             qtyAffected: number;
             detectedBy: string | null;
             detectedDate: Date;
-            ncrNumber: string;
             closedDate: Date | null;
         })[];
         total: number;
@@ -61,8 +61,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -81,6 +81,7 @@ export declare class NcrController {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -88,7 +89,6 @@ export declare class NcrController {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
     create(dto: CreateNcrDto, req: any): Promise<{
@@ -100,8 +100,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -120,6 +120,7 @@ export declare class NcrController {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -127,7 +128,6 @@ export declare class NcrController {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
     update(id: string, dto: UpdateNcrDto, req: any): Promise<{
@@ -139,8 +139,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -159,6 +159,7 @@ export declare class NcrController {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -166,7 +167,6 @@ export declare class NcrController {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
     close(id: string, req: any): Promise<{
@@ -178,8 +178,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -198,6 +198,7 @@ export declare class NcrController {
         itemName: string | null;
         disposition: string | null;
         workOrderId: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -205,7 +206,6 @@ export declare class NcrController {
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
 }

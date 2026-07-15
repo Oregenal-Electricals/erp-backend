@@ -47,11 +47,11 @@ export declare class DispatchPlanningService {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
+        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
-        planNumber: string;
         approvedDate: Date | null;
     }>;
     approve(id: string, user: any): Promise<{
@@ -94,11 +94,11 @@ export declare class DispatchPlanningService {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
+        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
-        planNumber: string;
         approvedDate: Date | null;
     }>;
     cancel(id: string, dto: CancelPlanDto, user: any): Promise<{
@@ -141,11 +141,11 @@ export declare class DispatchPlanningService {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
+        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
-        planNumber: string;
         approvedDate: Date | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -177,11 +177,11 @@ export declare class DispatchPlanningService {
             approvedBy: string | null;
             deliveryAddress: string | null;
             soId: string;
+            planNumber: string;
             plannedDate: Date;
             transportMode: string;
             transporterName: string | null;
             driverPhone: string | null;
-            planNumber: string;
             approvedDate: Date | null;
         })[];
         total: number;
@@ -228,11 +228,11 @@ export declare class DispatchPlanningService {
         approvedBy: string | null;
         deliveryAddress: string | null;
         soId: string;
+        planNumber: string;
         plannedDate: Date;
         transportMode: string;
         transporterName: string | null;
         driverPhone: string | null;
-        planNumber: string;
         approvedDate: Date | null;
     }>;
     getStats(user: any): Promise<{

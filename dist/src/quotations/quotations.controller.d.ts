@@ -36,8 +36,8 @@ export declare class QuotationsController {
             notes: string | null;
             revision: number;
             totalAmount: number;
-            validUntil: Date;
             quotationNumber: string;
+            validUntil: Date;
             termsConditions: string | null;
             subtotal: number;
             customerEmail: string | null;
@@ -82,8 +82,8 @@ export declare class QuotationsController {
             igst: number;
         }[];
         lead: {
-            companyName: string;
             leadNumber: string;
+            companyName: string;
         };
     } & {
         id: string;
@@ -101,8 +101,8 @@ export declare class QuotationsController {
         notes: string | null;
         revision: number;
         totalAmount: number;
-        validUntil: Date;
         quotationNumber: string;
+        validUntil: Date;
         termsConditions: string | null;
         subtotal: number;
         customerEmail: string | null;
@@ -143,8 +143,8 @@ export declare class QuotationsController {
             igst: number;
         }[];
         lead: {
-            companyName: string;
             leadNumber: string;
+            companyName: string;
         };
     } & {
         id: string;
@@ -162,8 +162,8 @@ export declare class QuotationsController {
         notes: string | null;
         revision: number;
         totalAmount: number;
-        validUntil: Date;
         quotationNumber: string;
+        validUntil: Date;
         termsConditions: string | null;
         subtotal: number;
         customerEmail: string | null;
@@ -204,8 +204,8 @@ export declare class QuotationsController {
             igst: number;
         }[];
         lead: {
-            companyName: string;
             leadNumber: string;
+            companyName: string;
         };
     } & {
         id: string;
@@ -223,8 +223,8 @@ export declare class QuotationsController {
         notes: string | null;
         revision: number;
         totalAmount: number;
-        validUntil: Date;
         quotationNumber: string;
+        validUntil: Date;
         termsConditions: string | null;
         subtotal: number;
         customerEmail: string | null;
@@ -265,8 +265,8 @@ export declare class QuotationsController {
             igst: number;
         }[];
         lead: {
-            companyName: string;
             leadNumber: string;
+            companyName: string;
         };
     } & {
         id: string;
@@ -284,8 +284,8 @@ export declare class QuotationsController {
         notes: string | null;
         revision: number;
         totalAmount: number;
-        validUntil: Date;
         quotationNumber: string;
+        validUntil: Date;
         termsConditions: string | null;
         subtotal: number;
         customerEmail: string | null;
@@ -326,8 +326,8 @@ export declare class QuotationsController {
             igst: number;
         }[];
         lead: {
-            companyName: string;
             leadNumber: string;
+            companyName: string;
         };
     } & {
         id: string;
@@ -345,8 +345,8 @@ export declare class QuotationsController {
         notes: string | null;
         revision: number;
         totalAmount: number;
-        validUntil: Date;
         quotationNumber: string;
+        validUntil: Date;
         termsConditions: string | null;
         subtotal: number;
         customerEmail: string | null;
@@ -387,8 +387,8 @@ export declare class QuotationsController {
             igst: number;
         }[];
         lead: {
-            companyName: string;
             leadNumber: string;
+            companyName: string;
         };
     } & {
         id: string;
@@ -406,8 +406,8 @@ export declare class QuotationsController {
         notes: string | null;
         revision: number;
         totalAmount: number;
-        validUntil: Date;
         quotationNumber: string;
+        validUntil: Date;
         termsConditions: string | null;
         subtotal: number;
         customerEmail: string | null;

@@ -36,8 +36,8 @@ export declare class StockAdjustmentController {
             reason: string;
             remarks: string | null;
             warehouseId: string;
-            adjustmentType: string;
             adjustmentNumber: string;
+            adjustmentType: string;
         })[];
         total: number;
         page: number;
@@ -58,9 +58,9 @@ export declare class StockAdjustmentController {
             itemName: string;
             uom: string;
             unitCost: number;
+            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
-            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -80,8 +80,8 @@ export declare class StockAdjustmentController {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
     create(dto: CreateAdjustmentDto, req: any): Promise<{
         items: {
@@ -97,9 +97,9 @@ export declare class StockAdjustmentController {
             itemName: string;
             uom: string;
             unitCost: number;
+            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
-            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -119,8 +119,8 @@ export declare class StockAdjustmentController {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
     approve(id: string, req: any): Promise<{
         items: {
@@ -136,9 +136,9 @@ export declare class StockAdjustmentController {
             itemName: string;
             uom: string;
             unitCost: number;
+            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
-            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -158,8 +158,8 @@ export declare class StockAdjustmentController {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
     cancel(id: string, req: any): Promise<{
         items: {
@@ -175,9 +175,9 @@ export declare class StockAdjustmentController {
             itemName: string;
             uom: string;
             unitCost: number;
+            adjustmentQty: number;
             systemQty: number;
             physicalQty: number;
-            adjustmentQty: number;
             adjustmentId: string;
         }[];
         warehouse: {
@@ -197,7 +197,7 @@ export declare class StockAdjustmentController {
         reason: string;
         remarks: string | null;
         warehouseId: string;
-        adjustmentType: string;
         adjustmentNumber: string;
+        adjustmentType: string;
     }>;
 }

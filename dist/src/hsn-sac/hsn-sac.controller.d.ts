@@ -26,10 +26,10 @@ export declare class HsnSacController {
             code: string;
             gstRate: number;
             codeType: string;
-            cessRate: number | null;
             igstRate: number;
             cgstRate: number;
             sgstRate: number;
+            cessRate: number | null;
         }[];
         total: number;
         page: number;
@@ -49,10 +49,10 @@ export declare class HsnSacController {
         code: string;
         gstRate: number;
         codeType: string;
-        cessRate: number | null;
         igstRate: number;
         cgstRate: number;
         sgstRate: number;
+        cessRate: number | null;
     }>;
     create(dto: CreateHsnSacDto, req: any): Promise<{
         id: string;
@@ -67,10 +67,10 @@ export declare class HsnSacController {
         code: string;
         gstRate: number;
         codeType: string;
-        cessRate: number | null;
         igstRate: number;
         cgstRate: number;
         sgstRate: number;
+        cessRate: number | null;
     }>;
     update(id: string, dto: UpdateHsnSacDto, req: any): Promise<{
         id: string;
@@ -85,10 +85,10 @@ export declare class HsnSacController {
         code: string;
         gstRate: number;
         codeType: string;
-        cessRate: number | null;
         igstRate: number;
         cgstRate: number;
         sgstRate: number;
+        cessRate: number | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

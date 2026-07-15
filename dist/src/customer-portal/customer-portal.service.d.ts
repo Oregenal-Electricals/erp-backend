@@ -64,10 +64,10 @@ export declare class CustomerPortalService {
             totalAmount: number;
             deliveryDate: Date;
             subtotal: number;
-            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
             soNumber: string;
+            cpoId: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
         })[];
@@ -94,10 +94,10 @@ export declare class CustomerPortalService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }[]>;
     getCustomerComplaints(customerId: string, companyId: string): Promise<{
         id: string;
@@ -125,12 +125,12 @@ export declare class CustomerPortalService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
+        complaintNumber: string;
         customerId: string | null;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
-        complaintNumber: string;
         responseDate: Date | null;
     }[]>;
 }

@@ -101,8 +101,6 @@ export declare class PayrollController {
             otherAllowances: number;
             otHours: number;
             otAmount: number;
-            tdsAmount: number;
-            otherDeductions: number;
             totalDeductions: number;
             workingDays: number;
             presentDays: number;
@@ -113,7 +111,9 @@ export declare class PayrollController {
             pfEmployer: number;
             esiEmployee: number;
             esiEmployer: number;
+            tdsAmount: number;
             lopAmount: number;
+            otherDeductions: number;
             netPay: number;
             payrollRunId: string;
         })[];
@@ -171,8 +171,6 @@ export declare class PayrollController {
             otherAllowances: number;
             otHours: number;
             otAmount: number;
-            tdsAmount: number;
-            otherDeductions: number;
             totalDeductions: number;
             workingDays: number;
             presentDays: number;
@@ -183,7 +181,9 @@ export declare class PayrollController {
             pfEmployer: number;
             esiEmployee: number;
             esiEmployer: number;
+            tdsAmount: number;
             lopAmount: number;
+            otherDeductions: number;
             netPay: number;
             payrollRunId: string;
         })[];
@@ -241,8 +241,6 @@ export declare class PayrollController {
             otherAllowances: number;
             otHours: number;
             otAmount: number;
-            tdsAmount: number;
-            otherDeductions: number;
             totalDeductions: number;
             workingDays: number;
             presentDays: number;
@@ -253,7 +251,9 @@ export declare class PayrollController {
             pfEmployer: number;
             esiEmployee: number;
             esiEmployer: number;
+            tdsAmount: number;
             lopAmount: number;
+            otherDeductions: number;
             netPay: number;
             payrollRunId: string;
         })[];
@@ -304,8 +304,6 @@ export declare class PayrollController {
         otherAllowances: number;
         otHours: number;
         otAmount: number;
-        tdsAmount: number;
-        otherDeductions: number;
         totalDeductions: number;
         workingDays: number;
         presentDays: number;
@@ -316,7 +314,9 @@ export declare class PayrollController {
         pfEmployer: number;
         esiEmployee: number;
         esiEmployer: number;
+        tdsAmount: number;
         lopAmount: number;
+        otherDeductions: number;
         netPay: number;
         payrollRunId: string;
     }>;

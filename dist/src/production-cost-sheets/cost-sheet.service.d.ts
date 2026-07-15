@@ -17,10 +17,13 @@ export declare class CostSheetService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -28,17 +31,14 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;
     update(id: string, dto: UpdateCostSheetDto, user: any): Promise<{
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -51,10 +51,13 @@ export declare class CostSheetService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -62,16 +65,13 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;
     finalize(id: string, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -84,10 +84,13 @@ export declare class CostSheetService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -95,19 +98,16 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
                 completedQty: number;
-                woNumber: string;
             };
         } & {
             id: string;
@@ -120,10 +120,13 @@ export declare class CostSheetService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             completedQty: number;
             workOrderId: string;
+            costSheetNumber: string;
+            materialCost: number;
+            totalShifts: number;
             laborHours: number;
             laborRatePerHour: number;
             laborCost: number;
@@ -131,9 +134,6 @@ export declare class CostSheetService {
             overheadRemarks: string | null;
             otherCost: number;
             otherRemarks: string | null;
-            costSheetNumber: string;
-            materialCost: number;
-            totalShifts: number;
             plannedMaterialCost: number;
             varianceCost: number;
         })[];
@@ -162,11 +162,11 @@ export declare class CostSheetService {
         }[];
         workOrder: {
             bomId: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
         id: string;
         companyId: string;
@@ -178,10 +178,13 @@ export declare class CostSheetService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -189,9 +192,6 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
     }>;

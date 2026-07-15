@@ -32,8 +32,6 @@ export declare class PayrollService {
             otherAllowances: number;
             otHours: number;
             otAmount: number;
-            tdsAmount: number;
-            otherDeductions: number;
             totalDeductions: number;
             workingDays: number;
             presentDays: number;
@@ -44,7 +42,9 @@ export declare class PayrollService {
             pfEmployer: number;
             esiEmployee: number;
             esiEmployer: number;
+            tdsAmount: number;
             lopAmount: number;
+            otherDeductions: number;
             netPay: number;
             payrollRunId: string;
         })[];
@@ -102,8 +102,6 @@ export declare class PayrollService {
             otherAllowances: number;
             otHours: number;
             otAmount: number;
-            tdsAmount: number;
-            otherDeductions: number;
             totalDeductions: number;
             workingDays: number;
             presentDays: number;
@@ -114,7 +112,9 @@ export declare class PayrollService {
             pfEmployer: number;
             esiEmployee: number;
             esiEmployer: number;
+            tdsAmount: number;
             lopAmount: number;
+            otherDeductions: number;
             netPay: number;
             payrollRunId: string;
         })[];
@@ -165,8 +165,6 @@ export declare class PayrollService {
         otherAllowances: number;
         otHours: number;
         otAmount: number;
-        tdsAmount: number;
-        otherDeductions: number;
         totalDeductions: number;
         workingDays: number;
         presentDays: number;
@@ -177,7 +175,9 @@ export declare class PayrollService {
         pfEmployer: number;
         esiEmployee: number;
         esiEmployer: number;
+        tdsAmount: number;
         lopAmount: number;
+        otherDeductions: number;
         netPay: number;
         payrollRunId: string;
     }>;
@@ -273,8 +273,6 @@ export declare class PayrollService {
             otherAllowances: number;
             otHours: number;
             otAmount: number;
-            tdsAmount: number;
-            otherDeductions: number;
             totalDeductions: number;
             workingDays: number;
             presentDays: number;
@@ -285,7 +283,9 @@ export declare class PayrollService {
             pfEmployer: number;
             esiEmployee: number;
             esiEmployer: number;
+            tdsAmount: number;
             lopAmount: number;
+            otherDeductions: number;
             netPay: number;
             payrollRunId: string;
         })[];

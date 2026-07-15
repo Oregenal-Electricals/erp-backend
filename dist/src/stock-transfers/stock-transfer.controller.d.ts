@@ -34,12 +34,12 @@ export declare class StockTransferController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
+            transferNumber: string;
             transferType: string;
-            fromWarehouseId: string;
-            toWarehouseId: string;
             fromBinId: string | null;
             toBinId: string | null;
-            transferNumber: string;
+            fromWarehouseId: string;
+            toWarehouseId: string;
         })[];
         total: number;
         page: number;
@@ -49,8 +49,8 @@ export declare class StockTransferController {
     findOne(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -88,18 +88,18 @@ export declare class StockTransferController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     create(dto: CreateTransferDto, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -137,18 +137,18 @@ export declare class StockTransferController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     confirm(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -186,18 +186,18 @@ export declare class StockTransferController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     cancel(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -235,11 +235,11 @@ export declare class StockTransferController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
 }

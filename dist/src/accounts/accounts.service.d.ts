@@ -25,8 +25,8 @@ export declare class AccountsService {
         accountName: string;
         accountType: string;
         accountSubType: string | null;
-        openingBalance: number;
         isSystemAccount: boolean;
+        openingBalance: number;
         currentBalance: number;
     }>;
     update(id: string, dto: UpdateAccountDto, user: any): Promise<{
@@ -45,8 +45,8 @@ export declare class AccountsService {
         accountName: string;
         accountType: string;
         accountSubType: string | null;
-        openingBalance: number;
         isSystemAccount: boolean;
+        openingBalance: number;
         currentBalance: number;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -74,8 +74,8 @@ export declare class AccountsService {
             accountName: string;
             accountType: string;
             accountSubType: string | null;
-            openingBalance: number;
             isSystemAccount: boolean;
+            openingBalance: number;
             currentBalance: number;
         })[];
         total: number;
@@ -110,8 +110,8 @@ export declare class AccountsService {
             accountName: string;
             accountType: string;
             accountSubType: string | null;
-            openingBalance: number;
             isSystemAccount: boolean;
+            openingBalance: number;
             currentBalance: number;
         }[];
     } & {
@@ -130,8 +130,8 @@ export declare class AccountsService {
         accountName: string;
         accountType: string;
         accountSubType: string | null;
-        openingBalance: number;
         isSystemAccount: boolean;
+        openingBalance: number;
         currentBalance: number;
     }>;
 }

@@ -60,8 +60,10 @@ export declare class EmployeesController {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -79,8 +81,6 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     getStats(req: any): Promise<{
@@ -213,8 +213,10 @@ export declare class EmployeesController {
             remarks: string | null;
             bankName: string | null;
             userId: string | null;
+            employeeNumber: string;
             dateOfBirth: Date | null;
             dateOfJoining: Date;
+            dateOfLeaving: Date | null;
             departmentId: string;
             designationId: string;
             reportingManagerId: string | null;
@@ -232,8 +234,6 @@ export declare class EmployeesController {
             otherAllowances: number;
             emergencyContact: string | null;
             emergencyPhone: string | null;
-            dateOfLeaving: Date | null;
-            employeeNumber: string;
             profilePhoto: string | null;
         })[];
         total: number;
@@ -297,8 +297,10 @@ export declare class EmployeesController {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -316,8 +318,6 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     create(dto: CreateEmployeeDto, req: any): Promise<{
@@ -370,8 +370,10 @@ export declare class EmployeesController {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -389,8 +391,6 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     update(id: string, dto: UpdateEmployeeDto, req: any): Promise<{
@@ -443,8 +443,10 @@ export declare class EmployeesController {
         remarks: string | null;
         bankName: string | null;
         userId: string | null;
+        employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
+        dateOfLeaving: Date | null;
         departmentId: string;
         designationId: string;
         reportingManagerId: string | null;
@@ -462,8 +464,6 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
-        dateOfLeaving: Date | null;
-        employeeNumber: string;
         profilePhoto: string | null;
     }>;
     uploadDoc(id: string, doc: any, req: any): Promise<{

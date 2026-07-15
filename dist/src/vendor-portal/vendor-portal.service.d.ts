@@ -47,9 +47,9 @@ export declare class VendorPortalService {
                 taxRate: number;
                 totalPrice: number;
                 quotationItemId: string | null;
-                orderedQty: number;
                 pendingQty: number;
                 taxAmount: number;
+                orderedQty: number;
                 receivedQty: number;
                 poId: string;
             }[];
@@ -71,8 +71,8 @@ export declare class VendorPortalService {
             approvedAt: Date | null;
             totalAmount: number;
             prId: string | null;
-            vendorId: string;
             rfqId: string | null;
+            vendorId: string;
             deliveryDate: Date;
             deliveryAddress: string | null;
             termsConditions: string | null;
@@ -163,10 +163,10 @@ export declare class VendorPortalService {
         currency: string;
         notes: string | null;
         totalAmount: number | null;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     })[]>;
 }

@@ -16,9 +16,9 @@ export declare class RcaController {
             ncr: {
                 description: string;
                 itemCode: string;
+                ncrNumber: string;
                 source: string;
                 severity: string;
-                ncrNumber: string;
             };
         } & {
             id: string;
@@ -33,6 +33,7 @@ export declare class RcaController {
             remarks: string | null;
             ncrId: string;
             rootCause: string | null;
+            rcaNumber: string;
             method: string;
             problem: string;
             why1: string | null;
@@ -48,7 +49,6 @@ export declare class RcaController {
             fishboneMeasurement: string | null;
             conclusion: string | null;
             conductedBy: string | null;
-            rcaNumber: string;
             conductedDate: Date;
         })[];
         total: number;
@@ -59,9 +59,9 @@ export declare class RcaController {
         ncr: {
             description: string;
             itemCode: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -76,6 +76,7 @@ export declare class RcaController {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -91,16 +92,15 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
     create(dto: CreateRcaDto, req: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -115,6 +115,7 @@ export declare class RcaController {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -130,16 +131,15 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
     update(id: string, dto: UpdateRcaDto, req: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -154,6 +154,7 @@ export declare class RcaController {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -169,16 +170,15 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
     complete(id: string, req: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
+            ncrNumber: string;
             source: string;
             severity: string;
-            ncrNumber: string;
         };
     } & {
         id: string;
@@ -193,6 +193,7 @@ export declare class RcaController {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
+        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -208,7 +209,6 @@ export declare class RcaController {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
-        rcaNumber: string;
         conductedDate: Date;
     }>;
 }
