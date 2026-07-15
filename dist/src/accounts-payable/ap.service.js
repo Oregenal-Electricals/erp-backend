@@ -47,6 +47,29 @@ let ApService = class ApService {
             if (!vendor)
                 throw new common_1.NotFoundException('Vendor not found');
         }
+        if (dto.poId) {
+            const grns = await this.prisma.grnHeader.findMany({
+                where: { poId: dto.poId, companyId: user.companyId, isActive: true },
+                include: { items: { where: { isActive: true } } },
+            });
+            const totalAcceptedValue = grns.reduce((sum, grn) => {
+                return sum + grn.items.reduce((s, item) => {
+                    const unitCost = item.landedCostPerUnit || item.unitPrice || 0;
+                    return s + (item.acceptedQty || 0) * unitCost;
+                }, 0);
+            }, 0);
+            const existingBills = await this.prisma.apBill.findMany({
+                where: { poId: dto.poId, companyId: user.companyId, isActive: true, status: { not: 'CANCELLED' } },
+            });
+            const alreadyBilled = existingBills.reduce((s, b) => s + b.totalAmount, 0);
+            const remainingBillable = totalAcceptedValue - alreadyBilled;
+            const maxAllowed = remainingBillable * 1.05;
+            if (dto.totalAmount > maxAllowed) {
+                throw new common_1.BadRequestException(`This invoice (${dto.totalAmount}) exceeds what's billable against this PO. ` +
+                    `Total accepted value so far: ${totalAcceptedValue.toFixed(2)}, already billed: ${alreadyBilled.toFixed(2)}, ` +
+                    `remaining billable: ${remainingBillable.toFixed(2)}. Check that goods were received and passed IQC before invoicing.`);
+            }
+        }
         const billNumber = await this.generateBillNumber(user.companyId);
         const billDate = dto.billDate ? new Date(dto.billDate) : new Date();
         const terms = dto.paymentTerms || 'NET_30';
