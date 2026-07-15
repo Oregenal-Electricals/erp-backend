@@ -26,8 +26,8 @@ export declare class SupplierQualityController {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            rating: string;
             vendorId: string;
+            rating: string;
             period: string;
             periodType: string;
             totalReceived: number;
@@ -56,8 +56,8 @@ export declare class SupplierQualityController {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            rating: string;
             vendorId: string;
+            rating: string;
             period: string;
             periodType: string;
             totalReceived: number;
@@ -87,8 +87,8 @@ export declare class SupplierQualityController {
             status: string;
             dueDate: Date;
             remarks: string | null;
-            verifiedBy: string | null;
             vendorId: string;
+            verifiedBy: string | null;
             severity: string;
             closedDate: Date | null;
             ncrId: string | null;
@@ -126,8 +126,8 @@ export declare class SupplierQualityController {
             status: string;
             dueDate: Date;
             remarks: string | null;
-            verifiedBy: string | null;
             vendorId: string;
+            verifiedBy: string | null;
             severity: string;
             closedDate: Date | null;
             ncrId: string | null;
@@ -161,8 +161,8 @@ export declare class SupplierQualityController {
         status: string;
         dueDate: Date;
         remarks: string | null;
-        verifiedBy: string | null;
         vendorId: string;
+        verifiedBy: string | null;
         severity: string;
         closedDate: Date | null;
         ncrId: string | null;
@@ -190,8 +190,8 @@ export declare class SupplierQualityController {
         status: string;
         dueDate: Date;
         remarks: string | null;
-        verifiedBy: string | null;
         vendorId: string;
+        verifiedBy: string | null;
         severity: string;
         closedDate: Date | null;
         ncrId: string | null;
@@ -219,8 +219,8 @@ export declare class SupplierQualityController {
         status: string;
         dueDate: Date;
         remarks: string | null;
-        verifiedBy: string | null;
         vendorId: string;
+        verifiedBy: string | null;
         severity: string;
         closedDate: Date | null;
         ncrId: string | null;
@@ -248,8 +248,8 @@ export declare class SupplierQualityController {
         status: string;
         dueDate: Date;
         remarks: string | null;
-        verifiedBy: string | null;
         vendorId: string;
+        verifiedBy: string | null;
         severity: string;
         closedDate: Date | null;
         ncrId: string | null;

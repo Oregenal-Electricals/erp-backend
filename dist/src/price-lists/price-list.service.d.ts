@@ -17,8 +17,8 @@ export declare class PriceListService {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
-        isDefault: boolean;
         currency: string;
+        isDefault: boolean;
         listType: string;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -38,8 +38,8 @@ export declare class PriceListService {
             createdBy: string | null;
             updatedBy: string | null;
             code: string;
-            isDefault: boolean;
             currency: string;
+            isDefault: boolean;
             listType: string;
         })[];
         total: number;
@@ -81,8 +81,8 @@ export declare class PriceListService {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
-        isDefault: boolean;
         currency: string;
+        isDefault: boolean;
         listType: string;
     }>;
     update(id: string, dto: UpdatePriceListDto, user: any): Promise<{
@@ -97,8 +97,8 @@ export declare class PriceListService {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
-        isDefault: boolean;
         currency: string;
+        isDefault: boolean;
         listType: string;
     }>;
     remove(id: string, user: any): Promise<{

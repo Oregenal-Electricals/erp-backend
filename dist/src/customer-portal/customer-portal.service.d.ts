@@ -32,12 +32,12 @@ export declare class CustomerPortalService {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
+                totalAmount: number;
                 itemCode: string;
                 itemName: string;
                 gstRate: number;
                 uom: string;
                 qty: number;
-                totalAmount: number;
                 unitPrice: number;
                 discount: number;
                 pendingQty: number;
@@ -59,11 +59,11 @@ export declare class CustomerPortalService {
             status: string;
             remarks: string | null;
             customerName: string;
-            cancelReason: string | null;
-            currency: string;
-            totalAmount: number;
             deliveryDate: Date;
+            currency: string;
             subtotal: number;
+            totalAmount: number;
+            cancelReason: string | null;
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;

@@ -383,8 +383,8 @@ export declare class CreditControlController {
         createdBy: string | null;
         updatedBy: string | null;
         customerName: string;
-        creditLimit: number;
         notes: string | null;
+        creditLimit: number;
         creditDays: number;
     }>;
     updateLimit(id: string, dto: UpdateCreditLimitDto, req: any): Promise<{
@@ -397,8 +397,8 @@ export declare class CreditControlController {
         createdBy: string | null;
         updatedBy: string | null;
         customerName: string;
-        creditLimit: number;
         notes: string | null;
+        creditLimit: number;
         creditDays: number;
     }>;
     releaseHold(id: string, dto: ReleaseCreditHoldDto, req: any): Promise<{

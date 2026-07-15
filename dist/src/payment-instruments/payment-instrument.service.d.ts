@@ -31,9 +31,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;
@@ -68,9 +68,9 @@ export declare class PaymentInstrumentService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            bankName: string;
             currency: string;
             notes: string | null;
+            bankName: string;
             amount: number;
             ipoId: string;
             piId: string | null;
@@ -114,9 +114,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;
@@ -155,9 +155,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;
@@ -196,9 +196,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;
@@ -237,9 +237,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;
@@ -278,9 +278,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;
@@ -319,9 +319,9 @@ export declare class PaymentInstrumentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        bankName: string;
         currency: string;
         notes: string | null;
+        bankName: string;
         amount: number;
         ipoId: string;
         piId: string | null;

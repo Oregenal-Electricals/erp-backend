@@ -131,8 +131,8 @@ export declare class CreditControlService {
         createdBy: string | null;
         updatedBy: string | null;
         customerName: string;
-        creditLimit: number;
         notes: string | null;
+        creditLimit: number;
         creditDays: number;
     }>;
     updateCreditLimit(id: string, dto: UpdateCreditLimitDto, user: any): Promise<{
@@ -145,8 +145,8 @@ export declare class CreditControlService {
         createdBy: string | null;
         updatedBy: string | null;
         customerName: string;
-        creditLimit: number;
         notes: string | null;
+        creditLimit: number;
         creditDays: number;
     }>;
     releaseHold(id: string, dto: ReleaseCreditHoldDto, user: any): Promise<{

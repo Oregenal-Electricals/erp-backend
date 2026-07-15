@@ -73,8 +73,8 @@ export declare class PoApprovalController {
             updatedBy: string | null;
             action: string;
             remarks: string | null;
-            approvedBy: string;
             poId: string;
+            approvedBy: string;
             approvalLevel: number;
         }[];
         id: string;
@@ -87,21 +87,21 @@ export declare class PoApprovalController {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }[]>;
     getHistory(poId: string, req: any): Promise<{
         id: string;
@@ -114,8 +114,8 @@ export declare class PoApprovalController {
         updatedBy: string | null;
         action: string;
         remarks: string | null;
-        approvedBy: string;
         poId: string;
+        approvedBy: string;
         approvalLevel: number;
     }[]>;
     approve(poId: string, dto: ApprovePoDto, req: any): Promise<{
@@ -130,8 +130,8 @@ export declare class PoApprovalController {
             updatedBy: string | null;
             action: string;
             remarks: string | null;
-            approvedBy: string;
             poId: string;
+            approvedBy: string;
             approvalLevel: number;
         };
         allApproved: boolean;
@@ -152,8 +152,8 @@ export declare class PoApprovalController {
             updatedBy: string | null;
             action: string;
             remarks: string | null;
-            approvedBy: string;
             poId: string;
+            approvedBy: string;
             approvalLevel: number;
         };
         message: string;

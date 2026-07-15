@@ -58,11 +58,11 @@ export declare class GstController {
             customerName: string;
             invoiceNumber: string;
             invoiceDate: Date;
-            customerAddress: string | null;
             paymentTerms: string;
-            notes: string | null;
-            totalAmount: number;
             subtotal: number;
+            totalAmount: number;
+            notes: string | null;
+            customerAddress: string | null;
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;

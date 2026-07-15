@@ -119,6 +119,7 @@ export declare class GateDashboardService {
             vehicleLogId: string | null;
             supplierMobile: string | null;
             supplierGstin: string | null;
+            poId: string | null;
             invoiceNumber: string | null;
             invoiceDate: Date | null;
             invoiceAmount: number | null;

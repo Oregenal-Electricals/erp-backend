@@ -36,6 +36,25 @@ let GateInwardService = class GateInwardService {
             const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
             ginNumber = `GIN-${String(fy).slice(2)}-${String(fy + 1).slice(2)}-${String(count + 1).padStart(4, '0')}`;
         }
+        let resolvedPoNumber = dto.poNumber;
+        let vendorMismatchWarning;
+        if (dto.poId) {
+            const po = await this.prisma.purchaseOrder.findFirst({
+                where: { id: dto.poId, companyId: user.companyId },
+                include: { vendor: { select: { name: true } } },
+            });
+            if (!po)
+                throw new common_1.NotFoundException('Purchase Order not found');
+            if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+                throw new common_1.BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+            }
+            resolvedPoNumber = po.poNumber;
+            const supplierLower = dto.supplierName.trim().toLowerCase();
+            const vendorLower = po.vendor.name.trim().toLowerCase();
+            if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
+                vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
+            }
+        }
         const entry = await this.prisma.gateInwardEntry.create({
             data: {
                 ginNumber,
@@ -45,7 +64,8 @@ let GateInwardService = class GateInwardService {
                 supplierName: dto.supplierName,
                 supplierMobile: dto.supplierMobile,
                 supplierGstin: dto.supplierGstin,
-                poNumber: dto.poNumber,
+                poId: dto.poId,
+                poNumber: resolvedPoNumber,
                 invoiceNumber: dto.invoiceNumber,
                 invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
                 invoiceAmount: dto.invoiceAmount,
@@ -63,7 +83,7 @@ let GateInwardService = class GateInwardService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: entry.id, action: 'CREATE', newValues: { ginNumber, supplierName: dto.supplierName }, changedBy: user.id });
-        return entry;
+        return Object.assign(Object.assign({}, entry), { vendorMismatchWarning });
     }
     async findAll(user, filters) {
         const where = { companyId: user.companyId };

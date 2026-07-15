@@ -20,6 +20,8 @@ export declare class ProductRevisionService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -28,8 +30,6 @@ export declare class ProductRevisionService {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -47,6 +47,8 @@ export declare class ProductRevisionService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            approvedBy: string | null;
+            approvedAt: Date | null;
             specifications: import("@prisma/client/runtime/library").JsonValue | null;
             drawingNumber: string | null;
             productId: string;
@@ -55,8 +57,6 @@ export declare class ProductRevisionService {
             changeType: string;
             previousRevision: string | null;
             effectiveDate: Date;
-            approvedBy: string | null;
-            approvedAt: Date | null;
         })[];
         total: number;
         page: number;
@@ -78,6 +78,8 @@ export declare class ProductRevisionService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -86,8 +88,6 @@ export declare class ProductRevisionService {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     findByProduct(productId: string, user: any): Promise<({
         product: {
@@ -104,6 +104,8 @@ export declare class ProductRevisionService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -112,8 +114,6 @@ export declare class ProductRevisionService {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     })[]>;
     update(id: string, dto: UpdateProductRevisionDto, user: any): Promise<{
         product: {
@@ -130,6 +130,8 @@ export declare class ProductRevisionService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -138,8 +140,6 @@ export declare class ProductRevisionService {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     approve(id: string, user: any): Promise<{
         product: {
@@ -156,6 +156,8 @@ export declare class ProductRevisionService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -164,8 +166,6 @@ export declare class ProductRevisionService {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     obsolete(id: string, user: any): Promise<{
         product: {
@@ -182,6 +182,8 @@ export declare class ProductRevisionService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -190,8 +192,6 @@ export declare class ProductRevisionService {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

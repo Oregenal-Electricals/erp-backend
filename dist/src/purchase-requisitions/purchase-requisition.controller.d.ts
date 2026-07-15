@@ -32,15 +32,15 @@ export declare class PurchaseRequisitionController {
             priority: string;
             requestedBy: string;
             rejectionReason: string | null;
-            notes: string | null;
+            totalAmount: number | null;
             approvedBy: string | null;
             approvedAt: Date | null;
+            notes: string | null;
             requiredDate: Date;
             prNumber: string;
             requestedDate: Date;
             rejectedBy: string | null;
             rejectedAt: Date | null;
-            totalAmount: number | null;
         })[];
         total: number;
         page: number;
@@ -59,19 +59,19 @@ export declare class PurchaseRequisitionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            prId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             itemType: string;
             hsnCode: string | null;
             uom: string;
-            notes: string | null;
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
             estimatedUnitPrice: number | null;
             approvedQty: number | null;
             estimatedTotal: number | null;
-            prId: string;
         }[];
     } & {
         id: string;
@@ -89,15 +89,15 @@ export declare class PurchaseRequisitionController {
         priority: string;
         requestedBy: string;
         rejectionReason: string | null;
-        notes: string | null;
+        totalAmount: number | null;
         approvedBy: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         requiredDate: Date;
         prNumber: string;
         requestedDate: Date;
         rejectedBy: string | null;
         rejectedAt: Date | null;
-        totalAmount: number | null;
     }>;
     create(dto: CreatePurchaseRequisitionDto, req: any): Promise<{
         items: {
@@ -111,19 +111,19 @@ export declare class PurchaseRequisitionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            prId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             itemType: string;
             hsnCode: string | null;
             uom: string;
-            notes: string | null;
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
             estimatedUnitPrice: number | null;
             approvedQty: number | null;
             estimatedTotal: number | null;
-            prId: string;
         }[];
     } & {
         id: string;
@@ -141,15 +141,15 @@ export declare class PurchaseRequisitionController {
         priority: string;
         requestedBy: string;
         rejectionReason: string | null;
-        notes: string | null;
+        totalAmount: number | null;
         approvedBy: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         requiredDate: Date;
         prNumber: string;
         requestedDate: Date;
         rejectedBy: string | null;
         rejectedAt: Date | null;
-        totalAmount: number | null;
     }>;
     update(id: string, dto: UpdatePurchaseRequisitionDto, req: any): Promise<{
         items: {
@@ -163,19 +163,19 @@ export declare class PurchaseRequisitionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            prId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             itemType: string;
             hsnCode: string | null;
             uom: string;
-            notes: string | null;
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
             estimatedUnitPrice: number | null;
             approvedQty: number | null;
             estimatedTotal: number | null;
-            prId: string;
         }[];
     } & {
         id: string;
@@ -193,15 +193,15 @@ export declare class PurchaseRequisitionController {
         priority: string;
         requestedBy: string;
         rejectionReason: string | null;
-        notes: string | null;
+        totalAmount: number | null;
         approvedBy: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         requiredDate: Date;
         prNumber: string;
         requestedDate: Date;
         rejectedBy: string | null;
         rejectedAt: Date | null;
-        totalAmount: number | null;
     }>;
     submit(id: string, req: any): Promise<{
         items: {
@@ -215,19 +215,19 @@ export declare class PurchaseRequisitionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            prId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             itemType: string;
             hsnCode: string | null;
             uom: string;
-            notes: string | null;
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
             estimatedUnitPrice: number | null;
             approvedQty: number | null;
             estimatedTotal: number | null;
-            prId: string;
         }[];
     } & {
         id: string;
@@ -245,15 +245,15 @@ export declare class PurchaseRequisitionController {
         priority: string;
         requestedBy: string;
         rejectionReason: string | null;
-        notes: string | null;
+        totalAmount: number | null;
         approvedBy: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         requiredDate: Date;
         prNumber: string;
         requestedDate: Date;
         rejectedBy: string | null;
         rejectedAt: Date | null;
-        totalAmount: number | null;
     }>;
     approve(id: string, req: any): Promise<{
         items: {
@@ -267,19 +267,19 @@ export declare class PurchaseRequisitionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            prId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             itemType: string;
             hsnCode: string | null;
             uom: string;
-            notes: string | null;
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
             estimatedUnitPrice: number | null;
             approvedQty: number | null;
             estimatedTotal: number | null;
-            prId: string;
         }[];
     } & {
         id: string;
@@ -297,15 +297,15 @@ export declare class PurchaseRequisitionController {
         priority: string;
         requestedBy: string;
         rejectionReason: string | null;
-        notes: string | null;
+        totalAmount: number | null;
         approvedBy: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         requiredDate: Date;
         prNumber: string;
         requestedDate: Date;
         rejectedBy: string | null;
         rejectedAt: Date | null;
-        totalAmount: number | null;
     }>;
     reject(id: string, dto: RejectPrDto, req: any): Promise<{
         items: {
@@ -319,19 +319,19 @@ export declare class PurchaseRequisitionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            prId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             itemType: string;
             hsnCode: string | null;
             uom: string;
-            notes: string | null;
             sequence: number;
             rawMaterialId: string | null;
             requiredQty: number;
             estimatedUnitPrice: number | null;
             approvedQty: number | null;
             estimatedTotal: number | null;
-            prId: string;
         }[];
     } & {
         id: string;
@@ -349,15 +349,15 @@ export declare class PurchaseRequisitionController {
         priority: string;
         requestedBy: string;
         rejectionReason: string | null;
-        notes: string | null;
+        totalAmount: number | null;
         approvedBy: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         requiredDate: Date;
         prNumber: string;
         requestedDate: Date;
         rejectedBy: string | null;
         rejectedAt: Date | null;
-        totalAmount: number | null;
     }>;
     addItem(id: string, dto: PrItemDto, req: any): Promise<{
         id: string;
@@ -370,19 +370,19 @@ export declare class PurchaseRequisitionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        prId: string;
+        notes: string | null;
         itemCode: string;
         itemName: string;
         itemType: string;
         hsnCode: string | null;
         uom: string;
-        notes: string | null;
         sequence: number;
         rawMaterialId: string | null;
         requiredQty: number;
         estimatedUnitPrice: number | null;
         approvedQty: number | null;
         estimatedTotal: number | null;
-        prId: string;
     }>;
     removeItem(id: string, itemId: string, req: any): Promise<{
         message: string;

@@ -17,13 +17,13 @@ export declare class RfqService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            rfqId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
-            rfqId: string;
         }[];
         vendors: ({
             vendor: {
@@ -42,8 +42,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -62,10 +62,10 @@ export declare class RfqService {
         updatedBy: string | null;
         status: string;
         title: string;
-        closedAt: Date | null;
+        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        prId: string;
+        closedAt: Date | null;
         responseDeadline: Date;
         deliveryLocation: string | null;
         rfqNumber: string;
@@ -92,10 +92,10 @@ export declare class RfqService {
             updatedBy: string | null;
             status: string;
             title: string;
-            closedAt: Date | null;
+            prId: string;
             paymentTerms: string | null;
             notes: string | null;
-            prId: string;
+            closedAt: Date | null;
             responseDeadline: Date;
             deliveryLocation: string | null;
             rfqNumber: string;
@@ -115,13 +115,13 @@ export declare class RfqService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            rfqId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
-            rfqId: string;
         }[];
         vendors: ({
             vendor: {
@@ -140,8 +140,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -160,10 +160,10 @@ export declare class RfqService {
         updatedBy: string | null;
         status: string;
         title: string;
-        closedAt: Date | null;
+        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        prId: string;
+        closedAt: Date | null;
         responseDeadline: Date;
         deliveryLocation: string | null;
         rfqNumber: string;
@@ -178,13 +178,13 @@ export declare class RfqService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            rfqId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
-            rfqId: string;
         }[];
         vendors: ({
             vendor: {
@@ -203,8 +203,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -223,10 +223,10 @@ export declare class RfqService {
         updatedBy: string | null;
         status: string;
         title: string;
-        closedAt: Date | null;
+        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        prId: string;
+        closedAt: Date | null;
         responseDeadline: Date;
         deliveryLocation: string | null;
         rfqNumber: string;
@@ -241,13 +241,13 @@ export declare class RfqService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            rfqId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
-            rfqId: string;
         }[];
         vendors: ({
             vendor: {
@@ -266,8 +266,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -286,10 +286,10 @@ export declare class RfqService {
         updatedBy: string | null;
         status: string;
         title: string;
-        closedAt: Date | null;
+        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        prId: string;
+        closedAt: Date | null;
         responseDeadline: Date;
         deliveryLocation: string | null;
         rfqNumber: string;
@@ -304,13 +304,13 @@ export declare class RfqService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            rfqId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
-            rfqId: string;
         }[];
         vendors: ({
             vendor: {
@@ -329,8 +329,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -349,10 +349,10 @@ export declare class RfqService {
         updatedBy: string | null;
         status: string;
         title: string;
-        closedAt: Date | null;
+        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        prId: string;
+        closedAt: Date | null;
         responseDeadline: Date;
         deliveryLocation: string | null;
         rfqNumber: string;
@@ -367,13 +367,13 @@ export declare class RfqService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            rfqId: string;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
-            rfqId: string;
         }[];
         vendors: ({
             vendor: {
@@ -392,8 +392,8 @@ export declare class RfqService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            vendorId: string;
             rfqId: string;
+            vendorId: string;
         })[];
         pr: {
             status: string;
@@ -412,10 +412,10 @@ export declare class RfqService {
         updatedBy: string | null;
         status: string;
         title: string;
-        closedAt: Date | null;
+        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        prId: string;
+        closedAt: Date | null;
         responseDeadline: Date;
         deliveryLocation: string | null;
         rfqNumber: string;
@@ -435,8 +435,8 @@ export declare class RfqService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        vendorId: string;
         rfqId: string;
+        vendorId: string;
     }>;
     removeVendor(id: string, vendorId: string, user: any): Promise<{
         message: string;

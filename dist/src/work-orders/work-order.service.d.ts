@@ -101,11 +101,11 @@ export declare class WorkOrderService {
                 createdBy: string | null;
                 updatedBy: string | null;
                 quantity: number;
+                notes: string | null;
                 itemCode: string;
                 itemName: string;
                 itemType: string;
                 uom: string;
-                notes: string | null;
                 sequence: number;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
@@ -126,9 +126,9 @@ export declare class WorkOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            productId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
+            productId: string;
             revisionId: string | null;
             version: string;
             effectiveFrom: Date;

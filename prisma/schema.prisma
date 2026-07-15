@@ -753,6 +753,8 @@ model GateInwardEntry {
   supplierName    String
   supplierMobile  String?
   supplierGstin   String?
+  poId            String?
+  po              PurchaseOrder? @relation(fields: [poId], references: [id])
   poNumber        String?
   invoiceNumber   String?
   invoiceDate     DateTime?
@@ -1798,6 +1800,7 @@ model PurchaseOrder {
   grnHeaders    GrnHeader[]
   @@unique([companyId, poNumber])
   apBills ApBill[]
+  gateInwardEntries GateInwardEntry[]
   @@map("purchase_orders")
 }
 

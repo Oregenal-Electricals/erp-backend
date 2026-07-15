@@ -144,9 +144,9 @@ export declare class LeaveManagementController {
             days: number;
             remarks: string | null;
             rejectionReason: string | null;
-            employeeId: string;
             approvedBy: string | null;
             approvedAt: Date | null;
+            employeeId: string;
             fromDate: Date;
             toDate: Date;
             leaveTypeId: string;
@@ -178,9 +178,9 @@ export declare class LeaveManagementController {
         days: number;
         remarks: string | null;
         rejectionReason: string | null;
-        employeeId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
+        employeeId: string;
         fromDate: Date;
         toDate: Date;
         leaveTypeId: string;
@@ -209,9 +209,9 @@ export declare class LeaveManagementController {
         days: number;
         remarks: string | null;
         rejectionReason: string | null;
-        employeeId: string;
         approvedBy: string | null;
         approvedAt: Date | null;
+        employeeId: string;
         fromDate: Date;
         toDate: Date;
         leaveTypeId: string;

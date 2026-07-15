@@ -4,6 +4,7 @@ export declare class CreateGateInwardDto {
     supplierName: string;
     supplierMobile?: string;
     supplierGstin?: string;
+    poId?: string;
     poNumber?: string;
     invoiceNumber?: string;
     invoiceDate?: string;

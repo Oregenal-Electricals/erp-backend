@@ -28,8 +28,8 @@ export declare class MisReportsService {
             customerName: string;
             invoiceNumber: string;
             invoiceDate: Date;
-            totalAmount: number;
             subtotal: number;
+            totalAmount: number;
             totalGst: number;
             outstandingAmount: number;
         }[];
@@ -54,15 +54,15 @@ export declare class MisReportsService {
                 name: string;
             };
             poNumber: string;
-            totalAmount: number;
-            deliveryDate: Date;
             poDate: Date;
+            deliveryDate: Date;
+            totalAmount: number;
         }[];
         bills: {
             status: string;
+            subtotal: number;
             totalAmount: number;
             vendorName: string;
-            subtotal: number;
             totalGst: number;
             outstandingAmount: number;
             billDate: Date;
@@ -203,8 +203,8 @@ export declare class MisReportsService {
             totalGst: number;
         }[];
         purchaseData: {
-            vendorName: string;
             subtotal: number;
+            vendorName: string;
             totalGst: number;
             billDate: Date;
             billNumber: string;

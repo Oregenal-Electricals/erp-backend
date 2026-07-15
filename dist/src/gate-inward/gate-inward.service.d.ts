@@ -9,6 +9,7 @@ export declare class GateInwardService {
     private settings;
     constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService);
     create(dto: CreateGateInwardDto, user: any): Promise<{
+        vendorMismatchWarning: string;
         plant: {
             id: string;
             name: string;
@@ -31,7 +32,6 @@ export declare class GateInwardService {
             firstName: string;
             lastName: string;
         };
-    } & {
         id: string;
         companyId: string;
         isActive: boolean;
@@ -51,6 +51,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -112,6 +113,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -168,6 +170,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -224,6 +227,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -280,6 +284,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -336,6 +341,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -392,6 +398,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -448,6 +455,7 @@ export declare class GateInwardService {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;

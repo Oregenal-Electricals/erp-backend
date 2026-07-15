@@ -30,6 +30,11 @@ export class CreateGateInwardDto {
   @IsString()
   supplierGstin?: string;
 
+  @ApiPropertyOptional({ example: 'uuid-of-purchase-order' })
+  @IsOptional()
+  @IsUUID('4')
+  poId?: string;
+
   @ApiPropertyOptional({ example: 'PO-26-27-0001' })
   @IsOptional()
   @IsString()

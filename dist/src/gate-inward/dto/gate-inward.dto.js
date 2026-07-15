@@ -45,6 +45,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateGateInwardDto.prototype, "supplierGstin", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'uuid-of-purchase-order' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)('4'),
+    __metadata("design:type", String)
+], CreateGateInwardDto.prototype, "poId", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'PO-26-27-0001' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

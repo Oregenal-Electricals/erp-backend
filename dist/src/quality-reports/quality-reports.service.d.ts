@@ -162,8 +162,8 @@ export declare class QualityReportsService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            rating: string;
             vendorId: string;
+            rating: string;
             period: string;
             periodType: string;
             totalReceived: number;
@@ -197,8 +197,8 @@ export declare class QualityReportsService {
             status: string;
             dueDate: Date;
             remarks: string | null;
-            verifiedBy: string | null;
             vendorId: string;
+            verifiedBy: string | null;
             severity: string;
             closedDate: Date | null;
             ncrId: string | null;

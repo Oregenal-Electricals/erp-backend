@@ -27,6 +27,9 @@ export declare class VendorService {
         phone: string | null;
         email: string | null;
         website: string | null;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -38,13 +41,10 @@ export declare class VendorService {
         bankBranch: string | null;
         accountNumber: string | null;
         ifscCode: string | null;
-        paymentTerms: string | null;
         creditLimit: number | null;
-        currency: string;
         tdsApplicable: boolean;
         tdsSection: string | null;
         rating: number | null;
-        notes: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: {
@@ -69,6 +69,9 @@ export declare class VendorService {
             phone: string | null;
             email: string | null;
             website: string | null;
+            paymentTerms: string | null;
+            currency: string;
+            notes: string | null;
             vendorType: string;
             isMsme: boolean;
             alternatePhone: string | null;
@@ -80,13 +83,10 @@ export declare class VendorService {
             bankBranch: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
-            paymentTerms: string | null;
             creditLimit: number | null;
-            currency: string;
             tdsApplicable: boolean;
             tdsSection: string | null;
             rating: number | null;
-            notes: string | null;
         }[];
         total: number;
         page: number;
@@ -115,6 +115,9 @@ export declare class VendorService {
         phone: string | null;
         email: string | null;
         website: string | null;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -126,13 +129,10 @@ export declare class VendorService {
         bankBranch: string | null;
         accountNumber: string | null;
         ifscCode: string | null;
-        paymentTerms: string | null;
         creditLimit: number | null;
-        currency: string;
         tdsApplicable: boolean;
         tdsSection: string | null;
         rating: number | null;
-        notes: string | null;
     }>;
     update(id: string, dto: UpdateVendorDto, user: any): Promise<{
         id: string;
@@ -156,6 +156,9 @@ export declare class VendorService {
         phone: string | null;
         email: string | null;
         website: string | null;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -167,13 +170,10 @@ export declare class VendorService {
         bankBranch: string | null;
         accountNumber: string | null;
         ifscCode: string | null;
-        paymentTerms: string | null;
         creditLimit: number | null;
-        currency: string;
         tdsApplicable: boolean;
         tdsSection: string | null;
         rating: number | null;
-        notes: string | null;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;

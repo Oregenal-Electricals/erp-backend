@@ -60,11 +60,11 @@ export declare class DispatchController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
-            totalAmount: number;
             unitPrice: number;
             gstAmount: number;
             dispatchedQty: number;
@@ -117,11 +117,11 @@ export declare class DispatchController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
-            totalAmount: number;
             unitPrice: number;
             gstAmount: number;
             dispatchedQty: number;

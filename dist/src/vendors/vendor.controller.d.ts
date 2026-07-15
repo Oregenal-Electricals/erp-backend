@@ -34,6 +34,9 @@ export declare class VendorController {
             phone: string | null;
             email: string | null;
             website: string | null;
+            paymentTerms: string | null;
+            currency: string;
+            notes: string | null;
             vendorType: string;
             isMsme: boolean;
             alternatePhone: string | null;
@@ -45,13 +48,10 @@ export declare class VendorController {
             bankBranch: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
-            paymentTerms: string | null;
             creditLimit: number | null;
-            currency: string;
             tdsApplicable: boolean;
             tdsSection: string | null;
             rating: number | null;
-            notes: string | null;
         }[];
         total: number;
         page: number;
@@ -80,6 +80,9 @@ export declare class VendorController {
         phone: string | null;
         email: string | null;
         website: string | null;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -91,13 +94,10 @@ export declare class VendorController {
         bankBranch: string | null;
         accountNumber: string | null;
         ifscCode: string | null;
-        paymentTerms: string | null;
         creditLimit: number | null;
-        currency: string;
         tdsApplicable: boolean;
         tdsSection: string | null;
         rating: number | null;
-        notes: string | null;
     }>;
     create(dto: CreateVendorDto, req: any): Promise<{
         id: string;
@@ -121,6 +121,9 @@ export declare class VendorController {
         phone: string | null;
         email: string | null;
         website: string | null;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -132,13 +135,10 @@ export declare class VendorController {
         bankBranch: string | null;
         accountNumber: string | null;
         ifscCode: string | null;
-        paymentTerms: string | null;
         creditLimit: number | null;
-        currency: string;
         tdsApplicable: boolean;
         tdsSection: string | null;
         rating: number | null;
-        notes: string | null;
     }>;
     update(id: string, dto: UpdateVendorDto, req: any): Promise<{
         id: string;
@@ -162,6 +162,9 @@ export declare class VendorController {
         phone: string | null;
         email: string | null;
         website: string | null;
+        paymentTerms: string | null;
+        currency: string;
+        notes: string | null;
         vendorType: string;
         isMsme: boolean;
         alternatePhone: string | null;
@@ -173,13 +176,10 @@ export declare class VendorController {
         bankBranch: string | null;
         accountNumber: string | null;
         ifscCode: string | null;
-        paymentTerms: string | null;
         creditLimit: number | null;
-        currency: string;
         tdsApplicable: boolean;
         tdsSection: string | null;
         rating: number | null;
-        notes: string | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

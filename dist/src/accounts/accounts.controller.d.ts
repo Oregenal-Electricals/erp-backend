@@ -35,8 +35,8 @@ export declare class AccountsController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            parentId: string | null;
             currency: string;
+            parentId: string | null;
             accountCode: string;
             accountName: string;
             accountType: string;
@@ -62,8 +62,8 @@ export declare class AccountsController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            parentId: string | null;
             currency: string;
+            parentId: string | null;
             accountCode: string;
             accountName: string;
             accountType: string;
@@ -82,8 +82,8 @@ export declare class AccountsController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        parentId: string | null;
         currency: string;
+        parentId: string | null;
         accountCode: string;
         accountName: string;
         accountType: string;
@@ -102,8 +102,8 @@ export declare class AccountsController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        parentId: string | null;
         currency: string;
+        parentId: string | null;
         accountCode: string;
         accountName: string;
         accountType: string;
@@ -122,8 +122,8 @@ export declare class AccountsController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        parentId: string | null;
         currency: string;
+        parentId: string | null;
         accountCode: string;
         accountName: string;
         accountType: string;

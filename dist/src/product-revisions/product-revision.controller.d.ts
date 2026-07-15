@@ -25,6 +25,8 @@ export declare class ProductRevisionController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            approvedBy: string | null;
+            approvedAt: Date | null;
             specifications: import("@prisma/client/runtime/library").JsonValue | null;
             drawingNumber: string | null;
             productId: string;
@@ -33,8 +35,6 @@ export declare class ProductRevisionController {
             changeType: string;
             previousRevision: string | null;
             effectiveDate: Date;
-            approvedBy: string | null;
-            approvedAt: Date | null;
         })[];
         total: number;
         page: number;
@@ -56,6 +56,8 @@ export declare class ProductRevisionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -64,8 +66,6 @@ export declare class ProductRevisionController {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
         product: {
@@ -82,6 +82,8 @@ export declare class ProductRevisionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -90,8 +92,6 @@ export declare class ProductRevisionController {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     create(dto: CreateProductRevisionDto, req: any): Promise<{
         product: {
@@ -108,6 +108,8 @@ export declare class ProductRevisionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -116,8 +118,6 @@ export declare class ProductRevisionController {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     update(id: string, dto: UpdateProductRevisionDto, req: any): Promise<{
         product: {
@@ -134,6 +134,8 @@ export declare class ProductRevisionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -142,8 +144,6 @@ export declare class ProductRevisionController {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     approve(id: string, req: any): Promise<{
         product: {
@@ -160,6 +160,8 @@ export declare class ProductRevisionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -168,8 +170,6 @@ export declare class ProductRevisionController {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
     obsolete(id: string, req: any): Promise<{
         product: {
@@ -186,6 +186,8 @@ export declare class ProductRevisionController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         drawingNumber: string | null;
         productId: string;
@@ -194,7 +196,5 @@ export declare class ProductRevisionController {
         changeType: string;
         previousRevision: string | null;
         effectiveDate: Date;
-        approvedBy: string | null;
-        approvedAt: Date | null;
     }>;
 }

@@ -39,8 +39,8 @@ export declare class VouchersService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        cancelReason: string | null;
         totalAmount: number;
+        cancelReason: string | null;
         cancelledDate: Date | null;
         referenceType: string | null;
         referenceId: string | null;
@@ -85,8 +85,8 @@ export declare class VouchersService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        cancelReason: string | null;
         totalAmount: number;
+        cancelReason: string | null;
         cancelledDate: Date | null;
         referenceType: string | null;
         referenceId: string | null;
@@ -131,8 +131,8 @@ export declare class VouchersService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        cancelReason: string | null;
         totalAmount: number;
+        cancelReason: string | null;
         cancelledDate: Date | null;
         referenceType: string | null;
         referenceId: string | null;
@@ -165,8 +165,8 @@ export declare class VouchersService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            cancelReason: string | null;
             totalAmount: number;
+            cancelReason: string | null;
             cancelledDate: Date | null;
             referenceType: string | null;
             referenceId: string | null;
@@ -215,8 +215,8 @@ export declare class VouchersService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        cancelReason: string | null;
         totalAmount: number;
+        cancelReason: string | null;
         cancelledDate: Date | null;
         referenceType: string | null;
         referenceId: string | null;
@@ -273,8 +273,8 @@ export declare class VouchersService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        cancelReason: string | null;
         totalAmount: number;
+        cancelReason: string | null;
         cancelledDate: Date | null;
         referenceType: string | null;
         referenceId: string | null;

@@ -20,6 +20,7 @@ export declare class PurchaseOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -38,7 +39,6 @@ export declare class PurchaseOrderService {
             pendingQty: number;
             taxAmount: number;
             receivedQty: number;
-            poId: string;
         }[];
         vendor: {
             name: string;
@@ -66,21 +66,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -102,21 +102,21 @@ export declare class PurchaseOrderService {
             updatedBy: string | null;
             status: string;
             poNumber: string;
-            paymentTerms: string | null;
-            currency: string;
-            notes: string | null;
-            approvedBy: string | null;
-            approvedAt: Date | null;
-            totalAmount: number;
-            prId: string | null;
-            vendorId: string;
             rfqId: string | null;
+            vendorId: string;
+            prId: string | null;
+            poDate: Date;
             deliveryDate: Date;
             deliveryAddress: string | null;
-            termsConditions: string | null;
-            poDate: Date;
+            paymentTerms: string | null;
+            currency: string;
             subtotal: number;
             totalTax: number;
+            totalAmount: number;
+            approvedBy: string | null;
+            approvedAt: Date | null;
+            notes: string | null;
+            termsConditions: string | null;
         })[];
         total: number;
         page: number;
@@ -134,6 +134,7 @@ export declare class PurchaseOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -152,7 +153,6 @@ export declare class PurchaseOrderService {
             pendingQty: number;
             taxAmount: number;
             receivedQty: number;
-            poId: string;
         }[];
         vendor: {
             name: string;
@@ -180,21 +180,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }>;
     findByVendor(vendorId: string, user: any): Promise<({
         _count: {
@@ -215,21 +215,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     })[]>;
     update(id: string, dto: UpdatePurchaseOrderDto, user: any): Promise<{
         items: {
@@ -242,6 +242,7 @@ export declare class PurchaseOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -260,7 +261,6 @@ export declare class PurchaseOrderService {
             pendingQty: number;
             taxAmount: number;
             receivedQty: number;
-            poId: string;
         }[];
         vendor: {
             name: string;
@@ -288,21 +288,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }>;
     approve(id: string, user: any): Promise<{
         items: {
@@ -315,6 +315,7 @@ export declare class PurchaseOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -333,7 +334,6 @@ export declare class PurchaseOrderService {
             pendingQty: number;
             taxAmount: number;
             receivedQty: number;
-            poId: string;
         }[];
         vendor: {
             name: string;
@@ -361,21 +361,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }>;
     send(id: string, user: any): Promise<{
         items: {
@@ -388,6 +388,7 @@ export declare class PurchaseOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -406,7 +407,6 @@ export declare class PurchaseOrderService {
             pendingQty: number;
             taxAmount: number;
             receivedQty: number;
-            poId: string;
         }[];
         vendor: {
             name: string;
@@ -434,21 +434,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }>;
     cancel(id: string, user: any): Promise<{
         items: {
@@ -461,6 +461,7 @@ export declare class PurchaseOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             hsnCode: string | null;
@@ -479,7 +480,6 @@ export declare class PurchaseOrderService {
             pendingQty: number;
             taxAmount: number;
             receivedQty: number;
-            poId: string;
         }[];
         vendor: {
             name: string;
@@ -507,21 +507,21 @@ export declare class PurchaseOrderService {
         updatedBy: string | null;
         status: string;
         poNumber: string;
-        paymentTerms: string | null;
-        currency: string;
-        notes: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        totalAmount: number;
-        prId: string | null;
-        vendorId: string;
         rfqId: string | null;
+        vendorId: string;
+        prId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        termsConditions: string | null;
-        poDate: Date;
+        paymentTerms: string | null;
+        currency: string;
         subtotal: number;
         totalTax: number;
+        totalAmount: number;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        notes: string | null;
+        termsConditions: string | null;
     }>;
     addItem(id: string, dto: PoItemDto, user: any): Promise<{
         id: string;
@@ -533,6 +533,7 @@ export declare class PurchaseOrderService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        poId: string;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
@@ -551,7 +552,6 @@ export declare class PurchaseOrderService {
         pendingQty: number;
         taxAmount: number;
         receivedQty: number;
-        poId: string;
     }>;
     updateItem(id: string, itemId: string, dto: UpdatePoItemDto, user: any): Promise<{
         id: string;
@@ -563,6 +563,7 @@ export declare class PurchaseOrderService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        poId: string;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
@@ -581,7 +582,6 @@ export declare class PurchaseOrderService {
         pendingQty: number;
         taxAmount: number;
         receivedQty: number;
-        poId: string;
     }>;
     removeItem(id: string, itemId: string, user: any): Promise<{
         message: string;

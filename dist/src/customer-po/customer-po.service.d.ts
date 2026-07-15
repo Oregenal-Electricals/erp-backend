@@ -21,12 +21,12 @@ export declare class CustomerPoService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
             qty: number;
-            totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
@@ -36,8 +36,8 @@ export declare class CustomerPoService {
             deliveredQty: number;
         }[];
         quotation: {
-            revision: number;
             totalAmount: number;
+            revision: number;
             quotationNumber: string;
         };
         amendmentOf: {
@@ -64,14 +64,14 @@ export declare class CustomerPoService {
         status: string;
         remarks: string | null;
         customerName: string;
-        cancelReason: string | null;
-        currency: string;
-        totalAmount: number;
-        quotationId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        poDate: Date;
+        currency: string;
         subtotal: number;
+        totalAmount: number;
+        cancelReason: string | null;
+        quotationId: string | null;
         poType: string;
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
@@ -97,12 +97,12 @@ export declare class CustomerPoService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
             qty: number;
-            totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
@@ -112,8 +112,8 @@ export declare class CustomerPoService {
             deliveredQty: number;
         }[];
         quotation: {
-            revision: number;
             totalAmount: number;
+            revision: number;
             quotationNumber: string;
         };
         amendmentOf: {
@@ -140,14 +140,14 @@ export declare class CustomerPoService {
         status: string;
         remarks: string | null;
         customerName: string;
-        cancelReason: string | null;
-        currency: string;
-        totalAmount: number;
-        quotationId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        poDate: Date;
+        currency: string;
         subtotal: number;
+        totalAmount: number;
+        cancelReason: string | null;
+        quotationId: string | null;
         poType: string;
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
@@ -173,12 +173,12 @@ export declare class CustomerPoService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
             qty: number;
-            totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
@@ -188,8 +188,8 @@ export declare class CustomerPoService {
             deliveredQty: number;
         }[];
         quotation: {
-            revision: number;
             totalAmount: number;
+            revision: number;
             quotationNumber: string;
         };
         amendmentOf: {
@@ -216,14 +216,14 @@ export declare class CustomerPoService {
         status: string;
         remarks: string | null;
         customerName: string;
-        cancelReason: string | null;
-        currency: string;
-        totalAmount: number;
-        quotationId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        poDate: Date;
+        currency: string;
         subtotal: number;
+        totalAmount: number;
+        cancelReason: string | null;
+        quotationId: string | null;
         poType: string;
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
@@ -249,12 +249,12 @@ export declare class CustomerPoService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
             qty: number;
-            totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
@@ -264,8 +264,8 @@ export declare class CustomerPoService {
             deliveredQty: number;
         }[];
         quotation: {
-            revision: number;
             totalAmount: number;
+            revision: number;
             quotationNumber: string;
         };
         amendmentOf: {
@@ -292,14 +292,14 @@ export declare class CustomerPoService {
         status: string;
         remarks: string | null;
         customerName: string;
-        cancelReason: string | null;
-        currency: string;
-        totalAmount: number;
-        quotationId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        poDate: Date;
+        currency: string;
         subtotal: number;
+        totalAmount: number;
+        cancelReason: string | null;
+        quotationId: string | null;
         poType: string;
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
@@ -325,12 +325,12 @@ export declare class CustomerPoService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
             qty: number;
-            totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
@@ -340,8 +340,8 @@ export declare class CustomerPoService {
             deliveredQty: number;
         }[];
         quotation: {
-            revision: number;
             totalAmount: number;
+            revision: number;
             quotationNumber: string;
         };
         amendmentOf: {
@@ -368,14 +368,14 @@ export declare class CustomerPoService {
         status: string;
         remarks: string | null;
         customerName: string;
-        cancelReason: string | null;
-        currency: string;
-        totalAmount: number;
-        quotationId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        poDate: Date;
+        currency: string;
         subtotal: number;
+        totalAmount: number;
+        cancelReason: string | null;
+        quotationId: string | null;
         poType: string;
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
@@ -420,14 +420,14 @@ export declare class CustomerPoService {
             status: string;
             remarks: string | null;
             customerName: string;
-            cancelReason: string | null;
-            currency: string;
-            totalAmount: number;
-            quotationId: string | null;
+            poDate: Date;
             deliveryDate: Date;
             deliveryAddress: string | null;
-            poDate: Date;
+            currency: string;
             subtotal: number;
+            totalAmount: number;
+            cancelReason: string | null;
+            quotationId: string | null;
             poType: string;
             customerPoNumber: string;
             verbalConfirmedBy: string | null;
@@ -457,12 +457,12 @@ export declare class CustomerPoService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             gstRate: number;
             uom: string;
             qty: number;
-            totalAmount: number;
             unitPrice: number;
             discount: number;
             pendingQty: number;
@@ -472,8 +472,8 @@ export declare class CustomerPoService {
             deliveredQty: number;
         }[];
         quotation: {
-            revision: number;
             totalAmount: number;
+            revision: number;
             quotationNumber: string;
         };
         amendmentOf: {
@@ -500,14 +500,14 @@ export declare class CustomerPoService {
         status: string;
         remarks: string | null;
         customerName: string;
-        cancelReason: string | null;
-        currency: string;
-        totalAmount: number;
-        quotationId: string | null;
+        poDate: Date;
         deliveryDate: Date;
         deliveryAddress: string | null;
-        poDate: Date;
+        currency: string;
         subtotal: number;
+        totalAmount: number;
+        cancelReason: string | null;
+        quotationId: string | null;
         poType: string;
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
@@ -578,12 +578,12 @@ export declare class CustomerPoService {
             createdBy: string;
             updatedBy: string;
             status: string;
+            prId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
             rawMaterialId: string | null;
             requiredQty: number;
-            prId: string | null;
             availableQty: number;
             customerPoId: string;
             shortageQty: number;

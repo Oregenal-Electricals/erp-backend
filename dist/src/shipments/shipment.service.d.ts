@@ -41,8 +41,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -85,8 +85,8 @@ export declare class ShipmentService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            carrierName: string;
             notes: string | null;
+            carrierName: string;
             portOfLoading: string | null;
             portOfDischarge: string | null;
             ipoId: string;
@@ -145,8 +145,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -200,8 +200,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -255,8 +255,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -310,8 +310,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -365,8 +365,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -420,8 +420,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;
@@ -475,8 +475,8 @@ export declare class ShipmentService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        carrierName: string;
         notes: string | null;
+        carrierName: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
         ipoId: string;

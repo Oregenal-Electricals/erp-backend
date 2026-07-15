@@ -5,6 +5,7 @@ export declare class GateInwardController {
     private readonly service;
     constructor(service: GateInwardService);
     create(dto: CreateGateInwardDto, user: any): Promise<{
+        vendorMismatchWarning: string;
         plant: {
             id: string;
             name: string;
@@ -27,7 +28,6 @@ export declare class GateInwardController {
             firstName: string;
             lastName: string;
         };
-    } & {
         id: string;
         companyId: string;
         isActive: boolean;
@@ -47,6 +47,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -103,6 +104,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -168,6 +170,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -224,6 +227,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -280,6 +284,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -336,6 +341,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -392,6 +398,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
@@ -448,6 +455,7 @@ export declare class GateInwardController {
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
+        poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
