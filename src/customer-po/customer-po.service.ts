@@ -717,6 +717,45 @@ export class CustomerPoService {
     };
   }
 
+  /**
+   * Aggregated view for Purchase: every OPEN material shortage across
+   * every Customer PO, grouped by item so Purchase sees "I need to buy
+   * X total of item Y" in one place, rather than checking each order
+   * individually. Each item also lists exactly which orders are driving
+   * that demand, so Purchase can trace it back if needed.
+   */
+  async getAllOpenShortages(user: any) {
+    const companyId = user.companyId;
+    const shortages = await this.prisma.materialShortage.findMany({
+      where: { companyId, status: 'OPEN' },
+      include: { customerPo: { select: { cpoNumber: true, customerName: true, deliveryDate: true } } },
+      orderBy: { itemCode: 'asc' },
+    });
+
+    const grouped = new Map<string, { itemCode: string; itemName: string; uom: string; totalShortageQty: number; affectedOrders: any[] }>();
+    for (const s of shortages) {
+      if (!grouped.has(s.itemCode)) {
+        grouped.set(s.itemCode, { itemCode: s.itemCode, itemName: s.itemName, uom: s.uom, totalShortageQty: 0, affectedOrders: [] });
+      }
+      const g = grouped.get(s.itemCode)!;
+      g.totalShortageQty = Math.round((g.totalShortageQty + s.shortageQty) * 1000) / 1000;
+      g.affectedOrders.push({
+        shortageId: s.id,
+        cpoNumber: s.customerPo.cpoNumber,
+        customerName: s.customerPo.customerName,
+        deliveryDate: s.customerPo.deliveryDate,
+        shortageQty: s.shortageQty,
+      });
+    }
+
+    const data = Array.from(grouped.values()).sort((a, b) => b.totalShortageQty - a.totalShortageQty);
+    return {
+      data,
+      totalItemsShort: data.length,
+      totalShortageRecords: shortages.length,
+    };
+  }
+
   async getShortages(cpoId: string, user: any) {
     const cpo = await this.prisma.customerPo.findFirst({ where: { id: cpoId, companyId: user.companyId } });
     if (!cpo) throw new NotFoundException('CPO not found');

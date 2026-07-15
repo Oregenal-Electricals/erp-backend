@@ -15,6 +15,17 @@ export declare class CustomerPoController {
         overdueCount: number;
         totalOrderValue: number;
     }>;
+    getAllOpenShortages(req: any): Promise<{
+        data: {
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            totalShortageQty: number;
+            affectedOrders: any[];
+        }[];
+        totalItemsShort: number;
+        totalShortageRecords: number;
+    }>;
     findAll(req: any, query: any): Promise<{
         data: ({
             items: {

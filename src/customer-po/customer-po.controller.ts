@@ -15,6 +15,10 @@ export class CustomerPoController {
   @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.cpoService.getStats(req.user); }
 
+  @Get('shortages/open')
+  @RequirePermissions(Permission.PURCHASE_VIEW)
+  getAllOpenShortages(@Request() req: any) { return this.cpoService.getAllOpenShortages(req.user); }
+
   @Get()
   @RequirePermissions(Permission.CUSTOMER_PO_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.cpoService.findAll(req.user, query); }

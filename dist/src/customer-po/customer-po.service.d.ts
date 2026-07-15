@@ -552,6 +552,17 @@ export declare class CustomerPoService {
             canFulfillFromStock: boolean;
         };
     }>;
+    getAllOpenShortages(user: any): Promise<{
+        data: {
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            totalShortageQty: number;
+            affectedOrders: any[];
+        }[];
+        totalItemsShort: number;
+        totalShortageRecords: number;
+    }>;
     getShortages(cpoId: string, user: any): Promise<{
         cpoNumber: string;
         mrpRunAt: Date;

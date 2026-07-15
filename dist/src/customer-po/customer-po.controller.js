@@ -25,6 +25,7 @@ let CustomerPoController = class CustomerPoController {
         this.cpoService = cpoService;
     }
     getStats(req) { return this.cpoService.getStats(req.user); }
+    getAllOpenShortages(req) { return this.cpoService.getAllOpenShortages(req.user); }
     findAll(req, query) { return this.cpoService.findAll(req.user, query); }
     findOne(id, req) { return this.cpoService.findOne(id, req.user); }
     getShortages(id, req) { return this.cpoService.getShortages(id, req.user); }
@@ -44,6 +45,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], CustomerPoController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Get)('shortages/open'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CustomerPoController.prototype, "getAllOpenShortages", null);
 __decorate([
     (0, common_1.Get)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.CUSTOMER_PO_VIEW),
