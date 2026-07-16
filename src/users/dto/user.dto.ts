@@ -50,14 +50,14 @@ export class CreateUserDto {
   })
   password: string;
 
-  @ApiProperty({ enum: UserRole, example: UserRole.VIEWER })
-  @IsEnum(UserRole, { message: 'Invalid role' })
-  role: UserRole;
+  @ApiProperty({ example: 'PURCHASE_MANAGER' })
+  @IsString()
+  role: string;
 
   @IsOptional()
   @IsArray()
-  @IsEnum(UserRole, { each: true })
-  additionalRoles?: UserRole[];
+  @IsString({ each: true })
+  additionalRoles?: string[];
 
   @ApiProperty({ example: 'aaba1738-6e81-44f7-b630-aa0327620870' })
   @IsUUID('4', { message: 'companyId must be a valid UUID' })
@@ -93,10 +93,10 @@ export class UpdateUserDto {
   @IsString()
   phone?: string;
 
-  @ApiPropertyOptional({ enum: UserRole })
+  @ApiPropertyOptional({ example: 'PURCHASE_MANAGER' })
   @IsOptional()
-  @IsEnum(UserRole, { message: 'Invalid role' })
-  role?: UserRole;
+  @IsString()
+  role?: string;
 }
 
 export class ResetPasswordDto {

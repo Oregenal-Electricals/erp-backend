@@ -43,6 +43,19 @@ export class UsersService {
     });
     if (!company) throw new NotFoundException('Company not found');
 
+    const rolesToCheck = [dto.role, ...(dto.additionalRoles || [])];
+    const existingRoles = await this.prisma.role.findMany({
+      where: { name: { in: rolesToCheck }, companyId: dto.companyId, isActive: true },
+      select: { name: true },
+    });
+    const existingRoleNames = new Set(existingRoles.map((r) => r.name));
+    const unknownRoles = rolesToCheck.filter((r) => !existingRoleNames.has(r));
+    if (unknownRoles.length > 0) {
+      throw new BadRequestException(
+        `Unknown role(s): ${unknownRoles.join(', ')} - check Roles & Permissions for the exact role name`,
+      );
+    }
+
     // Check email unique
     const emailExists = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -194,6 +207,17 @@ export class UsersService {
       throw new ForbiddenException(
         'Only SUPER_ADMIN can assign SUPER_ADMIN role',
       );
+    }
+
+    if (dto.role) {
+      const roleExists = await this.prisma.role.findFirst({
+        where: { name: dto.role, companyId: user.companyId, isActive: true },
+      });
+      if (!roleExists) {
+        throw new BadRequestException(
+          `Unknown role: ${dto.role} - check Roles & Permissions for the exact role name`,
+        );
+      }
     }
 
     // Check employee code unique

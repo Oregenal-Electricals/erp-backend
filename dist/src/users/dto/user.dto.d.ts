@@ -1,4 +1,3 @@
-import { UserRole } from '@prisma/client';
 export declare class CreateUserDto {
     employeeCode?: string;
     firstName: string;
@@ -6,8 +5,8 @@ export declare class CreateUserDto {
     email: string;
     phone?: string;
     password: string;
-    role: UserRole;
-    additionalRoles?: UserRole[];
+    role: string;
+    additionalRoles?: string[];
     companyId: string;
     mustChangePwd?: boolean;
 }
@@ -16,7 +15,7 @@ export declare class UpdateUserDto {
     firstName?: string;
     lastName?: string;
     phone?: string;
-    role?: UserRole;
+    role?: string;
 }
 export declare class ResetPasswordDto {
     newPassword: string;

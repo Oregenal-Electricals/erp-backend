@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChangePasswordDto = exports.ResetPasswordDto = exports.UpdateUserDto = exports.CreateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-const client_1 = require("@prisma/client");
 class CreateUserDto {
 }
 exports.CreateUserDto = CreateUserDto;
@@ -58,14 +57,14 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: client_1.UserRole, example: client_1.UserRole.VIEWER }),
-    (0, class_validator_1.IsEnum)(client_1.UserRole, { message: 'Invalid role' }),
+    (0, swagger_1.ApiProperty)({ example: 'PURCHASE_MANAGER' }),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsEnum)(client_1.UserRole, { each: true }),
+    (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateUserDto.prototype, "additionalRoles", void 0);
 __decorate([
@@ -110,9 +109,9 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "phone", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.UserRole }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'PURCHASE_MANAGER' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(client_1.UserRole, { message: 'Invalid role' }),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "role", void 0);
 class ResetPasswordDto {
