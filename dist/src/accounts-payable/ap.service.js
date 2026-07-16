@@ -41,6 +41,31 @@ let ApService = class ApService {
             payments: true,
         };
     }
+    async getBillableSummary(poId, companyId) {
+        const grns = await this.prisma.grnHeader.findMany({
+            where: { poId, companyId, isActive: true },
+            include: { items: { where: { isActive: true } } },
+        });
+        const totalAcceptedValue = grns.reduce((sum, grn) => {
+            return sum + grn.items.reduce((s, item) => {
+                const unitCost = item.landedCostPerUnit || item.unitPrice || 0;
+                return s + (item.acceptedQty || 0) * unitCost;
+            }, 0);
+        }, 0);
+        const existingBills = await this.prisma.apBill.findMany({
+            where: { poId, companyId, isActive: true, status: { not: 'CANCELLED' } },
+        });
+        const alreadyBilled = existingBills.reduce((s, b) => s + b.totalAmount, 0);
+        const remainingBillable = totalAcceptedValue - alreadyBilled;
+        const maxAllowed = remainingBillable * 1.05;
+        return { totalAcceptedValue, alreadyBilled, remainingBillable, maxAllowed };
+    }
+    async getBillable(poId, user) {
+        const po = await this.prisma.purchaseOrder.findFirst({ where: { id: poId, companyId: user.companyId } });
+        if (!po)
+            throw new common_1.NotFoundException('Purchase Order not found');
+        return this.getBillableSummary(poId, user.companyId);
+    }
     async create(dto, user) {
         if (dto.vendorId) {
             const vendor = await this.prisma.vendor.findFirst({ where: { id: dto.vendorId, companyId: user.companyId } });
@@ -48,26 +73,11 @@ let ApService = class ApService {
                 throw new common_1.NotFoundException('Vendor not found');
         }
         if (dto.poId) {
-            const grns = await this.prisma.grnHeader.findMany({
-                where: { poId: dto.poId, companyId: user.companyId, isActive: true },
-                include: { items: { where: { isActive: true } } },
-            });
-            const totalAcceptedValue = grns.reduce((sum, grn) => {
-                return sum + grn.items.reduce((s, item) => {
-                    const unitCost = item.landedCostPerUnit || item.unitPrice || 0;
-                    return s + (item.acceptedQty || 0) * unitCost;
-                }, 0);
-            }, 0);
-            const existingBills = await this.prisma.apBill.findMany({
-                where: { poId: dto.poId, companyId: user.companyId, isActive: true, status: { not: 'CANCELLED' } },
-            });
-            const alreadyBilled = existingBills.reduce((s, b) => s + b.totalAmount, 0);
-            const remainingBillable = totalAcceptedValue - alreadyBilled;
-            const maxAllowed = remainingBillable * 1.05;
-            if (dto.totalAmount > maxAllowed) {
+            const summary = await this.getBillableSummary(dto.poId, user.companyId);
+            if (dto.totalAmount > summary.maxAllowed) {
                 throw new common_1.BadRequestException(`This invoice (${dto.totalAmount}) exceeds what's billable against this PO. ` +
-                    `Total accepted value so far: ${totalAcceptedValue.toFixed(2)}, already billed: ${alreadyBilled.toFixed(2)}, ` +
-                    `remaining billable: ${remainingBillable.toFixed(2)}. Check that goods were received and passed IQC before invoicing.`);
+                    `Total accepted value so far: ${summary.totalAcceptedValue.toFixed(2)}, already billed: ${summary.alreadyBilled.toFixed(2)}, ` +
+                    `remaining billable: ${summary.remainingBillable.toFixed(2)}. Check that goods were received and passed IQC before invoicing.`);
             }
         }
         const billNumber = await this.generateBillNumber(user.companyId);

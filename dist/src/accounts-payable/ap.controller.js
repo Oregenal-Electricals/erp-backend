@@ -26,6 +26,7 @@ let ApController = class ApController {
     }
     getStats(req) { return this.apService.getStats(req.user); }
     getAging(req) { return this.apService.getAgingReport(req.user); }
+    getBillable(poId, req) { return this.apService.getBillable(poId, req.user); }
     findAll(req, query) { return this.apService.findAll(req.user, query); }
     findOne(id, req) { return this.apService.findOne(id, req.user); }
     create(dto, req) { return this.apService.create(dto, req.user); }
@@ -48,6 +49,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ApController.prototype, "getAging", null);
+__decorate([
+    (0, common_1.Get)('billable/:poId'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),
+    __param(0, (0, common_1.Param)('poId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], ApController.prototype, "getBillable", null);
 __decorate([
     (0, common_1.Get)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.FINANCE_VIEW),

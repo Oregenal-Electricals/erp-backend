@@ -9,6 +9,13 @@ export declare class ApService {
     private generatePaymentNumber;
     private calcDueDate;
     private includes;
+    private getBillableSummary;
+    getBillable(poId: string, user: any): Promise<{
+        totalAcceptedValue: number;
+        alreadyBilled: number;
+        remainingBillable: number;
+        maxAllowed: number;
+    }>;
     create(dto: CreateApBillDto, user: any): Promise<{
         vendor: {
             name: string;

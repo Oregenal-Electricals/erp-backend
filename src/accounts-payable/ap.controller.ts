@@ -18,6 +18,9 @@ export class ApController {
   @Get('aging')
   @RequirePermissions(Permission.FINANCE_VIEW)
   getAging(@Request() req: any) { return this.apService.getAgingReport(req.user); }
+  @Get('billable/:poId')
+  @RequirePermissions(Permission.FINANCE_VIEW)
+  getBillable(@Param('poId') poId: string, @Request() req: any) { return this.apService.getBillable(poId, req.user); }
 
   @Get()
   @RequirePermissions(Permission.FINANCE_VIEW)

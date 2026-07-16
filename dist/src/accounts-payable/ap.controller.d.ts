@@ -51,6 +51,12 @@ export declare class ApController {
             billNumber: string;
         }[];
     }>;
+    getBillable(poId: string, req: any): Promise<{
+        totalAcceptedValue: number;
+        alreadyBilled: number;
+        remainingBillable: number;
+        maxAllowed: number;
+    }>;
     findAll(req: any, query: any): Promise<{
         data: ({
             vendor: {
