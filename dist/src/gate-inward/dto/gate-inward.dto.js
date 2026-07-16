@@ -9,9 +9,52 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = void 0;
+exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
+class GateInwardItemDto {
+}
+exports.GateInwardItemDto = GateInwardItemDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'uuid-of-po-item' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GateInwardItemDto.prototype, "poItemId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'WIR-001' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GateInwardItemDto.prototype, "itemCode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Copper Wire 1.5 sqmm' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GateInwardItemDto.prototype, "itemName", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'NOS' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GateInwardItemDto.prototype, "uom", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 50 }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], GateInwardItemDto.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 5 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], GateInwardItemDto.prototype, "packageCount", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GateInwardItemDto.prototype, "remarks", void 0);
 class CreateGateInwardDto {
 }
 exports.CreateGateInwardDto = CreateGateInwardDto;
@@ -75,13 +118,15 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateGateInwardDto.prototype, "invoiceAmount", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'MS Steel Rods 10mm - 50 bundles' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'MS Steel Rods 10mm - 50 bundles' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], CreateGateInwardDto.prototype, "materialDescription", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 50 }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 50 }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateGateInwardDto.prototype, "quantity", void 0);
@@ -91,6 +136,14 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateGateInwardDto.prototype, "unit", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: [GateInwardItemDto] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => GateInwardItemDto),
+    __metadata("design:type", Array)
+], CreateGateInwardDto.prototype, "items", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 2500.5 }),
     (0, class_validator_1.IsOptional)(),

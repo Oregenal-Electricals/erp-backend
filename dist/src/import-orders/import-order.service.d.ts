@@ -21,8 +21,8 @@ export declare class ImportOrderService {
             status: string;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -138,8 +138,8 @@ export declare class ImportOrderService {
             status: string;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -210,8 +210,8 @@ export declare class ImportOrderService {
             status: string;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -282,8 +282,8 @@ export declare class ImportOrderService {
             status: string;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -354,8 +354,8 @@ export declare class ImportOrderService {
             status: string;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -426,8 +426,8 @@ export declare class ImportOrderService {
             status: string;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -497,8 +497,8 @@ export declare class ImportOrderService {
         status: string;
         itemCode: string;
         itemName: string;
-        hsnCode: string | null;
         uom: string;
+        hsnCode: string | null;
         igstRate: number;
         sequence: number;
         discount: number | null;

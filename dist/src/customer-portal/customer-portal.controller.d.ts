@@ -32,11 +32,11 @@ export declare class CustomerPortalController {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                totalAmount: number;
                 itemCode: string;
                 itemName: string;
-                gstRate: number;
                 uom: string;
+                totalAmount: number;
+                gstRate: number;
                 qty: number;
                 unitPrice: number;
                 discount: number;
@@ -113,10 +113,10 @@ export declare class CustomerPortalController {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
-        invoiceNumber: string | null;
-        closedBy: string | null;
         itemCode: string;
         itemName: string;
+        invoiceNumber: string | null;
+        closedBy: string | null;
         receivedDate: Date;
         assignedTo: string | null;
         batchNumber: string | null;

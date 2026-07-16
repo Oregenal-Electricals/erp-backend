@@ -1,3 +1,12 @@
+export declare class GateInwardItemDto {
+    poItemId?: string;
+    itemCode: string;
+    itemName: string;
+    uom?: string;
+    quantity: number;
+    packageCount?: number;
+    remarks?: string;
+}
 export declare class CreateGateInwardDto {
     plantId: string;
     vehicleLogId?: string;
@@ -9,9 +18,10 @@ export declare class CreateGateInwardDto {
     invoiceNumber?: string;
     invoiceDate?: string;
     invoiceAmount?: number;
-    materialDescription: string;
-    quantity: number;
+    materialDescription?: string;
+    quantity?: number;
     unit?: string;
+    items?: GateInwardItemDto[];
     grossWeight?: number;
     netWeight?: number;
     packageCount?: number;

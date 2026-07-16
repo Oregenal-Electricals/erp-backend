@@ -759,8 +759,8 @@ model GateInwardEntry {
   invoiceNumber   String?
   invoiceDate     DateTime?
   invoiceAmount   Float?
-  materialDescription String
-  quantity            Float
+  materialDescription String?
+  quantity            Float?
   unit                String   @default("NOS")
   grossWeight         Float?
   netWeight           Float?
@@ -781,6 +781,7 @@ model GateInwardEntry {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
   grnHeaders GrnHeader[]
+  items      GateInwardItem[]
 
   @@map("gate_inward_entries")
   @@index([companyId])
@@ -788,6 +789,30 @@ model GateInwardEntry {
   @@index([ginNumber])
   @@index([poNumber])
   @@index([createdAt])
+}
+
+model GateInwardItem {
+  id                String          @id @default(uuid())
+  companyId         String
+  gateInwardEntryId String
+  gateInwardEntry   GateInwardEntry @relation(fields: [gateInwardEntryId], references: [id], onDelete: Cascade)
+  poItemId          String?
+  itemCode          String
+  itemName          String
+  uom               String   @default("NOS")
+  quantity          Float
+  packageCount      Int?
+  remarks           String?
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@map("gate_inward_items")
+  @@index([companyId])
+  @@index([gateInwardEntryId])
 }
 
 model GateOutwardEntry {

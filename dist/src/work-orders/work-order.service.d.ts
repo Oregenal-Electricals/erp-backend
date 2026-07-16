@@ -100,12 +100,12 @@ export declare class WorkOrderService {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                quantity: number;
-                notes: string | null;
                 itemCode: string;
                 itemName: string;
-                itemType: string;
                 uom: string;
+                quantity: number;
+                notes: string | null;
+                itemType: string;
                 sequence: number;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;

@@ -24,9 +24,9 @@ export declare class QualityReportsService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            closedBy: string | null;
             itemCode: string | null;
             itemName: string | null;
+            closedBy: string | null;
             disposition: string | null;
             workOrderId: string | null;
             source: string;
@@ -228,10 +228,10 @@ export declare class QualityReportsService {
             customerPo: string | null;
             remarks: string | null;
             customerName: string;
-            invoiceNumber: string | null;
-            closedBy: string | null;
             itemCode: string;
             itemName: string;
+            invoiceNumber: string | null;
+            closedBy: string | null;
             receivedDate: Date;
             assignedTo: string | null;
             batchNumber: string | null;

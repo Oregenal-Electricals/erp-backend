@@ -112,10 +112,12 @@ export declare class GateDashboardController {
             unit: string;
             status: import(".prisma/client").$Enums.GateInwardStatus;
             remarks: string | null;
-            materialDescription: string;
+            materialDescription: string | null;
             supplierName: string;
             poNumber: string | null;
             netWeight: number | null;
+            quantity: number | null;
+            packageCount: number | null;
             vehicleLogId: string | null;
             supplierMobile: string | null;
             supplierGstin: string | null;
@@ -123,9 +125,7 @@ export declare class GateDashboardController {
             invoiceNumber: string | null;
             invoiceDate: Date | null;
             invoiceAmount: number | null;
-            quantity: number;
             grossWeight: number | null;
-            packageCount: number | null;
             rejectionReason: string | null;
             ginNumber: string;
             verifiedAt: Date | null;
@@ -153,12 +153,12 @@ export declare class GateDashboardController {
             materialDescription: string;
             customerName: string;
             netWeight: number | null;
+            quantity: number;
+            packageCount: number | null;
             vehicleLogId: string | null;
             invoiceNumber: string | null;
             invoiceAmount: number | null;
-            quantity: number;
             grossWeight: number | null;
-            packageCount: number | null;
             customerMobile: string | null;
             customerAddress: string | null;
             customerGstin: string | null;

@@ -10,6 +10,24 @@ export declare class GateInwardService {
     constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService);
     create(dto: CreateGateInwardDto, user: any): Promise<{
         vendorMismatchWarning: string;
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -44,10 +62,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -55,9 +75,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -71,6 +89,24 @@ export declare class GateInwardService {
         date?: string;
         search?: string;
     }): Promise<({
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -106,10 +142,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -117,9 +155,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -128,6 +164,24 @@ export declare class GateInwardService {
         verifiedById: string | null;
     })[]>;
     findOne(id: string): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -163,10 +217,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -174,9 +230,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -185,6 +239,24 @@ export declare class GateInwardService {
         verifiedById: string | null;
     }>;
     update(id: string, dto: UpdateGateInwardDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -220,10 +292,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -231,9 +305,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -242,6 +314,24 @@ export declare class GateInwardService {
         verifiedById: string | null;
     }>;
     verify(id: string, dto: VerifyGateInwardDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -277,10 +367,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -288,9 +380,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -299,6 +389,24 @@ export declare class GateInwardService {
         verifiedById: string | null;
     }>;
     sendToStores(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -334,10 +442,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -345,9 +455,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -356,6 +464,24 @@ export declare class GateInwardService {
         verifiedById: string | null;
     }>;
     complete(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -391,10 +517,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -402,9 +530,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;
@@ -413,6 +539,24 @@ export declare class GateInwardService {
         verifiedById: string | null;
     }>;
     reject(id: string, dto: RejectGateInwardDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
         plant: {
             id: string;
             name: string;
@@ -448,10 +592,12 @@ export declare class GateInwardService {
         unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
         remarks: string | null;
-        materialDescription: string;
+        materialDescription: string | null;
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -459,9 +605,7 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
         ginNumber: string;
         verifiedAt: Date | null;

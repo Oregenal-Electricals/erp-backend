@@ -33,9 +33,9 @@ export declare class NcrController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            closedBy: string | null;
             itemCode: string | null;
             itemName: string | null;
+            closedBy: string | null;
             disposition: string | null;
             workOrderId: string | null;
             source: string;
@@ -76,9 +76,9 @@ export declare class NcrController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        closedBy: string | null;
         itemCode: string | null;
         itemName: string | null;
+        closedBy: string | null;
         disposition: string | null;
         workOrderId: string | null;
         source: string;
@@ -115,9 +115,9 @@ export declare class NcrController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        closedBy: string | null;
         itemCode: string | null;
         itemName: string | null;
+        closedBy: string | null;
         disposition: string | null;
         workOrderId: string | null;
         source: string;
@@ -154,9 +154,9 @@ export declare class NcrController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        closedBy: string | null;
         itemCode: string | null;
         itemName: string | null;
+        closedBy: string | null;
         disposition: string | null;
         workOrderId: string | null;
         source: string;
@@ -193,9 +193,9 @@ export declare class NcrController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        closedBy: string | null;
         itemCode: string | null;
         itemName: string | null;
+        closedBy: string | null;
         disposition: string | null;
         workOrderId: string | null;
         source: string;

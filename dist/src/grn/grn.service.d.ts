@@ -17,6 +17,7 @@ export declare class GrnService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -25,7 +26,6 @@ export declare class GrnService {
             receivedQty: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
-            poItemId: string | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
@@ -65,11 +65,11 @@ export declare class GrnService {
         poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
+        gateInwardEntryId: string | null;
         warehouseId: string;
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
-        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
@@ -110,11 +110,11 @@ export declare class GrnService {
             poId: string | null;
             invoiceNumber: string | null;
             invoiceDate: Date | null;
+            gateInwardEntryId: string | null;
             warehouseId: string;
             ipoId: string | null;
             landedCostId: string | null;
             grnType: string;
-            gateInwardEntryId: string | null;
             receivedDate: Date;
             dcNumber: string | null;
             grnNumber: string;
@@ -134,6 +134,7 @@ export declare class GrnService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -142,7 +143,6 @@ export declare class GrnService {
             receivedQty: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
-            poItemId: string | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
@@ -182,11 +182,11 @@ export declare class GrnService {
         poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
+        gateInwardEntryId: string | null;
         warehouseId: string;
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
-        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
@@ -201,6 +201,7 @@ export declare class GrnService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -209,7 +210,6 @@ export declare class GrnService {
             receivedQty: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
-            poItemId: string | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
@@ -249,11 +249,11 @@ export declare class GrnService {
         poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
+        gateInwardEntryId: string | null;
         warehouseId: string;
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
-        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;
@@ -268,6 +268,7 @@ export declare class GrnService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
@@ -276,7 +277,6 @@ export declare class GrnService {
             receivedQty: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
-            poItemId: string | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
@@ -316,11 +316,11 @@ export declare class GrnService {
         poId: string | null;
         invoiceNumber: string | null;
         invoiceDate: Date | null;
+        gateInwardEntryId: string | null;
         warehouseId: string;
         ipoId: string | null;
         landedCostId: string | null;
         grnType: string;
-        gateInwardEntryId: string | null;
         receivedDate: Date;
         dcNumber: string | null;
         grnNumber: string;

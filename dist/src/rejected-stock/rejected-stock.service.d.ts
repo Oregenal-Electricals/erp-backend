@@ -17,10 +17,10 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
             disposition: string;
             dispositionNotes: string | null;
@@ -103,10 +103,10 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
             disposition: string;
             dispositionNotes: string | null;
@@ -153,10 +153,10 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
             disposition: string;
             dispositionNotes: string | null;
@@ -203,10 +203,10 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
             disposition: string;
             dispositionNotes: string | null;

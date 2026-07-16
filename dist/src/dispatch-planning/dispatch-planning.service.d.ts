@@ -255,11 +255,11 @@ export declare class DispatchPlanningService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
-            gstRate: number;
             uom: string;
+            totalAmount: number;
+            gstRate: number;
             qty: number;
             unitPrice: number;
             discount: number;

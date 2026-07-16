@@ -19,8 +19,8 @@ export declare class ProformaInvoiceService {
             updatedBy: string | null;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             sequence: number;
             qty: number;
             unitPriceForeign: number;
@@ -119,8 +119,8 @@ export declare class ProformaInvoiceService {
             updatedBy: string | null;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             sequence: number;
             qty: number;
             unitPriceForeign: number;
@@ -176,8 +176,8 @@ export declare class ProformaInvoiceService {
             updatedBy: string | null;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             sequence: number;
             qty: number;
             unitPriceForeign: number;
@@ -233,8 +233,8 @@ export declare class ProformaInvoiceService {
             updatedBy: string | null;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             sequence: number;
             qty: number;
             unitPriceForeign: number;
@@ -290,8 +290,8 @@ export declare class ProformaInvoiceService {
             updatedBy: string | null;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             sequence: number;
             qty: number;
             unitPriceForeign: number;
@@ -347,8 +347,8 @@ export declare class ProformaInvoiceService {
             updatedBy: string | null;
             itemCode: string;
             itemName: string;
-            hsnCode: string | null;
             uom: string;
+            hsnCode: string | null;
             sequence: number;
             qty: number;
             unitPriceForeign: number;

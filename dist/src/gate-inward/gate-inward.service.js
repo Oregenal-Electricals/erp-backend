@@ -22,15 +22,20 @@ let GateInwardService = class GateInwardService {
         this.settings = settings;
     }
     async create(dto, user) {
-        var _a;
+        var _a, _b, _c;
         const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
         if (!plant)
             throw new common_1.NotFoundException('Plant not found');
+        const hasFlatMaterial = !!dto.materialDescription && dto.quantity != null;
+        const hasItems = Array.isArray(dto.items) && dto.items.length > 0;
+        if (!hasFlatMaterial && !hasItems) {
+            throw new common_1.BadRequestException('Provide either materialDescription + quantity, or a list of items');
+        }
         let ginNumber;
         try {
             ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');
         }
-        catch (_b) {
+        catch (_d) {
             const count = await this.prisma.gateInwardEntry.count({ where: { companyId: user.companyId } });
             const now = new Date();
             const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
@@ -55,6 +60,8 @@ let GateInwardService = class GateInwardService {
                 vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
             }
         }
+        const materialDescription = (_a = dto.materialDescription) !== null && _a !== void 0 ? _a : (hasItems ? dto.items.map((i) => i.itemName).join(', ') : undefined);
+        const quantity = (_b = dto.quantity) !== null && _b !== void 0 ? _b : (hasItems ? dto.items.reduce((s, i) => s + i.quantity, 0) : undefined);
         const entry = await this.prisma.gateInwardEntry.create({
             data: {
                 ginNumber,
@@ -69,9 +76,9 @@ let GateInwardService = class GateInwardService {
                 invoiceNumber: dto.invoiceNumber,
                 invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
                 invoiceAmount: dto.invoiceAmount,
-                materialDescription: dto.materialDescription,
-                quantity: dto.quantity,
-                unit: (_a = dto.unit) !== null && _a !== void 0 ? _a : 'NOS',
+                materialDescription,
+                quantity,
+                unit: (_c = dto.unit) !== null && _c !== void 0 ? _c : 'NOS',
                 grossWeight: dto.grossWeight,
                 netWeight: dto.netWeight,
                 packageCount: dto.packageCount,
@@ -79,6 +86,23 @@ let GateInwardService = class GateInwardService {
                 receivedById: user.id,
                 createdBy: user.id,
                 updatedBy: user.id,
+                items: hasItems ? {
+                    create: dto.items.map((i) => {
+                        var _a;
+                        return ({
+                            companyId: user.companyId,
+                            poItemId: i.poItemId,
+                            itemCode: i.itemCode,
+                            itemName: i.itemName,
+                            uom: (_a = i.uom) !== null && _a !== void 0 ? _a : 'NOS',
+                            quantity: i.quantity,
+                            packageCount: i.packageCount,
+                            remarks: i.remarks,
+                            createdBy: user.id,
+                            updatedBy: user.id,
+                        });
+                    }),
+                } : undefined,
             },
             include: this.includes(),
         });
@@ -205,6 +229,7 @@ let GateInwardService = class GateInwardService {
             receivedBy: { select: { id: true, firstName: true, lastName: true } },
             verifiedBy: { select: { id: true, firstName: true, lastName: true } },
             vehicleLog: { select: { id: true, logNumber: true, vehicle: { select: { vehicleNumber: true } } } },
+            items: { where: { isActive: true } },
         };
     }
 };
