@@ -22,7 +22,7 @@ let GateInwardService = class GateInwardService {
         this.settings = settings;
     }
     async create(dto, user) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
         if (!plant)
             throw new common_1.NotFoundException('Plant not found');
@@ -35,7 +35,7 @@ let GateInwardService = class GateInwardService {
         try {
             ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');
         }
-        catch (_d) {
+        catch (_e) {
             const count = await this.prisma.gateInwardEntry.count({ where: { companyId: user.companyId } });
             const now = new Date();
             const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
@@ -62,6 +62,10 @@ let GateInwardService = class GateInwardService {
         }
         const materialDescription = (_a = dto.materialDescription) !== null && _a !== void 0 ? _a : (hasItems ? dto.items.map((i) => i.itemName).join(', ') : undefined);
         const quantity = (_b = dto.quantity) !== null && _b !== void 0 ? _b : (hasItems ? dto.items.reduce((s, i) => s + i.quantity, 0) : undefined);
+        const itemsPackageTotal = hasItems
+            ? dto.items.reduce((s, i) => s + (i.packageCount || 0), 0)
+            : 0;
+        const packageCount = (_c = dto.packageCount) !== null && _c !== void 0 ? _c : (itemsPackageTotal > 0 ? itemsPackageTotal : undefined);
         const entry = await this.prisma.gateInwardEntry.create({
             data: {
                 ginNumber,
@@ -78,10 +82,10 @@ let GateInwardService = class GateInwardService {
                 invoiceAmount: dto.invoiceAmount,
                 materialDescription,
                 quantity,
-                unit: (_c = dto.unit) !== null && _c !== void 0 ? _c : 'NOS',
+                unit: (_d = dto.unit) !== null && _d !== void 0 ? _d : 'NOS',
                 grossWeight: dto.grossWeight,
                 netWeight: dto.netWeight,
-                packageCount: dto.packageCount,
+                packageCount,
                 remarks: dto.remarks,
                 receivedById: user.id,
                 createdBy: user.id,

@@ -24,9 +24,6 @@ export class GateInwardService {
     const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
     if (!plant) throw new NotFoundException('Plant not found');
 
-    // A gate entry must describe what actually arrived, either via the
-    // old single flat description/quantity, or via real multiple items
-    // (a real invoice/delivery can carry several different materials).
     const hasFlatMaterial = !!dto.materialDescription && dto.quantity != null;
     const hasItems = Array.isArray(dto.items) && dto.items.length > 0;
     if (!hasFlatMaterial && !hasItems) {
@@ -61,13 +58,18 @@ export class GateInwardService {
       }
     }
 
-    // If items were given but no flat description, build a readable
-    // summary for the old flat field so anything still reading it
-    // (reports, search) sees something sensible rather than nothing.
     const materialDescription = dto.materialDescription
       ?? (hasItems ? dto.items!.map((i) => i.itemName).join(', ') : undefined);
     const quantity = dto.quantity
       ?? (hasItems ? dto.items!.reduce((s, i) => s + i.quantity, 0) : undefined);
+    // Same synthesis for package count - previously always null when
+    // the items[] path was used, so the detail page showed "—" for
+    // Package Count even when every item row had a real count entered.
+    const itemsPackageTotal = hasItems
+      ? dto.items!.reduce((s, i) => s + (i.packageCount || 0), 0)
+      : 0;
+    const packageCount = dto.packageCount
+      ?? (itemsPackageTotal > 0 ? itemsPackageTotal : undefined);
 
     const entry = await this.prisma.gateInwardEntry.create({
       data: {
@@ -88,7 +90,7 @@ export class GateInwardService {
         unit:          dto.unit ?? 'NOS',
         grossWeight:   dto.grossWeight,
         netWeight:     dto.netWeight,
-        packageCount:  dto.packageCount,
+        packageCount,
         remarks:       dto.remarks,
         receivedById:  user.id,
         createdBy:     user.id,
