@@ -66,6 +66,9 @@ export declare class BomService {
             product: {
                 name: string;
                 code: string;
+                uom: {
+                    code: string;
+                };
             };
         } & {
             id: string;

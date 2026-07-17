@@ -18,6 +18,9 @@ export declare class BomController {
             product: {
                 name: string;
                 code: string;
+                uom: {
+                    code: string;
+                };
             };
         } & {
             id: string;

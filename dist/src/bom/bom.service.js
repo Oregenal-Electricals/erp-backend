@@ -70,7 +70,7 @@ let BomService = class BomService {
         const [data, total] = await Promise.all([
             this.prisma.bom.findMany({
                 where, skip, take: Number(limit), orderBy: { createdAt: 'desc' },
-                include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
+                include: { product: { select: { code: true, name: true, uom: { select: { code: true } } } }, _count: { select: { items: true } } },
             }),
             this.prisma.bom.count({ where }),
         ]);
