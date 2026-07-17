@@ -12,12 +12,13 @@ const mrp_controller_1 = require("./mrp.controller");
 const mrp_service_1 = require("./mrp.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const work_order_module_1 = require("../work-orders/work-order.module");
 let MrpModule = class MrpModule {
 };
 exports.MrpModule = MrpModule;
 exports.MrpModule = MrpModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, work_order_module_1.WorkOrderModule],
         controllers: [mrp_controller_1.MrpController],
         providers: [mrp_service_1.MrpService],
         exports: [mrp_service_1.MrpService],

@@ -31,6 +31,7 @@ export declare class ProductionEntryController {
             woNumber: string;
             productCode: string;
             productName: string;
+            salesOrderId: string | null;
             plannedQty: number;
             completedQty: number;
             plannedStartDate: Date;

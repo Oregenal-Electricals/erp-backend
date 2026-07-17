@@ -26,6 +26,8 @@ let MrpController = class MrpController {
     calculate(woId, req) { return this.mrpService.calculateMrp(woId, req.user); }
     shortageReport(req) { return this.mrpService.getShortageReport(req.user); }
     materialPlan(req, query) { return this.mrpService.getMaterialPlan(req.user, query); }
+    planningBoard(req, warehouseId) { return this.mrpService.getPlanningBoard(req.user, warehouseId); }
+    runAllocation(dto, req) { return this.mrpService.runAllocation(dto, req.user); }
 };
 exports.MrpController = MrpController;
 __decorate([
@@ -54,6 +56,24 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], MrpController.prototype, "materialPlan", null);
+__decorate([
+    (0, common_1.Get)('planning-board'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MRP_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('warehouseId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], MrpController.prototype, "planningBoard", null);
+__decorate([
+    (0, common_1.Post)('run-allocation'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_CREATE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], MrpController.prototype, "runAllocation", null);
 exports.MrpController = MrpController = __decorate([
     (0, common_1.Controller)('mrp'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

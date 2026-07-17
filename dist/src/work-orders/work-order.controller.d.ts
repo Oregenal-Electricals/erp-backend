@@ -69,6 +69,7 @@ export declare class WorkOrderController {
             woNumber: string;
             productCode: string;
             productName: string;
+            salesOrderId: string | null;
             plannedQty: number;
             completedQty: number;
             plannedStartDate: Date;
@@ -151,6 +152,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;
@@ -204,6 +206,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;
@@ -240,6 +243,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;
@@ -276,6 +280,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;
@@ -312,6 +317,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;
@@ -348,6 +354,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;
@@ -384,6 +391,7 @@ export declare class WorkOrderController {
         woNumber: string;
         productCode: string;
         productName: string;
+        salesOrderId: string | null;
         plannedQty: number;
         completedQty: number;
         plannedStartDate: Date;

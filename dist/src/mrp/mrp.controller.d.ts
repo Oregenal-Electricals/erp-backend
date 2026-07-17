@@ -36,4 +36,14 @@ export declare class MrpController {
         totalWOs: number;
         totalItems: number;
     }>;
+    planningBoard(req: any, warehouseId: string): Promise<any[]>;
+    runAllocation(dto: any, req: any): Promise<{
+        feasible: boolean;
+        shortages: any[];
+        createdWorkOrders: any[];
+    } | {
+        feasible: boolean;
+        shortages: any[];
+        createdWorkOrders: any[];
+    }>;
 }

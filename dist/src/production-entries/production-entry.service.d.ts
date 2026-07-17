@@ -161,6 +161,7 @@ export declare class ProductionEntryService {
             woNumber: string;
             productCode: string;
             productName: string;
+            salesOrderId: string | null;
             plannedQty: number;
             completedQty: number;
             plannedStartDate: Date;

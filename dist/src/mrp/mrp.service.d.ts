@@ -1,7 +1,11 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 export declare class MrpService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private audit;
+    private materialReservation;
+    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService);
     calculateMrp(woId: string, user: any): Promise<{
         workOrder: {
             id: string;
@@ -36,4 +40,21 @@ export declare class MrpService {
         totalWOs: number;
         totalItems: number;
     }>;
+    getPlanningBoard(user: any, warehouseId: string): Promise<any[]>;
+    runAllocation(dto: {
+        warehouseId: string;
+        allocations: {
+            soItemId: string;
+            buildQty: number;
+        }[];
+    }, user: any): Promise<{
+        feasible: boolean;
+        shortages: any[];
+        createdWorkOrders: any[];
+    } | {
+        feasible: boolean;
+        shortages: any[];
+        createdWorkOrders: any[];
+    }>;
+    private generateWoNumber;
 }
