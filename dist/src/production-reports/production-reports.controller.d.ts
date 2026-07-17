@@ -29,8 +29,8 @@ export declare class ProductionReportsController {
     getShiftProduction(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
@@ -67,9 +67,9 @@ export declare class ProductionReportsController {
     getScrapAnalysis(req: any, query: any): Promise<{
         data: ({
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
-                woNumber: string;
             };
         } & {
             id: string;
@@ -100,9 +100,9 @@ export declare class ProductionReportsController {
     getQualitySummary(req: any, query: any): Promise<{
         data: ({
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
-                woNumber: string;
             };
         } & {
             result: string;

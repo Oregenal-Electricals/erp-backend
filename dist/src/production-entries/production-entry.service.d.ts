@@ -10,11 +10,11 @@ export declare class ProductionEntryService {
     create(dto: CreateProductionEntryDto, user: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -40,11 +40,11 @@ export declare class ProductionEntryService {
     confirm(id: string, user: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -71,11 +71,11 @@ export declare class ProductionEntryService {
         data: ({
             workOrder: {
                 status: string;
+                woNumber: string;
                 productCode: string;
                 productName: string;
                 plannedQty: number;
                 completedQty: number;
-                woNumber: string;
             };
         } & {
             id: string;
@@ -106,11 +106,11 @@ export declare class ProductionEntryService {
     findOne(id: string, user: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -158,15 +158,15 @@ export declare class ProductionEntryService {
             warehouseId: string;
             bomId: string | null;
             rejectedQty: number;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
-            completedQty: number;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
-            woNumber: string;
         };
         entries: {
             id: string;

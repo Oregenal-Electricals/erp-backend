@@ -1,11 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { MaterialReservationService } from './material-reservation.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
+
+const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
 
 @Injectable()
 export class WorkOrderService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private materialReservation: MaterialReservationService,
+  ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.workOrder.count({ where: { companyId } });
@@ -21,6 +28,9 @@ export class WorkOrderService {
   }
 
   async create(dto: CreateWorkOrderDto, user: any) {
+    if (dto.priority && dto.priority !== 'MEDIUM' && !PRIORITY_SETTER_ROLES.includes(user.role)) {
+      throw new ForbiddenException('Only Planning Manager and above can set Work Order priority above default');
+    }
     const woNumber = await this.generateNumber(user.companyId);
     const wo = await this.prisma.workOrder.create({
       data: {
@@ -77,15 +87,17 @@ export class WorkOrderService {
 
   async update(id: string, dto: UpdateWorkOrderDto, user: any) {
     const wo = await this.findOne(id, user);
-    if (['COMPLETED','CANCELLED'].includes(wo.status) && dto.status !== 'CANCELLED') {
+    if (['COMPLETED', 'CANCELLED'].includes(wo.status) && dto.status !== 'CANCELLED') {
       throw new BadRequestException(`Cannot update ${wo.status} work order`);
+    }
+    if (dto.priority && dto.priority !== wo.priority && !PRIORITY_SETTER_ROLES.includes(user.role)) {
+      throw new ForbiddenException('Only Planning Manager and above can change Work Order priority');
     }
 
     const updateData: any = { ...dto, updatedBy: user.id };
     if (dto.actualStartDate) updateData.actualStartDate = new Date(dto.actualStartDate);
     if (dto.actualEndDate) updateData.actualEndDate = new Date(dto.actualEndDate);
 
-    // Auto-set actual dates based on status
     if (dto.status === 'IN_PROGRESS' && !wo.actualStartDate) {
       updateData.actualStartDate = new Date();
     }
@@ -106,7 +118,9 @@ export class WorkOrderService {
   async release(id: string, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'DRAFT') throw new BadRequestException('Only DRAFT work orders can be released');
-    return this.update(id, { status: 'RELEASED' }, user);
+    const updated = await this.update(id, { status: 'RELEASED' }, user);
+    const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
+    return { ...updated, materialReservations: reservations };
   }
 
   async start(id: string, user: any) {

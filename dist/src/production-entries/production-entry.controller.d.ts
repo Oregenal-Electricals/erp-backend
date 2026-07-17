@@ -28,15 +28,15 @@ export declare class ProductionEntryController {
             warehouseId: string;
             bomId: string | null;
             rejectedQty: number;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
-            completedQty: number;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
-            woNumber: string;
         };
         entries: {
             id: string;
@@ -72,11 +72,11 @@ export declare class ProductionEntryController {
         data: ({
             workOrder: {
                 status: string;
+                woNumber: string;
                 productCode: string;
                 productName: string;
                 plannedQty: number;
                 completedQty: number;
-                woNumber: string;
             };
         } & {
             id: string;
@@ -107,11 +107,11 @@ export declare class ProductionEntryController {
     findOne(id: string, req: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -137,11 +137,11 @@ export declare class ProductionEntryController {
     create(dto: CreateProductionEntryDto, req: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -167,11 +167,11 @@ export declare class ProductionEntryController {
     confirm(id: string, req: any): Promise<{
         workOrder: {
             status: string;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
             completedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;

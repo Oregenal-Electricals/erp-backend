@@ -15,18 +15,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkOrderController = void 0;
 const common_1 = require("@nestjs/common");
 const work_order_service_1 = require("./work-order.service");
+const material_reservation_service_1 = require("./material-reservation.service");
 const work_order_dto_1 = require("./dto/work-order.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const permissions_guard_1 = require("../common/guards/permissions.guard");
 const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
 const permissions_enum_1 = require("../common/permissions/permissions.enum");
 let WorkOrderController = class WorkOrderController {
-    constructor(woService) {
+    constructor(woService, reservationService) {
         this.woService = woService;
+        this.reservationService = reservationService;
     }
     getStats(req) { return this.woService.getStats(req.user); }
+    getReservations(req, query) { return this.reservationService.findAll(req.user, query); }
     findAll(req, query) { return this.woService.findAll(req.user, query); }
     findOne(id, req) { return this.woService.findOne(id, req.user); }
+    getWoReservations(id) { return this.reservationService.findForWorkOrder(id); }
     create(dto, req) { return this.woService.create(dto, req.user); }
     update(id, dto, req) { return this.woService.update(id, dto, req.user); }
     release(id, req) { return this.woService.release(id, req.user); }
@@ -43,6 +47,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], WorkOrderController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Get)('reservations'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "getReservations", null);
 __decorate([
     (0, common_1.Get)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_VIEW),
@@ -61,6 +74,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], WorkOrderController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)(':id/reservations'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "getWoReservations", null);
 __decorate([
     (0, common_1.Post)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_CREATE),
@@ -120,6 +141,7 @@ __decorate([
 exports.WorkOrderController = WorkOrderController = __decorate([
     (0, common_1.Controller)('work-orders'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    __metadata("design:paramtypes", [work_order_service_1.WorkOrderService])
+    __metadata("design:paramtypes", [work_order_service_1.WorkOrderService,
+        material_reservation_service_1.MaterialReservationService])
 ], WorkOrderController);
 //# sourceMappingURL=work-order.controller.js.map

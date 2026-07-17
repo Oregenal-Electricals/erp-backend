@@ -16,8 +16,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -55,8 +55,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -94,8 +94,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;
@@ -173,8 +173,8 @@ export declare class NcrService {
             capaNumber: string;
         }[];
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
     } & {
         id: string;

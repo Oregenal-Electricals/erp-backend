@@ -17,8 +17,8 @@ export declare class OqcController {
     findAll(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
             fgReceipt: {
                 receivedQty: number;
@@ -66,8 +66,8 @@ export declare class OqcController {
     }>;
     findOne(id: string, req: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -112,8 +112,8 @@ export declare class OqcController {
     create(dto: CreateOqcDto, req: any): Promise<{
         passRate: number;
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -156,8 +156,8 @@ export declare class OqcController {
     }>;
     complete(id: string, dto: CompleteOqcDto, req: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -201,8 +201,8 @@ export declare class OqcController {
     }>;
     release(id: string, req: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;

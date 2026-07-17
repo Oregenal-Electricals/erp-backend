@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { MaterialReservationService } from './material-reservation.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
 export declare class WorkOrderService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private materialReservation;
+    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService);
     private generateNumber;
     private includes;
     create(dto: CreateWorkOrderDto, user: any): Promise<{
@@ -33,15 +35,15 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -70,15 +72,15 @@ export declare class WorkOrderService {
             warehouseId: string;
             bomId: string | null;
             rejectedQty: number;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
-            completedQty: number;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
-            woNumber: string;
         })[];
         total: number;
         page: number;
@@ -152,15 +154,15 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     update(id: string, dto: UpdateWorkOrderDto, user: any): Promise<{
         warehouse: {
@@ -188,17 +190,18 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     release(id: string, user: any): Promise<{
+        materialReservations: any[];
         warehouse: {
             name: string;
             code: string;
@@ -208,7 +211,6 @@ export declare class WorkOrderService {
             version: string;
             bomNumber: string;
         };
-    } & {
         id: string;
         companyId: string;
         isActive: boolean;
@@ -224,15 +226,15 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     start(id: string, user: any): Promise<{
         warehouse: {
@@ -260,15 +262,15 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     complete(id: string, dto: {
         completedQty: number;
@@ -299,15 +301,15 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     cancel(id: string, user: any): Promise<{
         warehouse: {
@@ -335,15 +337,15 @@ export declare class WorkOrderService {
         warehouseId: string;
         bomId: string | null;
         rejectedQty: number;
+        woNumber: string;
         productCode: string;
         productName: string;
         plannedQty: number;
+        completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
-        completedQty: number;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        woNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

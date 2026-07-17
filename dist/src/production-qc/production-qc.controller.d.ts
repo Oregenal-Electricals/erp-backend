@@ -16,9 +16,9 @@ export declare class ProductionQcController {
     findAll(req: any, query: any): Promise<{
         data: ({
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
-                woNumber: string;
             };
             productionEntry: {
                 shift: string;
@@ -56,9 +56,9 @@ export declare class ProductionQcController {
     }>;
     findOne(id: string, req: any): Promise<{
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -92,9 +92,9 @@ export declare class ProductionQcController {
     create(dto: CreateProductionQcDto, req: any): Promise<{
         passRate: number;
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -126,9 +126,9 @@ export declare class ProductionQcController {
     }>;
     complete(id: string, dto: CompleteQcDto, req: any): Promise<{
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
         };
         productionEntry: {
             shift: string;

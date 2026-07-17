@@ -13,10 +13,13 @@ exports.WorkOrderService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const material_reservation_service_1 = require("./material-reservation.service");
+const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
 let WorkOrderService = class WorkOrderService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, materialReservation) {
         this.prisma = prisma;
         this.audit = audit;
+        this.materialReservation = materialReservation;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.workOrder.count({ where: { companyId } });
@@ -30,6 +33,9 @@ let WorkOrderService = class WorkOrderService {
         };
     }
     async create(dto, user) {
+        if (dto.priority && dto.priority !== 'MEDIUM' && !PRIORITY_SETTER_ROLES.includes(user.role)) {
+            throw new common_1.ForbiddenException('Only Planning Manager and above can set Work Order priority above default');
+        }
         const woNumber = await this.generateNumber(user.companyId);
         const wo = await this.prisma.workOrder.create({
             data: {
@@ -88,6 +94,9 @@ let WorkOrderService = class WorkOrderService {
         if (['COMPLETED', 'CANCELLED'].includes(wo.status) && dto.status !== 'CANCELLED') {
             throw new common_1.BadRequestException(`Cannot update ${wo.status} work order`);
         }
+        if (dto.priority && dto.priority !== wo.priority && !PRIORITY_SETTER_ROLES.includes(user.role)) {
+            throw new common_1.ForbiddenException('Only Planning Manager and above can change Work Order priority');
+        }
         const updateData = Object.assign(Object.assign({}, dto), { updatedBy: user.id });
         if (dto.actualStartDate)
             updateData.actualStartDate = new Date(dto.actualStartDate);
@@ -111,7 +120,9 @@ let WorkOrderService = class WorkOrderService {
         const wo = await this.findOne(id, user);
         if (wo.status !== 'DRAFT')
             throw new common_1.BadRequestException('Only DRAFT work orders can be released');
-        return this.update(id, { status: 'RELEASED' }, user);
+        const updated = await this.update(id, { status: 'RELEASED' }, user);
+        const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
+        return Object.assign(Object.assign({}, updated), { materialReservations: reservations });
     }
     async start(id, user) {
         const wo = await this.findOne(id, user);
@@ -160,6 +171,8 @@ let WorkOrderService = class WorkOrderService {
 exports.WorkOrderService = WorkOrderService;
 exports.WorkOrderService = WorkOrderService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService,
+        material_reservation_service_1.MaterialReservationService])
 ], WorkOrderService);
 //# sourceMappingURL=work-order.service.js.map

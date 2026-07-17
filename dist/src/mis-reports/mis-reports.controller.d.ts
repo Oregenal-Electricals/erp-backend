@@ -168,15 +168,15 @@ export declare class MisReportsController {
         items: {
             status: string;
             rejectedQty: number;
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
+            completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
-            completedQty: number;
             actualStartDate: Date;
             actualEndDate: Date;
-            woNumber: string;
         }[];
     }>;
     getGstSummary(req: any, query: any): Promise<{

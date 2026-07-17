@@ -40,10 +40,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -90,10 +90,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -140,10 +140,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
@@ -170,8 +170,8 @@ export declare class ProductionIssueService {
                 name: string;
             };
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
@@ -223,10 +223,10 @@ export declare class ProductionIssueService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
             plannedQty: number;
-            woNumber: string;
         };
     } & {
         id: string;
