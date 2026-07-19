@@ -73,6 +73,7 @@ const inventory_dashboard_module_1 = require("./inventory-dashboard/inventory-da
 const inventory_reports_module_1 = require("./inventory-reports/inventory-reports.module");
 const work_order_module_1 = require("./work-orders/work-order.module");
 const mrp_module_1 = require("./mrp/mrp.module");
+const routing_module_1 = require("./routing/routing.module");
 const production_issue_module_1 = require("./production-issues/production-issue.module");
 const production_entry_module_1 = require("./production-entries/production-entry.module");
 const production_qc_module_1 = require("./production-qc/production-qc.module");
@@ -201,6 +202,7 @@ exports.AppModule = AppModule = __decorate([
             inventory_reports_module_1.InventoryReportsModule,
             work_order_module_1.WorkOrderModule,
             mrp_module_1.MrpModule,
+            routing_module_1.RoutingModule,
             production_issue_module_1.ProductionIssueModule,
             production_entry_module_1.ProductionEntryModule,
             production_qc_module_1.ProductionQcModule,

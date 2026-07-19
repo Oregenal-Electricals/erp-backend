@@ -61,6 +61,7 @@ import { InventoryDashboardModule } from './inventory-dashboard/inventory-dashbo
 import { InventoryReportsModule } from './inventory-reports/inventory-reports.module';
 import { WorkOrderModule } from './work-orders/work-order.module';
 import { MrpModule } from './mrp/mrp.module';
+import { RoutingModule } from './routing/routing.module';
 import { ProductionIssueModule } from './production-issues/production-issue.module';
 import { ProductionEntryModule } from './production-entries/production-entry.module';
 import { ProductionQcModule } from './production-qc/production-qc.module';
@@ -183,6 +184,7 @@ import configuration from './config/configuration';
     InventoryReportsModule,
     WorkOrderModule,
     MrpModule,
+    RoutingModule,
     ProductionIssueModule,
     ProductionEntryModule,
     ProductionQcModule,

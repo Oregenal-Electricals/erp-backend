@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
+const work_order_service_1 = require("../work-orders/work-order.service");
 let FgReceiptService = class FgReceiptService {
-    constructor(prisma, audit, stockLedger) {
+    constructor(prisma, audit, stockLedger, workOrderService) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
+        this.workOrderService = workOrderService;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.fgReceipt.count({ where: { companyId } });
@@ -115,6 +117,16 @@ let FgReceiptService = class FgReceiptService {
             where: { id }, data: { status: 'RECEIVED', updatedBy: user.id }, include: this.includes(),
         });
         await this.audit.log({ tableName: 'fg_receipts', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        const childWo = await this.prisma.workOrder.findFirst({
+            where: { parentWorkOrderId: receipt.workOrderId, companyId: user.companyId, status: 'DRAFT' },
+        });
+        if (childWo) {
+            try {
+                await this.workOrderService.release(childWo.id, user);
+            }
+            catch (e) {
+            }
+        }
         return updated;
     }
     async findAll(user, query) {
@@ -188,6 +200,7 @@ exports.FgReceiptService = FgReceiptService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        stock_ledger_service_1.StockLedgerService])
+        stock_ledger_service_1.StockLedgerService,
+        work_order_service_1.WorkOrderService])
 ], FgReceiptService);
 //# sourceMappingURL=fg-receipt.service.js.map

@@ -4,9 +4,9 @@ import { FgReceiptService } from './fg-receipt.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
 import { StockLedgerModule } from '../stock-ledger/stock-ledger.module';
-
+import { WorkOrderModule } from '../work-orders/work-order.module';
 @Module({
-  imports: [PrismaModule, CommonModule, StockLedgerModule],
+  imports: [PrismaModule, CommonModule, StockLedgerModule, WorkOrderModule],
   controllers: [FgReceiptController],
   providers: [FgReceiptService],
   exports: [FgReceiptService],

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { WorkOrderService } from '../work-orders/work-order.service';
 import { CreateFgReceiptDto } from './dto/fg-receipt.dto';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class FgReceiptService {
     private prisma: PrismaService,
     private audit: AuditService,
     private stockLedger: StockLedgerService,
+    private workOrderService: WorkOrderService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -32,7 +34,6 @@ export class FgReceiptService {
     if (!wo) throw new NotFoundException('Work order not found');
     if (wo.status !== 'COMPLETED') throw new BadRequestException('Work order must be COMPLETED');
 
-    // Check if FGR already exists for this WO
     const existing = await this.prisma.fgReceipt.findFirst({
       where: { workOrderId, companyId: user.companyId, status: 'RECEIVED' },
     });
@@ -86,7 +87,6 @@ export class FgReceiptService {
     if (!receipt) throw new NotFoundException('FG Receipt not found');
     if (receipt.status !== 'DRAFT') throw new BadRequestException('Only DRAFT receipts can be confirmed');
 
-    // Post stock ledger RECEIPT for FG item
     await this.stockLedger.postTransaction({
       companyId: user.companyId,
       itemCode: receipt.itemCode, itemName: receipt.itemName,
@@ -99,7 +99,6 @@ export class FgReceiptService {
       userId: user.id,
     });
 
-    // Create FG batch
     if (receipt.batchNumber) {
       await this.prisma.stockBatch.create({
         data: {
@@ -109,13 +108,25 @@ export class FgReceiptService {
           unitCost: receipt.unitCost, status: 'ACTIVE',
           companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
         },
-      }).catch(() => {}); // ignore if batch already exists
+      }).catch(() => {});
     }
 
     const updated = await this.prisma.fgReceipt.update({
       where: { id }, data: { status: 'RECEIVED', updatedBy: user.id }, include: this.includes(),
     });
     await this.audit.log({ tableName: 'fg_receipts', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+
+    const childWo = await this.prisma.workOrder.findFirst({
+      where: { parentWorkOrderId: receipt.workOrderId, companyId: user.companyId, status: 'DRAFT' },
+    });
+    if (childWo) {
+      try {
+        await this.workOrderService.release(childWo.id, user);
+      } catch (e) {
+        // don't fail the receipt confirmation if the next stage can't release
+      }
+    }
+
     return updated;
   }
 

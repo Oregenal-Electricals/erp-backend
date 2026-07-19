@@ -32,6 +32,9 @@ export declare class ProductionEntryController {
             productCode: string;
             productName: string;
             salesOrderId: string | null;
+            routingGroupId: string | null;
+            stageSequence: number | null;
+            parentWorkOrderId: string | null;
             plannedQty: number;
             completedQty: number;
             plannedStartDate: Date;

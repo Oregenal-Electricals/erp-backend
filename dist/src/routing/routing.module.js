@@ -6,23 +6,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FgReceiptModule = void 0;
+exports.RoutingModule = void 0;
 const common_1 = require("@nestjs/common");
-const fg_receipt_controller_1 = require("./fg-receipt.controller");
-const fg_receipt_service_1 = require("./fg-receipt.service");
+const routing_controller_1 = require("./routing.controller");
+const routing_service_1 = require("./routing.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
-const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
 const work_order_module_1 = require("../work-orders/work-order.module");
-let FgReceiptModule = class FgReceiptModule {
+let RoutingModule = class RoutingModule {
 };
-exports.FgReceiptModule = FgReceiptModule;
-exports.FgReceiptModule = FgReceiptModule = __decorate([
+exports.RoutingModule = RoutingModule;
+exports.RoutingModule = RoutingModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, work_order_module_1.WorkOrderModule],
-        controllers: [fg_receipt_controller_1.FgReceiptController],
-        providers: [fg_receipt_service_1.FgReceiptService],
-        exports: [fg_receipt_service_1.FgReceiptService],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, work_order_module_1.WorkOrderModule],
+        controllers: [routing_controller_1.RoutingController],
+        providers: [routing_service_1.RoutingService],
+        exports: [routing_service_1.RoutingService],
     })
-], FgReceiptModule);
-//# sourceMappingURL=fg-receipt.module.js.map
+], RoutingModule);
+//# sourceMappingURL=routing.module.js.map

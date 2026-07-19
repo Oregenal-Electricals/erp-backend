@@ -1,12 +1,14 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { WorkOrderService } from '../work-orders/work-order.service';
 import { CreateFgReceiptDto } from './dto/fg-receipt.dto';
 export declare class FgReceiptService {
     private prisma;
     private audit;
     private stockLedger;
-    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
+    private workOrderService;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, workOrderService: WorkOrderService);
     private generateNumber;
     private includes;
     createFromWo(workOrderId: string, user: any): Promise<{

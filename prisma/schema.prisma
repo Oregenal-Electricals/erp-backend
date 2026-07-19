@@ -262,6 +262,7 @@ model Company {
   stockAdjustments   StockAdjustment[]
   workOrders         WorkOrder[]
   materialReservations MaterialReservation[]
+  productRoutings    ProductRouting[]
   productionIssues   ProductionIssue[]
   productionEntries  ProductionEntry[]
   productionQcs      ProductionQc[]
@@ -1244,6 +1245,7 @@ model Product {
   revisions       ProductRevision[]
   boms            Bom[]
   bomRevisions    BomRevision[] @relation("BomRevisionProduct")
+  routings        ProductRouting[]
 
   @@unique([companyId, code])
   @@map("products")
@@ -1448,6 +1450,7 @@ model Bom {
   revisionsAsOld BomRevision[] @relation("BomRevisionOld")
 
   workOrders WorkOrder[]
+  routingStages RoutingStage[]
   @@unique([companyId, bomNumber])
   @@map("boms")
 }
@@ -2872,6 +2875,11 @@ model WorkOrder {
   warehouse         Warehouse @relation(fields: [warehouseId], references: [id])
   salesOrderId      String?
   salesOrder        SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  routingGroupId    String?
+  stageSequence     Int?
+  parentWorkOrderId String?
+  parentWorkOrder   WorkOrder? @relation("WorkOrderChain", fields: [parentWorkOrderId], references: [id])
+  childWorkOrders   WorkOrder[] @relation("WorkOrderChain")
   plannedQty        Float     @default(0)
   completedQty      Float     @default(0)
   rejectedQty       Float     @default(0)
@@ -2926,6 +2934,48 @@ model MaterialReservation {
   @@index([companyId])
   @@index([workOrderId])
   @@index([itemCode, warehouseId, status])
+}
+
+model ProductRouting {
+  id             String   @id @default(uuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id])
+  finalProductId String
+  finalProduct   Product  @relation(fields: [finalProductId], references: [id])
+  routingName    String
+  isActive       Boolean  @default(true)
+  isTestData     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  stages RoutingStage[]
+
+  @@map("product_routings")
+  @@index([companyId])
+}
+
+model RoutingStage {
+  id         String         @id @default(uuid())
+  companyId  String
+  routingId  String
+  routing    ProductRouting @relation(fields: [routingId], references: [id], onDelete: Cascade)
+  sequence   Int
+  stageName  String
+  bomId      String
+  bom        Bom            @relation(fields: [bomId], references: [id])
+  warehouseId String?
+  isActive   Boolean        @default(true)
+  isTestData Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  createdBy  String?
+  updatedBy  String?
+
+  @@map("routing_stages")
+  @@index([routingId])
+  @@unique([routingId, sequence])
 }
 
 // MODULE 56 — PRODUCTION MATERIAL ISSUE
