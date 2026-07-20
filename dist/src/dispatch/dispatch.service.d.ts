@@ -164,6 +164,63 @@ export declare class DispatchService {
         ewayBillNumber: string | null;
         dispatchNumber: string;
     }>;
+    markDelivered(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            totalAmount: number;
+            gstRate: number;
+            unitPrice: number;
+            gstAmount: number;
+            dispatchedQty: number;
+            soItemId: string;
+            planItemId: string | null;
+            dispatchId: string;
+        }[];
+        salesOrder: {
+            customerName: string;
+            soNumber: string;
+            cpo: {
+                customerPoNumber: string;
+                cpoNumber: string;
+            };
+        };
+        dispatchPlan: {
+            transportMode: string;
+            planNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        deliveryAddress: string | null;
+        soId: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planId: string;
+        dispatchDate: Date;
+        lrNumber: string | null;
+        ewayBillNumber: string | null;
+        dispatchNumber: string;
+    }>;
     getStats(user: any): Promise<{
         total: number;
         dispatched: number;

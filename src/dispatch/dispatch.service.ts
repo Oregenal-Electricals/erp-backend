@@ -165,6 +165,17 @@ export class DispatchService {
     return dispatch;
   }
 
+  async markDelivered(id: string, user: any) {
+    const dispatch = await this.prisma.dispatch.findFirst({ where: { id, companyId: user.companyId } });
+    if (!dispatch) throw new NotFoundException('Dispatch not found');
+    if (dispatch.status !== 'DISPATCHED') throw new BadRequestException('Only DISPATCHED deliveries can be marked delivered');
+    const updated = await this.prisma.dispatch.update({
+      where: { id }, data: { status: 'DELIVERED', updatedBy: user.id }, include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'dispatches', recordId: id, action: 'UPDATE', oldValues: { status: 'DISPATCHED' }, newValues: { status: 'DELIVERED' }, changedBy: user.id });
+    return updated;
+  }
+
   async getStats(user: any) {
     const where: any = { companyId: user.companyId };
     const [total, dispatched, delivered, cancelled] = await Promise.all([

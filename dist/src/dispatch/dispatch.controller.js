@@ -28,6 +28,7 @@ let DispatchController = class DispatchController {
     findAll(req, query) { return this.dispatchService.findAll(req.user, query); }
     findOne(id, req) { return this.dispatchService.findOne(id, req.user); }
     create(dto, req) { return this.dispatchService.create(dto, req.user); }
+    markDelivered(id, req) { return this.dispatchService.markDelivered(id, req.user); }
 };
 exports.DispatchController = DispatchController;
 __decorate([
@@ -65,6 +66,15 @@ __decorate([
     __metadata("design:paramtypes", [dispatch_dto_1.CreateDispatchDto, Object]),
     __metadata("design:returntype", void 0)
 ], DispatchController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)(':id/deliver'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], DispatchController.prototype, "markDelivered", null);
 exports.DispatchController = DispatchController = __decorate([
     (0, common_1.Controller)('dispatches'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

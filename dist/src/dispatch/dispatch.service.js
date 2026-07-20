@@ -163,6 +163,18 @@ let DispatchService = class DispatchService {
             throw new common_1.NotFoundException('Dispatch not found');
         return dispatch;
     }
+    async markDelivered(id, user) {
+        const dispatch = await this.prisma.dispatch.findFirst({ where: { id, companyId: user.companyId } });
+        if (!dispatch)
+            throw new common_1.NotFoundException('Dispatch not found');
+        if (dispatch.status !== 'DISPATCHED')
+            throw new common_1.BadRequestException('Only DISPATCHED deliveries can be marked delivered');
+        const updated = await this.prisma.dispatch.update({
+            where: { id }, data: { status: 'DELIVERED', updatedBy: user.id }, include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'dispatches', recordId: id, action: 'UPDATE', oldValues: { status: 'DISPATCHED' }, newValues: { status: 'DELIVERED' }, changedBy: user.id });
+        return updated;
+    }
     async getStats(user) {
         const where = { companyId: user.companyId };
         const [total, dispatched, delivered, cancelled] = await Promise.all([
