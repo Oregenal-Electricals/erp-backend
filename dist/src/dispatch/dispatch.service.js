@@ -13,10 +13,12 @@ exports.DispatchService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
 let DispatchService = class DispatchService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, stockLedger) {
         this.prisma = prisma;
         this.audit = audit;
+        this.stockLedger = stockLedger;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.dispatch.count({ where: { companyId } });
@@ -65,6 +67,23 @@ let DispatchService = class DispatchService {
                 createdBy: user.id, updatedBy: user.id,
             };
         });
+        for (const item of dto.items) {
+            const balance = await this.prisma.stockBalance.findFirst({
+                where: { companyId: user.companyId, itemCode: item.itemCode },
+                orderBy: { availableQty: 'desc' },
+            });
+            if (!balance || balance.availableQty < item.dispatchedQty) {
+                throw new common_1.BadRequestException(`Insufficient finished goods stock for ${item.itemCode} - available ${(balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0}, need ${item.dispatchedQty}`);
+            }
+            await this.stockLedger.postTransaction({
+                companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+                warehouseId: balance.warehouseId,
+                transactionType: 'ISSUE', referenceType: 'DISPATCH', referenceNumber: dispatchNumber,
+                outQty: item.dispatchedQty, unitCost: balance.unitCost,
+                remarks: `Dispatched against SO ${plan.salesOrder.soNumber}`,
+                userId: user.id,
+            });
+        }
         const dispatch = await this.prisma.dispatch.create({
             data: {
                 dispatchNumber, planId: dto.planId, soId: plan.soId,
@@ -161,6 +180,6 @@ let DispatchService = class DispatchService {
 exports.DispatchService = DispatchService;
 exports.DispatchService = DispatchService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, stock_ledger_service_1.StockLedgerService])
 ], DispatchService);
 //# sourceMappingURL=dispatch.service.js.map

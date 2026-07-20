@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { CreateDispatchDto } from './dto/dispatch.dto';
 
 @Injectable()
 export class DispatchService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private stockLedger: StockLedgerService) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.dispatch.count({ where: { companyId } });
@@ -57,6 +58,26 @@ export class DispatchService {
         createdBy: user.id, updatedBy: user.id,
       };
     });
+
+    for (const item of dto.items) {
+      const balance = await this.prisma.stockBalance.findFirst({
+        where: { companyId: user.companyId, itemCode: item.itemCode },
+        orderBy: { availableQty: 'desc' },
+      });
+      if (!balance || balance.availableQty < item.dispatchedQty) {
+        throw new BadRequestException(
+          `Insufficient finished goods stock for ${item.itemCode} - available ${balance?.availableQty || 0}, need ${item.dispatchedQty}`,
+        );
+      }
+      await this.stockLedger.postTransaction({
+        companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+        warehouseId: balance.warehouseId,
+        transactionType: 'ISSUE', referenceType: 'DISPATCH', referenceNumber: dispatchNumber,
+        outQty: item.dispatchedQty, unitCost: balance.unitCost,
+        remarks: `Dispatched against SO ${plan.salesOrder.soNumber}`,
+        userId: user.id,
+      });
+    }
 
     const dispatch = await this.prisma.dispatch.create({
       data: {

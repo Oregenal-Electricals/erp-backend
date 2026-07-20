@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { CreateDispatchDto } from './dto/dispatch.dto';
 export declare class DispatchService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private stockLedger;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
     private generateNumber;
     private includes;
     create(dto: CreateDispatchDto, user: any): Promise<{
