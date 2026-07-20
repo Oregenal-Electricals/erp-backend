@@ -144,7 +144,7 @@ let SalesOrdersService = class SalesOrdersService {
                 { customerName: { contains: search, mode: 'insensitive' } },
             ];
         if (status)
-            where.status = status;
+            where.status = status.includes(',') ? { in: status.split(',') } : status;
         const [data, total] = await Promise.all([
             this.prisma.salesOrder.findMany({
                 where, skip, take: Number(limit), orderBy: { createdAt: 'desc' },

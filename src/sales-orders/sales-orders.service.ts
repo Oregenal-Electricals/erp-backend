@@ -170,7 +170,7 @@ export class SalesOrdersService {
       { soNumber: { contains: search, mode: 'insensitive' } },
       { customerName: { contains: search, mode: 'insensitive' } },
     ];
-    if (status) where.status = status;
+    if (status) where.status = status.includes(',') ? { in: status.split(',') } : status;
 
     const [data, total] = await Promise.all([
       this.prisma.salesOrder.findMany({

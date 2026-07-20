@@ -276,6 +276,10 @@ export class MrpService {
       await this.audit.log({ tableName: 'work_orders', recordId: wo.id, action: 'CREATE', newValues: wo, changedBy: user.id });
       const reservations = await this.materialReservation.reserveForWorkOrder(wo.id, user);
       await this.prisma.workOrder.update({ where: { id: wo.id }, data: { status: 'RELEASED' } });
+      await this.prisma.salesOrder.updateMany({
+        where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
+        data: { status: 'IN_PRODUCTION', updatedBy: user.id },
+      });
       createdWorkOrders.push({
         woId: wo.id, woNumber, soNumber: r.soItem.salesOrder.soNumber,
         productCode: r.product.code, buildQty: r.buildQty, reservations,
