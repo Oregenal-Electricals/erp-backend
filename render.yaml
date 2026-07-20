@@ -12,3 +12,5 @@ services:
         value: staging
       - key: PORT
         value: 3001
+      - key: JWT_EXPIRES_IN
+        value: 7d
