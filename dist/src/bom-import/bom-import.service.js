@@ -267,10 +267,19 @@ let BomImportService = class BomImportService {
                 if (!item.itemCode || !item.itemName)
                     continue;
                 let rawMaterialId = item.rawMaterialId;
+                const uomRecord = item.uom
+                    ? await tx.unitOfMeasure.findFirst({ where: { companyId: user.companyId, code: item.uom } })
+                        || await tx.unitOfMeasure.create({
+                            data: { companyId: user.companyId, code: item.uom, name: item.uom, createdBy: user.id, updatedBy: user.id },
+                        })
+                    : null;
                 if (!rawMaterialId) {
                     const existingRm = await tx.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
                     if (existingRm) {
                         rawMaterialId = existingRm.id;
+                        if (uomRecord && existingRm.uomId !== uomRecord.id) {
+                            await tx.rawMaterial.update({ where: { id: existingRm.id }, data: { uomId: uomRecord.id, updatedBy: user.id } });
+                        }
                     }
                     else {
                         const newRm = await tx.rawMaterial.create({
@@ -280,6 +289,7 @@ let BomImportService = class BomImportService {
                                 name: item.itemName,
                                 brand: item.preferredMake || undefined,
                                 partNumber: item.itemCode,
+                                uomId: uomRecord === null || uomRecord === void 0 ? void 0 : uomRecord.id,
                                 createdBy: user.id,
                                 updatedBy: user.id,
                             },
