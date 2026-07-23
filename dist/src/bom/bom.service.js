@@ -54,7 +54,7 @@ let BomService = class BomService {
     async findAll(user, query) {
         const { page = 1, limit = 20, search, status, productId } = query;
         const skip = (Number(page) - 1) * Number(limit);
-        const where = {};
+        const where = { isActive: true };
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
         if (search)
@@ -285,7 +285,7 @@ let BomService = class BomService {
         await client.bom.update({ where: { id: bomId }, data: { totalCost } });
     }
     async getStats(user) {
-        const where = {};
+        const where = { isActive: true };
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
         const [total, draft, approved, obsolete] = await Promise.all([
