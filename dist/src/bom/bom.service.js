@@ -128,6 +128,13 @@ let BomService = class BomService {
             include: Object.assign({ product: { select: { code: true, name: true } } }, this.itemIncludes()),
         });
         await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+        const previousApproved = await this.prisma.bom.findMany({
+            where: { companyId: user.companyId, productId: bom.productId, status: 'APPROVED', id: { not: id } },
+        });
+        for (const prev of previousApproved) {
+            await this.prisma.bom.update({ where: { id: prev.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
+            await this.audit.log({ tableName: 'boms', recordId: prev.id, action: 'UPDATE', oldValues: prev, newValues: { status: 'OBSOLETE' }, changedBy: user.id });
+        }
         return updated;
     }
     async obsolete(id, user) {
