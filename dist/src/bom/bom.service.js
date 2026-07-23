@@ -178,8 +178,13 @@ let BomService = class BomService {
         const wastage = dto.wastagePercent || 0;
         const effectiveQty = dto.quantity * (1 + wastage / 100);
         const totalCost = dto.unitCost ? effectiveQty * dto.unitCost : null;
+        const lastItem = await client.bomItem.findFirst({
+            where: { bomId, isActive: true },
+            orderBy: { sequence: 'desc' },
+        });
+        const nextSequence = ((lastItem === null || lastItem === void 0 ? void 0 : lastItem.sequence) || 0) + 1;
         const item = await client.bomItem.create({
-            data: Object.assign(Object.assign({}, dto), { bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id }),
+            data: Object.assign(Object.assign({}, dto), { sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id }),
         });
         await this.ensureStockBalanceExists(item.itemCode, item.itemName, item.uom, user, client, options.defaultWarehouseId);
         if (!options.skipCostRecalc)
@@ -247,9 +252,25 @@ let BomService = class BomService {
         if (!item)
             throw new common_1.NotFoundException('BOM item not found');
         const updated = await this.prisma.bomItem.update({ where: { id: itemId }, data: { isActive: false, updatedBy: user.id } });
+        await this.resequenceItems(bomId, user);
         await this.recalculateBomCost(bomId);
         await this.audit.log({ tableName: 'bom_items', recordId: itemId, action: 'DELETE', oldValues: item, newValues: updated, changedBy: user.id });
         return { message: 'BOM item removed' };
+    }
+    async resequenceItems(bomId, user) {
+        const remaining = await this.prisma.bomItem.findMany({
+            where: { bomId, isActive: true },
+            orderBy: { sequence: 'asc' },
+        });
+        for (let i = 0; i < remaining.length; i++) {
+            const correctSequence = i + 1;
+            if (remaining[i].sequence !== correctSequence) {
+                await this.prisma.bomItem.update({
+                    where: { id: remaining[i].id },
+                    data: { sequence: correctSequence, updatedBy: user.id },
+                });
+            }
+        }
     }
     async recalculateBomCost(bomId, client = this.prisma) {
         const items = await client.bomItem.findMany({ where: { bomId, isActive: true } });

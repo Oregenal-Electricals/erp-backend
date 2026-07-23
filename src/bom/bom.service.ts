@@ -173,8 +173,14 @@ export class BomService {
     const effectiveQty = dto.quantity * (1 + wastage / 100);
     const totalCost = dto.unitCost ? effectiveQty * dto.unitCost : null;
 
+    const lastItem = await client.bomItem.findFirst({
+      where: { bomId, isActive: true },
+      orderBy: { sequence: 'desc' },
+    });
+    const nextSequence = (lastItem?.sequence || 0) + 1;
+
     const item = await client.bomItem.create({
-      data: { ...dto, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
+      data: { ...dto, sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
     });
 
     await this.ensureStockBalanceExists(item.itemCode, item.itemName, item.uom, user, client, options.defaultWarehouseId);
@@ -254,9 +260,26 @@ export class BomService {
     if (!item) throw new NotFoundException('BOM item not found');
 
     const updated = await this.prisma.bomItem.update({ where: { id: itemId }, data: { isActive: false, updatedBy: user.id } });
+    await this.resequenceItems(bomId, user);
     await this.recalculateBomCost(bomId);
     await this.audit.log({ tableName: 'bom_items', recordId: itemId, action: 'DELETE', oldValues: item, newValues: updated, changedBy: user.id });
     return { message: 'BOM item removed' };
+  }
+
+  private async resequenceItems(bomId: string, user: any) {
+    const remaining = await this.prisma.bomItem.findMany({
+      where: { bomId, isActive: true },
+      orderBy: { sequence: 'asc' },
+    });
+    for (let i = 0; i < remaining.length; i++) {
+      const correctSequence = i + 1;
+      if (remaining[i].sequence !== correctSequence) {
+        await this.prisma.bomItem.update({
+          where: { id: remaining[i].id },
+          data: { sequence: correctSequence, updatedBy: user.id },
+        });
+      }
+    }
   }
 
   private async recalculateBomCost(bomId: string, client: any = this.prisma) {

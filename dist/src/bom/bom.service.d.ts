@@ -390,6 +390,7 @@ export declare class BomService {
     removeItem(bomId: string, itemId: string, user: any): Promise<{
         message: string;
     }>;
+    private resequenceItems;
     private recalculateBomCost;
     getStats(user: any): Promise<{
         total: number;
