@@ -192,6 +192,31 @@ export class BomService {
       data: { ...dto, sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
     });
 
+    if ((item.itemType === 'RAW_MATERIAL' || !item.itemType) && !item.rawMaterialId) {
+      const uomRecord = item.uom
+        ? await client.unitOfMeasure.findFirst({ where: { companyId: user.companyId, code: item.uom } })
+          || await client.unitOfMeasure.create({
+            data: { companyId: user.companyId, code: item.uom, name: item.uom, createdBy: user.id, updatedBy: user.id },
+          })
+        : null;
+      const existingRm = await client.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
+      if (existingRm) {
+        if (uomRecord && existingRm.uomId !== uomRecord.id) {
+          await client.rawMaterial.update({ where: { id: existingRm.id }, data: { uomId: uomRecord.id, updatedBy: user.id } });
+        }
+        await client.bomItem.update({ where: { id: item.id }, data: { rawMaterialId: existingRm.id } });
+      } else {
+        const newRm = await client.rawMaterial.create({
+          data: {
+            companyId: user.companyId, code: item.itemCode, name: item.itemName,
+            partNumber: item.itemCode, uomId: uomRecord?.id,
+            createdBy: user.id, updatedBy: user.id,
+          },
+        });
+        await client.bomItem.update({ where: { id: item.id }, data: { rawMaterialId: newRm.id } });
+      }
+    }
+
     await this.ensureStockBalanceExists(item.itemCode, item.itemName, item.uom, user, client, options.defaultWarehouseId);
 
     if (!options.skipCostRecalc) await this.recalculateBomCost(bomId, client);
