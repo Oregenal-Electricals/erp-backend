@@ -235,12 +235,12 @@ export declare class QualityReportsService {
             receivedDate: Date;
             assignedTo: string | null;
             batchNumber: string | null;
+            customerId: string | null;
             correctiveAction: string | null;
             severity: string;
             qtyAffected: number;
             closedDate: Date | null;
             rootCause: string | null;
-            customerId: string | null;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;

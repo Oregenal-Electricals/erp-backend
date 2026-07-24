@@ -263,6 +263,7 @@ model Company {
   workOrders         WorkOrder[]
   materialReservations MaterialReservation[]
   productRoutings    ProductRouting[]
+  customers          Customer[]
   productionIssues   ProductionIssue[]
   productionEntries  ProductionEntry[]
   productionQcs      ProductionQc[]
@@ -3593,6 +3594,87 @@ model CustomerPo {
   @@index([companyId, status])
   salesOrders SalesOrder[]
   @@map("customer_pos")
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  code       String
+  name       String
+  email      String?
+  phone      String?
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String?
+  updatedBy  String?
+
+  addresses  CustomerAddress[]
+  contacts   CustomerContact[]
+  gstNumbers CustomerGst[]
+
+  @@unique([companyId, code])
+  @@map("customers")
+}
+
+model CustomerAddress {
+  id          String   @id @default(uuid())
+  companyId   String
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  addressType String   @default("DELIVERY")
+  addressLine String
+  city        String?
+  state       String?
+  pincode     String?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("customer_addresses")
+}
+
+model CustomerContact {
+  id          String   @id @default(uuid())
+  companyId   String
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name        String
+  designation String?
+  phone       String?
+  email       String?
+  isPrimary   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("customer_contacts")
+}
+
+model CustomerGst {
+  id          String   @id @default(uuid())
+  companyId   String
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  gstNumber   String
+  branchLabel String?
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@map("customer_gst_numbers")
 }
 
 model CustomerPoItem {

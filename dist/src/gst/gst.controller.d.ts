@@ -54,6 +54,7 @@ export declare class GstController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            customerAddress: string | null;
             dueDate: Date;
             customerName: string;
             invoiceNumber: string;
@@ -62,7 +63,6 @@ export declare class GstController {
             subtotal: number;
             totalAmount: number;
             notes: string | null;
-            customerAddress: string | null;
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;

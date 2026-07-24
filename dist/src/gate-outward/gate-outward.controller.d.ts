@@ -44,6 +44,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -55,7 +56,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -107,6 +107,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -118,7 +119,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -179,6 +179,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -190,7 +191,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -242,6 +242,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -253,7 +254,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -305,6 +305,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -316,7 +317,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -368,6 +368,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -379,7 +380,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -431,6 +431,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -442,7 +443,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
@@ -494,6 +494,7 @@ export declare class GateOutwardController {
         plantId: string;
         unit: string;
         status: import(".prisma/client").$Enums.GateOutwardStatus;
+        customerAddress: string | null;
         remarks: string | null;
         materialDescription: string;
         customerName: string;
@@ -505,7 +506,6 @@ export declare class GateOutwardController {
         invoiceAmount: number | null;
         grossWeight: number | null;
         customerMobile: string | null;
-        customerAddress: string | null;
         customerGstin: string | null;
         salesOrderNumber: string | null;
         deliveryChallanNumber: string | null;
