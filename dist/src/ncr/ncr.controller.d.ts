@@ -61,8 +61,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -100,8 +100,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -139,8 +139,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -178,8 +178,8 @@ export declare class NcrController {
             capaNumber: string;
         }[];
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;

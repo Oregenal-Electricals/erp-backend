@@ -17,9 +17,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -53,9 +53,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -89,9 +89,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -126,9 +126,9 @@ export declare class FgReceiptService {
                 code: string;
             };
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
                 plannedQty: number;
                 completedQty: number;
             };
@@ -167,9 +167,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };

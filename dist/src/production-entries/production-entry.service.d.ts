@@ -10,9 +10,9 @@ export declare class ProductionEntryService {
     create(dto: CreateProductionEntryDto, user: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -40,9 +40,9 @@ export declare class ProductionEntryService {
     confirm(id: string, user: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -71,9 +71,9 @@ export declare class ProductionEntryService {
         data: ({
             workOrder: {
                 status: string;
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
                 plannedQty: number;
                 completedQty: number;
             };
@@ -106,9 +106,9 @@ export declare class ProductionEntryService {
     findOne(id: string, user: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -156,11 +156,11 @@ export declare class ProductionEntryService {
             remarks: string | null;
             uom: string;
             warehouseId: string;
+            productCode: string;
+            productName: string;
             bomId: string | null;
             rejectedQty: number;
             woNumber: string;
-            productCode: string;
-            productName: string;
             salesOrderId: string | null;
             routingGroupId: string | null;
             stageSequence: number | null;

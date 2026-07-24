@@ -34,6 +34,7 @@ let BomController = class BomController {
     approve(id, req) { return this.bomService.approve(id, req.user); }
     obsolete(id, req) { return this.bomService.obsolete(id, req.user); }
     clone(id, req) { return this.bomService.clone(id, req.user); }
+    generateStages(id, dto, req) { return this.bomService.generateStages(id, dto, req.user); }
     addItem(id, dto, req) { return this.bomService.addItem(id, dto, req.user); }
     updateItem(id, itemId, dto, req) { return this.bomService.updateItem(id, itemId, dto, req.user); }
     removeItem(id, itemId, req) { return this.bomService.removeItem(id, itemId, req.user); }
@@ -129,6 +130,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], BomController.prototype, "clone", null);
+__decorate([
+    (0, common_1.Post)(':id/generate-stages'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, bom_dto_1.GenerateStagesDto, Object]),
+    __metadata("design:returntype", void 0)
+], BomController.prototype, "generateStages", null);
 __decorate([
     (0, common_1.Post)(':id/items'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),

@@ -49,8 +49,8 @@ export declare class ProductionDashboardService {
     getToday(user: any): Promise<{
         entries: ({
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             id: string;
@@ -85,19 +85,19 @@ export declare class ProductionDashboardService {
     getAlerts(user: any): Promise<{
         overdueWos: {
             status: string;
-            woNumber: string;
             productName: string;
+            woNumber: string;
             plannedEndDate: Date;
         }[];
         releasedNoIssue: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
             plannedStartDate: Date;
         }[];
         failedQc: ({
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             result: string;
@@ -124,8 +124,8 @@ export declare class ProductionDashboardService {
             qcNumber: string;
         })[];
         pendingFgr: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
             completedQty: number;
         }[];
         totalAlerts: number;
@@ -133,8 +133,8 @@ export declare class ProductionDashboardService {
     getQualityMetrics(user: any): Promise<{
         inspections: ({
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             result: string;

@@ -176,8 +176,8 @@ export declare class AnalyticsController {
         overdueWos: {
             status: string;
             priority: string;
-            woNumber: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
             plannedEndDate: Date;

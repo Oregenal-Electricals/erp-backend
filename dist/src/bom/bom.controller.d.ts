@@ -1,5 +1,5 @@
 import { BomService } from './bom.service';
-import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto } from './dto/bom.dto';
+import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 export declare class BomController {
     private readonly bomService;
     constructor(bomService: BomService);
@@ -363,6 +363,10 @@ export declare class BomController {
         effectiveTo: Date | null;
         bomNumber: string;
         totalCost: number | null;
+    }>;
+    generateStages(id: string, dto: GenerateStagesDto, req: any): Promise<{
+        sourceBomNumber: string;
+        stages: any[];
     }>;
     addItem(id: string, dto: CreateBomItemDto, req: any): Promise<any>;
     updateItem(id: string, itemId: string, dto: UpdateBomItemDto, req: any): Promise<{

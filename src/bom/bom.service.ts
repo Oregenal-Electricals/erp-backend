@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto } from './dto/bom.dto';
+import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 
 @Injectable()
 export class BomService {
@@ -170,6 +170,80 @@ export class BomService {
     }
     await this.audit.log({ tableName: 'boms', recordId: cloned.id, action: 'CREATE', newValues: cloned, changedBy: user.id });
     return this.findOne(cloned.id, user);
+  }
+
+  async generateStages(sourceBomId: string, dto: GenerateStagesDto, user: any) {
+    if (!dto.stages || dto.stages.length === 0) {
+      throw new BadRequestException('At least one stage is required');
+    }
+    const sourceBom = await this.prisma.bom.findFirst({
+      where: { id: sourceBomId, companyId: user.companyId },
+      include: { items: { where: { isActive: true } }, product: true },
+    });
+    if (!sourceBom) throw new NotFoundException('Source BOM not found');
+
+    const created: any[] = [];
+    let previousProduct: { code: string; name: string } | null = null;
+
+    for (const stage of dto.stages) {
+      const matchingItems = sourceBom.items.filter((i) => stage.sections.includes(i.section || ''));
+      if (matchingItems.length === 0) {
+        throw new BadRequestException(`No items found in source BOM for stage \"${stage.stageName}\" (sections: ${stage.sections.join(', ')})`);
+      }
+
+      let targetProduct: { id: string; code: string; name: string };
+      if (stage.productCode) {
+        const existing = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: stage.productCode } });
+        if (existing) {
+          targetProduct = existing;
+        } else {
+          targetProduct = await this.prisma.product.create({
+            data: {
+              companyId: user.companyId, code: stage.productCode,
+              name: stage.productName || `${sourceBom.product.name} - ${stage.stageName}`,
+              createdBy: user.id, updatedBy: user.id,
+            },
+          });
+        }
+      } else {
+        targetProduct = sourceBom.product;
+      }
+
+      const newBomNumber = `${sourceBom.bomNumber}-${stage.stageName.toUpperCase().replace(/[^A-Z0-9]/g, '')}`;
+      const newBom = await this.prisma.bom.create({
+        data: {
+          companyId: user.companyId, productId: targetProduct.id,
+          bomNumber: newBomNumber, version: 'v1',
+          description: `Stage \"${stage.stageName}\" auto-generated from ${sourceBom.bomNumber}`,
+          effectiveFrom: new Date(), status: 'DRAFT',
+          createdBy: user.id, updatedBy: user.id,
+        },
+      });
+
+      let seq = 1;
+      if (previousProduct) {
+        await this.addItem(newBom.id, {
+          sequence: seq++, itemType: 'SUB_ASSEMBLY',
+          itemCode: previousProduct.code, itemName: previousProduct.name,
+          uom: 'PCS', quantity: 1,
+        } as any, user, this.prisma, { skipCostRecalc: true, skipAudit: true });
+      }
+      for (const item of matchingItems) {
+        await this.addItem(newBom.id, {
+          sequence: seq++, itemType: item.itemType, rawMaterialId: item.rawMaterialId || undefined,
+          itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
+          quantity: item.quantity, wastagePercent: item.wastagePercent || undefined,
+          section: item.section || undefined, notes: item.notes || undefined,
+        } as any, user, this.prisma, { skipCostRecalc: true, skipAudit: true });
+      }
+      await this.recalculateBomCost(newBom.id);
+
+      await this.audit.log({ tableName: 'boms', recordId: newBom.id, action: 'CREATE', newValues: newBom, changedBy: user.id });
+      created.push({ stageName: stage.stageName, bomId: newBom.id, bomNumber: newBomNumber, productCode: targetProduct.code, itemCount: matchingItems.length + (previousProduct ? 1 : 0) });
+      previousProduct = targetProduct;
+    }
+
+    return { sourceBomNumber: sourceBom.bomNumber, stages: created };
   }
 
   // ── BOM ITEMS ─────────────────────────────────────────────────

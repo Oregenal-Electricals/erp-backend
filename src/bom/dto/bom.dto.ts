@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsBoolean, IsNumber, IsDateString, IsInt, IsIn, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsNumber, IsDateString, IsInt, IsIn, IsArray, ValidateNested, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateBomDto {
   @IsString() productId: string;
@@ -46,4 +47,16 @@ export class UpdateBomItemDto {
   @IsOptional() @IsBoolean() isCritical?: boolean;
   @IsOptional() @IsString() notes?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
+}
+
+export class GenerateStageDto {
+  @IsString() stageName: string;
+  @IsArray() @IsString({ each: true }) sections: string[];
+  @IsOptional() @IsString() productCode?: string;
+  @IsOptional() @IsString() productName?: string;
+}
+
+export class GenerateStagesDto {
+  @IsArray() @ValidateNested({ each: true }) @Type(() => GenerateStageDto)
+  stages: GenerateStageDto[];
 }

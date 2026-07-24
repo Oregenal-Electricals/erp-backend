@@ -18,8 +18,8 @@ export declare class ProductionIssueController {
                 name: string;
             };
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             id: string;
@@ -71,9 +71,9 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
@@ -121,9 +121,9 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
@@ -171,9 +171,9 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
@@ -221,9 +221,9 @@ export declare class ProductionIssueController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {

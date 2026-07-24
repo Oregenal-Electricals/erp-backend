@@ -9,8 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateBomItemDto = exports.CreateBomItemDto = exports.UpdateBomDto = exports.CreateBomDto = void 0;
+exports.GenerateStagesDto = exports.GenerateStageDto = exports.UpdateBomItemDto = exports.CreateBomItemDto = exports.UpdateBomDto = exports.CreateBomDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class CreateBomDto {
 }
 exports.CreateBomDto = CreateBomDto;
@@ -210,4 +211,35 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateBomItemDto.prototype, "isActive", void 0);
+class GenerateStageDto {
+}
+exports.GenerateStageDto = GenerateStageDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GenerateStageDto.prototype, "stageName", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], GenerateStageDto.prototype, "sections", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GenerateStageDto.prototype, "productCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GenerateStageDto.prototype, "productName", void 0);
+class GenerateStagesDto {
+}
+exports.GenerateStagesDto = GenerateStagesDto;
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => GenerateStageDto),
+    __metadata("design:type", Array)
+], GenerateStagesDto.prototype, "stages", void 0);
 //# sourceMappingURL=bom.dto.js.map

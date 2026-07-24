@@ -19,8 +19,8 @@ export declare class RoutingController {
             updatedBy: string | null;
             warehouseId: string | null;
             sequence: number;
-            bomId: string;
             stageName: string;
+            bomId: string;
             routingId: string;
         })[];
         finalProduct: {
@@ -55,8 +55,8 @@ export declare class RoutingController {
             updatedBy: string | null;
             warehouseId: string | null;
             sequence: number;
-            bomId: string;
             stageName: string;
+            bomId: string;
             routingId: string;
         })[];
         finalProduct: {
@@ -96,11 +96,11 @@ export declare class RoutingController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        productCode: string;
+        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
-        productCode: string;
-        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
@@ -124,8 +124,8 @@ export declare class RoutingController {
             updatedBy: string | null;
             warehouseId: string | null;
             sequence: number;
-            bomId: string;
             stageName: string;
+            bomId: string;
             routingId: string;
         }[];
         finalProduct: {

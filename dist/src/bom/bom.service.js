@@ -176,6 +176,75 @@ let BomService = class BomService {
         await this.audit.log({ tableName: 'boms', recordId: cloned.id, action: 'CREATE', newValues: cloned, changedBy: user.id });
         return this.findOne(cloned.id, user);
     }
+    async generateStages(sourceBomId, dto, user) {
+        if (!dto.stages || dto.stages.length === 0) {
+            throw new common_1.BadRequestException('At least one stage is required');
+        }
+        const sourceBom = await this.prisma.bom.findFirst({
+            where: { id: sourceBomId, companyId: user.companyId },
+            include: { items: { where: { isActive: true } }, product: true },
+        });
+        if (!sourceBom)
+            throw new common_1.NotFoundException('Source BOM not found');
+        const created = [];
+        let previousProduct = null;
+        for (const stage of dto.stages) {
+            const matchingItems = sourceBom.items.filter((i) => stage.sections.includes(i.section || ''));
+            if (matchingItems.length === 0) {
+                throw new common_1.BadRequestException(`No items found in source BOM for stage \"${stage.stageName}\" (sections: ${stage.sections.join(', ')})`);
+            }
+            let targetProduct;
+            if (stage.productCode) {
+                const existing = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: stage.productCode } });
+                if (existing) {
+                    targetProduct = existing;
+                }
+                else {
+                    targetProduct = await this.prisma.product.create({
+                        data: {
+                            companyId: user.companyId, code: stage.productCode,
+                            name: stage.productName || `${sourceBom.product.name} - ${stage.stageName}`,
+                            createdBy: user.id, updatedBy: user.id,
+                        },
+                    });
+                }
+            }
+            else {
+                targetProduct = sourceBom.product;
+            }
+            const newBomNumber = `${sourceBom.bomNumber}-${stage.stageName.toUpperCase().replace(/[^A-Z0-9]/g, '')}`;
+            const newBom = await this.prisma.bom.create({
+                data: {
+                    companyId: user.companyId, productId: targetProduct.id,
+                    bomNumber: newBomNumber, version: 'v1',
+                    description: `Stage \"${stage.stageName}\" auto-generated from ${sourceBom.bomNumber}`,
+                    effectiveFrom: new Date(), status: 'DRAFT',
+                    createdBy: user.id, updatedBy: user.id,
+                },
+            });
+            let seq = 1;
+            if (previousProduct) {
+                await this.addItem(newBom.id, {
+                    sequence: seq++, itemType: 'SUB_ASSEMBLY',
+                    itemCode: previousProduct.code, itemName: previousProduct.name,
+                    uom: 'PCS', quantity: 1,
+                }, user, this.prisma, { skipCostRecalc: true, skipAudit: true });
+            }
+            for (const item of matchingItems) {
+                await this.addItem(newBom.id, {
+                    sequence: seq++, itemType: item.itemType, rawMaterialId: item.rawMaterialId || undefined,
+                    itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
+                    quantity: item.quantity, wastagePercent: item.wastagePercent || undefined,
+                    section: item.section || undefined, notes: item.notes || undefined,
+                }, user, this.prisma, { skipCostRecalc: true, skipAudit: true });
+            }
+            await this.recalculateBomCost(newBom.id);
+            await this.audit.log({ tableName: 'boms', recordId: newBom.id, action: 'CREATE', newValues: newBom, changedBy: user.id });
+            created.push({ stageName: stage.stageName, bomId: newBom.id, bomNumber: newBomNumber, productCode: targetProduct.code, itemCount: matchingItems.length + (previousProduct ? 1 : 0) });
+            previousProduct = targetProduct;
+        }
+        return { sourceBomNumber: sourceBom.bomNumber, stages: created };
+    }
     async addItem(bomId, dto, user, client = this.prisma, options = {}) {
         const bom = client === this.prisma ? await this.findOne(bomId, user) : await client.bom.findFirst({ where: { id: bomId, companyId: user.companyId } });
         if (!bom)

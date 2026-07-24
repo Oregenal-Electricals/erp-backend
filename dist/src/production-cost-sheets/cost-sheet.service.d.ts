@@ -36,9 +36,9 @@ export declare class CostSheetService {
     }>;
     update(id: string, dto: UpdateCostSheetDto, user: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -70,8 +70,8 @@ export declare class CostSheetService {
     }>;
     finalize(id: string, user: any): Promise<{
         workOrder: {
-            woNumber: string;
             productName: string;
+            woNumber: string;
         };
     } & {
         id: string;
@@ -104,9 +104,9 @@ export declare class CostSheetService {
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
                 completedQty: number;
             };
         } & {
@@ -161,10 +161,10 @@ export declare class CostSheetService {
             productionIssueId: string;
         }[];
         workOrder: {
-            bomId: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            bomId: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };

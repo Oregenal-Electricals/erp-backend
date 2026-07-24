@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto } from './dto/bom.dto';
+import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 export declare class BomService {
     private prisma;
     private audit;
@@ -361,6 +361,10 @@ export declare class BomService {
         effectiveTo: Date | null;
         bomNumber: string;
         totalCost: number | null;
+    }>;
+    generateStages(sourceBomId: string, dto: GenerateStagesDto, user: any): Promise<{
+        sourceBomNumber: string;
+        stages: any[];
     }>;
     addItem(bomId: string, dto: CreateBomItemDto, user: any, client?: any, options?: {
         skipCostRecalc?: boolean;

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { BomService } from './bom.service';
-import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto } from './dto/bom.dto';
+import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -50,6 +50,10 @@ export class BomController {
   @Post(':id/clone')
   @RequirePermissions(Permission.INVENTORY_CREATE)
   clone(@Param('id') id: string, @Request() req: any) { return this.bomService.clone(id, req.user); }
+
+  @Post(':id/generate-stages')
+  @RequirePermissions(Permission.INVENTORY_CREATE)
+  generateStages(@Param('id') id: string, @Body() dto: GenerateStagesDto, @Request() req: any) { return this.bomService.generateStages(id, dto, req.user); }
 
   @Post(':id/items')
   @RequirePermissions(Permission.INVENTORY_CREATE)

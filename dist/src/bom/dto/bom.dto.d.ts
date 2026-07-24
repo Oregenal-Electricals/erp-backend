@@ -42,3 +42,12 @@ export declare class UpdateBomItemDto {
     notes?: string;
     isActive?: boolean;
 }
+export declare class GenerateStageDto {
+    stageName: string;
+    sections: string[];
+    productCode?: string;
+    productName?: string;
+}
+export declare class GenerateStagesDto {
+    stages: GenerateStageDto[];
+}
