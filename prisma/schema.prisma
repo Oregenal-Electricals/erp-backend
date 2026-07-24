@@ -1463,6 +1463,7 @@ model BomItem {
   companyId       String
   sequence        Int      @default(1)
   itemType        String   @default("RAW_MATERIAL") // RAW_MATERIAL, COMPONENT, SUB_ASSEMBLY
+  section         String?
   rawMaterialId   String?
   rawMaterial     RawMaterial? @relation(fields: [rawMaterialId], references: [id])
   itemCode        String

@@ -16,6 +16,7 @@ export declare class UpdateBomDto {
 export declare class CreateBomItemDto {
     sequence?: number;
     itemType?: string;
+    section?: string;
     rawMaterialId?: string;
     itemCode: string;
     itemName: string;
@@ -29,6 +30,7 @@ export declare class CreateBomItemDto {
 export declare class UpdateBomItemDto {
     sequence?: number;
     itemType?: string;
+    section?: string;
     rawMaterialId?: string;
     itemCode?: string;
     itemName?: string;

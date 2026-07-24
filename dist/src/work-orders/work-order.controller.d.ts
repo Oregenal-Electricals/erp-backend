@@ -107,6 +107,7 @@ export declare class WorkOrderController {
                 notes: string | null;
                 itemType: string;
                 sequence: number;
+                section: string | null;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
                 unitCost: number | null;

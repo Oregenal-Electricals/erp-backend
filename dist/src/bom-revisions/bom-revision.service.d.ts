@@ -103,6 +103,7 @@ export declare class BomRevisionService {
                 notes: string | null;
                 itemType: string;
                 sequence: number;
+                section: string | null;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
                 unitCost: number | null;
@@ -149,6 +150,7 @@ export declare class BomRevisionService {
                 notes: string | null;
                 itemType: string;
                 sequence: number;
+                section: string | null;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
                 unitCost: number | null;

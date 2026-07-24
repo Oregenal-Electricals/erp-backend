@@ -90,6 +90,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], CreateBomItemDto.prototype, "section", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateBomItemDto.prototype, "rawMaterialId", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
@@ -146,6 +151,11 @@ __decorate([
     (0, class_validator_1.IsIn)(['RAW_MATERIAL', 'COMPONENT', 'SUB_ASSEMBLY']),
     __metadata("design:type", String)
 ], UpdateBomItemDto.prototype, "itemType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateBomItemDto.prototype, "section", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

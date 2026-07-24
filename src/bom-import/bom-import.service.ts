@@ -213,7 +213,7 @@ export class BomImportService {
    * either the whole import succeeds, or none of it is left half-done.
    */
   async confirmImport(dto: ConfirmBomImportDto, user: any) {
-    const flatItems = dto.sections.flatMap((s) => s.items);
+    const flatItems = dto.sections.flatMap((s) => s.items.map((item) => ({ ...item, section: s.name })));
     if (flatItems.length === 0) throw new BadRequestException('No items to import');
 
     return this.prisma.$transaction(async (tx) => {
@@ -345,6 +345,7 @@ export class BomImportService {
             itemName: item.itemName,
             uom: item.uom,
             quantity: item.quantity,
+            section: item.section,
             notes: [item.package && `Package: ${item.package}`, item.preferredMake && `Preferred: ${item.preferredMake}`, item.alternateMakes && `Alt: ${item.alternateMakes}`]
               .filter(Boolean)
               .join(' | ') || undefined,

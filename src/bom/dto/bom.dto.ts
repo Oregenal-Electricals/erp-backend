@@ -20,6 +20,7 @@ export class UpdateBomDto {
 export class CreateBomItemDto {
   @IsOptional() @IsInt() @Min(1) sequence?: number;
   @IsOptional() @IsString() @IsIn(['RAW_MATERIAL', 'COMPONENT', 'SUB_ASSEMBLY']) itemType?: string;
+  @IsOptional() @IsString() section?: string;
   @IsOptional() @IsString() rawMaterialId?: string;
   @IsString() itemCode: string;
   @IsString() itemName: string;
@@ -34,6 +35,7 @@ export class CreateBomItemDto {
 export class UpdateBomItemDto {
   @IsOptional() @IsInt() @Min(1) sequence?: number;
   @IsOptional() @IsString() @IsIn(['RAW_MATERIAL', 'COMPONENT', 'SUB_ASSEMBLY']) itemType?: string;
+  @IsOptional() @IsString() section?: string;
   @IsOptional() @IsString() rawMaterialId?: string;
   @IsOptional() @IsString() itemCode?: string;
   @IsOptional() @IsString() itemName?: string;
