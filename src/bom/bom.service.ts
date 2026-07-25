@@ -50,7 +50,6 @@ export class BomService {
 
   async findAll(user: any, query: any) {
     const { page = 1, limit = 20, search, status, productId, bomType, hideObsolete } = query;
-    const skip = (Number(page) - 1) * Number(limit);
     const where: any = { isActive: true };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     if (search) where.OR = [
@@ -58,22 +57,49 @@ export class BomService {
       { product: { name: { contains: search, mode: 'insensitive' } } },
       { product: { code: { contains: search, mode: 'insensitive' } } },
     ];
-    if (status) where.status = status;
-    else if (hideObsolete === 'true') where.status = { not: 'OBSOLETE' };
     if (bomType) where.bomType = bomType;
     if (productId) where.productId = productId;
 
-    const [data, total] = await Promise.all([
-      this.prisma.bom.findMany({
-        where, skip, take: Number(limit), orderBy: { createdAt: 'desc' },
-        include: { product: { select: { code: true, name: true, uom: { select: { code: true } } } }, _count: { select: { items: true } } },
-      }),
-      this.prisma.bom.count({ where }),
-    ]);
+    // Fetch the whole matching set, then collapse each bomNumber chain down to
+    // one representative row (prefer APPROVED, then DRAFT, then OBSOLETE;
+    // highest version number as tiebreaker) so the list shows one row per
+    // BOM identity, not one row per version.
+    const all = await this.prisma.bom.findMany({
+      where, orderBy: { createdAt: 'desc' },
+      include: { product: { select: { code: true, name: true, uom: { select: { code: true } } } }, _count: { select: { items: true } } },
+    });
+    const rank = (s: string) => (s === 'APPROVED' ? 2 : s === 'DRAFT' ? 1 : 0);
+    const verNum = (v: string) => parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
+    const groups = new Map<string, any>();
+    for (const b of all) {
+      const existing = groups.get(b.bomNumber);
+      if (!existing || rank(b.status) > rank(existing.status) ||
+          (rank(b.status) === rank(existing.status) && verNum(b.version) > verNum(existing.version))) {
+        groups.set(b.bomNumber, b);
+      }
+    }
+    let representative = Array.from(groups.values());
+    if (status) representative = representative.filter(b => b.status === status);
+    else if (hideObsolete === 'true') representative = representative.filter(b => b.status !== 'OBSOLETE');
+    representative.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const total = representative.length;
+    const skip = (Number(page) - 1) * Number(limit);
+    const data = representative.slice(skip, skip + Number(limit));
     return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
   }
 
-  // Stage BOMs generated from this master BOM (for the "View Stages" drill-down)
+  // Full version chain for this BOM's identity (same bomNumber), excluding itself - for the detail page's "Version History"
+  async getVersions(id: string, user: any) {
+    const bom = await this.findOne(id, user);
+    const where: any = { companyId: bom.companyId, bomNumber: bom.bomNumber, id: { not: id }, isActive: true };
+    return this.prisma.bom.findMany({
+      where, orderBy: { createdAt: 'desc' },
+      include: { _count: { select: { items: true } } },
+    });
+  }
+
+  // Stage BOMs generated from this master BOM (for the detail page's "Stage BOMs" section)
   async getStages(id: string, user: any) {
     const where: any = { sourceBomId: id, isActive: true };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
@@ -83,14 +109,9 @@ export class BomService {
     });
   }
 
-  // Obsolete version history for a BOM's product+bomType chain (for the "Version History" drill-down)
+  // Alias kept for existing /history route - same as getVersions
   async getHistory(id: string, user: any) {
-    const bom = await this.findOne(id, user);
-    const where: any = { companyId: bom.companyId, productId: bom.productId, bomType: bom.bomType, status: 'OBSOLETE', isActive: true };
-    return this.prisma.bom.findMany({
-      where, orderBy: { createdAt: 'desc' },
-      include: { _count: { select: { items: true } } },
-    });
+    return this.getVersions(id, user);
   }
 
   async findOne(id: string, user: any) {
@@ -144,11 +165,54 @@ export class BomService {
     await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
 
     const previousApproved = await this.prisma.bom.findMany({
-      where: { companyId: user.companyId, productId: bom.productId, bomType: bom.bomType, status: 'APPROVED', id: { not: id } },
+      where: { companyId: user.companyId, bomNumber: bom.bomNumber, status: 'APPROVED', id: { not: id } },
     });
     for (const prev of previousApproved) {
       await this.prisma.bom.update({ where: { id: prev.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
       await this.audit.log({ tableName: 'boms', recordId: prev.id, action: 'UPDATE', oldValues: prev, newValues: { status: 'OBSOLETE' }, changedBy: user.id });
+
+      // Cascade: when a MASTER's new version replaces an old approved one,
+      // the old master's stage-BOMs are now orphaned to an obsolete parent.
+      // Obsolete them too, and auto-create a DRAFT clone of each pointing at
+      // the new master, so the whole chain (master + stages) stays consistent
+      // and nothing is left silently APPROVED-but-orphaned.
+      if (bom.bomType === 'MASTER') {
+        const orphanedStages = await this.prisma.bom.findMany({
+          where: { companyId: user.companyId, sourceBomId: prev.id, bomType: 'STAGE', status: 'APPROVED' },
+          include: this.itemIncludes(),
+        });
+        for (const stage of orphanedStages) {
+          await this.prisma.bom.update({ where: { id: stage.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
+          await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: { status: 'OBSOLETE' }, changedBy: user.id });
+
+          const siblings = await this.prisma.bom.findMany({ where: { companyId: user.companyId, bomNumber: stage.bomNumber }, select: { version: true } });
+          const maxVersion = Math.max(0, ...siblings.map(s => parseInt((s.version || 'v1').replace(/[^0-9]/g, '') || '1')));
+          const newStage = await this.prisma.bom.create({
+            data: {
+              companyId: user.companyId, productId: stage.productId,
+              bomNumber: stage.bomNumber, version: `v${maxVersion + 1}`,
+              bomType: 'STAGE', sourceBomId: updated.id,
+              description: `Carried forward from ${stage.bomNumber} ${stage.version} after master ${bom.bomNumber} was re-approved - review and approve`,
+              effectiveFrom: new Date(), status: 'DRAFT',
+              createdBy: user.id, updatedBy: user.id,
+            },
+          });
+          if (stage.items && stage.items.length > 0) {
+            await this.prisma.bomItem.createMany({
+              data: stage.items.map(item => ({
+                bomId: newStage.id, companyId: user.companyId,
+                sequence: item.sequence, itemType: item.itemType,
+                rawMaterialId: item.rawMaterialId,
+                itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
+                quantity: item.quantity, wastagePercent: item.wastagePercent,
+                effectiveQty: item.effectiveQty, unitCost: item.unitCost,
+                totalCost: item.totalCost, isCritical: item.isCritical,
+                notes: item.notes, createdBy: user.id, updatedBy: user.id,
+              })),
+            });
+          }
+        }
+      }
     }
 
     return updated;
@@ -164,15 +228,18 @@ export class BomService {
 
   async clone(id: string, user: any) {
     const bom = await this.findOne(id, user);
-    const versionNum = parseInt((bom.version || 'v1').replace(/[^0-9]/g, '') || '1') + 1;
-    const baseBomNumber = bom.bomNumber.replace(/-v\d+$/, ''); // strip any existing -vN suffix so repeat clones stay clean
-    const bomNumber = `${baseBomNumber}-v${versionNum}`;
+    const siblings = await this.prisma.bom.findMany({
+      where: { companyId: user.companyId, bomNumber: bom.bomNumber },
+      select: { version: true },
+    });
+    const maxVersion = Math.max(0, ...siblings.map(s => parseInt((s.version || 'v1').replace(/[^0-9]/g, '') || '1')));
+    const versionNum = maxVersion + 1;
     const cloned = await this.prisma.bom.create({
       data: {
         companyId: user.companyId, productId: bom.productId,
-        bomNumber, version: `v${versionNum}`,
+        bomNumber: bom.bomNumber, version: `v${versionNum}`,
         bomType: bom.bomType, sourceBomId: bom.sourceBomId,
-        description: `Cloned from ${bom.bomNumber}`,
+        description: `Cloned from ${bom.bomNumber} ${bom.version}`,
         effectiveFrom: new Date(), status: 'DRAFT',
         createdBy: user.id, updatedBy: user.id,
       },

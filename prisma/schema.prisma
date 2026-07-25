@@ -1456,7 +1456,7 @@ model Bom {
 
   workOrders WorkOrder[]
   routingStages RoutingStage[]
-  @@unique([companyId, bomNumber])
+  @@unique([companyId, bomNumber, version])
   @@map("boms")
 }
 
