@@ -27,7 +27,7 @@ let CustomerPoController = class CustomerPoController {
     getStats(req) { return this.cpoService.getStats(req.user); }
     getAllOpenShortages(req) { return this.cpoService.getAllOpenShortages(req.user); }
     markShortagesRaised(body, req) {
-        return this.cpoService.markShortagesRaised(body.itemCodes, body.poId, req.user);
+        return this.cpoService.markShortagesRaised(body.items, body.poId, req.user);
     }
     findAll(req, query) { return this.cpoService.findAll(req.user, query); }
     findOne(id, req) { return this.cpoService.findOne(id, req.user); }

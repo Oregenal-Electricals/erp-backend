@@ -412,7 +412,12 @@ let CustomerPoService = class CustomerPoService {
         const allocationForThisCpo = new Map();
         for (const [itemCode, queue] of demandQueue.entries()) {
             const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
-            let runningStock = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
+            const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
+                where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
+                select: { pendingQty: true },
+            });
+            const onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
+            let runningStock = ((balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0) + onOrderQty;
             const totalStock = runningStock;
             for (const entry of queue) {
                 const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
@@ -625,12 +630,38 @@ let CustomerPoService = class CustomerPoService {
             totalShortageRecords: shortages.length,
         };
     }
-    async markShortagesRaised(itemCodes, poId, user) {
-        const result = await this.prisma.materialShortage.updateMany({
-            where: { companyId: user.companyId, itemCode: { in: itemCodes }, status: 'OPEN' },
-            data: { status: 'PR_RAISED', prId: poId, updatedBy: user.id },
-        });
-        return { updated: result.count };
+    async markShortagesRaised(items, poId, user) {
+        let totalUpdated = 0;
+        for (const { itemCode, qtyOrdered } of items) {
+            let remaining = qtyOrdered;
+            if (remaining <= 0)
+                continue;
+            const openRows = await this.prisma.materialShortage.findMany({
+                where: { companyId: user.companyId, itemCode, status: 'OPEN' },
+                orderBy: { createdAt: 'asc' },
+            });
+            for (const row of openRows) {
+                if (remaining <= 0)
+                    break;
+                if (row.shortageQty <= remaining) {
+                    await this.prisma.materialShortage.update({
+                        where: { id: row.id },
+                        data: { status: 'PR_RAISED', prId: poId, updatedBy: user.id },
+                    });
+                    remaining -= row.shortageQty;
+                    totalUpdated++;
+                }
+                else {
+                    await this.prisma.materialShortage.update({
+                        where: { id: row.id },
+                        data: { shortageQty: Math.round((row.shortageQty - remaining) * 1000) / 1000, prId: poId, updatedBy: user.id },
+                    });
+                    remaining = 0;
+                    totalUpdated++;
+                }
+            }
+        }
+        return { updated: totalUpdated };
     }
     async getShortages(cpoId, user) {
         const cpo = await this.prisma.customerPo.findFirst({ where: { id: cpoId, companyId: user.companyId } });

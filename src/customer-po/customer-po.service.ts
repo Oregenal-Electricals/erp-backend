@@ -529,7 +529,17 @@ export class CustomerPoService {
     const allocationForThisCpo = new Map<string, { netRequired: number; availableQty: number; shortage: number }>();
     for (const [itemCode, queue] of demandQueue.entries()) {
       const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
-      let runningStock = balance?.availableQty || 0;
+      // Include material already on order (PO sent/approved/partially received,
+      // not yet fully received) as available supply for this check - otherwise
+      // re-running the shortage check while a PO is in transit would recreate
+      // an identical OPEN shortage for material that's already been ordered,
+      // letting someone raise a duplicate PO for the same shortfall.
+      const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
+        where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
+        select: { pendingQty: true },
+      });
+      const onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
+      let runningStock = (balance?.availableQty || 0) + onOrderQty;
       const totalStock = runningStock;
       for (const entry of queue) {
         const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
@@ -759,12 +769,44 @@ export class CustomerPoService {
   // Marks all OPEN shortage records for the given item codes as PR_RAISED,
   // linking them to the PO just created from the shortage screen - closes
   // the loop so Purchase can trace which PO covers which shortage.
-  async markShortagesRaised(itemCodes: string[], poId: string, user: any) {
-    const result = await this.prisma.materialShortage.updateMany({
-      where: { companyId: user.companyId, itemCode: { in: itemCodes }, status: 'OPEN' },
-      data: { status: 'PR_RAISED', prId: poId, updatedBy: user.id },
-    });
-    return { updated: result.count };
+  // Marks OPEN shortage records as covered by the given PO, but only up to
+  // the quantity actually ordered per item - not the whole shortage. If the
+  // PO covers less than the total shortage for an item, the oldest OPEN
+  // records get fully marked PR_RAISED first, and the remainder is either
+  // partially reduced (if a record is only partly covered) or left
+  // untouched OPEN so the real remaining gap stays visible on this screen.
+  async markShortagesRaised(items: { itemCode: string; qtyOrdered: number }[], poId: string, user: any) {
+    let totalUpdated = 0;
+    for (const { itemCode, qtyOrdered } of items) {
+      let remaining = qtyOrdered;
+      if (remaining <= 0) continue;
+
+      const openRows = await this.prisma.materialShortage.findMany({
+        where: { companyId: user.companyId, itemCode, status: 'OPEN' },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      for (const row of openRows) {
+        if (remaining <= 0) break;
+        if (row.shortageQty <= remaining) {
+          await this.prisma.materialShortage.update({
+            where: { id: row.id },
+            data: { status: 'PR_RAISED', prId: poId, updatedBy: user.id },
+          });
+          remaining -= row.shortageQty;
+          totalUpdated++;
+        } else {
+          // Only partially covered - reduce the shortage in place, stays OPEN
+          await this.prisma.materialShortage.update({
+            where: { id: row.id },
+            data: { shortageQty: Math.round((row.shortageQty - remaining) * 1000) / 1000, prId: poId, updatedBy: user.id },
+          });
+          remaining = 0;
+          totalUpdated++;
+        }
+      }
+    }
+    return { updated: totalUpdated };
   }
 
   async getShortages(cpoId: string, user: any) {

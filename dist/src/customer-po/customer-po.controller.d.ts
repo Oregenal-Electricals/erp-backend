@@ -27,7 +27,10 @@ export declare class CustomerPoController {
         totalShortageRecords: number;
     }>;
     markShortagesRaised(body: {
-        itemCodes: string[];
+        items: {
+            itemCode: string;
+            qtyOrdered: number;
+        }[];
         poId: string;
     }, req: any): Promise<{
         updated: number;

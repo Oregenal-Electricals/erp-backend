@@ -21,8 +21,8 @@ export class CustomerPoController {
 
   @Post('shortages/mark-raised')
   @RequirePermissions(Permission.PURCHASE_CREATE)
-  markShortagesRaised(@Body() body: { itemCodes: string[]; poId: string }, @Request() req: any) {
-    return this.cpoService.markShortagesRaised(body.itemCodes, body.poId, req.user);
+  markShortagesRaised(@Body() body: { items: { itemCode: string; qtyOrdered: number }[]; poId: string }, @Request() req: any) {
+    return this.cpoService.markShortagesRaised(body.items, body.poId, req.user);
   }
 
   @Get()
