@@ -82,7 +82,7 @@ export class PurchaseOrderService {
   }
 
   async findAll(user: any, query: any) {
-    const { page = 1, limit = 20, search, status, vendorId } = query;
+    const { page = 1, limit = 20, search, status, vendorId, excludeGateInwarded } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const where: any = {};
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
@@ -90,8 +90,15 @@ export class PurchaseOrderService {
       { poNumber: { contains: search, mode: 'insensitive' } },
       { vendor: { name: { contains: search, mode: 'insensitive' } } },
     ];
-    if (status) where.status = status;
+    if (status) where.status = status.includes(',') ? { in: status.split(',') } : status;
     if (vendorId) where.vendorId = vendorId;
+    if (excludeGateInwarded === 'true') {
+      // Show POs that still have something left to receive - i.e. at least
+      // one item with pendingQty > 0. This correctly keeps partially-received
+      // POs visible (more material still due), and only hides POs where
+      // every item has already been fully received.
+      where.items = { some: { pendingQty: { gt: 0 } } };
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.purchaseOrder.findMany({

@@ -79,7 +79,7 @@ let PurchaseOrderService = class PurchaseOrderService {
         return po;
     }
     async findAll(user, query) {
-        const { page = 1, limit = 20, search, status, vendorId } = query;
+        const { page = 1, limit = 20, search, status, vendorId, excludeGateInwarded } = query;
         const skip = (Number(page) - 1) * Number(limit);
         const where = {};
         if (user.role !== 'SUPER_ADMIN')
@@ -90,9 +90,12 @@ let PurchaseOrderService = class PurchaseOrderService {
                 { vendor: { name: { contains: search, mode: 'insensitive' } } },
             ];
         if (status)
-            where.status = status;
+            where.status = status.includes(',') ? { in: status.split(',') } : status;
         if (vendorId)
             where.vendorId = vendorId;
+        if (excludeGateInwarded === 'true') {
+            where.items = { some: { pendingQty: { gt: 0 } } };
+        }
         const [data, total] = await Promise.all([
             this.prisma.purchaseOrder.findMany({
                 where, skip, take: Number(limit), orderBy: { createdAt: 'desc' },
