@@ -30,6 +30,26 @@ export class GateInwardService {
       throw new BadRequestException('Provide either materialDescription + quantity, or a list of items');
     }
 
+    if (dto.poId) {
+      // Guard against accidental double-submission (double-click race,
+      // browser back-button resubmit, network retry) creating a
+      // near-identical duplicate GIN for the same PO moments apart.
+      const recentDuplicate = await this.prisma.gateInwardEntry.findFirst({
+        where: {
+          companyId: user.companyId,
+          poId: dto.poId,
+          isActive: true,
+          createdAt: { gte: new Date(Date.now() - 60 * 1000) },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (recentDuplicate) {
+        throw new BadRequestException(
+          `A Gate Inward entry (${recentDuplicate.ginNumber}) was already created for this PO less than a minute ago. ` +
+          `If this is a genuinely separate delivery, please wait a moment and try again.`
+        );
+      }
+    }
     let ginNumber: string;
     try {
       ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');

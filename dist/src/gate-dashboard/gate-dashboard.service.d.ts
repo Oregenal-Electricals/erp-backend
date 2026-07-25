@@ -128,10 +128,10 @@ export declare class GateDashboardService {
             grossWeight: number | null;
             rejectionReason: string | null;
             ginNumber: string;
-            verifiedAt: Date | null;
-            completedAt: Date | null;
             receivedById: string;
             verifiedById: string | null;
+            verifiedAt: Date | null;
+            completedAt: Date | null;
         })[];
         pendingGOEList: ({
             plant: {

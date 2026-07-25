@@ -74,10 +74,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
     findAll(user: any, status?: GateInwardStatus, plantId?: string, date?: string, search?: string): Promise<({
         items: {
@@ -149,10 +149,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     })[]>;
     getStats(user: any): Promise<{
         total: number;
@@ -233,10 +233,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
     update(id: string, dto: UpdateGateInwardDto, user: any): Promise<{
         items: {
@@ -308,10 +308,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
     verify(id: string, dto: VerifyGateInwardDto, user: any): Promise<{
         items: {
@@ -383,10 +383,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
     sendToStores(id: string, user: any): Promise<{
         items: {
@@ -458,10 +458,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
     complete(id: string, user: any): Promise<{
         items: {
@@ -533,10 +533,10 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
     reject(id: string, dto: RejectGateInwardDto, user: any): Promise<{
         items: {
@@ -608,9 +608,9 @@ export declare class GateInwardController {
         grossWeight: number | null;
         rejectionReason: string | null;
         ginNumber: string;
-        verifiedAt: Date | null;
-        completedAt: Date | null;
         receivedById: string;
         verifiedById: string | null;
+        verifiedAt: Date | null;
+        completedAt: Date | null;
     }>;
 }

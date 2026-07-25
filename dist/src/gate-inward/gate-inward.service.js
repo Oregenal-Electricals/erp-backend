@@ -31,6 +31,21 @@ let GateInwardService = class GateInwardService {
         if (!hasFlatMaterial && !hasItems) {
             throw new common_1.BadRequestException('Provide either materialDescription + quantity, or a list of items');
         }
+        if (dto.poId) {
+            const recentDuplicate = await this.prisma.gateInwardEntry.findFirst({
+                where: {
+                    companyId: user.companyId,
+                    poId: dto.poId,
+                    isActive: true,
+                    createdAt: { gte: new Date(Date.now() - 60 * 1000) },
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+            if (recentDuplicate) {
+                throw new common_1.BadRequestException(`A Gate Inward entry (${recentDuplicate.ginNumber}) was already created for this PO less than a minute ago. ` +
+                    `If this is a genuinely separate delivery, please wait a moment and try again.`);
+            }
+        }
         let ginNumber;
         try {
             ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');

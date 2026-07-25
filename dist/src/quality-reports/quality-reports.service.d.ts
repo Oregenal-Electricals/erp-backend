@@ -197,8 +197,8 @@ export declare class QualityReportsService {
             status: string;
             dueDate: Date;
             remarks: string | null;
-            vendorId: string;
             verifiedBy: string | null;
+            vendorId: string;
             severity: string;
             closedDate: Date | null;
             ncrId: string | null;
