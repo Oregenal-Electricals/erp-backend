@@ -49,7 +49,7 @@ export class BomService {
   }
 
   async findAll(user: any, query: any) {
-    const { page = 1, limit = 20, search, status, productId } = query;
+    const { page = 1, limit = 20, search, status, productId, bomType, hideObsolete } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const where: any = { isActive: true };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
@@ -59,6 +59,8 @@ export class BomService {
       { product: { code: { contains: search, mode: 'insensitive' } } },
     ];
     if (status) where.status = status;
+    else if (hideObsolete === 'true') where.status = { not: 'OBSOLETE' };
+    if (bomType) where.bomType = bomType;
     if (productId) where.productId = productId;
 
     const [data, total] = await Promise.all([
@@ -69,6 +71,26 @@ export class BomService {
       this.prisma.bom.count({ where }),
     ]);
     return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
+  }
+
+  // Stage BOMs generated from this master BOM (for the "View Stages" drill-down)
+  async getStages(id: string, user: any) {
+    const where: any = { sourceBomId: id, isActive: true };
+    if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
+    return this.prisma.bom.findMany({
+      where, orderBy: { createdAt: 'asc' },
+      include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
+    });
+  }
+
+  // Obsolete version history for a BOM's product+bomType chain (for the "Version History" drill-down)
+  async getHistory(id: string, user: any) {
+    const bom = await this.findOne(id, user);
+    const where: any = { companyId: bom.companyId, productId: bom.productId, bomType: bom.bomType, status: 'OBSOLETE', isActive: true };
+    return this.prisma.bom.findMany({
+      where, orderBy: { createdAt: 'desc' },
+      include: { _count: { select: { items: true } } },
+    });
   }
 
   async findOne(id: string, user: any) {
@@ -122,7 +144,7 @@ export class BomService {
     await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
 
     const previousApproved = await this.prisma.bom.findMany({
-      where: { companyId: user.companyId, productId: bom.productId, status: 'APPROVED', id: { not: id } },
+      where: { companyId: user.companyId, productId: bom.productId, bomType: bom.bomType, status: 'APPROVED', id: { not: id } },
     });
     for (const prev of previousApproved) {
       await this.prisma.bom.update({ where: { id: prev.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
@@ -214,6 +236,7 @@ export class BomService {
         data: {
           companyId: user.companyId, productId: targetProduct.id,
           bomNumber: newBomNumber, version: 'v1',
+          bomType: 'STAGE', sourceBomId: sourceBom.id,
           description: `Stage \"${stage.stageName}\" auto-generated from ${sourceBom.bomNumber}`,
           effectiveFrom: new Date(), status: 'DRAFT',
           createdBy: user.id, updatedBy: user.id,

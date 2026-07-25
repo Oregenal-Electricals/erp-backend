@@ -23,6 +23,14 @@ export class BomController {
   @RequirePermissions(Permission.INVENTORY_VIEW)
   findByProduct(@Param('productId') productId: string, @Request() req: any) { return this.bomService.findByProduct(productId, req.user); }
 
+  @Get(':id/stages')
+  @RequirePermissions(Permission.INVENTORY_VIEW)
+  getStages(@Param('id') id: string, @Request() req: any) { return this.bomService.getStages(id, req.user); }
+
+  @Get(':id/history')
+  @RequirePermissions(Permission.INVENTORY_VIEW)
+  getHistory(@Param('id') id: string, @Request() req: any) { return this.bomService.getHistory(id, req.user); }
+
   @Get(':id')
   @RequirePermissions(Permission.INVENTORY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.bomService.findOne(id, req.user); }

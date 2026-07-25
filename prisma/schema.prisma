@@ -1432,6 +1432,10 @@ model Bom {
   revision      ProductRevision? @relation(fields: [revisionId], references: [id])
   bomNumber     String
   version       String    @default("v1")
+  bomType       String    @default("MASTER") // MASTER = complete flat recipe, STAGE = one routing-stage sub-BOM
+  sourceBomId   String?
+  sourceBom     Bom?      @relation("BomStages", fields: [sourceBomId], references: [id])
+  stageBoms     Bom[]     @relation("BomStages")
   description   String?
   effectiveFrom DateTime  @default(now())
   effectiveTo   DateTime?
