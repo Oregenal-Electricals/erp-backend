@@ -26,6 +26,9 @@ let CustomerPoController = class CustomerPoController {
     }
     getStats(req) { return this.cpoService.getStats(req.user); }
     getAllOpenShortages(req) { return this.cpoService.getAllOpenShortages(req.user); }
+    markShortagesRaised(body, req) {
+        return this.cpoService.markShortagesRaised(body.itemCodes, body.poId, req.user);
+    }
     findAll(req, query) { return this.cpoService.findAll(req.user, query); }
     findOne(id, req) { return this.cpoService.findOne(id, req.user); }
     getShortages(id, req) { return this.cpoService.getShortages(id, req.user); }
@@ -53,6 +56,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], CustomerPoController.prototype, "getAllOpenShortages", null);
+__decorate([
+    (0, common_1.Post)('shortages/mark-raised'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_CREATE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], CustomerPoController.prototype, "markShortagesRaised", null);
 __decorate([
     (0, common_1.Get)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.CUSTOMER_PO_VIEW),

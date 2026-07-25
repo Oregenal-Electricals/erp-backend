@@ -563,6 +563,9 @@ export declare class CustomerPoService {
         totalItemsShort: number;
         totalShortageRecords: number;
     }>;
+    markShortagesRaised(itemCodes: string[], poId: string, user: any): Promise<{
+        updated: number;
+    }>;
     getShortages(cpoId: string, user: any): Promise<{
         cpoNumber: string;
         mrpRunAt: Date;

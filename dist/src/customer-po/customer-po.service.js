@@ -625,6 +625,13 @@ let CustomerPoService = class CustomerPoService {
             totalShortageRecords: shortages.length,
         };
     }
+    async markShortagesRaised(itemCodes, poId, user) {
+        const result = await this.prisma.materialShortage.updateMany({
+            where: { companyId: user.companyId, itemCode: { in: itemCodes }, status: 'OPEN' },
+            data: { status: 'PR_RAISED', prId: poId, updatedBy: user.id },
+        });
+        return { updated: result.count };
+    }
     async getShortages(cpoId, user) {
         const cpo = await this.prisma.customerPo.findFirst({ where: { id: cpoId, companyId: user.companyId } });
         if (!cpo)

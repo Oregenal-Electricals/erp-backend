@@ -26,6 +26,12 @@ export declare class CustomerPoController {
         totalItemsShort: number;
         totalShortageRecords: number;
     }>;
+    markShortagesRaised(body: {
+        itemCodes: string[];
+        poId: string;
+    }, req: any): Promise<{
+        updated: number;
+    }>;
     findAll(req: any, query: any): Promise<{
         data: ({
             items: {

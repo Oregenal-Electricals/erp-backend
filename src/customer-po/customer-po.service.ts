@@ -756,6 +756,17 @@ export class CustomerPoService {
     };
   }
 
+  // Marks all OPEN shortage records for the given item codes as PR_RAISED,
+  // linking them to the PO just created from the shortage screen - closes
+  // the loop so Purchase can trace which PO covers which shortage.
+  async markShortagesRaised(itemCodes: string[], poId: string, user: any) {
+    const result = await this.prisma.materialShortage.updateMany({
+      where: { companyId: user.companyId, itemCode: { in: itemCodes }, status: 'OPEN' },
+      data: { status: 'PR_RAISED', prId: poId, updatedBy: user.id },
+    });
+    return { updated: result.count };
+  }
+
   async getShortages(cpoId: string, user: any) {
     const cpo = await this.prisma.customerPo.findFirst({ where: { id: cpoId, companyId: user.companyId } });
     if (!cpo) throw new NotFoundException('CPO not found');
