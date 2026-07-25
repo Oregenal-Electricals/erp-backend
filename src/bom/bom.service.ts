@@ -254,7 +254,20 @@ export class BomService {
 
     const wastage = dto.wastagePercent || 0;
     const effectiveQty = dto.quantity * (1 + wastage / 100);
-    const totalCost = dto.unitCost ? effectiveQty * dto.unitCost : null;
+
+    // If the caller didn't supply a unit cost (Excel import, or copying
+    // items into an auto-generated routing-stage BOM), fall back to the
+    // item's real last-known cost from stock so the BOM isn't left blank
+    // when that data already exists. Only defaults when unitCost is not
+    // provided at all - an explicit 0 from the caller is respected as-is.
+    let unitCost = dto.unitCost;
+    if (unitCost === undefined || unitCost === null) {
+      const stock = await client.stockBalance.findFirst({
+        where: { companyId: user.companyId, itemCode: dto.itemCode },
+      });
+      if (stock && stock.unitCost > 0) unitCost = stock.unitCost;
+    }
+    const totalCost = unitCost ? effectiveQty * unitCost : null;
 
     const lastItem = await client.bomItem.findFirst({
       where: { bomId, isActive: true },
@@ -263,7 +276,7 @@ export class BomService {
     const nextSequence = (lastItem?.sequence || 0) + 1;
 
     const item = await client.bomItem.create({
-      data: { ...dto, sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
+      data: { ...dto, unitCost, sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
     });
 
     if ((item.itemType === 'RAW_MATERIAL' || !item.itemType) && !item.rawMaterialId) {
