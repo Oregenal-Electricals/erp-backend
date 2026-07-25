@@ -11,40 +11,7 @@ export declare class BomController {
         totalItems: number;
     }>;
     findAll(req: any, query: any): Promise<{
-        data: ({
-            _count: {
-                items: number;
-            };
-            product: {
-                name: string;
-                code: string;
-                uom: {
-                    code: string;
-                };
-            };
-        } & {
-            id: string;
-            companyId: string;
-            description: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            approvedBy: string | null;
-            approvedAt: Date | null;
-            productId: string;
-            revisionId: string | null;
-            version: string;
-            effectiveFrom: Date;
-            effectiveTo: Date | null;
-            bomNumber: string;
-            bomType: string;
-            sourceBomId: string | null;
-            totalCost: number | null;
-        })[];
+        data: any[];
         total: number;
         page: number;
         limit: number;
