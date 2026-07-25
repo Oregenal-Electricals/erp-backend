@@ -164,8 +164,9 @@ export class BomService {
 
   async clone(id: string, user: any) {
     const bom = await this.findOne(id, user);
-    const bomNumber = await this.generateBomNumber(user.companyId, (bom as any).product?.brand);
     const versionNum = parseInt((bom.version || 'v1').replace(/[^0-9]/g, '') || '1') + 1;
+    const baseBomNumber = bom.bomNumber.replace(/-v\d+$/, ''); // strip any existing -vN suffix so repeat clones stay clean
+    const bomNumber = `${baseBomNumber}-v${versionNum}`;
     const cloned = await this.prisma.bom.create({
       data: {
         companyId: user.companyId, productId: bom.productId,
