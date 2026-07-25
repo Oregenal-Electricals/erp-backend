@@ -103,10 +103,21 @@ let BomService = class BomService {
         const where = { sourceBomId: id, isActive: true };
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
-        return this.prisma.bom.findMany({
+        const all = await this.prisma.bom.findMany({
             where, orderBy: { createdAt: 'asc' },
             include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
         });
+        const rank = (s) => (s === 'APPROVED' ? 2 : s === 'DRAFT' ? 1 : 0);
+        const verNum = (v) => parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
+        const groups = new Map();
+        for (const b of all) {
+            const existing = groups.get(b.bomNumber);
+            if (!existing || rank(b.status) > rank(existing.status) ||
+                (rank(b.status) === rank(existing.status) && verNum(b.version) > verNum(existing.version))) {
+                groups.set(b.bomNumber, b);
+            }
+        }
+        return Array.from(groups.values()).sort((a, b) => a.bomNumber.localeCompare(b.bomNumber));
     }
     async getHistory(id, user) {
         return this.getVersions(id, user);

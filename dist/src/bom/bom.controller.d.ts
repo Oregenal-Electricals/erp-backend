@@ -48,37 +48,7 @@ export declare class BomController {
         sourceBomId: string | null;
         totalCost: number | null;
     })[]>;
-    getStages(id: string, req: any): Promise<({
-        _count: {
-            items: number;
-        };
-        product: {
-            name: string;
-            code: string;
-        };
-    } & {
-        id: string;
-        companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        productId: string;
-        revisionId: string | null;
-        version: string;
-        effectiveFrom: Date;
-        effectiveTo: Date | null;
-        bomNumber: string;
-        bomType: string;
-        sourceBomId: string | null;
-        totalCost: number | null;
-    })[]>;
+    getStages(id: string, req: any): Promise<any[]>;
     getHistory(id: string, req: any): Promise<({
         _count: {
             items: number;
