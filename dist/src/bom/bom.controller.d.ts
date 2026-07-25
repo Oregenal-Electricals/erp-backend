@@ -41,6 +41,8 @@ export declare class BomController {
             effectiveFrom: Date;
             effectiveTo: Date | null;
             bomNumber: string;
+            bomType: string;
+            sourceBomId: string | null;
             totalCost: number | null;
         })[];
         total: number;
@@ -75,6 +77,66 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
+        totalCost: number | null;
+    })[]>;
+    getStages(id: string, req: any): Promise<({
+        _count: {
+            items: number;
+        };
+        product: {
+            name: string;
+            code: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        productId: string;
+        revisionId: string | null;
+        version: string;
+        effectiveFrom: Date;
+        effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
+        totalCost: number | null;
+    })[]>;
+    getHistory(id: string, req: any): Promise<({
+        _count: {
+            items: number;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        productId: string;
+        revisionId: string | null;
+        version: string;
+        effectiveFrom: Date;
+        effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
@@ -130,6 +192,8 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     create(dto: CreateBomDto, req: any): Promise<{
@@ -181,6 +245,8 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     update(id: string, dto: UpdateBomDto, req: any): Promise<{
@@ -232,6 +298,8 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     remove(id: string, req: any): Promise<{
@@ -286,6 +354,8 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     obsolete(id: string, req: any): Promise<{
@@ -307,6 +377,8 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     clone(id: string, req: any): Promise<{
@@ -362,6 +434,8 @@ export declare class BomController {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     generateStages(id: string, dto: GenerateStagesDto, req: any): Promise<{

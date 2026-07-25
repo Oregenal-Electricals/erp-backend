@@ -145,6 +145,8 @@ export declare class WorkOrderService {
             effectiveFrom: Date;
             effectiveTo: Date | null;
             bomNumber: string;
+            bomType: string;
+            sourceBomId: string | null;
             totalCost: number | null;
         };
     } & {

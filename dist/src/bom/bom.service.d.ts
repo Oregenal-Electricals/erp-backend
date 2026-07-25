@@ -57,6 +57,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -90,6 +92,8 @@ export declare class BomService {
             effectiveFrom: Date;
             effectiveTo: Date | null;
             bomNumber: string;
+            bomType: string;
+            sourceBomId: string | null;
             totalCost: number | null;
         })[];
         total: number;
@@ -97,6 +101,64 @@ export declare class BomService {
         limit: number;
         totalPages: number;
     }>;
+    getStages(id: string, user: any): Promise<({
+        _count: {
+            items: number;
+        };
+        product: {
+            name: string;
+            code: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        productId: string;
+        revisionId: string | null;
+        version: string;
+        effectiveFrom: Date;
+        effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
+        totalCost: number | null;
+    })[]>;
+    getHistory(id: string, user: any): Promise<({
+        _count: {
+            items: number;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        productId: string;
+        revisionId: string | null;
+        version: string;
+        effectiveFrom: Date;
+        effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
+        totalCost: number | null;
+    })[]>;
     findOne(id: string, user: any): Promise<{
         items: {
             id: string;
@@ -150,6 +212,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     findByProduct(productId: string, user: any): Promise<({
@@ -179,6 +243,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     })[]>;
     update(id: string, dto: UpdateBomDto, user: any): Promise<{
@@ -230,6 +296,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     remove(id: string, user: any): Promise<{
@@ -284,6 +352,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     obsolete(id: string, user: any): Promise<{
@@ -305,6 +375,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     clone(id: string, user: any): Promise<{
@@ -360,6 +432,8 @@ export declare class BomService {
         effectiveFrom: Date;
         effectiveTo: Date | null;
         bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     generateStages(sourceBomId: string, dto: GenerateStagesDto, user: any): Promise<{

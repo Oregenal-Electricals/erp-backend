@@ -27,6 +27,8 @@ let BomController = class BomController {
     getStats(req) { return this.bomService.getStats(req.user); }
     findAll(req, query) { return this.bomService.findAll(req.user, query); }
     findByProduct(productId, req) { return this.bomService.findByProduct(productId, req.user); }
+    getStages(id, req) { return this.bomService.getStages(id, req.user); }
+    getHistory(id, req) { return this.bomService.getHistory(id, req.user); }
     findOne(id, req) { return this.bomService.findOne(id, req.user); }
     create(dto, req) { return this.bomService.create(dto, req.user); }
     update(id, dto, req) { return this.bomService.update(id, dto, req.user); }
@@ -66,6 +68,24 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], BomController.prototype, "findByProduct", null);
+__decorate([
+    (0, common_1.Get)(':id/stages'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], BomController.prototype, "getStages", null);
+__decorate([
+    (0, common_1.Get)(':id/history'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], BomController.prototype, "getHistory", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),

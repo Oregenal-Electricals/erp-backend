@@ -52,7 +52,7 @@ let BomService = class BomService {
         return bom;
     }
     async findAll(user, query) {
-        const { page = 1, limit = 20, search, status, productId } = query;
+        const { page = 1, limit = 20, search, status, productId, bomType, hideObsolete } = query;
         const skip = (Number(page) - 1) * Number(limit);
         const where = { isActive: true };
         if (user.role !== 'SUPER_ADMIN')
@@ -65,6 +65,10 @@ let BomService = class BomService {
             ];
         if (status)
             where.status = status;
+        else if (hideObsolete === 'true')
+            where.status = { not: 'OBSOLETE' };
+        if (bomType)
+            where.bomType = bomType;
         if (productId)
             where.productId = productId;
         const [data, total] = await Promise.all([
@@ -75,6 +79,23 @@ let BomService = class BomService {
             this.prisma.bom.count({ where }),
         ]);
         return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
+    }
+    async getStages(id, user) {
+        const where = { sourceBomId: id, isActive: true };
+        if (user.role !== 'SUPER_ADMIN')
+            where.companyId = user.companyId;
+        return this.prisma.bom.findMany({
+            where, orderBy: { createdAt: 'asc' },
+            include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
+        });
+    }
+    async getHistory(id, user) {
+        const bom = await this.findOne(id, user);
+        const where = { companyId: bom.companyId, productId: bom.productId, bomType: bom.bomType, status: 'OBSOLETE', isActive: true };
+        return this.prisma.bom.findMany({
+            where, orderBy: { createdAt: 'desc' },
+            include: { _count: { select: { items: true } } },
+        });
     }
     async findOne(id, user) {
         const where = { id };
@@ -129,7 +150,7 @@ let BomService = class BomService {
         });
         await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
         const previousApproved = await this.prisma.bom.findMany({
-            where: { companyId: user.companyId, productId: bom.productId, status: 'APPROVED', id: { not: id } },
+            where: { companyId: user.companyId, productId: bom.productId, bomType: bom.bomType, status: 'APPROVED', id: { not: id } },
         });
         for (const prev of previousApproved) {
             await this.prisma.bom.update({ where: { id: prev.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
@@ -154,6 +175,7 @@ let BomService = class BomService {
             data: {
                 companyId: user.companyId, productId: bom.productId,
                 bomNumber, version: `v${versionNum}`,
+                bomType: bom.bomType, sourceBomId: bom.sourceBomId,
                 description: `Cloned from ${bom.bomNumber}`,
                 effectiveFrom: new Date(), status: 'DRAFT',
                 createdBy: user.id, updatedBy: user.id,
@@ -217,6 +239,7 @@ let BomService = class BomService {
                 data: {
                     companyId: user.companyId, productId: targetProduct.id,
                     bomNumber: newBomNumber, version: 'v1',
+                    bomType: 'STAGE', sourceBomId: sourceBom.id,
                     description: `Stage \"${stage.stageName}\" auto-generated from ${sourceBom.bomNumber}`,
                     effectiveFrom: new Date(), status: 'DRAFT',
                     createdBy: user.id, updatedBy: user.id,
@@ -253,14 +276,22 @@ let BomService = class BomService {
             throw new common_1.BadRequestException('Can only add items to DRAFT BOMs');
         const wastage = dto.wastagePercent || 0;
         const effectiveQty = dto.quantity * (1 + wastage / 100);
-        const totalCost = dto.unitCost ? effectiveQty * dto.unitCost : null;
+        let unitCost = dto.unitCost;
+        if (unitCost === undefined || unitCost === null) {
+            const stock = await client.stockBalance.findFirst({
+                where: { companyId: user.companyId, itemCode: dto.itemCode },
+            });
+            if (stock && stock.unitCost > 0)
+                unitCost = stock.unitCost;
+        }
+        const totalCost = unitCost ? effectiveQty * unitCost : null;
         const lastItem = await client.bomItem.findFirst({
             where: { bomId, isActive: true },
             orderBy: { sequence: 'desc' },
         });
         const nextSequence = ((lastItem === null || lastItem === void 0 ? void 0 : lastItem.sequence) || 0) + 1;
         const item = await client.bomItem.create({
-            data: Object.assign(Object.assign({}, dto), { sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id }),
+            data: Object.assign(Object.assign({}, dto), { unitCost, sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id }),
         });
         if ((item.itemType === 'RAW_MATERIAL' || !item.itemType) && !item.rawMaterialId) {
             const uomRecord = item.uom

@@ -137,6 +137,8 @@ export declare class BomRevisionController {
             effectiveFrom: Date;
             effectiveTo: Date | null;
             bomNumber: string;
+            bomType: string;
+            sourceBomId: string | null;
             totalCost: number | null;
         };
         previousBom: {
@@ -184,6 +186,8 @@ export declare class BomRevisionController {
             effectiveFrom: Date;
             effectiveTo: Date | null;
             bomNumber: string;
+            bomType: string;
+            sourceBomId: string | null;
             totalCost: number | null;
         };
     } & {
