@@ -167,7 +167,7 @@ export class MrpService {
         const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
         const bom = product
           ? await this.prisma.bom.findFirst({
-              where: { companyId, productId: product.id, status: 'APPROVED' },
+              where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
               include: { items: { where: { isActive: true } } },
             })
           : null;
@@ -223,7 +223,7 @@ export class MrpService {
       const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
       if (!product) throw new BadRequestException(`No product master found for item code ${soItem.itemCode}`);
       const bom = await this.prisma.bom.findFirst({
-        where: { companyId, productId: product.id, status: 'APPROVED' },
+        where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
         include: { items: { where: { isActive: true } } },
       });
       if (!bom) throw new BadRequestException(`No approved BOM found for ${soItem.itemCode}`);

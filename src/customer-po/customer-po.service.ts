@@ -437,7 +437,7 @@ export class CustomerPoService {
         const effectiveQty = fgNetOverride?.has(cpoItem.itemCode) ? fgNetOverride.get(cpoItem.itemCode)! : cpoItem.qty;
         if (effectiveQty <= 0) continue;
         const bom = await this.prisma.bom.findFirst({
-          where: { companyId, productId: product.id, status: 'APPROVED' },
+          where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
           include: { items: { where: { isActive: true } } },
           orderBy: { effectiveFrom: 'desc' },
         });
@@ -572,7 +572,7 @@ export class CustomerPoService {
         }
 
         const bom = await this.prisma.bom.findFirst({
-          where: { companyId, productId: product.id, status: 'APPROVED' },
+          where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
           include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
           orderBy: { effectiveFrom: 'desc' },
         });

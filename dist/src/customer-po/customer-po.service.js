@@ -321,7 +321,7 @@ let CustomerPoService = class CustomerPoService {
                 if (effectiveQty <= 0)
                     continue;
                 const bom = await this.prisma.bom.findFirst({
-                    where: { companyId, productId: product.id, status: 'APPROVED' },
+                    where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
                     include: { items: { where: { isActive: true } } },
                     orderBy: { effectiveFrom: 'desc' },
                 });
@@ -452,7 +452,7 @@ let CustomerPoService = class CustomerPoService {
                     continue;
                 }
                 const bom = await this.prisma.bom.findFirst({
-                    where: { companyId, productId: product.id, status: 'APPROVED' },
+                    where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
                     include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
                     orderBy: { effectiveFrom: 'desc' },
                 });
