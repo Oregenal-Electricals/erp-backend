@@ -170,6 +170,7 @@ export class BomService {
       data: {
         companyId: user.companyId, productId: bom.productId,
         bomNumber, version: `v${versionNum}`,
+        bomType: bom.bomType, sourceBomId: bom.sourceBomId,
         description: `Cloned from ${bom.bomNumber}`,
         effectiveFrom: new Date(), status: 'DRAFT',
         createdBy: user.id, updatedBy: user.id,
