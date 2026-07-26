@@ -153,7 +153,7 @@ let MrpService = class MrpService {
         if (!warehouseId)
             throw new common_1.BadRequestException('warehouseId is required');
         const sos = await this.prisma.salesOrder.findMany({
-            where: { companyId, status: 'CONFIRMED' },
+            where: { companyId, status: { in: ['CONFIRMED', 'IN_PRODUCTION'] } },
             include: { items: { where: { isActive: true, pendingQty: { gt: 0 } } } },
             orderBy: { deliveryDate: 'asc' },
         });
