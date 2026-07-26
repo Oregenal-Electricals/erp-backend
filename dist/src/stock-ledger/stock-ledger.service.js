@@ -158,7 +158,18 @@ let StockLedgerService = class StockLedgerService {
             }),
             this.prisma.stockBalance.count({ where }),
         ]);
-        return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
+        const codes = data.map(d => d.itemCode);
+        const rawMaterials = await this.prisma.rawMaterial.findMany({ where: { code: { in: codes } }, select: { code: true, minStockLevel: true } });
+        const minLevelByCode = new Map();
+        for (const rm of rawMaterials)
+            if (rm.minStockLevel != null)
+                minLevelByCode.set(rm.code, rm.minStockLevel);
+        const enriched = data.map(row => {
+            var _a;
+            const minStockLevel = (_a = minLevelByCode.get(row.itemCode)) !== null && _a !== void 0 ? _a : null;
+            return Object.assign(Object.assign({}, row), { minStockLevel, isLowStock: minStockLevel != null && row.availableQty < minStockLevel });
+        });
+        return { data: enriched, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
     }
     async getItemLedger(itemCode, user) {
         const where = { itemCode };
@@ -188,13 +199,24 @@ let StockLedgerService = class StockLedgerService {
         const where = {};
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
-        const [totalItems, totalMovements, totalValue] = await Promise.all([
+        const [totalItems, totalMovements, totalValue, allBalances] = await Promise.all([
             this.prisma.stockBalance.count({ where: Object.assign(Object.assign({}, where), { availableQty: { gt: 0 } }) }),
             this.prisma.stockLedger.count({ where }),
             this.prisma.stockBalance.aggregate({ where, _sum: { totalValue: true } }),
+            this.prisma.stockBalance.findMany({ where, select: { itemCode: true, availableQty: true } }),
         ]);
         const byType = await this.prisma.stockLedger.groupBy({ by: ['transactionType'], where, _count: true, _sum: { inQty: true, outQty: true } });
-        return { totalItems, totalMovements, totalValue: totalValue._sum.totalValue || 0, byType };
+        const codes = allBalances.map(b => b.itemCode);
+        const rawMaterials = await this.prisma.rawMaterial.findMany({ where: { code: { in: codes } }, select: { code: true, minStockLevel: true } });
+        const minLevelByCode = new Map();
+        for (const rm of rawMaterials)
+            if (rm.minStockLevel != null)
+                minLevelByCode.set(rm.code, rm.minStockLevel);
+        const lowStockCount = allBalances.filter(b => {
+            const min = minLevelByCode.get(b.itemCode);
+            return min != null && b.availableQty < min;
+        }).length;
+        return { totalItems, totalMovements, totalValue: totalValue._sum.totalValue || 0, byType, lowStockCount };
     }
 };
 exports.StockLedgerService = StockLedgerService;

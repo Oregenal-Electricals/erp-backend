@@ -14,14 +14,16 @@ export declare class StockLedgerController {
                 outQty: number;
             };
         })[];
+        lowStockCount: number;
     }>;
     findBalance(req: any, query: any): Promise<{
-        data: ({
+        data: {
+            minStockLevel: number;
+            isLowStock: boolean;
             warehouse: {
                 name: string;
                 code: string;
             };
-        } & {
             id: string;
             companyId: string;
             isActive: boolean;
@@ -39,7 +41,7 @@ export declare class StockLedgerController {
             reservedQty: number;
             inQcQty: number;
             lastUpdated: Date;
-        })[];
+        }[];
         total: number;
         page: number;
         limit: number;

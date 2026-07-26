@@ -85,12 +85,13 @@ export declare class StockLedgerService {
         totalPages: number;
     }>;
     findBalance(user: any, query: any): Promise<{
-        data: ({
+        data: {
+            minStockLevel: number;
+            isLowStock: boolean;
             warehouse: {
                 name: string;
                 code: string;
             };
-        } & {
             id: string;
             companyId: string;
             isActive: boolean;
@@ -108,7 +109,7 @@ export declare class StockLedgerService {
             reservedQty: number;
             inQcQty: number;
             lastUpdated: Date;
-        })[];
+        }[];
         total: number;
         page: number;
         limit: number;
@@ -177,5 +178,6 @@ export declare class StockLedgerService {
                 outQty: number;
             };
         })[];
+        lowStockCount: number;
     }>;
 }
