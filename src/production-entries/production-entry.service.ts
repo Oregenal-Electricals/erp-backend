@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { CreateProductionEntryDto } from './dto/production-entry.dto';
 
 @Injectable()
 export class ProductionEntryService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private materialReservation: MaterialReservationService,
+  ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.productionEntry.count({ where: { companyId } });
@@ -83,6 +88,15 @@ export class ProductionEntryService {
         updatedBy: user.id,
       },
     });
+
+    // This bypasses WorkOrderService.complete() (it goes straight to
+    // status COMPLETED via the WO's own progress accumulating to plannedQty),
+    // so the reservation release has to be triggered here too - otherwise
+    // the material that was reserved for this WO sits ACTIVE forever even
+    // though production genuinely consumed it.
+    if (woStatus === 'COMPLETED' && entry.workOrder.status !== 'COMPLETED') {
+      await this.materialReservation.releaseReservations(entry.workOrderId, user, true);
+    }
 
     const updated = await this.prisma.productionEntry.update({
       where: { id }, data: { status: 'CONFIRMED', updatedBy: user.id }, include: this.includes(),

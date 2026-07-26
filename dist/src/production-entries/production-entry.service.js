@@ -13,10 +13,12 @@ exports.ProductionEntryService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const material_reservation_service_1 = require("../work-orders/material-reservation.service");
 let ProductionEntryService = class ProductionEntryService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, materialReservation) {
         this.prisma = prisma;
         this.audit = audit;
+        this.materialReservation = materialReservation;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionEntry.count({ where: { companyId } });
@@ -86,6 +88,9 @@ let ProductionEntryService = class ProductionEntryService {
                 updatedBy: user.id,
             },
         });
+        if (woStatus === 'COMPLETED' && entry.workOrder.status !== 'COMPLETED') {
+            await this.materialReservation.releaseReservations(entry.workOrderId, user, true);
+        }
         const updated = await this.prisma.productionEntry.update({
             where: { id }, data: { status: 'CONFIRMED', updatedBy: user.id }, include: this.includes(),
         });
@@ -171,6 +176,8 @@ let ProductionEntryService = class ProductionEntryService {
 exports.ProductionEntryService = ProductionEntryService;
 exports.ProductionEntryService = ProductionEntryService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService,
+        material_reservation_service_1.MaterialReservationService])
 ], ProductionEntryService);
 //# sourceMappingURL=production-entry.service.js.map

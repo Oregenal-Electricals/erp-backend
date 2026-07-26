@@ -12,12 +12,13 @@ const production_entry_controller_1 = require("./production-entry.controller");
 const production_entry_service_1 = require("./production-entry.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const work_order_module_1 = require("../work-orders/work-order.module");
 let ProductionEntryModule = class ProductionEntryModule {
 };
 exports.ProductionEntryModule = ProductionEntryModule;
 exports.ProductionEntryModule = ProductionEntryModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, work_order_module_1.WorkOrderModule],
         controllers: [production_entry_controller_1.ProductionEntryController],
         providers: [production_entry_service_1.ProductionEntryService],
         exports: [production_entry_service_1.ProductionEntryService],

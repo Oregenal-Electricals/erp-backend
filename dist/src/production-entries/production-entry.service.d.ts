@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { CreateProductionEntryDto } from './dto/production-entry.dto';
 export declare class ProductionEntryService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private materialReservation;
+    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService);
     private generateNumber;
     private includes;
     create(dto: CreateProductionEntryDto, user: any): Promise<{
