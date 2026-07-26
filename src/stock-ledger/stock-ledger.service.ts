@@ -99,6 +99,14 @@ export class StockLedgerService {
     if (!iqc) throw new NotFoundException('IQC not found');
     if (iqc.status !== 'APPROVED') throw new BadRequestException('IQC must be APPROVED');
 
+    // Guard against double-crediting: approve() already calls this
+    // automatically, so a manual retry (e.g. from a stock page's "Receive"
+    // button) must not create duplicate ledger entries for the same IQC.
+    const alreadyReceived = await this.prisma.stockLedger.findFirst({
+      where: { companyId: user.companyId, referenceType: 'IQC', referenceId: iqcId },
+    });
+    if (alreadyReceived) throw new BadRequestException(`Stock has already been received for ${iqc.iqcNumber}`);
+
     const grn = iqc.grn as any;
     const entries = [];
 

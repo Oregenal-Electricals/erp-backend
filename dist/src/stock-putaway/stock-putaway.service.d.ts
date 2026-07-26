@@ -9,6 +9,30 @@ export declare class StockPutawayService {
     constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
     private generateNumber;
     private includes;
+    getPendingIqcs(user: any): Promise<({
+        grn: {
+            warehouse: {
+                name: string;
+            };
+            warehouseId: string;
+            grnNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        grnId: string;
+        inspectedBy: string | null;
+        iqcNumber: string;
+        inspectionDate: Date;
+    })[]>;
     create(dto: CreatePutawayDto, user: any): Promise<{
         items: ({
             bin: {

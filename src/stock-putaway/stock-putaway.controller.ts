@@ -19,6 +19,10 @@ export class StockPutawayController {
   @RequirePermissions(Permission.STOCK_PUTAWAY_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.spService.findAll(req.user, query); }
 
+  @Get('pending-iqcs')
+  @RequirePermissions(Permission.STOCK_PUTAWAY_VIEW)
+  getPendingIqcs(@Request() req: any) { return this.spService.getPendingIqcs(req.user); }
+
   @Get(':id')
   @RequirePermissions(Permission.INVENTORY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.spService.findOne(id, req.user); }

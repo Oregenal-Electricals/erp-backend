@@ -27,6 +27,26 @@ export class StockPutawayService {
     };
   }
 
+  // IQC inspections that are APPROVED (material accepted, stock already
+  // credited into the warehouse) but don't yet have a StockPutaway record -
+  // this is what should show as "pending" on the Putaway screen, mirroring
+  // the same pending-queue pattern used for GRN/IQC elsewhere.
+  async getPendingIqcs(user: any) {
+    const where: any = { status: 'APPROVED', isActive: true };
+    if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
+    const approvedIqcs = await this.prisma.iqcInspection.findMany({
+      where,
+      include: { grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    const alreadyPutAway = await this.prisma.stockPutaway.findMany({
+      where: { companyId: user.companyId, iqcId: { not: null }, isActive: true },
+      select: { iqcId: true },
+    });
+    const putAwayIqcIds = new Set(alreadyPutAway.map(p => p.iqcId));
+    return approvedIqcs.filter(iqc => !putAwayIqcIds.has(iqc.id));
+  }
+
   async create(dto: CreatePutawayDto, user: any) {
     const grn = await this.prisma.grnHeader.findFirst({ where: { id: dto.grnId, companyId: user.companyId } });
     if (!grn) throw new NotFoundException('GRN not found');

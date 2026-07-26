@@ -33,6 +33,22 @@ let StockPutawayService = class StockPutawayService {
             items: { where: { isActive: true }, include: { bin: { select: { code: true, status: true } } } },
         };
     }
+    async getPendingIqcs(user) {
+        const where = { status: 'APPROVED', isActive: true };
+        if (user.role !== 'SUPER_ADMIN')
+            where.companyId = user.companyId;
+        const approvedIqcs = await this.prisma.iqcInspection.findMany({
+            where,
+            include: { grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } } },
+            orderBy: { createdAt: 'asc' },
+        });
+        const alreadyPutAway = await this.prisma.stockPutaway.findMany({
+            where: { companyId: user.companyId, iqcId: { not: null }, isActive: true },
+            select: { iqcId: true },
+        });
+        const putAwayIqcIds = new Set(alreadyPutAway.map(p => p.iqcId));
+        return approvedIqcs.filter(iqc => !putAwayIqcIds.has(iqc.id));
+    }
     async create(dto, user) {
         const grn = await this.prisma.grnHeader.findFirst({ where: { id: dto.grnId, companyId: user.companyId } });
         if (!grn)

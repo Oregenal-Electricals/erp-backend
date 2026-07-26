@@ -86,6 +86,11 @@ let StockLedgerService = class StockLedgerService {
             throw new common_1.NotFoundException('IQC not found');
         if (iqc.status !== 'APPROVED')
             throw new common_1.BadRequestException('IQC must be APPROVED');
+        const alreadyReceived = await this.prisma.stockLedger.findFirst({
+            where: { companyId: user.companyId, referenceType: 'IQC', referenceId: iqcId },
+        });
+        if (alreadyReceived)
+            throw new common_1.BadRequestException(`Stock has already been received for ${iqc.iqcNumber}`);
         const grn = iqc.grn;
         const entries = [];
         for (const item of iqc.items) {
