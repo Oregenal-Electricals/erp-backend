@@ -74,6 +74,25 @@ let StockLedgerService = class StockLedgerService {
         }
         return ledgerEntry;
     }
+    async getPendingReceive(user) {
+        const where = { status: 'APPROVED', isActive: true };
+        if (user.role !== 'SUPER_ADMIN')
+            where.companyId = user.companyId;
+        const approvedIqcs = await this.prisma.iqcInspection.findMany({
+            where,
+            include: {
+                grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } },
+                _count: { select: { items: true } },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+        const alreadyReceived = await this.prisma.stockLedger.findMany({
+            where: { companyId: user.companyId, referenceType: 'IQC', referenceId: { in: approvedIqcs.map(i => i.id) } },
+            select: { referenceId: true },
+        });
+        const receivedIqcIds = new Set(alreadyReceived.map(r => r.referenceId));
+        return approvedIqcs.filter(iqc => !receivedIqcIds.has(iqc.id));
+    }
     async receiveFromIqc(iqcId, user) {
         const iqc = await this.prisma.iqcInspection.findFirst({
             where: { id: iqcId, companyId: user.companyId },

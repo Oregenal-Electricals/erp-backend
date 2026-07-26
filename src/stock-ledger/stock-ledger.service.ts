@@ -88,6 +88,30 @@ export class StockLedgerService {
     return ledgerEntry;
   }
 
+  // Approved IQCs that don't yet have any stock_ledger entry referencing
+  // them - what should actually show as "ready to receive" on this panel.
+  // Every approve() call already auto-receives stock, so in normal
+  // operation this stays empty; it's a safety net for any historical or
+  // edge-case gaps rather than a routine manual step.
+  async getPendingReceive(user: any) {
+    const where: any = { status: 'APPROVED', isActive: true };
+    if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
+    const approvedIqcs = await this.prisma.iqcInspection.findMany({
+      where,
+      include: {
+        grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } },
+        _count: { select: { items: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    const alreadyReceived = await this.prisma.stockLedger.findMany({
+      where: { companyId: user.companyId, referenceType: 'IQC', referenceId: { in: approvedIqcs.map(i => i.id) } },
+      select: { referenceId: true },
+    });
+    const receivedIqcIds = new Set(alreadyReceived.map(r => r.referenceId));
+    return approvedIqcs.filter(iqc => !receivedIqcIds.has(iqc.id));
+  }
+
   async receiveFromIqc(iqcId: string, user: any) {
     const iqc = await this.prisma.iqcInspection.findFirst({
       where: { id: iqcId, companyId: user.companyId },

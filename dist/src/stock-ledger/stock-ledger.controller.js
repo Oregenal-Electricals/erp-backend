@@ -26,6 +26,7 @@ let StockLedgerController = class StockLedgerController {
     }
     getStats(req) { return this.slService.getStats(req.user); }
     findBalance(req, query) { return this.slService.findBalance(req.user, query); }
+    getPendingReceive(req) { return this.slService.getPendingReceive(req.user); }
     getItemLedger(code, req) { return this.slService.getItemLedger(code, req.user); }
     findLedger(req, query) { return this.slService.findLedger(req.user, query); }
     receiveFromIqc(iqcId, req) { return this.slService.receiveFromIqc(iqcId, req.user); }
@@ -49,6 +50,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], StockLedgerController.prototype, "findBalance", null);
+__decorate([
+    (0, common_1.Get)('pending-receive'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], StockLedgerController.prototype, "getPendingReceive", null);
 __decorate([
     (0, common_1.Get)('item/:code'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),

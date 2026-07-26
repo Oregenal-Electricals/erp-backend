@@ -19,6 +19,10 @@ export class StockLedgerController {
   @RequirePermissions(Permission.INVENTORY_VIEW)
   findBalance(@Request() req: any, @Query() query: any) { return this.slService.findBalance(req.user, query); }
 
+  @Get('pending-receive')
+  @RequirePermissions(Permission.INVENTORY_VIEW)
+  getPendingReceive(@Request() req: any) { return this.slService.getPendingReceive(req.user); }
+
   @Get('item/:code')
   @RequirePermissions(Permission.INVENTORY_VIEW)
   getItemLedger(@Param('code') code: string, @Request() req: any) { return this.slService.getItemLedger(code, req.user); }

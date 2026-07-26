@@ -47,6 +47,33 @@ export declare class StockLedgerController {
         limit: number;
         totalPages: number;
     }>;
+    getPendingReceive(req: any): Promise<({
+        _count: {
+            items: number;
+        };
+        grn: {
+            warehouse: {
+                name: string;
+            };
+            warehouseId: string;
+            grnNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        grnId: string;
+        inspectedBy: string | null;
+        iqcNumber: string;
+        inspectionDate: Date;
+    })[]>;
     getItemLedger(code: string, req: any): Promise<({
         warehouse: {
             name: string;
