@@ -69,6 +69,11 @@ let GrnService = class GrnService {
             throw new common_1.BadRequestException('Domestic GRN requires a Purchase Order');
         if (dto.grnType === 'IMPORT' && !dto.ipoId)
             throw new common_1.BadRequestException('Import GRN requires an Import Purchase Order');
+        if (!dto.warehouseId)
+            throw new common_1.BadRequestException('Please select a Warehouse');
+        const warehouse = await this.prisma.warehouse.findFirst({ where: { id: dto.warehouseId, companyId: user.companyId } });
+        if (!warehouse)
+            throw new common_1.BadRequestException('Selected Warehouse was not found');
         const grnNumber = await this.generateGrnNumber(user.companyId);
         const grn = await this.prisma.grnHeader.create({
             data: {
