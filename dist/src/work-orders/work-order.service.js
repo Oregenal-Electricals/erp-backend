@@ -15,6 +15,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const material_reservation_service_1 = require("./material-reservation.service");
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
+const STAGE_BYPASS_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 let WorkOrderService = class WorkOrderService {
     constructor(prisma, audit, materialReservation) {
         this.prisma = prisma;
@@ -58,6 +59,9 @@ let WorkOrderService = class WorkOrderService {
         const where = {};
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
+        if (user.assignedStage && !STAGE_BYPASS_ROLES.includes(user.role)) {
+            where.stageName = user.assignedStage;
+        }
         if (search)
             where.OR = [
                 { woNumber: { contains: search, mode: 'insensitive' } },
@@ -153,6 +157,9 @@ let WorkOrderService = class WorkOrderService {
         const where = {};
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
+        if (user.assignedStage && !STAGE_BYPASS_ROLES.includes(user.role)) {
+            where.stageName = user.assignedStage;
+        }
         const [total, draft, released, inProgress, completed, cancelled] = await Promise.all([
             this.prisma.workOrder.count({ where }),
             this.prisma.workOrder.count({ where: Object.assign(Object.assign({}, where), { status: 'DRAFT' }) }),

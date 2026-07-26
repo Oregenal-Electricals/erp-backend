@@ -9,6 +9,7 @@ export declare class CreateUserDto {
     additionalRoles?: string[];
     companyId: string;
     mustChangePwd?: boolean;
+    assignedStage?: string;
 }
 export declare class UpdateUserDto {
     employeeCode?: string;
@@ -16,6 +17,7 @@ export declare class UpdateUserDto {
     lastName?: string;
     phone?: string;
     role?: string;
+    assignedStage?: string;
 }
 export declare class ResetPasswordDto {
     newPassword: string;

@@ -95,7 +95,7 @@ let RoutingService = class RoutingService {
             }, user);
             await this.prisma.workOrder.update({
                 where: { id: wo.id },
-                data: { routingGroupId, stageSequence: stage.sequence, parentWorkOrderId: previousWoId },
+                data: { routingGroupId, stageSequence: stage.sequence, stageName: stage.stageName, parentWorkOrderId: previousWoId },
             });
             if (stage.sequence === 1) {
                 await this.workOrderService.release(wo.id, user);

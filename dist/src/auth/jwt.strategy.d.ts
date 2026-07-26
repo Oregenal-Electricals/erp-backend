@@ -21,6 +21,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
         email: string;
         firstName: string;
         lastName: string;
+        assignedStage: string;
         isLocked: boolean;
     }>;
 }

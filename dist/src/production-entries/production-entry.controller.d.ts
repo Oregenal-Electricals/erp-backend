@@ -26,6 +26,7 @@ export declare class ProductionEntryController {
             remarks: string | null;
             uom: string;
             warehouseId: string;
+            stageName: string | null;
             productCode: string;
             productName: string;
             bomId: string | null;

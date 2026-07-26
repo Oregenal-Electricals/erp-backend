@@ -64,6 +64,7 @@ export declare class WorkOrderController {
             remarks: string | null;
             uom: string;
             warehouseId: string;
+            stageName: string | null;
             productCode: string;
             productName: string;
             bomId: string | null;
@@ -153,6 +154,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;
@@ -210,6 +212,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;
@@ -250,6 +253,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;
@@ -290,6 +294,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;
@@ -330,6 +335,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;
@@ -370,6 +376,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;
@@ -410,6 +417,7 @@ export declare class WorkOrderController {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
         bomId: string | null;

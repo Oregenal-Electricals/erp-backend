@@ -67,6 +67,11 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   mustChangePwd?: boolean;
+
+  @ApiPropertyOptional({ example: 'SMT' })
+  @IsOptional()
+  @IsString()
+  assignedStage?: string;
 }
 
 export class UpdateUserDto {
@@ -97,6 +102,11 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   role?: string;
+
+  @ApiPropertyOptional({ example: 'SMT' })
+  @IsOptional()
+  @IsString()
+  assignedStage?: string;
 }
 
 export class ResetPasswordDto {

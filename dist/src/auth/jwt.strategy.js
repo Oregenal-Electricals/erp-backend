@@ -37,6 +37,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
                 companyId: true,
                 isActive: true,
                 isLocked: true,
+                assignedStage: true,
             },
         });
         if (!user) {

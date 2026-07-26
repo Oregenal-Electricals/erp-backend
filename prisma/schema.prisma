@@ -469,6 +469,7 @@ model User {
   passwordHash  String
   role          String   @default("VIEWER")
   additionalRoles String[]
+  assignedStage String?
   mustChangePwd Boolean  @default(true)
   companyId     String
   company       Company  @relation(fields: [companyId], references: [id])
@@ -2883,6 +2884,7 @@ model WorkOrder {
   salesOrder        SalesOrder? @relation(fields: [salesOrderId], references: [id])
   routingGroupId    String?
   stageSequence     Int?
+  stageName         String?
   parentWorkOrderId String?
   parentWorkOrder   WorkOrder? @relation("WorkOrderChain", fields: [parentWorkOrderId], references: [id])
   childWorkOrders   WorkOrder[] @relation("WorkOrderChain")

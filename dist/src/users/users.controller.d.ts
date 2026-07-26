@@ -65,6 +65,7 @@ export declare class UsersController {
         employeeCode: string;
         firstName: string;
         lastName: string;
+        assignedStage: string;
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
@@ -83,6 +84,7 @@ export declare class UsersController {
         employeeCode: string;
         firstName: string;
         lastName: string;
+        assignedStage: string;
     }>;
     toggleUserStatus(id: string, user: any): Promise<{
         role: string;

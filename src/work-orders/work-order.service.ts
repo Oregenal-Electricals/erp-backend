@@ -5,6 +5,7 @@ import { MaterialReservationService } from './material-reservation.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
 
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
+const STAGE_BYPASS_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 
 @Injectable()
 export class WorkOrderService {
@@ -53,6 +54,12 @@ export class WorkOrderService {
     const skip = (Number(page) - 1) * Number(limit);
     const where: any = {};
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
+    // Operators assigned to a specific stage (SMT, MI, Assembly, Packaging)
+    // only see Work Orders for that stage - supervisors and above still see
+    // everything so they can monitor the whole chain.
+    if (user.assignedStage && !STAGE_BYPASS_ROLES.includes(user.role)) {
+      where.stageName = user.assignedStage;
+    }
     if (search) where.OR = [
       { woNumber: { contains: search, mode: 'insensitive' } },
       { productCode: { contains: search, mode: 'insensitive' } },
@@ -151,6 +158,9 @@ export class WorkOrderService {
   async getStats(user: any) {
     const where: any = {};
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
+    if (user.assignedStage && !STAGE_BYPASS_ROLES.includes(user.role)) {
+      where.stageName = user.assignedStage;
+    }
     const [total, draft, released, inProgress, completed, cancelled] = await Promise.all([
       this.prisma.workOrder.count({ where }),
       this.prisma.workOrder.count({ where: { ...where, status: 'DRAFT' } }),
