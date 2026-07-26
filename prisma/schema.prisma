@@ -325,6 +325,8 @@ model Company {
   warehouseRacks     WarehouseRack[]
   warehouseBins      WarehouseBin[]
   customFieldValues      CustomFieldValue[]
+  manpowerAllocations    ManpowerAllocation[]
+  manpowerQueries        ManpowerQuery[]
 
   @@map("companies")
   @@index([code])
@@ -501,6 +503,10 @@ model User {
   gpIssued         GatePass[]         @relation("GPIssuedBy")
   gpClosed         GatePass[]         @relation("GPClosedBy")
   gpEmployee       GatePass[]         @relation("GPEmployee")
+  manpowerFrom     ManpowerAllocation[] @relation("ManpowerFrom")
+  manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
+  manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
+  manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
 
   @@map("users")
   @@index([email])
@@ -865,6 +871,68 @@ model GateOutwardEntry {
   @@index([plantId])
   @@index([goeNumber])
   @@index([createdAt])
+}
+
+// Generic hierarchical manpower handoff record - one row per level of the
+// chain (HR -> Plant Manager -> Stage/Store/Quality Head -> Line), mirroring
+// the same parent/child chain pattern already used for WorkOrder routing
+// stages (parentId + level), so the whole day's headcount handoff is
+// traceable and each level must explicitly accept what was handed to them.
+model ManpowerAllocation {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  date       DateTime
+  level      String   // HR_TO_PLANT, PLANT_TO_STAGE, STAGE_TO_LINE
+  category   String?  // stage name (SMT/MI/Assembly/Packaging), STORE, QUALITY, or a line name - null at the top level
+  fromUserId String
+  fromUser   User     @relation("ManpowerFrom", fields: [fromUserId], references: [id])
+  toUserId   String
+  toUser     User     @relation("ManpowerTo", fields: [toUserId], references: [id])
+  parentId   String?
+  parent     ManpowerAllocation?  @relation("ManpowerChain", fields: [parentId], references: [id])
+  children   ManpowerAllocation[] @relation("ManpowerChain")
+  count      Int
+  status     String   @default("PENDING") // PENDING, ACCEPTED, QUERIED
+  remarks    String?
+  isActive   Boolean  @default(true)
+  isTestData Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String?
+  updatedBy  String?
+
+  queries    ManpowerQuery[]
+
+  @@map("manpower_allocations")
+  @@index([companyId])
+  @@index([toUserId])
+  @@index([parentId])
+}
+
+model ManpowerQuery {
+  id             String   @id @default(uuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id])
+  allocationId   String
+  allocation     ManpowerAllocation @relation(fields: [allocationId], references: [id])
+  raisedByUserId String
+  raisedBy       User     @relation("QueryRaisedBy", fields: [raisedByUserId], references: [id])
+  raisedToUserId String
+  raisedTo       User     @relation("QueryRaisedTo", fields: [raisedToUserId], references: [id])
+  message        String
+  response       String?
+  status         String   @default("OPEN") // OPEN, RESOLVED
+  isActive       Boolean  @default(true)
+  isTestData     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  @@map("manpower_queries")
+  @@index([companyId])
+  @@index([allocationId])
 }
 
 model GatePass {

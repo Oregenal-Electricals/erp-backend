@@ -60,6 +60,7 @@ import { InventoryValuationModule } from './inventory-valuation/inventory-valuat
 import { InventoryDashboardModule } from './inventory-dashboard/inventory-dashboard.module';
 import { InventoryReportsModule } from './inventory-reports/inventory-reports.module';
 import { WorkOrderModule } from './work-orders/work-order.module';
+import { ManpowerModule } from './manpower/manpower.module';
 import { MrpModule } from './mrp/mrp.module';
 import { RoutingModule } from './routing/routing.module';
 import { CustomerModule } from './customers/customer.module';
@@ -184,6 +185,7 @@ import configuration from './config/configuration';
     InventoryDashboardModule,
     InventoryReportsModule,
     WorkOrderModule,
+    ManpowerModule,
     MrpModule,
     RoutingModule,
     CustomerModule,
