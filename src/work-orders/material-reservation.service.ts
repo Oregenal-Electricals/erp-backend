@@ -134,6 +134,60 @@ export class MaterialReservationService {
     return results;
   }
 
+  // Reservations were being created on release but never released or
+  // consumed on completion/cancellation - meaning reservedQty grew forever
+  // and material never actually left stock even after being used in
+  // production. This closes that gap:
+  // - consumed=true (WO completed): the material genuinely left the
+  //   warehouse into the finished product, so it comes out of reservedQty
+  //   permanently, with a ledger entry for traceability.
+  // - consumed=false (WO cancelled): nothing was actually used, so it goes
+  //   back into availableQty for other work orders to use.
+  async releaseReservations(workOrderId: string, user: any, consumed: boolean) {
+    const reservations = await this.prisma.materialReservation.findMany({
+      where: { workOrderId, status: 'ACTIVE' },
+    });
+    for (const r of reservations) {
+      const balance = await this.prisma.stockBalance.findFirst({
+        where: { companyId: r.companyId, itemCode: r.itemCode, warehouseId: r.warehouseId },
+      });
+      if (balance) {
+        if (consumed) {
+          const consumedValue = r.reservedQty * balance.unitCost;
+          await this.prisma.stockBalance.update({
+            where: { id: balance.id },
+            data: { reservedQty: { decrement: r.reservedQty }, totalValue: { decrement: consumedValue } },
+          });
+          await this.prisma.stockLedger.create({
+            data: {
+              companyId: r.companyId, itemCode: r.itemCode, itemName: r.itemName, warehouseId: r.warehouseId,
+              transactionType: 'PRODUCTION_CONSUMPTION', referenceType: 'WORK_ORDER', referenceId: workOrderId,
+              inQty: 0, outQty: r.reservedQty,
+              balanceQty: balance.availableQty + balance.reservedQty - r.reservedQty,
+              unitCost: balance.unitCost, totalCost: consumedValue,
+              remarks: 'Consumed on Work Order completion',
+              createdBy: user.id, updatedBy: user.id,
+            },
+          });
+        } else {
+          await this.prisma.stockBalance.update({
+            where: { id: balance.id },
+            data: { reservedQty: { decrement: r.reservedQty }, availableQty: { increment: r.reservedQty } },
+          });
+        }
+      }
+      await this.prisma.materialReservation.update({
+        where: { id: r.id },
+        data: {
+          status: 'RELEASED',
+          releasedReason: consumed ? 'Consumed on WO completion' : 'WO cancelled',
+          updatedBy: user.id,
+        },
+      });
+    }
+    return { released: reservations.length };
+  }
+
   async findForWorkOrder(workOrderId: string) {
     return this.prisma.materialReservation.findMany({
       where: { workOrderId },

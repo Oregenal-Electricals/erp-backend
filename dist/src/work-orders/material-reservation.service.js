@@ -121,6 +121,51 @@ let MaterialReservationService = class MaterialReservationService {
         }
         return results;
     }
+    async releaseReservations(workOrderId, user, consumed) {
+        const reservations = await this.prisma.materialReservation.findMany({
+            where: { workOrderId, status: 'ACTIVE' },
+        });
+        for (const r of reservations) {
+            const balance = await this.prisma.stockBalance.findFirst({
+                where: { companyId: r.companyId, itemCode: r.itemCode, warehouseId: r.warehouseId },
+            });
+            if (balance) {
+                if (consumed) {
+                    const consumedValue = r.reservedQty * balance.unitCost;
+                    await this.prisma.stockBalance.update({
+                        where: { id: balance.id },
+                        data: { reservedQty: { decrement: r.reservedQty }, totalValue: { decrement: consumedValue } },
+                    });
+                    await this.prisma.stockLedger.create({
+                        data: {
+                            companyId: r.companyId, itemCode: r.itemCode, itemName: r.itemName, warehouseId: r.warehouseId,
+                            transactionType: 'PRODUCTION_CONSUMPTION', referenceType: 'WORK_ORDER', referenceId: workOrderId,
+                            inQty: 0, outQty: r.reservedQty,
+                            balanceQty: balance.availableQty + balance.reservedQty - r.reservedQty,
+                            unitCost: balance.unitCost, totalCost: consumedValue,
+                            remarks: 'Consumed on Work Order completion',
+                            createdBy: user.id, updatedBy: user.id,
+                        },
+                    });
+                }
+                else {
+                    await this.prisma.stockBalance.update({
+                        where: { id: balance.id },
+                        data: { reservedQty: { decrement: r.reservedQty }, availableQty: { increment: r.reservedQty } },
+                    });
+                }
+            }
+            await this.prisma.materialReservation.update({
+                where: { id: r.id },
+                data: {
+                    status: 'RELEASED',
+                    releasedReason: consumed ? 'Consumed on WO completion' : 'WO cancelled',
+                    updatedBy: user.id,
+                },
+            });
+        }
+        return { released: reservations.length };
+    }
     async findForWorkOrder(workOrderId) {
         return this.prisma.materialReservation.findMany({
             where: { workOrderId },

@@ -39,11 +39,27 @@ export class FgReceiptService {
     });
     if (existing) throw new BadRequestException(`FG Receipt ${existing.receiptNumber} already exists for this WO`);
 
+    // Compute a real per-unit cost from the material actually reserved for
+    // this Work Order, priced at current stock cost - previously this was
+    // hardcoded to 0, making every FG Receipt show zero value.
+    const reservations = await this.prisma.materialReservation.findMany({
+      where: { workOrderId, isActive: true },
+    });
+    let totalMaterialCost = 0;
+    for (const r of reservations) {
+      const balance = await this.prisma.stockBalance.findFirst({
+        where: { companyId: user.companyId, itemCode: r.itemCode, warehouseId: r.warehouseId },
+        select: { unitCost: true },
+      });
+      totalMaterialCost += r.reservedQty * (balance?.unitCost || 0);
+    }
+    const computedUnitCost = wo.completedQty > 0 ? totalMaterialCost / wo.completedQty : 0;
+
     return this.create({
       workOrderId, warehouseId: wo.warehouseId,
       receivedQty: wo.completedQty, rejectedQty: wo.rejectedQty || 0,
       batchNumber: `FG-${wo.woNumber}-${new Date().getFullYear()}`,
-      unitCost: 0, remarks: `Auto-created from WO ${wo.woNumber}`,
+      unitCost: computedUnitCost, remarks: `Auto-created from WO ${wo.woNumber}`,
     }, user);
   }
 

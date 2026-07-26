@@ -5,6 +5,9 @@ export declare class MaterialReservationService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     reserveForWorkOrder(workOrderId: string, user: any): Promise<any[]>;
+    releaseReservations(workOrderId: string, user: any, consumed: boolean): Promise<{
+        released: number;
+    }>;
     findForWorkOrder(workOrderId: string): Promise<{
         id: string;
         companyId: string;

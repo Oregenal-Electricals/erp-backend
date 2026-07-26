@@ -132,16 +132,20 @@ export class WorkOrderService {
   async complete(id: string, dto: { completedQty: number; rejectedQty?: number }, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'IN_PROGRESS') throw new BadRequestException('Only IN_PROGRESS work orders can be completed');
-    return this.update(id, {
+    const result = await this.update(id, {
       status: 'COMPLETED', completedQty: dto.completedQty,
       rejectedQty: dto.rejectedQty || 0, actualEndDate: new Date().toISOString(),
     }, user);
+    await this.materialReservation.releaseReservations(id, user, true);
+    return result;
   }
 
   async cancel(id: string, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status === 'COMPLETED') throw new BadRequestException('Cannot cancel completed work order');
-    return this.update(id, { status: 'CANCELLED' }, user);
+    const result = await this.update(id, { status: 'CANCELLED' }, user);
+    await this.materialReservation.releaseReservations(id, user, false);
+    return result;
   }
 
   async getStats(user: any) {
