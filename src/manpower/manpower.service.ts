@@ -17,6 +17,7 @@ export class ManpowerService {
     return {
       fromUser: { select: { id: true, firstName: true, lastName: true, role: true } },
       toUser: { select: { id: true, firstName: true, lastName: true, role: true } },
+      workOrder: { select: { id: true, woNumber: true, productName: true, stageName: true } },
       queries: { where: { isActive: true }, include: {
         raisedBy: { select: { firstName: true, lastName: true } },
         raisedTo: { select: { firstName: true, lastName: true } },
@@ -76,6 +77,11 @@ export class ManpowerService {
     const nextLevel = NEXT_LEVEL[parent.level];
     if (!nextLevel) throw new BadRequestException(`${parent.level} cannot be distributed further`);
     if (!dto.lines || dto.lines.length === 0) throw new BadRequestException('Provide at least one line to distribute to');
+    for (const line of dto.lines) {
+      if (!line.toUserId && !line.workOrderId) {
+        throw new BadRequestException('Each line needs either a recipient (line incharge) or a Work Order, or both');
+      }
+    }
 
     const created = [];
     for (const line of dto.lines) {
@@ -87,6 +93,11 @@ export class ManpowerService {
           category: line.category,
           fromUserId: user.id,
           toUserId: line.toUserId,
+          workOrderId: line.workOrderId,
+          // A line with no recipient person is just the Stage Head logging
+          // "N manpower on this Work Order today" - there's no one else to
+          // hand it off to, so it doesn't sit PENDING waiting for an accept.
+          status: line.toUserId ? 'PENDING' : 'ACCEPTED',
           parentId: parent.id,
           count: line.count,
           remarks: line.remarks,
@@ -151,6 +162,9 @@ export class ManpowerService {
   async raiseQuery(dto: RaiseManpowerQueryDto, user: any) {
     const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: dto.allocationId, companyId: user.companyId } });
     if (!allocation) throw new NotFoundException('Allocation not found');
+    if (!allocation.toUserId) {
+      throw new BadRequestException('This allocation was logged directly against a Work Order with no recipient - there is no second party to raise a query with');
+    }
     let raisedToUserId: string;
     if (allocation.toUserId === user.id) raisedToUserId = allocation.fromUserId;
     else if (allocation.fromUserId === user.id) raisedToUserId = allocation.toUserId;

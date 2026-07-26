@@ -15,7 +15,8 @@ export class CreateManpowerAllocationDto {
 export class DistributeManpowerDto {
   @IsString() parentId: string;
   lines: {
-    toUserId: string;
+    toUserId?: string;
+    workOrderId?: string;
     category?: string;
     count: number;
     remarks?: string;

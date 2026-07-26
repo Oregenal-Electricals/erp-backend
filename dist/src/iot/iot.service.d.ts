@@ -116,8 +116,8 @@ export declare class IotService {
             updatedBy: string;
             status: string;
             value: number | null;
-            severity: string;
             message: string;
+            severity: string;
             machineId: string;
             alertType: string;
             parameter: string | null;
@@ -198,8 +198,8 @@ export declare class IotService {
         updatedBy: string;
         status: string;
         value: number | null;
-        severity: string;
         message: string;
+        severity: string;
         machineId: string;
         alertType: string;
         parameter: string | null;
@@ -218,8 +218,8 @@ export declare class IotService {
         updatedBy: string;
         status: string;
         value: number | null;
-        severity: string;
         message: string;
+        severity: string;
         machineId: string;
         alertType: string;
         parameter: string | null;

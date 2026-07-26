@@ -887,14 +887,16 @@ model ManpowerAllocation {
   category   String?  // stage name (SMT/MI/Assembly/Packaging), STORE, QUALITY, or a line name - null at the top level
   fromUserId String
   fromUser   User     @relation("ManpowerFrom", fields: [fromUserId], references: [id])
-  toUserId   String
-  toUser     User     @relation("ManpowerTo", fields: [toUserId], references: [id])
+  toUserId   String?
+  toUser     User?    @relation("ManpowerTo", fields: [toUserId], references: [id])
   parentId   String?
   parent     ManpowerAllocation?  @relation("ManpowerChain", fields: [parentId], references: [id])
   children   ManpowerAllocation[] @relation("ManpowerChain")
   count      Int
   status     String   @default("PENDING") // PENDING, ACCEPTED, QUERIED
   remarks    String?
+  workOrderId String?
+  workOrder   WorkOrder? @relation(fields: [workOrderId], references: [id])
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
   createdAt  DateTime @default(now())
@@ -2981,6 +2983,7 @@ model WorkOrder {
   ncrRecords NcrRecord[]
   oqcInspections OqcInspection[]
   materialReservations MaterialReservation[]
+  manpowerAllocations ManpowerAllocation[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
