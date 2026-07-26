@@ -226,6 +226,14 @@ let MrpService = class MrpService {
             });
             if (!bom)
                 throw new common_1.BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
+            const alreadyPlanned = await this.prisma.workOrder.aggregate({
+                where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: { not: 'CANCELLED' } },
+                _sum: { plannedQty: true },
+            });
+            const remainingToPlan = Math.max(0, soItem.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
+            if (a.buildQty > remainingToPlan + 0.0001) {
+                throw new common_1.BadRequestException(`Build qty for ${soItem.itemCode} (${a.buildQty}) exceeds the remaining unplanned quantity (${remainingToPlan}) for ${soItem.salesOrder.soNumber}`);
+            }
             resolved.push({ soItem, product, bom, buildQty: a.buildQty });
         }
         const needByItem = {};

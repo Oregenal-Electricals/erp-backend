@@ -227,6 +227,19 @@ export class MrpService {
         include: { items: { where: { isActive: true } } },
       });
       if (!bom) throw new BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
+
+      // Defense in depth: the planning board only shows the remaining
+      // unplanned quantity, but never trust client-submitted qty blindly -
+      // recompute it here and reject anything beyond what's actually left.
+      const alreadyPlanned = await this.prisma.workOrder.aggregate({
+        where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: { not: 'CANCELLED' } },
+        _sum: { plannedQty: true },
+      });
+      const remainingToPlan = Math.max(0, soItem.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
+      if (a.buildQty > remainingToPlan + 0.0001) {
+        throw new BadRequestException(`Build qty for ${soItem.itemCode} (${a.buildQty}) exceeds the remaining unplanned quantity (${remainingToPlan}) for ${soItem.salesOrder.soNumber}`);
+      }
+
       resolved.push({ soItem, product, bom, buildQty: a.buildQty });
     }
 
