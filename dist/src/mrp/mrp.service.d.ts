@@ -1,11 +1,13 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
+import { RoutingService } from '../routing/routing.service';
 export declare class MrpService {
     private prisma;
     private audit;
     private materialReservation;
-    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService);
+    private routingService;
+    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, routingService: RoutingService);
     calculateMrp(woId: string, user: any): Promise<{
         workOrder: {
             id: string;

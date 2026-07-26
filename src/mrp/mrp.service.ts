@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
+import { RoutingService } from '../routing/routing.service';
 
 @Injectable()
 export class MrpService {
@@ -9,6 +10,7 @@ export class MrpService {
     private prisma: PrismaService,
     private audit: AuditService,
     private materialReservation: MaterialReservationService,
+    private routingService: RoutingService,
   ) {}
 
   async calculateMrp(woId: string, user: any) {
@@ -273,6 +275,43 @@ export class MrpService {
 
     const createdWorkOrders = [];
     for (const r of resolved) {
+      // If this product has a defined production routing (SMT -> MI ->
+      // Assembly -> Packaging etc.), create the full stage chain directly
+      // instead of also creating a separate top-level Work Order. Creating
+      // both used to reserve the same material twice - once against a
+      // "parent" WO that never got produced against, and again against
+      // each routing stage - leaving the parent's reservation stuck
+      // forever since nothing ever completed or cancelled it.
+      const routing = await this.prisma.productRouting.findFirst({
+        where: { companyId, finalProductId: r.product.id, isActive: true },
+      });
+
+      if (routing) {
+        const chain = await this.routingService.startProduction(
+          { routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId },
+          user,
+        );
+        // Only the final stage produces the same item the Sales Order is
+        // waiting on, so that's the one MRP's remaining-qty tracking needs
+        // to see.
+        const finalStage = chain.stages[chain.stages.length - 1];
+        await this.prisma.workOrder.update({
+          where: { id: finalStage.woId },
+          data: { salesOrderId: r.soItem.salesOrder.id },
+        });
+        await this.prisma.salesOrder.updateMany({
+          where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
+          data: { status: 'IN_PRODUCTION', updatedBy: user.id },
+        });
+        createdWorkOrders.push({
+          woId: finalStage.woId, woNumber: finalStage.woNumber,
+          soNumber: r.soItem.salesOrder.soNumber,
+          productCode: r.product.code, buildQty: r.buildQty,
+          routingGroupId: chain.routingGroupId, stages: chain.stages,
+        });
+        continue;
+      }
+
       const woNumber = await this.generateWoNumber(companyId);
       const wo = await this.prisma.workOrder.create({
         data: {

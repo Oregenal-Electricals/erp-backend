@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const material_reservation_service_1 = require("../work-orders/material-reservation.service");
+const routing_service_1 = require("../routing/routing.service");
 let MrpService = class MrpService {
-    constructor(prisma, audit, materialReservation) {
+    constructor(prisma, audit, materialReservation, routingService) {
         this.prisma = prisma;
         this.audit = audit;
         this.materialReservation = materialReservation;
+        this.routingService = routingService;
     }
     async calculateMrp(woId, user) {
         var _a;
@@ -264,6 +266,28 @@ let MrpService = class MrpService {
         }
         const createdWorkOrders = [];
         for (const r of resolved) {
+            const routing = await this.prisma.productRouting.findFirst({
+                where: { companyId, finalProductId: r.product.id, isActive: true },
+            });
+            if (routing) {
+                const chain = await this.routingService.startProduction({ routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId }, user);
+                const finalStage = chain.stages[chain.stages.length - 1];
+                await this.prisma.workOrder.update({
+                    where: { id: finalStage.woId },
+                    data: { salesOrderId: r.soItem.salesOrder.id },
+                });
+                await this.prisma.salesOrder.updateMany({
+                    where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
+                    data: { status: 'IN_PRODUCTION', updatedBy: user.id },
+                });
+                createdWorkOrders.push({
+                    woId: finalStage.woId, woNumber: finalStage.woNumber,
+                    soNumber: r.soItem.salesOrder.soNumber,
+                    productCode: r.product.code, buildQty: r.buildQty,
+                    routingGroupId: chain.routingGroupId, stages: chain.stages,
+                });
+                continue;
+            }
             const woNumber = await this.generateWoNumber(companyId);
             const wo = await this.prisma.workOrder.create({
                 data: {
@@ -302,6 +326,7 @@ exports.MrpService = MrpService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        material_reservation_service_1.MaterialReservationService])
+        material_reservation_service_1.MaterialReservationService,
+        routing_service_1.RoutingService])
 ], MrpService);
 //# sourceMappingURL=mrp.service.js.map

@@ -4,8 +4,9 @@ import { MrpService } from './mrp.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
 import { WorkOrderModule } from '../work-orders/work-order.module';
+import { RoutingModule } from '../routing/routing.module';
 @Module({
-  imports: [PrismaModule, CommonModule, WorkOrderModule],
+  imports: [PrismaModule, CommonModule, WorkOrderModule, RoutingModule],
   controllers: [MrpController],
   providers: [MrpService],
   exports: [MrpService],
