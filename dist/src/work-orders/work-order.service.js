@@ -145,15 +145,37 @@ let WorkOrderService = class WorkOrderService {
         }, user);
         return Object.assign(Object.assign({}, wo), { pendingApproval: true, approvalRequestId: request === null || request === void 0 ? void 0 : request.id, message: 'Submitted for Plant Head approval - this Work Order has not started yet' });
     }
-    async approveStart(requestId, user) {
+    async stop(id, user) {
+        const wo = await this.findOne(id, user);
+        if (wo.status !== 'IN_PROGRESS')
+            throw new common_1.BadRequestException('Only IN_PROGRESS work orders can be stopped');
+        return this.update(id, { status: 'STOPPED' }, user);
+    }
+    async restart(id, user) {
+        const wo = await this.findOne(id, user);
+        if (wo.status !== 'STOPPED')
+            throw new common_1.BadRequestException('Only STOPPED work orders can be restarted');
+        if (STAGE_BYPASS_ROLES.includes(user.role)) {
+            return this.update(id, { status: 'IN_PROGRESS' }, user);
+        }
+        const { request } = await this.workflows.submit({
+            documentType: 'WO_RESTART', documentId: wo.id, documentNumber: wo.woNumber,
+            remarks: `Restart requested by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        }, user);
+        return Object.assign(Object.assign({}, wo), { pendingApproval: true, approvalRequestId: request === null || request === void 0 ? void 0 : request.id, message: 'Submitted for Plant Head approval - this Work Order is still stopped' });
+    }
+    async approveRequest(requestId, user) {
         const actionResult = await this.workflows.act(requestId, { action: 'APPROVED' }, user);
         if (actionResult.status === 'APPROVED') {
-            await this.start(actionResult.documentId, user);
-            await this.notifyAdmins(user, actionResult, 'Work Order start approved');
+            if (actionResult.documentType === 'WO_START')
+                await this.start(actionResult.documentId, user);
+            else if (actionResult.documentType === 'WO_RESTART')
+                await this.update(actionResult.documentId, { status: 'IN_PROGRESS' }, user);
+            await this.notifyAdmins(user, actionResult, `${actionResult.documentType.replace(/_/g, ' ')} approved`);
         }
         return actionResult;
     }
-    async rejectStart(requestId, user, comments) {
+    async rejectRequest(requestId, user, comments) {
         return this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
     }
     async notifyAdmins(actorUser, request, message) {

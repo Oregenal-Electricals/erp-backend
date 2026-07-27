@@ -37,8 +37,10 @@ let WorkOrderController = class WorkOrderController {
     start(id, req) { return this.woService.start(id, req.user); }
     complete(id, dto, req) { return this.woService.complete(id, dto, req.user); }
     cancel(id, req) { return this.woService.cancel(id, req.user); }
-    approveStart(requestId, req) { return this.woService.approveStart(requestId, req.user); }
-    rejectStart(requestId, dto, req) { return this.woService.rejectStart(requestId, req.user, dto === null || dto === void 0 ? void 0 : dto.comments); }
+    stop(id, req) { return this.woService.stop(id, req.user); }
+    restart(id, req) { return this.woService.restart(id, req.user); }
+    approveRequest(requestId, req) { return this.woService.approveRequest(requestId, req.user); }
+    rejectRequest(requestId, dto, req) { return this.woService.rejectRequest(requestId, req.user, dto === null || dto === void 0 ? void 0 : dto.comments); }
 };
 exports.WorkOrderController = WorkOrderController;
 __decorate([
@@ -141,6 +143,24 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WorkOrderController.prototype, "cancel", null);
 __decorate([
+    (0, common_1.Post)(':id/stop'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "stop", null);
+__decorate([
+    (0, common_1.Post)(':id/restart'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "restart", null);
+__decorate([
     (0, common_1.Post)('approvals/:requestId/approve'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),
     __param(0, (0, common_1.Param)('requestId')),
@@ -148,7 +168,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], WorkOrderController.prototype, "approveStart", null);
+], WorkOrderController.prototype, "approveRequest", null);
 __decorate([
     (0, common_1.Post)('approvals/:requestId/reject'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),
@@ -158,7 +178,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", void 0)
-], WorkOrderController.prototype, "rejectStart", null);
+], WorkOrderController.prototype, "rejectRequest", null);
 exports.WorkOrderController = WorkOrderController = __decorate([
     (0, common_1.Controller)('work-orders'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

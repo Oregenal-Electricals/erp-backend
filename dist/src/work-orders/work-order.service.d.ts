@@ -395,7 +395,175 @@ export declare class WorkOrderService {
         actualStartDate: Date | null;
         actualEndDate: Date | null;
     }>;
-    approveStart(requestId: string, user: any): Promise<{
+    stop(id: string, user: any): Promise<{
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        bom: {
+            status: string;
+            version: string;
+            bomNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        priority: string;
+        remarks: string | null;
+        uom: string;
+        warehouseId: string;
+        stageName: string | null;
+        productCode: string;
+        productName: string;
+        bomId: string | null;
+        rejectedQty: number;
+        woNumber: string;
+        salesOrderId: string | null;
+        routingGroupId: string | null;
+        stageSequence: number | null;
+        parentWorkOrderId: string | null;
+        plannedQty: number;
+        completedQty: number;
+        plannedStartDate: Date;
+        plannedEndDate: Date;
+        actualStartDate: Date | null;
+        actualEndDate: Date | null;
+    }>;
+    restart(id: string, user: any): Promise<({
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        bom: {
+            status: string;
+            version: string;
+            bomNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        priority: string;
+        remarks: string | null;
+        uom: string;
+        warehouseId: string;
+        stageName: string | null;
+        productCode: string;
+        productName: string;
+        bomId: string | null;
+        rejectedQty: number;
+        woNumber: string;
+        salesOrderId: string | null;
+        routingGroupId: string | null;
+        stageSequence: number | null;
+        parentWorkOrderId: string | null;
+        plannedQty: number;
+        completedQty: number;
+        plannedStartDate: Date;
+        plannedEndDate: Date;
+        actualStartDate: Date | null;
+        actualEndDate: Date | null;
+    }) | {
+        pendingApproval: boolean;
+        approvalRequestId: string;
+        message: string;
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        bom: {
+            items: {
+                id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                itemCode: string;
+                itemName: string;
+                uom: string;
+                quantity: number;
+                notes: string | null;
+                itemType: string;
+                sequence: number;
+                section: string | null;
+                rawMaterialId: string | null;
+                wastagePercent: number | null;
+                unitCost: number | null;
+                isCritical: boolean;
+                totalCost: number | null;
+                bomId: string;
+                effectiveQty: number;
+            }[];
+        } & {
+            id: string;
+            companyId: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            approvedBy: string | null;
+            approvedAt: Date | null;
+            productId: string;
+            revisionId: string | null;
+            version: string;
+            effectiveFrom: Date;
+            effectiveTo: Date | null;
+            bomNumber: string;
+            bomType: string;
+            sourceBomId: string | null;
+            totalCost: number | null;
+        };
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        priority: string;
+        remarks: string | null;
+        uom: string;
+        warehouseId: string;
+        stageName: string | null;
+        productCode: string;
+        productName: string;
+        bomId: string | null;
+        rejectedQty: number;
+        woNumber: string;
+        salesOrderId: string | null;
+        routingGroupId: string | null;
+        stageSequence: number | null;
+        parentWorkOrderId: string | null;
+        plannedQty: number;
+        completedQty: number;
+        plannedStartDate: Date;
+        plannedEndDate: Date;
+        actualStartDate: Date | null;
+        actualEndDate: Date | null;
+    }>;
+    approveRequest(requestId: string, user: any): Promise<{
         workflow: {
             name: string;
         };
@@ -435,7 +603,7 @@ export declare class WorkOrderService {
         currentLevel: number;
         totalLevels: number;
     }>;
-    rejectStart(requestId: string, user: any, comments?: string): Promise<{
+    rejectRequest(requestId: string, user: any, comments?: string): Promise<{
         workflow: {
             name: string;
         };

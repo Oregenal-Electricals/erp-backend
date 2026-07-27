@@ -46,10 +46,16 @@ export class WorkOrderController {
   @Post(':id/cancel')
   @RequirePermissions(Permission.PRODUCTION_EDIT)
   cancel(@Param('id') id: string, @Request() req: any) { return this.woService.cancel(id, req.user); }
+  @Post(':id/stop')
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
+  stop(@Param('id') id: string, @Request() req: any) { return this.woService.stop(id, req.user); }
+  @Post(':id/restart')
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
+  restart(@Param('id') id: string, @Request() req: any) { return this.woService.restart(id, req.user); }
   @Post('approvals/:requestId/approve')
   @RequirePermissions(Permission.WORK_ORDER_APPROVE)
-  approveStart(@Param('requestId') requestId: string, @Request() req: any) { return this.woService.approveStart(requestId, req.user); }
+  approveRequest(@Param('requestId') requestId: string, @Request() req: any) { return this.woService.approveRequest(requestId, req.user); }
   @Post('approvals/:requestId/reject')
   @RequirePermissions(Permission.WORK_ORDER_APPROVE)
-  rejectStart(@Param('requestId') requestId: string, @Body() dto: { comments?: string }, @Request() req: any) { return this.woService.rejectStart(requestId, req.user, dto?.comments); }
+  rejectRequest(@Param('requestId') requestId: string, @Body() dto: { comments?: string }, @Request() req: any) { return this.woService.rejectRequest(requestId, req.user, dto?.comments); }
 }
