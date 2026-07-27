@@ -77,6 +77,7 @@ let RoutingService = class RoutingService {
         const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         const createdStageWos = [];
         let previousWoId = null;
+        let rootNumber = null;
         for (const stage of routing.stages) {
             const bom = await this.prisma.bom.findFirst({ where: { id: stage.bomId, companyId: user.companyId } });
             if (!bom)
@@ -93,14 +94,17 @@ let RoutingService = class RoutingService {
                 priority: 'MEDIUM',
                 remarks: `Stage ${stage.sequence} (${stage.stageName}) of routing ${routing.routingName}`,
             }, user);
+            if (!rootNumber)
+                rootNumber = wo.woNumber;
+            const stageWoNumber = `${rootNumber}-${stage.stageName.toUpperCase()}`;
             await this.prisma.workOrder.update({
                 where: { id: wo.id },
-                data: { routingGroupId, stageSequence: stage.sequence, stageName: stage.stageName, parentWorkOrderId: previousWoId },
+                data: { woNumber: stageWoNumber, routingGroupId, stageSequence: stage.sequence, stageName: stage.stageName, parentWorkOrderId: previousWoId },
             });
             if (stage.sequence === 1) {
                 await this.workOrderService.release(wo.id, user);
             }
-            createdStageWos.push({ woId: wo.id, woNumber: wo.woNumber, stageName: stage.stageName, sequence: stage.sequence });
+            createdStageWos.push({ woId: wo.id, woNumber: stageWoNumber, stageName: stage.stageName, sequence: stage.sequence });
             previousWoId = wo.id;
         }
         await this.audit.log({

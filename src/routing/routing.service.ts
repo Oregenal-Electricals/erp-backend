@@ -72,6 +72,7 @@ export class RoutingService {
 
     const createdStageWos: any[] = [];
     let previousWoId: string | null = null;
+    let rootNumber: string | null = null;
 
     for (const stage of routing.stages) {
       const bom = await this.prisma.bom.findFirst({ where: { id: stage.bomId, companyId: user.companyId } });
@@ -89,16 +90,24 @@ export class RoutingService {
         remarks: `Stage ${stage.sequence} (${stage.stageName}) of routing ${routing.routingName}`,
       } as any, user);
 
+      // The first stage's own auto-generated number becomes the shared
+      // "root" for the whole chain - every stage then displays as
+      // {root}-{STAGENAME} (e.g. WO-2026-0009-SMT, WO-2026-0009-MI) so
+      // Plant Manager and above can see at a glance which Work Orders
+      // belong to the same production run.
+      if (!rootNumber) rootNumber = wo.woNumber;
+      const stageWoNumber = `${rootNumber}-${stage.stageName.toUpperCase()}`;
+
       await this.prisma.workOrder.update({
         where: { id: wo.id },
-        data: { routingGroupId, stageSequence: stage.sequence, stageName: stage.stageName, parentWorkOrderId: previousWoId },
+        data: { woNumber: stageWoNumber, routingGroupId, stageSequence: stage.sequence, stageName: stage.stageName, parentWorkOrderId: previousWoId },
       });
 
       if (stage.sequence === 1) {
         await this.workOrderService.release(wo.id, user);
       }
 
-      createdStageWos.push({ woId: wo.id, woNumber: wo.woNumber, stageName: stage.stageName, sequence: stage.sequence });
+      createdStageWos.push({ woId: wo.id, woNumber: stageWoNumber, stageName: stage.stageName, sequence: stage.sequence });
       previousWoId = wo.id;
     }
 
