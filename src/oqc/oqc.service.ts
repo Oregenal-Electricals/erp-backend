@@ -2,10 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateOqcDto, CompleteOqcDto } from './dto/oqc.dto';
+import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 
 @Injectable()
 export class OqcService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private stockLedger: StockLedgerService) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.oqcInspection.count({ where: { companyId } });
@@ -21,6 +22,21 @@ export class OqcService {
   }
 
   async create(dto: CreateOqcDto, user: any) {
+    // Every OQC record must be tied to a real FG Receipt now - without
+    // that link there's nothing for release() to credit stock against,
+    // and Store's job is specifically to verify a receipt before its
+    // stock becomes usable, not to log inspections in the abstract.
+    if (!dto.fgReceiptId) throw new BadRequestException('fgReceiptId is required');
+    const fgReceipt = await this.prisma.fgReceipt.findFirst({
+      where: { id: dto.fgReceiptId, companyId: user.companyId },
+    });
+    if (!fgReceipt) throw new NotFoundException('FG Receipt not found');
+    if (fgReceipt.status !== 'RECEIVED') throw new BadRequestException('FG Receipt must be RECEIVED before OQC can be raised against it');
+    const existing = await this.prisma.oqcInspection.findFirst({
+      where: { fgReceiptId: dto.fgReceiptId, companyId: user.companyId },
+    });
+    if (existing) throw new BadRequestException(`OQC ${existing.oqcNumber} already exists for this FG Receipt`);
+
     const oqcNumber = await this.generateNumber(user.companyId);
     const passRate = dto.sampleSize > 0 ? Math.round(dto.passQty / dto.sampleSize * 100) : 0;
 
@@ -84,6 +100,13 @@ export class OqcService {
       data: { status: 'RELEASED', releasedBy: user.id, releasedDate: new Date(), updatedBy: user.id },
       include: this.includes(),
     });
+
+    // This is the actual Store checkpoint - FG stock becomes visible to
+    // StockBalance (and therefore dispatchable, reservable by the next
+    // routing stage, etc.) only from this point on, not from FG Receipt
+    // confirmation.
+    await this.stockLedger.receiveFromOqc(id, user);
+
     await this.audit.log({ tableName: 'oqc_inspections', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
   }
@@ -115,6 +138,21 @@ export class OqcService {
     const oqc = await this.prisma.oqcInspection.findFirst({ where: { id, companyId: user.companyId }, include: this.includes() });
     if (!oqc) throw new NotFoundException('OQC record not found');
     return oqc;
+  }
+
+  async getPendingFgReceipts(user: any) {
+    const companyId = user.companyId;
+    const receipts = await this.prisma.fgReceipt.findMany({
+      where: { companyId, status: 'RECEIVED' },
+      include: { workOrder: { select: { woNumber: true } }, warehouse: { select: { name: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    const result = [];
+    for (const r of receipts) {
+      const oqc = await this.prisma.oqcInspection.findFirst({ where: { fgReceiptId: r.id, companyId } });
+      if (!oqc) result.push(r);
+    }
+    return { data: result, total: result.length };
   }
 
   async getStats(user: any) {

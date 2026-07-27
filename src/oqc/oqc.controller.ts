@@ -15,6 +15,10 @@ export class OqcController {
   @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.oqcService.getStats(req.user); }
 
+  @Get('pending-fg-receipts')
+  @RequirePermissions(Permission.OQC_VIEW)
+  getPendingFgReceipts(@Request() req: any) { return this.oqcService.getPendingFgReceipts(req.user); }
+
   @Get()
   @RequirePermissions(Permission.OQC_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.oqcService.findAll(req.user, query); }

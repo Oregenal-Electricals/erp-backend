@@ -162,6 +162,69 @@ export class StockLedgerService {
     return { message: `${entries.length} stock entries created`, entries };
   }
 
+  /**
+   * Credits finished-goods stock into StockBalance/StockLedger - but only
+   * once Outgoing QC has actually PASSED and RELEASED the lot. This is the
+   * FG mirror of receiveFromIqc(): before this runs, an FG Receipt marks
+   * material as physically received into Store, but it stays completely
+   * invisible to StockBalance (and therefore to dispatch, shortage checks,
+   * and downstream production reservation) until OQC clears it. A failed
+   * or still-pending OQC inspection can never release, so that stock never
+   * silently becomes available - Store is a real checkpoint on FG the same
+   * way IQC already is on raw materials, not just a paperwork record.
+   */
+  async receiveFromOqc(oqcId: string, user: any) {
+    const oqc = await this.prisma.oqcInspection.findFirst({
+      where: { id: oqcId, companyId: user.companyId },
+      include: { fgReceipt: true },
+    });
+    if (!oqc) throw new NotFoundException('OQC inspection not found');
+    if (oqc.status !== 'RELEASED') throw new BadRequestException('OQC must be RELEASED');
+    if (!oqc.fgReceipt) throw new BadRequestException('OQC has no linked FG Receipt to credit stock for');
+
+    // Guard against double-crediting: release() already calls this
+    // automatically, so a manual retry must not create duplicate ledger
+    // entries for the same OQC.
+    const alreadyReceived = await this.prisma.stockLedger.findFirst({
+      where: { companyId: user.companyId, referenceType: 'OQC', referenceId: oqcId },
+    });
+    if (alreadyReceived) throw new BadRequestException(`Stock has already been received for ${oqc.oqcNumber}`);
+
+    const fgReceipt = oqc.fgReceipt;
+    // A PASS result releases the full received lot, not just the sampled
+    // quantity - sampleSize/passQty are a statistical check on the batch,
+    // standard AQL-style lot inspection, not a per-unit accept/reject.
+    const entry = await this.postTransaction({
+      companyId: user.companyId,
+      itemCode: fgReceipt.itemCode,
+      itemName: fgReceipt.itemName,
+      warehouseId: fgReceipt.warehouseId,
+      transactionType: 'RECEIPT',
+      referenceType: 'OQC',
+      referenceId: oqcId,
+      referenceNumber: oqc.oqcNumber,
+      inQty: fgReceipt.receivedQty,
+      unitCost: fgReceipt.unitCost,
+      remarks: `FG stock released to Store after OQC ${oqc.oqcNumber} PASS`,
+      userId: user.id,
+    });
+
+    if (fgReceipt.batchNumber) {
+      await this.prisma.stockBatch.create({
+        data: {
+          batchNumber: fgReceipt.batchNumber, itemCode: fgReceipt.itemCode,
+          itemName: fgReceipt.itemName, warehouseId: fgReceipt.warehouseId,
+          originalQty: fgReceipt.receivedQty, availableQty: fgReceipt.receivedQty,
+          unitCost: fgReceipt.unitCost, status: 'ACTIVE',
+          companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+        },
+      }).catch(() => {});
+    }
+
+    await this.audit.log({ tableName: 'stock_ledger', recordId: oqcId, action: 'CREATE', newValues: { entry }, changedBy: user.id });
+    return { message: 'Stock entry created', entry };
+  }
+
   async findLedger(user: any, query: any) {
     const { page = 1, limit = 20, itemCode, warehouseId, transactionType } = query;
     const skip = (Number(page) - 1) * Number(limit);

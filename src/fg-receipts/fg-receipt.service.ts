@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { WorkOrderService } from '../work-orders/work-order.service';
 import { CreateFgReceiptDto } from './dto/fg-receipt.dto';
 
@@ -10,7 +9,6 @@ export class FgReceiptService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
-    private stockLedger: StockLedgerService,
     private workOrderService: WorkOrderService,
   ) {}
 
@@ -103,30 +101,14 @@ export class FgReceiptService {
     if (!receipt) throw new NotFoundException('FG Receipt not found');
     if (receipt.status !== 'DRAFT') throw new BadRequestException('Only DRAFT receipts can be confirmed');
 
-    await this.stockLedger.postTransaction({
-      companyId: user.companyId,
-      itemCode: receipt.itemCode, itemName: receipt.itemName,
-      warehouseId: receipt.warehouseId,
-      transactionType: 'RECEIPT',
-      referenceType: 'FG_RECEIPT',
-      referenceId: receipt.id, referenceNumber: receipt.receiptNumber,
-      inQty: receipt.receivedQty, unitCost: receipt.unitCost,
-      remarks: `FG Receipt from WO`,
-      userId: user.id,
-    });
-
-    if (receipt.batchNumber) {
-      await this.prisma.stockBatch.create({
-        data: {
-          batchNumber: receipt.batchNumber, itemCode: receipt.itemCode,
-          itemName: receipt.itemName, warehouseId: receipt.warehouseId,
-          originalQty: receipt.receivedQty, availableQty: receipt.receivedQty,
-          unitCost: receipt.unitCost, status: 'ACTIVE',
-          companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
-        },
-      }).catch(() => {});
-    }
-
+    // Confirming a receipt means the material has physically arrived in
+    // Store - it does NOT credit StockBalance and does NOT create a stock
+    // batch. That only happens once Outgoing QC inspects this receipt and
+    // releases it (OqcService.release() -> StockLedgerService.receiveFromOqc()).
+    // Store verifying goods before they're usable/dispatchable applies to
+    // finished goods exactly the same way it already applies to incoming
+    // raw materials via IQC - a completed Work Order's output isn't
+    // automatically "real" stock just because production finished it.
     const updated = await this.prisma.fgReceipt.update({
       where: { id }, data: { status: 'RECEIVED', updatedBy: user.id }, include: this.includes(),
     });

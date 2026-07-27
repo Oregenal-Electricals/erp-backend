@@ -4,7 +4,7 @@ const RESULTS = ['PASS','FAIL','CONDITIONAL','PENDING'];
 const CHECKS = ['PASS','FAIL','NA'];
 
 export class CreateOqcDto {
-  @IsOptional() @IsString() fgReceiptId?: string;
+  @IsString() fgReceiptId: string;
   @IsOptional() @IsString() workOrderId?: string;
   @IsString() itemCode: string;
   @IsString() itemName: string;
