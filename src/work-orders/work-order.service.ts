@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from './material-reservation.service';
+import { WorkflowsService } from '../workflows/workflows.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
 
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
@@ -13,6 +15,8 @@ export class WorkOrderService {
     private prisma: PrismaService,
     private audit: AuditService,
     private materialReservation: MaterialReservationService,
+    private workflows: WorkflowsService,
+    private notifications: NotificationsService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -133,7 +137,46 @@ export class WorkOrderService {
   async start(id: string, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'RELEASED') throw new BadRequestException('Only RELEASED work orders can be started');
-    return this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+    // Plant Head (and above) starting a Work Order is the approval itself -
+    // no need to wait on themselves. Anyone else's start request goes
+    // through the same generic multi-level approval engine already used
+    // for PO/SO/Voucher approvals, and doesn't take effect until a Plant
+    // Head approves it.
+    if (STAGE_BYPASS_ROLES.includes(user.role)) {
+      return this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+    }
+    const { request } = await this.workflows.submit({
+      documentType: 'WO_START', documentId: wo.id, documentNumber: wo.woNumber,
+      remarks: `Start requested by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+    }, user);
+    return { ...wo, pendingApproval: true, approvalRequestId: request?.id, message: 'Submitted for Plant Head approval - this Work Order has not started yet' };
+  }
+
+  async approveStart(requestId: string, user: any) {
+    const actionResult = await this.workflows.act(requestId, { action: 'APPROVED' }, user);
+    if (actionResult.status === 'APPROVED') {
+      await this.start(actionResult.documentId, user);
+      await this.notifyAdmins(user, actionResult, 'Work Order start approved');
+    }
+    return actionResult;
+  }
+
+  async rejectStart(requestId: string, user: any, comments?: string) {
+    return this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+  }
+
+  private async notifyAdmins(actorUser: any, request: any, message: string) {
+    const admins = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
+    });
+    for (const admin of admins) {
+      await this.notifications.create({
+        userId: admin.id, type: 'PRODUCTION_APPROVAL', title: 'Production approval action',
+        message: `${message}: ${request.documentNumber}`,
+        referenceType: request.documentType, referenceId: request.documentId,
+        referenceNumber: request.documentNumber, priority: 'MEDIUM',
+      }, actorUser.companyId, actorUser.id);
+    }
   }
 
   async complete(id: string, dto: { completedQty: number; rejectedQty?: number }, user: any) {

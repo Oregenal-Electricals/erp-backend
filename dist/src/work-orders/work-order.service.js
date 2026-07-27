@@ -14,13 +14,17 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const material_reservation_service_1 = require("./material-reservation.service");
+const workflows_service_1 = require("../workflows/workflows.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
 const STAGE_BYPASS_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 let WorkOrderService = class WorkOrderService {
-    constructor(prisma, audit, materialReservation) {
+    constructor(prisma, audit, materialReservation, workflows, notifications) {
         this.prisma = prisma;
         this.audit = audit;
         this.materialReservation = materialReservation;
+        this.workflows = workflows;
+        this.notifications = notifications;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.workOrder.count({ where: { companyId } });
@@ -132,7 +136,38 @@ let WorkOrderService = class WorkOrderService {
         const wo = await this.findOne(id, user);
         if (wo.status !== 'RELEASED')
             throw new common_1.BadRequestException('Only RELEASED work orders can be started');
-        return this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+        if (STAGE_BYPASS_ROLES.includes(user.role)) {
+            return this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+        }
+        const { request } = await this.workflows.submit({
+            documentType: 'WO_START', documentId: wo.id, documentNumber: wo.woNumber,
+            remarks: `Start requested by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        }, user);
+        return Object.assign(Object.assign({}, wo), { pendingApproval: true, approvalRequestId: request === null || request === void 0 ? void 0 : request.id, message: 'Submitted for Plant Head approval - this Work Order has not started yet' });
+    }
+    async approveStart(requestId, user) {
+        const actionResult = await this.workflows.act(requestId, { action: 'APPROVED' }, user);
+        if (actionResult.status === 'APPROVED') {
+            await this.start(actionResult.documentId, user);
+            await this.notifyAdmins(user, actionResult, 'Work Order start approved');
+        }
+        return actionResult;
+    }
+    async rejectStart(requestId, user, comments) {
+        return this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+    }
+    async notifyAdmins(actorUser, request, message) {
+        const admins = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
+        });
+        for (const admin of admins) {
+            await this.notifications.create({
+                userId: admin.id, type: 'PRODUCTION_APPROVAL', title: 'Production approval action',
+                message: `${message}: ${request.documentNumber}`,
+                referenceType: request.documentType, referenceId: request.documentId,
+                referenceNumber: request.documentNumber, priority: 'MEDIUM',
+            }, actorUser.companyId, actorUser.id);
+        }
     }
     async complete(id, dto, user) {
         const wo = await this.findOne(id, user);
@@ -184,6 +219,8 @@ exports.WorkOrderService = WorkOrderService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        material_reservation_service_1.MaterialReservationService])
+        material_reservation_service_1.MaterialReservationService,
+        workflows_service_1.WorkflowsService,
+        notifications_service_1.NotificationsService])
 ], WorkOrderService);
 //# sourceMappingURL=work-order.service.js.map

@@ -37,6 +37,8 @@ let WorkOrderController = class WorkOrderController {
     start(id, req) { return this.woService.start(id, req.user); }
     complete(id, dto, req) { return this.woService.complete(id, dto, req.user); }
     cancel(id, req) { return this.woService.cancel(id, req.user); }
+    approveStart(requestId, req) { return this.woService.approveStart(requestId, req.user); }
+    rejectStart(requestId, dto, req) { return this.woService.rejectStart(requestId, req.user, dto === null || dto === void 0 ? void 0 : dto.comments); }
 };
 exports.WorkOrderController = WorkOrderController;
 __decorate([
@@ -138,6 +140,25 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], WorkOrderController.prototype, "cancel", null);
+__decorate([
+    (0, common_1.Post)('approvals/:requestId/approve'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),
+    __param(0, (0, common_1.Param)('requestId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "approveStart", null);
+__decorate([
+    (0, common_1.Post)('approvals/:requestId/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),
+    __param(0, (0, common_1.Param)('requestId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "rejectStart", null);
 exports.WorkOrderController = WorkOrderController = __decorate([
     (0, common_1.Controller)('work-orders'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

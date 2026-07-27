@@ -41,8 +41,8 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -112,8 +112,8 @@ export declare class ManpowerController {
                 createdBy: string | null;
                 updatedBy: string | null;
                 status: string;
-                allocationId: string;
                 message: string;
+                allocationId: string;
                 response: string | null;
                 raisedByUserId: string;
                 raisedToUserId: string;
@@ -169,8 +169,8 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -233,8 +233,8 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -297,8 +297,8 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -361,8 +361,8 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -403,8 +403,8 @@ export declare class ManpowerController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        allocationId: string;
         message: string;
+        allocationId: string;
         response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
@@ -419,8 +419,8 @@ export declare class ManpowerController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        allocationId: string;
         message: string;
+        allocationId: string;
         response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;

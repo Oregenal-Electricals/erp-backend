@@ -13,12 +13,14 @@ const work_order_service_1 = require("./work-order.service");
 const material_reservation_service_1 = require("./material-reservation.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const workflows_module_1 = require("../workflows/workflows.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let WorkOrderModule = class WorkOrderModule {
 };
 exports.WorkOrderModule = WorkOrderModule;
 exports.WorkOrderModule = WorkOrderModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, workflows_module_1.WorkflowsModule, notifications_module_1.NotificationsModule],
         controllers: [work_order_controller_1.WorkOrderController],
         providers: [work_order_service_1.WorkOrderService, material_reservation_service_1.MaterialReservationService],
         exports: [work_order_service_1.WorkOrderService, material_reservation_service_1.MaterialReservationService],

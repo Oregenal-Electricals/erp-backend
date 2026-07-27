@@ -44,8 +44,8 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -108,8 +108,8 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -178,8 +178,8 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -249,8 +249,8 @@ export declare class ManpowerService {
                 createdBy: string | null;
                 updatedBy: string | null;
                 status: string;
-                allocationId: string;
                 message: string;
+                allocationId: string;
                 response: string | null;
                 raisedByUserId: string;
                 raisedToUserId: string;
@@ -306,8 +306,8 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -370,8 +370,8 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
-            allocationId: string;
             message: string;
+            allocationId: string;
             response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
@@ -406,8 +406,8 @@ export declare class ManpowerService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        allocationId: string;
         message: string;
+        allocationId: string;
         response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
@@ -422,8 +422,8 @@ export declare class ManpowerService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        allocationId: string;
         message: string;
+        allocationId: string;
         response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;

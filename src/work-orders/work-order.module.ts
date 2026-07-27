@@ -4,9 +4,11 @@ import { WorkOrderService } from './work-order.service';
 import { MaterialReservationService } from './material-reservation.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
+import { WorkflowsModule } from '../workflows/workflows.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule],
+  imports: [PrismaModule, CommonModule, WorkflowsModule, NotificationsModule],
   controllers: [WorkOrderController],
   providers: [WorkOrderService, MaterialReservationService],
   exports: [WorkOrderService, MaterialReservationService],
