@@ -55,8 +55,8 @@ export declare class ProductionEntryController {
             shift: string;
             status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
@@ -95,8 +95,8 @@ export declare class ProductionEntryController {
             shift: string;
             status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
@@ -130,8 +130,8 @@ export declare class ProductionEntryController {
         shift: string;
         status: string;
         remarks: string | null;
-        totalQty: number;
         workOrderId: string;
+        totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
@@ -160,8 +160,8 @@ export declare class ProductionEntryController {
         shift: string;
         status: string;
         remarks: string | null;
-        totalQty: number;
         workOrderId: string;
+        totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
@@ -190,8 +190,8 @@ export declare class ProductionEntryController {
         shift: string;
         status: string;
         remarks: string | null;
-        totalQty: number;
         workOrderId: string;
+        totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;

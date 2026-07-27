@@ -12,8 +12,8 @@ export declare class StockTransferService {
     create(dto: CreateTransferDto, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -61,8 +61,8 @@ export declare class StockTransferService {
     confirm(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -110,8 +110,8 @@ export declare class StockTransferService {
     cancel(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -193,8 +193,8 @@ export declare class StockTransferService {
     findOne(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;

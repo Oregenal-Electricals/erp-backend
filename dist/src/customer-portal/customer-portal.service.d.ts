@@ -118,8 +118,8 @@ export declare class CustomerPortalService {
         invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
-        assignedTo: string | null;
         batchNumber: string | null;
+        assignedTo: string | null;
         customerId: string | null;
         correctiveAction: string | null;
         severity: string;

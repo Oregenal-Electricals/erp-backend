@@ -33,9 +33,9 @@ export declare class ProductionIssueController {
             status: string;
             remarks: string | null;
             warehouseId: string;
-            issueMethod: string;
-            issueNumber: string;
             workOrderId: string;
+            issueNumber: string;
+            issueMethod: string;
         })[];
         total: number;
         page: number;
@@ -45,8 +45,8 @@ export declare class ProductionIssueController {
     findOne(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -88,15 +88,15 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
-        issueNumber: string;
         workOrderId: string;
+        issueNumber: string;
+        issueMethod: string;
     }>;
     create(dto: CreateProductionIssueDto, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -138,15 +138,15 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
-        issueNumber: string;
         workOrderId: string;
+        issueNumber: string;
+        issueMethod: string;
     }>;
     createFromMrp(woId: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -188,15 +188,15 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
-        issueNumber: string;
         workOrderId: string;
+        issueNumber: string;
+        issueMethod: string;
     }>;
     confirm(id: string, req: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -238,8 +238,8 @@ export declare class ProductionIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueMethod: string;
-        issueNumber: string;
         workOrderId: string;
+        issueNumber: string;
+        issueMethod: string;
     }>;
 }

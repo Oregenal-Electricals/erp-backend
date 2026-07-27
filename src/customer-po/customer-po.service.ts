@@ -3,10 +3,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
+import { MrpService } from '../mrp/mrp.service';
 
 @Injectable()
 export class CustomerPoService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService, private mrpService: MrpService) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -368,11 +369,18 @@ export class CustomerPoService {
 
   /**
    * Shortage check logic, per business rule:
-   * 1. If the sold item is a Product WITH an approved BOM -> explode BOM,
-   *    check each raw material's stock (existing MRP-style logic).
-   * 2. If the sold item is a Product with NO approved BOM -> do not
-   *    attempt any stock check. Auto-create a Task flagging that a BOM
-   *    needs to be created for this product, linked back to this CPO.
+   * 1. If the sold item is a Product WITH an approved BOM (either its own
+   *    MASTER BOM, or - for an intermediate routing-stage item ordered
+   *    directly, like an SMT board or an MI assembly - the STAGE BOM off
+   *    its RoutingStage) -> recursively explode the full BOM/routing tree
+   *    down to true raw materials, checking each one's stock. An
+   *    intermediate item that already has enough of its own finished
+   *    stock never has its own raw materials checked at all - only a
+   *    genuine shortfall recurses further.
+   * 2. If the sold item is a Product with NO approved BOM anywhere in its
+   *    tree -> do not attempt any stock check. Auto-create a Task
+   *    flagging that a BOM needs to be created for this product, linked
+   *    back to this CPO.
    * 3. If the sold item IS a raw material itself (no Product master
    *    matches, but a RawMaterial does) -> skip BOM entirely, check that
    *    raw material's own stock directly against the ordered quantity.
@@ -380,10 +388,11 @@ export class CustomerPoService {
    *    flag as unknown/unmapped item code.
    *
    * Stock allocation is FIFO across ALL open Customer POs (not just this
-   * one) that need the same raw material - whichever PO was created
-   * first gets first claim on available stock; later POs see only what's
-   * left. Without this, two POs needing the same limited material would
-   * each independently see the same "available" stock and both report a
+   * one) that need the same item - at EVERY level of the BOM/routing
+   * tree, not just the top one - whichever PO was created first gets
+   * first claim on available stock; later POs see only what's left.
+   * Without this, two POs needing the same limited material would each
+   * independently see the same "available" stock and both report a
    * smaller shortage than the true combined shortfall. Only RECEIVED,
    * ACKNOWLEDGED, and IN_PROGRESS POs compete for stock this way -
    * CANCELLED POs make no claim, and COMPLETED POs are assumed to have
@@ -391,84 +400,6 @@ export class CustomerPoService {
    * the live stock balance), so including them again here would
    * double-count their consumption.
    */
-
-  /**
-   * Explodes a single CPO's items into total raw-material demand
-   * (summed across all its line items), with NO side effects - used
-   * purely for computing how much of each material this order is
-   * claiming, when building the cross-order FIFO queue. Items with a
-   * missing BOM or unmapped item code are silently skipped here (they
-   * contribute no calculable raw-material demand); the BOM_MISSING /
-   * NO_PRODUCT_MASTER flagging and Task creation only happen in the
-   * main runShortageCheck pass, for the specific CPO being checked.
-   */
-  private async getFinishedGoodDemand(companyId: string, cpo: any): Promise<Map<string, { requiredQty: number; uom: string; itemName: string; productId: string }>> {
-    const demand = new Map<string, { requiredQty: number; uom: string; itemName: string; productId: string }>();
-    for (const cpoItem of cpo.items) {
-      const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
-      if (!product) continue;
-      const existing = demand.get(cpoItem.itemCode);
-      if (existing) existing.requiredQty += cpoItem.qty;
-      else demand.set(cpoItem.itemCode, { requiredQty: cpoItem.qty, uom: cpoItem.uom, itemName: cpoItem.itemName, productId: product.id });
-    }
-    return demand;
-  }
-
-  /**
-   * Explodes a CPO's Product-type items into raw material demand via
-   * their approved BOM, and passes raw-material-type items straight
-   * through as their own demand. Items with a missing BOM or unmapped
-   * item code are silently skipped here; BOM_MISSING / NO_PRODUCT_MASTER
-   * flagging and Task creation only happen in the main runShortageCheck
-   * pass, for the specific CPO being checked.
-   *
-   * fgNetOverride, when supplied, maps a Product's itemCode to the
-   * quantity that STILL needs producing after Finished Goods stock has
-   * already covered part (or all) of the demand - so BOM explosion only
-   * happens for the genuine production shortfall, not the full ordered
-   * quantity. An item with a net override of 0 needs no production at
-   * all and is skipped entirely.
-   */
-  private async getRawMaterialDemand(companyId: string, cpo: any, fgNetOverride?: Map<string, number>): Promise<Map<string, { requiredQty: number; uom: string; itemName: string; rawMaterialId: string | null }>> {
-    const demand = new Map<string, { requiredQty: number; uom: string; itemName: string; rawMaterialId: string | null }>();
-    for (const cpoItem of cpo.items) {
-      const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
-      if (product) {
-        const effectiveQty = fgNetOverride?.has(cpoItem.itemCode) ? fgNetOverride.get(cpoItem.itemCode)! : cpoItem.qty;
-        if (effectiveQty <= 0) continue;
-        let bom = await this.prisma.bom.findFirst({
-          where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-          include: { items: { where: { isActive: true } } },
-          orderBy: { effectiveFrom: 'desc' },
-        });
-        if (!bom) {
-          const matchedStage = await this.prisma.routingStage.findFirst({
-            where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-            include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
-          });
-          if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
-        }
-        if (!bom) continue;
-        for (const bomItem of bom.items) {
-          const grossQty = bomItem.effectiveQty * effectiveQty;
-          const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
-          const netRequired = grossQty + wasteQty;
-          const existing = demand.get(bomItem.itemCode);
-          if (existing) existing.requiredQty += netRequired;
-          else demand.set(bomItem.itemCode, { requiredQty: netRequired, uom: bomItem.uom, itemName: bomItem.itemName, rawMaterialId: bomItem.rawMaterialId || null });
-        }
-        continue;
-      }
-      const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: cpoItem.itemCode } });
-      if (rawMaterial) {
-        const existing = demand.get(cpoItem.itemCode);
-        if (existing) existing.requiredQty += cpoItem.qty;
-        else demand.set(cpoItem.itemCode, { requiredQty: cpoItem.qty, uom: cpoItem.uom, itemName: cpoItem.itemName, rawMaterialId: rawMaterial.id });
-      }
-    }
-    return demand;
-  }
-
   async runShortageCheck(cpoId: string, user: any) {
     const companyId = user.companyId;
     const cpo = await this.prisma.customerPo.findFirst({
@@ -488,119 +419,53 @@ export class CustomerPoService {
       include: { items: { where: { isActive: true } } },
       orderBy: { createdAt: 'asc' },
     });
+    const bucketOrder = openCpos.map(c => c.id);
 
-    // PASS 1: Finished Goods stock, FIFO-shared across all open CPOs.
-    // If finished units already exist in stock, use those first - only
-    // the genuine shortfall needs BOM explosion / raw material checking.
-    const fgDemandQueue = new Map<string, Array<{ cpoId: string; requiredQty: number }>>();
+    // One level-0 demand bucket per (open CPO, sellable line item) -
+    // shared across ALL open CPOs so the engine can FIFO-allocate the
+    // same limited stock pool fairly, oldest order first, at every level
+    // of the BOM/routing tree, not just the top one. Items matching
+    // neither a Product nor a RawMaterial master contribute no demand
+    // here and are reported as NO_PRODUCT_MASTER below instead.
+    const buckets: { bucketKey: string; itemCode: string; itemName: string; uom: string; qty: number }[] = [];
     for (const otherCpo of openCpos) {
-      const fgDemand = await this.getFinishedGoodDemand(companyId, otherCpo);
-      for (const [itemCode, info] of fgDemand.entries()) {
-        if (!fgDemandQueue.has(itemCode)) fgDemandQueue.set(itemCode, []);
-        fgDemandQueue.get(itemCode)!.push({ cpoId: otherCpo.id, requiredQty: info.requiredQty });
+      for (const item of otherCpo.items) {
+        const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
+        const rawMaterial = product ? null : await this.prisma.rawMaterial.findFirst({ where: { companyId, code: item.itemCode } });
+        if (!product && !rawMaterial) continue;
+        buckets.push({ bucketKey: otherCpo.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
       }
     }
 
-    const fgAllocationByCpo = new Map<string, Map<string, { fgAvailableQty: number; fgAllocatedQty: number; netProductionQty: number }>>();
-    for (const [itemCode, queue] of fgDemandQueue.entries()) {
-      const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
-      let runningStock = balance?.availableQty || 0;
-      const totalFgStock = runningStock;
-      for (const entry of queue) {
-        const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
-        runningStock -= allocated;
-        if (!fgAllocationByCpo.has(entry.cpoId)) fgAllocationByCpo.set(entry.cpoId, new Map());
-        fgAllocationByCpo.get(entry.cpoId)!.set(itemCode, {
-          fgAvailableQty: totalFgStock,
-          fgAllocatedQty: allocated,
-          netProductionQty: Math.max(0, entry.requiredQty - allocated),
-        });
-      }
-    }
+    const { levelZero, leafShortages, leavesOf } = await this.mrpService.explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder);
+    const cpoLevelZero = levelZero.get(cpoId) || new Map();
+    const cpoLeafShortages = leafShortages.get(cpoId) || [];
 
-    // PASS 2: Raw material demand, FIFO-shared across all open CPOs.
-    // Each CPO's Product-type items use their post-FG-allocation net
-    // production quantity, not their raw ordered quantity.
-    const demandQueue = new Map<string, Array<{ cpoId: string; requiredQty: number }>>();
-    for (const otherCpo of openCpos) {
-      const fgNetForThisCpo = fgAllocationByCpo.get(otherCpo.id);
-      const fgNetOverride = fgNetForThisCpo
-        ? new Map(Array.from(fgNetForThisCpo.entries()).map(([code, info]) => [code, info.netProductionQty]))
-        : undefined;
-      const demand = await this.getRawMaterialDemand(companyId, otherCpo, fgNetOverride);
-      for (const [itemCode, info] of demand.entries()) {
-        if (!demandQueue.has(itemCode)) demandQueue.set(itemCode, []);
-        demandQueue.get(itemCode)!.push({ cpoId: otherCpo.id, requiredQty: info.requiredQty });
-      }
-    }
-    const allocationForThisCpo = new Map<string, { netRequired: number; availableQty: number; shortage: number }>();
-    for (const [itemCode, queue] of demandQueue.entries()) {
-      const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
-      // Include material already on order (PO sent/approved/partially received,
-      // not yet fully received) as available supply for this check - otherwise
-      // re-running the shortage check while a PO is in transit would recreate
-      // an identical OPEN shortage for material that's already been ordered,
-      // letting someone raise a duplicate PO for the same shortfall.
-      const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
-        where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
-        select: { pendingQty: true },
-      });
-      const onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
-      let runningStock = (balance?.availableQty || 0) + onOrderQty;
-      const totalStock = runningStock;
-      for (const entry of queue) {
-        const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
-        const shortage = Math.max(0, entry.requiredQty - allocated);
-        runningStock -= allocated;
-        if (entry.cpoId === cpoId) {
-          allocationForThisCpo.set(itemCode, {
-            netRequired: entry.requiredQty,
-            availableQty: totalStock,
-            shortage,
-          });
-        }
-      }
-    }
-
-    const fgAllocationForThisCpo = fgAllocationByCpo.get(cpoId) || new Map();
     const shortageRows: any[] = [];
     const itemResults: any[] = [];
     const bomTasksCreated: string[] = [];
     let hasShortage = false;
+
     for (const cpoItem of cpo.items) {
-      const product = await this.prisma.product.findFirst({
-        where: { companyId, code: cpoItem.itemCode },
-      });
+      const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+
       if (product) {
-        const fgAlloc = fgAllocationForThisCpo.get(cpoItem.itemCode);
-        const fgAvailableQty = fgAlloc?.fgAvailableQty ?? 0;
-        const fgAllocatedQty = fgAlloc?.fgAllocatedQty ?? 0;
-        const netProductionQty = fgAlloc ? fgAlloc.netProductionQty : cpoItem.qty;
+        const lz = cpoLevelZero.get(cpoItem.itemCode);
+        const fgAvailableQty = lz?.availableQty ?? 0;
+        const fgAllocatedQty = lz?.allocatedQty ?? 0;
+        const netProductionQty = lz ? lz.netQty : cpoItem.qty;
 
         if (netProductionQty <= 0) {
           itemResults.push({
             itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
             status: 'AVAILABLE_FROM_FG_STOCK',
             message: `Fully covered by existing finished goods stock (${fgAllocatedQty} ${cpoItem.uom} allocated). No production required.`,
-            requiredQty: cpoItem.qty,
-            fgAvailableQty, fgAllocatedQty,
+            requiredQty: cpoItem.qty, fgAvailableQty, fgAllocatedQty,
           });
           continue;
         }
 
-        let bom = await this.prisma.bom.findFirst({
-          where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-          include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
-          orderBy: { effectiveFrom: 'desc' },
-        });
-        if (!bom) {
-          const matchedStage = await this.prisma.routingStage.findFirst({
-            where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-            include: { bom: { include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } } }, routing: true },
-          });
-          if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
-        }
-        if (!bom) {
+        if (!lz?.hasBom) {
           const taskNumber = await this.generateTaskNumber(companyId);
           const task = await this.prisma.task.create({
             data: {
@@ -630,52 +495,64 @@ export class CustomerPoService {
           });
           continue;
         }
-        const componentResults = [];
-        for (const bomItem of bom.items) {
-          const alloc = allocationForThisCpo.get(bomItem.itemCode);
-          const netRequired = alloc ? alloc.netRequired : (bomItem.effectiveQty * netProductionQty);
-          const availableQty = alloc ? alloc.availableQty : 0;
-          const shortage = alloc ? alloc.shortage : netRequired;
-          if (shortage > 0) {
-            hasShortage = true;
-            shortageRows.push({
-              companyId,
-              customerPoId: cpoId,
-              rawMaterialId: bomItem.rawMaterialId || null,
-              itemCode: bomItem.itemCode,
-              itemName: bomItem.itemName,
-              requiredQty: Math.round(netRequired * 1000) / 1000,
-              availableQty,
-              shortageQty: Math.round(shortage * 1000) / 1000,
-              uom: bomItem.uom,
-              status: 'OPEN',
-              createdBy: user.id,
-              updatedBy: user.id,
-            });
-          }
-          componentResults.push({
-            itemCode: bomItem.itemCode, itemName: bomItem.itemName, uom: bomItem.uom,
-            netRequired: Math.round(netRequired * 1000) / 1000,
-            availableQty,
-            shortage: Math.round(shortage * 1000) / 1000,
-            status: shortage > 0 ? 'SHORTAGE' : 'AVAILABLE',
+
+        const masterBom = await this.prisma.bom.findFirst({
+          where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
+        });
+        const stageBom = masterBom ? null : (await this.prisma.routingStage.findFirst({
+          where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+          include: { bom: true, routing: true },
+        }))?.bom;
+        const bomNumber = masterBom?.bomNumber || stageBom?.bomNumber || null;
+
+        // Fully-exploded, true-leaf-level components - an intermediate
+        // stage's own output (SMT board, MI assembly, etc.) only shows up
+        // here if IT genuinely lacks stock; otherwise it's invisible, and
+        // its own raw materials never needed to be checked at all.
+        const reachableLeaves = leavesOf.get(cpoItem.itemCode) || new Set<string>();
+        const componentResults = cpoLeafShortages
+          .filter(s => reachableLeaves.has(s.itemCode))
+          .map(s => ({
+            itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+            netRequired: s.netRequired, availableQty: s.availableQty,
+            shortage: s.shortage, status: 'SHORTAGE',
+          }));
+
+        for (const c of componentResults) {
+          hasShortage = true;
+          shortageRows.push({
+            companyId,
+            customerPoId: cpoId,
+            rawMaterialId: cpoLeafShortages.find(s => s.itemCode === c.itemCode)?.rawMaterialId || null,
+            itemCode: c.itemCode,
+            itemName: c.itemName,
+            requiredQty: c.netRequired,
+            availableQty: c.availableQty,
+            shortageQty: c.shortage,
+            uom: c.uom,
+            status: 'OPEN',
+            createdBy: user.id,
+            updatedBy: user.id,
           });
         }
+
         itemResults.push({
           itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
-          status: 'CHECKED', bomNumber: bom.bomNumber, components: componentResults,
+          status: 'CHECKED', bomNumber, components: componentResults,
           fgAvailableQty, fgAllocatedQty, netProductionQty,
           message: fgAllocatedQty > 0 ? `${fgAllocatedQty} ${cpoItem.uom} covered by finished goods stock; ${netProductionQty} ${cpoItem.uom} requires production.` : undefined,
         });
         continue;
       }
+
       const rawMaterial = await this.prisma.rawMaterial.findFirst({
         where: { companyId, code: cpoItem.itemCode },
       });
       if (rawMaterial) {
-        const alloc = allocationForThisCpo.get(cpoItem.itemCode);
-        const availableQty = alloc ? alloc.availableQty : 0;
-        const shortage = alloc ? alloc.shortage : cpoItem.qty;
+        const leaf = cpoLeafShortages.find(s => s.itemCode === cpoItem.itemCode);
+        const lz = cpoLevelZero.get(cpoItem.itemCode);
+        const availableQty = lz?.availableQty ?? 0;
+        const shortage = leaf?.shortage ?? 0;
         if (shortage > 0) {
           hasShortage = true;
           shortageRows.push({
@@ -740,6 +617,7 @@ export class CustomerPoService {
       },
     };
   }
+
 
   /**
    * Aggregated view for Purchase: every OPEN material shortage across

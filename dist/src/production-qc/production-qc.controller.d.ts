@@ -37,8 +37,8 @@ export declare class ProductionQcController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            inspectionDate: Date;
             workOrderId: string;
+            inspectionDate: Date;
             productionEntryId: string | null;
             inspectionStage: string;
             inspectorName: string | null;
@@ -77,8 +77,8 @@ export declare class ProductionQcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        inspectionDate: Date;
         workOrderId: string;
+        inspectionDate: Date;
         productionEntryId: string | null;
         inspectionStage: string;
         inspectorName: string | null;
@@ -112,8 +112,8 @@ export declare class ProductionQcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        inspectionDate: Date;
         workOrderId: string;
+        inspectionDate: Date;
         productionEntryId: string | null;
         inspectionStage: string;
         inspectorName: string | null;
@@ -147,8 +147,8 @@ export declare class ProductionQcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        inspectionDate: Date;
         workOrderId: string;
+        inspectionDate: Date;
         productionEntryId: string | null;
         inspectionStage: string;
         inspectorName: string | null;

@@ -36,10 +36,10 @@ export declare class StockLedgerService {
         warehouseId: string;
         unitCost: number;
         totalCost: number;
+        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        transactionType: string;
         inQty: number;
         outQty: number;
         balanceQty: number;
@@ -97,10 +97,10 @@ export declare class StockLedgerService {
             warehouseId: string;
             unitCost: number;
             totalCost: number;
+            transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            transactionType: string;
             inQty: number;
             outQty: number;
             balanceQty: number;
@@ -161,10 +161,10 @@ export declare class StockLedgerService {
         warehouseId: string;
         unitCost: number;
         totalCost: number;
+        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        transactionType: string;
         inQty: number;
         outQty: number;
         balanceQty: number;
@@ -185,10 +185,10 @@ export declare class StockLedgerService {
         warehouseId: string;
         unitCost: number;
         totalCost: number;
+        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        transactionType: string;
         inQty: number;
         outQty: number;
         balanceQty: number;

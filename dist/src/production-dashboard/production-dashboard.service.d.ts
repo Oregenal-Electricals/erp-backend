@@ -64,8 +64,8 @@ export declare class ProductionDashboardService {
             shift: string;
             status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
@@ -111,8 +111,8 @@ export declare class ProductionDashboardService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            inspectionDate: Date;
             workOrderId: string;
+            inspectionDate: Date;
             productionEntryId: string | null;
             inspectionStage: string;
             inspectorName: string | null;
@@ -148,8 +148,8 @@ export declare class ProductionDashboardService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            inspectionDate: Date;
             workOrderId: string;
+            inspectionDate: Date;
             productionEntryId: string | null;
             inspectionStage: string;
             inspectorName: string | null;

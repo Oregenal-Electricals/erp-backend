@@ -34,8 +34,8 @@ export declare class NcrService {
         itemCode: string | null;
         itemName: string | null;
         closedBy: string | null;
-        disposition: string | null;
         workOrderId: string | null;
+        disposition: string | null;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -73,8 +73,8 @@ export declare class NcrService {
         itemCode: string | null;
         itemName: string | null;
         closedBy: string | null;
-        disposition: string | null;
         workOrderId: string | null;
+        disposition: string | null;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -112,8 +112,8 @@ export declare class NcrService {
         itemCode: string | null;
         itemName: string | null;
         closedBy: string | null;
-        disposition: string | null;
         workOrderId: string | null;
+        disposition: string | null;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
@@ -148,8 +148,8 @@ export declare class NcrService {
             itemCode: string | null;
             itemName: string | null;
             closedBy: string | null;
-            disposition: string | null;
             workOrderId: string | null;
+            disposition: string | null;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
@@ -191,8 +191,8 @@ export declare class NcrService {
         itemCode: string | null;
         itemName: string | null;
         closedBy: string | null;
-        disposition: string | null;
         workOrderId: string | null;
+        disposition: string | null;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;

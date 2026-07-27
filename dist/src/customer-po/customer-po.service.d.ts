@@ -2,11 +2,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
+import { MrpService } from '../mrp/mrp.service';
 export declare class CustomerPoService {
     private prisma;
     private audit;
     private salesOrders;
-    constructor(prisma: PrismaService, audit: AuditService, salesOrders: SalesOrdersService);
+    private mrpService;
+    constructor(prisma: PrismaService, audit: AuditService, salesOrders: SalesOrdersService, mrpService: MrpService);
     private generateNumber;
     private generateTaskNumber;
     private calcItem;
@@ -535,8 +537,6 @@ export declare class CustomerPoService {
         overdueCount: number;
         totalOrderValue: number;
     }>;
-    private getFinishedGoodDemand;
-    private getRawMaterialDemand;
     runShortageCheck(cpoId: string, user: any): Promise<{
         cpoNumber: string;
         itemResults: any[];

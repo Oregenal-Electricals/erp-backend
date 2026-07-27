@@ -27,8 +27,8 @@ export declare class QualityReportsService {
             itemCode: string | null;
             itemName: string | null;
             closedBy: string | null;
-            disposition: string | null;
             workOrderId: string | null;
+            disposition: string | null;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
@@ -115,10 +115,10 @@ export declare class QualityReportsService {
             itemCode: string;
             itemName: string;
             uom: string;
-            inspectionDate: Date;
-            lotNumber: string | null;
-            batchNumber: string | null;
             workOrderId: string | null;
+            batchNumber: string | null;
+            lotNumber: string | null;
+            inspectionDate: Date;
             inspectorName: string | null;
             sampleSize: number;
             passQty: number;
@@ -233,8 +233,8 @@ export declare class QualityReportsService {
             invoiceNumber: string | null;
             closedBy: string | null;
             receivedDate: Date;
-            assignedTo: string | null;
             batchNumber: string | null;
+            assignedTo: string | null;
             customerId: string | null;
             correctiveAction: string | null;
             severity: string;

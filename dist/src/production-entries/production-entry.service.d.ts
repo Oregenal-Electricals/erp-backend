@@ -30,8 +30,8 @@ export declare class ProductionEntryService {
         shift: string;
         status: string;
         remarks: string | null;
-        totalQty: number;
         workOrderId: string;
+        totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
@@ -60,8 +60,8 @@ export declare class ProductionEntryService {
         shift: string;
         status: string;
         remarks: string | null;
-        totalQty: number;
         workOrderId: string;
+        totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
@@ -91,8 +91,8 @@ export declare class ProductionEntryService {
             shift: string;
             status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
@@ -126,8 +126,8 @@ export declare class ProductionEntryService {
         shift: string;
         status: string;
         remarks: string | null;
-        totalQty: number;
         workOrderId: string;
+        totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
@@ -187,8 +187,8 @@ export declare class ProductionEntryService {
             shift: string;
             status: string;
             remarks: string | null;
-            totalQty: number;
             workOrderId: string;
+            totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;

@@ -46,9 +46,9 @@ export declare class FgReceiptController {
             totalCost: number;
             receivedQty: number;
             rejectedQty: number;
-            batchNumber: string | null;
             plannedQty: number;
             workOrderId: string;
+            batchNumber: string | null;
             receiptNumber: string;
         })[];
         total: number;
@@ -87,9 +87,9 @@ export declare class FgReceiptController {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     create(dto: CreateFgReceiptDto, req: any): Promise<{
@@ -123,9 +123,9 @@ export declare class FgReceiptController {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     createFromWo(woId: string, req: any): Promise<{
@@ -159,9 +159,9 @@ export declare class FgReceiptController {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     confirm(id: string, req: any): Promise<{
@@ -195,9 +195,9 @@ export declare class FgReceiptController {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
 }

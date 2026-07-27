@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const sales_orders_service_1 = require("../sales-orders/sales-orders.service");
+const mrp_service_1 = require("../mrp/mrp.service");
 let CustomerPoService = class CustomerPoService {
-    constructor(prisma, audit, salesOrders) {
+    constructor(prisma, audit, salesOrders, mrpService) {
         this.prisma = prisma;
         this.audit = audit;
         this.salesOrders = salesOrders;
+        this.mrpService = mrpService;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -298,68 +300,8 @@ let CustomerPoService = class CustomerPoService {
         });
         return { total, received, acknowledged, inProgress, completed, cancelled, written, verbal, overdueCount, totalOrderValue: valueAgg._sum.totalAmount || 0 };
     }
-    async getFinishedGoodDemand(companyId, cpo) {
-        const demand = new Map();
-        for (const cpoItem of cpo.items) {
-            const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
-            if (!product)
-                continue;
-            const existing = demand.get(cpoItem.itemCode);
-            if (existing)
-                existing.requiredQty += cpoItem.qty;
-            else
-                demand.set(cpoItem.itemCode, { requiredQty: cpoItem.qty, uom: cpoItem.uom, itemName: cpoItem.itemName, productId: product.id });
-        }
-        return demand;
-    }
-    async getRawMaterialDemand(companyId, cpo, fgNetOverride) {
-        const demand = new Map();
-        for (const cpoItem of cpo.items) {
-            const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
-            if (product) {
-                const effectiveQty = (fgNetOverride === null || fgNetOverride === void 0 ? void 0 : fgNetOverride.has(cpoItem.itemCode)) ? fgNetOverride.get(cpoItem.itemCode) : cpoItem.qty;
-                if (effectiveQty <= 0)
-                    continue;
-                let bom = await this.prisma.bom.findFirst({
-                    where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-                    include: { items: { where: { isActive: true } } },
-                    orderBy: { effectiveFrom: 'desc' },
-                });
-                if (!bom) {
-                    const matchedStage = await this.prisma.routingStage.findFirst({
-                        where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-                        include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
-                    });
-                    if (matchedStage && matchedStage.routing.isActive)
-                        bom = matchedStage.bom;
-                }
-                if (!bom)
-                    continue;
-                for (const bomItem of bom.items) {
-                    const grossQty = bomItem.effectiveQty * effectiveQty;
-                    const wasteQty = (bomItem.wastagePercent || 0) / 100 * grossQty;
-                    const netRequired = grossQty + wasteQty;
-                    const existing = demand.get(bomItem.itemCode);
-                    if (existing)
-                        existing.requiredQty += netRequired;
-                    else
-                        demand.set(bomItem.itemCode, { requiredQty: netRequired, uom: bomItem.uom, itemName: bomItem.itemName, rawMaterialId: bomItem.rawMaterialId || null });
-                }
-                continue;
-            }
-            const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: cpoItem.itemCode } });
-            if (rawMaterial) {
-                const existing = demand.get(cpoItem.itemCode);
-                if (existing)
-                    existing.requiredQty += cpoItem.qty;
-                else
-                    demand.set(cpoItem.itemCode, { requiredQty: cpoItem.qty, uom: cpoItem.uom, itemName: cpoItem.itemName, rawMaterialId: rawMaterial.id });
-            }
-        }
-        return demand;
-    }
     async runShortageCheck(cpoId, user) {
-        var _a, _b;
+        var _a, _b, _c, _d, _e, _f;
         const companyId = user.companyId;
         const cpo = await this.prisma.customerPo.findFirst({
             where: { id: cpoId, companyId },
@@ -378,106 +320,41 @@ let CustomerPoService = class CustomerPoService {
             include: { items: { where: { isActive: true } } },
             orderBy: { createdAt: 'asc' },
         });
-        const fgDemandQueue = new Map();
+        const bucketOrder = openCpos.map(c => c.id);
+        const buckets = [];
         for (const otherCpo of openCpos) {
-            const fgDemand = await this.getFinishedGoodDemand(companyId, otherCpo);
-            for (const [itemCode, info] of fgDemand.entries()) {
-                if (!fgDemandQueue.has(itemCode))
-                    fgDemandQueue.set(itemCode, []);
-                fgDemandQueue.get(itemCode).push({ cpoId: otherCpo.id, requiredQty: info.requiredQty });
+            for (const item of otherCpo.items) {
+                const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
+                const rawMaterial = product ? null : await this.prisma.rawMaterial.findFirst({ where: { companyId, code: item.itemCode } });
+                if (!product && !rawMaterial)
+                    continue;
+                buckets.push({ bucketKey: otherCpo.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
             }
         }
-        const fgAllocationByCpo = new Map();
-        for (const [itemCode, queue] of fgDemandQueue.entries()) {
-            const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
-            let runningStock = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
-            const totalFgStock = runningStock;
-            for (const entry of queue) {
-                const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
-                runningStock -= allocated;
-                if (!fgAllocationByCpo.has(entry.cpoId))
-                    fgAllocationByCpo.set(entry.cpoId, new Map());
-                fgAllocationByCpo.get(entry.cpoId).set(itemCode, {
-                    fgAvailableQty: totalFgStock,
-                    fgAllocatedQty: allocated,
-                    netProductionQty: Math.max(0, entry.requiredQty - allocated),
-                });
-            }
-        }
-        const demandQueue = new Map();
-        for (const otherCpo of openCpos) {
-            const fgNetForThisCpo = fgAllocationByCpo.get(otherCpo.id);
-            const fgNetOverride = fgNetForThisCpo
-                ? new Map(Array.from(fgNetForThisCpo.entries()).map(([code, info]) => [code, info.netProductionQty]))
-                : undefined;
-            const demand = await this.getRawMaterialDemand(companyId, otherCpo, fgNetOverride);
-            for (const [itemCode, info] of demand.entries()) {
-                if (!demandQueue.has(itemCode))
-                    demandQueue.set(itemCode, []);
-                demandQueue.get(itemCode).push({ cpoId: otherCpo.id, requiredQty: info.requiredQty });
-            }
-        }
-        const allocationForThisCpo = new Map();
-        for (const [itemCode, queue] of demandQueue.entries()) {
-            const balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
-            const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
-                where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
-                select: { pendingQty: true },
-            });
-            const onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
-            let runningStock = ((balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0) + onOrderQty;
-            const totalStock = runningStock;
-            for (const entry of queue) {
-                const allocated = Math.min(entry.requiredQty, Math.max(0, runningStock));
-                const shortage = Math.max(0, entry.requiredQty - allocated);
-                runningStock -= allocated;
-                if (entry.cpoId === cpoId) {
-                    allocationForThisCpo.set(itemCode, {
-                        netRequired: entry.requiredQty,
-                        availableQty: totalStock,
-                        shortage,
-                    });
-                }
-            }
-        }
-        const fgAllocationForThisCpo = fgAllocationByCpo.get(cpoId) || new Map();
+        const { levelZero, leafShortages, leavesOf } = await this.mrpService.explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder);
+        const cpoLevelZero = levelZero.get(cpoId) || new Map();
+        const cpoLeafShortages = leafShortages.get(cpoId) || [];
         const shortageRows = [];
         const itemResults = [];
         const bomTasksCreated = [];
         let hasShortage = false;
         for (const cpoItem of cpo.items) {
-            const product = await this.prisma.product.findFirst({
-                where: { companyId, code: cpoItem.itemCode },
-            });
+            const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
             if (product) {
-                const fgAlloc = fgAllocationForThisCpo.get(cpoItem.itemCode);
-                const fgAvailableQty = (_a = fgAlloc === null || fgAlloc === void 0 ? void 0 : fgAlloc.fgAvailableQty) !== null && _a !== void 0 ? _a : 0;
-                const fgAllocatedQty = (_b = fgAlloc === null || fgAlloc === void 0 ? void 0 : fgAlloc.fgAllocatedQty) !== null && _b !== void 0 ? _b : 0;
-                const netProductionQty = fgAlloc ? fgAlloc.netProductionQty : cpoItem.qty;
+                const lz = cpoLevelZero.get(cpoItem.itemCode);
+                const fgAvailableQty = (_a = lz === null || lz === void 0 ? void 0 : lz.availableQty) !== null && _a !== void 0 ? _a : 0;
+                const fgAllocatedQty = (_b = lz === null || lz === void 0 ? void 0 : lz.allocatedQty) !== null && _b !== void 0 ? _b : 0;
+                const netProductionQty = lz ? lz.netQty : cpoItem.qty;
                 if (netProductionQty <= 0) {
                     itemResults.push({
                         itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
                         status: 'AVAILABLE_FROM_FG_STOCK',
                         message: `Fully covered by existing finished goods stock (${fgAllocatedQty} ${cpoItem.uom} allocated). No production required.`,
-                        requiredQty: cpoItem.qty,
-                        fgAvailableQty, fgAllocatedQty,
+                        requiredQty: cpoItem.qty, fgAvailableQty, fgAllocatedQty,
                     });
                     continue;
                 }
-                let bom = await this.prisma.bom.findFirst({
-                    where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-                    include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
-                    orderBy: { effectiveFrom: 'desc' },
-                });
-                if (!bom) {
-                    const matchedStage = await this.prisma.routingStage.findFirst({
-                        where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-                        include: { bom: { include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } } }, routing: true },
-                    });
-                    if (matchedStage && matchedStage.routing.isActive)
-                        bom = matchedStage.bom;
-                }
-                if (!bom) {
+                if (!(lz === null || lz === void 0 ? void 0 : lz.hasBom)) {
                     const taskNumber = await this.generateTaskNumber(companyId);
                     const task = await this.prisma.task.create({
                         data: {
@@ -507,40 +384,42 @@ let CustomerPoService = class CustomerPoService {
                     });
                     continue;
                 }
-                const componentResults = [];
-                for (const bomItem of bom.items) {
-                    const alloc = allocationForThisCpo.get(bomItem.itemCode);
-                    const netRequired = alloc ? alloc.netRequired : (bomItem.effectiveQty * netProductionQty);
-                    const availableQty = alloc ? alloc.availableQty : 0;
-                    const shortage = alloc ? alloc.shortage : netRequired;
-                    if (shortage > 0) {
-                        hasShortage = true;
-                        shortageRows.push({
-                            companyId,
-                            customerPoId: cpoId,
-                            rawMaterialId: bomItem.rawMaterialId || null,
-                            itemCode: bomItem.itemCode,
-                            itemName: bomItem.itemName,
-                            requiredQty: Math.round(netRequired * 1000) / 1000,
-                            availableQty,
-                            shortageQty: Math.round(shortage * 1000) / 1000,
-                            uom: bomItem.uom,
-                            status: 'OPEN',
-                            createdBy: user.id,
-                            updatedBy: user.id,
-                        });
-                    }
-                    componentResults.push({
-                        itemCode: bomItem.itemCode, itemName: bomItem.itemName, uom: bomItem.uom,
-                        netRequired: Math.round(netRequired * 1000) / 1000,
-                        availableQty,
-                        shortage: Math.round(shortage * 1000) / 1000,
-                        status: shortage > 0 ? 'SHORTAGE' : 'AVAILABLE',
+                const masterBom = await this.prisma.bom.findFirst({
+                    where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
+                });
+                const stageBom = masterBom ? null : (_c = (await this.prisma.routingStage.findFirst({
+                    where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+                    include: { bom: true, routing: true },
+                }))) === null || _c === void 0 ? void 0 : _c.bom;
+                const bomNumber = (masterBom === null || masterBom === void 0 ? void 0 : masterBom.bomNumber) || (stageBom === null || stageBom === void 0 ? void 0 : stageBom.bomNumber) || null;
+                const reachableLeaves = leavesOf.get(cpoItem.itemCode) || new Set();
+                const componentResults = cpoLeafShortages
+                    .filter(s => reachableLeaves.has(s.itemCode))
+                    .map(s => ({
+                    itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+                    netRequired: s.netRequired, availableQty: s.availableQty,
+                    shortage: s.shortage, status: 'SHORTAGE',
+                }));
+                for (const c of componentResults) {
+                    hasShortage = true;
+                    shortageRows.push({
+                        companyId,
+                        customerPoId: cpoId,
+                        rawMaterialId: ((_d = cpoLeafShortages.find(s => s.itemCode === c.itemCode)) === null || _d === void 0 ? void 0 : _d.rawMaterialId) || null,
+                        itemCode: c.itemCode,
+                        itemName: c.itemName,
+                        requiredQty: c.netRequired,
+                        availableQty: c.availableQty,
+                        shortageQty: c.shortage,
+                        uom: c.uom,
+                        status: 'OPEN',
+                        createdBy: user.id,
+                        updatedBy: user.id,
                     });
                 }
                 itemResults.push({
                     itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
-                    status: 'CHECKED', bomNumber: bom.bomNumber, components: componentResults,
+                    status: 'CHECKED', bomNumber, components: componentResults,
                     fgAvailableQty, fgAllocatedQty, netProductionQty,
                     message: fgAllocatedQty > 0 ? `${fgAllocatedQty} ${cpoItem.uom} covered by finished goods stock; ${netProductionQty} ${cpoItem.uom} requires production.` : undefined,
                 });
@@ -550,9 +429,10 @@ let CustomerPoService = class CustomerPoService {
                 where: { companyId, code: cpoItem.itemCode },
             });
             if (rawMaterial) {
-                const alloc = allocationForThisCpo.get(cpoItem.itemCode);
-                const availableQty = alloc ? alloc.availableQty : 0;
-                const shortage = alloc ? alloc.shortage : cpoItem.qty;
+                const leaf = cpoLeafShortages.find(s => s.itemCode === cpoItem.itemCode);
+                const lz = cpoLevelZero.get(cpoItem.itemCode);
+                const availableQty = (_e = lz === null || lz === void 0 ? void 0 : lz.availableQty) !== null && _e !== void 0 ? _e : 0;
+                const shortage = (_f = leaf === null || leaf === void 0 ? void 0 : leaf.shortage) !== null && _f !== void 0 ? _f : 0;
                 if (shortage > 0) {
                     hasShortage = true;
                     shortageRows.push({
@@ -700,6 +580,6 @@ let CustomerPoService = class CustomerPoService {
 exports.CustomerPoService = CustomerPoService;
 exports.CustomerPoService = CustomerPoService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService, mrp_service_1.MrpService])
 ], CustomerPoService);
 //# sourceMappingURL=customer-po.service.js.map

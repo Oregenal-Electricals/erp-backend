@@ -13,6 +13,241 @@ export class MrpService {
     private routingService: RoutingService,
   ) {}
 
+  /**
+   * Looks up the approved BOM that actually produces a given product -
+   * either its own standalone MASTER BOM (Type 1: the fully-packaged
+   * item), or, if none exists, the STAGE-type BOM hanging off whichever
+   * RoutingStage produces it directly (Type 2/3: an intermediate item
+   * like an SMT board or an MI assembly, ordered on its own). Returns
+   * null if the item isn't producible at all (a true raw material, or a
+   * product with no BOM yet).
+   */
+  private async findProducingBom(companyId: string, productId: string) {
+    const master = await this.prisma.bom.findFirst({
+      where: { companyId, productId, status: 'APPROVED', bomType: 'MASTER' },
+      include: { items: { where: { isActive: true } } },
+    });
+    if (master) return master;
+    const matchedStage = await this.prisma.routingStage.findFirst({
+      where: { companyId, isActive: true, bom: { productId, status: 'APPROVED' } },
+      include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+    });
+    if (matchedStage && matchedStage.routing.isActive) return matchedStage.bom;
+    return null;
+  }
+
+  /**
+   * Discovers the full BOM/routing tree structure below a set of root
+   * item codes - which items are producible (have their own BOM,
+   * possibly via a routing stage) and which are true leaves (raw
+   * materials, or anything with no approved BOM at all) - along with
+   * each item's "low-level code": the DEEPEST level at which it appears
+   * anywhere in the combined tree. Processing items in low-level-code
+   * order later guarantees that an item used both directly and via a
+   * deeper sub-assembly has ALL of its demand aggregated before it's
+   * ever netted against stock, instead of being checked prematurely with
+   * only part of its true total demand.
+   *
+   * Structure-only, no stock involved - safe to compute once and reuse
+   * across many CPOs/orders that share the same product tree.
+   */
+  private async discoverBomTree(companyId: string, rootItemCodes: string[]) {
+    const lowLevelCode = new Map<string, number>();
+    const bomOf = new Map<string, { itemCode: string; itemName: string; uom: string; qtyPerUnit: number }[] | null>();
+    const itemMeta = new Map<string, { itemName: string; uom: string }>();
+
+    const discover = async (itemCode: string, depth: number, ancestors: Set<string>): Promise<void> => {
+      lowLevelCode.set(itemCode, Math.max(lowLevelCode.get(itemCode) ?? -1, depth));
+      if (ancestors.has(itemCode)) return; // cycle guard - a BOM should never reference itself, but never trust that blindly
+      let children = bomOf.get(itemCode);
+      if (children === undefined) {
+        const product = await this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+        if (!product) { bomOf.set(itemCode, null); return; }
+        itemMeta.set(itemCode, { itemName: product.name, uom: 'PCS' });
+        const bom = await this.findProducingBom(companyId, product.id);
+        if (!bom) { bomOf.set(itemCode, null); return; }
+        children = bom.items.map(bi => ({
+          itemCode: bi.itemCode, itemName: bi.itemName, uom: bi.uom,
+          // Wastage is expressed as a percentage on top of the pure BOM
+          // ratio, so it has to be folded in here - at every level, not
+          // just the top one - or a wasteful sub-assembly's true
+          // material cost would be understated the deeper it sits.
+          qtyPerUnit: bi.effectiveQty * (1 + (bi.wastagePercent || 0) / 100),
+        }));
+        bomOf.set(itemCode, children);
+      }
+      if (!children) return;
+      const nextAncestors = new Set(ancestors); nextAncestors.add(itemCode);
+      for (const c of children) {
+        if (!itemMeta.has(c.itemCode)) itemMeta.set(c.itemCode, { itemName: c.itemName, uom: c.uom });
+        await discover(c.itemCode, depth + 1, nextAncestors);
+      }
+    };
+
+    for (const code of rootItemCodes) await discover(code, 0, new Set());
+
+    // For each root, which true-leaf item codes does its own tree
+    // ultimately touch - used to attribute shared-pool leaf shortages
+    // back to the specific top-level item that pulled them in.
+    const leavesOf = new Map<string, Set<string>>();
+    const collectLeaves = (itemCode: string, seen: Set<string>): Set<string> => {
+      if (seen.has(itemCode)) return new Set();
+      seen.add(itemCode);
+      const children = bomOf.get(itemCode);
+      if (!children) return new Set([itemCode]);
+      const out = new Set<string>();
+      for (const c of children) for (const l of collectLeaves(c.itemCode, seen)) out.add(l);
+      return out;
+    };
+    for (const code of rootItemCodes) leavesOf.set(code, collectLeaves(code, new Set()));
+
+    return { lowLevelCode, bomOf, itemMeta, leavesOf };
+  }
+
+  /**
+   * The one shared engine behind every material-shortage/requirement
+   * calculation in the system - the Production Planning board, Run
+   * Allocation, and the Customer PO shortage check all call this instead
+   * of each doing their own single-level BOM lookup.
+   *
+   * `buckets` is one demand entry per (bucketKey, item code) - bucketKey
+   * is normally a CPO id (for the multi-CPO shortage check, where many
+   * orders compete for the same limited stock) or a single synthetic key
+   * (for a one-off calculation like Run Allocation). `bucketOrder` fixes
+   * the priority order buckets are allocated stock in when supply is
+   * short - oldest order first, matching how the business actually
+   * fulfils orders.
+   *
+   * Every item, at every level, is netted against ONE shared stock pool
+   * before its shortfall (if any) is passed down to its own BOM's
+   * components. An intermediate item (an SMT board, an MI assembly, or
+   * any other routing-stage output) that already has enough finished
+   * stock never has its own raw materials pulled in at all - only the
+   * genuine gap gets exploded further. This is why an order for an
+   * intermediate item shows either its own available stock, or a real
+   * raw-material shortage - never a false "no BOM" error and never an
+   * opaque "intermediate item unavailable" without saying why.
+   *
+   * A true raw material (or any item with no approved BOM at all, at any
+   * level) also has purchase-order-in-transit quantity counted as
+   * available supply, on top of on-hand stock - re-running a shortage
+   * check while a PO is already in flight for the same shortfall
+   * shouldn't manufacture a duplicate shortage. This on-order allowance
+   * only applies at true leaves; an intermediate item is made in-house,
+   * never bought from a vendor, so it has no "on order" concept of its
+   * own.
+   *
+   * warehouseId, if given, scopes the stock check to one warehouse
+   * (Run Allocation, the Planning board). Omitted, it checks company-wide
+   * stock (the CPO shortage check, matching its existing behaviour).
+   */
+  async explodeMultiCpoMaterialNeeds(
+    companyId: string,
+    buckets: { bucketKey: string; itemCode: string; itemName: string; uom: string; qty: number }[],
+    bucketOrder: string[],
+    warehouseId?: string,
+  ) {
+    const rootItemCodes = Array.from(new Set(buckets.map(b => b.itemCode)));
+    const { lowLevelCode, bomOf, itemMeta: discoveredMeta, leavesOf } = await this.discoverBomTree(companyId, rootItemCodes);
+    const itemMeta = discoveredMeta;
+    for (const b of buckets) itemMeta.set(b.itemCode, { itemName: b.itemName, uom: b.uom });
+
+    let currentQueue = new Map<string, Map<string, number>>(); // itemCode -> bucketKey -> qty
+    for (const b of buckets) {
+      if (!currentQueue.has(b.itemCode)) currentQueue.set(b.itemCode, new Map());
+      const m = currentQueue.get(b.itemCode)!;
+      m.set(b.bucketKey, (m.get(b.bucketKey) || 0) + b.qty);
+    }
+
+    const levelZero = new Map<string, Map<string, { requiredQty: number; availableQty: number; allocatedQty: number; netQty: number; hasBom: boolean }>>();
+    const leafShortages = new Map<string, { itemCode: string; itemName: string; uom: string; netRequired: number; availableQty: number; shortage: number; rawMaterialId: string | null }[]>();
+
+    const maxLevel = Math.max(0, ...Array.from(lowLevelCode.values()));
+    for (let level = 0; level <= maxLevel; level++) {
+      const nextQueue = new Map<string, Map<string, number>>();
+      const itemsAtLevel = Array.from(lowLevelCode.entries()).filter(([, lvl]) => lvl === level).map(([code]) => code);
+
+      for (const itemCode of itemsAtLevel) {
+        const bucketQtyMap = currentQueue.get(itemCode);
+        if (!bucketQtyMap || bucketQtyMap.size === 0) continue;
+
+        const children = bomOf.get(itemCode);
+        const meta = itemMeta.get(itemCode) || { itemName: itemCode, uom: 'PCS' };
+
+        const balance = warehouseId
+          ? await this.prisma.stockBalance.findUnique({ where: { companyId_itemCode_warehouseId: { companyId, itemCode, warehouseId } } })
+          : await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
+        let onOrderQty = 0;
+        if (!children) {
+          const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
+            where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
+            select: { pendingQty: true },
+          });
+          onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
+        }
+        let runningStock = (balance?.availableQty || 0) + onOrderQty;
+        const totalStock = runningStock;
+
+        for (const bucketKey of bucketOrder) {
+          const required = bucketQtyMap.get(bucketKey);
+          if (!required || required <= 0.0001) continue;
+          const allocated = Math.min(required, Math.max(0, runningStock));
+          runningStock -= allocated;
+          const net = Math.max(0, required - allocated);
+
+          if (level === 0) {
+            if (!levelZero.has(bucketKey)) levelZero.set(bucketKey, new Map());
+            levelZero.get(bucketKey)!.set(itemCode, {
+              requiredQty: required, availableQty: totalStock, allocatedQty: allocated,
+              netQty: net, hasBom: !!children,
+            });
+          }
+
+          if (net <= 0.0001) continue;
+
+          if (!children) {
+            const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: itemCode } });
+            if (!leafShortages.has(bucketKey)) leafShortages.set(bucketKey, []);
+            leafShortages.get(bucketKey)!.push({
+              itemCode, itemName: meta.itemName, uom: meta.uom,
+              netRequired: Math.round(required * 1000) / 1000,
+              availableQty: totalStock,
+              shortage: Math.round(net * 1000) / 1000,
+              rawMaterialId: rawMaterial?.id || null,
+            });
+            continue;
+          }
+
+          for (const c of children) {
+            if (!nextQueue.has(c.itemCode)) nextQueue.set(c.itemCode, new Map());
+            const nm = nextQueue.get(c.itemCode)!;
+            nm.set(bucketKey, (nm.get(bucketKey) || 0) + c.qtyPerUnit * net);
+          }
+        }
+      }
+      currentQueue = nextQueue;
+    }
+
+    return { levelZero, leafShortages, leavesOf };
+  }
+
+  /**
+   * Single-order convenience wrapper around the shared engine, for
+   * callers (Run Allocation, the Planning board) that just want one flat
+   * list of true material shortages for one demand set against one
+   * warehouse, with no multi-order FIFO sharing involved.
+   */
+  private async explodeMaterialNeeds(
+    companyId: string,
+    warehouseId: string,
+    rootDemands: { itemCode: string; itemName: string; uom: string; qty: number }[],
+  ) {
+    const SINGLE = 'SINGLE';
+    const buckets = rootDemands.map(d => ({ bucketKey: SINGLE, itemCode: d.itemCode, itemName: d.itemName, uom: d.uom, qty: d.qty }));
+    const { leafShortages } = await this.explodeMultiCpoMaterialNeeds(companyId, buckets, [SINGLE], warehouseId);
+    return leafShortages.get(SINGLE) || [];
+  }
+
   async calculateMrp(woId: string, user: any) {
     const companyId = user.companyId;
 
@@ -167,23 +402,7 @@ export class MrpService {
       const itemsOut = [];
       for (const item of so.items) {
         const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
-        let bom = product
-          ? await this.prisma.bom.findFirst({
-              where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-              include: { items: { where: { isActive: true } } },
-            })
-          : null;
-        // Same Type 2/3 fallback as runAllocation() below - an intermediate
-        // routing stage's own item only has a STAGE-type BOM, not a MASTER
-        // one, so without this the board would wrongly show "No approved
-        // BOM" instead of the real material shortage.
-        if (!bom && product) {
-          const matchedStage = await this.prisma.routingStage.findFirst({
-            where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-            include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
-          });
-          if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
-        }
+        const bom = product ? await this.findProducingBom(companyId, product.id) : null;
 
         const alreadyPlanned = await this.prisma.workOrder.aggregate({
           where: { companyId, salesOrderId: so.id, productCode: item.itemCode, status: { not: 'CANCELLED' } },
@@ -191,18 +410,19 @@ export class MrpService {
         });
         const remainingToPlan = Math.max(0, item.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
 
-        const rmRequirements = [];
-        if (bom) {
-          for (const bi of bom.items) {
-            const balance = await this.prisma.stockBalance.findUnique({
-              where: { companyId_itemCode_warehouseId: { companyId, itemCode: bi.itemCode, warehouseId } },
-            });
-            rmRequirements.push({
-              itemCode: bi.itemCode, itemName: bi.itemName, uom: bi.uom,
-              qtyPerUnit: bi.effectiveQty, availableQty: balance?.availableQty || 0,
-            });
-          }
-        }
+        // Fully-exploded, true-leaf material shortages for the remaining
+        // unplanned quantity - an intermediate item like an SMT board or
+        // MI assembly is invisible here entirely if its own stock already
+        // covers what's needed; only genuine raw-material gaps show up.
+        const rawRmRequirements = bom && remainingToPlan > 0
+          ? await this.explodeMaterialNeeds(companyId, warehouseId, [
+              { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: remainingToPlan },
+            ])
+          : [];
+        const rmRequirements = rawRmRequirements.map(s => ({
+          itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+          totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+        }));
 
         itemsOut.push({
           soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName,
@@ -240,19 +460,8 @@ export class MrpService {
       // its own MASTER BOM), or an intermediate routing stage's own output
       // directly (Type 2/3, e.g. SMT boards or an MI assembly) - those are
       // only backed by a STAGE-type BOM hanging off a RoutingStage, never a
-      // standalone MASTER BOM on the product itself. Fall back to that
-      // stage BOM so material needs can still be calculated correctly.
-      let bom = await this.prisma.bom.findFirst({
-        where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-        include: { items: { where: { isActive: true } } },
-      });
-      if (!bom) {
-        const matchedStage = await this.prisma.routingStage.findFirst({
-          where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-          include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
-        });
-        if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
-      }
+      // standalone MASTER BOM on the product itself.
+      const bom = await this.findProducingBom(companyId, product.id);
       if (!bom) throw new BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
 
       // Defense in depth: the planning board only shows the remaining
@@ -270,29 +479,19 @@ export class MrpService {
       resolved.push({ soItem, product, bom, buildQty: a.buildQty });
     }
 
-    const needByItem: Record<string, { itemName: string; uom: string; totalNeeded: number }> = {};
-    for (const r of resolved) {
-      for (const bi of r.bom.items) {
-        const need = bi.effectiveQty * r.buildQty;
-        if (!needByItem[bi.itemCode]) needByItem[bi.itemCode] = { itemName: bi.itemName, uom: bi.uom, totalNeeded: 0 };
-        needByItem[bi.itemCode].totalNeeded += need;
-      }
-    }
-
-    const shortages: any[] = [];
-    for (const [itemCode, need] of Object.entries(needByItem)) {
-      const balance = await this.prisma.stockBalance.findUnique({
-        where: { companyId_itemCode_warehouseId: { companyId, itemCode, warehouseId: dto.warehouseId } },
-      });
-      const available = balance?.availableQty || 0;
-      if (need.totalNeeded > available + 0.0001) {
-        shortages.push({
-          itemCode, itemName: need.itemName, uom: need.uom,
-          totalNeeded: Math.round(need.totalNeeded * 1000) / 1000,
-          available, shortfall: Math.round((need.totalNeeded - available) * 1000) / 1000,
-        });
-      }
-    }
+    // Fully-exploded, true-leaf-level shortages across everything being
+    // allocated in this call - an intermediate item (SMT board, MI
+    // assembly, etc.) that already has enough of its own stock never
+    // forces its raw materials to be checked at all; only a genuine gap
+    // recurses down to what would actually need to be purchased.
+    const rawShortages = await this.explodeMaterialNeeds(
+      companyId, dto.warehouseId,
+      resolved.map(r => ({ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty })),
+    );
+    const shortages = rawShortages.map(s => ({
+      itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+      totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+    }));
 
     if (shortages.length > 0) {
       return { feasible: false, shortages, createdWorkOrders: [] };

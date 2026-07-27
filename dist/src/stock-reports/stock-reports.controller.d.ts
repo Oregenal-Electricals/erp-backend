@@ -23,10 +23,10 @@ export declare class StockReportsController {
             warehouseId: string;
             unitCost: number;
             totalCost: number;
+            transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            transactionType: string;
             inQty: number;
             outQty: number;
             balanceQty: number;
@@ -110,10 +110,10 @@ export declare class StockReportsController {
             warehouseId: string;
             unitCost: number;
             totalCost: number;
+            transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            transactionType: string;
             inQty: number;
             outQty: number;
             balanceQty: number;
@@ -144,11 +144,11 @@ export declare class StockReportsController {
             grnId: string | null;
             availableQty: number;
             reservedQty: number;
-            grnItemId: string | null;
+            batchNumber: string;
             lotNumber: string | null;
+            grnItemId: string | null;
             mfgDate: Date | null;
             originalQty: number;
-            batchNumber: string;
         })[];
         summary: {
             totalIn: number;
@@ -183,11 +183,11 @@ export declare class StockReportsController {
             grnId: string | null;
             availableQty: number;
             reservedQty: number;
-            grnItemId: string | null;
+            batchNumber: string;
             lotNumber: string | null;
+            grnItemId: string | null;
             mfgDate: Date | null;
             originalQty: number;
-            batchNumber: string;
         })[];
         total: number;
         page: number;

@@ -18,8 +18,8 @@ export declare class NotificationsService {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        userId: string;
         message: string;
+        userId: string;
         isRead: boolean;
         readAt: Date | null;
     }>;
@@ -41,8 +41,8 @@ export declare class NotificationsService {
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            userId: string;
             message: string;
+            userId: string;
             isRead: boolean;
             readAt: Date | null;
         }[];

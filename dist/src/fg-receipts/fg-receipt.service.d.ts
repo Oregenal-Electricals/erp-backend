@@ -42,9 +42,9 @@ export declare class FgReceiptService {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     create(dto: CreateFgReceiptDto, user: any): Promise<{
@@ -78,9 +78,9 @@ export declare class FgReceiptService {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     confirm(id: string, user: any): Promise<{
@@ -114,9 +114,9 @@ export declare class FgReceiptService {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -151,9 +151,9 @@ export declare class FgReceiptService {
             totalCost: number;
             receivedQty: number;
             rejectedQty: number;
-            batchNumber: string | null;
             plannedQty: number;
             workOrderId: string;
+            batchNumber: string | null;
             receiptNumber: string;
         })[];
         total: number;
@@ -192,9 +192,9 @@ export declare class FgReceiptService {
         totalCost: number;
         receivedQty: number;
         rejectedQty: number;
-        batchNumber: string | null;
         plannedQty: number;
         workOrderId: string;
+        batchNumber: string | null;
         receiptNumber: string;
     }>;
     getStats(user: any): Promise<{

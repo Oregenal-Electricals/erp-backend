@@ -22,6 +22,165 @@ let MrpService = class MrpService {
         this.materialReservation = materialReservation;
         this.routingService = routingService;
     }
+    async findProducingBom(companyId, productId) {
+        const master = await this.prisma.bom.findFirst({
+            where: { companyId, productId, status: 'APPROVED', bomType: 'MASTER' },
+            include: { items: { where: { isActive: true } } },
+        });
+        if (master)
+            return master;
+        const matchedStage = await this.prisma.routingStage.findFirst({
+            where: { companyId, isActive: true, bom: { productId, status: 'APPROVED' } },
+            include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+        });
+        if (matchedStage && matchedStage.routing.isActive)
+            return matchedStage.bom;
+        return null;
+    }
+    async discoverBomTree(companyId, rootItemCodes) {
+        const lowLevelCode = new Map();
+        const bomOf = new Map();
+        const itemMeta = new Map();
+        const discover = async (itemCode, depth, ancestors) => {
+            var _a;
+            lowLevelCode.set(itemCode, Math.max((_a = lowLevelCode.get(itemCode)) !== null && _a !== void 0 ? _a : -1, depth));
+            if (ancestors.has(itemCode))
+                return;
+            let children = bomOf.get(itemCode);
+            if (children === undefined) {
+                const product = await this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+                if (!product) {
+                    bomOf.set(itemCode, null);
+                    return;
+                }
+                itemMeta.set(itemCode, { itemName: product.name, uom: 'PCS' });
+                const bom = await this.findProducingBom(companyId, product.id);
+                if (!bom) {
+                    bomOf.set(itemCode, null);
+                    return;
+                }
+                children = bom.items.map(bi => ({
+                    itemCode: bi.itemCode, itemName: bi.itemName, uom: bi.uom,
+                    qtyPerUnit: bi.effectiveQty * (1 + (bi.wastagePercent || 0) / 100),
+                }));
+                bomOf.set(itemCode, children);
+            }
+            if (!children)
+                return;
+            const nextAncestors = new Set(ancestors);
+            nextAncestors.add(itemCode);
+            for (const c of children) {
+                if (!itemMeta.has(c.itemCode))
+                    itemMeta.set(c.itemCode, { itemName: c.itemName, uom: c.uom });
+                await discover(c.itemCode, depth + 1, nextAncestors);
+            }
+        };
+        for (const code of rootItemCodes)
+            await discover(code, 0, new Set());
+        const leavesOf = new Map();
+        const collectLeaves = (itemCode, seen) => {
+            if (seen.has(itemCode))
+                return new Set();
+            seen.add(itemCode);
+            const children = bomOf.get(itemCode);
+            if (!children)
+                return new Set([itemCode]);
+            const out = new Set();
+            for (const c of children)
+                for (const l of collectLeaves(c.itemCode, seen))
+                    out.add(l);
+            return out;
+        };
+        for (const code of rootItemCodes)
+            leavesOf.set(code, collectLeaves(code, new Set()));
+        return { lowLevelCode, bomOf, itemMeta, leavesOf };
+    }
+    async explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder, warehouseId) {
+        const rootItemCodes = Array.from(new Set(buckets.map(b => b.itemCode)));
+        const { lowLevelCode, bomOf, itemMeta: discoveredMeta, leavesOf } = await this.discoverBomTree(companyId, rootItemCodes);
+        const itemMeta = discoveredMeta;
+        for (const b of buckets)
+            itemMeta.set(b.itemCode, { itemName: b.itemName, uom: b.uom });
+        let currentQueue = new Map();
+        for (const b of buckets) {
+            if (!currentQueue.has(b.itemCode))
+                currentQueue.set(b.itemCode, new Map());
+            const m = currentQueue.get(b.itemCode);
+            m.set(b.bucketKey, (m.get(b.bucketKey) || 0) + b.qty);
+        }
+        const levelZero = new Map();
+        const leafShortages = new Map();
+        const maxLevel = Math.max(0, ...Array.from(lowLevelCode.values()));
+        for (let level = 0; level <= maxLevel; level++) {
+            const nextQueue = new Map();
+            const itemsAtLevel = Array.from(lowLevelCode.entries()).filter(([, lvl]) => lvl === level).map(([code]) => code);
+            for (const itemCode of itemsAtLevel) {
+                const bucketQtyMap = currentQueue.get(itemCode);
+                if (!bucketQtyMap || bucketQtyMap.size === 0)
+                    continue;
+                const children = bomOf.get(itemCode);
+                const meta = itemMeta.get(itemCode) || { itemName: itemCode, uom: 'PCS' };
+                const balance = warehouseId
+                    ? await this.prisma.stockBalance.findUnique({ where: { companyId_itemCode_warehouseId: { companyId, itemCode, warehouseId } } })
+                    : await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode } });
+                let onOrderQty = 0;
+                if (!children) {
+                    const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
+                        where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
+                        select: { pendingQty: true },
+                    });
+                    onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
+                }
+                let runningStock = ((balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0) + onOrderQty;
+                const totalStock = runningStock;
+                for (const bucketKey of bucketOrder) {
+                    const required = bucketQtyMap.get(bucketKey);
+                    if (!required || required <= 0.0001)
+                        continue;
+                    const allocated = Math.min(required, Math.max(0, runningStock));
+                    runningStock -= allocated;
+                    const net = Math.max(0, required - allocated);
+                    if (level === 0) {
+                        if (!levelZero.has(bucketKey))
+                            levelZero.set(bucketKey, new Map());
+                        levelZero.get(bucketKey).set(itemCode, {
+                            requiredQty: required, availableQty: totalStock, allocatedQty: allocated,
+                            netQty: net, hasBom: !!children,
+                        });
+                    }
+                    if (net <= 0.0001)
+                        continue;
+                    if (!children) {
+                        const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: itemCode } });
+                        if (!leafShortages.has(bucketKey))
+                            leafShortages.set(bucketKey, []);
+                        leafShortages.get(bucketKey).push({
+                            itemCode, itemName: meta.itemName, uom: meta.uom,
+                            netRequired: Math.round(required * 1000) / 1000,
+                            availableQty: totalStock,
+                            shortage: Math.round(net * 1000) / 1000,
+                            rawMaterialId: (rawMaterial === null || rawMaterial === void 0 ? void 0 : rawMaterial.id) || null,
+                        });
+                        continue;
+                    }
+                    for (const c of children) {
+                        if (!nextQueue.has(c.itemCode))
+                            nextQueue.set(c.itemCode, new Map());
+                        const nm = nextQueue.get(c.itemCode);
+                        nm.set(bucketKey, (nm.get(bucketKey) || 0) + c.qtyPerUnit * net);
+                    }
+                }
+            }
+            currentQueue = nextQueue;
+        }
+        return { levelZero, leafShortages, leavesOf };
+    }
+    async explodeMaterialNeeds(companyId, warehouseId, rootDemands) {
+        const SINGLE = 'SINGLE';
+        const buckets = rootDemands.map(d => ({ bucketKey: SINGLE, itemCode: d.itemCode, itemName: d.itemName, uom: d.uom, qty: d.qty }));
+        const { leafShortages } = await this.explodeMultiCpoMaterialNeeds(companyId, buckets, [SINGLE], warehouseId);
+        return leafShortages.get(SINGLE) || [];
+    }
     async calculateMrp(woId, user) {
         var _a;
         const companyId = user.companyId;
@@ -166,37 +325,21 @@ let MrpService = class MrpService {
             const itemsOut = [];
             for (const item of so.items) {
                 const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
-                let bom = product
-                    ? await this.prisma.bom.findFirst({
-                        where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-                        include: { items: { where: { isActive: true } } },
-                    })
-                    : null;
-                if (!bom && product) {
-                    const matchedStage = await this.prisma.routingStage.findFirst({
-                        where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-                        include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
-                    });
-                    if (matchedStage && matchedStage.routing.isActive)
-                        bom = matchedStage.bom;
-                }
+                const bom = product ? await this.findProducingBom(companyId, product.id) : null;
                 const alreadyPlanned = await this.prisma.workOrder.aggregate({
                     where: { companyId, salesOrderId: so.id, productCode: item.itemCode, status: { not: 'CANCELLED' } },
                     _sum: { plannedQty: true },
                 });
                 const remainingToPlan = Math.max(0, item.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
-                const rmRequirements = [];
-                if (bom) {
-                    for (const bi of bom.items) {
-                        const balance = await this.prisma.stockBalance.findUnique({
-                            where: { companyId_itemCode_warehouseId: { companyId, itemCode: bi.itemCode, warehouseId } },
-                        });
-                        rmRequirements.push({
-                            itemCode: bi.itemCode, itemName: bi.itemName, uom: bi.uom,
-                            qtyPerUnit: bi.effectiveQty, availableQty: (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0,
-                        });
-                    }
-                }
+                const rawRmRequirements = bom && remainingToPlan > 0
+                    ? await this.explodeMaterialNeeds(companyId, warehouseId, [
+                        { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: remainingToPlan },
+                    ])
+                    : [];
+                const rmRequirements = rawRmRequirements.map(s => ({
+                    itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+                    totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+                }));
                 itemsOut.push({
                     soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName,
                     pendingQty: item.pendingQty, alreadyPlannedQty: alreadyPlanned._sum.plannedQty || 0,
@@ -230,18 +373,7 @@ let MrpService = class MrpService {
             const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
             if (!product)
                 throw new common_1.BadRequestException(`No product master found for item code ${soItem.itemCode}`);
-            let bom = await this.prisma.bom.findFirst({
-                where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
-                include: { items: { where: { isActive: true } } },
-            });
-            if (!bom) {
-                const matchedStage = await this.prisma.routingStage.findFirst({
-                    where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
-                    include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
-                });
-                if (matchedStage && matchedStage.routing.isActive)
-                    bom = matchedStage.bom;
-            }
+            const bom = await this.findProducingBom(companyId, product.id);
             if (!bom)
                 throw new common_1.BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
             const alreadyPlanned = await this.prisma.workOrder.aggregate({
@@ -254,29 +386,11 @@ let MrpService = class MrpService {
             }
             resolved.push({ soItem, product, bom, buildQty: a.buildQty });
         }
-        const needByItem = {};
-        for (const r of resolved) {
-            for (const bi of r.bom.items) {
-                const need = bi.effectiveQty * r.buildQty;
-                if (!needByItem[bi.itemCode])
-                    needByItem[bi.itemCode] = { itemName: bi.itemName, uom: bi.uom, totalNeeded: 0 };
-                needByItem[bi.itemCode].totalNeeded += need;
-            }
-        }
-        const shortages = [];
-        for (const [itemCode, need] of Object.entries(needByItem)) {
-            const balance = await this.prisma.stockBalance.findUnique({
-                where: { companyId_itemCode_warehouseId: { companyId, itemCode, warehouseId: dto.warehouseId } },
-            });
-            const available = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
-            if (need.totalNeeded > available + 0.0001) {
-                shortages.push({
-                    itemCode, itemName: need.itemName, uom: need.uom,
-                    totalNeeded: Math.round(need.totalNeeded * 1000) / 1000,
-                    available, shortfall: Math.round((need.totalNeeded - available) * 1000) / 1000,
-                });
-            }
-        }
+        const rawShortages = await this.explodeMaterialNeeds(companyId, dto.warehouseId, resolved.map(r => ({ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty })));
+        const shortages = rawShortages.map(s => ({
+            itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+            totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+        }));
         if (shortages.length > 0) {
             return { feasible: false, shortages, createdWorkOrders: [] };
         }

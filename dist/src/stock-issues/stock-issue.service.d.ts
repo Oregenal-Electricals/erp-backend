@@ -27,8 +27,8 @@ export declare class StockIssueService {
     create(dto: CreateStockIssueDto, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -43,8 +43,8 @@ export declare class StockIssueService {
             itemName: string;
             uom: string;
             unitCost: number;
-            requestedQty: number;
             issuedQty: number;
+            requestedQty: number;
             batchId: string | null;
             issueId: string;
         })[];
@@ -63,17 +63,17 @@ export declare class StockIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
+        issueNumber: string;
+        issueMethod: string;
         referenceType: string;
         referenceId: string | null;
         issuedTo: string;
-        issueMethod: string;
-        issueNumber: string;
     }>;
     confirm(id: string, user: any): Promise<{
         items: ({
             batch: {
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -88,8 +88,8 @@ export declare class StockIssueService {
             itemName: string;
             uom: string;
             unitCost: number;
-            requestedQty: number;
             issuedQty: number;
+            requestedQty: number;
             batchId: string | null;
             issueId: string;
         })[];
@@ -108,11 +108,11 @@ export declare class StockIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
+        issueNumber: string;
+        issueMethod: string;
         referenceType: string;
         referenceId: string | null;
         issuedTo: string;
-        issueMethod: string;
-        issueNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -134,11 +134,11 @@ export declare class StockIssueService {
             status: string;
             remarks: string | null;
             warehouseId: string;
+            issueNumber: string;
+            issueMethod: string;
             referenceType: string;
             referenceId: string | null;
             issuedTo: string;
-            issueMethod: string;
-            issueNumber: string;
         })[];
         total: number;
         page: number;
@@ -149,8 +149,8 @@ export declare class StockIssueService {
         items: ({
             batch: {
                 receivedDate: Date;
-                lotNumber: string;
                 batchNumber: string;
+                lotNumber: string;
             };
         } & {
             id: string;
@@ -165,8 +165,8 @@ export declare class StockIssueService {
             itemName: string;
             uom: string;
             unitCost: number;
-            requestedQty: number;
             issuedQty: number;
+            requestedQty: number;
             batchId: string | null;
             issueId: string;
         })[];
@@ -185,11 +185,11 @@ export declare class StockIssueService {
         status: string;
         remarks: string | null;
         warehouseId: string;
+        issueNumber: string;
+        issueMethod: string;
         referenceType: string;
         referenceId: string | null;
         issuedTo: string;
-        issueMethod: string;
-        issueNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

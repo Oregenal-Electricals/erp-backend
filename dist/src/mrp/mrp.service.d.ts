@@ -8,6 +8,34 @@ export declare class MrpService {
     private materialReservation;
     private routingService;
     constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, routingService: RoutingService);
+    private findProducingBom;
+    private discoverBomTree;
+    explodeMultiCpoMaterialNeeds(companyId: string, buckets: {
+        bucketKey: string;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        qty: number;
+    }[], bucketOrder: string[], warehouseId?: string): Promise<{
+        levelZero: Map<string, Map<string, {
+            requiredQty: number;
+            availableQty: number;
+            allocatedQty: number;
+            netQty: number;
+            hasBom: boolean;
+        }>>;
+        leafShortages: Map<string, {
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            netRequired: number;
+            availableQty: number;
+            shortage: number;
+            rawMaterialId: string | null;
+        }[]>;
+        leavesOf: Map<string, Set<string>>;
+    }>;
+    private explodeMaterialNeeds;
     calculateMrp(woId: string, user: any): Promise<{
         workOrder: {
             id: string;
@@ -51,7 +79,14 @@ export declare class MrpService {
         }[];
     }, user: any): Promise<{
         feasible: boolean;
-        shortages: any[];
+        shortages: {
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            totalNeeded: number;
+            available: number;
+            shortfall: number;
+        }[];
         createdWorkOrders: any[];
     } | {
         feasible: boolean;
