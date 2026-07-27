@@ -224,10 +224,24 @@ export class MrpService {
       if (!soItem) throw new NotFoundException(`Sales order item ${a.soItemId} not found`);
       const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
       if (!product) throw new BadRequestException(`No product master found for item code ${soItem.itemCode}`);
-      const bom = await this.prisma.bom.findFirst({
+
+      // A customer may order the fully-packaged product (Type 1, backed by
+      // its own MASTER BOM), or an intermediate routing stage's own output
+      // directly (Type 2/3, e.g. SMT boards or an MI assembly) - those are
+      // only backed by a STAGE-type BOM hanging off a RoutingStage, never a
+      // standalone MASTER BOM on the product itself. Fall back to that
+      // stage BOM so material needs can still be calculated correctly.
+      let bom = await this.prisma.bom.findFirst({
         where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
         include: { items: { where: { isActive: true } } },
       });
+      if (!bom) {
+        const matchedStage = await this.prisma.routingStage.findFirst({
+          where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+          include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+        });
+        if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
+      }
       if (!bom) throw new BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
 
       // Defense in depth: the planning board only shows the remaining

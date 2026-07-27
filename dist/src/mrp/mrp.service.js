@@ -222,10 +222,18 @@ let MrpService = class MrpService {
             const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
             if (!product)
                 throw new common_1.BadRequestException(`No product master found for item code ${soItem.itemCode}`);
-            const bom = await this.prisma.bom.findFirst({
+            let bom = await this.prisma.bom.findFirst({
                 where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
                 include: { items: { where: { isActive: true } } },
             });
+            if (!bom) {
+                const matchedStage = await this.prisma.routingStage.findFirst({
+                    where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+                    include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+                });
+                if (matchedStage && matchedStage.routing.isActive)
+                    bom = matchedStage.bom;
+            }
             if (!bom)
                 throw new common_1.BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
             const alreadyPlanned = await this.prisma.workOrder.aggregate({
