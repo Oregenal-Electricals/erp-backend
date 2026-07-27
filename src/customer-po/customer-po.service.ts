@@ -436,11 +436,18 @@ export class CustomerPoService {
       if (product) {
         const effectiveQty = fgNetOverride?.has(cpoItem.itemCode) ? fgNetOverride.get(cpoItem.itemCode)! : cpoItem.qty;
         if (effectiveQty <= 0) continue;
-        const bom = await this.prisma.bom.findFirst({
+        let bom = await this.prisma.bom.findFirst({
           where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
           include: { items: { where: { isActive: true } } },
           orderBy: { effectiveFrom: 'desc' },
         });
+        if (!bom) {
+          const matchedStage = await this.prisma.routingStage.findFirst({
+            where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+            include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+          });
+          if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
+        }
         if (!bom) continue;
         for (const bomItem of bom.items) {
           const grossQty = bomItem.effectiveQty * effectiveQty;
@@ -581,11 +588,18 @@ export class CustomerPoService {
           continue;
         }
 
-        const bom = await this.prisma.bom.findFirst({
+        let bom = await this.prisma.bom.findFirst({
           where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
           include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } },
           orderBy: { effectiveFrom: 'desc' },
         });
+        if (!bom) {
+          const matchedStage = await this.prisma.routingStage.findFirst({
+            where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+            include: { bom: { include: { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } } }, routing: true },
+          });
+          if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
+        }
         if (!bom) {
           const taskNumber = await this.generateTaskNumber(companyId);
           const task = await this.prisma.task.create({

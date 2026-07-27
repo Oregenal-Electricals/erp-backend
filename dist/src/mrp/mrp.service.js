@@ -166,12 +166,20 @@ let MrpService = class MrpService {
             const itemsOut = [];
             for (const item of so.items) {
                 const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
-                const bom = product
+                let bom = product
                     ? await this.prisma.bom.findFirst({
                         where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
                         include: { items: { where: { isActive: true } } },
                     })
                     : null;
+                if (!bom && product) {
+                    const matchedStage = await this.prisma.routingStage.findFirst({
+                        where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+                        include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+                    });
+                    if (matchedStage && matchedStage.routing.isActive)
+                        bom = matchedStage.bom;
+                }
                 const alreadyPlanned = await this.prisma.workOrder.aggregate({
                     where: { companyId, salesOrderId: so.id, productCode: item.itemCode, status: { not: 'CANCELLED' } },
                     _sum: { plannedQty: true },

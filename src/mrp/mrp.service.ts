@@ -167,12 +167,23 @@ export class MrpService {
       const itemsOut = [];
       for (const item of so.items) {
         const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
-        const bom = product
+        let bom = product
           ? await this.prisma.bom.findFirst({
               where: { companyId, productId: product.id, status: 'APPROVED', bomType: 'MASTER' },
               include: { items: { where: { isActive: true } } },
             })
           : null;
+        // Same Type 2/3 fallback as runAllocation() below - an intermediate
+        // routing stage's own item only has a STAGE-type BOM, not a MASTER
+        // one, so without this the board would wrongly show "No approved
+        // BOM" instead of the real material shortage.
+        if (!bom && product) {
+          const matchedStage = await this.prisma.routingStage.findFirst({
+            where: { companyId, isActive: true, bom: { productId: product.id, status: 'APPROVED' } },
+            include: { bom: { include: { items: { where: { isActive: true } } } }, routing: true },
+          });
+          if (matchedStage && matchedStage.routing.isActive) bom = matchedStage.bom;
+        }
 
         const alreadyPlanned = await this.prisma.workOrder.aggregate({
           where: { companyId, salesOrderId: so.id, productCode: item.itemCode, status: { not: 'CANCELLED' } },
