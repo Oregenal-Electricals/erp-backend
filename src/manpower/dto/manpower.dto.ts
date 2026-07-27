@@ -31,3 +31,16 @@ export class RaiseManpowerQueryDto {
 export class ResolveManpowerQueryDto {
   @IsString() response: string;
 }
+
+export class AdjustManpowerDto {
+  @IsString() allocationId: string;
+  @IsInt() delta: number; // positive = increase, negative = decrease
+  @IsOptional() @IsString() reason?: string;
+}
+
+export class TransferManpowerDto {
+  @IsString() allocationId: string;
+  @IsString() toWorkOrderId: string;
+  @IsInt() @Min(1) qty: number;
+  @IsOptional() @IsString() reason?: string;
+}

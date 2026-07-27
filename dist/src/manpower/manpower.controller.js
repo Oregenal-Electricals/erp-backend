@@ -32,6 +32,10 @@ let ManpowerController = class ManpowerController {
     distribute(dto, req) { return this.manpowerService.distribute(dto, req.user); }
     raiseQuery(dto, req) { return this.manpowerService.raiseQuery(dto, req.user); }
     resolveQuery(id, dto, req) { return this.manpowerService.resolveQuery(id, dto, req.user); }
+    adjust(dto, req) { return this.manpowerService.requestAdjust(dto, req.user); }
+    transfer(dto, req) { return this.manpowerService.requestTransfer(dto, req.user); }
+    approveRequest(requestId, req) { return this.manpowerService.approveManpowerRequest(requestId, req.user); }
+    rejectRequest(requestId, dto, req) { return this.manpowerService.rejectManpowerRequest(requestId, req.user, dto === null || dto === void 0 ? void 0 : dto.comments); }
 };
 exports.ManpowerController = ManpowerController;
 __decorate([
@@ -107,6 +111,43 @@ __decorate([
     __metadata("design:paramtypes", [String, manpower_dto_1.ResolveManpowerQueryDto, Object]),
     __metadata("design:returntype", void 0)
 ], ManpowerController.prototype, "resolveQuery", null);
+__decorate([
+    (0, common_1.Post)('allocations/adjust'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_ADJUST),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [manpower_dto_1.AdjustManpowerDto, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "adjust", null);
+__decorate([
+    (0, common_1.Post)('allocations/transfer'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_ADJUST),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [manpower_dto_1.TransferManpowerDto, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "transfer", null);
+__decorate([
+    (0, common_1.Post)('approvals/:requestId/approve'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),
+    __param(0, (0, common_1.Param)('requestId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "approveRequest", null);
+__decorate([
+    (0, common_1.Post)('approvals/:requestId/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),
+    __param(0, (0, common_1.Param)('requestId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "rejectRequest", null);
 exports.ManpowerController = ManpowerController = __decorate([
     (0, common_1.Controller)('manpower'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

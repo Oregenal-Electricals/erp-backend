@@ -1,5 +1,5 @@
 import { ManpowerService } from './manpower.service';
-import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto } from './dto/manpower.dto';
+import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto } from './dto/manpower.dto';
 export declare class ManpowerController {
     private manpowerService;
     constructor(manpowerService: ManpowerService);
@@ -424,5 +424,135 @@ export declare class ManpowerController {
         response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
+    }>;
+    adjust(dto: AdjustManpowerDto, req: any): Promise<{
+        level: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        category: string | null;
+        remarks: string | null;
+        date: Date;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
+        toUserId: string | null;
+        fromUserId: string;
+    } | {
+        pendingApproval: boolean;
+        approvalRequestId: string;
+        message: string;
+    }>;
+    transfer(dto: TransferManpowerDto, req: any): Promise<{
+        level: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        category: string | null;
+        remarks: string | null;
+        date: Date;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
+        toUserId: string | null;
+        fromUserId: string;
+    } | {
+        pendingApproval: boolean;
+        approvalRequestId: string;
+        message: string;
+    }>;
+    approveRequest(requestId: string, req: any): Promise<{
+        workflow: {
+            name: string;
+        };
+        actions: {
+            level: number;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            comments: string | null;
+            action: string;
+            actionBy: string;
+            actionDate: Date;
+            requestId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
+    }>;
+    rejectRequest(requestId: string, dto: {
+        comments?: string;
+    }, req: any): Promise<{
+        workflow: {
+            name: string;
+        };
+        actions: {
+            level: number;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            comments: string | null;
+            action: string;
+            actionBy: string;
+            actionDate: Date;
+            requestId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
     }>;
 }

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResolveManpowerQueryDto = exports.RaiseManpowerQueryDto = exports.DistributeManpowerDto = exports.CreateManpowerAllocationDto = void 0;
+exports.TransferManpowerDto = exports.AdjustManpowerDto = exports.ResolveManpowerQueryDto = exports.RaiseManpowerQueryDto = exports.DistributeManpowerDto = exports.CreateManpowerAllocationDto = void 0;
 const class_validator_1 = require("class-validator");
 const LEVELS = ['HR_TO_PLANT', 'PLANT_TO_STAGE', 'STAGE_TO_LINE'];
 class CreateManpowerAllocationDto {
@@ -72,4 +72,41 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ResolveManpowerQueryDto.prototype, "response", void 0);
+class AdjustManpowerDto {
+}
+exports.AdjustManpowerDto = AdjustManpowerDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AdjustManpowerDto.prototype, "allocationId", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], AdjustManpowerDto.prototype, "delta", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AdjustManpowerDto.prototype, "reason", void 0);
+class TransferManpowerDto {
+}
+exports.TransferManpowerDto = TransferManpowerDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TransferManpowerDto.prototype, "allocationId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TransferManpowerDto.prototype, "toWorkOrderId", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], TransferManpowerDto.prototype, "qty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TransferManpowerDto.prototype, "reason", void 0);
 //# sourceMappingURL=manpower.dto.js.map

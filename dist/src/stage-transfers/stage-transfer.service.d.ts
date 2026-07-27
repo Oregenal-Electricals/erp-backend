@@ -43,8 +43,8 @@ export declare class StageTransferService {
         itemCode: string;
         itemName: string;
         qty: number;
-        fromWorkOrderId: string;
         toWorkOrderId: string;
+        fromWorkOrderId: string;
         givenAt: Date;
         receivedAt: Date | null;
         givenByUserId: string;
@@ -87,8 +87,8 @@ export declare class StageTransferService {
         itemCode: string;
         itemName: string;
         qty: number;
-        fromWorkOrderId: string;
         toWorkOrderId: string;
+        fromWorkOrderId: string;
         givenAt: Date;
         receivedAt: Date | null;
         givenByUserId: string;
@@ -131,8 +131,8 @@ export declare class StageTransferService {
         itemCode: string;
         itemName: string;
         qty: number;
-        fromWorkOrderId: string;
         toWorkOrderId: string;
+        fromWorkOrderId: string;
         givenAt: Date;
         receivedAt: Date | null;
         givenByUserId: string;

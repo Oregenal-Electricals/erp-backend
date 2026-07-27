@@ -4,7 +4,7 @@ import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { Permission } from '../common/permissions/permissions.enum';
 import { ManpowerService } from './manpower.service';
-import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto } from './dto/manpower.dto';
+import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto } from './dto/manpower.dto';
 
 @Controller('manpower')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -42,4 +42,20 @@ export class ManpowerController {
   @Post('queries/:id/resolve')
   @RequirePermissions(Permission.MANPOWER_QUERY)
   resolveQuery(@Param('id') id: string, @Body() dto: ResolveManpowerQueryDto, @Request() req: any) { return this.manpowerService.resolveQuery(id, dto, req.user); }
+
+  @Post('allocations/adjust')
+  @RequirePermissions(Permission.MANPOWER_ADJUST)
+  adjust(@Body() dto: AdjustManpowerDto, @Request() req: any) { return this.manpowerService.requestAdjust(dto, req.user); }
+
+  @Post('allocations/transfer')
+  @RequirePermissions(Permission.MANPOWER_ADJUST)
+  transfer(@Body() dto: TransferManpowerDto, @Request() req: any) { return this.manpowerService.requestTransfer(dto, req.user); }
+
+  @Post('approvals/:requestId/approve')
+  @RequirePermissions(Permission.WORK_ORDER_APPROVE)
+  approveRequest(@Param('requestId') requestId: string, @Request() req: any) { return this.manpowerService.approveManpowerRequest(requestId, req.user); }
+
+  @Post('approvals/:requestId/reject')
+  @RequirePermissions(Permission.WORK_ORDER_APPROVE)
+  rejectRequest(@Param('requestId') requestId: string, @Body() dto: { comments?: string }, @Request() req: any) { return this.manpowerService.rejectManpowerRequest(requestId, req.user, dto?.comments); }
 }

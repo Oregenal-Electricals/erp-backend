@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto } from './dto/manpower.dto';
+import { WorkflowsService } from '../workflows/workflows.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto } from './dto/manpower.dto';
 
 const SUPERVISOR_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 const NEXT_LEVEL: Record<string, string> = {
@@ -11,7 +13,12 @@ const NEXT_LEVEL: Record<string, string> = {
 
 @Injectable()
 export class ManpowerService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private workflows: WorkflowsService,
+    private notifications: NotificationsService,
+  ) {}
 
   private includes() {
     return {
@@ -191,5 +198,101 @@ export class ManpowerService {
     });
     await this.audit.log({ tableName: 'manpower_queries', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
+  }
+
+  // Increasing or decreasing manpower on an already-active Work Order's
+  // allocation goes through the same Plant Head approval gate as starting
+  // or restarting the Work Order itself - a Plant-Head-tier user's change
+  // applies immediately, anyone else's waits for approval.
+  async requestAdjust(dto: AdjustManpowerDto, user: any) {
+    const allocation = await this.prisma.manpowerAllocation.findFirst({
+      where: { id: dto.allocationId, companyId: user.companyId }, include: { workOrder: true },
+    });
+    if (!allocation) throw new NotFoundException('Allocation not found');
+    if (!allocation.workOrderId) throw new BadRequestException('Only a Work Order-linked allocation can be adjusted this way');
+    if (allocation.workOrder?.status !== 'IN_PROGRESS') throw new BadRequestException('This Work Order is not currently active');
+    const newCount = allocation.count + dto.delta;
+    if (newCount < 0) throw new BadRequestException('This would take the allocation below zero');
+
+    if (SUPERVISOR_ROLES.includes(user.role)) {
+      return this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: newCount, updatedBy: user.id } });
+    }
+    const documentType = dto.delta >= 0 ? 'MANPOWER_INCREASE' : 'MANPOWER_DECREASE';
+    const { request } = await this.workflows.submit({
+      documentType, documentId: allocation.id, documentNumber: allocation.workOrder.woNumber,
+      amount: Math.abs(dto.delta), remarks: dto.reason,
+    }, user);
+    return { pendingApproval: true, approvalRequestId: request?.id, message: 'Submitted for Plant Head approval - manpower count has not changed yet' };
+  }
+
+  async requestTransfer(dto: TransferManpowerDto, user: any) {
+    const allocation = await this.prisma.manpowerAllocation.findFirst({
+      where: { id: dto.allocationId, companyId: user.companyId }, include: { workOrder: true },
+    });
+    if (!allocation) throw new NotFoundException('Allocation not found');
+    if (!allocation.workOrderId) throw new BadRequestException('Only a Work Order-linked allocation can be transferred');
+    if (dto.qty > allocation.count) throw new BadRequestException(`Cannot transfer more than the ${allocation.count} currently allocated`);
+    const toWo = await this.prisma.workOrder.findFirst({ where: { id: dto.toWorkOrderId, companyId: user.companyId } });
+    if (!toWo) throw new NotFoundException('Destination Work Order not found');
+
+    if (SUPERVISOR_ROLES.includes(user.role)) {
+      return this.executeTransfer(allocation, dto.toWorkOrderId, dto.qty, user);
+    }
+    // documentId/amount hold the source allocation and quantity; the
+    // destination Work Order doesn't fit the generic engine's fixed
+    // columns, so it rides along as structured remarks instead of adding
+    // a bespoke field to a table shared by every other approval type.
+    const { request } = await this.workflows.submit({
+      documentType: 'MANPOWER_TRANSFER', documentId: allocation.id, documentNumber: allocation.workOrder.woNumber,
+      amount: dto.qty, remarks: JSON.stringify({ reason: dto.reason, toWorkOrderId: dto.toWorkOrderId }),
+    }, user);
+    return { pendingApproval: true, approvalRequestId: request?.id, message: 'Submitted for Plant Head approval - manpower has not moved yet' };
+  }
+
+  private async executeTransfer(allocation: any, toWorkOrderId: string, qty: number, user: any) {
+    await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count - qty, updatedBy: user.id } });
+    return this.prisma.manpowerAllocation.create({
+      data: {
+        companyId: user.companyId, date: allocation.date, level: allocation.level, category: allocation.category,
+        fromUserId: user.id, workOrderId: toWorkOrderId, count: qty, status: 'ACCEPTED',
+        remarks: `Transferred from ${allocation.workOrder?.woNumber || 'another Work Order'}`,
+        createdBy: user.id, updatedBy: user.id,
+      },
+    });
+  }
+
+  // Shared approve/reject for every gated manpower action, dispatching by
+  // documentType the same way Work Order approvals do.
+  async approveManpowerRequest(requestId: string, user: any) {
+    const actionResult = await this.workflows.act(requestId, { action: 'APPROVED' }, user);
+    if (actionResult.status === 'APPROVED') {
+      if (actionResult.documentType === 'MANPOWER_INCREASE' || actionResult.documentType === 'MANPOWER_DECREASE') {
+        const delta = actionResult.documentType === 'MANPOWER_INCREASE' ? actionResult.amount : -actionResult.amount;
+        const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId } });
+        if (allocation) await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count + delta, updatedBy: user.id } });
+      } else if (actionResult.documentType === 'MANPOWER_TRANSFER') {
+        const { toWorkOrderId } = JSON.parse(actionResult.remarks || '{}');
+        const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId }, include: { workOrder: true } });
+        if (allocation && toWorkOrderId) await this.executeTransfer(allocation, toWorkOrderId, actionResult.amount, user);
+      }
+      await this.notifyAdmins(user, actionResult, `${actionResult.documentType.replace(/_/g, ' ')} approved`);
+    }
+    return actionResult;
+  }
+
+  async rejectManpowerRequest(requestId: string, user: any, comments?: string) {
+    return this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+  }
+
+  private async notifyAdmins(actorUser: any, request: any, message: string) {
+    const admins = await this.prisma.user.findMany({ where: { companyId: actorUser.companyId, role: { in: ['ADMIN', 'SUPER_ADMIN'] } } });
+    for (const admin of admins) {
+      await this.notifications.create({
+        userId: admin.id, type: 'PRODUCTION_APPROVAL', title: 'Production approval action',
+        message: `${message}: ${request.documentNumber}`,
+        referenceType: request.documentType, referenceId: request.documentId,
+        referenceNumber: request.documentNumber, priority: 'MEDIUM',
+      }, actorUser.companyId, actorUser.id);
+    }
   }
 }

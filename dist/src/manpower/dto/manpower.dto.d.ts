@@ -24,3 +24,14 @@ export declare class RaiseManpowerQueryDto {
 export declare class ResolveManpowerQueryDto {
     response: string;
 }
+export declare class AdjustManpowerDto {
+    allocationId: string;
+    delta: number;
+    reason?: string;
+}
+export declare class TransferManpowerDto {
+    allocationId: string;
+    toWorkOrderId: string;
+    qty: number;
+    reason?: string;
+}

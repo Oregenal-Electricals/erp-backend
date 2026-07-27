@@ -1,10 +1,14 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto } from './dto/manpower.dto';
+import { WorkflowsService } from '../workflows/workflows.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto } from './dto/manpower.dto';
 export declare class ManpowerService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private workflows;
+    private notifications;
+    constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService, notifications: NotificationsService);
     private includes;
     create(dto: CreateManpowerAllocationDto, user: any): Promise<{
         workOrder: {
@@ -428,4 +432,134 @@ export declare class ManpowerService {
         raisedByUserId: string;
         raisedToUserId: string;
     }>;
+    requestAdjust(dto: AdjustManpowerDto, user: any): Promise<{
+        level: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        category: string | null;
+        remarks: string | null;
+        date: Date;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
+        toUserId: string | null;
+        fromUserId: string;
+    } | {
+        pendingApproval: boolean;
+        approvalRequestId: string;
+        message: string;
+    }>;
+    requestTransfer(dto: TransferManpowerDto, user: any): Promise<{
+        level: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        category: string | null;
+        remarks: string | null;
+        date: Date;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
+        toUserId: string | null;
+        fromUserId: string;
+    } | {
+        pendingApproval: boolean;
+        approvalRequestId: string;
+        message: string;
+    }>;
+    private executeTransfer;
+    approveManpowerRequest(requestId: string, user: any): Promise<{
+        workflow: {
+            name: string;
+        };
+        actions: {
+            level: number;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            comments: string | null;
+            action: string;
+            actionBy: string;
+            actionDate: Date;
+            requestId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
+    }>;
+    rejectManpowerRequest(requestId: string, user: any, comments?: string): Promise<{
+        workflow: {
+            name: string;
+        };
+        actions: {
+            level: number;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            comments: string | null;
+            action: string;
+            actionBy: string;
+            actionDate: Date;
+            requestId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
+        currentLevel: number;
+        totalLevels: number;
+    }>;
+    private notifyAdmins;
 }

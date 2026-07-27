@@ -12,12 +12,14 @@ const manpower_controller_1 = require("./manpower.controller");
 const manpower_service_1 = require("./manpower.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const workflows_module_1 = require("../workflows/workflows.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let ManpowerModule = class ManpowerModule {
 };
 exports.ManpowerModule = ManpowerModule;
 exports.ManpowerModule = ManpowerModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, workflows_module_1.WorkflowsModule, notifications_module_1.NotificationsModule],
         controllers: [manpower_controller_1.ManpowerController],
         providers: [manpower_service_1.ManpowerService],
         exports: [manpower_service_1.ManpowerService],
