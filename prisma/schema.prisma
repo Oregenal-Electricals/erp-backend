@@ -327,6 +327,7 @@ model Company {
   customFieldValues      CustomFieldValue[]
   manpowerAllocations    ManpowerAllocation[]
   manpowerQueries        ManpowerQuery[]
+  stageTransferNotes     StageTransferNote[]
 
   @@map("companies")
   @@index([code])
@@ -507,6 +508,8 @@ model User {
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
+  transfersGiven    StageTransferNote[] @relation("TransferGivenBy")
+  transfersReceived StageTransferNote[] @relation("TransferReceivedBy")
 
   @@map("users")
   @@index([email])
@@ -935,6 +938,44 @@ model ManpowerQuery {
   @@map("manpower_queries")
   @@index([companyId])
   @@index([allocationId])
+}
+
+// A stage explicitly hands off its finished output to the next stage (or
+// any other stage) instead of that handoff happening invisibly through
+// automatic BOM-based material consumption. The giving side creates this
+// as PENDING; the receiving side must explicitly accept it before it's
+// considered received - giving both sides a real, visible record of what
+// physically moved between them and when.
+model StageTransferNote {
+  id             String    @id @default(uuid())
+  companyId      String
+  company        Company   @relation(fields: [companyId], references: [id])
+  fromWorkOrderId String
+  fromWorkOrder   WorkOrder @relation("StageTransferFrom", fields: [fromWorkOrderId], references: [id])
+  toWorkOrderId   String
+  toWorkOrder     WorkOrder @relation("StageTransferTo", fields: [toWorkOrderId], references: [id])
+  itemCode       String
+  itemName       String
+  qty            Float
+  status         String    @default("PENDING") // PENDING, RECEIVED
+  givenByUserId  String
+  givenBy        User      @relation("TransferGivenBy", fields: [givenByUserId], references: [id])
+  givenAt        DateTime  @default(now())
+  receivedByUserId String?
+  receivedBy       User?   @relation("TransferReceivedBy", fields: [receivedByUserId], references: [id])
+  receivedAt       DateTime?
+  remarks        String?
+  isActive       Boolean   @default(true)
+  isTestData     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  @@map("stage_transfer_notes")
+  @@index([companyId])
+  @@index([fromWorkOrderId])
+  @@index([toWorkOrderId])
 }
 
 model GatePass {
@@ -2984,6 +3025,8 @@ model WorkOrder {
   oqcInspections OqcInspection[]
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
+  stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
+  stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
