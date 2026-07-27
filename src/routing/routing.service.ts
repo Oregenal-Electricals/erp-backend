@@ -73,8 +73,15 @@ export class RoutingService {
     const createdStageWos: any[] = [];
     let previousWoId: string | null = null;
     let rootNumber: string | null = null;
+    // Not every order needs the whole chain - a customer buying just SMT
+    // boards or MI assemblies (rather than the final packaged product)
+    // only needs the routing to run up through the stage that actually
+    // produces what they ordered, not all the way to Packaging.
+    const stagesToRun = dto.stopAtSequence
+      ? routing.stages.filter(s => s.sequence <= dto.stopAtSequence)
+      : routing.stages;
 
-    for (const stage of routing.stages) {
+    for (const stage of stagesToRun) {
       const bom = await this.prisma.bom.findFirst({ where: { id: stage.bomId, companyId: user.companyId } });
       if (!bom) throw new NotFoundException(`BOM not found for stage ${stage.stageName}`);
       const stageProduct = await this.prisma.product.findFirst({ where: { id: bom.productId, companyId: user.companyId } });

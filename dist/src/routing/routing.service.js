@@ -78,7 +78,10 @@ let RoutingService = class RoutingService {
         const createdStageWos = [];
         let previousWoId = null;
         let rootNumber = null;
-        for (const stage of routing.stages) {
+        const stagesToRun = dto.stopAtSequence
+            ? routing.stages.filter(s => s.sequence <= dto.stopAtSequence)
+            : routing.stages;
+        for (const stage of stagesToRun) {
             const bom = await this.prisma.bom.findFirst({ where: { id: stage.bomId, companyId: user.companyId } });
             if (!bom)
                 throw new common_1.NotFoundException(`BOM not found for stage ${stage.stageName}`);

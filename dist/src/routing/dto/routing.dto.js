@@ -61,4 +61,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], StartProductionDto.prototype, "warehouseId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], StartProductionDto.prototype, "stopAtSequence", void 0);
 //# sourceMappingURL=routing.dto.js.map

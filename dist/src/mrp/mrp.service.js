@@ -266,11 +266,22 @@ let MrpService = class MrpService {
         }
         const createdWorkOrders = [];
         for (const r of resolved) {
-            const routing = await this.prisma.productRouting.findFirst({
+            let routing = await this.prisma.productRouting.findFirst({
                 where: { companyId, finalProductId: r.product.id, isActive: true },
             });
+            let stopAtSequence = undefined;
+            if (!routing) {
+                const matchedStage = await this.prisma.routingStage.findFirst({
+                    where: { companyId, isActive: true, bom: { productId: r.product.id } },
+                    include: { routing: true },
+                });
+                if (matchedStage && matchedStage.routing.isActive) {
+                    routing = matchedStage.routing;
+                    stopAtSequence = matchedStage.sequence;
+                }
+            }
             if (routing) {
-                const chain = await this.routingService.startProduction({ routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId }, user);
+                const chain = await this.routingService.startProduction({ routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId, stopAtSequence }, user);
                 const finalStage = chain.stages[chain.stages.length - 1];
                 await this.prisma.workOrder.update({
                     where: { id: finalStage.woId },

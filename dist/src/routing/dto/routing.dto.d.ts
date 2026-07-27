@@ -12,4 +12,5 @@ export declare class StartProductionDto {
     routingId: string;
     plannedQty: number;
     warehouseId: string;
+    stopAtSequence?: number;
 }

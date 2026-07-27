@@ -20,4 +20,5 @@ export class StartProductionDto {
   @IsString() routingId: string;
   @IsNumber() @Min(0.0001) plannedQty: number;
   @IsString() warehouseId: string;
+  @IsOptional() @IsNumber() stopAtSequence?: number;
 }

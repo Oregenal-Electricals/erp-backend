@@ -282,13 +282,30 @@ export class MrpService {
       // "parent" WO that never got produced against, and again against
       // each routing stage - leaving the parent's reservation stuck
       // forever since nothing ever completed or cancelled it.
-      const routing = await this.prisma.productRouting.findFirst({
+      // A customer may order the fully-packaged product (Type 1, full
+      // chain), or an intermediate stage's own output directly - SMT
+      // boards (Type 2) or an MI-stage assembly (Type 3). Either way, we
+      // find whichever routing stage actually produces the ordered item
+      // and only run the chain up through that stage.
+      let routing = await this.prisma.productRouting.findFirst({
         where: { companyId, finalProductId: r.product.id, isActive: true },
       });
+      let stopAtSequence: number | undefined = undefined;
+
+      if (!routing) {
+        const matchedStage = await this.prisma.routingStage.findFirst({
+          where: { companyId, isActive: true, bom: { productId: r.product.id } },
+          include: { routing: true },
+        });
+        if (matchedStage && matchedStage.routing.isActive) {
+          routing = matchedStage.routing;
+          stopAtSequence = matchedStage.sequence;
+        }
+      }
 
       if (routing) {
         const chain = await this.routingService.startProduction(
-          { routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId },
+          { routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId, stopAtSequence },
           user,
         );
         // Only the final stage produces the same item the Sales Order is
