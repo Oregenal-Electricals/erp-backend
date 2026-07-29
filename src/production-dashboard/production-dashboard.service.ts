@@ -161,4 +161,188 @@ export class ProductionDashboardService {
 
     return { inspections, byResult, totalSampled, totalPassed, overallPassRate };
   }
+
+  /**
+   * Hourly Production Monitoring Dashboard (Phase D). Everything the
+   * existing getOverview()/getToday()/getAlerts() endpoints don't cover:
+   * manpower per Work Order, output broken down by hour AND by routing
+   * stage (not just shift), idle manpower, stage-to-stage transfers, an
+   * efficiency figure per WO, and a best-effort manpower-cost estimate.
+   *
+   * Manpower costing is a genuine estimate, not a precise figure - it
+   * converts each allocated employee's monthly gross salary
+   * (Employee.basicSalary + hraAmount + conveyanceAmount +
+   * otherAllowances, matched via Employee.userId ->
+   * ManpowerAllocation.toUserId) into an hourly rate using a standard
+   * 208 hours/month assumption (26 working days x 8 hours). If your
+   * actual working-hours convention differs, this ratio is the one
+   * place to change it. A ManpowerAllocation with no matching Employee
+   * record (e.g. a contractor logged only as a User) contributes
+   * headcount to the numbers but no cost - flagged separately below
+   * rather than silently assumed at zero cost.
+   */
+  async getHourlyMonitoring(user: any, dateStr?: string) {
+    const companyId = user.companyId;
+    const HOURS_PER_MONTH = 208; // 26 working days x 8 hours - see docstring above
+
+    const day = dateStr ? new Date(dateStr) : new Date();
+    day.setHours(0, 0, 0, 0);
+    const nextDay = new Date(day);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const [activeWos, startedToday, completedToday, entries, manpowerToday, transfersToday] = await Promise.all([
+      this.prisma.workOrder.findMany({
+        where: { companyId, status: { in: ['RELEASED', 'IN_PROGRESS'] } },
+        select: {
+          id: true, woNumber: true, productCode: true, productName: true,
+          stageName: true, status: true, plannedQty: true, completedQty: true,
+          plannedStartDate: true, plannedEndDate: true, actualStartDate: true,
+        },
+      }),
+      this.prisma.workOrder.count({ where: { companyId, actualStartDate: { gte: day, lt: nextDay } } }),
+      this.prisma.workOrder.count({ where: { companyId, status: 'COMPLETED', actualEndDate: { gte: day, lt: nextDay } } }),
+      this.prisma.productionEntry.findMany({
+        where: { companyId, status: 'CONFIRMED', entryDate: { gte: day, lt: nextDay } },
+        include: { workOrder: { select: { woNumber: true, productName: true, stageName: true } } },
+      }),
+      this.prisma.manpowerAllocation.findMany({
+        where: { companyId, level: 'STAGE_TO_LINE', date: { gte: day, lt: nextDay }, status: { in: ['PENDING', 'ACCEPTED'] } },
+      }),
+      this.prisma.stageTransferNote.findMany({
+        where: { companyId, givenAt: { gte: day, lt: nextDay } },
+        include: {
+          fromWorkOrder: { select: { woNumber: true, stageName: true } },
+          toWorkOrder: { select: { woNumber: true, stageName: true } },
+        },
+        orderBy: { givenAt: 'desc' },
+      }),
+    ]);
+
+    // --- Hourly output: bucket confirmed entries by the hour they were logged ---
+    const hourlyBuckets = new Map<number, { goodQty: number; scrapQty: number; entries: number }>();
+    for (let h = 0; h < 24; h++) hourlyBuckets.set(h, { goodQty: 0, scrapQty: 0, entries: 0 });
+    for (const e of entries) {
+      const hour = e.entryDate.getHours();
+      const bucket = hourlyBuckets.get(hour)!;
+      bucket.goodQty += e.goodQty; bucket.scrapQty += e.scrapQty; bucket.entries += 1;
+    }
+    const hourlyOutput = Array.from(hourlyBuckets.entries())
+      .map(([hour, v]) => ({ hour: `${String(hour).padStart(2, '0')}:00`, ...v }))
+      .filter(b => b.entries > 0 || (b.hour >= '06:00' && b.hour <= '22:00')); // hide the dead overnight hours unless something actually happened
+
+    // --- Stage-wise output: group the same entries by routing stage instead of by hour ---
+    const stageMap = new Map<string, { goodQty: number; scrapQty: number; woNumbers: Set<string> }>();
+    for (const e of entries) {
+      const stage = e.workOrder.stageName || 'NO_ROUTING';
+      if (!stageMap.has(stage)) stageMap.set(stage, { goodQty: 0, scrapQty: 0, woNumbers: new Set() });
+      const s = stageMap.get(stage)!;
+      s.goodQty += e.goodQty; s.scrapQty += e.scrapQty; s.woNumbers.add(e.workOrder.woNumber);
+    }
+    const stageWiseOutput = Array.from(stageMap.entries()).map(([stageName, v]) => ({
+      stageName, goodQty: v.goodQty, scrapQty: v.scrapQty, workOrderCount: v.woNumbers.size,
+    }));
+
+    // --- Manpower per active WO, plus idle headcount (allocated today but not tied to any active WO) ---
+    const manpowerByWo = new Map<string, number>();
+    let unassignedHeadcount = 0;
+    for (const m of manpowerToday) {
+      if (m.workOrderId) manpowerByWo.set(m.workOrderId, (manpowerByWo.get(m.workOrderId) || 0) + m.count);
+      else unassignedHeadcount += m.count;
+    }
+    const activeWoIds = new Set(activeWos.map(w => w.id));
+    const idleHeadcount = manpowerToday
+      .filter(m => m.workOrderId && !activeWoIds.has(m.workOrderId))
+      .reduce((s, m) => s + m.count, 0) + unassignedHeadcount;
+    const totalAllocatedToday = manpowerToday.reduce((s, m) => s + m.count, 0);
+
+    // --- Per-WO view: progress, manpower, and a simple actual-vs-planned efficiency figure ---
+    const now = Date.now();
+    const woDetails = activeWos.map(wo => {
+      const progressPct = wo.plannedQty > 0 ? Math.round(wo.completedQty / wo.plannedQty * 100) : 0;
+      const allocatedManpower = manpowerByWo.get(wo.id) || 0;
+      let efficiencyPct: number | null = null;
+      if (wo.actualStartDate && wo.plannedStartDate && wo.plannedEndDate) {
+        const plannedHours = (wo.plannedEndDate.getTime() - wo.plannedStartDate.getTime()) / (1000 * 60 * 60);
+        const elapsedHours = (now - wo.actualStartDate.getTime()) / (1000 * 60 * 60);
+        if (plannedHours > 0 && elapsedHours > 0) {
+          const plannedRatePerHour = wo.plannedQty / plannedHours;
+          const actualRatePerHour = wo.completedQty / elapsedHours;
+          efficiencyPct = plannedRatePerHour > 0 ? Math.round(actualRatePerHour / plannedRatePerHour * 100) : null;
+        }
+      }
+      return {
+        id: wo.id, woNumber: wo.woNumber, productCode: wo.productCode, productName: wo.productName,
+        stageName: wo.stageName, status: wo.status, plannedQty: wo.plannedQty, completedQty: wo.completedQty,
+        progressPct, allocatedManpower, efficiencyPct,
+      };
+    });
+
+    // --- Manpower-based costing estimate ---
+    const employees = await this.prisma.employee.findMany({
+      where: { companyId, userId: { in: manpowerToday.filter(m => m.toUserId).map(m => m.toUserId as string) } },
+      select: { userId: true, basicSalary: true, hraAmount: true, conveyanceAmount: true, otherAllowances: true },
+    });
+    const hourlyRateByUserId = new Map<string, number>();
+    for (const emp of employees) {
+      const grossMonthly = emp.basicSalary + emp.hraAmount + emp.conveyanceAmount + emp.otherAllowances;
+      hourlyRateByUserId.set(emp.userId as string, grossMonthly / HOURS_PER_MONTH);
+    }
+    let totalManpowerCostToday = 0;
+    let headcountWithoutRate = 0;
+    const costByStage = new Map<string, { headcount: number; estimatedCost: number }>();
+    for (const m of manpowerToday) {
+      const stage = m.category || 'UNSPECIFIED';
+      if (!costByStage.has(stage)) costByStage.set(stage, { headcount: 0, estimatedCost: 0 });
+      const bucket = costByStage.get(stage)!;
+      bucket.headcount += m.count;
+      const rate = m.toUserId ? hourlyRateByUserId.get(m.toUserId) : undefined;
+      if (rate) {
+        const cost = rate * m.count * 8; // assumes a standard 8-hour shift per allocated headcount
+        bucket.estimatedCost += cost;
+        totalManpowerCostToday += cost;
+      } else {
+        headcountWithoutRate += m.count;
+      }
+    }
+
+    return {
+      date: day.toISOString().slice(0, 10),
+      workOrders: {
+        active: woDetails,
+        activeCount: activeWos.length,
+        startedToday, completedToday,
+      },
+      hourlyOutput,
+      stageWiseOutput,
+      manpower: {
+        totalAllocatedToday, idleHeadcount,
+        utilizationPct: totalAllocatedToday > 0 ? Math.round((totalAllocatedToday - idleHeadcount) / totalAllocatedToday * 100) : 0,
+      },
+      transfers: {
+        todayCount: transfersToday.length,
+        list: transfersToday.map(t => ({
+          id: t.id, itemCode: t.itemCode, itemName: t.itemName, qty: t.qty, status: t.status,
+          fromWoNumber: t.fromWorkOrder.woNumber, fromStage: t.fromWorkOrder.stageName,
+          toWoNumber: t.toWorkOrder.woNumber, toStage: t.toWorkOrder.stageName,
+          givenAt: t.givenAt, receivedAt: t.receivedAt,
+        })),
+      },
+      efficiency: {
+        overallGoodVsTotalPct: (() => {
+          const totalGood = entries.reduce((s, e) => s + e.goodQty, 0);
+          const totalScrap = entries.reduce((s, e) => s + e.scrapQty, 0);
+          const total = totalGood + totalScrap;
+          return total > 0 ? Math.round(totalGood / total * 100) : 0;
+        })(),
+      },
+      costing: {
+        assumptionNote: `Hourly rate estimated as (basicSalary + hraAmount + conveyanceAmount + otherAllowances) / ${HOURS_PER_MONTH} standard monthly hours (26 days x 8 hours). Adjust HOURS_PER_MONTH in production-dashboard.service.ts if your actual working-hours convention differs.`,
+        totalManpowerCostToday: Math.round(totalManpowerCostToday * 100) / 100,
+        headcountWithoutRate,
+        perStage: Array.from(costByStage.entries()).map(([stageName, v]) => ({
+          stageName, headcount: v.headcount, estimatedCost: Math.round(v.estimatedCost * 100) / 100,
+        })),
+      },
+    };
+  }
 }

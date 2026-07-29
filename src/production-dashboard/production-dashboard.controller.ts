@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { ProductionDashboardService } from './production-dashboard.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -29,4 +29,8 @@ export class ProductionDashboardController {
   @Get('quality')
   @RequirePermissions(Permission.PRODUCTION_VIEW)
   getQuality(@Request() req: any) { return this.pdService.getQualityMetrics(req.user); }
+
+  @Get('hourly-monitoring')
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  getHourlyMonitoring(@Request() req: any, @Query('date') date?: string) { return this.pdService.getHourlyMonitoring(req.user, date); }
 }
