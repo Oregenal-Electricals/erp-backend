@@ -1,0 +1,274 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateDispatchPlanDto, CancelPlanDto } from './dto/dispatch-plan.dto';
+export declare class DispatchPlanningService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    private generateNumber;
+    private includes;
+    create(dto: CreateDispatchPlanDto, user: any): Promise<{
+        items: {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        deliveryAddress: string | null;
+        approvedBy: string | null;
+        cancelReason: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    approve(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        deliveryAddress: string | null;
+        approvedBy: string | null;
+        cancelReason: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    cancel(id: string, dto: CancelPlanDto, user: any): Promise<{
+        items: {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        deliveryAddress: string | null;
+        approvedBy: string | null;
+        cancelReason: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: ({
+            items: {
+                id: string;
+                itemCode: string;
+                plannedQty: number;
+            }[];
+            salesOrder: {
+                customerName: string;
+                soNumber: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            vehicleNumber: string | null;
+            remarks: string | null;
+            driverName: string | null;
+            customerName: string;
+            deliveryAddress: string | null;
+            approvedBy: string | null;
+            cancelReason: string | null;
+            soId: string;
+            plannedDate: Date;
+            transportMode: string;
+            transporterName: string | null;
+            driverPhone: string | null;
+            planNumber: string;
+            approvedDate: Date | null;
+        })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            plannedQty: number;
+            soItemId: string;
+            planId: string;
+        }[];
+        salesOrder: {
+            status: string;
+            customerName: string;
+            totalAmount: number;
+            soNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        customerName: string;
+        deliveryAddress: string | null;
+        approvedBy: string | null;
+        cancelReason: string | null;
+        soId: string;
+        plannedDate: Date;
+        transportMode: string;
+        transporterName: string | null;
+        driverPhone: string | null;
+        planNumber: string;
+        approvedDate: Date | null;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        draft: number;
+        approved: number;
+        dispatched: number;
+        cancelled: number;
+        overdue: number;
+    }>;
+    getPendingSoItems(soId: string, user: any): Promise<{
+        soNumber: string;
+        customerName: string;
+        items: {
+            id: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            totalAmount: number;
+            gstRate: number;
+            qty: number;
+            unitPrice: number;
+            discount: number;
+            pendingQty: number;
+            cpoItemId: string | null;
+            taxableAmt: number;
+            gstAmount: number;
+            dispatchedQty: number;
+            soId: string;
+        }[];
+    }>;
+}

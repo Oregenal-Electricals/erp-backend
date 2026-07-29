@@ -1,0 +1,403 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { CreateProformaInvoiceDto, UpdateProformaInvoiceDto, RejectPiDto } from './dto/proforma-invoice.dto';
+export declare class ProformaInvoiceService {
+    private prisma;
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
+    private generatePiNumber;
+    private includes;
+    create(dto: CreateProformaInvoiceDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            hsnCode: string | null;
+            sequence: number;
+            qty: number;
+            unitPriceForeign: number;
+            totalForeign: number;
+            totalInr: number;
+            ipoItemId: string | null;
+            piId: string;
+        }[];
+        ipo: {
+            status: string;
+            vendor: {
+                name: string;
+                code: string;
+            };
+            currency: string;
+            exchangeRate: number;
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        rejectionReason: string | null;
+        currency: string;
+        totalAmount: number;
+        notes: string | null;
+        bankName: string | null;
+        validUntil: Date | null;
+        exchangeRate: number;
+        subtotalForeign: number;
+        ipoId: string;
+        vendorPiNumber: string | null;
+        piDate: Date;
+        bankAddress: string | null;
+        swiftCode: string | null;
+        piNumber: string;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: ({
+            _count: {
+                items: number;
+            };
+            ipo: {
+                vendor: {
+                    name: string;
+                    code: string;
+                };
+                currency: string;
+                ipoNumber: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            rejectionReason: string | null;
+            currency: string;
+            totalAmount: number;
+            notes: string | null;
+            bankName: string | null;
+            validUntil: Date | null;
+            exchangeRate: number;
+            subtotalForeign: number;
+            ipoId: string;
+            vendorPiNumber: string | null;
+            piDate: Date;
+            bankAddress: string | null;
+            swiftCode: string | null;
+            piNumber: string;
+        })[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            hsnCode: string | null;
+            sequence: number;
+            qty: number;
+            unitPriceForeign: number;
+            totalForeign: number;
+            totalInr: number;
+            ipoItemId: string | null;
+            piId: string;
+        }[];
+        ipo: {
+            status: string;
+            vendor: {
+                name: string;
+                code: string;
+            };
+            currency: string;
+            exchangeRate: number;
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        rejectionReason: string | null;
+        currency: string;
+        totalAmount: number;
+        notes: string | null;
+        bankName: string | null;
+        validUntil: Date | null;
+        exchangeRate: number;
+        subtotalForeign: number;
+        ipoId: string;
+        vendorPiNumber: string | null;
+        piDate: Date;
+        bankAddress: string | null;
+        swiftCode: string | null;
+        piNumber: string;
+    }>;
+    findByIpo(ipoId: string, user: any): Promise<({
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            hsnCode: string | null;
+            sequence: number;
+            qty: number;
+            unitPriceForeign: number;
+            totalForeign: number;
+            totalInr: number;
+            ipoItemId: string | null;
+            piId: string;
+        }[];
+        ipo: {
+            status: string;
+            vendor: {
+                name: string;
+                code: string;
+            };
+            currency: string;
+            exchangeRate: number;
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        rejectionReason: string | null;
+        currency: string;
+        totalAmount: number;
+        notes: string | null;
+        bankName: string | null;
+        validUntil: Date | null;
+        exchangeRate: number;
+        subtotalForeign: number;
+        ipoId: string;
+        vendorPiNumber: string | null;
+        piDate: Date;
+        bankAddress: string | null;
+        swiftCode: string | null;
+        piNumber: string;
+    })[]>;
+    update(id: string, dto: UpdateProformaInvoiceDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            hsnCode: string | null;
+            sequence: number;
+            qty: number;
+            unitPriceForeign: number;
+            totalForeign: number;
+            totalInr: number;
+            ipoItemId: string | null;
+            piId: string;
+        }[];
+        ipo: {
+            status: string;
+            vendor: {
+                name: string;
+                code: string;
+            };
+            currency: string;
+            exchangeRate: number;
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        rejectionReason: string | null;
+        currency: string;
+        totalAmount: number;
+        notes: string | null;
+        bankName: string | null;
+        validUntil: Date | null;
+        exchangeRate: number;
+        subtotalForeign: number;
+        ipoId: string;
+        vendorPiNumber: string | null;
+        piDate: Date;
+        bankAddress: string | null;
+        swiftCode: string | null;
+        piNumber: string;
+    }>;
+    accept(id: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            hsnCode: string | null;
+            sequence: number;
+            qty: number;
+            unitPriceForeign: number;
+            totalForeign: number;
+            totalInr: number;
+            ipoItemId: string | null;
+            piId: string;
+        }[];
+        ipo: {
+            status: string;
+            vendor: {
+                name: string;
+                code: string;
+            };
+            currency: string;
+            exchangeRate: number;
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        rejectionReason: string | null;
+        currency: string;
+        totalAmount: number;
+        notes: string | null;
+        bankName: string | null;
+        validUntil: Date | null;
+        exchangeRate: number;
+        subtotalForeign: number;
+        ipoId: string;
+        vendorPiNumber: string | null;
+        piDate: Date;
+        bankAddress: string | null;
+        swiftCode: string | null;
+        piNumber: string;
+    }>;
+    reject(id: string, dto: RejectPiDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            hsnCode: string | null;
+            sequence: number;
+            qty: number;
+            unitPriceForeign: number;
+            totalForeign: number;
+            totalInr: number;
+            ipoItemId: string | null;
+            piId: string;
+        }[];
+        ipo: {
+            status: string;
+            vendor: {
+                name: string;
+                code: string;
+            };
+            currency: string;
+            exchangeRate: number;
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        rejectionReason: string | null;
+        currency: string;
+        totalAmount: number;
+        notes: string | null;
+        bankName: string | null;
+        validUntil: Date | null;
+        exchangeRate: number;
+        subtotalForeign: number;
+        ipoId: string;
+        vendorPiNumber: string | null;
+        piDate: Date;
+        bankAddress: string | null;
+        swiftCode: string | null;
+        piNumber: string;
+    }>;
+    getStats(user: any): Promise<{
+        total: number;
+        received: number;
+        accepted: number;
+        rejected: number;
+        totalValueInr: number;
+        totalValueForeign: number;
+    }>;
+}
