@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateProductionQcDto, CompleteQcDto } from './dto/production-qc.dto';
+import { WorkOrderService } from '../work-orders/work-order.service';
 export declare class ProductionQcService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private workOrderService;
+    constructor(prisma: PrismaService, audit: AuditService, workOrderService: WorkOrderService);
     private generateNumber;
     private includes;
     create(dto: CreateProductionQcDto, user: any): Promise<{
@@ -31,16 +33,16 @@ export declare class ProductionQcService {
         status: string;
         remarks: string | null;
         workOrderId: string;
-        inspectionDate: Date;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
         inspectorName: string | null;
+        inspectionDate: Date;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        productionEntryId: string | null;
-        inspectionStage: string;
         defectDescription: string | null;
         correctiveAction: string | null;
-        qcNumber: string;
     }>;
     complete(id: string, dto: CompleteQcDto, user: any): Promise<{
         workOrder: {
@@ -66,16 +68,16 @@ export declare class ProductionQcService {
         status: string;
         remarks: string | null;
         workOrderId: string;
-        inspectionDate: Date;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
         inspectorName: string | null;
+        inspectionDate: Date;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        productionEntryId: string | null;
-        inspectionStage: string;
         defectDescription: string | null;
         correctiveAction: string | null;
-        qcNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -102,16 +104,16 @@ export declare class ProductionQcService {
             status: string;
             remarks: string | null;
             workOrderId: string;
-            inspectionDate: Date;
+            qcNumber: string;
+            productionEntryId: string | null;
+            inspectionStage: string;
             inspectorName: string | null;
+            inspectionDate: Date;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            productionEntryId: string | null;
-            inspectionStage: string;
             defectDescription: string | null;
             correctiveAction: string | null;
-            qcNumber: string;
         })[];
         total: number;
         page: number;
@@ -142,16 +144,16 @@ export declare class ProductionQcService {
         status: string;
         remarks: string | null;
         workOrderId: string;
-        inspectionDate: Date;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
         inspectorName: string | null;
+        inspectionDate: Date;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        productionEntryId: string | null;
-        inspectionStage: string;
         defectDescription: string | null;
         correctiveAction: string | null;
-        qcNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

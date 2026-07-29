@@ -210,6 +210,21 @@ export class WorkOrderService {
   async complete(id: string, dto: { completedQty: number; rejectedQty?: number }, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'IN_PROGRESS') throw new BadRequestException('Only IN_PROGRESS work orders can be completed');
+
+    // In-process quality is a real gate, not just a log: if the most
+    // recent IPQC inspection for this WO failed, completion is blocked
+    // until a corrective re-inspection (a new IPQC record with a PASS or
+    // CONDITIONAL result) exists. This holds even after a Plant Head
+    // approves resuming a stopped WO - approving the restart isn't the
+    // same as confirming the underlying quality issue was actually fixed.
+    const lastQc = await this.prisma.productionQc.findFirst({
+      where: { companyId: user.companyId, workOrderId: id, status: 'COMPLETED' },
+      orderBy: { inspectionDate: 'desc' },
+    });
+    if (lastQc && lastQc.result === 'FAIL') {
+      throw new BadRequestException(`Cannot complete: the most recent in-process QC inspection (${lastQc.qcNumber}) failed. Record a corrective re-inspection with a PASS or CONDITIONAL result first.`);
+    }
+
     const result = await this.update(id, {
       status: 'COMPLETED', completedQty: dto.completedQty,
       rejectedQty: dto.rejectedQty || 0, actualEndDate: new Date().toISOString(),

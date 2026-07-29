@@ -112,16 +112,16 @@ export declare class ProductionDashboardService {
             status: string;
             remarks: string | null;
             workOrderId: string;
-            inspectionDate: Date;
+            qcNumber: string;
+            productionEntryId: string | null;
+            inspectionStage: string;
             inspectorName: string | null;
+            inspectionDate: Date;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            productionEntryId: string | null;
-            inspectionStage: string;
             defectDescription: string | null;
             correctiveAction: string | null;
-            qcNumber: string;
         })[];
         pendingFgr: {
             productName: string;
@@ -149,16 +149,16 @@ export declare class ProductionDashboardService {
             status: string;
             remarks: string | null;
             workOrderId: string;
-            inspectionDate: Date;
+            qcNumber: string;
+            productionEntryId: string | null;
+            inspectionStage: string;
             inspectorName: string | null;
+            inspectionDate: Date;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            productionEntryId: string | null;
-            inspectionStage: string;
             defectDescription: string | null;
             correctiveAction: string | null;
-            qcNumber: string;
         })[];
         byResult: {
             PASS: number;

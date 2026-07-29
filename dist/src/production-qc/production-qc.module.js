@@ -12,12 +12,13 @@ const production_qc_controller_1 = require("./production-qc.controller");
 const production_qc_service_1 = require("./production-qc.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const work_order_module_1 = require("../work-orders/work-order.module");
 let ProductionQcModule = class ProductionQcModule {
 };
 exports.ProductionQcModule = ProductionQcModule;
 exports.ProductionQcModule = ProductionQcModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, work_order_module_1.WorkOrderModule],
         controllers: [production_qc_controller_1.ProductionQcController],
         providers: [production_qc_service_1.ProductionQcService],
         exports: [production_qc_service_1.ProductionQcService],

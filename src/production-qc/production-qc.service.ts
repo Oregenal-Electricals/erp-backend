@@ -2,10 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateProductionQcDto, CompleteQcDto } from './dto/production-qc.dto';
+import { WorkOrderService } from '../work-orders/work-order.service';
 
 @Injectable()
 export class ProductionQcService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private workOrderService: WorkOrderService) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.productionQc.count({ where: { companyId } });
@@ -64,6 +65,26 @@ export class ProductionQcService {
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'production_qc', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+
+    // A FAIL is a real quality gate, not just a record - immediately halt
+    // further production on this Work Order (same as a manual Stop, no
+    // approval needed to stop - it's a reactive floor decision). Resuming
+    // it already requires Plant Head approval via the existing WO Restart
+    // workflow gate, so a failed in-process inspection can't be silently
+    // worked past. Wrapped defensively so a WO that's already moved on to
+    // some other state (completed/cancelled through a separate action)
+    // doesn't block recording the QC result itself.
+    if (dto.result === 'FAIL') {
+      try {
+        const wo = await this.prisma.workOrder.findFirst({ where: { id: qc.workOrderId, companyId: user.companyId } });
+        if (wo && wo.status === 'IN_PROGRESS') {
+          await this.workOrderService.stop(qc.workOrderId, user);
+        }
+      } catch (e) {
+        // don't fail the QC completion itself if the WO couldn't be stopped
+      }
+    }
+
     return updated;
   }
 

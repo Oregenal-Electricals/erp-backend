@@ -13,10 +13,12 @@ exports.ProductionQcService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const work_order_service_1 = require("../work-orders/work-order.service");
 let ProductionQcService = class ProductionQcService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, workOrderService) {
         this.prisma = prisma;
         this.audit = audit;
+        this.workOrderService = workOrderService;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionQc.count({ where: { companyId } });
@@ -71,6 +73,16 @@ let ProductionQcService = class ProductionQcService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'production_qc', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        if (dto.result === 'FAIL') {
+            try {
+                const wo = await this.prisma.workOrder.findFirst({ where: { id: qc.workOrderId, companyId: user.companyId } });
+                if (wo && wo.status === 'IN_PROGRESS') {
+                    await this.workOrderService.stop(qc.workOrderId, user);
+                }
+            }
+            catch (e) {
+            }
+        }
         return updated;
     }
     async findAll(user, query) {
@@ -120,6 +132,6 @@ let ProductionQcService = class ProductionQcService {
 exports.ProductionQcService = ProductionQcService;
 exports.ProductionQcService = ProductionQcService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, work_order_service_1.WorkOrderService])
 ], ProductionQcService);
 //# sourceMappingURL=production-qc.service.js.map

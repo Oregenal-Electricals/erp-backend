@@ -34,8 +34,8 @@ export declare class IqcController {
             remarks: string | null;
             grnId: string;
             inspectedBy: string | null;
-            iqcNumber: string;
             inspectionDate: Date;
+            iqcNumber: string;
         })[];
         total: number;
         page: number;
@@ -83,8 +83,8 @@ export declare class IqcController {
         remarks: string | null;
         grnId: string;
         inspectedBy: string | null;
-        iqcNumber: string;
         inspectionDate: Date;
+        iqcNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: {
@@ -127,8 +127,8 @@ export declare class IqcController {
         remarks: string | null;
         grnId: string;
         inspectedBy: string | null;
-        iqcNumber: string;
         inspectionDate: Date;
+        iqcNumber: string;
     }>;
     create(dto: CreateIqcDto, req: any): Promise<{
         items: {
@@ -171,8 +171,8 @@ export declare class IqcController {
         remarks: string | null;
         grnId: string;
         inspectedBy: string | null;
-        iqcNumber: string;
         inspectionDate: Date;
+        iqcNumber: string;
     }>;
     updateItems(id: string, dto: UpdateIqcItemsDto, req: any): Promise<{
         items: {
@@ -215,8 +215,8 @@ export declare class IqcController {
         remarks: string | null;
         grnId: string;
         inspectedBy: string | null;
-        iqcNumber: string;
         inspectionDate: Date;
+        iqcNumber: string;
     }>;
     approve(id: string, req: any): Promise<{
         items: {
@@ -259,7 +259,7 @@ export declare class IqcController {
         remarks: string | null;
         grnId: string;
         inspectedBy: string | null;
-        iqcNumber: string;
         inspectionDate: Date;
+        iqcNumber: string;
     }>;
 }

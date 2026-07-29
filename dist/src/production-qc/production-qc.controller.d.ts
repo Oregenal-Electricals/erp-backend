@@ -38,16 +38,16 @@ export declare class ProductionQcController {
             status: string;
             remarks: string | null;
             workOrderId: string;
-            inspectionDate: Date;
+            qcNumber: string;
+            productionEntryId: string | null;
+            inspectionStage: string;
             inspectorName: string | null;
+            inspectionDate: Date;
             sampleSize: number;
             passQty: number;
             failQty: number;
-            productionEntryId: string | null;
-            inspectionStage: string;
             defectDescription: string | null;
             correctiveAction: string | null;
-            qcNumber: string;
         })[];
         total: number;
         page: number;
@@ -78,16 +78,16 @@ export declare class ProductionQcController {
         status: string;
         remarks: string | null;
         workOrderId: string;
-        inspectionDate: Date;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
         inspectorName: string | null;
+        inspectionDate: Date;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        productionEntryId: string | null;
-        inspectionStage: string;
         defectDescription: string | null;
         correctiveAction: string | null;
-        qcNumber: string;
     }>;
     create(dto: CreateProductionQcDto, req: any): Promise<{
         passRate: number;
@@ -113,16 +113,16 @@ export declare class ProductionQcController {
         status: string;
         remarks: string | null;
         workOrderId: string;
-        inspectionDate: Date;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
         inspectorName: string | null;
+        inspectionDate: Date;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        productionEntryId: string | null;
-        inspectionStage: string;
         defectDescription: string | null;
         correctiveAction: string | null;
-        qcNumber: string;
     }>;
     complete(id: string, dto: CompleteQcDto, req: any): Promise<{
         workOrder: {
@@ -148,15 +148,15 @@ export declare class ProductionQcController {
         status: string;
         remarks: string | null;
         workOrderId: string;
-        inspectionDate: Date;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
         inspectorName: string | null;
+        inspectionDate: Date;
         sampleSize: number;
         passQty: number;
         failQty: number;
-        productionEntryId: string | null;
-        inspectionStage: string;
         defectDescription: string | null;
         correctiveAction: string | null;
-        qcNumber: string;
     }>;
 }

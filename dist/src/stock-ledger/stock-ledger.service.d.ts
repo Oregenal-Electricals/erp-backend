@@ -69,8 +69,8 @@ export declare class StockLedgerService {
         remarks: string | null;
         grnId: string;
         inspectedBy: string | null;
-        iqcNumber: string;
         inspectionDate: Date;
+        iqcNumber: string;
     })[]>;
     receiveFromIqc(iqcId: string, user: any): Promise<{
         message: string;

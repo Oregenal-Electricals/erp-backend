@@ -27,9 +27,9 @@ export declare class CapaService {
         dueDate: Date;
         remarks: string | null;
         verifiedBy: string | null;
+        correctiveAction: string;
         assignedTo: string | null;
         completedDate: Date | null;
-        correctiveAction: string;
         capaNumber: string;
         ncrId: string;
         rootCause: string | null;
@@ -57,9 +57,9 @@ export declare class CapaService {
         dueDate: Date;
         remarks: string | null;
         verifiedBy: string | null;
+        correctiveAction: string;
         assignedTo: string | null;
         completedDate: Date | null;
-        correctiveAction: string;
         capaNumber: string;
         ncrId: string;
         rootCause: string | null;
@@ -87,9 +87,9 @@ export declare class CapaService {
         dueDate: Date;
         remarks: string | null;
         verifiedBy: string | null;
+        correctiveAction: string;
         assignedTo: string | null;
         completedDate: Date | null;
-        correctiveAction: string;
         capaNumber: string;
         ncrId: string;
         rootCause: string | null;
@@ -118,9 +118,9 @@ export declare class CapaService {
             dueDate: Date;
             remarks: string | null;
             verifiedBy: string | null;
+            correctiveAction: string;
             assignedTo: string | null;
             completedDate: Date | null;
-            correctiveAction: string;
             capaNumber: string;
             ncrId: string;
             rootCause: string | null;
@@ -152,9 +152,9 @@ export declare class CapaService {
         dueDate: Date;
         remarks: string | null;
         verifiedBy: string | null;
+        correctiveAction: string;
         assignedTo: string | null;
         completedDate: Date | null;
-        correctiveAction: string;
         capaNumber: string;
         ncrId: string;
         rootCause: string | null;

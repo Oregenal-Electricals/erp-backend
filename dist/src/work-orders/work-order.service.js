@@ -195,6 +195,13 @@ let WorkOrderService = class WorkOrderService {
         const wo = await this.findOne(id, user);
         if (wo.status !== 'IN_PROGRESS')
             throw new common_1.BadRequestException('Only IN_PROGRESS work orders can be completed');
+        const lastQc = await this.prisma.productionQc.findFirst({
+            where: { companyId: user.companyId, workOrderId: id, status: 'COMPLETED' },
+            orderBy: { inspectionDate: 'desc' },
+        });
+        if (lastQc && lastQc.result === 'FAIL') {
+            throw new common_1.BadRequestException(`Cannot complete: the most recent in-process QC inspection (${lastQc.qcNumber}) failed. Record a corrective re-inspection with a PASS or CONDITIONAL result first.`);
+        }
         const result = await this.update(id, {
             status: 'COMPLETED', completedQty: dto.completedQty,
             rejectedQty: dto.rejectedQty || 0, actualEndDate: new Date().toISOString(),
