@@ -1,6 +1,6 @@
 # Oregenal Electricals ERP — Project Status
 
-**Last updated:** July 27, 2026
+**Last updated:** July 29, 2026
 **Purpose:** If you're Claude starting a fresh chat with no memory of prior sessions, read this file first. It tells you exactly what's built, what's pending, and how to pick up work correctly.
 
 ---
@@ -14,9 +14,18 @@
 - **Local repos:** `~/Desktop/websites/erp/erp-backend` and `~/Desktop/websites/erp/erp-frontend`
 - Every push to `main` on either repo auto-deploys to staging (there is no separate production environment yet).
 - Login: `superadmin@oregenalelectrical.com` / `Oregenal@123`. Company ID: `83eda866-ba63-472c-902f-561f05b6b1c1`
-- **Workflow with the user:** Claude has a sandboxed copy of both repos and makes all edits there first, verifies with a build, then hands the user a `git apply` patch (or occasionally a base64-encoded full file, or raw `cat > file` for new/status files) to run on their real machine. The user does not code themselves — Claude does 100% of the implementation and the user copy-pastes and reports build output back.
+- **Workflow with the user:** Claude has a sandboxed copy of both repos and makes all edits there first, verifies with a build, then hands the user a patch to run on their real machine. The user does not code themselves — Claude does 100% of the implementation and the user copy-pastes and reports build output back.
 - **Critical Prisma rule:** never use `prisma migrate dev` — always hand-write SQL DDL and apply directly to both dev and staging DBs via psql, then update `schema.prisma` to match and run `npx prisma generate`.
-- Always run `rm -rf dist && npx nest build` before committing on the backend (dist/ is committed to the repo for Render).
+- Always run `rm -rf dist && npx nest build` before committing on the backend (dist/ is committed to the repo for Render deployment - see the "dist/ tracking incident" lesson below, this has broken silently before).
+- **Companion doc:** `ERP_Manual_Testing_Guide.md` (added this session) is a sequential, top-to-bottom manual testing walkthrough organized by business flow (login → masters → sales → planning → production → store/QC → dispatch → etc.), separate from this file's per-session changelog format. Update it alongside this file when a flow's behavior changes.
+
+### Patch delivery lessons (read this before handing the user any patch)
+
+This session surfaced two real, repeatable terminal-paste failure modes - both now solved, but worth knowing so they aren't rediscovered the hard way:
+
+1. **zsh history expansion on `!`**: any `!` character (common in TypeScript - `if (!bom)`, non-null assertions like `.get(x)!`) triggers zsh's `!`-as-history-reference behavior when pasted into an interactive terminal, silently corrupting or failing the paste (`zsh: event not found`). Fix: have the user run `setopt no_bang_hist` once per terminal session before pasting anything containing `!`. This persists for that terminal tab/window only - remind them to re-run it if they open a new one.
+2. **Long single-line content gets silently corrupted at the terminal's wrap boundary** - specifically, a space character can be dropped exactly where a long line wraps, producing joined words (`onebutton`, `withreal`, etc.) in what actually lands in the file. This happens on prose/markdown files with long paragraph lines far more than on code (which naturally wraps at reasonable widths). **Do not trust a visual `cat`/`head`/`tail` of a long-line file pasted back into chat as proof of corruption or correctness** - display-level wrapping can look corrupted even when the file is fine, and vice versa. The reliable check is always `grep -c` for a specific suspicious substring (reads real bytes) or a checksum, never eyeballing wrapped terminal output. For files with long prose lines, deliver via base64 embedded as a Python string literal (`python3 -c "data='...'; open(f,'wb').write(base64.b64decode(data))"`) rather than a raw heredoc - short fixed-width base64 lines never hit a wrap boundary. Code patches with normal line lengths are fine as plain-text heredocs (`cat > file << 'EOF'`) once `no_bang_hist` is set.
+3. **Always confirm `pwd` before delivering a patch.** The user works across three related directories (`~/Desktop/websites/erp`, `.../erp-backend`, `.../erp-frontend`) in the same terminal session and has landed in the wrong one more than once (patch silently fails with "No such file or directory", or worse, a file gets created in the wrong repo entirely). Have every patch/heredoc command start with an explicit `cd` to the intended repo, and echo `pwd` as part of the verification step.
 
 ---
 
@@ -26,63 +35,104 @@
 Fixed dead/orphaned Stock Ledger page, added low-stock flagging, idempotent IQC receive, Putaway pending queue auto-populated from real GRN data, Rack & Bin inline forms.
 
 ### 2. Production routing engine — verified end-to-end
-SMT → MI → Assembly → Packaging chain via `ProductRouting` / `RoutingStage` / `WorkOrder.routingGroupId`. Each stage auto-releases only once the prior stage gets a **confirmed FG Receipt**. First real click-test of this system happened this session — it works.
+SMT → MI → Assembly → Packaging chain via `ProductRouting` / `RoutingStage` / `WorkOrder.routingGroupId`. Each stage auto-releases only once the prior stage gets a confirmed FG Receipt (note: as of item 14 below, "confirmed" alone no longer means the stock is actually usable - see Phase C).
 
 ### 3. Critical material-reservation bug (found and fixed)
-Reservations were created on Work Order release but **never released** on completion or cancellation — material stayed locked forever. Fixed in three places: `WorkOrderService.complete()`, `.cancel()`, and `ProductionEntryService.confirm()` (which bypasses the service's `complete()` with its own raw update — a separate code path that needed its own fix). Backfilled ~52,000 units of incorrectly-locked stock on both DBs.
+Reservations were created on Work Order release but never released on completion or cancellation. Fixed in `WorkOrderService.complete()`, `.cancel()`, and `ProductionEntryService.confirm()`. Backfilled ~52,000 units of incorrectly-locked stock on both DBs.
 
 ### 4. Double-reservation bug (found and fixed)
-`MrpService.runAllocation()` used to create a "parent" Work Order AND the routing chain separately reserved the same material again. Fixed by merging Run Allocation directly into routing-chain creation — no more redundant parent WO.
+`MrpService.runAllocation()` used to create a redundant "parent" Work Order alongside the routing chain, double-reserving material. Fixed by merging Run Allocation directly into routing-chain creation.
 
 ### 5. Work Order naming
-Routing stage WOs are named `{root}-{STAGENAME}` (e.g. `WO-2026-0009-SMT`, `-MI`, `-ASSEMBLY`, `-PACKAGING`). This was implemented in `RoutingService.startProduction()`. Historical WOs from before the fix were manually backfilled via SQL (`WO-2026-0005` and `WO-2026-0006` chains).
+Routing stage WOs are named `{root}-{STAGENAME}` (e.g. `WO-2026-0009-SMT`). Implemented in `RoutingService.startProduction()`.
 
 ### 6. Production Floor page (`/production/floor`)
-Single-screen execution: pick your active Work Order, enter Good/Scrap Qty, one button does Start → Record → Confirm → Complete → FG Receipt (previously 5 separate pages).
+Single-screen execution: Start → Record → Confirm → Complete → FG Receipt collapsed to one button. **Note (Phase C):** completing here no longer makes stock instantly dispatchable/consumable - see item 14. The page itself doesn't yet display any messaging about this; still an open follow-up (see "Not yet started").
 
 ### 7. Per-user stage assignment (`assignedStage` on User)
-An operator assigned to e.g. `SMT` only sees SMT's Work Orders (backend-filtered in `WorkOrderService.findAll()`/`getStats()`). Supervisors/Plant Head/Admin tier always see everything. Set via **Users → Edit → Assigned Production Stage**.
+Backend-filtered in `WorkOrderService.findAll()`/`getStats()`. Plant-Head-tier roles always see everything.
 
 ### 8. Grouped Work Orders view
-Routing chains collapse into one clickable header row with overall chain progress, instead of one flat row per stage. `groupSummary()` in `work-orders/page.jsx`.
+Routing chains collapse into one clickable header row with overall chain progress. `groupSummary()` in `work-orders/page.jsx`.
 
-### 9. Manpower Allocation module (new: `ManpowerAllocation`, `ManpowerQuery` models)
-Hierarchical: `HR_TO_PLANT` → `PLANT_TO_STAGE` → `STAGE_TO_LINE`. Each level must **accept** what's handed to them. **Distribute** splits to multiple recipients at once. A line can go to a person (Line Incharge), directly to a **Work Order** (`workOrderId` field, optional `toUserId`), or both. Mismatches between distributed total and parent count can be **queried** and resolved. Page: `/production/manpower`. Permissions: `MANPOWER_VIEW/ALLOCATE/ACCEPT/DISTRIBUTE/QUERY/ADJUST`.
+### 9. Manpower Allocation module (`ManpowerAllocation`, `ManpowerQuery` models)
+Hierarchical `HR_TO_PLANT → PLANT_TO_STAGE → STAGE_TO_LINE`, accept/distribute/query. Page: `/production/manpower`.
 
-### 10. Stage-to-Stage FG Transfer Notes (new: `StageTransferNote` model)
-Explicit Give/Receive handoff between stages' Work Orders — a visible acknowledgment record sitting *alongside* (not replacing) the automatic BOM-based material consumption. Page: `/production/stage-transfers`. Permissions: `STAGE_TRANSFER_VIEW/GIVE/RECEIVE`.
+### 10. Stage-to-Stage FG Transfer Notes (`StageTransferNote` model)
+Explicit Give/Receive handoff, alongside (not replacing) automatic BOM-based consumption. Page: `/production/stage-transfers`.
 
-### 11. Plant Head Approval Gate — **reuses the existing generic multi-level workflow engine** (`WorkflowDefinition` / `WorkflowStep` / `ApprovalRequest` / `ApprovalAction` — this already existed for PO/SO/Voucher approvals; do NOT build a parallel approval system, always check for and reuse this one first)
-- **Work Order Start**: gated. Plant-Head-tier roles (`SUPER_ADMIN`, `ADMIN`, `CORPORATE_ADMIN`, `PLANT_HEAD`, `UNIT_HEAD`, `PLANNING_MANAGER` — this exact list is called `STAGE_BYPASS_ROLES` in `work-order.service.ts` and `SUPERVISOR_ROLES` in `manpower.service.ts`, same roles) self-approve instantly; anyone else's Start submits a `WO_START` approval request and does NOT take effect until approved.
-- **Work Order Stop**: instant, no approval needed (reactive/floor decision).
-- **Work Order Restart**: gated, same pattern, `documentType: 'WO_RESTART'`.
-- **Manpower Increase/Decrease** on an active (`IN_PROGRESS`) Work Order's allocation: gated, `documentType: 'MANPOWER_INCREASE'`/`'MANPOWER_DECREASE'`.
-- **Manpower Transfer** between Work Orders: gated, `documentType: 'MANPOWER_TRANSFER'`. Destination WO id is packed into `ApprovalRequest.remarks` as JSON (`{reason, toWorkOrderId}`) since the generic engine's schema has no bespoke payload field — this is intentional, not a hack to "fix" later.
-- All of these share **one pair of endpoints per domain**: `POST /work-orders/approvals/:requestId/approve|reject` and `POST /manpower/approvals/:requestId/approve|reject` — each dispatches internally based on `documentType`, so adding a new gated action later is just one more `if` branch, not a new route.
-- Every approval **auto-notifies all Admin/Super Admin users** via the existing `NotificationsService`.
-- A frontend **Pending Approvals panel** exists on the Work Orders page (visible to Plant-Head-tier roles); Plant Head can also just use the pre-existing generic `/workflows` page (it works with any `documentType` automatically — no frontend change was needed there).
-- `WorkflowDefinition` rows for `WO_START`, `WO_RESTART`, `MANPOWER_INCREASE`, `MANPOWER_DECREASE`, `MANPOWER_TRANSFER` were seeded via SQL for every company (1 approval level, "Plant Head Approval" step, `triggerCondition: 'ALWAYS'`). If a new company is added later, seed these the same way or the generic engine will still create requests with default 1-level behavior (it doesn't hard-require a definition to exist) but the UI/reporting is cleaner with one.
-- Permission: `WORK_ORDER_APPROVE` gates all approve/reject endpoints (both Work Order and Manpower ones — one permission, deliberately, since it's the same real-world authority).
+### 11. Plant Head Approval Gate
+Reuses the existing generic multi-level workflow engine (`WorkflowDefinition`/`WorkflowStep`/`ApprovalRequest`/`ApprovalAction`) - do NOT build a parallel approval system, always check for and reuse this one first. Gates WO Start (non-Plant-Head-tier roles), WO Restart, Manpower Increase/Decrease/Transfer. WO Stop is always instant. Endpoints: `POST /work-orders/approvals/:requestId/approve|reject`, `POST /manpower/approvals/:requestId/approve|reject`.
 
-### 12. Work Order Types 1-4 (partial routing chains) — **in progress, Types 1-3 done, Type 4 not yet verified**
-Per the user's detailed process doc (see "Source documents" below), a customer's order determines how much of the routing chain needs to run:
-- **Type 1** (full product): order the final packaged item code → full chain, unchanged existing behavior.
-- **Type 2** (SMT-only dispatch): order the SMT stage's own item code directly → chain runs stage 1 only.
-- **Type 3** (MI-only dispatch): order the MI stage's item code → chain runs SMT → MI, stops there.
-- **Type 4** (raw material only, no manufacturing): order a plain raw material with no matching routing at all → falls through to existing bare-WO/no-routing behavior. **This existed already and was not specifically re-verified this session** — worth a real test.
+### 12. Work Order Types 1-4 (partial routing chains) — **verified this session, Types 1-3 confirmed working end-to-end; Type 4 unchanged/pre-existing, not specifically re-tested**
+A customer/sales order can target the full routing chain (Type 1) or an intermediate stage's own output directly (Type 2: e.g. just SMT boards; Type 3: e.g. SMT+MI, stopping before Assembly/Packaging). Type 4 (plain raw material, no routing match) falls through to existing bare-WO behavior.
 
-Implementation: `MrpService.runAllocation()` now looks up a `RoutingStage` (not just `ProductRouting.finalProductId`) whose own BOM produces the ordered item, and passes `stopAtSequence` to `RoutingService.startProduction()`, which filters `routing.stages` down to `sequence <= stopAtSequence` before creating Work Orders. **This was just pushed and has NOT yet been tested with a real order** — next step when resuming is to create a Sales Order for `TRPLEDECOPN036CW-MI` and confirm Run Allocation creates exactly 2 stage Work Orders (SMT + MI), not 4.
+Implementation: `MrpService.runAllocation()` looks up whichever `RoutingStage`'s own BOM produces the ordered item, passes `stopAtSequence` to `RoutingService.startProduction()`, which filters `routing.stages` down to `sequence <= stopAtSequence`.
 
-The "Store must receive, verify, and inventory before dispatch" business rule (from the process doc) is believed to already be satisfied by the existing FG Receipt mechanism for whichever stage ends up being the last one run — **this has not been explicitly verified for Type 2/3 orders**, only reasoned about. Worth confirming.
+**Verified live this session**: creating a Sales Order for an MI-stage item and running allocation created exactly 2 stage Work Orders (`{root}-SMT`, `{root}-MI`), no Assembly/Packaging WO - confirmed via both direct API calls and the actual Production Planning board UI.
+
+### 13. Recursive multi-level BOM/routing shortage engine — **new this session, replaces four separate single-level lookups**
+Before this session, every material-shortage/requirement calculation (Production Planning board, Run Allocation, Customer PO shortage check) did its own independent single-level BOM lookup - meaning an intermediate item (SMT board, MI board) with zero finished stock but abundant raw materials to actually *produce* it would incorrectly show as an opaque "shortage" or even a false "No approved BOM" error, instead of correctly recursing into that item's own BOM/routing chain.
+
+**Fixed**: one shared engine, `MrpService.explodeMultiCpoMaterialNeeds()`, now backs all three calculation points. Every item at every level of its BOM/routing tree is netted against its own stock first; only a genuine shortfall recurses further down into that item's own components. An intermediate item that already has enough finished stock never has its own raw materials checked at all. A true raw material (or anything with no BOM at all, at any level) also counts purchase-order-in-transit quantity as available supply. For the multi-CPO shortage check specifically, stock allocation is FIFO across all open Customer POs *at every level* of the tree, not just the top one - whichever PO was created first gets first claim on scarce material anywhere in the chain, not just on the final product.
+
+`MrpService.calculateMrp()` (the per-Work-Order, execution-time material check used by Production Issues) deliberately stays single-level - it answers "can I physically issue material to this exact WO right now," a floor-execution question where "the input stage could theoretically be produced" isn't actionable. Don't mistake this for an inconsistency; it's an intentional scope difference between planning-time and execution-time checks.
+
+`getFinishedGoodDemand`/`getRawMaterialDemand` (the old single-level helpers in `customer-po.service.ts`) were removed entirely, fully superseded.
+
+### 14. Phase C — Store/OQC gate on finished goods — **new this session, done, backend + frontend**
+Before this session, `FgReceiptService.confirm()` credited `StockBalance` directly the instant a completed Work Order's FG Receipt was confirmed - meaning the Production Floor's single-button flow made stock dispatchable, reservable by the next routing stage, and visible to shortage checks within seconds, with zero Store/QC checkpoint. A whole `OqcInspection` module existed (create/complete/release) but had no connection to stock at all - pure paperwork.
+
+**Fixed, mirroring the pre-existing IQC pattern exactly** (GRN → `IqcService.approve()` → `StockLedgerService.receiveFromIqc()` credits stock - this raw-material-side gate already worked correctly and needed no changes):
+- `FgReceipt.confirm()` now only marks the receipt `RECEIVED` (physically in Store, pending QC) - does not touch `StockBalance`, does not create a stock batch.
+- New `StockLedgerService.receiveFromOqc(oqcId, user)` - the FG mirror of `receiveFromIqc()` - credits stock (and creates the batch) only once an OQC inspection is `COMPLETED` with `result: PASS` and explicitly `RELEASED`.
+- `OqcInspection.fgReceiptId` is now **required** (was optional) - every OQC must trace to a real receipt, both DTO-level and validated in `create()`. One OQC per FG Receipt (duplicate creation rejected).
+- A `FAIL`/`CONDITIONAL` result can never release - that lot's stock simply never becomes available until someone resolves it. (No formal rework/scrap/quarantine flow exists yet for this - see "Not yet started".)
+- Applies identically to all FG types: final panel, SMT board, MI board.
+- New `GET /oqc/pending-fg-receipts` - the actual Store/QC work queue (FG Receipts `RECEIVED` with no OQC record yet). Without this endpoint the whole gate would be practically invisible to the people who need to act on it.
+- Frontend `/quality/oqc` updated: requires FG Receipt selection (was optional), dropdown sourced from the new pending-queue endpoint instead of a generic RECEIVED-status fetch, added a "Pending OQC" stat card.
+
+**Verified live end-to-end on staging**: created a real Work Order, completed it, confirmed its FG Receipt (stock stayed at 0, correctly gated), then created/completed/released an OQC inspection (stock immediately became available, matching the received quantity).
+
+### 15. Phase D — Hourly Production Monitoring Dashboard — **new this session, done, backend + frontend**
+The pre-existing `production-dashboard` module (overview/active-wos/today/alerts/quality endpoints) had no hourly granularity, no manpower data, no stage-wise output breakdown, no utilization/efficiency, no manpower costing.
+
+New `GET /production-dashboard/hourly-monitoring` (optional `?date=YYYY-MM-DD`, defaults to today):
+- Active/started-today/completed-today Work Orders, each with manpower headcount and a simple actual-vs-planned efficiency % where start/planned dates allow it.
+- Output bucketed both by hour (from `ProductionEntry.entryDate`) and by routing stage, from the same confirmed-entries data.
+- Manpower: total allocated today, idle headcount (allocated but not tied to any currently-active WO), utilization %.
+- Stage-to-stage transfers logged today (`StageTransferNote`).
+- **Manpower-cost estimate** - converts each allocated employee's monthly gross salary (`Employee.basicSalary + hraAmount + conveyanceAmount + otherAllowances`, matched via `Employee.userId → ManpowerAllocation.toUserId`) into an hourly rate using a documented `HOURS_PER_MONTH = 208` (26 days × 8 hours) assumption - this constant lives at the top of `getHourlyMonitoring()` in `production-dashboard.service.ts` if the real convention differs. Headcount with no matched Employee record (e.g. a contractor logged only as a bare User) is reported separately, never silently costed at zero.
+
+Frontend: new "Hourly Monitoring" panel added to the *real* `/production/dashboard` page (see the sidebar-bug note below) - stat row, hourly bar chart, stage output + transfers side by side, cost estimate with the assumption note shown inline so it's never mistaken for an exact figure.
+
+**Verified live**: endpoint returns correct structured data reflecting real active Work Orders; full-zero values on days with no logged floor activity are correct, not a bug.
+
+### 16. Sidebar bug fix — Production Dashboard nav link pointed to a stale duplicate page
+Discovered while visually verifying Phase D: the sidebar's "Production Dashboard" link pointed to `/production-dashboard` (a stale, broken duplicate page that calls a nonexistent bare API endpoint and just shows an empty-state placeholder), not `/production/dashboard` (the real, actively-maintained page every other Production Floor/Manpower/etc. link correctly points to). Fixed the one-line link in `Sidebar.jsx`. **The stale duplicate page file itself was deliberately left in place** - deleting it is sidebar-cleanup territory needing its own explicit confirmation, not something to fold into a quick link fix. Flagged again under "Not yet started."
+
+### 17. Stock Adjustment DECREASE sign bug (found and fixed) — unrelated to the rest of this session, found while cleaning up test data
+`adjustmentQty` for `DECREASE` type was computed as `systemQty - physicalQty`, which is *positive* when the physical count is genuinely lower than system (the normal reason to raise a decrease) - but `approve()` treats any positive `adjustmentQty` as crediting stock **in**, regardless of stated type. Every real `DECREASE` adjustment in the system's history where physical < system silently added stock instead of removing it.
+
+Fixed: all three types (`INCREASE`/`DECREASE`/`RECOUNT`) now use the same `adjustmentQty = physicalQty - systemQty` convention. Added a guard rejecting `INCREASE`/`DECREASE` submissions whose numbers actually represent the opposite direction (use `RECOUNT` for a genuine either-direction correction).
+
+**Not yet done: a historical data audit.** Every `DECREASE` adjustment ever approved before this fix should be reviewed - some may have silently inflated stock balances and need manual correction. This hasn't been attempted yet.
+
+### 18. `dist/` tracking incident (found and fixed) — process lesson, not a product feature
+During the Phase D commit, the local `nest build` step apparently hadn't finished writing `dist/` at the moment `git add -A && git commit` ran, resulting in a commit that deleted all 1,414 previously-tracked `dist/` files and added back none (`+189/-113233` lines). Render was never actually affected - it builds from source on its own infrastructure regardless of what's committed - but this contradicted the documented "dist/ is committed" convention and surfaced as 1,400+ "untracked files" noise in the user's local git status/VS Code. Fixed by re-adding the current (complete, verified) on-disk `dist/` and committing fresh. **Lesson for future sessions:** after any `rm -rf dist && npx nest build`, verify `ls dist/src | wc -l` roughly matches `ls src | wc -l` (off by ~1 for naming convention) *before* trusting `git add -A` picked everything up correctly - don't just trust that the build command succeeded silently.
 
 ---
 
 ## Not yet started
 
-- **Phase C** — confirm Dispatch can only ever pull from Store-verified inventory (all item types: final FG, SMT FG, MI FG, raw material), no department bypassing Store.
-- **Phase D** — Hourly Production Monitoring Dashboard (active/completed/started WOs, manpower per WO, product/stage-wise output, utilization, idle manpower, transfers, efficiency, manpower-based costing).
-- **Sidebar/page cleanup review** — the user asked for a full review of unused sidebar tabs/pages, to be removed only after explicit confirmation per item, and never removing something that's still needed even if a newer feature was just built to replace it (verify the old one is truly dead first). **This has not been started at all.**
-- **Frontend UI for Stop/Restart's own dedicated request flow** exists (buttons on Work Orders page), but Manpower Adjust/Transfer's UI (`/production/manpower`) only has the request-side forms — there's no dedicated "my pending manpower approvals" panel there yet (Plant Head currently must use the generic `/workflows` page for these, same as Work Order approvals before the panel was added there).
+- **Sidebar/page cleanup review** — full audit of unused tabs/pages, still not started as a systematic pass (one specific broken link was fixed opportunistically - item 16 above - but that's not the full review). Nothing should be removed without explicit per-item confirmation, and never remove something still needed even if a newer feature was just built to replace it - verify the old one is truly dead first.
+- **Production Floor page messaging** — doesn't yet tell floor staff that completing a WO/confirming an FG Receipt no longer makes stock instantly usable (Phase C). Floor staff may be confused why stock doesn't show up immediately downstream. Needs a UX pass, not a backend change.
+- **OQC rework/scrap/quarantine flow** — a `FAIL`/`CONDITIONAL` OQC result currently just stays permanently un-released with no formal next step. Safe (nothing bad happens) but incomplete as a workflow.
+- **Stock Adjustment historical audit** — see item 17 above. Every pre-fix `DECREASE` adjustment needs manual review for silently-inflated balances.
+- **Frontend UI for Stop/Restart's own dedicated request flow** exists (buttons on Work Orders page), but Manpower Adjust/Transfer's UI (`/production/manpower`) only has the request-side forms - no dedicated "my pending manpower approvals" panel yet (Plant Head must use the generic `/workflows` page for these).
+- **MRP Shortage Report** — no "Create PR from Shortage" quick-action button; manual re-entry required to raise a Purchase Requisition from a shortage line.
+- **Gate Inward for Import shipments** — Gate Inward currently only links to domestic Purchase Orders; Import shipments physically pass through the same gate but bypass this step entirely today.
+- **Duplicate `RolePermission` rows** for `PURCHASE_MANAGER` (found 2026-07-15) — harmless but still unaudited across other roles.
 
 ---
 
@@ -92,14 +142,15 @@ The "Store must receive, verify, and inventory before dispatch" business rule (f
 - All APIs: JWT + RBAC (`PermissionsGuard`) + validation + audit logging.
 - No negative stock at DB or service layer; prices frozen on approved documents.
 - Multi-company isolation via `companyId` on all tables.
-- New permissions must be added to `src/common/permissions/permissions.enum.ts` AND, if they should be visible in the admin UI, to the `PERMISSION_SECTIONS` array in `erp-frontend/src/app/(app)/settings/roles-permissions/page.jsx` (tabs + actions), plus `ACTION_LABELS` for readable action names. Adding to the enum alone makes the permission functional but invisible to admins trying to grant it.
-- **Before building any new cross-cutting system (approval, notification, transfer, etc.), search the existing codebase first** — this project already has more general-purpose infrastructure than expected (a full multi-level approval engine, a notification system) that was nearly duplicated twice this session before being discovered and reused instead. `grep -rn "ApprovalRequest\|WorkflowDefinition\|Notification"` style searches across `src/` are cheap insurance.
-- Sandbox note: `npx prisma generate` and `npx nest build` sometimes fail in Claude's sandbox due to network restrictions on Prisma's binary CDN, even when the actual code is correct — when this happens, ask the user to run `npx prisma generate` on their own machine as the real validation step, since their machine has full network access.
+- New permissions must be added to `src/common/permissions/permissions.enum.ts` AND, if they should be visible in the admin UI, to the `PERMISSION_SECTIONS` array in `erp-frontend/src/app/(app)/settings/roles-permissions/page.jsx`.
+- **Before building any new cross-cutting system (approval, notification, transfer, shortage-calculation, stock-gating, etc.), search the existing codebase first.** This project consistently has more general-purpose infrastructure than expected - the multi-level approval engine and the IQC stock-gating pattern (reused for OQC this session, item 14) are the two clearest examples. `grep -rn` across `src/` before building anything that smells like it might already exist is cheap insurance.
+- **Store/QC is a real gate on stock, symmetrically, for both directions**: raw materials via IQC (`receiveFromIqc`), finished goods via OQC (`receiveFromOqc`, new this session). Nothing becomes real `StockBalance` - dispatchable, reservable by the next stage, visible to shortage checks - without an explicit Store/QC pass-and-release step. If a future module needs to introduce ANY new way material enters stock, check whether it should go through one of these two gates rather than posting to `StockLedger` directly.
+- Sandbox note: `npx prisma generate` and `npx nest build` fail in Claude's sandbox due to network restrictions on Prisma's binary CDN, even when the code is correct - this is expected and not a signal of a real problem. Ask the user to run these on their own machine as the real validation step. See the "Patch delivery lessons" section above for the terminal-paste gotchas discovered alongside this.
 
 ---
 
-## Source documents referenced this session
+## Source documents referenced in past sessions
 
-The user provided two planning documents mid-session that are worth re-reading if continuing this work:
-1. A 6-step manpower/production description (HR→Plant→Stage→Line manpower, WO merging under one root number, stage-to-stage transfer notes) — fully implemented (items 9, 10 above, plus the WO naming/grouping in items 5/8).
-2. A longer "Production Prediction, Manpower Planning & Work Order Approval Process" document covering: morning manpower allocation, Plant Head approval workflow (with the exact list of gated actions), Work Order Types 1-4, dynamic manpower management, hourly production monitoring, and dispatch control exclusively through Store. This is the source for items 11 and 12 above, and for the "Not yet started" Phase C/D items. If the user references "the doc" or "as I described," this is almost certainly what they mean — ask them to re-paste it if it's not already in view, since it's long and detailed enough that summarizing from memory risks missing a rule.
+1. A 6-step manpower/production description (HR→Plant→Stage→Line manpower, WO merging under one root number, stage-to-stage transfer notes) — fully implemented (items 9, 10, plus WO naming/grouping in items 5/8).
+2. A longer "Production Prediction, Manpower Planning & Work Order Approval Process" document covering: morning manpower allocation, Plant Head approval workflow, Work Order Types 1-4, dynamic manpower management, hourly production monitoring, and dispatch control exclusively through Store. Source for items 11, 12, 14, 15 above. If the user references "the doc" or "as I described," this is almost certainly what they mean.
+3. `ERP_Manual_Testing_Guide.md` (this repo root, added this session) — not a planning doc, but the companion sequential testing walkthrough. Read it alongside this file when picking up work; it documents exact verified commands/expected-results for everything marked [Verified] here.
