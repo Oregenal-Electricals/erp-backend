@@ -29,12 +29,22 @@ export class StockAdjustmentService {
     if (!dto.items || dto.items.length === 0) throw new BadRequestException('Adjustment must have at least one item');
 
     const adjustmentNumber = await this.generateNumber(user.companyId);
-    // Calculate adjustmentQty for each item
+    // adjustmentQty is always physicalQty - systemQty, for every type: positive
+    // means stock goes up, negative means it goes down - matching exactly what
+    // approve() below does with the sign. adjustmentType is a label for WHY the
+    // adjustment happened (found more / found less / recounted), not a
+    // separate instruction for which direction to apply - it must never flip
+    // the sign of the math, or a genuine decrease (physical count lower than
+    // system, the normal reason to raise a DECREASE adjustment) silently adds
+    // stock instead of removing it.
     const items = dto.items.map(item => {
-      let adjustmentQty = 0;
-      if (dto.adjustmentType === 'INCREASE') adjustmentQty = item.physicalQty - item.systemQty;
-      else if (dto.adjustmentType === 'DECREASE') adjustmentQty = item.systemQty - item.physicalQty;
-      else adjustmentQty = item.physicalQty - item.systemQty; // RECOUNT
+      const adjustmentQty = item.physicalQty - item.systemQty;
+      if (dto.adjustmentType === 'INCREASE' && adjustmentQty < 0) {
+        throw new BadRequestException(`${item.itemCode}: physicalQty is less than systemQty - this is a decrease, not an increase. Use adjustmentType DECREASE or RECOUNT.`);
+      }
+      if (dto.adjustmentType === 'DECREASE' && adjustmentQty > 0) {
+        throw new BadRequestException(`${item.itemCode}: physicalQty is more than systemQty - this is an increase, not a decrease. Use adjustmentType INCREASE or RECOUNT.`);
+      }
       return { ...item, adjustmentQty };
     });
 
