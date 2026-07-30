@@ -13,6 +13,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const test_session_context_1 = require("../common/context/test-session.context");
+const MODELS_WITH_TEST_DATA_FIELD = new Set(client_1.Prisma.dmmf.datamodel.models
+    .filter((m) => m.fields.some((f) => f.name === 'isTestData'))
+    .map((m) => m.name.charAt(0).toLowerCase() + m.name.slice(1)));
+const CREATE_METHODS = ['create', 'createMany', 'createManyAndReturn', 'upsert'];
 let PrismaService = PrismaService_1 = class PrismaService extends client_1.PrismaClient {
     constructor() {
         super({
@@ -25,6 +30,44 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
     async onModuleInit() {
         await this.$connect();
         this.logger.log('Database connected');
+        try {
+            this.installTestDataAutoTagging();
+        }
+        catch (e) {
+            this.logger.error('Failed to install test-data auto-tagging - continuing without it', e);
+        }
+    }
+    installTestDataAutoTagging() {
+        for (const modelProp of MODELS_WITH_TEST_DATA_FIELD) {
+            const delegate = this[modelProp];
+            if (!delegate)
+                continue;
+            for (const method of CREATE_METHODS) {
+                if (typeof delegate[method] !== 'function')
+                    continue;
+                const original = delegate[method].bind(delegate);
+                delegate[method] = (args) => {
+                    if ((0, test_session_context_1.isTestSessionActive)() && args) {
+                        if (method === 'upsert' && args.create) {
+                            args.create.isTestData = true;
+                        }
+                        else if (method === 'createMany' || method === 'createManyAndReturn') {
+                            if (Array.isArray(args.data)) {
+                                args.data = args.data.map((d) => (Object.assign(Object.assign({}, d), { isTestData: true })));
+                            }
+                            else if (args.data) {
+                                args.data.isTestData = true;
+                            }
+                        }
+                        else if (args.data) {
+                            args.data.isTestData = true;
+                        }
+                    }
+                    return original(args);
+                };
+            }
+        }
+        this.logger.log(`Test-data auto-tagging installed on ${MODELS_WITH_TEST_DATA_FIELD.size} models`);
     }
     async onModuleDestroy() {
         await this.$disconnect();

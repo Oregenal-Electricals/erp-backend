@@ -131,10 +131,11 @@ const customer_portal_module_1 = require("./customer-portal/customer-portal.modu
 const iot_module_1 = require("./iot/iot.module");
 const accounting_module_1 = require("./accounting/accounting.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
+const test_session_middleware_1 = require("./common/middleware/test-session.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
 let AppModule = class AppModule {
     configure(consumer) {
-        consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
+        consumer.apply(test_session_middleware_1.TestSessionMiddleware, logger_middleware_1.LoggerMiddleware).forRoutes('*');
     }
 };
 exports.AppModule = AppModule;
