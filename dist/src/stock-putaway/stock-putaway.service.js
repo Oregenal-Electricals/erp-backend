@@ -116,11 +116,24 @@ let StockPutawayService = class StockPutawayService {
         return this.findOne(id, user);
     }
     async complete(id, user) {
+        var _a, _b;
         const putaway = await this.findOne(id, user);
         if (putaway.status === 'COMPLETED')
             throw new common_1.BadRequestException('Already completed');
         if (!putaway.items || putaway.items.length === 0)
             throw new common_1.BadRequestException('No items to putaway');
+        const bins = new Map();
+        for (const item of putaway.items) {
+            const bin = await this.prisma.warehouseBin.findUnique({ where: { id: item.binId } });
+            if (!bin)
+                continue;
+            const alreadyPlanned = (_b = (_a = bins.get(item.binId)) === null || _a === void 0 ? void 0 : _a.currentQty) !== null && _b !== void 0 ? _b : bin.currentQty;
+            const newQty = alreadyPlanned + item.qty;
+            if (bin.maxQty && newQty > bin.maxQty) {
+                throw new common_1.BadRequestException(`Bin ${bin.code} can only hold ${bin.maxQty} but this putaway would bring it to ${newQty} (already has ${bin.currentQty}, adding ${item.qty}). Split this item across multiple bins or choose a bin with more capacity.`);
+            }
+            bins.set(item.binId, { currentQty: newQty, maxQty: bin.maxQty, code: bin.code });
+        }
         for (const item of putaway.items) {
             const bin = await this.prisma.warehouseBin.findUnique({ where: { id: item.binId } });
             if (!bin)

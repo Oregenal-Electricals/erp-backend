@@ -120,6 +120,26 @@ export class StockPutawayService {
     if (putaway.status === 'COMPLETED') throw new BadRequestException('Already completed');
     if (!putaway.items || putaway.items.length === 0) throw new BadRequestException('No items to putaway');
 
+    // Validate every item fits its bin's physical capacity BEFORE writing
+    // anything - a bin's maxQty was previously only used to choose the
+    // FULL/PARTIAL status label, never to actually stop an over-capacity
+    // quantity from being recorded. Checking everything up front (rather
+    // than failing partway through the loop below) keeps this atomic: no
+    // bins get updated at all if any single item would overflow.
+    const bins = new Map<string, { currentQty: number; maxQty: number | null; code: string }>();
+    for (const item of putaway.items as any[]) {
+      const bin = await this.prisma.warehouseBin.findUnique({ where: { id: item.binId } });
+      if (!bin) continue;
+      const alreadyPlanned = bins.get(item.binId)?.currentQty ?? bin.currentQty;
+      const newQty = alreadyPlanned + item.qty;
+      if (bin.maxQty && newQty > bin.maxQty) {
+        throw new BadRequestException(
+          `Bin ${bin.code} can only hold ${bin.maxQty} but this putaway would bring it to ${newQty} (already has ${bin.currentQty}, adding ${item.qty}). Split this item across multiple bins or choose a bin with more capacity.`,
+        );
+      }
+      bins.set(item.binId, { currentQty: newQty, maxQty: bin.maxQty, code: bin.code });
+    }
+
     // Update each bin status
     for (const item of putaway.items as any[]) {
       const bin = await this.prisma.warehouseBin.findUnique({ where: { id: item.binId } });
