@@ -128,11 +128,11 @@ export declare class TrainingController {
         };
         enrollments: ({
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 designation: {
                     name: string;
                 };

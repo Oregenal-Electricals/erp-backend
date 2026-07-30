@@ -179,11 +179,11 @@ export declare class LeaveManagementService {
     findAllApplications(user: any, query: any): Promise<{
         data: ({
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 employeeNumber: string;
             };
             leaveType: {

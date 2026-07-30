@@ -121,13 +121,25 @@ Fixed: all three types (`INCREASE`/`DECREASE`/`RECOUNT`) now use the same `adjus
 ### 18. `dist/` tracking incident (found and fixed) — process lesson, not a product feature
 During the Phase D commit, the local `nest build` step apparently hadn't finished writing `dist/` at the moment `git add -A && git commit` ran, resulting in a commit that deleted all 1,414 previously-tracked `dist/` files and added back none (`+189/-113233` lines). Render was never actually affected - it builds from source on its own infrastructure regardless of what's committed - but this contradicted the documented "dist/ is committed" convention and surfaced as 1,400+ "untracked files" noise in the user's local git status/VS Code. Fixed by re-adding the current (complete, verified) on-disk `dist/` and committing fresh. **Lesson for future sessions:** after any `rm -rf dist && npx nest build`, verify `ls dist/src | wc -l` roughly matches `ls src | wc -l` (off by ~1 for naming convention) *before* trusting `git add -A` picked everything up correctly - don't just trust that the build command succeeded silently.
 
+### 19. IPQC becomes a real gate — new this session, backend only (no frontend change needed)
+The pre-existing `production-qc` module (In-Process QC, tied to a Work Order + optional Production Entry, `inspectionStage` defaulting to `IN_PROCESS`) was in the exact same situation OQC was in before Phase C: real inspection records with PASS/FAIL/CONDITIONAL results, but zero enforcement - a FAIL had no effect on production, which could carry on and complete normally regardless.
+
+**Fixed, reusing existing patterns rather than building new approval logic:**
+- `ProductionQcService.complete()`: when `result: FAIL` is recorded, the linked Work Order (if `IN_PROGRESS`) is automatically `stop()`'d - same as a manual Stop, instant, no approval needed (a reactive floor decision, consistent with the existing WO Stop semantics).
+- Resuming already requires Plant Head approval for non-Plant-Head-tier roles via the pre-existing WO Restart workflow gate - no new approval logic needed there.
+- `WorkOrderService.complete()` additionally, independently checks the most recent `ProductionQc` record for that WO and rejects completion outright if it's still `FAIL` - this holds even after a Plant Head approves a restart, since approving a restart isn't the same as confirming a corrective re-inspection actually happened. A new IPQC record with `PASS` or `CONDITIONAL` clears it.
+
+**Verified live end-to-end on staging**: started a WO → logged IPQC FAIL → WO auto-stopped → restarted (instant, SUPER_ADMIN bypass) → completion attempt correctly rejected citing the specific failed inspection number → logged a corrective PASS re-inspection → completion succeeded.
+
+No frontend changes were needed - the existing `/production/ipqc` page's create/complete flow already exercises this correctly; the enforcement is entirely backend-side.
+
 ---
 
 ## Not yet started
 
 - **Sidebar/page cleanup review** — full audit of unused tabs/pages, still not started as a systematic pass (one specific broken link was fixed opportunistically - item 16 above - but that's not the full review). Nothing should be removed without explicit per-item confirmation, and never remove something still needed even if a newer feature was just built to replace it - verify the old one is truly dead first.
 - **Production Floor page messaging** — doesn't yet tell floor staff that completing a WO/confirming an FG Receipt no longer makes stock instantly usable (Phase C). Floor staff may be confused why stock doesn't show up immediately downstream. Needs a UX pass, not a backend change.
-- **OQC rework/scrap/quarantine flow** — a `FAIL`/`CONDITIONAL` OQC result currently just stays permanently un-released with no formal next step. Safe (nothing bad happens) but incomplete as a workflow.
+- **OQC / IPQC rework/scrap/quarantine flow** — a `FAIL`/`CONDITIONAL` OQC result currently just stays permanently un-released with no formal next step, and a stopped WO with an unresolved IPQC FAIL has no formal disposition path either (scrap the WIP? rework and re-inspect? who decides?) beyond "someone eventually logs a corrective PASS." Both are safe (nothing bad happens automatically) but incomplete as a workflow - worth a combined pass across both.
 - **Stock Adjustment historical audit** — see item 17 above. Every pre-fix `DECREASE` adjustment needs manual review for silently-inflated balances.
 - **Frontend UI for Stop/Restart's own dedicated request flow** exists (buttons on Work Orders page), but Manpower Adjust/Transfer's UI (`/production/manpower`) only has the request-side forms - no dedicated "my pending manpower approvals" panel yet (Plant Head must use the generic `/workflows` page for these).
 - **MRP Shortage Report** — no "Create PR from Shortage" quick-action button; manual re-entry required to raise a Purchase Requisition from a shortage line.

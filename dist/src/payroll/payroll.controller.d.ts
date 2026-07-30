@@ -71,11 +71,11 @@ export declare class PayrollController {
     findOne(id: string, req: any): Promise<{
         entries: ({
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 designation: {
                     name: string;
                 };

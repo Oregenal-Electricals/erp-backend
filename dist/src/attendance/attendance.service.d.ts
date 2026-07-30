@@ -162,11 +162,11 @@ export declare class AttendanceService {
                 endTime: string;
             };
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 employeeNumber: string;
             };
         } & {

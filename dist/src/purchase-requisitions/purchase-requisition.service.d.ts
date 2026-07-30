@@ -43,8 +43,8 @@ export declare class PurchaseRequisitionService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        department: string | null;
         status: string;
+        department: string | null;
         title: string;
         priority: string;
         requestedBy: string;
@@ -74,8 +74,8 @@ export declare class PurchaseRequisitionService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            department: string | null;
             status: string;
+            department: string | null;
             title: string;
             priority: string;
             requestedBy: string;
@@ -131,8 +131,8 @@ export declare class PurchaseRequisitionService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        department: string | null;
         status: string;
+        department: string | null;
         title: string;
         priority: string;
         requestedBy: string;
@@ -183,8 +183,8 @@ export declare class PurchaseRequisitionService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        department: string | null;
         status: string;
+        department: string | null;
         title: string;
         priority: string;
         requestedBy: string;
@@ -235,8 +235,8 @@ export declare class PurchaseRequisitionService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        department: string | null;
         status: string;
+        department: string | null;
         title: string;
         priority: string;
         requestedBy: string;
@@ -287,8 +287,8 @@ export declare class PurchaseRequisitionService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        department: string | null;
         status: string;
+        department: string | null;
         title: string;
         priority: string;
         requestedBy: string;
@@ -339,8 +339,8 @@ export declare class PurchaseRequisitionService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        department: string | null;
         status: string;
+        department: string | null;
         title: string;
         priority: string;
         requestedBy: string;

@@ -99,8 +99,8 @@ export declare class IotService {
             updatedAt: Date;
             createdBy: string;
             updatedBy: string;
-            unit: string | null;
             value: number;
+            unit: string | null;
             machineId: string;
             readingType: string;
             recordedAt: Date;
@@ -154,8 +154,8 @@ export declare class IotService {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        unit: string | null;
         value: number;
+        unit: string | null;
         machineId: string;
         readingType: string;
         recordedAt: Date;
@@ -175,8 +175,8 @@ export declare class IotService {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        unit: string | null;
         value: number;
+        unit: string | null;
         machineId: string;
         readingType: string;
         recordedAt: Date;

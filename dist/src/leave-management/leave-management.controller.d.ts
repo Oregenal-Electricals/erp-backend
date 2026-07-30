@@ -118,11 +118,11 @@ export declare class LeaveManagementController {
     findAll(req: any, query: any): Promise<{
         data: ({
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 employeeNumber: string;
             };
             leaveType: {

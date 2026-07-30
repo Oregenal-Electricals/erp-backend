@@ -243,11 +243,11 @@ export declare class PayrollService {
     findOne(runId: string, user: any): Promise<{
         entries: ({
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 designation: {
                     name: string;
                 };

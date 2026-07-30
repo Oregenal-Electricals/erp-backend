@@ -173,11 +173,11 @@ export declare class TrainingService {
         };
         enrollments: ({
             employee: {
+                firstName: string;
+                lastName: string;
                 department: {
                     name: string;
                 };
-                firstName: string;
-                lastName: string;
                 designation: {
                     name: string;
                 };

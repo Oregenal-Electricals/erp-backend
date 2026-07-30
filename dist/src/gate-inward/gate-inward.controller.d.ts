@@ -55,8 +55,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -130,8 +130,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -214,8 +214,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -289,8 +289,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -364,8 +364,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -439,8 +439,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -514,8 +514,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;
@@ -589,8 +589,8 @@ export declare class GateInwardController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        unit: string;
         status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
         remarks: string | null;
         materialDescription: string | null;
         supplierName: string;

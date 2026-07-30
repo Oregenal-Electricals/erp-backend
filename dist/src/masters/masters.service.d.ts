@@ -292,8 +292,8 @@ export declare class MastersService {
             createdBy: string;
             updatedBy: string;
             code: string;
-            unitType: string;
             plantId: string;
+            unitType: string;
         }[];
     } & {
         id: string;
@@ -369,8 +369,8 @@ export declare class MastersService {
         createdBy: string;
         updatedBy: string;
         code: string;
-        unitType: string;
         plantId: string;
+        unitType: string;
     }>;
     findAllUnits(plantId?: string, includeInactive?: boolean, user?: any): Promise<({
         plant: {
@@ -393,8 +393,8 @@ export declare class MastersService {
         createdBy: string;
         updatedBy: string;
         code: string;
-        unitType: string;
         plantId: string;
+        unitType: string;
     })[]>;
     findOneUnit(id: string): Promise<{
         plant: {
@@ -434,8 +434,8 @@ export declare class MastersService {
         createdBy: string;
         updatedBy: string;
         code: string;
-        unitType: string;
         plantId: string;
+        unitType: string;
     }>;
     updateUnit(id: string, dto: UpdateUnitDto, userId: string): Promise<{
         id: string;
@@ -448,8 +448,8 @@ export declare class MastersService {
         createdBy: string;
         updatedBy: string;
         code: string;
-        unitType: string;
         plantId: string;
+        unitType: string;
     }>;
     toggleUnitStatus(id: string, userId: string): Promise<{
         id: string;
@@ -462,8 +462,8 @@ export declare class MastersService {
         createdBy: string;
         updatedBy: string;
         code: string;
-        unitType: string;
         plantId: string;
+        unitType: string;
     }>;
     createDepartment(dto: CreateDepartmentDto, userId: string): Promise<{
         id: string;

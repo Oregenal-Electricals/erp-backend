@@ -28,8 +28,8 @@ export declare class PriceListController {
             createdBy: string | null;
             updatedBy: string | null;
             code: string;
-            currency: string;
             isDefault: boolean;
+            currency: string;
             listType: string;
         })[];
         total: number;
@@ -71,8 +71,8 @@ export declare class PriceListController {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
-        currency: string;
         isDefault: boolean;
+        currency: string;
         listType: string;
     }>;
     create(dto: CreatePriceListDto, req: any): Promise<{
@@ -87,8 +87,8 @@ export declare class PriceListController {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
-        currency: string;
         isDefault: boolean;
+        currency: string;
         listType: string;
     }>;
     update(id: string, dto: UpdatePriceListDto, req: any): Promise<{
@@ -103,8 +103,8 @@ export declare class PriceListController {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
-        currency: string;
         isDefault: boolean;
+        currency: string;
         listType: string;
     }>;
     remove(id: string, req: any): Promise<{

@@ -109,8 +109,8 @@ export declare class GateDashboardController {
             createdBy: string;
             updatedBy: string;
             plantId: string;
-            unit: string;
             status: import(".prisma/client").$Enums.GateInwardStatus;
+            unit: string;
             remarks: string | null;
             materialDescription: string | null;
             supplierName: string;
@@ -147,8 +147,8 @@ export declare class GateDashboardController {
             createdBy: string;
             updatedBy: string;
             plantId: string;
-            unit: string;
             status: import(".prisma/client").$Enums.GateOutwardStatus;
+            unit: string;
             customerAddress: string | null;
             remarks: string | null;
             materialDescription: string;
@@ -194,9 +194,9 @@ export declare class GateDashboardController {
             createdBy: string;
             updatedBy: string;
             plantId: string;
-            unit: string;
-            status: import(".prisma/client").$Enums.GatePassStatus;
             type: import(".prisma/client").$Enums.GatePassType;
+            status: import(".prisma/client").$Enums.GatePassStatus;
+            unit: string;
             requestedById: string;
             purpose: string;
             vehicleNumber: string | null;
