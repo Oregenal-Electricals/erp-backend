@@ -15,7 +15,8 @@
 - Every push to `main` on either repo auto-deploys to staging (there is no separate production environment yet).
 - Login: `superadmin@oregenalelectrical.com` / `Oregenal@123`. Company ID: `83eda866-ba63-472c-902f-561f05b6b1c1`
 - **Workflow with the user:** Claude has a sandboxed copy of both repos and makes all edits there first, verifies with a build, then hands the user a patch to run on their real machine. The user does not code themselves — Claude does 100% of the implementation and the user copy-pastes and reports build output back.
-- **Critical Prisma rule:** never use `prisma migrate dev` — always hand-write SQL DDL and apply directly to both dev and staging DBs via psql, then update `schema.prisma` to match and run `npx prisma generate`.
+- **Critical Prisma rule:** never use `prisma migrate dev` — always hand-write SQL DDL and apply directly to both dev and staging DBs via psql, then update `schema.prisma` to match and run `npx prisma generate`. (Exception: `prisma db push --force-reset` is fine for a deliberate full wipe-and-rebuild of an empty database — see item 20 below. It's incremental drift on a database with existing data that this rule guards against.)
+- **`prisma/seeds/seed.ts`** creates the real Company/Plant/Warehouse/all 14 role logins directly via Prisma Client (bypasses HTTP/JWT - the only way to bootstrap back in after a full wipe, since login itself requires an existing User). It does **not** seed products, raw materials, BOMs, routing, customers, or vendors - no automated script exists for any of that yet.
 - Always run `rm -rf dist && npx nest build` before committing on the backend (dist/ is committed to the repo for Render deployment - see the "dist/ tracking incident" lesson below, this has broken silently before).
 - **Companion doc:** `ERP_Manual_Testing_Guide.md` (added this session) is a sequential, top-to-bottom manual testing walkthrough organized by business flow (login → masters → sales → planning → production → store/QC → dispatch → etc.), separate from this file's per-session changelog format. Update it alongside this file when a flow's behavior changes.
 
@@ -132,6 +133,27 @@ The pre-existing `production-qc` module (In-Process QC, tied to a Work Order + o
 **Verified live end-to-end on staging**: started a WO → logged IPQC FAIL → WO auto-stopped → restarted (instant, SUPER_ADMIN bypass) → completion attempt correctly rejected citing the specific failed inspection number → logged a corrective PASS re-inspection → completion succeeded.
 
 No frontend changes were needed - the existing `/production/ipqc` page's create/complete flow already exercises this correctly; the enforcement is entirely backend-side.
+
+### 20. Both databases fully wiped and rebuilt from scratch, at the user's explicit request
+`prisma/seeds/seed.ts` previously seeded a placeholder "Acme Electronics" company that had nothing to do with this project - real master data (Oregenal Electricals company/plant/warehouse/user accounts) had only ever been created manually via the API/UI across many past sessions, with no repeatable seed script for any of it. When the user asked for a complete wipe of both dev and staging, this was flagged clearly before doing anything - a full wipe destroys that master data with no automated way back, since no seed script could reconstruct it.
+
+**Rewrote `prisma/seeds/seed.ts`** to seed the real company via Prisma Client directly (bypassing HTTP/JWT entirely - the only way to bootstrap back in once every table, including Users, is empty): Company, Plant, Warehouse, Financial Year, one login per role (`role@oregenalelectrical.com` / `Oregenal@123`, matching the pattern already used throughout this project's documentation), Numbering Series, and System Settings. `Company`/`Plant`'s `address`/`city`/`state`/`pincode` are required fields with no default - the first version of this rewrite omitted them and failed to compile; fixed in a follow-up commit.
+
+The Company ID (`83eda866-...`), Warehouse ID (`8ee69281-...`), and SUPER_ADMIN User ID (`19b228a1-...`) are hardcoded to the exact values already referenced throughout this file and `ERP_Manual_Testing_Guide.md`, so none of that documentation needed updating after the wipe.
+
+**Sequence used** (dev first as a rehearsal, then the identical sequence against staging once dev was confirmed working):
+```bash
+npx prisma db push --force-reset      # drops everything, rebuilds schema fresh from schema.prisma
+npx ts-node prisma/seeds/seed.ts      # company/plant/warehouse/users/settings
+npx ts-node prisma/seed_roles_from_static_file.ts   # RolePermission rows for every seeded role
+```
+`db push --force-reset` (not `prisma migrate`) is the right tool here specifically *because* the target is an empty database being brought to a known-good current-schema state - it doesn't generate migration history, consistent with this project never using `prisma migrate dev`. That established rule is about avoiding risky auto-generated drift on a database that already has data; it doesn't apply the same way to a deliberate full rebuild.
+
+**Real gotcha hit along the way:** `export DATABASE_URL=...` in the shell did **not** override the value Prisma actually used - `db push` clearly printed it was still connecting to dev even with staging's URL exported. Prisma's own `.env` loading took precedence over the shell export. Fixed by editing `.env` directly (verified via `grep` before running anything, reverted via a backup copy immediately after) rather than relying on shell env vars for this kind of operation in the future.
+
+**Verified**: seed script output confirmed all data created correctly on both DBs; live login against the real Render-served staging API (`https://erp-backend-ry5v.onrender.com/api/v1/auth/login`) returned a valid token with the correct company - the actual proof this worked, not just the seed script claiming success.
+
+**What's still empty and needs manual re-creation via the UI/API** (no seed script exists for any of this): products, raw materials, BOMs, routing definitions, customers, vendors, and any warehouses beyond `WH-MAIN`.
 
 ---
 
