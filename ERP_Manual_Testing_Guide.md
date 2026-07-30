@@ -47,6 +47,12 @@ All seeded test accounts follow `role@oregenalelectrical.com` / `Oregenal@123` (
 - **If you create real records on staging while testing** (a WO, an FG Receipt, a stock adjustment, etc.) and don't need them to persist: either flag them `isTestData = true` via SQL afterward, or properly reverse them (e.g. a stock adjustment with the opposite sign — see the stock adjustment gotcha in §8.1). Don't just leave stray test units sitting in real stock balances; they'll silently pollute dashboards, shortage checks, and reports for real users.
 - Stock adjustments in particular are shared-aggregate operations (`StockBalance` is one row per item+warehouse, not a per-transaction ledger) — you cannot "hide" a bad test adjustment by flagging it `isTestData`; you have to actually reverse the quantity. See §8.1 for the exact mechanics.
 
+### 0.5 Both databases were fully wiped and rebuilt (see PROJECT_STATUS.md item 20)
+
+Both dev and staging were completely reset (`prisma db push --force-reset`) and reseeded from scratch via `prisma/seeds/seed.ts`, at the user's explicit request. **Every specific example record number referenced anywhere below this point in this guide** (CPO numbers, SO numbers, WO numbers, product IDs beyond the ones with fixed IDs, etc.) **no longer exists** — those were real records from before the wipe. The *procedures* themselves (which endpoints to call, in what order, what to expect) remain fully valid; you'll just need to create fresh records to follow along, using the same steps.
+
+Company ID, Warehouse ID (`WH-MAIN`), and the `superadmin@oregenalelectrical.com` login survived the wipe unchanged (see §0.3) since the new seed script hardcodes them. Every other role's login (`role@oregenalelectrical.com` / `Oregenal@123`) was recreated fresh with a new underlying User ID, but the same email/password. Products, raw materials, BOMs, routing, customers, and vendors are all empty post-wipe — none of that is seeded automatically. Re-verify §1 (Masters Setup) is populated before attempting any of the later sections.
+
 ---
 
 ## 1. Masters Setup [Checklist]
