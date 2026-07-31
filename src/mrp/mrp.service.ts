@@ -51,6 +51,24 @@ export class MrpService {
    * Structure-only, no stock involved - safe to compute once and reuse
    * across many CPOs/orders that share the same product tree.
    */
+  // TEMPORARY diagnostic method - remove once the 50-vs-11 leaf shortage
+  // discrepancy is root-caused. Calls discoverBomTree() directly and
+  // returns its raw internal Maps as plain JSON.
+  async debugTree(user: any, itemCode: string) {
+    const companyId = user.companyId;
+    const { lowLevelCode, bomOf, leavesOf } = await this.discoverBomTree(companyId, [itemCode]);
+    return {
+      itemCode,
+      lowLevelCode: Object.fromEntries(lowLevelCode),
+      bomOfCount: bomOf.size,
+      bomOf: Object.fromEntries(
+        Array.from(bomOf.entries()).map(([k, v]) => [k, v ? v.length : null]),
+      ),
+      leavesOfRoot: leavesOf.get(itemCode) ? Array.from(leavesOf.get(itemCode)!) : [],
+      leavesOfRootCount: leavesOf.get(itemCode)?.size || 0,
+    };
+  }
+
   private async discoverBomTree(companyId: string, rootItemCodes: string[]) {
     const lowLevelCode = new Map<string, number>();
     const bomOf = new Map<string, { itemCode: string; itemName: string; uom: string; qtyPerUnit: number }[] | null>();

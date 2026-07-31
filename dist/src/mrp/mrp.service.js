@@ -37,6 +37,19 @@ let MrpService = class MrpService {
             return matchedStage.bom;
         return null;
     }
+    async debugTree(user, itemCode) {
+        var _a;
+        const companyId = user.companyId;
+        const { lowLevelCode, bomOf, leavesOf } = await this.discoverBomTree(companyId, [itemCode]);
+        return {
+            itemCode,
+            lowLevelCode: Object.fromEntries(lowLevelCode),
+            bomOfCount: bomOf.size,
+            bomOf: Object.fromEntries(Array.from(bomOf.entries()).map(([k, v]) => [k, v ? v.length : null])),
+            leavesOfRoot: leavesOf.get(itemCode) ? Array.from(leavesOf.get(itemCode)) : [],
+            leavesOfRootCount: ((_a = leavesOf.get(itemCode)) === null || _a === void 0 ? void 0 : _a.size) || 0,
+        };
+    }
     async discoverBomTree(companyId, rootItemCodes) {
         const lowLevelCode = new Map();
         const bomOf = new Map();

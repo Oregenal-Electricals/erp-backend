@@ -27,6 +27,7 @@ let MrpController = class MrpController {
     shortageReport(req) { return this.mrpService.getShortageReport(req.user); }
     materialPlan(req, query) { return this.mrpService.getMaterialPlan(req.user, query); }
     planningBoard(req, warehouseId) { return this.mrpService.getPlanningBoard(req.user, warehouseId); }
+    debugTree(req, itemCode) { return this.mrpService.debugTree(req.user, itemCode); }
     runAllocation(dto, req) { return this.mrpService.runAllocation(dto, req.user); }
 };
 exports.MrpController = MrpController;
@@ -65,6 +66,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MrpController.prototype, "planningBoard", null);
+__decorate([
+    (0, common_1.Get)('debug-tree/:itemCode'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MRP_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('itemCode')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], MrpController.prototype, "debugTree", null);
 __decorate([
     (0, common_1.Post)('run-allocation'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_CREATE),
