@@ -37,13 +37,6 @@ export declare class MrpController {
         totalItems: number;
     }>;
     planningBoard(req: any, warehouseId: string): Promise<any[]>;
-    debugTree(req: any, itemCode: string, warehouseId?: string): Promise<{
-        itemCode: string;
-        leafShortageCount: number;
-        leafShortageCodes: string[];
-        traceCount: number;
-        trace: any[];
-    }>;
     runAllocation(dto: any, req: any): Promise<{
         feasible: boolean;
         shortages: {
