@@ -9,17 +9,12 @@ export declare class MrpService {
     private routingService;
     constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, routingService: RoutingService);
     private findProducingBom;
-    debugTree(user: any, itemCode: string): Promise<{
+    debugTree(user: any, itemCode: string, warehouseId?: string): Promise<{
         itemCode: string;
-        lowLevelCode: {
-            [k: string]: number;
-        };
-        bomOfCount: number;
-        bomOf: {
-            [k: string]: number;
-        };
-        leavesOfRoot: string[];
-        leavesOfRootCount: number;
+        leafShortageCount: number;
+        leafShortageCodes: string[];
+        traceCount: number;
+        trace: any[];
     }>;
     private discoverBomTree;
     explodeMultiCpoMaterialNeeds(companyId: string, buckets: {
@@ -28,7 +23,7 @@ export declare class MrpService {
         itemName: string;
         uom: string;
         qty: number;
-    }[], bucketOrder: string[], warehouseId?: string): Promise<{
+    }[], bucketOrder: string[], warehouseId?: string, trace?: any[]): Promise<{
         levelZero: Map<string, Map<string, {
             requiredQty: number;
             availableQty: number;

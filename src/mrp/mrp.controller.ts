@@ -25,7 +25,7 @@ export class MrpController {
   // discrepancy is root-caused. Exposes raw discoverBomTree() state.
   @Get('debug-tree/:itemCode')
   @RequirePermissions(Permission.MRP_VIEW)
-  debugTree(@Request() req: any, @Param('itemCode') itemCode: string) { return this.mrpService.debugTree(req.user, itemCode); }
+  debugTree(@Request() req: any, @Param('itemCode') itemCode: string, @Query('warehouseId') warehouseId?: string) { return this.mrpService.debugTree(req.user, itemCode, warehouseId); }
   @Post('run-allocation')
   @RequirePermissions(Permission.PRODUCTION_CREATE)
   runAllocation(@Body() dto: any, @Request() req: any) { return this.mrpService.runAllocation(dto, req.user); }

@@ -51,21 +51,20 @@ export class MrpService {
    * Structure-only, no stock involved - safe to compute once and reuse
    * across many CPOs/orders that share the same product tree.
    */
-  // TEMPORARY diagnostic method - remove once the 50-vs-11 leaf shortage
-  // discrepancy is root-caused. Calls discoverBomTree() directly and
-  // returns its raw internal Maps as plain JSON.
-  async debugTree(user: any, itemCode: string) {
+  // TEMPORARY diagnostic method - remove alongside the debug-tree endpoint
+  // once the 50-vs-11 leaf shortage discrepancy is root-caused. Runs the
+  // real explodeMultiCpoMaterialNeeds() with a live trace array attached.
+  async debugTree(user: any, itemCode: string, warehouseId?: string) {
     const companyId = user.companyId;
-    const { lowLevelCode, bomOf, leavesOf } = await this.discoverBomTree(companyId, [itemCode]);
+    const trace: any[] = [];
+    const buckets = [{ bucketKey: 'SINGLE', itemCode, itemName: itemCode, uom: 'PCS', qty: 10 }];
+    const { leafShortages } = await this.explodeMultiCpoMaterialNeeds(companyId, buckets, ['SINGLE'], warehouseId, trace);
     return {
       itemCode,
-      lowLevelCode: Object.fromEntries(lowLevelCode),
-      bomOfCount: bomOf.size,
-      bomOf: Object.fromEntries(
-        Array.from(bomOf.entries()).map(([k, v]) => [k, v ? v.length : null]),
-      ),
-      leavesOfRoot: leavesOf.get(itemCode) ? Array.from(leavesOf.get(itemCode)!) : [],
-      leavesOfRootCount: leavesOf.get(itemCode)?.size || 0,
+      leafShortageCount: (leafShortages.get('SINGLE') || []).length,
+      leafShortageCodes: (leafShortages.get('SINGLE') || []).map(s => s.itemCode),
+      traceCount: trace.length,
+      trace,
     };
   }
 
@@ -164,6 +163,7 @@ export class MrpService {
     buckets: { bucketKey: string; itemCode: string; itemName: string; uom: string; qty: number }[],
     bucketOrder: string[],
     warehouseId?: string,
+    trace?: any[], // TEMPORARY debug param - remove alongside debug-tree endpoint once root-caused
   ) {
     const rootItemCodes = Array.from(new Set(buckets.map(b => b.itemCode)));
     const { lowLevelCode, bomOf, itemMeta: discoveredMeta, leavesOf } = await this.discoverBomTree(companyId, rootItemCodes);
@@ -187,7 +187,10 @@ export class MrpService {
 
       for (const itemCode of itemsAtLevel) {
         const bucketQtyMap = currentQueue.get(itemCode);
-        if (!bucketQtyMap || bucketQtyMap.size === 0) continue;
+        if (!bucketQtyMap || bucketQtyMap.size === 0) {
+          if (trace) trace.push({ level, itemCode, stage: 'SKIPPED_no_bucketQtyMap' });
+          continue;
+        }
 
         const children = bomOf.get(itemCode);
         const meta = itemMeta.get(itemCode) || { itemName: itemCode, uom: 'PCS' };
@@ -208,7 +211,10 @@ export class MrpService {
 
         for (const bucketKey of bucketOrder) {
           const required = bucketQtyMap.get(bucketKey);
-          if (!required || required <= 0.0001) continue;
+          if (!required || required <= 0.0001) {
+            if (trace) trace.push({ level, itemCode, bucketKey, stage: 'SKIPPED_no_required_qty', required });
+            continue;
+          }
           const allocated = Math.min(required, Math.max(0, runningStock));
           runningStock -= allocated;
           const net = Math.max(0, required - allocated);
@@ -221,7 +227,10 @@ export class MrpService {
             });
           }
 
-          if (net <= 0.0001) continue;
+          if (net <= 0.0001) {
+            if (trace) trace.push({ level, itemCode, bucketKey, stage: 'SKIPPED_net_zero', required, allocated, net });
+            continue;
+          }
 
           if (!children) {
             const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: itemCode } });
@@ -233,9 +242,11 @@ export class MrpService {
               shortage: Math.round(net * 1000) / 1000,
               rawMaterialId: rawMaterial?.id || null,
             });
+            if (trace) trace.push({ level, itemCode, bucketKey, stage: 'ADDED_to_leafShortages', required, net });
             continue;
           }
 
+          if (trace) trace.push({ level, itemCode, bucketKey, stage: 'RECURSED_has_children', childCount: children.length, net });
           for (const c of children) {
             if (!nextQueue.has(c.itemCode)) nextQueue.set(c.itemCode, new Map());
             const nm = nextQueue.get(c.itemCode)!;
