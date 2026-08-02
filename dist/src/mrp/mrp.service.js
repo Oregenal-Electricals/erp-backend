@@ -126,7 +126,7 @@ let MrpService = class MrpService {
                 let onOrderQty = 0;
                 if (!children) {
                     const onOrderItems = await this.prisma.purchaseOrderItem.findMany({
-                        where: { companyId, itemCode, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] } } },
+                        where: { companyId, itemCode, isTestData: false, po: { status: { in: ['SENT', 'APPROVED', 'PARTIALLY_RECEIVED'] }, isTestData: false } },
                         select: { pendingQty: true },
                     });
                     onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
@@ -314,8 +314,8 @@ let MrpService = class MrpService {
         if (!warehouseId)
             throw new common_1.BadRequestException('warehouseId is required');
         const sos = await this.prisma.salesOrder.findMany({
-            where: { companyId, status: { in: ['CONFIRMED', 'IN_PRODUCTION'] } },
-            include: { items: { where: { isActive: true, pendingQty: { gt: 0 } } } },
+            where: { companyId, status: { in: ['CONFIRMED', 'IN_PRODUCTION'] }, isTestData: false },
+            include: { items: { where: { isActive: true, pendingQty: { gt: 0 }, isTestData: false } } },
             orderBy: { deliveryDate: 'asc' },
         });
         const board = [];
@@ -327,7 +327,7 @@ let MrpService = class MrpService {
                 const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
                 const bom = product ? await this.findProducingBom(companyId, product.id) : null;
                 const alreadyPlanned = await this.prisma.workOrder.aggregate({
-                    where: { companyId, salesOrderId: so.id, productCode: item.itemCode, status: { not: 'CANCELLED' } },
+                    where: { companyId, salesOrderId: so.id, productCode: item.itemCode, status: { not: 'CANCELLED' }, isTestData: false },
                     _sum: { plannedQty: true },
                 });
                 const remainingToPlan = Math.max(0, item.pendingQty - (alreadyPlanned._sum.plannedQty || 0));

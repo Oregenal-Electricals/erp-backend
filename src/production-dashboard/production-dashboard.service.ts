@@ -16,19 +16,19 @@ export class ProductionDashboardService {
       totalWos, draftWos, releasedWos, inProgressWos, completedWos, cancelledWos,
       todayEntries, totalFgReceipts, pendingFgr, qcStats, costStats,
     ] = await Promise.all([
-      this.prisma.workOrder.count({ where: { companyId } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'DRAFT' } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'RELEASED' } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'IN_PROGRESS' } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'COMPLETED' } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'CANCELLED' } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'DRAFT' } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'RELEASED' } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'IN_PROGRESS' } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'COMPLETED' } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'CANCELLED' } }),
       this.prisma.productionEntry.findMany({
-        where: { companyId, status: 'CONFIRMED', entryDate: { gte: today, lt: tomorrow } },
+        where: { companyId, isTestData: false, status: 'CONFIRMED', entryDate: { gte: today, lt: tomorrow } },
       }),
-      this.prisma.fgReceipt.count({ where: { companyId, status: 'RECEIVED' } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'COMPLETED', fgReceipts: { none: { status: 'RECEIVED' } } } }),
-      this.prisma.productionQc.aggregate({ where: { companyId }, _sum: { sampleSize: true, passQty: true }, _count: { id: true } }),
-      this.prisma.productionCostSheet.aggregate({ where: { companyId }, _sum: { totalCost: true, materialCost: true } }),
+      this.prisma.fgReceipt.count({ where: { companyId, isTestData: false, status: 'RECEIVED' } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'COMPLETED', fgReceipts: { none: { status: 'RECEIVED' } } } }),
+      this.prisma.productionQc.aggregate({ where: { companyId, isTestData: false }, _sum: { sampleSize: true, passQty: true }, _count: { id: true } }),
+      this.prisma.productionCostSheet.aggregate({ where: { companyId, isTestData: false }, _sum: { totalCost: true, materialCost: true } }),
     ]);
 
     const todayGoodQty = todayEntries.reduce((s, e) => s + e.goodQty, 0);
@@ -48,7 +48,7 @@ export class ProductionDashboardService {
   async getActiveWos(user: any) {
     const companyId = user.companyId;
     const wos = await this.prisma.workOrder.findMany({
-      where: { companyId, status: { in: ['RELEASED', 'IN_PROGRESS'] } },
+      where: { companyId, isTestData: false, status: { in: ['RELEASED', 'IN_PROGRESS'] } },
       include: {
         warehouse: { select: { name: true } },
         productionIssues: { where: { status: 'ISSUED' }, select: { id: true } },
@@ -81,7 +81,7 @@ export class ProductionDashboardService {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const entries = await this.prisma.productionEntry.findMany({
-      where: { companyId, entryDate: { gte: today, lt: tomorrow } },
+      where: { companyId, isTestData: false, entryDate: { gte: today, lt: tomorrow } },
       include: { workOrder: { select: { woNumber: true, productName: true } } },
       orderBy: { entryDate: 'desc' },
     });
@@ -110,19 +110,19 @@ export class ProductionDashboardService {
 
     // Overdue WOs
     const overdueWos = await this.prisma.workOrder.findMany({
-      where: { companyId, status: { in: ['RELEASED','IN_PROGRESS'] }, plannedEndDate: { lt: new Date() } },
+      where: { companyId, isTestData: false, status: { in: ['RELEASED','IN_PROGRESS'] }, plannedEndDate: { lt: new Date() } },
       select: { woNumber: true, productName: true, plannedEndDate: true, status: true },
     });
 
     // WOs with no material issued
     const releasedNoIssue = await this.prisma.workOrder.findMany({
-      where: { companyId, status: 'RELEASED', productionIssues: { none: {} } },
+      where: { companyId, isTestData: false, status: 'RELEASED', productionIssues: { none: {} } },
       select: { woNumber: true, productName: true, plannedStartDate: true },
     });
 
     // Failed QC
     const failedQc = await this.prisma.productionQc.findMany({
-      where: { companyId, result: 'FAIL' },
+      where: { companyId, isTestData: false, result: 'FAIL' },
       include: { workOrder: { select: { woNumber: true, productName: true } } },
       orderBy: { inspectionDate: 'desc' },
       take: 5,
@@ -130,7 +130,7 @@ export class ProductionDashboardService {
 
     // Completed WOs without FGR
     const pendingFgr = await this.prisma.workOrder.findMany({
-      where: { companyId, status: 'COMPLETED', fgReceipts: { none: { status: 'RECEIVED' } } },
+      where: { companyId, isTestData: false, status: 'COMPLETED', fgReceipts: { none: { status: 'RECEIVED' } } },
       select: { woNumber: true, productName: true, completedQty: true },
     });
 
@@ -143,7 +143,7 @@ export class ProductionDashboardService {
   async getQualityMetrics(user: any) {
     const companyId = user.companyId;
     const inspections = await this.prisma.productionQc.findMany({
-      where: { companyId, status: 'COMPLETED' },
+      where: { companyId, isTestData: false, status: 'COMPLETED' },
       include: { workOrder: { select: { woNumber: true, productName: true } } },
       orderBy: { inspectionDate: 'desc' },
       take: 20,
@@ -192,24 +192,24 @@ export class ProductionDashboardService {
 
     const [activeWos, startedToday, completedToday, entries, manpowerToday, transfersToday] = await Promise.all([
       this.prisma.workOrder.findMany({
-        where: { companyId, status: { in: ['RELEASED', 'IN_PROGRESS'] } },
+        where: { companyId, isTestData: false, status: { in: ['RELEASED', 'IN_PROGRESS'] } },
         select: {
           id: true, woNumber: true, productCode: true, productName: true,
           stageName: true, status: true, plannedQty: true, completedQty: true,
           plannedStartDate: true, plannedEndDate: true, actualStartDate: true,
         },
       }),
-      this.prisma.workOrder.count({ where: { companyId, actualStartDate: { gte: day, lt: nextDay } } }),
-      this.prisma.workOrder.count({ where: { companyId, status: 'COMPLETED', actualEndDate: { gte: day, lt: nextDay } } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, actualStartDate: { gte: day, lt: nextDay } } }),
+      this.prisma.workOrder.count({ where: { companyId, isTestData: false, status: 'COMPLETED', actualEndDate: { gte: day, lt: nextDay } } }),
       this.prisma.productionEntry.findMany({
-        where: { companyId, status: 'CONFIRMED', entryDate: { gte: day, lt: nextDay } },
+        where: { companyId, isTestData: false, status: 'CONFIRMED', entryDate: { gte: day, lt: nextDay } },
         include: { workOrder: { select: { woNumber: true, productName: true, stageName: true } } },
       }),
       this.prisma.manpowerAllocation.findMany({
-        where: { companyId, level: 'STAGE_TO_LINE', date: { gte: day, lt: nextDay }, status: { in: ['PENDING', 'ACCEPTED'] } },
+        where: { companyId, isTestData: false, level: 'STAGE_TO_LINE', date: { gte: day, lt: nextDay }, status: { in: ['PENDING', 'ACCEPTED'] } },
       }),
       this.prisma.stageTransferNote.findMany({
-        where: { companyId, givenAt: { gte: day, lt: nextDay } },
+        where: { companyId, isTestData: false, givenAt: { gte: day, lt: nextDay } },
         include: {
           fromWorkOrder: { select: { woNumber: true, stageName: true } },
           toWorkOrder: { select: { woNumber: true, stageName: true } },
@@ -279,7 +279,7 @@ export class ProductionDashboardService {
 
     // --- Manpower-based costing estimate ---
     const employees = await this.prisma.employee.findMany({
-      where: { companyId, userId: { in: manpowerToday.filter(m => m.toUserId).map(m => m.toUserId as string) } },
+      where: { companyId, isTestData: false, userId: { in: manpowerToday.filter(m => m.toUserId).map(m => m.toUserId as string) } },
       select: { userId: true, basicSalary: true, hraAmount: true, conveyanceAmount: true, otherAllowances: true },
     });
     const hourlyRateByUserId = new Map<string, number>();
