@@ -190,6 +190,18 @@ Created a real test Customer, a Customer PO for `MAGIK-2*2` (qty 10), acknowledg
 
 **Lesson for future sessions**: when a live number looks wrong, don't assume the calculation logic is broken before checking whether it's reading real (possibly leftover test) data correctly. `explodeMultiCpoMaterialNeeds()`'s on-order-quantity check (`purchaseOrderItem.findMany` for `SENT`/`APPROVED`/`PARTIALLY_RECEIVED` POs) is **not** scoped by warehouse - a PO anywhere in the company counts toward every warehouse's shortage calculation for that item code. Test-data cleanup for any flow that touches Purchase Orders needs to include the PO itself, not just GRN/IQC/Putaway records downstream of it.
 
+### 26. Test-session dashboard/MRP filtering - the piece that makes item 21's tagging actually invisible from real numbers
+Prompted directly by item 25's investigation: a leftover test Purchase Order silently skewed a real MRP calculation, and nothing had been excluding test-flagged records from any reporting/planning endpoint before now. Fixed:
+
+- **MRP** (`mrp.service.ts`): the on-order-PO lookup inside `explodeMultiCpoMaterialNeeds()` now excludes test-flagged `PurchaseOrder`/`PurchaseOrderItem` records - this is the exact calculation item 25 spent a real investigation root-causing. The Planning Board (`getPlanningBoard()`) now excludes test-flagged `SalesOrder`/`SalesOrderItem`, and the already-planned quantity aggregate excludes test-flagged `WorkOrder`.
+- **Production Dashboard** (`production-dashboard.service.ts`): all 6 endpoints (`getOverview`, `getActiveWos`, `getToday`, `getAlerts`, `getQualityMetrics`, `getHourlyMonitoring`) now exclude test-flagged `WorkOrder`, `ProductionEntry`, `FgReceipt`, `ProductionQc`, `ProductionCostSheet`, `ManpowerAllocation`, and `StageTransferNote` from every count/list/sum - 25 query sites total.
+
+**Deliberately did NOT attempt to filter `StockBalance`** - it is a single running-total row per item+warehouse, updated incrementally by many transactions (some real, some test) rather than a discrete per-row record with a clean test/real split. `isTestData` does not apply meaningfully to an aggregate number that is already mixed. `TEST-WH` warehouse isolation (item 21) is what actually keeps test stock activity from ever touching `WH-MAIN`'s balance in the first place - that is the real fix for stock numbers, not a filter.
+
+**Verified live on staging**: after this fix, the Planning Board correctly shows 0 Sales Orders (our item-25 test SO is properly excluded now), and the Production Dashboard's Work Order count dropped from 5 to the 1 genuinely real Work Order in the system - the 4 test-flagged stage WOs from item 25's verification are correctly invisible.
+
+**Related safeguard added earlier the same stretch** (`erp-frontend`, BOM upload page): Test Mode's tagging works cleanly for transactional records but not for master/reference data (Products, Raw Materials) - `bom-import`'s `findFirst`-by-code reuse logic means an item code created while Test Mode is on stays tagged `isTestData: true` forever, even after Test Mode is turned off and the same code gets reused for real work. Added a visible warning banner plus a `confirm()` gate on the BOM upload page specifically, since that is the master-data-creation flow most likely to be hit while testing other things.
+
 ---
 
 ## Not yet started
@@ -202,7 +214,6 @@ Created a real test Customer, a Customer PO for `MAGIK-2*2` (qty 10), acknowledg
 - **MRP Shortage Report** — no "Create PR from Shortage" quick-action button; manual re-entry required to raise a Purchase Requisition from a shortage line.
 - **Gate Inward for Import shipments** — Gate Inward currently only links to domestic Purchase Orders; Import shipments physically pass through the same gate but bypass this step entirely today.
 - **Duplicate `RolePermission` rows** for `PURCHASE_MANAGER` (found 2026-07-15) — harmless but still unaudited across other roles.
-- **Test-session dashboard filtering** — even with auto-tagging working (both backend and frontend now done - item 21), the key reporting endpoints (stock balance, production dashboard, MRP shortage checks) don't yet exclude `isTestData: true` records from their calculations. Auto-tagging alone doesn't hide test data from real numbers - this filtering step is what actually would.
 - **Test-data purge capability** — no way yet to bulk-delete everything tagged `isTestData: true` in one action; cleanup is still manual per-record (as this whole session's cleanup steps demonstrate).
 - **Two extra DRAFT duplicate "MAGIK-0001" BOM uploads** (`c85dbade-dcc7-431d-a5ce-11bbb57ad7a9`, `b4ae5f2d-cf43-47c9-8580-0647a28aa61d`) found while investigating item 24's duplicate-BOM issue — harmless (DRAFT, never picked up by production logic) but not cleaned up.
 - **Master data rebuild** — customers (beyond one test customer), vendors, additional warehouses/racks/bins beyond the one `TEST-WH` rack. The end-to-end live test (Sales Order → Work Orders) is done - see item 25.
