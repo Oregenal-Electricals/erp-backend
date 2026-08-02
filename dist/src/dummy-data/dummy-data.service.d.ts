@@ -55,4 +55,15 @@ export declare class DummyDataService {
         };
         warning: string;
     }>;
+    getTestSessionSummary(companyId?: string): Promise<{
+        total: number;
+        byTable: Record<string, number>;
+    }>;
+    purgeTestSessionData(companyId?: string): Promise<{
+        message: string;
+        deleted: Record<string, number>;
+        totalDeleted: number;
+        blockedTables: string[];
+        note: string;
+    }>;
 }

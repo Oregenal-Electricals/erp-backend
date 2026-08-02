@@ -37,6 +37,12 @@ let DummyDataController = class DummyDataController {
     purgeAll() {
         return this.service.purgeAll();
     }
+    getTestSessionSummary(user) {
+        return this.service.getTestSessionSummary(user.role === client_1.UserRole.SUPER_ADMIN ? undefined : user.companyId);
+    }
+    purgeTestSessionData(user) {
+        return this.service.purgeTestSessionData(user.role === client_1.UserRole.SUPER_ADMIN ? undefined : user.companyId);
+    }
 };
 exports.DummyDataController = DummyDataController;
 __decorate([
@@ -71,6 +77,22 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], DummyDataController.prototype, "purgeAll", null);
+__decorate([
+    (0, common_1.Get)('test-session-summary'),
+    (0, swagger_1.ApiOperation)({ summary: 'Count isTestData:true rows across every module (Work Orders, Stock Adjustments, BOMs, POs, etc.) - read-only' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], DummyDataController.prototype, "getTestSessionSummary", null);
+__decorate([
+    (0, common_1.Delete)('purge-test-session'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete every isTestData:true row across every module (Test Mode-created data) - SUPER_ADMIN only' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], DummyDataController.prototype, "purgeTestSessionData", null);
 exports.DummyDataController = DummyDataController = __decorate([
     (0, swagger_1.ApiTags)('Dummy Data'),
     (0, swagger_1.ApiBearerAuth)(),

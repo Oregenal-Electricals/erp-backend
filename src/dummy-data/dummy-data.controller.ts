@@ -46,4 +46,20 @@ export class DummyDataController {
   purgeAll() {
     return this.service.purgeAll();
   }
+
+  @Get('test-session-summary')
+  @ApiOperation({ summary: 'Count isTestData:true rows across every module (Work Orders, Stock Adjustments, BOMs, POs, etc.) - read-only' })
+  getTestSessionSummary(@CurrentUser() user: any) {
+    return this.service.getTestSessionSummary(
+      user.role === UserRole.SUPER_ADMIN ? undefined : user.companyId,
+    );
+  }
+
+  @Delete('purge-test-session')
+  @ApiOperation({ summary: 'Delete every isTestData:true row across every module (Test Mode-created data) - SUPER_ADMIN only' })
+  purgeTestSessionData(@CurrentUser() user: any) {
+    return this.service.purgeTestSessionData(
+      user.role === UserRole.SUPER_ADMIN ? undefined : user.companyId,
+    );
+  }
 }

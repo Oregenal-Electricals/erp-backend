@@ -47,6 +47,12 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcryptjs"));
+const TEST_DATA_TABLES = client_1.Prisma.dmmf.datamodel.models
+    .filter((m) => m.fields.some((f) => f.name === 'isTestData') && m.name !== 'Company')
+    .map((m) => m.dbName || m.name);
+const HAS_COMPANY_ID = new Set(client_1.Prisma.dmmf.datamodel.models
+    .filter((m) => m.fields.some((f) => f.name === 'companyId'))
+    .map((m) => m.dbName || m.name));
 let DummyDataService = class DummyDataService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -279,6 +285,65 @@ let DummyDataService = class DummyDataService {
         results.plants = (await this.prisma.plant.deleteMany({ where: { isTestData: true } })).count;
         results.companies = (await this.prisma.company.deleteMany({ where: { isTestData: true } })).count;
         return { message: 'All test data purged', deleted: results, warning: 'Real data was NOT touched' };
+    }
+    async getTestSessionSummary(companyId) {
+        var _a;
+        const results = {};
+        for (const table of TEST_DATA_TABLES) {
+            try {
+                const scoped = companyId && HAS_COMPANY_ID.has(table);
+                const sql = scoped
+                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "isTestData" = true AND "companyId" = $1`
+                    : `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "isTestData" = true`;
+                const rows = scoped
+                    ? await this.prisma.$queryRawUnsafe(sql, companyId)
+                    : await this.prisma.$queryRawUnsafe(sql);
+                const count = ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.count) || 0;
+                if (count > 0)
+                    results[table] = count;
+            }
+            catch (_b) {
+            }
+        }
+        const total = Object.values(results).reduce((s, c) => s + c, 0);
+        return { total, byTable: results };
+    }
+    async purgeTestSessionData(companyId) {
+        let remaining = [...TEST_DATA_TABLES];
+        const deleted = {};
+        let madeProgress = true;
+        while (remaining.length > 0 && madeProgress) {
+            madeProgress = false;
+            const stillBlocked = [];
+            for (const table of remaining) {
+                try {
+                    const scoped = companyId && HAS_COMPANY_ID.has(table);
+                    const sql = scoped
+                        ? `DELETE FROM "${table}" WHERE "isTestData" = true AND "companyId" = $1`
+                        : `DELETE FROM "${table}" WHERE "isTestData" = true`;
+                    const count = scoped
+                        ? await this.prisma.$executeRawUnsafe(sql, companyId)
+                        : await this.prisma.$executeRawUnsafe(sql);
+                    if (count > 0)
+                        deleted[table] = count;
+                    madeProgress = true;
+                }
+                catch (_a) {
+                    stillBlocked.push(table);
+                }
+            }
+            remaining = stillBlocked;
+        }
+        const totalDeleted = Object.values(deleted).reduce((s, c) => s + c, 0);
+        return {
+            message: `Purged ${totalDeleted} test-tagged rows across ${Object.keys(deleted).length} tables`,
+            deleted,
+            totalDeleted,
+            blockedTables: remaining,
+            note: remaining.length > 0
+                ? 'Tables in blockedTables still have test-tagged rows that a real (non-test) record depends on - these were deliberately left alone rather than force-deleted.'
+                : undefined,
+        };
     }
 };
 exports.DummyDataService = DummyDataService;

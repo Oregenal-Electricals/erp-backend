@@ -1,7 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserRole } from '@prisma/client';
+import { UserRole, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+
+// Table (not model) names for every model that has an isTestData field,
+// computed once from Prisma's own schema metadata rather than hardcoded -
+// used by the generic test-session summary/purge below, which is separate
+// from this file's existing seedCompany/purgeCompany/purgeAll (those are
+// for a fixed, narrow set of org-structure demo entities and predate the
+// X-Test-Session auto-tagging feature - see PrismaService and
+// PROJECT_STATUS.md item 21). Company itself is deliberately excluded -
+// purging a whole Company is far too destructive for this tool and was
+// never something Test Mode creates anyway.
+const TEST_DATA_TABLES: string[] = Prisma.dmmf.datamodel.models
+  .filter((m) => m.fields.some((f) => f.name === 'isTestData') && m.name !== 'Company')
+  .map((m) => m.dbName || m.name);
+
+const HAS_COMPANY_ID: Set<string> = new Set(
+  Prisma.dmmf.datamodel.models
+    .filter((m) => m.fields.some((f) => f.name === 'companyId'))
+    .map((m) => m.dbName || m.name),
+);
 
 @Injectable()
 export class DummyDataService {
@@ -279,5 +298,86 @@ export class DummyDataService {
     results.companies      = (await this.prisma.company.deleteMany({ where: { isTestData: true } })).count;
 
     return { message: 'All test data purged', deleted: results, warning: 'Real data was NOT touched' };
+  }
+
+  /**
+   * Counts isTestData:true rows across every table that has the field
+   * (computed from Prisma's schema metadata, not a hardcoded list) -
+   * covers everything the X-Test-Session auto-tagging feature (item 21)
+   * can create: Work Orders, Stock Adjustments, Customer POs, Sales
+   * Orders, BOMs, and 150+ other modules, not just the fixed org-
+   * structure entities seedCompany()/purgeCompany() above handle.
+   * Read-only - safe to call anytime, no confirmation needed.
+   */
+  async getTestSessionSummary(companyId?: string) {
+    const results: Record<string, number> = {};
+    for (const table of TEST_DATA_TABLES) {
+      try {
+        const scoped = companyId && HAS_COMPANY_ID.has(table);
+        const sql = scoped
+          ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "isTestData" = true AND "companyId" = $1`
+          : `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "isTestData" = true`;
+        const rows = scoped
+          ? await this.prisma.$queryRawUnsafe<{ count: number }[]>(sql, companyId)
+          : await this.prisma.$queryRawUnsafe<{ count: number }[]>(sql);
+        const count = rows[0]?.count || 0;
+        if (count > 0) results[table] = count;
+      } catch {
+        // Table genuinely has no rows, or some other non-fatal read issue -
+        // a summary should never fail just because one table is empty.
+      }
+    }
+    const total = Object.values(results).reduce((s, c) => s + c, 0);
+    return { total, byTable: results };
+  }
+
+  /**
+   * Deletes every isTestData:true row across every eligible table.
+   * Foreign-key dependency order isn't known upfront (166 models,
+   * no hand-maintained ordering) - instead, repeatedly attempts every
+   * remaining table and only stops retrying a table once it succeeds;
+   * a table that still has a real (non-test) row referencing one of its
+   * test rows will keep failing every pass and is reported, never
+   * silently skipped or force-deleted. This makes the operation
+   * self-ordering and safe: nothing gets deleted out of order, and
+   * anything genuinely still depended-on by real data is left alone
+   * and flagged for manual review instead.
+   */
+  async purgeTestSessionData(companyId?: string) {
+    let remaining = [...TEST_DATA_TABLES];
+    const deleted: Record<string, number> = {};
+    let madeProgress = true;
+
+    while (remaining.length > 0 && madeProgress) {
+      madeProgress = false;
+      const stillBlocked: string[] = [];
+      for (const table of remaining) {
+        try {
+          const scoped = companyId && HAS_COMPANY_ID.has(table);
+          const sql = scoped
+            ? `DELETE FROM "${table}" WHERE "isTestData" = true AND "companyId" = $1`
+            : `DELETE FROM "${table}" WHERE "isTestData" = true`;
+          const count = scoped
+            ? await this.prisma.$executeRawUnsafe(sql, companyId)
+            : await this.prisma.$executeRawUnsafe(sql);
+          if (count > 0) deleted[table] = count;
+          madeProgress = true;
+        } catch {
+          stillBlocked.push(table);
+        }
+      }
+      remaining = stillBlocked;
+    }
+
+    const totalDeleted = Object.values(deleted).reduce((s, c) => s + c, 0);
+    return {
+      message: `Purged ${totalDeleted} test-tagged rows across ${Object.keys(deleted).length} tables`,
+      deleted,
+      totalDeleted,
+      blockedTables: remaining,
+      note: remaining.length > 0
+        ? 'Tables in blockedTables still have test-tagged rows that a real (non-test) record depends on - these were deliberately left alone rather than force-deleted.'
+        : undefined,
+    };
   }
 }

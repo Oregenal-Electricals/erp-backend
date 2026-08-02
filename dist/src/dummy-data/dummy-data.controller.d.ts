@@ -55,4 +55,15 @@ export declare class DummyDataController {
         };
         warning: string;
     }>;
+    getTestSessionSummary(user: any): Promise<{
+        total: number;
+        byTable: Record<string, number>;
+    }>;
+    purgeTestSessionData(user: any): Promise<{
+        message: string;
+        deleted: Record<string, number>;
+        totalDeleted: number;
+        blockedTables: string[];
+        note: string;
+    }>;
 }
