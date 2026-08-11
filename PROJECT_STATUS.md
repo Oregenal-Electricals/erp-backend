@@ -202,6 +202,16 @@ Prompted directly by item 25's investigation: a leftover test Purchase Order sil
 
 **Related safeguard added earlier the same stretch** (`erp-frontend`, BOM upload page): Test Mode's tagging works cleanly for transactional records but not for master/reference data (Products, Raw Materials) - `bom-import`'s `findFirst`-by-code reuse logic means an item code created while Test Mode is on stays tagged `isTestData: true` forever, even after Test Mode is turned off and the same code gets reused for real work. Added a visible warning banner plus a `confirm()` gate on the BOM upload page specifically, since that is the master-data-creation flow most likely to be hit while testing other things.
 
+### 27. Test-data purge tool built and immediately used to clear the whole session's accumulated test data - completes the tag -> filter -> purge trilogy
+Found the existing `dummy-data` module already had SUPER_ADMIN-gated seed/purge endpoints, but scoped to a fixed, narrow set of 8 org-structure demo entities (Company/Plant/Unit/Department/Branch/FinancialYear/User/ChangeRequest) that predates the X-Test-Session auto-tagging feature and does not cover any of the 150+ modules Test Mode can actually create data in. Extended it with two new, clearly-separate endpoints rather than touching the existing narrow logic:
+
+- `GET /dummy-data/test-session-summary` - read-only counts of `isTestData: true` rows across every table that has the field (computed from `Prisma.dmmf`, not hardcoded).
+- `DELETE /dummy-data/purge-test-session` - deletes them, using a self-ordering retry loop (166 models, no hand-maintained FK dependency order) - repeatedly attempts every remaining table and drops one from the retry list once it succeeds. A table still blocked by a real (non-test) record referencing one of its test rows is reported, never silently skipped or force-deleted.
+
+**Immediately used for real**: ran it against everything this session had accumulated. First pass purged 75 of 83 known rows across 9 tables, correctly leaving 4 tables (`grn_headers`, `iqc_inspections`, `work_orders`, `customer_pos`) blocked. Investigating each blocker surfaced a genuine, useful pattern: **side-effect records created by read-like operations were never tagged**, because the *triggering* request (Planning Board queries, Run Allocation, GRN/IQC approval) was called directly via curl for real feature verification earlier this session, not through Test Mode - so the auto-tagging correctly left them `isTestData: false`, exactly as designed. Found and manually flagged four such gaps: `MaterialShortage` (written by the Planning Board as an audit trail), `MaterialReservation` (written by Run Allocation), `StockBatch`/`GrnItem`/`IqcItem` (written by IQC approval), and `RejectedStock` (written by IQC rejection). After flagging each and re-running the purge, **the final pass reported `blockedTables: []` and `test-session-summary` reads `{total: 0}`** - all 187 test-tagged rows across 19 tables from this entire session are gone, and real data was never touched.
+
+**Lesson for future sessions**: the auto-tagging feature (item 21) only tags what the *directly-headed* request creates - it has no way to know that a seemingly read-only endpoint has a persistence side-effect, so anything triggered outside an actual Test Mode session (including Claude's own curl-based verification work) needs the same manual-flagging discipline this whole session used. The purge tool's refusal to force-delete blocked tables is what made these four gaps visible and safe to fix, rather than either leaving orphaned rows or corrupting real data.
+
 ---
 
 ## Not yet started
@@ -214,7 +224,6 @@ Prompted directly by item 25's investigation: a leftover test Purchase Order sil
 - **MRP Shortage Report** — no "Create PR from Shortage" quick-action button; manual re-entry required to raise a Purchase Requisition from a shortage line.
 - **Gate Inward for Import shipments** — Gate Inward currently only links to domestic Purchase Orders; Import shipments physically pass through the same gate but bypass this step entirely today.
 - **Duplicate `RolePermission` rows** for `PURCHASE_MANAGER` (found 2026-07-15) — harmless but still unaudited across other roles.
-- **Test-data purge capability** — no way yet to bulk-delete everything tagged `isTestData: true` in one action; cleanup is still manual per-record (as this whole session's cleanup steps demonstrate).
 - **Two extra DRAFT duplicate "MAGIK-0001" BOM uploads** (`c85dbade-dcc7-431d-a5ce-11bbb57ad7a9`, `b4ae5f2d-cf43-47c9-8580-0647a28aa61d`) found while investigating item 24's duplicate-BOM issue — harmless (DRAFT, never picked up by production logic) but not cleaned up.
 - **Master data rebuild** — customers (beyond one test customer), vendors, additional warehouses/racks/bins beyond the one `TEST-WH` rack. The end-to-end live test (Sales Order → Work Orders) is done - see item 25.
 
