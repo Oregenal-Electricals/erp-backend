@@ -212,6 +212,8 @@ Found the existing `dummy-data` module already had SUPER_ADMIN-gated seed/purge 
 
 **Lesson for future sessions**: the auto-tagging feature (item 21) only tags what the *directly-headed* request creates - it has no way to know that a seemingly read-only endpoint has a persistence side-effect, so anything triggered outside an actual Test Mode session (including Claude's own curl-based verification work) needs the same manual-flagging discipline this whole session used. The purge tool's refusal to force-delete blocked tables is what made these four gaps visible and safe to fix, rather than either leaving orphaned rows or corrupting real data.
 
+**Two small cleanup items also closed out this stretch**: the 2 leftover DRAFT duplicate "MAGIK-0001" BOM uploads from item 24's investigation were confirmed genuinely unused (DRAFT, never picked up by production logic) and deleted. The "duplicate `RolePermission` rows for PURCHASE_MANAGER" item was checked directly - zero duplicates found anywhere in `role_permissions`, because that issue predated item 20's full database wipe (found 2026-07-15) and the reseed rebuilt roles/permissions cleanly from scratch. Both items removed from Not yet started.
+
 ---
 
 ## Not yet started
@@ -223,8 +225,6 @@ Found the existing `dummy-data` module already had SUPER_ADMIN-gated seed/purge 
 - **Frontend UI for Stop/Restart's own dedicated request flow** exists (buttons on Work Orders page), but Manpower Adjust/Transfer's UI (`/production/manpower`) only has the request-side forms - no dedicated "my pending manpower approvals" panel yet (Plant Head must use the generic `/workflows` page for these).
 - **MRP Shortage Report** — no "Create PR from Shortage" quick-action button; manual re-entry required to raise a Purchase Requisition from a shortage line.
 - **Gate Inward for Import shipments** — Gate Inward currently only links to domestic Purchase Orders; Import shipments physically pass through the same gate but bypass this step entirely today.
-- **Duplicate `RolePermission` rows** for `PURCHASE_MANAGER` (found 2026-07-15) — harmless but still unaudited across other roles.
-- **Two extra DRAFT duplicate "MAGIK-0001" BOM uploads** (`c85dbade-dcc7-431d-a5ce-11bbb57ad7a9`, `b4ae5f2d-cf43-47c9-8580-0647a28aa61d`) found while investigating item 24's duplicate-BOM issue — harmless (DRAFT, never picked up by production logic) but not cleaned up.
 - **Master data rebuild** — customers (beyond one test customer), vendors, additional warehouses/racks/bins beyond the one `TEST-WH` rack. The end-to-end live test (Sales Order → Work Orders) is done - see item 25.
 
 ---
