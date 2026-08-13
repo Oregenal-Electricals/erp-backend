@@ -5,6 +5,8 @@ export declare class PrismaService extends PrismaClient implements OnModuleInit,
     constructor();
     onModuleInit(): Promise<void>;
     private installTestDataAutoTagging;
+    private wrapClient;
+    private installTransactionAutoTagging;
     onModuleDestroy(): Promise<void>;
     healthCheck(): Promise<boolean>;
     cleanDatabase(): Promise<void>;

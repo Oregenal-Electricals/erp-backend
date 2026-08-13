@@ -42,6 +42,7 @@ export class PrismaService
     this.logger.log('Database connected');
     try {
       this.installTestDataAutoTagging();
+      this.installTransactionAutoTagging();
     } catch (e) {
       // Every module in the app depends on PrismaService - this feature
       // must never be able to take down startup. Worst case if this
@@ -70,10 +71,20 @@ export class PrismaService
    * NestJS lifecycle methods added on this class would still resolve
    * correctly on whatever $extends() hands back. This wrapping approach
    * leaves the proven class extension completely untouched.
+   *
+   * Shared with installTransactionAutoTagging() below via wrapClient(),
+   * since $transaction(async (tx) => ...) hands callers a *separate*,
+   * freshly-generated client object per call - wrapping `this` here has
+   * no effect on that object at all.
    */
   private installTestDataAutoTagging() {
+    this.wrapClient(this);
+    this.logger.log(`Test-data auto-tagging installed on ${MODELS_WITH_TEST_DATA_FIELD.size} models`);
+  }
+
+  private wrapClient(client: any) {
     for (const modelProp of MODELS_WITH_TEST_DATA_FIELD) {
-      const delegate = (this as any)[modelProp];
+      const delegate = client[modelProp];
       if (!delegate) continue; // defensive: skip rather than crash if a property name doesn't match what Prisma actually generated
       for (const method of CREATE_METHODS) {
         if (typeof delegate[method] !== 'function') continue;
@@ -96,7 +107,42 @@ export class PrismaService
         };
       }
     }
-    this.logger.log(`Test-data auto-tagging installed on ${MODELS_WITH_TEST_DATA_FIELD.size} models`);
+  }
+
+  /**
+   * Interactive transactions (`this.$transaction(async (tx) => {...})`,
+   * used throughout the app for multi-table atomic writes - CPO
+   * acknowledge creating its Sales Order, GRN/IQC/dispatch flows, etc.)
+   * hand the callback a `tx` client that Prisma generates fresh per
+   * call - it is not `this` and installTestDataAutoTagging()'s wrapping
+   * of `this`'s delegates never touches it. Found live: acknowledging a
+   * CPO under Test Mode correctly tagged the CPO itself, but the
+   * Sales Order created inside that same $transaction() callback came
+   * back isTestData: false. Fixed by wrapping $transaction itself: for
+   * the callback form specifically, apply the same wrapClient() to the
+   * tx object Prisma provides before handing it to the caller's
+   * function, so every create/createMany/createManyAndReturn/upsert
+   * inside any transaction gets tagged exactly like it does outside one.
+   * The array form of $transaction ($transaction([p1, p2])) is left
+   * untouched - those promises are already built from already-wrapped
+   * delegate calls by the time they reach $transaction.
+   */
+  private installTransactionAutoTagging() {
+    const originalTransaction = this.$transaction.bind(this);
+    (this as any).$transaction = (arg: any, options?: any) => {
+      if (typeof arg === 'function') {
+        return originalTransaction((tx: any) => {
+          try {
+            this.wrapClient(tx);
+          } catch {
+            // Same fail-safe posture as the rest of this feature - a
+            // wrapping failure must never break the caller's transaction.
+          }
+          return arg(tx);
+        }, options);
+      }
+      return originalTransaction(arg, options);
+    };
   }
 
   async onModuleDestroy() {

@@ -32,14 +32,19 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
         this.logger.log('Database connected');
         try {
             this.installTestDataAutoTagging();
+            this.installTransactionAutoTagging();
         }
         catch (e) {
             this.logger.error('Failed to install test-data auto-tagging - continuing without it', e);
         }
     }
     installTestDataAutoTagging() {
+        this.wrapClient(this);
+        this.logger.log(`Test-data auto-tagging installed on ${MODELS_WITH_TEST_DATA_FIELD.size} models`);
+    }
+    wrapClient(client) {
         for (const modelProp of MODELS_WITH_TEST_DATA_FIELD) {
-            const delegate = this[modelProp];
+            const delegate = client[modelProp];
             if (!delegate)
                 continue;
             for (const method of CREATE_METHODS) {
@@ -67,7 +72,22 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
                 };
             }
         }
-        this.logger.log(`Test-data auto-tagging installed on ${MODELS_WITH_TEST_DATA_FIELD.size} models`);
+    }
+    installTransactionAutoTagging() {
+        const originalTransaction = this.$transaction.bind(this);
+        this.$transaction = (arg, options) => {
+            if (typeof arg === 'function') {
+                return originalTransaction((tx) => {
+                    try {
+                        this.wrapClient(tx);
+                    }
+                    catch (_a) {
+                    }
+                    return arg(tx);
+                }, options);
+            }
+            return originalTransaction(arg, options);
+        };
     }
     async onModuleDestroy() {
         await this.$disconnect();
