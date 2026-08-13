@@ -222,6 +222,15 @@ User feedback, verbatim: the app has too many disconnected places to do one thin
 
 Net effect: BOM pages show routing status inline; Work Orders is the one place left to manually start production. One less concept to learn, nothing lost.
 
+### 29. Full order-to-dispatch end-to-end test run live, entirely under Test Mode - found and fixed a real gap in item 21's auto-tagging along the way
+At the user's explicit request: ran the complete real business flow from zero to a delivered order, live on staging, with `X-Test-Session: true` on every single call. Customer + Vendor -> Purchase Order (all 50 raw materials) -> Approve -> Send -> GRN -> Submit -> IQC -> Approve (raw material stock credited) -> Customer PO -> Acknowledge -> Sales Order -> Confirm -> Run Allocation (`feasible: true`, all 4 stage Work Orders created) -> SMT -> MI -> Assembly -> Packaging, each stage Released/Started/Completed -> FG Receipt -> Confirmed -> OQC created/completed/released (finished-good stock credited, next stage auto-released each time, exactly as items 2 and 14 describe) -> Dispatch Plan -> Approved -> Dispatch created -> **Delivered**. Every stage of the system built and fixed this session worked together correctly in one real, continuous sequence.
+
+**A genuine, previously-undiscovered gap in the test-tagging feature surfaced along the way**: `dummy-data/test-session-summary` after the run showed `sales_orders`, `sales_order_items`, `customer_po_items`, `purchase_order_items`, `grn_items`, and `iqc_items` completely missing, despite every request in the whole test correctly carrying the header. Root cause: several flows (Customer PO acknowledge creating its Sales Order, GRN, IQC, dispatch) use `this.$transaction(async (tx) => {...})` for atomic multi-table writes - Prisma generates `tx` fresh per call, a completely different object from `this`, so item 21's wrapping of `this`'s model delegates never touched it. Any `create()` made via `tx` bypassed auto-tagging entirely, silently, for every transactional flow in the app, not just this one.
+
+**Fixed properly, not worked around**: `PrismaService` now also wraps $transaction itself - for the callback form specifically, the same model-delegate wrapping gets applied to the `tx` object before it reaches the caller's function, so every write inside any transaction is tagged exactly like it is outside one. The array form (`$transaction([p1, p2])`) is untouched, since those promises are already built from wrapped delegate calls before reaching $transaction. This is a real correctness fix, not a one-off patch - it closes the gap for every current and future transactional flow in the app, not just the 6 tables this specific test happened to touch.
+
+**Verified end to end**: manually flagged the pre-fix records this run had created (559 rows, 25 tables), then ran `purge-test-session` - `558` deleted, `blockedTables: []`, and a final `test-session-summary` read back `{total: 0}`. Real data was never touched at any point.
+
 ---
 
 ## Not yet started
