@@ -214,6 +214,14 @@ Found the existing `dummy-data` module already had SUPER_ADMIN-gated seed/purge 
 
 **Two small cleanup items also closed out this stretch**: the 2 leftover DRAFT duplicate "MAGIK-0001" BOM uploads from item 24's investigation were confirmed genuinely unused (DRAFT, never picked up by production logic) and deleted. The "duplicate `RolePermission` rows for PURCHASE_MANAGER" item was checked directly - zero duplicates found anywhere in `role_permissions`, because that issue predated item 20's full database wipe (found 2026-07-15) and the reseed rebuilt roles/permissions cleanly from scratch. Both items removed from Not yet started.
 
+### 28. Real user feedback acted on directly: the BOM -> Routing journey and the standalone Routing page both simplified
+User feedback, verbatim: the app has too many disconnected places to do one thing - specifically, uploading a BOM gave no indication that a completely separate Production module and manual routing setup were needed next. Two connected fixes:
+
+- **Guided "Set Up Production" flow added to the BOM detail page** (`erp-frontend`): once a master BOM is approved, a new card walks through generating stages (auto-guessing stage names like "SMT"/"MI"/"Assembly"/"Packaging" from the uploaded sheet's own sections, always editable), approving all stages in one click, and creating the routing - all on the one page, ending at "routing ready." Deliberately does **not** also trigger Start Production - that decision (full chain vs. a specific intermediate stage, per Work Order Types 1-4) belongs to the Sales Order / Planning Board / Run Allocation path, which already knows which case applies to a given order; bolting it on here would risk defaulting to the wrong chain for partial orders. The backend endpoint this uses (`GET /boms/:id/stages`) already existed with a comment saying it was "for the detail page's Stage BOMs section" - built but never actually wired up on the frontend until now.
+- **The standalone `/production/routing` page removed entirely**, following through on the same feedback once applied to that page too: its "Defined Routings" list was now fully redundant with the BOM page's own status, and its manual routing-creation form redundant with the guided flow above. The one thing on that page that wasn't redundant - manually starting build-to-stock production not tied to any Sales Order - moved to the Work Orders page as a "+ Start Routing Chain" button next to "+ New Work Order," so there's no page whose only remaining purpose is one small form. Removed from the sidebar entirely.
+
+Net effect: BOM pages show routing status inline; Work Orders is the one place left to manually start production. One less concept to learn, nothing lost.
+
 ---
 
 ## Not yet started

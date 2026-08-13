@@ -66,7 +66,7 @@ Confirm these exist (or create them) before testing anything downstream — almo
 | Products | `/masters/products` | `productType` (`FINISHED_GOOD` etc.); code is the join key almost everything else uses |
 | Raw Materials | `/masters/raw-materials` | Separate table from `Product` — an itemCode matches **either** a Product **or** a RawMaterial, never both, and a lot of logic branches on which one it is |
 | BOM | `/inventory/bom` | `bomType`: `MASTER` (a product's own top-level recipe) or `STAGE` (auto-generated per routing stage — see §3.3); `status` must be `APPROVED` before anything can use it |
-| Routing | `/production/routing` | Defines the multi-stage chain (e.g. SMT → MI → Assembly → Packaging) a product's production actually follows |
+| Routing | Set up from the BOM detail page (`/inventory/bom/[id]`) once approved — no separate page as of item 28 | Defines the multi-stage chain (e.g. SMT → MI → Assembly → Packaging) a product's production actually follows; manually starting build-to-stock production against one lives on `/production/work-orders` ("+ Start Routing Chain") |
 | Vendors | `/masters/vendors` | Needed for RFQ/PO/GRN flow (§7) |
 | Customers | `/sales/customers` | Auto-fills onto Customer PO |
 | UOM / HSN-SAC / Price Lists | `/masters/unit`, `/masters/hsn-sac`, `/masters/price-lists` | Standard lookup data |
