@@ -231,11 +231,21 @@ At the user's explicit request: ran the complete real business flow from zero to
 
 **Verified end to end**: manually flagged the pre-fix records this run had created (559 rows, 25 tables), then ran `purge-test-session` - `558` deleted, `blockedTables: []`, and a final `test-session-summary` read back `{total: 0}`. Real data was never touched at any point.
 
+### 30. Full sidebar/page cleanup audit completed - 45 dead duplicate pages removed, one missing link added
+User feedback, verbatim: too many pages that either aren't in use or aren't clearly connected. Did the full systematic pass this had been waiting on since item 16 (which fixed one instance of this same pattern opportunistically without doing the complete audit).
+
+Cross-referenced every href actually used in `Sidebar.jsx` against every `page.jsx`/`page.js` that exists in the app router, then grepped the whole `src/` tree for any other reference (href, router.push) to each orphaned page before touching anything - found a single, extremely consistent pattern repeating across nearly every domain: an old generation of flat top-level pages (`/production-dashboard`, `/stock-ledger`, `/rejected-stock`, `/po-amendments`, etc.) had been superseded by a folder-structure redesign (`/production/dashboard`, `/inventory/stock`, `/inventory/rejected`, `/purchase/amendments`) and the sidebar updated to point at the new locations, but the old page files were never deleted - the exact same shape as item 16's single fix, just never done comprehensively. Presented the full list with what replaced each one before removing anything, per the standing rule never to delete a sidebar/page without explicit confirmation.
+
+**Removed 45 page directories** (47 individual page files, since `inventory/warehouses` alone contained 3: list + `create` + `[id]`) across Production, Quality, Purchase, Inventory/Stock, Sales, Import, Gate, Finance, and HR - full list in the commit message. One deliberate exception: `quality/dashboard` was the *orphan* here while the old flat `/quality-dashboard` is what the sidebar actually still uses - the reverse of every other case - so that old-looking one was left alone rather than assumed dead by pattern-matching. A few unrelated genuinely-unwired features (`finance/reports`, `finance/bank-recon`, `hr/departments`, `hr/reports`, `item-categories`/`inventory/categories`, `gate/vehicle-entry`, `data-import`) surfaced the same way (zero references anywhere) and were removed too, rather than left as more orphaned clutter.
+
+**Also added Raw Materials to the Inventory sidebar section** - `/masters/raw-materials` is a real, actively-used page (its data has been referenced constantly all session) that had simply never been linked from anywhere in the nav.
+
+**Verified**: `npm run build` succeeded cleanly both times (page count 194 -> 148), no broken imports, nothing else in `src/` referenced any of the removed paths.
+
 ---
 
 ## Not yet started
 
-- **Sidebar/page cleanup review** — full audit of unused tabs/pages, still not started as a systematic pass (one specific broken link was fixed opportunistically - item 16 above - but that's not the full review). Nothing should be removed without explicit per-item confirmation, and never remove something still needed even if a newer feature was just built to replace it - verify the old one is truly dead first.
 - **Production Floor page messaging** — doesn't yet tell floor staff that completing a WO/confirming an FG Receipt no longer makes stock instantly usable (Phase C). Floor staff may be confused why stock doesn't show up immediately downstream. Needs a UX pass, not a backend change.
 - **OQC / IPQC rework/scrap/quarantine flow** — a `FAIL`/`CONDITIONAL` OQC result currently just stays permanently un-released with no formal next step, and a stopped WO with an unresolved IPQC FAIL has no formal disposition path either (scrap the WIP? rework and re-inspect? who decides?) beyond "someone eventually logs a corrective PASS." Both are safe (nothing bad happens automatically) but incomplete as a workflow - worth a combined pass across both.
 - **Stock Adjustment historical audit** — see item 17 above. Every pre-fix `DECREASE` adjustment needs manual review for silently-inflated balances.
