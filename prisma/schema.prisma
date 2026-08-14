@@ -5374,3 +5374,51 @@ model RolePermission {
   @@index([companyId, roleId])
   @@map("role_permissions")
 }
+// Append to erp-backend/prisma/schema.prisma
+
+model UiControlElement {
+  id             String   @id @default(uuid())
+  companyId      String   @map("company_id")
+  key            String
+  elementType    String   @map("element_type")
+  module         String
+  page           String?
+  label          String
+  icon           String?
+  parentKey      String?  @map("parent_key")
+  sortOrder      Int      @default(0) @map("sort_order")
+  defaultVisible Boolean  @default(true) @map("default_visible")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  createdBy  String?  @map("created_by")
+  updatedBy  String?  @map("updated_by")
+  isActive   Boolean  @default(true) @map("is_active")
+  isTestData Boolean  @default(false) @map("is_test_data")
+
+  overrides UiControlOverride[]
+
+  @@unique([companyId, key])
+  @@map("ui_control_elements")
+}
+
+model UiControlOverride {
+  id                String   @id @default(uuid())
+  companyId         String   @map("company_id")
+  elementId         String   @map("element_id")
+  element           UiControlElement @relation(fields: [elementId], references: [id], onDelete: Cascade)
+  scopeType         String   @map("scope_type") // ROLE | USER
+  roleName          String?  @map("role_name")   // matches Role.name
+  userId            String?  @map("user_id")
+  isVisible         Boolean  @map("is_visible")
+  sortOrderOverride Int?     @map("sort_order_override")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  createdBy  String?  @map("created_by")
+  updatedBy  String?  @map("updated_by")
+  isActive   Boolean  @default(true) @map("is_active")
+  isTestData Boolean  @default(false) @map("is_test_data")
+
+  @@map("ui_control_overrides")
+}

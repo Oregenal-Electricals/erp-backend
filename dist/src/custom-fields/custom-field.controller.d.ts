@@ -18,15 +18,15 @@ export declare class CustomFieldController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isRequired: boolean;
         module: string;
+        sortOrder: number;
+        isRequired: boolean;
         fieldKey: string;
         fieldLabel: string;
         fieldType: string;
         options: import("@prisma/client/runtime/library").JsonValue | null;
         placeholder: string | null;
         defaultValue: string | null;
-        sortOrder: number;
     }[]>;
     getAllDefinitions(req: any): Promise<{
         id: string;
@@ -37,15 +37,15 @@ export declare class CustomFieldController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isRequired: boolean;
         module: string;
+        sortOrder: number;
+        isRequired: boolean;
         fieldKey: string;
         fieldLabel: string;
         fieldType: string;
         options: import("@prisma/client/runtime/library").JsonValue | null;
         placeholder: string | null;
         defaultValue: string | null;
-        sortOrder: number;
     }[]>;
     createDefinition(dto: CreateCustomFieldDefinitionDto, req: any): Promise<{
         id: string;
@@ -56,15 +56,15 @@ export declare class CustomFieldController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isRequired: boolean;
         module: string;
+        sortOrder: number;
+        isRequired: boolean;
         fieldKey: string;
         fieldLabel: string;
         fieldType: string;
         options: import("@prisma/client/runtime/library").JsonValue | null;
         placeholder: string | null;
         defaultValue: string | null;
-        sortOrder: number;
     }>;
     updateDefinition(id: string, dto: UpdateCustomFieldDefinitionDto, req: any): Promise<{
         id: string;
@@ -75,15 +75,15 @@ export declare class CustomFieldController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isRequired: boolean;
         module: string;
+        sortOrder: number;
+        isRequired: boolean;
         fieldKey: string;
         fieldLabel: string;
         fieldType: string;
         options: import("@prisma/client/runtime/library").JsonValue | null;
         placeholder: string | null;
         defaultValue: string | null;
-        sortOrder: number;
     }>;
     deleteDefinition(id: string, req: any): Promise<{
         message: string;
@@ -98,15 +98,15 @@ export declare class CustomFieldController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isRequired: boolean;
         module: string;
+        sortOrder: number;
+        isRequired: boolean;
         fieldKey: string;
         fieldLabel: string;
         fieldType: string;
         options: import("@prisma/client/runtime/library").JsonValue | null;
         placeholder: string | null;
         defaultValue: string | null;
-        sortOrder: number;
     }[]>;
     saveValues(module: string, recordId: string, body: any, req: any): Promise<any[]>;
 }

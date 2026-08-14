@@ -118,20 +118,38 @@ import { VendorPortalModule } from './vendor-portal/vendor-portal.module';
 import { CustomerPortalModule } from './customer-portal/customer-portal.module';
 import { IotModule } from './iot/iot.module';
 import { AccountingModule } from './accounting/accounting.module';
+import { UiControlModule } from './ui-control/ui-control.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { TestSessionMiddleware } from './common/middleware/test-session.middleware';
 import configuration from './config/configuration';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [configuration], envFilePath: ['.env'] }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+      envFilePath: ['.env'],
+    }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-    PrismaModule, CommonModule, HealthModule, AuthModule,
-    MastersModule, UsersModule, PermissionsModule, SettingsModule,
-    ChangeRequestsModule, DummyDataModule,
-    VisitorManagementModule, VehicleManagementModule,
-    GateInwardModule, GateOutwardModule, GatePassModule,
-    GateDashboardModule, ItemMasterModule, WarehouseModule,
+    PrismaModule,
+    CommonModule,
+    HealthModule,
+    AuthModule,
+    UiControlModule,
+    MastersModule,
+    UsersModule,
+    PermissionsModule,
+    SettingsModule,
+    ChangeRequestsModule,
+    DummyDataModule,
+    VisitorManagementModule,
+    VehicleManagementModule,
+    GateInwardModule,
+    GateOutwardModule,
+    GatePassModule,
+    GateDashboardModule,
+    ItemMasterModule,
+    WarehouseModule,
     VendorModule,
     ProductModule,
     RawMaterialModule,

@@ -130,6 +130,7 @@ const vendor_portal_module_1 = require("./vendor-portal/vendor-portal.module");
 const customer_portal_module_1 = require("./customer-portal/customer-portal.module");
 const iot_module_1 = require("./iot/iot.module");
 const accounting_module_1 = require("./accounting/accounting.module");
+const ui_control_module_1 = require("./ui-control/ui-control.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const test_session_middleware_1 = require("./common/middleware/test-session.middleware");
 const configuration_1 = __importDefault(require("./config/configuration"));
@@ -142,14 +143,31 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true, load: [configuration_1.default], envFilePath: ['.env'] }),
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [configuration_1.default],
+                envFilePath: ['.env'],
+            }),
             throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-            prisma_module_1.PrismaModule, common_module_1.CommonModule, health_module_1.HealthModule, auth_module_1.AuthModule,
-            masters_module_1.MastersModule, users_module_1.UsersModule, permissions_module_1.PermissionsModule, settings_module_1.SettingsModule,
-            change_requests_module_1.ChangeRequestsModule, dummy_data_module_1.DummyDataModule,
-            visitor_management_module_1.VisitorManagementModule, vehicle_management_module_1.VehicleManagementModule,
-            gate_inward_module_1.GateInwardModule, gate_outward_module_1.GateOutwardModule, gate_pass_module_1.GatePassModule,
-            gate_dashboard_module_1.GateDashboardModule, item_master_module_1.ItemMasterModule, warehouse_module_1.WarehouseModule,
+            prisma_module_1.PrismaModule,
+            common_module_1.CommonModule,
+            health_module_1.HealthModule,
+            auth_module_1.AuthModule,
+            ui_control_module_1.UiControlModule,
+            masters_module_1.MastersModule,
+            users_module_1.UsersModule,
+            permissions_module_1.PermissionsModule,
+            settings_module_1.SettingsModule,
+            change_requests_module_1.ChangeRequestsModule,
+            dummy_data_module_1.DummyDataModule,
+            visitor_management_module_1.VisitorManagementModule,
+            vehicle_management_module_1.VehicleManagementModule,
+            gate_inward_module_1.GateInwardModule,
+            gate_outward_module_1.GateOutwardModule,
+            gate_pass_module_1.GatePassModule,
+            gate_dashboard_module_1.GateDashboardModule,
+            item_master_module_1.ItemMasterModule,
+            warehouse_module_1.WarehouseModule,
             vendor_module_1.VendorModule,
             product_module_1.ProductModule,
             raw_material_module_1.RawMaterialModule,

@@ -1,0 +1,213 @@
+import { UiControlService } from './ui-control.service';
+import { SyncElementsDto, CreateElementDto, UpdateElementDto, ReorderElementsDto, BulkUpsertOverridesDto } from './dto/ui-control.dto';
+export declare class UiControlController {
+    private readonly service;
+    constructor(service: UiControlService);
+    myVisibility(user: any): Promise<Record<string, {
+        visible: boolean;
+        sortOrder: number;
+    }>>;
+    mySidebar(user: any): Promise<{
+        key: string;
+        label: string;
+        icon: string;
+        page: string;
+        items: {
+            key: string;
+            label: string;
+            icon: string;
+            page: string;
+        }[];
+    }[]>;
+    listElements(user: any, module?: string): Promise<({
+        overrides: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            roleName: string | null;
+            userId: string | null;
+            elementId: string;
+            scopeType: string;
+            isVisible: boolean;
+            sortOrderOverride: number | null;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        label: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        key: string;
+        elementType: string;
+        module: string;
+        page: string | null;
+        icon: string | null;
+        parentKey: string | null;
+        sortOrder: number;
+        defaultVisible: boolean;
+    })[]>;
+    structure(user: any): Promise<{
+        items: ({
+            overrides: {
+                id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                roleName: string | null;
+                userId: string | null;
+                elementId: string;
+                scopeType: string;
+                isVisible: boolean;
+                sortOrderOverride: number | null;
+            }[];
+        } & {
+            id: string;
+            companyId: string;
+            label: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            key: string;
+            elementType: string;
+            module: string;
+            page: string | null;
+            icon: string | null;
+            parentKey: string | null;
+            sortOrder: number;
+            defaultVisible: boolean;
+        })[];
+        overrides: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            roleName: string | null;
+            userId: string | null;
+            elementId: string;
+            scopeType: string;
+            isVisible: boolean;
+            sortOrderOverride: number | null;
+        }[];
+        id: string;
+        companyId: string;
+        label: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        key: string;
+        elementType: string;
+        module: string;
+        page: string | null;
+        icon: string | null;
+        parentKey: string | null;
+        sortOrder: number;
+        defaultVisible: boolean;
+    }[]>;
+    pageElements(user: any): Promise<Record<string, any[]>>;
+    sync(user: any, dto: SyncElementsDto): Promise<{
+        synced: number;
+        elements: any[];
+    }>;
+    create(user: any, dto: CreateElementDto): Promise<{
+        id: string;
+        companyId: string;
+        label: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        key: string;
+        elementType: string;
+        module: string;
+        page: string | null;
+        icon: string | null;
+        parentKey: string | null;
+        sortOrder: number;
+        defaultVisible: boolean;
+    }>;
+    reorder(user: any, dto: ReorderElementsDto): Promise<{
+        reordered: number;
+    }>;
+    update(user: any, id: string, dto: UpdateElementDto): Promise<{
+        id: string;
+        companyId: string;
+        label: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        key: string;
+        elementType: string;
+        module: string;
+        page: string | null;
+        icon: string | null;
+        parentKey: string | null;
+        sortOrder: number;
+        defaultVisible: boolean;
+    }>;
+    remove(id: string): Promise<{
+        id: string;
+        companyId: string;
+        label: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        key: string;
+        elementType: string;
+        module: string;
+        page: string | null;
+        icon: string | null;
+        parentKey: string | null;
+        sortOrder: number;
+        defaultVisible: boolean;
+    }>;
+    bulkUpsert(user: any, dto: BulkUpsertOverridesDto): Promise<{
+        updated: number;
+    }>;
+    removeOverride(id: string): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        roleName: string | null;
+        userId: string | null;
+        elementId: string;
+        scopeType: string;
+        isVisible: boolean;
+        sortOrderOverride: number | null;
+    }>;
+}

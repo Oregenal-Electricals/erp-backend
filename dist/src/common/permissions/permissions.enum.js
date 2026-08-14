@@ -168,5 +168,6 @@ var Permission;
     Permission["MIS_REPORT_VIEW"] = "MIS_REPORT_VIEW";
     Permission["ANALYTICS_TAB_VIEW"] = "ANALYTICS_TAB_VIEW";
     Permission["AUDIT_VIEW"] = "AUDIT_VIEW";
+    Permission["UI_CONTROL_MANAGE"] = "UI_CONTROL_MANAGE";
 })(Permission || (exports.Permission = Permission = {}));
 //# sourceMappingURL=permissions.enum.js.map
