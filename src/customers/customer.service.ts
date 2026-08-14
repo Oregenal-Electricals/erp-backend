@@ -76,6 +76,41 @@ export class CustomerService {
     return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
   }
 
+  /**
+   * One-click customer creation from anywhere in the app (e.g. the Customer
+   * PO form's "+ Add new customer" option) - takes just a name, generates a
+   * unique code the same way BOM numbers get generated elsewhere in this
+   * project (sanitized prefix + numeric suffix on collision), and creates a
+   * REAL, permanent Customer row. This is the fix for customer names typed
+   * on a PO never actually landing in the Customers master list.
+   */
+  async quickCreate(dto: { name: string; email?: string; phone?: string }, user: any) {
+    const base = (dto.name || 'CUST').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) || 'CUST';
+    let code = base;
+    let suffix = 1;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const existing = await this.prisma.customer.findUnique({
+        where: { companyId_code: { companyId: user.companyId, code } },
+      });
+      if (!existing) break;
+      suffix++;
+      code = `${base}${suffix}`;
+    }
+    const customer = await this.prisma.customer.create({
+      data: {
+        companyId: user.companyId,
+        code,
+        name: dto.name,
+        email: dto.email || undefined,
+        phone: dto.phone || undefined,
+        createdBy: user.id,
+        updatedBy: user.id,
+      },
+    });
+    return customer;
+  }
+
   async findOne(id: string, user: any) {
     const where: any = { id };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;

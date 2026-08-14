@@ -3684,6 +3684,8 @@ model CustomerPo {
   quotationId       String?
   quotation         Quotation? @relation(fields: [quotationId], references: [id])
   customerName      String
+  customerId        String?
+  customer          Customer? @relation(fields: [customerId], references: [id])
   customerEmail     String?
   customerPhone     String?
   deliveryAddress   String?
@@ -3735,6 +3737,7 @@ model Customer {
   addresses  CustomerAddress[]
   contacts   CustomerContact[]
   gstNumbers CustomerGst[]
+  customerPos       CustomerPo[]
 
   @@unique([companyId, code])
   @@map("customers")

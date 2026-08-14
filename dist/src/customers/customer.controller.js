@@ -24,12 +24,27 @@ let CustomerController = class CustomerController {
     constructor(customerService) {
         this.customerService = customerService;
     }
-    getStats(req) { return this.customerService.getStats(req.user); }
-    findAll(req, query) { return this.customerService.findAll(req.user, query); }
-    findOne(id, req) { return this.customerService.findOne(id, req.user); }
-    create(dto, req) { return this.customerService.create(dto, req.user); }
-    update(id, dto, req) { return this.customerService.update(id, dto, req.user); }
-    remove(id, req) { return this.customerService.remove(id, req.user); }
+    getStats(req) {
+        return this.customerService.getStats(req.user);
+    }
+    findAll(req, query) {
+        return this.customerService.findAll(req.user, query);
+    }
+    findOne(id, req) {
+        return this.customerService.findOne(id, req.user);
+    }
+    create(dto, req) {
+        return this.customerService.create(dto, req.user);
+    }
+    quickCreate(dto, req) {
+        return this.customerService.quickCreate(dto, req.user);
+    }
+    update(id, dto, req) {
+        return this.customerService.update(id, dto, req.user);
+    }
+    remove(id, req) {
+        return this.customerService.remove(id, req.user);
+    }
 };
 exports.CustomerController = CustomerController;
 __decorate([
@@ -67,6 +82,15 @@ __decorate([
     __metadata("design:paramtypes", [customer_dto_1.CreateCustomerDto, Object]),
     __metadata("design:returntype", void 0)
 ], CustomerController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('quick-create'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_CREATE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], CustomerController.prototype, "quickCreate", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_EDIT),

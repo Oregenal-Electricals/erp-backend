@@ -232,10 +232,10 @@ export declare class QualityReportsController {
             invoiceNumber: string | null;
             closedBy: string | null;
             receivedDate: Date;
+            customerId: string | null;
             correctiveAction: string | null;
             batchNumber: string | null;
             assignedTo: string | null;
-            customerId: string | null;
             severity: string;
             qtyAffected: number;
             closedDate: Date | null;

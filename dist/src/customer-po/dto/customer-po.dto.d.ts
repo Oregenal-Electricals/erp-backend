@@ -14,6 +14,7 @@ export declare class CreateCpoDto {
     verbalConfirmedBy?: string;
     verbalConfirmedDate?: string;
     quotationId?: string;
+    customerId?: string;
     customerName: string;
     customerEmail?: string;
     customerPhone?: string;
@@ -30,6 +31,7 @@ export declare class UpdateCpoDto {
     verbalConfirmedBy?: string;
     verbalConfirmedDate?: string;
     quotationId?: string;
+    customerId?: string;
     customerName: string;
     customerEmail?: string;
     customerPhone?: string;

@@ -46,9 +46,9 @@ export declare class CustomerController {
             state: string | null;
             pincode: string | null;
             isDefault: boolean;
+            customerId: string;
             addressType: string;
             addressLine: string;
-            customerId: string;
         }[];
         contacts: {
             id: string;
@@ -63,8 +63,8 @@ export declare class CustomerController {
             phone: string | null;
             email: string | null;
             designation: string | null;
-            isPrimary: boolean;
             customerId: string;
+            isPrimary: boolean;
         }[];
         gstNumbers: {
             id: string;
@@ -75,9 +75,9 @@ export declare class CustomerController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            customerId: string;
             gstNumber: string;
             branchLabel: string | null;
-            customerId: string;
         }[];
     } & {
         id: string;
@@ -107,9 +107,9 @@ export declare class CustomerController {
             state: string | null;
             pincode: string | null;
             isDefault: boolean;
+            customerId: string;
             addressType: string;
             addressLine: string;
-            customerId: string;
         }[];
         contacts: {
             id: string;
@@ -124,8 +124,8 @@ export declare class CustomerController {
             phone: string | null;
             email: string | null;
             designation: string | null;
-            isPrimary: boolean;
             customerId: string;
+            isPrimary: boolean;
         }[];
         gstNumbers: {
             id: string;
@@ -136,11 +136,29 @@ export declare class CustomerController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            customerId: string;
             gstNumber: string;
             branchLabel: string | null;
-            customerId: string;
         }[];
     } & {
+        id: string;
+        companyId: string;
+        name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        code: string;
+        phone: string | null;
+        email: string | null;
+    }>;
+    quickCreate(dto: {
+        name: string;
+        email?: string;
+        phone?: string;
+    }, req: any): Promise<{
         id: string;
         companyId: string;
         name: string;
@@ -168,9 +186,9 @@ export declare class CustomerController {
             state: string | null;
             pincode: string | null;
             isDefault: boolean;
+            customerId: string;
             addressType: string;
             addressLine: string;
-            customerId: string;
         }[];
         contacts: {
             id: string;
@@ -185,8 +203,8 @@ export declare class CustomerController {
             phone: string | null;
             email: string | null;
             designation: string | null;
-            isPrimary: boolean;
             customerId: string;
+            isPrimary: boolean;
         }[];
         gstNumbers: {
             id: string;
@@ -197,9 +215,9 @@ export declare class CustomerController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            customerId: string;
             gstNumber: string;
             branchLabel: string | null;
-            customerId: string;
         }[];
     } & {
         id: string;

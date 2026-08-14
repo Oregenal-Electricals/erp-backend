@@ -83,6 +83,32 @@ let CustomerService = class CustomerService {
         ]);
         return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
     }
+    async quickCreate(dto, user) {
+        const base = (dto.name || 'CUST').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) || 'CUST';
+        let code = base;
+        let suffix = 1;
+        while (true) {
+            const existing = await this.prisma.customer.findUnique({
+                where: { companyId_code: { companyId: user.companyId, code } },
+            });
+            if (!existing)
+                break;
+            suffix++;
+            code = `${base}${suffix}`;
+        }
+        const customer = await this.prisma.customer.create({
+            data: {
+                companyId: user.companyId,
+                code,
+                name: dto.name,
+                email: dto.email || undefined,
+                phone: dto.phone || undefined,
+                createdBy: user.id,
+                updatedBy: user.id,
+            },
+        });
+        return customer;
+    }
     async findOne(id, user) {
         const where = { id };
         if (user.role !== 'SUPER_ADMIN')

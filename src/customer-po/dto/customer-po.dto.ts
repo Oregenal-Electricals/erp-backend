@@ -30,6 +30,7 @@ export class CreateCpoDto {
   verbalConfirmedDate?: string;
 
   @IsOptional() @IsString() quotationId?: string;
+  @IsOptional() @IsString() customerId?: string;
   @IsString() customerName: string;
   @IsOptional() @IsString() customerEmail?: string;
   @IsOptional() @IsString() customerPhone?: string;
@@ -57,6 +58,7 @@ export class UpdateCpoDto {
   verbalConfirmedDate?: string;
 
   @IsOptional() @IsString() quotationId?: string;
+  @IsOptional() @IsString() customerId?: string;
   @IsString() customerName: string;
   @IsOptional() @IsString() customerEmail?: string;
   @IsOptional() @IsString() customerPhone?: string;

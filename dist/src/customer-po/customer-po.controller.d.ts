@@ -71,6 +71,7 @@ export declare class CustomerPoController {
             customerPoNumber: string;
             verbalConfirmedBy: string | null;
             verbalConfirmedDate: Date | null;
+            customerId: string | null;
             customerEmail: string | null;
             customerPhone: string | null;
             cpoNumber: string;
@@ -151,6 +152,7 @@ export declare class CustomerPoController {
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         cpoNumber: string;
@@ -254,6 +256,7 @@ export declare class CustomerPoController {
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         cpoNumber: string;
@@ -330,6 +333,7 @@ export declare class CustomerPoController {
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         cpoNumber: string;
@@ -406,6 +410,7 @@ export declare class CustomerPoController {
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         cpoNumber: string;
@@ -482,6 +487,7 @@ export declare class CustomerPoController {
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         cpoNumber: string;
@@ -558,6 +564,7 @@ export declare class CustomerPoController {
         customerPoNumber: string;
         verbalConfirmedBy: string | null;
         verbalConfirmedDate: Date | null;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         cpoNumber: string;
