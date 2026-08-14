@@ -28,7 +28,6 @@ import { PriceHistoryModule } from './price-history/price-history.module';
 import { ProductRevisionModule } from './product-revisions/product-revision.module';
 import { BomModule } from './bom/bom.module';
 import { BomImportModule } from './bom-import/bom-import.module';
-import { BomRevisionModule } from './bom-revisions/bom-revision.module';
 import { CustomFieldModule } from './custom-fields/custom-field.module';
 import { PurchaseRequisitionModule } from './purchase-requisitions/purchase-requisition.module';
 import { RfqModule } from './rfq/rfq.module';
@@ -159,7 +158,6 @@ import configuration from './config/configuration';
     ProductRevisionModule,
     BomModule,
     BomImportModule,
-    BomRevisionModule,
     CustomFieldModule,
     PurchaseRequisitionModule,
     RfqModule,
