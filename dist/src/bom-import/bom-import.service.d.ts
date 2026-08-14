@@ -22,6 +22,7 @@ export declare class BomImportService {
     private audit;
     private bomService;
     constructor(prisma: PrismaService, audit: AuditService, bomService: BomService);
+    private applyTestPrefix;
     private parseRows;
     private rowsFromExcelBuffer;
     private rowsFromCsvBuffer;
@@ -34,6 +35,7 @@ export declare class BomImportService {
         totalItems: number;
         newRawMaterialsCount: number;
         existingRawMaterialsCount: number;
+        isTestSession: boolean;
     }>;
     private buildPreview;
     confirmImport(dto: ConfirmBomImportDto, user: any): Promise<{

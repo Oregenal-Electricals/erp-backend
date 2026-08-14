@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { BomService } from '../bom/bom.service';
 import { ConfirmBomImportDto } from './dto/bom-import.dto';
+import { isTestSessionActive } from '../common/context/test-session.context';
 
 interface ParsedItem {
   sNo: any;
@@ -23,6 +24,7 @@ interface ParsedSection {
 }
 
 const STOP_MARKERS = ['Prepared By', 'Checked By', 'Verified By', 'Approved By'];
+const TEST_CODE_PREFIX = 'TEST-';
 
 function parseQtyUom(val: any): [number | null, string] {
   if (val === null || val === undefined || val === '') return [null, 'PCS'];
@@ -49,6 +51,20 @@ export class BomImportService {
     private audit: AuditService,
     private bomService: BomService,
   ) {}
+
+  /**
+   * When the current request is a Test Mode session, every NEW Product or
+   * RawMaterial code gets prefixed so it can never collide with a real code
+   * uploaded later. A real (non-test) session always looks up and creates
+   * bare codes, so it will never find or touch a test-prefixed row - the two
+   * are structurally separate, not just tagged. Idempotent: won't double-prefix
+   * a code that already has it.
+   */
+  private applyTestPrefix(code: string): string {
+    if (!code) return code;
+    if (!isTestSessionActive()) return code;
+    return code.startsWith(TEST_CODE_PREFIX) ? code : `${TEST_CODE_PREFIX}${code}`;
+  }
 
   /**
    * Parses raw row data (already normalized to array-of-arrays, one row
@@ -157,6 +173,10 @@ export class BomImportService {
    * anything) so the frontend can show a clear preview: which raw
    * materials already exist vs. will be newly created, and whether the
    * product itself already exists.
+   *
+   * In a Test Mode session, this checks against TEST-prefixed codes -
+   * matching exactly what confirmImport() will actually create - so the
+   * preview never falsely claims a real row already exists (or vice versa).
    */
   private async buildPreview(parsed: { product: any; docInfo: any; sections: ParsedSection[] }, companyId: string) {
     if (!parsed.product.name && parsed.product.description) {
@@ -164,19 +184,23 @@ export class BomImportService {
     }
 
     const allPartCodes = parsed.sections.flatMap((s) => s.items.map((i) => i.partCode)).filter(Boolean);
-    const existingMaterials = allPartCodes.length
+    const lookupCodes = allPartCodes.map((c) => this.applyTestPrefix(c));
+    const existingMaterials = lookupCodes.length
       ? await this.prisma.rawMaterial.findMany({
-          where: { companyId, code: { in: allPartCodes } },
+          where: { companyId, code: { in: lookupCodes } },
           select: { id: true, code: true },
         })
       : [];
-    const existingCodeSet = new Set(existingMaterials.map((m) => m.code));
-    const existingIdByCode = new Map(existingMaterials.map((m) => [m.code, m.id]));
+    // Map back by the ORIGINAL (unprefixed) code so the rest of this method
+    // can keep comparing against parsed.partCode as before.
+    const stripPrefix = (c: string) => (c.startsWith(TEST_CODE_PREFIX) ? c.slice(TEST_CODE_PREFIX.length) : c);
+    const existingCodeSet = new Set(existingMaterials.map((m) => stripPrefix(m.code)));
+    const existingIdByCode = new Map(existingMaterials.map((m) => [stripPrefix(m.code), m.id]));
 
     let existingProduct: any = null;
     if (parsed.product.code) {
       existingProduct = await this.prisma.product.findFirst({
-        where: { companyId, code: parsed.product.code },
+        where: { companyId, code: this.applyTestPrefix(parsed.product.code) },
         select: { id: true, code: true, name: true },
       });
     }
@@ -202,6 +226,7 @@ export class BomImportService {
       totalItems,
       newRawMaterialsCount: newCount,
       existingRawMaterialsCount: totalItems - newCount,
+      isTestSession: isTestSessionActive(),
     };
   }
 
@@ -211,6 +236,10 @@ export class BomImportService {
    * for each item so the auto-zero-stock-balance hook fires exactly as
    * it does for a manually-entered BOM. All wrapped in one transaction:
    * either the whole import succeeds, or none of it is left half-done.
+   *
+   * Test Mode: every newly created Product/RawMaterial code is prefixed
+   * (see applyTestPrefix) so it structurally can never collide with a real
+   * code uploaded later - not just tagged isTestData, genuinely separate.
    */
   async confirmImport(dto: ConfirmBomImportDto, user: any) {
     const flatItems = dto.sections.flatMap((s) => s.items.map((item) => ({ ...item, section: s.name })));
@@ -232,7 +261,7 @@ export class BomImportService {
         const newProduct = await tx.product.create({
           data: {
             companyId: user.companyId,
-            code: dto.product.code,
+            code: this.applyTestPrefix(dto.product.code),
             name: dto.product.name,
             brand: dto.product.brand,
             description: dto.product.description,
@@ -278,6 +307,7 @@ export class BomImportService {
       for (const item of flatItems) {
         if (!item.itemCode || !item.itemName) continue; // skip incomplete rows silently
 
+        const lookupCode = this.applyTestPrefix(item.itemCode);
         let rawMaterialId = item.rawMaterialId;
         const uomRecord = item.uom
           ? await tx.unitOfMeasure.findFirst({ where: { companyId: user.companyId, code: item.uom } })
@@ -286,7 +316,7 @@ export class BomImportService {
             })
           : null;
         if (!rawMaterialId) {
-          const existingRm = await tx.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
+          const existingRm = await tx.rawMaterial.findFirst({ where: { companyId: user.companyId, code: lookupCode } });
           if (existingRm) {
             rawMaterialId = existingRm.id;
             if (uomRecord && existingRm.uomId !== uomRecord.id) {
@@ -296,10 +326,10 @@ export class BomImportService {
             const newRm = await tx.rawMaterial.create({
               data: {
                 companyId: user.companyId,
-                code: item.itemCode,
+                code: lookupCode,
                 name: item.itemName,
                 brand: item.preferredMake || undefined,
-                partNumber: item.itemCode,
+                partNumber: lookupCode,
                 uomId: uomRecord?.id,
                 createdBy: user.id,
                 updatedBy: user.id,
@@ -341,7 +371,7 @@ export class BomImportService {
             sequence: sequence++,
             itemType: 'RAW_MATERIAL',
             rawMaterialId,
-            itemCode: item.itemCode,
+            itemCode: lookupCode,
             itemName: item.itemName,
             uom: item.uom,
             quantity: item.quantity,

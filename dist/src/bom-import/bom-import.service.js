@@ -49,7 +49,9 @@ const sync_1 = require("csv-parse/sync");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const bom_service_1 = require("../bom/bom.service");
+const test_session_context_1 = require("../common/context/test-session.context");
 const STOP_MARKERS = ['Prepared By', 'Checked By', 'Verified By', 'Approved By'];
+const TEST_CODE_PREFIX = 'TEST-';
 function parseQtyUom(val) {
     if (val === null || val === undefined || val === '')
         return [null, 'PCS'];
@@ -74,6 +76,13 @@ let BomImportService = class BomImportService {
         this.prisma = prisma;
         this.audit = audit;
         this.bomService = bomService;
+    }
+    applyTestPrefix(code) {
+        if (!code)
+            return code;
+        if (!(0, test_session_context_1.isTestSessionActive)())
+            return code;
+        return code.startsWith(TEST_CODE_PREFIX) ? code : `${TEST_CODE_PREFIX}${code}`;
     }
     parseRows(rows) {
         const product = {};
@@ -170,18 +179,20 @@ let BomImportService = class BomImportService {
             parsed.product.name = parsed.product.description;
         }
         const allPartCodes = parsed.sections.flatMap((s) => s.items.map((i) => i.partCode)).filter(Boolean);
-        const existingMaterials = allPartCodes.length
+        const lookupCodes = allPartCodes.map((c) => this.applyTestPrefix(c));
+        const existingMaterials = lookupCodes.length
             ? await this.prisma.rawMaterial.findMany({
-                where: { companyId, code: { in: allPartCodes } },
+                where: { companyId, code: { in: lookupCodes } },
                 select: { id: true, code: true },
             })
             : [];
-        const existingCodeSet = new Set(existingMaterials.map((m) => m.code));
-        const existingIdByCode = new Map(existingMaterials.map((m) => [m.code, m.id]));
+        const stripPrefix = (c) => (c.startsWith(TEST_CODE_PREFIX) ? c.slice(TEST_CODE_PREFIX.length) : c);
+        const existingCodeSet = new Set(existingMaterials.map((m) => stripPrefix(m.code)));
+        const existingIdByCode = new Map(existingMaterials.map((m) => [stripPrefix(m.code), m.id]));
         let existingProduct = null;
         if (parsed.product.code) {
             existingProduct = await this.prisma.product.findFirst({
-                where: { companyId, code: parsed.product.code },
+                where: { companyId, code: this.applyTestPrefix(parsed.product.code) },
                 select: { id: true, code: true, name: true },
             });
         }
@@ -206,6 +217,7 @@ let BomImportService = class BomImportService {
             totalItems,
             newRawMaterialsCount: newCount,
             existingRawMaterialsCount: totalItems - newCount,
+            isTestSession: (0, test_session_context_1.isTestSessionActive)(),
         };
     }
     async confirmImport(dto, user) {
@@ -229,7 +241,7 @@ let BomImportService = class BomImportService {
                 const newProduct = await tx.product.create({
                     data: {
                         companyId: user.companyId,
-                        code: dto.product.code,
+                        code: this.applyTestPrefix(dto.product.code),
                         name: dto.product.name,
                         brand: dto.product.brand,
                         description: dto.product.description,
@@ -266,6 +278,7 @@ let BomImportService = class BomImportService {
             for (const item of flatItems) {
                 if (!item.itemCode || !item.itemName)
                     continue;
+                const lookupCode = this.applyTestPrefix(item.itemCode);
                 let rawMaterialId = item.rawMaterialId;
                 const uomRecord = item.uom
                     ? await tx.unitOfMeasure.findFirst({ where: { companyId: user.companyId, code: item.uom } })
@@ -274,7 +287,7 @@ let BomImportService = class BomImportService {
                         })
                     : null;
                 if (!rawMaterialId) {
-                    const existingRm = await tx.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
+                    const existingRm = await tx.rawMaterial.findFirst({ where: { companyId: user.companyId, code: lookupCode } });
                     if (existingRm) {
                         rawMaterialId = existingRm.id;
                         if (uomRecord && existingRm.uomId !== uomRecord.id) {
@@ -285,10 +298,10 @@ let BomImportService = class BomImportService {
                         const newRm = await tx.rawMaterial.create({
                             data: {
                                 companyId: user.companyId,
-                                code: item.itemCode,
+                                code: lookupCode,
                                 name: item.itemName,
                                 brand: item.preferredMake || undefined,
-                                partNumber: item.itemCode,
+                                partNumber: lookupCode,
                                 uomId: uomRecord === null || uomRecord === void 0 ? void 0 : uomRecord.id,
                                 createdBy: user.id,
                                 updatedBy: user.id,
@@ -323,7 +336,7 @@ let BomImportService = class BomImportService {
                     sequence: sequence++,
                     itemType: 'RAW_MATERIAL',
                     rawMaterialId,
-                    itemCode: item.itemCode,
+                    itemCode: lookupCode,
                     itemName: item.itemName,
                     uom: item.uom,
                     quantity: item.quantity,
