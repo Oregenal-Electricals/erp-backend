@@ -104,24 +104,35 @@ export class BomService {
     const where: any = { sourceBomId: id, isActive: true };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     const all = await this.prisma.bom.findMany({
-      where, orderBy: { createdAt: 'asc' },
-      include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
+      where,
+      orderBy: { createdAt: 'asc' },
+      include: {
+        product: { select: { code: true, name: true } },
+        _count: { select: { items: true } },
+      },
     });
     // Collapse each stage's bomNumber chain to one representative row
     // (prefer APPROVED, then DRAFT, then OBSOLETE; highest version as
     // tiebreaker) - same rule as the main list, so obsolete stage versions
     // don't clutter this panel either.
     const rank = (s: string) => (s === 'APPROVED' ? 2 : s === 'DRAFT' ? 1 : 0);
-    const verNum = (v: string) => parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
+    const verNum = (v: string) =>
+      parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
     const groups = new Map<string, any>();
+    const firstSeenOrder: string[] = []; // preserves creation order (SMT -> MI -> Assembly -> Packaging), not alphabetical
     for (const b of all) {
       const existing = groups.get(b.bomNumber);
-      if (!existing || rank(b.status) > rank(existing.status) ||
-          (rank(b.status) === rank(existing.status) && verNum(b.version) > verNum(existing.version))) {
+      if (!existing) firstSeenOrder.push(b.bomNumber);
+      if (
+        !existing ||
+        rank(b.status) > rank(existing.status) ||
+        (rank(b.status) === rank(existing.status) &&
+          verNum(b.version) > verNum(existing.version))
+      ) {
         groups.set(b.bomNumber, b);
       }
     }
-    return Array.from(groups.values()).sort((a, b) => a.bomNumber.localeCompare(b.bomNumber));
+    return firstSeenOrder.map((bomNumber) => groups.get(bomNumber));
   }
 
   // Alias kept for existing /history route - same as getVersions

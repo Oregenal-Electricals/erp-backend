@@ -104,20 +104,29 @@ let BomService = class BomService {
         if (user.role !== 'SUPER_ADMIN')
             where.companyId = user.companyId;
         const all = await this.prisma.bom.findMany({
-            where, orderBy: { createdAt: 'asc' },
-            include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
+            where,
+            orderBy: { createdAt: 'asc' },
+            include: {
+                product: { select: { code: true, name: true } },
+                _count: { select: { items: true } },
+            },
         });
         const rank = (s) => (s === 'APPROVED' ? 2 : s === 'DRAFT' ? 1 : 0);
         const verNum = (v) => parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
         const groups = new Map();
+        const firstSeenOrder = [];
         for (const b of all) {
             const existing = groups.get(b.bomNumber);
-            if (!existing || rank(b.status) > rank(existing.status) ||
-                (rank(b.status) === rank(existing.status) && verNum(b.version) > verNum(existing.version))) {
+            if (!existing)
+                firstSeenOrder.push(b.bomNumber);
+            if (!existing ||
+                rank(b.status) > rank(existing.status) ||
+                (rank(b.status) === rank(existing.status) &&
+                    verNum(b.version) > verNum(existing.version))) {
                 groups.set(b.bomNumber, b);
             }
         }
-        return Array.from(groups.values()).sort((a, b) => a.bomNumber.localeCompare(b.bomNumber));
+        return firstSeenOrder.map((bomNumber) => groups.get(bomNumber));
     }
     async getHistory(id, user) {
         return this.getVersions(id, user);
