@@ -1,6 +1,6 @@
 # Oregenal Electricals ERP — Project Status
 
-**Last updated:** July 29, 2026
+**Last updated:** August 14, 2026
 **Purpose:** If you're Claude starting a fresh chat with no memory of prior sessions, read this file first. It tells you exactly what's built, what's pending, and how to pick up work correctly.
 
 ---
@@ -296,7 +296,7 @@ User flagged, during a sidebar review, that "BOM Revisions" in the Inventory sec
 
 ---
 
-## Not yet started (updated)
+## Not yet started
 
 - **Production Floor page messaging**, **OQC/IPQC rework/scrap/quarantine flow**, **Stock Adjustment historical audit**, **Manpower approvals dedicated panel**, **MRP Shortage Report quick-action**, **Gate Inward for Import shipments**, **further master data rebuild** - all still open from before this session, untouched.
 - **UI Control Center: local-environment test pass** - never run against `npm run start:dev`/localhost this session; needed before the module can be marked complete per the project's own Final Rule.
