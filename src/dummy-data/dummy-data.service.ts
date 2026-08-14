@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -21,6 +21,26 @@ const HAS_COMPANY_ID: Set<string> = new Set(
     .filter((m) => m.fields.some((f) => f.name === 'companyId'))
     .map((m) => m.dbName || m.name),
 );
+
+// ── Full-wipe-except-master-data support ──
+// Model names (not table names) considered "master data" - protected from
+// the full wipe below. Verified against the real schema at startup via
+// UNMATCHED_KEEP_NAMES: if a name here doesn't match an actual Prisma model,
+// the wipe endpoint refuses to run rather than risk deleting something that
+// was meant to be protected due to a typo.
+const KEEP_MODEL_NAMES = new Set([
+  'Company', 'Plant', 'Unit', 'Department', 'Branch', 'Warehouse', 'FinancialYear',
+  'User', 'Role', 'RolePermission', 'NumberingSeries', 'SystemSettings',
+  'UnitOfMeasure', 'HsnSac', 'UiControlElement', 'UiControlOverride',
+]);
+const ALL_MODEL_NAMES = new Set(Prisma.dmmf.datamodel.models.map((m) => m.name));
+const KEEP_TABLES: Set<string> = new Set(
+  Prisma.dmmf.datamodel.models.filter((m) => KEEP_MODEL_NAMES.has(m.name)).map((m) => m.dbName || m.name),
+);
+const WIPE_TABLES: string[] = Prisma.dmmf.datamodel.models
+  .filter((m) => !KEEP_MODEL_NAMES.has(m.name))
+  .map((m) => m.dbName || m.name);
+const UNMATCHED_KEEP_NAMES: string[] = [...KEEP_MODEL_NAMES].filter((n) => !ALL_MODEL_NAMES.has(n));
 
 @Injectable()
 export class DummyDataService {
@@ -57,7 +77,7 @@ export class DummyDataService {
 
     const plantData = [
       { code: `${company.code}-PLT-T1`, name: `${company.name} - Main Plant`,     plantType: 'MANUFACTURING' },
-      { code: `${company.code}-PLT-T2`, name: `${company.name} - Assembly Plant`, plantType: 'ASSEMBLY'      },
+      { code: `${company.code}-PLT-T2`, name: `${company.name} - Assembly Plant`, plantType: 'ASSEMBLY'     },
       { code: `${company.code}-PLT-T3`, name: `${company.name} - Warehouse`,      plantType: 'WAREHOUSE'     },
     ];
 
@@ -120,7 +140,7 @@ export class DummyDataService {
 
     const branchData = [
       { code: `${company.code}-BR-T1`, name: `${company.name} - HO Branch`,    branchType: 'HEAD_OFFICE' },
-      { code: `${company.code}-BR-T2`, name: `${company.name} - Sales Branch`, branchType: 'SALES'       },
+      { code: `${company.code}-BR-T2`, name: `${company.name} - Sales Branch`, branchType: 'SALES' },
     ];
 
     for (const b of branchData) {
@@ -218,13 +238,11 @@ export class DummyDataService {
 
     const results = { changeRequestComments: 0, changeRequests: 0, users: 0, financialYears: 0, branches: 0, departments: 0, units: 0, plants: 0 };
 
-    // Step 1: Get all test users for this company
     const testUsers = await this.prisma.user.findMany({
       where: { companyId, isTestData: true }, select: { id: true },
     });
     const testUserIds = testUsers.map(u => u.id);
 
-    // Step 2: Delete all CRs by test users (even non-test ones to avoid FK violation)
     if (testUserIds.length > 0) {
       const crsToDelete = await this.prisma.changeRequest.findMany({
         where: { requestedById: { in: testUserIds } }, select: { id: true },
@@ -240,7 +258,6 @@ export class DummyDataService {
       }
     }
 
-    // Step 3: Delete test CRs for this company (those not by test users)
     const remainingTestCRs = await this.prisma.changeRequest.findMany({
       where: { companyId, isTestData: true }, select: { id: true },
     });
@@ -253,7 +270,6 @@ export class DummyDataService {
       })).count;
     }
 
-    // Step 4: Delete test users
     results.users = (await this.prisma.user.deleteMany({
       where: { companyId, isTestData: true },
     })).count;
@@ -274,7 +290,6 @@ export class DummyDataService {
   async purgeAll() {
     const results = { changeRequests: 0, users: 0, financialYears: 0, branches: 0, departments: 0, units: 0, plants: 0, companies: 0 };
 
-    // Delete all CR comments first
     const allCRs = await this.prisma.changeRequest.findMany({ select: { id: true } });
     if (allCRs.length > 0) {
       await this.prisma.changeRequestComment.deleteMany({
@@ -282,7 +297,6 @@ export class DummyDataService {
       });
     }
 
-    // Delete all CRs by test users
     const testUsers = await this.prisma.user.findMany({ where: { isTestData: true }, select: { id: true } });
     if (testUsers.length > 0) {
       await this.prisma.changeRequest.deleteMany({ where: { requestedById: { in: testUsers.map(u => u.id) } } });
@@ -378,6 +392,123 @@ export class DummyDataService {
       note: remaining.length > 0
         ? 'Tables in blockedTables still have test-tagged rows that a real (non-test) record depends on - these were deliberately left alone rather than force-deleted.'
         : undefined,
+    };
+  }
+
+  /**
+   * Read-only. Shows exactly what a full wipe would do, BEFORE anything is
+   * deleted: which tables are protected (master data) with their current row
+   * counts, which tables would be wiped and how many rows each has right
+   * now, and - critically - flags any KEEP_MODEL_NAMES entry that doesn't
+   * actually match a real Prisma model name. If unmatchedKeepNames is
+   * non-empty, DO NOT proceed - fix the name list in code first.
+   */
+  async getFullWipePreview(companyId?: string) {
+    const keepCounts: Record<string, number> = {};
+    for (const table of KEEP_TABLES) {
+      try {
+        const scoped = companyId && HAS_COMPANY_ID.has(table);
+        const sql = scoped
+          ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "companyId" = $1`
+          : `SELECT COUNT(*)::int AS count FROM "${table}"`;
+        const rows = scoped
+          ? await this.prisma.$queryRawUnsafe<{ count: number }[]>(sql, companyId)
+          : await this.prisma.$queryRawUnsafe<{ count: number }[]>(sql);
+        keepCounts[table] = rows[0]?.count || 0;
+      } catch {
+        keepCounts[table] = -1; // query failed - investigate before proceeding
+      }
+    }
+
+    const wipeCounts: Record<string, number> = {};
+    for (const table of WIPE_TABLES) {
+      try {
+        const scoped = companyId && HAS_COMPANY_ID.has(table);
+        const sql = scoped
+          ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "companyId" = $1`
+          : `SELECT COUNT(*)::int AS count FROM "${table}"`;
+        const rows = scoped
+          ? await this.prisma.$queryRawUnsafe<{ count: number }[]>(sql, companyId)
+          : await this.prisma.$queryRawUnsafe<{ count: number }[]>(sql);
+        const count = rows[0]?.count || 0;
+        if (count > 0) wipeCounts[table] = count;
+      } catch {
+        // empty/non-existent table - fine
+      }
+    }
+
+    const totalRowsToWipe = Object.values(wipeCounts).reduce((s, c) => s + c, 0);
+
+    return {
+      safeToProceed: UNMATCHED_KEEP_NAMES.length === 0,
+      unmatchedKeepNames: UNMATCHED_KEEP_NAMES, // non-empty = STOP, fix the code first
+      keptTables: keepCounts,
+      tablesToWipe: wipeCounts,
+      totalTablesAffected: Object.keys(wipeCounts).length,
+      totalRowsToWipe,
+      note: 'This is a dry run. Nothing has been deleted. Call the confirmed delete endpoint with the exact confirmation phrase to actually wipe.',
+    };
+  }
+
+  /**
+   * DESTRUCTIVE. Deletes every row in every table NOT in KEEP_TABLES - both
+   * real and test data alike, regardless of isTestData. Requires the literal
+   * confirmationPhrase 'DELETE ALL TRANSACTIONAL DATA' in the request body;
+   * anything else is rejected with zero effect. Uses the same self-ordering
+   * retry-loop as purgeTestSessionData so FK dependency order within the
+   * wipe set doesn't need to be hand-maintained. SUPER_ADMIN only - enforced
+   * again here, not just at the controller/guard level, given the stakes.
+   */
+  async fullWipeExceptMasterData(confirmationPhrase: string, user: any, companyId?: string) {
+    if (user?.role !== 'SUPER_ADMIN') {
+      throw new ForbiddenException('Only SUPER_ADMIN can perform a full data wipe');
+    }
+    if (confirmationPhrase !== 'DELETE ALL TRANSACTIONAL DATA') {
+      throw new BadRequestException(
+        'Confirmation phrase does not match. Nothing was deleted. Send exactly: "DELETE ALL TRANSACTIONAL DATA"',
+      );
+    }
+    if (UNMATCHED_KEEP_NAMES.length > 0) {
+      throw new BadRequestException(
+        `Refusing to run: these KEEP model names don't match the real schema and must be fixed first: ${UNMATCHED_KEEP_NAMES.join(', ')}`,
+      );
+    }
+
+    let remaining = [...WIPE_TABLES];
+    const deleted: Record<string, number> = {};
+    let madeProgress = true;
+
+    while (remaining.length > 0 && madeProgress) {
+      madeProgress = false;
+      const stillBlocked: string[] = [];
+      for (const table of remaining) {
+        try {
+          const scoped = companyId && HAS_COMPANY_ID.has(table);
+          const sql = scoped
+            ? `DELETE FROM "${table}" WHERE "companyId" = $1`
+            : `DELETE FROM "${table}"`;
+          const count = scoped
+            ? await this.prisma.$executeRawUnsafe(sql, companyId)
+            : await this.prisma.$executeRawUnsafe(sql);
+          if (count > 0) deleted[table] = count;
+          madeProgress = true;
+        } catch {
+          stillBlocked.push(table);
+        }
+      }
+      remaining = stillBlocked;
+    }
+
+    const totalDeleted = Object.values(deleted).reduce((s, c) => s + c, 0);
+    return {
+      message: `Full wipe complete: ${totalDeleted} rows deleted across ${Object.keys(deleted).length} tables. Master data was preserved.`,
+      deleted,
+      totalDeleted,
+      blockedTables: remaining,
+      note: remaining.length > 0
+        ? 'Tables in blockedTables still have rows a KEPT (master data) record depends on, or another blocked table depends on - left alone rather than force-deleted. Review manually.'
+        : 'No blocked tables - the wipe set fully cleared.',
+      keptTables: [...KEEP_TABLES],
     };
   }
 }

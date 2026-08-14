@@ -43,6 +43,12 @@ let DummyDataController = class DummyDataController {
     purgeTestSessionData(user) {
         return this.service.purgeTestSessionData(user.role === client_1.UserRole.SUPER_ADMIN ? undefined : user.companyId);
     }
+    getFullWipePreview(user) {
+        return this.service.getFullWipePreview(user.role === client_1.UserRole.SUPER_ADMIN ? undefined : user.companyId);
+    }
+    fullWipeExceptMasterData(confirmationPhrase, user) {
+        return this.service.fullWipeExceptMasterData(confirmationPhrase, user, user.role === client_1.UserRole.SUPER_ADMIN ? undefined : user.companyId);
+    }
 };
 exports.DummyDataController = DummyDataController;
 __decorate([
@@ -79,7 +85,7 @@ __decorate([
 ], DummyDataController.prototype, "purgeAll", null);
 __decorate([
     (0, common_1.Get)('test-session-summary'),
-    (0, swagger_1.ApiOperation)({ summary: 'Count isTestData:true rows across every module (Work Orders, Stock Adjustments, BOMs, POs, etc.) - read-only' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Count isTestData:true rows across every module - read-only' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -87,12 +93,29 @@ __decorate([
 ], DummyDataController.prototype, "getTestSessionSummary", null);
 __decorate([
     (0, common_1.Delete)('purge-test-session'),
-    (0, swagger_1.ApiOperation)({ summary: 'Delete every isTestData:true row across every module (Test Mode-created data) - SUPER_ADMIN only' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete every isTestData:true row across every module - SUPER_ADMIN only' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], DummyDataController.prototype, "purgeTestSessionData", null);
+__decorate([
+    (0, common_1.Get)('full-wipe-preview'),
+    (0, swagger_1.ApiOperation)({ summary: 'DRY RUN: shows exactly what a full wipe would delete vs keep, before anything is deleted' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], DummyDataController.prototype, "getFullWipePreview", null);
+__decorate([
+    (0, common_1.Delete)('full-wipe'),
+    (0, swagger_1.ApiOperation)({ summary: 'DESTRUCTIVE: deletes ALL data except master data. Requires exact confirmationPhrase in body: DELETE ALL TRANSACTIONAL DATA' }),
+    __param(0, (0, common_1.Body)('confirmationPhrase')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], DummyDataController.prototype, "fullWipeExceptMasterData", null);
 exports.DummyDataController = DummyDataController = __decorate([
     (0, swagger_1.ApiTags)('Dummy Data'),
     (0, swagger_1.ApiBearerAuth)(),

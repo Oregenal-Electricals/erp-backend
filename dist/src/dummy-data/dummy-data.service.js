@@ -53,6 +53,17 @@ const TEST_DATA_TABLES = client_1.Prisma.dmmf.datamodel.models
 const HAS_COMPANY_ID = new Set(client_1.Prisma.dmmf.datamodel.models
     .filter((m) => m.fields.some((f) => f.name === 'companyId'))
     .map((m) => m.dbName || m.name));
+const KEEP_MODEL_NAMES = new Set([
+    'Company', 'Plant', 'Unit', 'Department', 'Branch', 'Warehouse', 'FinancialYear',
+    'User', 'Role', 'RolePermission', 'NumberingSeries', 'SystemSettings',
+    'UnitOfMeasure', 'HsnSac', 'UiControlElement', 'UiControlOverride',
+]);
+const ALL_MODEL_NAMES = new Set(client_1.Prisma.dmmf.datamodel.models.map((m) => m.name));
+const KEEP_TABLES = new Set(client_1.Prisma.dmmf.datamodel.models.filter((m) => KEEP_MODEL_NAMES.has(m.name)).map((m) => m.dbName || m.name));
+const WIPE_TABLES = client_1.Prisma.dmmf.datamodel.models
+    .filter((m) => !KEEP_MODEL_NAMES.has(m.name))
+    .map((m) => m.dbName || m.name);
+const UNMATCHED_KEEP_NAMES = [...KEEP_MODEL_NAMES].filter((n) => !ALL_MODEL_NAMES.has(n));
 let DummyDataService = class DummyDataService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -343,6 +354,99 @@ let DummyDataService = class DummyDataService {
             note: remaining.length > 0
                 ? 'Tables in blockedTables still have test-tagged rows that a real (non-test) record depends on - these were deliberately left alone rather than force-deleted.'
                 : undefined,
+        };
+    }
+    async getFullWipePreview(companyId) {
+        var _a, _b;
+        const keepCounts = {};
+        for (const table of KEEP_TABLES) {
+            try {
+                const scoped = companyId && HAS_COMPANY_ID.has(table);
+                const sql = scoped
+                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "companyId" = $1`
+                    : `SELECT COUNT(*)::int AS count FROM "${table}"`;
+                const rows = scoped
+                    ? await this.prisma.$queryRawUnsafe(sql, companyId)
+                    : await this.prisma.$queryRawUnsafe(sql);
+                keepCounts[table] = ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.count) || 0;
+            }
+            catch (_c) {
+                keepCounts[table] = -1;
+            }
+        }
+        const wipeCounts = {};
+        for (const table of WIPE_TABLES) {
+            try {
+                const scoped = companyId && HAS_COMPANY_ID.has(table);
+                const sql = scoped
+                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "companyId" = $1`
+                    : `SELECT COUNT(*)::int AS count FROM "${table}"`;
+                const rows = scoped
+                    ? await this.prisma.$queryRawUnsafe(sql, companyId)
+                    : await this.prisma.$queryRawUnsafe(sql);
+                const count = ((_b = rows[0]) === null || _b === void 0 ? void 0 : _b.count) || 0;
+                if (count > 0)
+                    wipeCounts[table] = count;
+            }
+            catch (_d) {
+            }
+        }
+        const totalRowsToWipe = Object.values(wipeCounts).reduce((s, c) => s + c, 0);
+        return {
+            safeToProceed: UNMATCHED_KEEP_NAMES.length === 0,
+            unmatchedKeepNames: UNMATCHED_KEEP_NAMES,
+            keptTables: keepCounts,
+            tablesToWipe: wipeCounts,
+            totalTablesAffected: Object.keys(wipeCounts).length,
+            totalRowsToWipe,
+            note: 'This is a dry run. Nothing has been deleted. Call the confirmed delete endpoint with the exact confirmation phrase to actually wipe.',
+        };
+    }
+    async fullWipeExceptMasterData(confirmationPhrase, user, companyId) {
+        if ((user === null || user === void 0 ? void 0 : user.role) !== 'SUPER_ADMIN') {
+            throw new common_1.ForbiddenException('Only SUPER_ADMIN can perform a full data wipe');
+        }
+        if (confirmationPhrase !== 'DELETE ALL TRANSACTIONAL DATA') {
+            throw new common_1.BadRequestException('Confirmation phrase does not match. Nothing was deleted. Send exactly: "DELETE ALL TRANSACTIONAL DATA"');
+        }
+        if (UNMATCHED_KEEP_NAMES.length > 0) {
+            throw new common_1.BadRequestException(`Refusing to run: these KEEP model names don't match the real schema and must be fixed first: ${UNMATCHED_KEEP_NAMES.join(', ')}`);
+        }
+        let remaining = [...WIPE_TABLES];
+        const deleted = {};
+        let madeProgress = true;
+        while (remaining.length > 0 && madeProgress) {
+            madeProgress = false;
+            const stillBlocked = [];
+            for (const table of remaining) {
+                try {
+                    const scoped = companyId && HAS_COMPANY_ID.has(table);
+                    const sql = scoped
+                        ? `DELETE FROM "${table}" WHERE "companyId" = $1`
+                        : `DELETE FROM "${table}"`;
+                    const count = scoped
+                        ? await this.prisma.$executeRawUnsafe(sql, companyId)
+                        : await this.prisma.$executeRawUnsafe(sql);
+                    if (count > 0)
+                        deleted[table] = count;
+                    madeProgress = true;
+                }
+                catch (_a) {
+                    stillBlocked.push(table);
+                }
+            }
+            remaining = stillBlocked;
+        }
+        const totalDeleted = Object.values(deleted).reduce((s, c) => s + c, 0);
+        return {
+            message: `Full wipe complete: ${totalDeleted} rows deleted across ${Object.keys(deleted).length} tables. Master data was preserved.`,
+            deleted,
+            totalDeleted,
+            blockedTables: remaining,
+            note: remaining.length > 0
+                ? 'Tables in blockedTables still have rows a KEPT (master data) record depends on, or another blocked table depends on - left alone rather than force-deleted. Review manually.'
+                : 'No blocked tables - the wipe set fully cleared.',
+            keptTables: [...KEEP_TABLES],
         };
     }
 };

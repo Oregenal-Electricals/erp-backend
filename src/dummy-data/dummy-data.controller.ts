@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Delete,
+  Controller, Get, Post, Delete, Body,
   Param, UseGuards, ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -48,7 +48,7 @@ export class DummyDataController {
   }
 
   @Get('test-session-summary')
-  @ApiOperation({ summary: 'Count isTestData:true rows across every module (Work Orders, Stock Adjustments, BOMs, POs, etc.) - read-only' })
+  @ApiOperation({ summary: 'Count isTestData:true rows across every module - read-only' })
   getTestSessionSummary(@CurrentUser() user: any) {
     return this.service.getTestSessionSummary(
       user.role === UserRole.SUPER_ADMIN ? undefined : user.companyId,
@@ -56,9 +56,27 @@ export class DummyDataController {
   }
 
   @Delete('purge-test-session')
-  @ApiOperation({ summary: 'Delete every isTestData:true row across every module (Test Mode-created data) - SUPER_ADMIN only' })
+  @ApiOperation({ summary: 'Delete every isTestData:true row across every module - SUPER_ADMIN only' })
   purgeTestSessionData(@CurrentUser() user: any) {
     return this.service.purgeTestSessionData(
+      user.role === UserRole.SUPER_ADMIN ? undefined : user.companyId,
+    );
+  }
+
+  @Get('full-wipe-preview')
+  @ApiOperation({ summary: 'DRY RUN: shows exactly what a full wipe would delete vs keep, before anything is deleted' })
+  getFullWipePreview(@CurrentUser() user: any) {
+    return this.service.getFullWipePreview(
+      user.role === UserRole.SUPER_ADMIN ? undefined : user.companyId,
+    );
+  }
+
+  @Delete('full-wipe')
+  @ApiOperation({ summary: 'DESTRUCTIVE: deletes ALL data except master data. Requires exact confirmationPhrase in body: DELETE ALL TRANSACTIONAL DATA' })
+  fullWipeExceptMasterData(@Body('confirmationPhrase') confirmationPhrase: string, @CurrentUser() user: any) {
+    return this.service.fullWipeExceptMasterData(
+      confirmationPhrase,
+      user,
       user.role === UserRole.SUPER_ADMIN ? undefined : user.companyId,
     );
   }

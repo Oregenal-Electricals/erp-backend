@@ -66,4 +66,21 @@ export declare class DummyDataController {
         blockedTables: string[];
         note: string;
     }>;
+    getFullWipePreview(user: any): Promise<{
+        safeToProceed: boolean;
+        unmatchedKeepNames: string[];
+        keptTables: Record<string, number>;
+        tablesToWipe: Record<string, number>;
+        totalTablesAffected: number;
+        totalRowsToWipe: number;
+        note: string;
+    }>;
+    fullWipeExceptMasterData(confirmationPhrase: string, user: any): Promise<{
+        message: string;
+        deleted: Record<string, number>;
+        totalDeleted: number;
+        blockedTables: string[];
+        note: string;
+        keptTables: string[];
+    }>;
 }
