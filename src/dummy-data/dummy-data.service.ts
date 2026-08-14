@@ -30,8 +30,8 @@ const HAS_COMPANY_ID: Set<string> = new Set(
 // was meant to be protected due to a typo.
 const KEEP_MODEL_NAMES = new Set([
   'Company', 'Plant', 'Unit', 'Department', 'Branch', 'Warehouse', 'FinancialYear',
-  'User', 'Role', 'RolePermission', 'NumberingSeries', 'SystemSettings',
-  'UnitOfMeasure', 'HsnSac', 'UiControlElement', 'UiControlOverride',
+  'User', 'Role', 'RolePermission', 'NumberingSeries', 'SystemSetting',
+  'UnitOfMeasure', 'HsnSacCode', 'UiControlElement', 'UiControlOverride', 'AuditLog',
 ]);
 const ALL_MODEL_NAMES = new Set(Prisma.dmmf.datamodel.models.map((m) => m.name));
 const KEEP_TABLES: Set<string> = new Set(
