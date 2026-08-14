@@ -24,11 +24,18 @@ let RoutingController = class RoutingController {
     constructor(routingService) {
         this.routingService = routingService;
     }
-    findAll(req) { return this.routingService.findAll(req.user); }
-    findOne(id, req) { return this.routingService.findOne(id, req.user); }
-    getChain(routingGroupId, req) { return this.routingService.getChain(routingGroupId, req.user); }
-    create(dto, req) { return this.routingService.createRouting(dto, req.user); }
-    startProduction(dto, req) { return this.routingService.startProduction(dto, req.user); }
+    findAll(req) {
+        return this.routingService.findAll(req.user);
+    }
+    findOne(id, req) {
+        return this.routingService.findOne(id, req.user);
+    }
+    getChain(routingGroupId, req) {
+        return this.routingService.getChain(routingGroupId, req.user);
+    }
+    create(dto, req) {
+        return this.routingService.createRouting(dto, req.user);
+    }
 };
 exports.RoutingController = RoutingController;
 __decorate([
@@ -66,15 +73,6 @@ __decorate([
     __metadata("design:paramtypes", [routing_dto_1.CreateRoutingDto, Object]),
     __metadata("design:returntype", void 0)
 ], RoutingController.prototype, "create", null);
-__decorate([
-    (0, common_1.Post)('start-production'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_CREATE),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [routing_dto_1.StartProductionDto, Object]),
-    __metadata("design:returntype", void 0)
-], RoutingController.prototype, "startProduction", null);
 exports.RoutingController = RoutingController = __decorate([
     (0, common_1.Controller)('routing'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

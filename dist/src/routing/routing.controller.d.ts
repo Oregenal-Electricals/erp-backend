@@ -1,5 +1,5 @@
 import { RoutingService } from './routing.service';
-import { CreateRoutingDto, StartProductionDto } from './dto/routing.dto';
+import { CreateRoutingDto } from './dto/routing.dto';
 export declare class RoutingController {
     private readonly routingService;
     constructor(routingService: RoutingService);
@@ -144,9 +144,5 @@ export declare class RoutingController {
         updatedBy: string | null;
         finalProductId: string;
         routingName: string;
-    }>;
-    startProduction(dto: StartProductionDto, req: any): Promise<{
-        routingGroupId: string;
-        stages: any[];
     }>;
 }
