@@ -87,10 +87,11 @@ let UiControlService = class UiControlService {
             orderBy: [{ sortOrder: 'asc' }],
         });
         const sections = elements.filter((e) => e.elementType === 'SIDEBAR_SECTION');
-        const items = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM');
-        return sections
-            .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map((s) => (Object.assign(Object.assign({}, s), { items: items.filter((i) => i.parentKey === s.key).sort((a, b) => a.sortOrder - b.sortOrder) })));
+        const nestedItems = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM' && e.parentKey);
+        const standaloneItems = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM' && !e.parentKey);
+        const sectionNodes = sections.map((s) => (Object.assign(Object.assign({}, s), { items: nestedItems.filter((i) => i.parentKey === s.key).sort((a, b) => a.sortOrder - b.sortOrder) })));
+        const standaloneNodes = standaloneItems.map((i) => (Object.assign(Object.assign({}, i), { items: [] })));
+        return [...sectionNodes, ...standaloneNodes].sort((a, b) => a.sortOrder - b.sortOrder);
     }
     async getPageElements(companyId) {
         const elements = await this.prisma.uiControlElement.findMany({

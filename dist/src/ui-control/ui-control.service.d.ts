@@ -104,42 +104,7 @@ export declare class UiControlService {
         defaultVisible: boolean;
     })[]>;
     getStructureTree(companyId: string): Promise<{
-        items: ({
-            overrides: {
-                id: string;
-                companyId: string;
-                isActive: boolean;
-                isTestData: boolean;
-                createdAt: Date;
-                updatedAt: Date;
-                createdBy: string | null;
-                updatedBy: string | null;
-                roleName: string | null;
-                userId: string | null;
-                elementId: string;
-                scopeType: string;
-                isVisible: boolean;
-                sortOrderOverride: number | null;
-            }[];
-        } & {
-            id: string;
-            companyId: string;
-            label: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            key: string;
-            elementType: string;
-            module: string;
-            page: string | null;
-            icon: string | null;
-            parentKey: string | null;
-            sortOrder: number;
-            defaultVisible: boolean;
-        })[];
+        items: any[];
         overrides: {
             id: string;
             companyId: string;
@@ -181,10 +146,10 @@ export declare class UiControlService {
         icon: string;
         page: string;
         items: {
-            key: string;
-            label: string;
-            icon: string;
-            page: string;
+            key: any;
+            label: any;
+            icon: any;
+            page: any;
         }[];
     }[]>;
     upsertOverride(companyId: string, dto: UpsertOverrideDto, userId: string): Promise<{

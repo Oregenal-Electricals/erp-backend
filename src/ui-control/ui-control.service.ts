@@ -94,13 +94,19 @@ export class UiControlService {
       orderBy: [{ sortOrder: 'asc' }],
     });
     const sections = elements.filter((e) => e.elementType === 'SIDEBAR_SECTION');
-    const items = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM');
-    return sections
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((s) => ({
-        ...s,
-        items: items.filter((i) => i.parentKey === s.key).sort((a, b) => a.sortOrder - b.sortOrder),
-      }));
+    // Nested items live under a section (parentKey set). A SIDEBAR_ITEM with
+    // NO parentKey is a standalone top-level link (e.g. Dashboard) — it must
+    // appear in the same top-level list as sections, not get silently dropped.
+    const nestedItems = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM' && e.parentKey);
+    const standaloneItems = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM' && !e.parentKey);
+
+    const sectionNodes = sections.map((s) => ({
+      ...s,
+      items: nestedItems.filter((i) => i.parentKey === s.key).sort((a, b) => a.sortOrder - b.sortOrder),
+    }));
+    const standaloneNodes = standaloneItems.map((i) => ({ ...i, items: [] }));
+
+    return [...sectionNodes, ...standaloneNodes].sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
   async getPageElements(companyId: string) {
