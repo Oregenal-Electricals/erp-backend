@@ -443,9 +443,29 @@ export class MrpService {
     return board;
   }
 
-  async runAllocation(dto: { warehouseId: string; allocations: { soItemId: string; buildQty: number }[] }, user: any) {
+  /**
+   * Priority-ordered, partial-fulfillment allocation. Sales Order items are
+   * processed in the exact order the caller submits them (the Production
+   * Planning screen submits them in the user's ranked ↑↓ priority order) -
+   * each item gets first claim on whatever material is still available
+   * after every higher-priority item ahead of it has already taken its
+   * share. An item with only partial raw-material coverage gets a Work
+   * Order for the maximum quantity actually producible right now, not an
+   * all-or-nothing rejection; the shortfall simply stays as pendingQty for
+   * a future allocation run once more stock arrives - no separate "pending"
+   * record needed, since remainingToPlan is already computed dynamically
+   * everywhere else in this file.
+   *
+   * "Virtual consumption" tracking: since nothing is actually reserved in
+   * the database until a Work Order is created, a higher-priority item's
+   * claim on a shared raw material has to be tracked in memory (consumedSoFar)
+   * and subtracted from what the next item sees as available - otherwise
+   * every item in the batch would see the same starting stock levels and
+   * over-allocate the same scarce material to more than one order.
+   */
+  async runAllocation(dto: { warehouseId: string; allocations: { soItemId: string; buildQty: number }[]}, user: any) {
     const companyId = user.companyId;
-    const active = (dto.allocations || []).filter(a => a.buildQty > 0);
+    const active = (dto.allocations || []).filter(a=> a.buildQty > 0);
     if (active.length === 0) throw new BadRequestException('No build quantities entered');
     if (!dto.warehouseId) throw new BadRequestException('warehouseId is required');
 
@@ -456,22 +476,14 @@ export class MrpService {
         include: { salesOrder: true },
       });
       if (!soItem) throw new NotFoundException(`Sales order item ${a.soItemId} not found`);
-      const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
+      const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode }});
       if (!product) throw new BadRequestException(`No product master found for item code ${soItem.itemCode}`);
 
-      // A customer may order the fully-packaged product (Type 1, backed by
-      // its own MASTER BOM), or an intermediate routing stage's own output
-      // directly (Type 2/3, e.g. SMT boards or an MI assembly) - those are
-      // only backed by a STAGE-type BOM hanging off a RoutingStage, never a
-      // standalone MASTER BOM on the product itself.
       const bom = await this.findProducingBom(companyId, product.id);
       if (!bom) throw new BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
 
-      // Defense in depth: the planning board only shows the remaining
-      // unplanned quantity, but never trust client-submitted qty blindly -
-      // recompute it here and reject anything beyond what's actually left.
       const alreadyPlanned = await this.prisma.workOrder.aggregate({
-        where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: { not: 'CANCELLED' } },
+        where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: {not: 'CANCELLED' } },
         _sum: { plannedQty: true },
       });
       const remainingToPlan = Math.max(0, soItem.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
@@ -482,38 +494,45 @@ export class MrpService {
       resolved.push({ soItem, product, bom, buildQty: a.buildQty });
     }
 
-    // Fully-exploded, true-leaf-level shortages across everything being
-    // allocated in this call - an intermediate item (SMT board, MI
-    // assembly, etc.) that already has enough of its own stock never
-    // forces its raw materials to be checked at all; only a genuine gap
-    // recurses down to what would actually need to be purchased.
-    const rawShortages = await this.explodeMaterialNeeds(
-      companyId, dto.warehouseId,
-      resolved.map(r => ({ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty })),
-    );
-    const shortages = rawShortages.map(s => ({
-      itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
-      totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
-    }));
-
-    if (shortages.length > 0) {
-      return { feasible: false, shortages, createdWorkOrders: [] };
-    }
-
+    const consumedSoFar = new Map<string, number>();
     const createdWorkOrders = [];
+    const partiallyFulfilled = [];
+    const skipped = [];
+
     for (const r of resolved) {
-      // If this product has a defined production routing (SMT -> MI ->
-      // Assembly -> Packaging etc.), create the full stage chain directly
-      // instead of also creating a separate top-level Work Order. Creating
-      // both used to reserve the same material twice - once against a
-      // "parent" WO that never got produced against, and again against
-      // each routing stage - leaving the parent's reservation stuck
-      // forever since nothing ever completed or cancelled it.
-      // A customer may order the fully-packaged product (Type 1, full
-      // chain), or an intermediate stage's own output directly - SMT
-      // boards (Type 2) or an MI-stage assembly (Type 3). Either way, we
-      // find whichever routing stage actually produces the ordered item
-      // and only run the chain up through that stage.
+      const rawNeed = await this.explodeMaterialNeeds(
+        companyId, dto.warehouseId,
+        [{ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty }],
+      );
+
+      let minRatio = 1;
+      for (const need of rawNeed) {
+        const alreadyTaken = consumedSoFar.get(need.itemCode) || 0;
+        const effectiveAvailable = Math.max(0, need.availableQty - alreadyTaken);
+        const ratio = need.netRequired > 0 ? effectiveAvailable / need.netRequired : 1;
+        minRatio = Math.min(minRatio, ratio);
+      }
+      minRatio = Math.max(0, Math.min(1, minRatio));
+      const actualQty = Math.floor(r.buildQty * minRatio);
+
+      if (actualQty <= 0) {
+        skipped.push({
+          soItemId: r.soItem.id, itemCode: r.soItem.itemCode, itemName: r.soItem.itemName,
+          soNumber: r.soItem.salesOrder.soNumber, requestedQty: r.buildQty,
+          reason: 'No material currently available for this item',
+        });
+        continue;
+      }
+
+      // Record this item's ACTUAL consumption (at whatever qty is really
+      // being built) so the next, lower-priority item in this same run sees
+      // correctly reduced availability - before anything else, this happens
+      // regardless of routing vs. plain-WO path below.
+      for (const need of rawNeed) {
+        const perUnit = r.buildQty > 0 ? need.netRequired / r.buildQty : 0;
+        consumedSoFar.set(need.itemCode, (consumedSoFar.get(need.itemCode) || 0) + perUnit * actualQty);
+      }
+
       let routing = await this.prisma.productRouting.findFirst({
         where: { companyId, finalProductId: r.product.id, isActive: true },
       });
@@ -530,14 +549,13 @@ export class MrpService {
         }
       }
 
+      let createdEntry: any;
+
       if (routing) {
         const chain = await this.routingService.startProduction(
-          { routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId, stopAtSequence },
+          { routingId: routing.id, plannedQty: actualQty, warehouseId: dto.warehouseId, stopAtSequence},
           user,
         );
-        // Only the final stage produces the same item the Sales Order is
-        // waiting on, so that's the one MRP's remaining-qty tracking needs
-        // to see.
         const finalStage = chain.stages[chain.stages.length - 1];
         await this.prisma.workOrder.update({
           where: { id: finalStage.woId },
@@ -547,44 +565,62 @@ export class MrpService {
           where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
           data: { status: 'IN_PRODUCTION', updatedBy: user.id },
         });
-        createdWorkOrders.push({
+        createdEntry = {
           woId: finalStage.woId, woNumber: finalStage.woNumber,
           soNumber: r.soItem.salesOrder.soNumber,
-          productCode: r.product.code, buildQty: r.buildQty,
+          productCode: r.product.code, buildQty: actualQty,
           routingGroupId: chain.routingGroupId, stages: chain.stages,
+        };
+      } else {
+        const woNumber = await this.generateWoNumber(companyId);
+        const wo = await this.prisma.workOrder.create({
+          data: {
+            woNumber, productCode: r.product.code, productName: r.product.name,
+            uom: r.soItem.uom || 'PCS', bomId: r.bom.id, warehouseId: dto.warehouseId,
+            plannedQty: actualQty,
+            plannedStartDate: new Date(),
+            plannedEndDate: new Date(Date.now() + 7 *24 * 60 * 60 * 1000),
+            priority: 'MEDIUM', salesOrderId: r.soItem.salesOrder.id,
+            remarks: `Auto-planned from ${r.soItem.salesOrder.soNumber}`,
+            companyId, createdBy: user.id, updatedBy:user.id,
+          },
         });
-        continue;
+        await this.audit.log({ tableName: 'work_orders', recordId: wo.id, action: 'CREATE', newValues: wo, changedBy: user.id });
+        const reservations = await this.materialReservation.reserveForWorkOrder(wo.id, user);
+        await this.prisma.workOrder.update({ where: {id: wo.id }, data: { status: 'RELEASED' } });
+        await this.prisma.salesOrder.updateMany({
+          where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
+          data: { status: 'IN_PRODUCTION', updatedBy:user.id },
+        });
+        createdEntry = {
+          woId: wo.id, woNumber, soNumber: r.soItem.salesOrder.soNumber,
+          productCode: r.product.code, buildQty: actualQty, reservations,
+        };
       }
 
-      const woNumber = await this.generateWoNumber(companyId);
-      const wo = await this.prisma.workOrder.create({
-        data: {
-          woNumber, productCode: r.product.code, productName: r.product.name,
-          uom: r.soItem.uom || 'PCS', bomId: r.bom.id, warehouseId: dto.warehouseId,
-          plannedQty: r.buildQty,
-          plannedStartDate: new Date(),
-          plannedEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          priority: 'MEDIUM', salesOrderId: r.soItem.salesOrder.id,
-          remarks: `Auto-planned from ${r.soItem.salesOrder.soNumber}`,
-          companyId, createdBy: user.id, updatedBy: user.id,
-        },
-      });
-      await this.audit.log({ tableName: 'work_orders', recordId: wo.id, action: 'CREATE', newValues: wo, changedBy: user.id });
-      const reservations = await this.materialReservation.reserveForWorkOrder(wo.id, user);
-      await this.prisma.workOrder.update({ where: { id: wo.id }, data: { status: 'RELEASED' } });
-      await this.prisma.salesOrder.updateMany({
-        where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
-        data: { status: 'IN_PRODUCTION', updatedBy: user.id },
-      });
-      createdWorkOrders.push({
-        woId: wo.id, woNumber, soNumber: r.soItem.salesOrder.soNumber,
-        productCode: r.product.code, buildQty: r.buildQty, reservations,
-      });
+      if (actualQty < r.buildQty) {
+        createdEntry.partial = true;
+        createdEntry.requestedQty = r.buildQty;
+        createdEntry.remainingPending = r.buildQty - actualQty;
+        partiallyFulfilled.push({
+          itemCode: r.soItem.itemCode, soNumber: r.soItem.salesOrder.soNumber,
+          requestedQty: r.buildQty, builtQty: actualQty, remainingPending: r.buildQty - actualQty,
+        });
+      }
+
+      createdWorkOrders.push(createdEntry);
     }
 
-    return { feasible: true, shortages: [], createdWorkOrders };
+    return {
+      feasible: createdWorkOrders.length > 0,
+      createdWorkOrders,
+      partiallyFulfilled,
+      skipped,
+      note: skipped.length > 0 || partiallyFulfilled.length > 0
+        ? 'Some items were partially fulfilled or skipped due to material availability - the shortfall remains pending for a future allocation run.'
+        : undefined,
+    };
   }
-
   private async generateWoNumber(companyId: string): Promise<string> {
     const count = await this.prisma.workOrder.count({ where: { companyId } });
     const year = new Date().getFullYear();

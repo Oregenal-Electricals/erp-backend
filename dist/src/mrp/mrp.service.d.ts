@@ -79,19 +79,10 @@ export declare class MrpService {
         }[];
     }, user: any): Promise<{
         feasible: boolean;
-        shortages: {
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            totalNeeded: number;
-            available: number;
-            shortfall: number;
-        }[];
         createdWorkOrders: any[];
-    } | {
-        feasible: boolean;
-        shortages: any[];
-        createdWorkOrders: any[];
+        partiallyFulfilled: any[];
+        skipped: any[];
+        note: string;
     }>;
     private generateWoNumber;
 }

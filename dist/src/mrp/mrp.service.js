@@ -389,16 +389,33 @@ let MrpService = class MrpService {
             }
             resolved.push({ soItem, product, bom, buildQty: a.buildQty });
         }
-        const rawShortages = await this.explodeMaterialNeeds(companyId, dto.warehouseId, resolved.map(r => ({ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty })));
-        const shortages = rawShortages.map(s => ({
-            itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
-            totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
-        }));
-        if (shortages.length > 0) {
-            return { feasible: false, shortages, createdWorkOrders: [] };
-        }
+        const consumedSoFar = new Map();
         const createdWorkOrders = [];
+        const partiallyFulfilled = [];
+        const skipped = [];
         for (const r of resolved) {
+            const rawNeed = await this.explodeMaterialNeeds(companyId, dto.warehouseId, [{ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty }]);
+            let minRatio = 1;
+            for (const need of rawNeed) {
+                const alreadyTaken = consumedSoFar.get(need.itemCode) || 0;
+                const effectiveAvailable = Math.max(0, need.availableQty - alreadyTaken);
+                const ratio = need.netRequired > 0 ? effectiveAvailable / need.netRequired : 1;
+                minRatio = Math.min(minRatio, ratio);
+            }
+            minRatio = Math.max(0, Math.min(1, minRatio));
+            const actualQty = Math.floor(r.buildQty * minRatio);
+            if (actualQty <= 0) {
+                skipped.push({
+                    soItemId: r.soItem.id, itemCode: r.soItem.itemCode, itemName: r.soItem.itemName,
+                    soNumber: r.soItem.salesOrder.soNumber, requestedQty: r.buildQty,
+                    reason: 'No material currently available for this item',
+                });
+                continue;
+            }
+            for (const need of rawNeed) {
+                const perUnit = r.buildQty > 0 ? need.netRequired / r.buildQty : 0;
+                consumedSoFar.set(need.itemCode, (consumedSoFar.get(need.itemCode) || 0) + perUnit * actualQty);
+            }
             let routing = await this.prisma.productRouting.findFirst({
                 where: { companyId, finalProductId: r.product.id, isActive: true },
             });
@@ -413,8 +430,9 @@ let MrpService = class MrpService {
                     stopAtSequence = matchedStage.sequence;
                 }
             }
+            let createdEntry;
             if (routing) {
-                const chain = await this.routingService.startProduction({ routingId: routing.id, plannedQty: r.buildQty, warehouseId: dto.warehouseId, stopAtSequence }, user);
+                const chain = await this.routingService.startProduction({ routingId: routing.id, plannedQty: actualQty, warehouseId: dto.warehouseId, stopAtSequence }, user);
                 const finalStage = chain.stages[chain.stages.length - 1];
                 await this.prisma.workOrder.update({
                     where: { id: finalStage.woId },
@@ -424,40 +442,59 @@ let MrpService = class MrpService {
                     where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
                     data: { status: 'IN_PRODUCTION', updatedBy: user.id },
                 });
-                createdWorkOrders.push({
+                createdEntry = {
                     woId: finalStage.woId, woNumber: finalStage.woNumber,
                     soNumber: r.soItem.salesOrder.soNumber,
-                    productCode: r.product.code, buildQty: r.buildQty,
+                    productCode: r.product.code, buildQty: actualQty,
                     routingGroupId: chain.routingGroupId, stages: chain.stages,
-                });
-                continue;
+                };
             }
-            const woNumber = await this.generateWoNumber(companyId);
-            const wo = await this.prisma.workOrder.create({
-                data: {
-                    woNumber, productCode: r.product.code, productName: r.product.name,
-                    uom: r.soItem.uom || 'PCS', bomId: r.bom.id, warehouseId: dto.warehouseId,
-                    plannedQty: r.buildQty,
-                    plannedStartDate: new Date(),
-                    plannedEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                    priority: 'MEDIUM', salesOrderId: r.soItem.salesOrder.id,
-                    remarks: `Auto-planned from ${r.soItem.salesOrder.soNumber}`,
-                    companyId, createdBy: user.id, updatedBy: user.id,
-                },
-            });
-            await this.audit.log({ tableName: 'work_orders', recordId: wo.id, action: 'CREATE', newValues: wo, changedBy: user.id });
-            const reservations = await this.materialReservation.reserveForWorkOrder(wo.id, user);
-            await this.prisma.workOrder.update({ where: { id: wo.id }, data: { status: 'RELEASED' } });
-            await this.prisma.salesOrder.updateMany({
-                where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
-                data: { status: 'IN_PRODUCTION', updatedBy: user.id },
-            });
-            createdWorkOrders.push({
-                woId: wo.id, woNumber, soNumber: r.soItem.salesOrder.soNumber,
-                productCode: r.product.code, buildQty: r.buildQty, reservations,
-            });
+            else {
+                const woNumber = await this.generateWoNumber(companyId);
+                const wo = await this.prisma.workOrder.create({
+                    data: {
+                        woNumber, productCode: r.product.code, productName: r.product.name,
+                        uom: r.soItem.uom || 'PCS', bomId: r.bom.id, warehouseId: dto.warehouseId,
+                        plannedQty: actualQty,
+                        plannedStartDate: new Date(),
+                        plannedEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                        priority: 'MEDIUM', salesOrderId: r.soItem.salesOrder.id,
+                        remarks: `Auto-planned from ${r.soItem.salesOrder.soNumber}`,
+                        companyId, createdBy: user.id, updatedBy: user.id,
+                    },
+                });
+                await this.audit.log({ tableName: 'work_orders', recordId: wo.id, action: 'CREATE', newValues: wo, changedBy: user.id });
+                const reservations = await this.materialReservation.reserveForWorkOrder(wo.id, user);
+                await this.prisma.workOrder.update({ where: { id: wo.id }, data: { status: 'RELEASED' } });
+                await this.prisma.salesOrder.updateMany({
+                    where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
+                    data: { status: 'IN_PRODUCTION', updatedBy: user.id },
+                });
+                createdEntry = {
+                    woId: wo.id, woNumber, soNumber: r.soItem.salesOrder.soNumber,
+                    productCode: r.product.code, buildQty: actualQty, reservations,
+                };
+            }
+            if (actualQty < r.buildQty) {
+                createdEntry.partial = true;
+                createdEntry.requestedQty = r.buildQty;
+                createdEntry.remainingPending = r.buildQty - actualQty;
+                partiallyFulfilled.push({
+                    itemCode: r.soItem.itemCode, soNumber: r.soItem.salesOrder.soNumber,
+                    requestedQty: r.buildQty, builtQty: actualQty, remainingPending: r.buildQty - actualQty,
+                });
+            }
+            createdWorkOrders.push(createdEntry);
         }
-        return { feasible: true, shortages: [], createdWorkOrders };
+        return {
+            feasible: createdWorkOrders.length > 0,
+            createdWorkOrders,
+            partiallyFulfilled,
+            skipped,
+            note: skipped.length > 0 || partiallyFulfilled.length > 0
+                ? 'Some items were partially fulfilled or skipped due to material availability - the shortfall remains pending for a future allocation run.'
+                : undefined,
+        };
     }
     async generateWoNumber(companyId) {
         const count = await this.prisma.workOrder.count({ where: { companyId } });
