@@ -348,13 +348,31 @@ At the user's explicit request, confirmed via two direct design questions before
 
 ---
 
+### 43. UI Control Center — Module Complete (local test pass done, final closeout)
+
+Confirmed working end-to-end against **local dev** as the last remaining step from item 31 (dev DB needed bootstrapping first - found already restored to a working state, 1 company/14 users/124 UI Control elements, cause unclear but data verified correct). One real environment issue caught and fixed along the way: `.env` had been left pointing at staging (from an earlier same-session swap-and-restore) rather than dev - restored from `.env.dev.backup`, verified the connection string before trusting it.
+
+**Verified locally**: backend (`npm run start:dev`, port 3001) returns the identical `/ui-control/my-sidebar` response as staging - same 14 top-level entries, same nested item counts across every section. Frontend (`npm run dev`, port 3000, `NEXT_PUBLIC_API_URL` correctly pointed at `localhost:3001`) - sidebar renders correctly, `/settings/ui-control` loads, drag/move-and-save persists correctly.
+
+**Per the project's own Final Rule** ("no module is complete until local and staging both work") - **UI Control Center is now Module Complete.** Manifest rollout (extending field/column-level control beyond the one BOM price example to other modules) remains open as a separate, ongoing, module-by-module task - same cadence as everything else in this project - not a blocker to closing this module out.
+
+---
+
+---
+
 ## Not yet started
 
-- Everything already listed remains open (Production Floor messaging, OQC/IPQC disposition flow, Stock Adjustment historical audit, Manpower approvals panel, MRP Shortage Report quick-action, Gate Inward for Import, UI Control Center local-environment test pass and manifest rollout, dev DB bootstrap, the `/masters` dead-links bug).
-- **Run Allocation frontend update** - the Production Planning page needs to actually display `partiallyFulfilled` and `skipped` results from the new response shape; right now a partial/skipped result is invisible in the UI even though the backend correctly computed it (confirmed only via direct API testing this session).
-- **Audit other nested Prisma writes for the same silent test-tagging gap** found in item 41 #2 - any `X: { create: [...] }` nested write anywhere in the codebase is a candidate; the CPO→SO one is fixed, others may not be.
-- **JWT token lifetime** - observed expiring within roughly a minute or two of issuance multiple times again this session (same issue flagged, still not investigated, in an earlier part of this session). Genuinely disruptive during rapid API testing; worth checking `JWT_EXPIRES_IN` is actually being read/honored.
-- **A true multi-order priority-ranking test of Run Allocation** has not been run - only a single-item partial-fulfillment scenario was verified. The "higher-priority order gets first claim on shared scarce material, lower-priority order gets whatever's left" behavior is implemented and logically sound but hasn't been exercised with two competing Sales Orders sharing a bottleneck material.
+- **Production Floor page messaging** - doesn't yet tell floor staff that completing a WO/confirming an FG Receipt no longer makes stock instantly usable (Phase C). Needs a UX pass, not a backend change.
+- **OQC / IPQC rework/scrap/quarantine flow** - a `FAIL`/`CONDITIONAL` OQC result currently just stays permanently un-released with no formal next step, and a stopped WO with an unresolved IPQC FAIL has no formal disposition path either.
+- **Stock Adjustment historical audit** - every pre-fix `DECREASE` adjustment needs manual review for silently-inflated balances.
+- **Frontend UI for a dedicated Manpower approvals panel** - Plant Head must currently use the generic `/workflows` page; no "my pending manpower approvals" view exists yet.
+- **MRP Shortage Report** - no "Create PR from Shortage" quick-action button; manual re-entry required to raise a Purchase Requisition from a shortage line.
+- **Gate Inward for Import shipments** - Gate Inward currently only links to domestic Purchase Orders; Import shipments bypass this step entirely today.
+- **UI Control Center: manifest rollout** - field/column-level control (the `<UiGate>` framework) is proven working for one example (`purchase.po.field.unitPrice`); the other ~145 modules' fields/columns/buttons still need their keys added one module at a time.
+- **A pre-existing, unrelated bug found but not fixed**: the `/masters` landing page has dead links using old pluralized/hyphenated route names (`/gate-inward`, `/masters/branches`, etc.) that no longer exist post-routing-cleanup - same disease as the sidebar audit in item 30, on a page that audit didn't cover.
+- **Audit other nested Prisma writes for the silent test-tagging gap found in item 41 #2** - any `X: { create: [...] }` nested write anywhere in the codebase is a candidate for the same bug (a top-level model gets auto-tagged `isTestData` correctly, its nested-created children silently don't). The CPO→SO one is fixed; others may not be.
+- **JWT token lifetime** - observed expiring within roughly a minute or two of issuance multiple times this session, well short of the documented `24h`/`7d` intent. Genuinely disruptive during rapid API testing; worth checking `JWT_EXPIRES_IN` is actually being read/honored, and whether Render restarts are invalidating sessions.
+- **A true multi-order priority-ranking test of Run Allocation** has not been run - only a single-item partial-fulfillment scenario was verified. The "higher-priority order gets first claim on shared scarce material" behavior is implemented and logically sound but hasn't been exercised with two competing Sales Orders sharing a bottleneck material.
 
 ---
 
