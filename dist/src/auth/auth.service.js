@@ -104,6 +104,33 @@ let AuthService = class AuthService {
             },
         };
     }
+    async previewLoginAsRole(roleName, requestingUser) {
+        if (requestingUser.role !== 'SUPER_ADMIN') {
+            throw new common_1.UnauthorizedException('Only SUPER_ADMIN can start a role preview');
+        }
+        const user = await this.prisma.user.findFirst({
+            where: { companyId: requestingUser.companyId, role: roleName, isActive: true },
+            include: { company: { select: { id: true, name: true, code: true } } },
+            orderBy: { createdAt: 'asc' },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException(`No active user found for role ${roleName} - seed one first via Settings > Users`);
+        }
+        const allRoles = [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i);
+        const payload = {
+            sub: user.id, email: user.email, role: user.role,
+            additionalRoles: user.additionalRoles || [], allRoles, companyId: user.companyId,
+        };
+        const accessToken = this.jwt.sign(payload);
+        return {
+            accessToken,
+            user: {
+                id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                role: user.role, additionalRoles: user.additionalRoles || [], allRoles,
+                companyId: user.companyId, company: user.company, mustChangePwd: user.mustChangePwd,
+            },
+        };
+    }
     async me(userId) {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },

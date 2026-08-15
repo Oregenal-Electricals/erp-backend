@@ -24,6 +24,25 @@ export declare class AuthService {
             mustChangePwd: boolean;
         };
     }>;
+    previewLoginAsRole(roleName: string, requestingUser: any): Promise<{
+        accessToken: string;
+        user: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            role: string;
+            additionalRoles: string[];
+            allRoles: string[];
+            companyId: string;
+            company: {
+                id: string;
+                name: string;
+                code: string;
+            };
+            mustChangePwd: boolean;
+        };
+    }>;
     me(userId: string): Promise<{
         allRoles: string[];
         role: string;

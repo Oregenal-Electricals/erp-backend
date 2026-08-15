@@ -28,6 +28,9 @@ let AuthController = class AuthController {
         const ip = req.ip || ((_a = req.socket) === null || _a === void 0 ? void 0 : _a.remoteAddress);
         return this.authService.login(dto, ip);
     }
+    async previewLogin(roleName, user) {
+        return this.authService.previewLoginAsRole(roleName, user);
+    }
     async me(user) {
         return this.authService.me(user.id);
     }
@@ -49,6 +52,17 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get current logged-in user profile' }),
+    (0, common_1.Post)('preview-login'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'SUPER_ADMIN only: log in directly as the real seeded user for a given role, to preview their full experience' }),
+    __param(0, (0, common_1.Body)('roleName')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "previewLogin", null);
+__decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

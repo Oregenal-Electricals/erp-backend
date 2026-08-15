@@ -24,6 +24,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current logged-in user profile' })
+  @Post('preview-login')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'SUPER_ADMIN only: log in directly as the real seeded user for a given role, to preview their full experience' })
+  async previewLogin(@Body('roleName') roleName: string, @CurrentUser() user: any) {
+    return this.authService.previewLoginAsRole(roleName, user);
+  }
+
   async me(@CurrentUser() user: any) {
     return this.authService.me(user.id);
   }
