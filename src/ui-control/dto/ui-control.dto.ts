@@ -50,6 +50,7 @@ export class UpsertOverrideDto {
   @IsOptional() @IsString() userId?: string;
   @IsBoolean() isVisible: boolean;
   @IsOptional() @IsString() customLabel?: string;
+  @IsOptional() @IsString() parentKeyOverride?: string;
   @IsOptional() @IsInt() sortOrderOverride?: number;
 }
 

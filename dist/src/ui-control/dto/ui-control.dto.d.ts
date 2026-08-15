@@ -37,6 +37,7 @@ export declare class UpsertOverrideDto {
     userId?: string;
     isVisible: boolean;
     customLabel?: string;
+    parentKeyOverride?: string;
     sortOrderOverride?: number;
 }
 export declare class BulkUpsertOverridesDto {

@@ -7,31 +7,10 @@ export declare class UiControlController {
         visible: boolean;
         sortOrder: number;
         label: string;
+        parentKeyOverride?: string | null;
     }>>;
-    mySidebar(user: any): Promise<{
-        key: string;
-        label: string;
-        icon: string;
-        page: string;
-        items: {
-            key: any;
-            label: any;
-            icon: any;
-            page: any;
-        }[];
-    }[]>;
-    previewSidebar(user: any, roleName: string): Promise<{
-        key: string;
-        label: string;
-        icon: string;
-        page: string;
-        items: {
-            key: any;
-            label: any;
-            icon: any;
-            page: any;
-        }[];
-    }[]>;
+    mySidebar(user: any): Promise<any[]>;
+    previewSidebar(user: any, roleName: string): Promise<any[]>;
     listElements(user: any, module?: string): Promise<({
         overrides: {
             id: string;
@@ -48,6 +27,7 @@ export declare class UiControlController {
             scopeType: string;
             isVisible: boolean;
             customLabel: string | null;
+            parentKeyOverride: string | null;
             sortOrderOverride: number | null;
         }[];
     } & {
@@ -86,6 +66,7 @@ export declare class UiControlController {
             scopeType: string;
             isVisible: boolean;
             customLabel: string | null;
+            parentKeyOverride: string | null;
             sortOrderOverride: number | null;
         }[];
         id: string;
@@ -189,6 +170,7 @@ export declare class UiControlController {
         scopeType: string;
         isVisible: boolean;
         customLabel: string | null;
+        parentKeyOverride: string | null;
         sortOrderOverride: number | null;
     }>;
 }

@@ -159,6 +159,11 @@ __decorate([
 ], UpsertOverrideDto.prototype, "customLabel", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpsertOverrideDto.prototype, "parentKeyOverride", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], UpsertOverrideDto.prototype, "sortOrderOverride", void 0);

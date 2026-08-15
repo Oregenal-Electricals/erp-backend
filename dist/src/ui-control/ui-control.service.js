@@ -8,6 +8,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UiControlService = void 0;
 const common_1 = require("@nestjs/common");
@@ -108,29 +119,58 @@ let UiControlService = class UiControlService {
         }
         return grouped;
     }
-    async getMySidebar(companyId, userId, allRoles) {
-        const tree = await this.getStructureTree(companyId);
-        if (allRoles.includes('SUPER_ADMIN')) {
-            return tree.map((s) => ({
-                key: s.key, label: s.label, icon: s.icon, page: s.page,
-                items: s.items.map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
-            }));
-        }
-        const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
-        return tree
-            .filter((s) => { var _a; return ((_a = visMap[s.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
-            .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = visMap[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = visMap[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
-            .map((s) => {
+    buildRoleAwareSidebar(elements, effectiveFn) {
+        const sections = elements.filter((e) => e.elementType === 'SIDEBAR_SECTION');
+        const items = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM');
+        const effectiveParent = (item) => {
             var _a;
+            const override = (_a = effectiveFn(item.key)) === null || _a === void 0 ? void 0 : _a.parentKeyOverride;
+            if (override === '__ROOT__')
+                return null;
+            if (override)
+                return override;
+            return item.parentKey || null;
+        };
+        const sectionNodes = sections
+            .filter((s) => { var _a; return ((_a = effectiveFn(s.key)) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+            .map((s) => {
+            var _a, _b, _c;
             return ({
-                key: s.key, label: ((_a = visMap[s.key]) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
-                items: s.items
-                    .filter((i) => { var _a; return ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
-                    .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = visMap[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = visMap[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
-                    .map((i) => { var _a; return ({ key: i.key, label: ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
+                key: s.key, label: ((_a = effectiveFn(s.key)) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
+                sortOrder: (_c = (_b = effectiveFn(s.key)) === null || _b === void 0 ? void 0 : _b.sortOrder) !== null && _c !== void 0 ? _c : s.sortOrder,
+                items: items
+                    .filter((i) => { var _a; return effectiveParent(i) === s.key && ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+                    .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = effectiveFn(a.key)) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = effectiveFn(b.key)) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
+                    .map((i) => { var _a; return ({ key: i.key, label: ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
             });
         })
             .filter((s) => s.items.length > 0 || s.page);
+        const standaloneNodes = items
+            .filter((i) => { var _a; return effectiveParent(i) === null && ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+            .map((i) => {
+            var _a, _b, _c;
+            return ({
+                key: i.key, label: ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page,
+                sortOrder: (_c = (_b = effectiveFn(i.key)) === null || _b === void 0 ? void 0 : _b.sortOrder) !== null && _c !== void 0 ? _c : i.sortOrder,
+                items: [],
+            });
+        });
+        return [...sectionNodes, ...standaloneNodes]
+            .sort((a, b) => { var _a, _b; return ((_a = a.sortOrder) !== null && _a !== void 0 ? _a : 0) - ((_b = b.sortOrder) !== null && _b !== void 0 ? _b : 0); })
+            .map((_a) => {
+            var { sortOrder } = _a, rest = __rest(_a, ["sortOrder"]);
+            return rest;
+        });
+    }
+    async getMySidebar(companyId, userId, allRoles) {
+        const elements = await this.prisma.uiControlElement.findMany({
+            where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
+        });
+        if (allRoles.includes('SUPER_ADMIN')) {
+            return this.buildRoleAwareSidebar(elements, () => ({ visible: true }));
+        }
+        const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
+        return this.buildRoleAwareSidebar(elements, (key) => visMap[key]);
     }
     async upsertOverride(companyId, dto, userId) {
         var _a, _b;
@@ -149,6 +189,7 @@ let UiControlService = class UiControlService {
                     isVisible: dto.isVisible,
                     sortOrderOverride: dto.sortOrderOverride,
                     customLabel: dto.customLabel !== undefined ? (dto.customLabel || null) : existing.customLabel,
+                    parentKeyOverride: dto.parentKeyOverride !== undefined ? (dto.parentKeyOverride || null) : existing.parentKeyOverride,
                     updatedBy: userId,
                 },
             });
@@ -163,6 +204,7 @@ let UiControlService = class UiControlService {
                 userId: dto.scopeType === 'USER' ? dto.userId : null,
                 isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride,
                 customLabel: dto.customLabel || null,
+                parentKeyOverride: dto.parentKeyOverride || null,
                 createdBy: userId, updatedBy: userId,
             },
         });
@@ -193,6 +235,7 @@ let UiControlService = class UiControlService {
             let visible = el.defaultVisible;
             let sortOrder = el.sortOrder;
             let label = el.label;
+            let parentKeyOverride = undefined;
             const roleOverrides = el.overrides.filter((o) => o.scopeType === 'ROLE');
             if (roleOverrides.length > 0) {
                 visible = roleOverrides.every((o) => o.isVisible);
@@ -202,6 +245,9 @@ let UiControlService = class UiControlService {
                 const withLabel = roleOverrides.find((o) => o.customLabel);
                 if (withLabel)
                     label = withLabel.customLabel;
+                const withParent = roleOverrides.find((o) => o.parentKeyOverride);
+                if (withParent)
+                    parentKeyOverride = withParent.parentKeyOverride;
             }
             const userOverride = el.overrides.find((o) => o.scopeType === 'USER' && o.userId === userId);
             if (userOverride) {
@@ -210,24 +256,22 @@ let UiControlService = class UiControlService {
                     sortOrder = userOverride.sortOrderOverride;
                 if (userOverride.customLabel)
                     label = userOverride.customLabel;
+                if (userOverride.parentKeyOverride)
+                    parentKeyOverride = userOverride.parentKeyOverride;
             }
-            map[el.key] = { visible, sortOrder, label };
+            map[el.key] = { visible, sortOrder, label, parentKeyOverride };
         }
         return map;
     }
     async getSidebarForRole(companyId, roleName) {
         var _a;
-        const tree = await this.getStructureTree(companyId);
-        if (roleName === 'SUPER_ADMIN') {
-            return tree.map((s) => ({
-                key: s.key, label: s.label, icon: s.icon, page: s.page,
-                items: s.items.map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
-            }));
-        }
         const elements = await this.prisma.uiControlElement.findMany({
             where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
             include: { overrides: { where: { isActive: true, scopeType: 'ROLE', roleName } } },
         });
+        if (roleName === 'SUPER_ADMIN') {
+            return this.buildRoleAwareSidebar(elements, () => ({ visible: true }));
+        }
         const effectiveByKey = {};
         for (const el of elements) {
             const ov = el.overrides[0];
@@ -235,22 +279,10 @@ let UiControlService = class UiControlService {
                 visible: ov ? ov.isVisible : el.defaultVisible,
                 label: (ov === null || ov === void 0 ? void 0 : ov.customLabel) || el.label,
                 sortOrder: (_a = ov === null || ov === void 0 ? void 0 : ov.sortOrderOverride) !== null && _a !== void 0 ? _a : el.sortOrder,
+                parentKeyOverride: ov === null || ov === void 0 ? void 0 : ov.parentKeyOverride,
             };
         }
-        return tree
-            .filter((s) => { var _a; return ((_a = effectiveByKey[s.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
-            .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = effectiveByKey[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = effectiveByKey[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
-            .map((s) => {
-            var _a;
-            return ({
-                key: s.key, label: ((_a = effectiveByKey[s.key]) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
-                items: s.items
-                    .filter((i) => { var _a; return ((_a = effectiveByKey[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
-                    .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = effectiveByKey[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = effectiveByKey[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
-                    .map((i) => { var _a; return ({ key: i.key, label: ((_a = effectiveByKey[i.key]) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
-            });
-        })
-            .filter((s) => s.items.length > 0 || s.page);
+        return this.buildRoleAwareSidebar(elements, (key) => effectiveByKey[key]);
     }
 };
 exports.UiControlService = UiControlService;

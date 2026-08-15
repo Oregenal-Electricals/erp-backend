@@ -126,27 +126,57 @@ export class UiControlService {
 
   // The real, renderable sidebar for the logged-in user. SUPER_ADMIN mirrors the
   // hardcoded bypass already in PermissionsGuard — never locked out of their own nav.
-  async getMySidebar(companyId: string, userId: string, allRoles: string[]) {
-    const tree = await this.getStructureTree(companyId);
-    if (allRoles.includes('SUPER_ADMIN')) {
-      return tree.map((s) => ({
-        key: s.key, label: s.label, icon: s.icon, page: s.page,
-        items: s.items.map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
-      }));
-    }
-
-    const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
-    return tree
-      .filter((s) => visMap[s.key]?.visible !== false)
-      .sort((a, b) => (visMap[a.key]?.sortOrder ?? 0) - (visMap[b.key]?.sortOrder ?? 0))
+  /**
+   * Shared by getMySidebar and getSidebarForRole - takes a flat list of
+   * SIDEBAR_SECTION/SIDEBAR_ITEM elements and an "effective" resolver
+   * function (which already knows how to merge role/user overrides for a
+   * given key), and rebuilds the tree from scratch based on each item's
+   * EFFECTIVE parent rather than its original one. An item's parentKeyOverride
+   * of '__ROOT__' promotes it to a standalone top-level tab for that
+   * scope; any other override value moves it under a different section;
+   * no override at all keeps its original section membership.
+   */
+  private buildRoleAwareSidebar(elements: any[], effectiveFn: (key: string) => { visible?: boolean; label?: string; sortOrder?: number; parentKeyOverride?: string | null } | undefined) {
+    const sections = elements.filter((e) => e.elementType === 'SIDEBAR_SECTION');
+    const items = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM');
+    const effectiveParent = (item: any) => {
+      const override = effectiveFn(item.key)?.parentKeyOverride;
+      if (override === '__ROOT__') return null;
+      if (override) return override;
+      return item.parentKey || null;
+    };
+    const sectionNodes = sections
+      .filter((s) => effectiveFn(s.key)?.visible !== false)
       .map((s) => ({
-        key: s.key, label: visMap[s.key]?.label || s.label, icon: s.icon, page: s.page,
-        items: s.items
-          .filter((i) => visMap[i.key]?.visible !== false)
-          .sort((a, b) => (visMap[a.key]?.sortOrder ?? 0) - (visMap[b.key]?.sortOrder ?? 0))
-          .map((i) => ({ key: i.key, label: visMap[i.key]?.label || i.label, icon: i.icon, page: i.page })),
+        key: s.key, label: effectiveFn(s.key)?.label || s.label, icon: s.icon, page: s.page,
+        sortOrder: effectiveFn(s.key)?.sortOrder ?? s.sortOrder,
+        items: items
+          .filter((i) => effectiveParent(i) === s.key && effectiveFn(i.key)?.visible !== false)
+          .sort((a, b) => (effectiveFn(a.key)?.sortOrder ?? 0) - (effectiveFn(b.key)?.sortOrder ?? 0))
+          .map((i) => ({ key: i.key, label: effectiveFn(i.key)?.label || i.label, icon: i.icon, page: i.page })),
       }))
       .filter((s) => s.items.length > 0 || s.page);
+    const standaloneNodes = items
+      .filter((i) => effectiveParent(i) === null && effectiveFn(i.key)?.visible !== false)
+      .map((i) => ({
+        key: i.key, label: effectiveFn(i.key)?.label || i.label, icon: i.icon, page: i.page,
+        sortOrder: effectiveFn(i.key)?.sortOrder ?? i.sortOrder,
+        items: [],
+      }));
+    return [...sectionNodes, ...standaloneNodes]
+      .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map(({ sortOrder, ...rest }: any) => rest);
+  }
+
+  async getMySidebar(companyId: string, userId: string, allRoles: string[]) {
+    const elements = await this.prisma.uiControlElement.findMany({
+      where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
+    });
+    if (allRoles.includes('SUPER_ADMIN')) {
+      return this.buildRoleAwareSidebar(elements, () => ({ visible: true }));
+    }
+    const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
+    return this.buildRoleAwareSidebar(elements, (key) => visMap[key]);
   }
 
   async upsertOverride(companyId: string, dto: UpsertOverrideDto, userId: string) {
@@ -166,6 +196,7 @@ export class UiControlService {
           isVisible: dto.isVisible,
           sortOrderOverride: dto.sortOrderOverride,
           customLabel: dto.customLabel !== undefined ? (dto.customLabel || null) : existing.customLabel,
+          parentKeyOverride: dto.parentKeyOverride !== undefined ? (dto.parentKeyOverride || null) : existing.parentKeyOverride,
           updatedBy: userId,
         },
       });
@@ -181,6 +212,7 @@ export class UiControlService {
         userId: dto.scopeType === 'USER' ? dto.userId : null,
         isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride,
         customLabel: dto.customLabel || null,
+        parentKeyOverride: dto.parentKeyOverride || null,
         createdBy: userId, updatedBy: userId,
       },
     });
@@ -210,13 +242,12 @@ export class UiControlService {
         },
       },
     });
-
-    const map: Record<string, { visible: boolean; sortOrder: number; label: string }> = {};
+    const map: Record<string, { visible: boolean; sortOrder: number; label: string; parentKeyOverride?: string | null }> = {};
     for (const el of elements) {
       let visible = el.defaultVisible;
       let sortOrder = el.sortOrder;
       let label = el.label;
-
+      let parentKeyOverride: string | null | undefined = undefined;
       const roleOverrides = el.overrides.filter((o) => o.scopeType === 'ROLE');
       if (roleOverrides.length > 0) {
         visible = roleOverrides.every((o) => o.isVisible);
@@ -224,53 +255,39 @@ export class UiControlService {
         if (withSort) sortOrder = withSort.sortOrderOverride;
         const withLabel = roleOverrides.find((o) => o.customLabel);
         if (withLabel) label = withLabel.customLabel;
+        const withParent = roleOverrides.find((o) => o.parentKeyOverride);
+        if (withParent) parentKeyOverride = withParent.parentKeyOverride;
       }
-
       const userOverride = el.overrides.find((o) => o.scopeType === 'USER' && o.userId === userId);
       if (userOverride) {
         visible = userOverride.isVisible;
         if (userOverride.sortOrderOverride != null) sortOrder = userOverride.sortOrderOverride;
         if (userOverride.customLabel) label = userOverride.customLabel;
+        if (userOverride.parentKeyOverride) parentKeyOverride = userOverride.parentKeyOverride;
       }
-
-      map[el.key] = { visible, sortOrder, label };
+      map[el.key] = { visible, sortOrder, label, parentKeyOverride };
     }
     return map;
   }
 
   async getSidebarForRole(companyId: string, roleName: string) {
-    const tree = await this.getStructureTree(companyId);
-    if (roleName === 'SUPER_ADMIN') {
-      return tree.map((s) => ({
-        key: s.key, label: s.label, icon: s.icon, page: s.page,
-        items: s.items.map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
-      }));
-    }
-
     const elements = await this.prisma.uiControlElement.findMany({
       where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
       include: { overrides: { where: { isActive: true, scopeType: 'ROLE', roleName } } },
     });
-    const effectiveByKey: Record<string, { visible: boolean; label: string; sortOrder: number }> = {};
+    if (roleName === 'SUPER_ADMIN') {
+      return this.buildRoleAwareSidebar(elements, () => ({ visible: true }));
+    }
+    const effectiveByKey: Record<string, { visible: boolean; label: string; sortOrder: number; parentKeyOverride?: string | null }> = {};
     for (const el of elements) {
       const ov = el.overrides[0];
       effectiveByKey[el.key] = {
         visible: ov ? ov.isVisible : el.defaultVisible,
         label: ov?.customLabel || el.label,
         sortOrder: ov?.sortOrderOverride ?? el.sortOrder,
+        parentKeyOverride: ov?.parentKeyOverride,
       };
     }
-
-    return tree
-      .filter((s) => effectiveByKey[s.key]?.visible !== false)
-      .sort((a, b) => (effectiveByKey[a.key]?.sortOrder ?? 0) - (effectiveByKey[b.key]?.sortOrder ?? 0))
-      .map((s) => ({
-        key: s.key, label: effectiveByKey[s.key]?.label || s.label, icon: s.icon, page: s.page,
-        items: s.items
-          .filter((i) => effectiveByKey[i.key]?.visible !== false)
-          .sort((a, b) => (effectiveByKey[a.key]?.sortOrder ?? 0) - (effectiveByKey[b.key]?.sortOrder ?? 0))
-          .map((i) => ({ key: i.key, label: effectiveByKey[i.key]?.label || i.label, icon: i.icon, page: i.page })),
-      }))
-      .filter((s) => s.items.length > 0 || s.page);
+    return this.buildRoleAwareSidebar(elements, (key) => effectiveByKey[key]);
   }
 }

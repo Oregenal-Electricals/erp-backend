@@ -5416,6 +5416,7 @@ model UiControlOverride {
   isVisible         Boolean  @map("is_visible")
   sortOrderOverride Int?     @map("sort_order_override")
   customLabel       String?  @map("custom_label")
+  parentKeyOverride String?  @map("parent_key_override")
 
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
