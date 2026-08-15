@@ -5,12 +5,10 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
   @Post('login')
   @ApiOperation({
     summary: 'Login with email and password — returns JWT token',
@@ -19,11 +17,6 @@ export class AuthController {
     const ip = req.ip || req.socket?.remoteAddress;
     return this.authService.login(dto, ip);
   }
-
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current logged-in user profile' })
   @Post('preview-login')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -31,7 +24,10 @@ export class AuthController {
   async previewLogin(@Body('roleName') roleName: string, @CurrentUser() user: any) {
     return this.authService.previewLoginAsRole(roleName, user);
   }
-
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current logged-in user profile' })
   async me(@CurrentUser() user: any) {
     return this.authService.me(user.id);
   }
