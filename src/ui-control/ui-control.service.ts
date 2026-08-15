@@ -138,10 +138,12 @@ export class UiControlService {
     const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
     return tree
       .filter((s) => visMap[s.key]?.visible !== false)
+      .sort((a, b) => (visMap[a.key]?.sortOrder ?? 0) - (visMap[b.key]?.sortOrder ?? 0))
       .map((s) => ({
         key: s.key, label: visMap[s.key]?.label || s.label, icon: s.icon, page: s.page,
         items: s.items
           .filter((i) => visMap[i.key]?.visible !== false)
+          .sort((a, b) => (visMap[a.key]?.sortOrder ?? 0) - (visMap[b.key]?.sortOrder ?? 0))
           .map((i) => ({ key: i.key, label: visMap[i.key]?.label || i.label, icon: i.icon, page: i.page })),
       }))
       .filter((s) => s.items.length > 0 || s.page);
@@ -249,21 +251,24 @@ export class UiControlService {
       where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
       include: { overrides: { where: { isActive: true, scopeType: 'ROLE', roleName } } },
     });
-    const effectiveByKey: Record<string, { visible: boolean; label: string }> = {};
+    const effectiveByKey: Record<string, { visible: boolean; label: string; sortOrder: number }> = {};
     for (const el of elements) {
       const ov = el.overrides[0];
       effectiveByKey[el.key] = {
         visible: ov ? ov.isVisible : el.defaultVisible,
         label: ov?.customLabel || el.label,
+        sortOrder: ov?.sortOrderOverride ?? el.sortOrder,
       };
     }
 
     return tree
       .filter((s) => effectiveByKey[s.key]?.visible !== false)
+      .sort((a, b) => (effectiveByKey[a.key]?.sortOrder ?? 0) - (effectiveByKey[b.key]?.sortOrder ?? 0))
       .map((s) => ({
         key: s.key, label: effectiveByKey[s.key]?.label || s.label, icon: s.icon, page: s.page,
         items: s.items
           .filter((i) => effectiveByKey[i.key]?.visible !== false)
+          .sort((a, b) => (effectiveByKey[a.key]?.sortOrder ?? 0) - (effectiveByKey[b.key]?.sortOrder ?? 0))
           .map((i) => ({ key: i.key, label: effectiveByKey[i.key]?.label || i.label, icon: i.icon, page: i.page })),
       }))
       .filter((s) => s.items.length > 0 || s.page);

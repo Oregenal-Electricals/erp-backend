@@ -119,12 +119,14 @@ let UiControlService = class UiControlService {
         const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
         return tree
             .filter((s) => { var _a; return ((_a = visMap[s.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+            .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = visMap[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = visMap[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
             .map((s) => {
             var _a;
             return ({
                 key: s.key, label: ((_a = visMap[s.key]) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
                 items: s.items
                     .filter((i) => { var _a; return ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+                    .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = visMap[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = visMap[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
                     .map((i) => { var _a; return ({ key: i.key, label: ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
             });
         })
@@ -214,6 +216,7 @@ let UiControlService = class UiControlService {
         return map;
     }
     async getSidebarForRole(companyId, roleName) {
+        var _a;
         const tree = await this.getStructureTree(companyId);
         if (roleName === 'SUPER_ADMIN') {
             return tree.map((s) => ({
@@ -231,16 +234,19 @@ let UiControlService = class UiControlService {
             effectiveByKey[el.key] = {
                 visible: ov ? ov.isVisible : el.defaultVisible,
                 label: (ov === null || ov === void 0 ? void 0 : ov.customLabel) || el.label,
+                sortOrder: (_a = ov === null || ov === void 0 ? void 0 : ov.sortOrderOverride) !== null && _a !== void 0 ? _a : el.sortOrder,
             };
         }
         return tree
             .filter((s) => { var _a; return ((_a = effectiveByKey[s.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+            .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = effectiveByKey[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = effectiveByKey[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
             .map((s) => {
             var _a;
             return ({
                 key: s.key, label: ((_a = effectiveByKey[s.key]) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
                 items: s.items
                     .filter((i) => { var _a; return ((_a = effectiveByKey[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+                    .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = effectiveByKey[a.key]) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = effectiveByKey[b.key]) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
                     .map((i) => { var _a; return ({ key: i.key, label: ((_a = effectiveByKey[i.key]) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
             });
         })
