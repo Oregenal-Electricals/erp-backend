@@ -1,6 +1,6 @@
 # Oregenal Electricals ERP — Project Status
 
-**Last updated:** August 14, 2026
+**Last updated:** August 15, 2026
 **Purpose:** If you're Claude starting a fresh chat with no memory of prior sessions, read this file first. It tells you exactly what's built, what's pending, and how to pick up work correctly.
 
 ---
@@ -296,15 +296,65 @@ User flagged, during a sidebar review, that "BOM Revisions" in the Inventory sec
 
 ---
 
+### 37. Manual "Start Routing Chain" removed entirely - production now only ever starts via Customer PO → Sales Order → Run Allocation
+
+At the user's explicit direction: no production should ever start from a manual trigger, even for build-to-stock - only through the real pipeline. Removed `POST /routing/start-production` from `RoutingController` (the underlying `RoutingService.startProduction()` method is untouched and still called directly by `MrpService.runAllocation()` as an internal service method, not via HTTP - confirmed safe to remove the endpoint without affecting the automatic pipeline). Removed the "+ Start Routing Chain" button, its modal, and all associated state/handlers from the Work Orders page.
+
+The BOM detail page's routing panel - which used to point people at the now-removed button ("For build-to-stock, use Work Orders → Start Routing Chain") - now shows the routing chain as a simple, persistent, informational two-line display: the routing name/stage count, then the stage sequence (e.g. `SMT → MI → ASSEMBLY → PACKAGING`), with no start action at all. The BOM page's job is now purely "show how this product is built," never "start building it."
+
+### 38. Customer PO now links to a real, permanent Customer record
+
+Found via user report: typing a new customer name on a Customer PO never actually created anything in the Customers master list - `customerName` was pure free text with zero connection to the real `Customer` table (no `customerId` field existed on `CustomerPo` at all). Fixed properly, not cosmetically:
+
+- **Schema**: added nullable `customerId` FK on `CustomerPo` → `Customer` (hand-written SQL, applied to dev and staging - caught and fixed a genuine `@map` mismatch on the first attempt, where `customerId` had no `@map("customer_id")` and Prisma tried to write to a column that didn't exist, blocking every single Customer PO creation until fixed).
+- **Backend**: new `POST /customers/quick-create` (name/email/phone only, auto-generates a unique code the same way BOM numbers do); `customer-po.service.ts` now stores `customerId` on both create and update paths.
+- **Frontend**: rather than keep the minimal quick-create form, extracted the *existing, full* Customer create/edit modal (address/contacts/GST) out of the Customers list page into a shared `CustomerFormModal` component - both the Customers page and the Customer PO form now use the identical, fully-featured form. Customer Name field moved above Customer PO Number per the user's explicit request. Selecting or creating a customer now fetches full detail (addresses etc.) and auto-fills the form exactly the same way whether the customer is new or existing.
+
+**Verified live on staging**: created a real customer ("Bajaj") via the inline modal from the Customer PO form, confirmed it appeared permanently in `/sales/customers` with its address, and confirmed searching that name on a second Customer PO showed it as an existing match rather than offering to create it again.
+
+### 39. Material Shortage Check redesigned as a proper table
+
+The Customer PO detail page's shortage check displayed each raw material as an inline flex-row of text. Rebuilt as a real bordered grid table - columns Item / Available / Required / Difference, item names at readable size with proper word-wrap for long descriptions, and the Difference column now shows its unit (e.g. `-1000 PCS`, `-5880 MTR`) instead of a bare number.
+
+### 40. Document Attachments: two real bugs fixed
+
+- **Every upload/download/delete was silently broken** - `DocumentAttachments.jsx` read its auth token from `localStorage.getItem('accessToken')`, a key that is never set anywhere in this app (the real key, used everywhere else, is `erp_token`). `getToken()` always returned `undefined`, so the backend correctly rejected every request as unauthorized regardless of how fresh the login was. One-line fix.
+- **Added a "View" option** alongside the existing Download - opens the file inline in a new browser tab (via a blob URL) instead of always forcing a file-system download, for PDFs/images people just want to look at. (One follow-up slip during this fix: the button referencing `handleView` got added in a commit where the actual `handleView` function failed to match/insert - would have thrown a runtime error on click. Caught before the user tried it, fixed in the very next commit with a verified line-number insertion instead of text matching.)
+
+### 41. Three real Test Mode isolation bugs found via a genuine live end-to-end run
+
+Attempting a full Test-Mode-only rehearsal of Customer PO → Sales Order → Run Allocation (at the user's request, to understand why Test Mode couldn't do this at all) surfaced three separate, real bugs - each traced to ground truth via direct SQL queries rather than guessed at:
+
+1. **Planning Board hard-excluded ALL test data, unconditionally** - `MrpService.getPlanningBoard()` (and its on-order-PO shortage helper) had `isTestData: false` hardcoded with no session awareness at all, unlike every other Test Mode fix this session. This meant a test session's own Sales Orders were **permanently invisible** to the one screen that triggers Work Order creation - Test Mode could create data but never act on it. Fixed by making the query session-aware via `isTestSessionActive()`, exactly like the BOM import fix earlier: a test session now sees only its own test-flagged Sales Orders (a complete, isolated sandbox), a real session sees only real ones, never mixed. Applied consistently across all four `isTestData: false` sites in the affected code path.
+
+2. **Sales Order items auto-created from CPO acknowledgment were never tagged test, even when the parent Sales Order correctly was.** Root cause: `SalesOrdersService.createFromCpo()` creates the SO via `tx.salesOrder.create({ data: { items: { create: calcItems } } })` - a **nested Prisma write**. The project's global auto-tagging Client Extension only intercepts **top-level** `create`/`createMany`/`upsert` calls per model; a nested `items: { create: [...] }` inside a parent's create() never triggers the child model's own hook, so it's completely invisible to the tagging mechanism. The parent `SalesOrder` row got tagged correctly (`isTestData: true`, since that's a top-level call); every one of its `SalesOrderItem` rows silently defaulted to `false`. Since `getPlanningBoard()`'s item-inclusion filter also matches on `isTestData`, this alone was enough to make the Sales Order vanish from the board even after fix #1, because the mismatched item made `so.items.length === 0` after filtering. Fixed by explicitly setting `isTestData: isTestSessionActive()` on each nested item at the point of creation, rather than relying on the global mechanism reaching somewhere it structurally cannot. **This is the same class of gap as the `$transaction` nested-write issue found in a much earlier session (item 29) - nested writes of any kind bypass the top-level auto-tagging extension and need explicit tagging at the source.** Worth grep-ing for other `X: { create: [...] }` nested writes elsewhere in the codebase that may have the identical silent gap.
+
+3. **MRP Production Planning table showed blank quantities** - unrelated to Test Mode, a plain field-name mismatch: the backend's Planning Board response uses `rm.totalNeeded`/`rm.available`, but the frontend read `rm.qtyPerUnit`/`rm.availableQty` (fields that don't exist in the response), so React silently rendered nothing for the number while the adjacent unit label (`rm.uom`, which does exist) still showed - looked like "PCS" with no number in front of it. One-line fix once traced.
+
+**Existing broken data corrected via direct SQL** after each fix (the specific `SO-2026-0001` item that predated the tagging fix), rather than only fixing the code going forward.
+
+### 42. Run Allocation rewritten: priority-ordered, partial-fulfillment - major feature, proven end-to-end
+
+At the user's explicit request, confirmed via two direct design questions before building: Run Allocation no longer requires 100% material coverage to do anything. New behavior, confirmed by the user:
+
+- **Sales Order items are processed in the exact priority order submitted** (the Production Planning screen's ↑↓ ranking) - the highest-priority item gets first claim on available material; whatever's left goes to the next, and so on. Scarce shared raw materials are never double-claimed by two orders in the same run.
+- **An item with only partial material coverage gets a Work Order for the maximum quantity actually producible right now** - not an all-or-nothing rejection. The shortfall simply stays as `pendingQty` (already computed dynamically everywhere else in this file) for a future allocation run once more stock arrives.
+- **"Virtual consumption" tracked in memory across the run**: since nothing is reserved in the database until a Work Order is actually created, a higher-priority item's claim on a shared material has to be subtracted from what the next item in the same run sees as available, or every item would see identical starting stock and over-allocate the same scarce material to multiple orders. Implemented as a `Map<itemCode, consumedQty>` accumulated item-by-item within `runAllocation()`.
+- Response shape changed from `{ feasible, shortages, createdWorkOrders }` to `{ feasible, createdWorkOrders, partiallyFulfilled, skipped, note }` - `feasible` now means "at least one Work Order was created," not "everything was fully covered." **Frontend has not yet been updated to display `partiallyFulfilled`/`skipped` - still shows only `createdWorkOrders` from the old contract.** This is the immediate next step.
+
+**Verified end-to-end live on staging, twice, proving both the zero-stock and partial-success paths in one session**:
+- With zero stock anywhere: correctly returned `feasible: false`, item landed in `skipped` with a clear reason, no crash, nothing malformed.
+- With 10,000 units seeded for every raw material (via direct SQL into the isolated Test Warehouse, never touching Main Store): one material still needed more than that per unit, correctly bottlenecking the build to **312 of 1000 requested** - the full 4-stage routing chain (SMT → MI → Assembly → Packaging) was created with `plannedQty: 312` **consistently across every stage**, first stage `RELEASED`, remaining stages correctly `DRAFT` pending the prior stage's completion, Sales Order flipped to `IN_PRODUCTION`, and `remainingPending: 688` correctly reported - confirmed directly against the database, not just the API response.
+
+---
+
 ## Not yet started
 
-- **Production Floor page messaging**, **OQC/IPQC rework/scrap/quarantine flow**, **Stock Adjustment historical audit**, **Manpower approvals dedicated panel**, **MRP Shortage Report quick-action**, **Gate Inward for Import shipments**, **further master data rebuild** - all still open from before this session, untouched.
-- **UI Control Center: local-environment test pass** - never run against `npm run start:dev`/localhost this session; needed before the module can be marked complete per the project's own Final Rule.
-- **UI Control Center: manifest rollout** - field/column/button-level control proven only for one example (`purchase.po.field.unitPrice`); the other ~145 modules need their keys added one at a time.
-- **Dev database (`erp_development`) bootstrap** - still empty; needs `prisma/seeds/seed.ts` run before it's usable for anything.
-- **A pre-existing, unrelated bug surfaced but not fixed this session**: the `/masters` landing page has dead links using old pluralized/hyphenated route names (`/gate-inward`, `/masters/branches`, etc.) that no longer exist post-routing-cleanup - same disease as the sidebar audit in item 30, just on a page that audit didn't cover. Confirmed via browser console 404s, not yet investigated further.
-- **JWT token lifetime observed expiring much faster than the documented `24h`/`7d` intent** during this session's staging curl testing (tokens went stale within roughly a minute or two of issuance in several instances) - flagged, not investigated. Worth checking `JWT_EXPIRES_IN` is actually being read/applied correctly, and whether Render restarts are invalidating sessions as the existing "JWT expiry should be 7d" backlog item already anticipated.
-- **BOM Test Mode fix (item 33) full verification** - the `TEST-` prefix was confirmed visually once; the complete cycle (test upload → real upload of same file → confirm both exist independently → purge removes only the test one) was never fully walked through end to end.
+- Everything already listed remains open (Production Floor messaging, OQC/IPQC disposition flow, Stock Adjustment historical audit, Manpower approvals panel, MRP Shortage Report quick-action, Gate Inward for Import, UI Control Center local-environment test pass and manifest rollout, dev DB bootstrap, the `/masters` dead-links bug).
+- **Run Allocation frontend update** - the Production Planning page needs to actually display `partiallyFulfilled` and `skipped` results from the new response shape; right now a partial/skipped result is invisible in the UI even though the backend correctly computed it (confirmed only via direct API testing this session).
+- **Audit other nested Prisma writes for the same silent test-tagging gap** found in item 41 #2 - any `X: { create: [...] }` nested write anywhere in the codebase is a candidate; the CPO→SO one is fixed, others may not be.
+- **JWT token lifetime** - observed expiring within roughly a minute or two of issuance multiple times again this session (same issue flagged, still not investigated, in an earlier part of this session). Genuinely disruptive during rapid API testing; worth checking `JWT_EXPIRES_IN` is actually being read/honored.
+- **A true multi-order priority-ranking test of Run Allocation** has not been run - only a single-item partial-fulfillment scenario was verified. The "higher-priority order gets first claim on shared scarce material, lower-priority order gets whatever's left" behavior is implemented and logically sound but hasn't been exercised with two competing Sales Orders sharing a bottleneck material.
 
 ---
 
