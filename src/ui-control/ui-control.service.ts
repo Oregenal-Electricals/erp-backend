@@ -139,10 +139,10 @@ export class UiControlService {
     return tree
       .filter((s) => visMap[s.key]?.visible !== false)
       .map((s) => ({
-        key: s.key, label: s.label, icon: s.icon, page: s.page,
+        key: s.key, label: visMap[s.key]?.label || s.label, icon: s.icon, page: s.page,
         items: s.items
           .filter((i) => visMap[i.key]?.visible !== false)
-          .map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
+          .map((i) => ({ key: i.key, label: visMap[i.key]?.label || i.label, icon: i.icon, page: i.page })),
       }))
       .filter((s) => s.items.length > 0 || s.page);
   }
@@ -160,7 +160,12 @@ export class UiControlService {
     if (existing) {
       return this.prisma.uiControlOverride.update({
         where: { id: existing.id },
-        data: { isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride, updatedBy: userId },
+        data: {
+          isVisible: dto.isVisible,
+          sortOrderOverride: dto.sortOrderOverride,
+          customLabel: dto.customLabel !== undefined ? (dto.customLabel || null) : existing.customLabel,
+          updatedBy: userId,
+        },
       });
     }
 
@@ -173,6 +178,7 @@ export class UiControlService {
         roleName: dto.scopeType === 'ROLE' ? dto.roleName : null,
         userId: dto.scopeType === 'USER' ? dto.userId : null,
         isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride,
+        customLabel: dto.customLabel || null,
         createdBy: userId, updatedBy: userId,
       },
     });
@@ -203,27 +209,63 @@ export class UiControlService {
       },
     });
 
-    const map: Record<string, { visible: boolean; sortOrder: number }> = {};
+    const map: Record<string, { visible: boolean; sortOrder: number; label: string }> = {};
     for (const el of elements) {
       let visible = el.defaultVisible;
       let sortOrder = el.sortOrder;
+      let label = el.label;
 
       const roleOverrides = el.overrides.filter((o) => o.scopeType === 'ROLE');
       if (roleOverrides.length > 0) {
-        // If ANY of the user's roles is explicitly hidden, hide it — most restrictive wins.
         visible = roleOverrides.every((o) => o.isVisible);
         const withSort = roleOverrides.find((o) => o.sortOrderOverride != null);
         if (withSort) sortOrder = withSort.sortOrderOverride;
+        const withLabel = roleOverrides.find((o) => o.customLabel);
+        if (withLabel) label = withLabel.customLabel;
       }
 
       const userOverride = el.overrides.find((o) => o.scopeType === 'USER' && o.userId === userId);
       if (userOverride) {
         visible = userOverride.isVisible;
         if (userOverride.sortOrderOverride != null) sortOrder = userOverride.sortOrderOverride;
+        if (userOverride.customLabel) label = userOverride.customLabel;
       }
 
-      map[el.key] = { visible, sortOrder };
+      map[el.key] = { visible, sortOrder, label };
     }
     return map;
+  }
+
+  async getSidebarForRole(companyId: string, roleName: string) {
+    const tree = await this.getStructureTree(companyId);
+    if (roleName === 'SUPER_ADMIN') {
+      return tree.map((s) => ({
+        key: s.key, label: s.label, icon: s.icon, page: s.page,
+        items: s.items.map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
+      }));
+    }
+
+    const elements = await this.prisma.uiControlElement.findMany({
+      where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
+      include: { overrides: { where: { isActive: true, scopeType: 'ROLE', roleName } } },
+    });
+    const effectiveByKey: Record<string, { visible: boolean; label: string }> = {};
+    for (const el of elements) {
+      const ov = el.overrides[0];
+      effectiveByKey[el.key] = {
+        visible: ov ? ov.isVisible : el.defaultVisible,
+        label: ov?.customLabel || el.label,
+      };
+    }
+
+    return tree
+      .filter((s) => effectiveByKey[s.key]?.visible !== false)
+      .map((s) => ({
+        key: s.key, label: effectiveByKey[s.key]?.label || s.label, icon: s.icon, page: s.page,
+        items: s.items
+          .filter((i) => effectiveByKey[i.key]?.visible !== false)
+          .map((i) => ({ key: i.key, label: effectiveByKey[i.key]?.label || i.label, icon: i.icon, page: i.page })),
+      }))
+      .filter((s) => s.items.length > 0 || s.page);
   }
 }

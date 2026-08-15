@@ -6,8 +6,21 @@ export declare class UiControlController {
     myVisibility(user: any): Promise<Record<string, {
         visible: boolean;
         sortOrder: number;
+        label: string;
     }>>;
     mySidebar(user: any): Promise<{
+        key: string;
+        label: string;
+        icon: string;
+        page: string;
+        items: {
+            key: any;
+            label: any;
+            icon: any;
+            page: any;
+        }[];
+    }[]>;
+    previewSidebar(user: any, roleName: string): Promise<{
         key: string;
         label: string;
         icon: string;
@@ -34,6 +47,7 @@ export declare class UiControlController {
             elementId: string;
             scopeType: string;
             isVisible: boolean;
+            customLabel: string | null;
             sortOrderOverride: number | null;
         }[];
     } & {
@@ -71,6 +85,7 @@ export declare class UiControlController {
             elementId: string;
             scopeType: string;
             isVisible: boolean;
+            customLabel: string | null;
             sortOrderOverride: number | null;
         }[];
         id: string;
@@ -173,6 +188,7 @@ export declare class UiControlController {
         elementId: string;
         scopeType: string;
         isVisible: boolean;
+        customLabel: string | null;
         sortOrderOverride: number | null;
     }>;
 }

@@ -119,12 +119,15 @@ let UiControlService = class UiControlService {
         const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
         return tree
             .filter((s) => { var _a; return ((_a = visMap[s.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
-            .map((s) => ({
-            key: s.key, label: s.label, icon: s.icon, page: s.page,
-            items: s.items
-                .filter((i) => { var _a; return ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
-                .map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
-        }))
+            .map((s) => {
+            var _a;
+            return ({
+                key: s.key, label: ((_a = visMap[s.key]) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
+                items: s.items
+                    .filter((i) => { var _a; return ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+                    .map((i) => { var _a; return ({ key: i.key, label: ((_a = visMap[i.key]) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
+            });
+        })
             .filter((s) => s.items.length > 0 || s.page);
     }
     async upsertOverride(companyId, dto, userId) {
@@ -140,7 +143,12 @@ let UiControlService = class UiControlService {
         if (existing) {
             return this.prisma.uiControlOverride.update({
                 where: { id: existing.id },
-                data: { isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride, updatedBy: userId },
+                data: {
+                    isVisible: dto.isVisible,
+                    sortOrderOverride: dto.sortOrderOverride,
+                    customLabel: dto.customLabel !== undefined ? (dto.customLabel || null) : existing.customLabel,
+                    updatedBy: userId,
+                },
             });
         }
         const element = await this.prisma.uiControlElement.findUnique({ where: { id: dto.elementId } });
@@ -152,6 +160,7 @@ let UiControlService = class UiControlService {
                 roleName: dto.scopeType === 'ROLE' ? dto.roleName : null,
                 userId: dto.scopeType === 'USER' ? dto.userId : null,
                 isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride,
+                customLabel: dto.customLabel || null,
                 createdBy: userId, updatedBy: userId,
             },
         });
@@ -181,22 +190,61 @@ let UiControlService = class UiControlService {
         for (const el of elements) {
             let visible = el.defaultVisible;
             let sortOrder = el.sortOrder;
+            let label = el.label;
             const roleOverrides = el.overrides.filter((o) => o.scopeType === 'ROLE');
             if (roleOverrides.length > 0) {
                 visible = roleOverrides.every((o) => o.isVisible);
                 const withSort = roleOverrides.find((o) => o.sortOrderOverride != null);
                 if (withSort)
                     sortOrder = withSort.sortOrderOverride;
+                const withLabel = roleOverrides.find((o) => o.customLabel);
+                if (withLabel)
+                    label = withLabel.customLabel;
             }
             const userOverride = el.overrides.find((o) => o.scopeType === 'USER' && o.userId === userId);
             if (userOverride) {
                 visible = userOverride.isVisible;
                 if (userOverride.sortOrderOverride != null)
                     sortOrder = userOverride.sortOrderOverride;
+                if (userOverride.customLabel)
+                    label = userOverride.customLabel;
             }
-            map[el.key] = { visible, sortOrder };
+            map[el.key] = { visible, sortOrder, label };
         }
         return map;
+    }
+    async getSidebarForRole(companyId, roleName) {
+        const tree = await this.getStructureTree(companyId);
+        if (roleName === 'SUPER_ADMIN') {
+            return tree.map((s) => ({
+                key: s.key, label: s.label, icon: s.icon, page: s.page,
+                items: s.items.map((i) => ({ key: i.key, label: i.label, icon: i.icon, page: i.page })),
+            }));
+        }
+        const elements = await this.prisma.uiControlElement.findMany({
+            where: { companyId, isActive: true, elementType: { in: ['SIDEBAR_SECTION', 'SIDEBAR_ITEM'] } },
+            include: { overrides: { where: { isActive: true, scopeType: 'ROLE', roleName } } },
+        });
+        const effectiveByKey = {};
+        for (const el of elements) {
+            const ov = el.overrides[0];
+            effectiveByKey[el.key] = {
+                visible: ov ? ov.isVisible : el.defaultVisible,
+                label: (ov === null || ov === void 0 ? void 0 : ov.customLabel) || el.label,
+            };
+        }
+        return tree
+            .filter((s) => { var _a; return ((_a = effectiveByKey[s.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+            .map((s) => {
+            var _a;
+            return ({
+                key: s.key, label: ((_a = effectiveByKey[s.key]) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
+                items: s.items
+                    .filter((i) => { var _a; return ((_a = effectiveByKey[i.key]) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
+                    .map((i) => { var _a; return ({ key: i.key, label: ((_a = effectiveByKey[i.key]) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
+            });
+        })
+            .filter((s) => s.items.length > 0 || s.page);
     }
 };
 exports.UiControlService = UiControlService;

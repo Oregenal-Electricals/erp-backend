@@ -49,6 +49,7 @@ export class UpsertOverrideDto {
   @IsOptional() @IsString() roleName?: string;
   @IsOptional() @IsString() userId?: string;
   @IsBoolean() isVisible: boolean;
+  @IsOptional() @IsString() customLabel?: string;
   @IsOptional() @IsInt() sortOrderOverride?: number;
 }
 

@@ -35,6 +35,12 @@ export class UiControlController {
   }
 
   // ── Everything below requires UI_CONTROL_MANAGE ──
+  @Get('preview-sidebar')
+  @UseGuards(PermissionsGuard) @RequirePermissions(Permission.UI_CONTROL_MANAGE)
+  async previewSidebar(@CurrentUser() user: any, @Query('roleName') roleName: string) {
+    return this.service.getSidebarForRole(user.companyId, roleName);
+  }
+
   @Get('elements')
   @UseGuards(PermissionsGuard) @RequirePermissions(Permission.UI_CONTROL_MANAGE)
   async listElements(@CurrentUser() user: any, @Query('module') module?: string) {

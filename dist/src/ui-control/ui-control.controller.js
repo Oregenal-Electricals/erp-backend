@@ -34,6 +34,9 @@ let UiControlController = class UiControlController {
     async mySidebar(user) {
         return this.service.getMySidebar(user.companyId, user.id, rolesOf(user));
     }
+    async previewSidebar(user, roleName) {
+        return this.service.getSidebarForRole(user.companyId, roleName);
+    }
     async listElements(user, module) {
         return this.service.listElements(user.companyId, module);
     }
@@ -80,6 +83,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UiControlController.prototype, "mySidebar", null);
+__decorate([
+    (0, common_1.Get)('preview-sidebar'),
+    (0, common_1.UseGuards)(permissions_guard_1.PermissionsGuard),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.UI_CONTROL_MANAGE),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('roleName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UiControlController.prototype, "previewSidebar", null);
 __decorate([
     (0, common_1.Get)('elements'),
     (0, common_1.UseGuards)(permissions_guard_1.PermissionsGuard),
