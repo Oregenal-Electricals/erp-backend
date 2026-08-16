@@ -216,6 +216,19 @@ export class BomService {
       include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
     });
     await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+    // A MASTER BOM's stages move through the chain together with it, not
+    // as a separate manual step per stage - verifying the master verifies
+    // every DRAFT stage beneath it in the same action.
+    if (bom.bomType === 'MASTER') {
+      const draftStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'DRAFT', isActive: true } });
+      for (const stage of draftStages) {
+        const updatedStage = await this.prisma.bom.update({
+          where: { id: stage.id },
+          data: { status: 'VERIFIED', verifiedBy: user.id, verifiedAt: new Date(), updatedBy: user.id },
+        });
+        await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: updatedStage, changedBy: user.id });
+      }
+    }
     return updated;
   }
 
@@ -268,6 +281,19 @@ export class BomService {
       include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
     });
     await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+    // Same cascade as verify() above - approving the master approves every
+    // VERIFIED stage beneath it in the same action, so master and stages
+    // always move through the chain together as one synchronized unit.
+    if (bom.bomType === 'MASTER') {
+      const verifiedStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'VERIFIED', isActive: true } });
+      for (const stage of verifiedStages) {
+        const updatedStage = await this.prisma.bom.update({
+          where: { id: stage.id },
+          data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
+        });
+        await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: updatedStage, changedBy: user.id });
+      }
+    }
 
     const previousApproved = await this.prisma.bom.findMany({
       where: { companyId: user.companyId, bomNumber: bom.bomNumber, status: 'APPROVED', id: { not: id } },

@@ -193,6 +193,16 @@ let BomService = class BomService {
             include: Object.assign({ product: { select: { code: true, name: true } } }, this.itemIncludes()),
         });
         await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+        if (bom.bomType === 'MASTER') {
+            const draftStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'DRAFT', isActive: true } });
+            for (const stage of draftStages) {
+                const updatedStage = await this.prisma.bom.update({
+                    where: { id: stage.id },
+                    data: { status: 'VERIFIED', verifiedBy: user.id, verifiedAt: new Date(), updatedBy: user.id },
+                });
+                await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: updatedStage, changedBy: user.id });
+            }
+        }
         return updated;
     }
     async raiseQuery(dto, user) {
@@ -240,6 +250,16 @@ let BomService = class BomService {
             include: Object.assign({ product: { select: { code: true, name: true } } }, this.itemIncludes()),
         });
         await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+        if (bom.bomType === 'MASTER') {
+            const verifiedStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'VERIFIED', isActive: true } });
+            for (const stage of verifiedStages) {
+                const updatedStage = await this.prisma.bom.update({
+                    where: { id: stage.id },
+                    data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
+                });
+                await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: updatedStage, changedBy: user.id });
+            }
+        }
         const previousApproved = await this.prisma.bom.findMany({
             where: { companyId: user.companyId, bomNumber: bom.bomNumber, status: 'APPROVED', id: { not: id } },
         });
