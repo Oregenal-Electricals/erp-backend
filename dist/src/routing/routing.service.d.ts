@@ -8,10 +8,6 @@ export declare class RoutingService {
     private workOrderService;
     constructor(prisma: PrismaService, audit: AuditService, workOrderService: WorkOrderService);
     createRouting(dto: CreateRoutingDto, user: any): Promise<{
-        finalProduct: {
-            name: string;
-            code: string;
-        };
         stages: {
             id: string;
             companyId: string;
@@ -22,11 +18,15 @@ export declare class RoutingService {
             createdBy: string | null;
             updatedBy: string | null;
             warehouseId: string | null;
-            bomId: string;
             sequence: number;
             stageName: string;
+            bomId: string;
             routingId: string;
         }[];
+        finalProduct: {
+            name: string;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -36,14 +36,10 @@ export declare class RoutingService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        routingName: string;
         finalProductId: string;
+        routingName: string;
     }>;
     findAll(user: any): Promise<({
-        finalProduct: {
-            name: string;
-            code: string;
-        };
         stages: ({
             bom: {
                 bomNumber: string;
@@ -58,11 +54,15 @@ export declare class RoutingService {
             createdBy: string | null;
             updatedBy: string | null;
             warehouseId: string | null;
-            bomId: string;
             sequence: number;
             stageName: string;
+            bomId: string;
             routingId: string;
         })[];
+        finalProduct: {
+            name: string;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -72,14 +72,10 @@ export declare class RoutingService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        routingName: string;
         finalProductId: string;
+        routingName: string;
     })[]>;
     findOne(id: string, user: any): Promise<{
-        finalProduct: {
-            name: string;
-            code: string;
-        };
         stages: ({
             bom: {
                 bomNumber: string;
@@ -94,11 +90,15 @@ export declare class RoutingService {
             createdBy: string | null;
             updatedBy: string | null;
             warehouseId: string | null;
-            bomId: string;
             sequence: number;
             stageName: string;
+            bomId: string;
             routingId: string;
         })[];
+        finalProduct: {
+            name: string;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -108,8 +108,8 @@ export declare class RoutingService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        routingName: string;
         finalProductId: string;
+        routingName: string;
     }>;
     startProduction(dto: StartProductionDto, user: any): Promise<{
         routingGroupId: string;
@@ -136,15 +136,15 @@ export declare class RoutingService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
+        stageName: string | null;
+        productCode: string;
+        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
-        productCode: string;
-        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
-        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;

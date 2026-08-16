@@ -33,10 +33,10 @@ export declare class VendorPortalService {
                 createdBy: string | null;
                 updatedBy: string | null;
                 status: string;
-                poId: string;
                 itemCode: string;
                 itemName: string;
                 uom: string;
+                poId: string;
                 hsnCode: string | null;
                 igstRate: number;
                 cgstRate: number;
@@ -48,9 +48,9 @@ export declare class VendorPortalService {
                 taxRate: number;
                 totalPrice: number;
                 quotationItemId: string | null;
+                orderedQty: number;
                 pendingQty: number;
                 taxAmount: number;
-                orderedQty: number;
                 receivedQty: number;
             }[];
         } & {
@@ -94,11 +94,11 @@ export declare class VendorPortalService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rfqId: string;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rfqId: string;
+            notes: string | null;
             requiredQty: number;
             prItemId: string | null;
         }[];
@@ -132,10 +132,10 @@ export declare class VendorPortalService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -165,8 +165,8 @@ export declare class VendorPortalService {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
-        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
+        quotationNumber: string;
     })[]>;
 }

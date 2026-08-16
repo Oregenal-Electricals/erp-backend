@@ -12,9 +12,9 @@ export declare class ProductionEntryService {
     create(dto: CreateProductionEntryDto, user: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -32,19 +32,19 @@ export declare class ProductionEntryService {
         remarks: string | null;
         workOrderId: string;
         totalQty: number;
-        goodQty: number;
-        scrapQty: number;
-        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
+        goodQty: number;
+        scrapQty: number;
+        entryNumber: string;
     }>;
     confirm(id: string, user: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -62,20 +62,20 @@ export declare class ProductionEntryService {
         remarks: string | null;
         workOrderId: string;
         totalQty: number;
-        goodQty: number;
-        scrapQty: number;
-        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
+        goodQty: number;
+        scrapQty: number;
+        entryNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
                 status: string;
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
                 plannedQty: number;
                 completedQty: number;
             };
@@ -93,12 +93,12 @@ export declare class ProductionEntryService {
             remarks: string | null;
             workOrderId: string;
             totalQty: number;
-            goodQty: number;
-            scrapQty: number;
-            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
+            goodQty: number;
+            scrapQty: number;
+            entryNumber: string;
         })[];
         total: number;
         page: number;
@@ -108,9 +108,9 @@ export declare class ProductionEntryService {
     findOne(id: string, user: any): Promise<{
         workOrder: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -128,12 +128,12 @@ export declare class ProductionEntryService {
         remarks: string | null;
         workOrderId: string;
         totalQty: number;
-        goodQty: number;
-        scrapQty: number;
-        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
+        goodQty: number;
+        scrapQty: number;
+        entryNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;
@@ -158,15 +158,15 @@ export declare class ProductionEntryService {
             remarks: string | null;
             uom: string;
             warehouseId: string;
+            stageName: string | null;
+            productCode: string;
+            productName: string;
             bomId: string | null;
             rejectedQty: number;
             woNumber: string;
-            productCode: string;
-            productName: string;
             salesOrderId: string | null;
             routingGroupId: string | null;
             stageSequence: number | null;
-            stageName: string | null;
             parentWorkOrderId: string | null;
             plannedQty: number;
             completedQty: number;
@@ -189,12 +189,12 @@ export declare class ProductionEntryService {
             remarks: string | null;
             workOrderId: string;
             totalQty: number;
-            goodQty: number;
-            scrapQty: number;
-            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
+            goodQty: number;
+            scrapQty: number;
+            entryNumber: string;
         }[];
         summary: {
             plannedQty: number;

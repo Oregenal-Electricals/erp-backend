@@ -31,29 +31,29 @@ export declare class PaymentInstrumentController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            bankName: string;
             status: string;
             currency: string;
             notes: string | null;
-            expiryDate: Date | null;
+            bankName: string;
             amount: number;
             ipoId: string;
-            issueDate: Date;
-            amountInr: number;
-            presentationDays: number | null;
             piId: string | null;
-            instrumentNumber: string;
             instrumentType: string;
             bankReference: string | null;
             vendorBankName: string | null;
             vendorSwiftCode: string | null;
+            amountInr: number;
+            issueDate: Date;
+            expiryDate: Date | null;
             latestShipmentDate: Date | null;
+            presentationDays: number | null;
+            instrumentNumber: string;
         })[];
         total: number;
         page: number;
@@ -71,35 +71,35 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         ipo: {
@@ -112,35 +112,35 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     }>;
     create(dto: CreatePaymentInstrumentDto, req: any): Promise<{
         ipo: {
@@ -153,35 +153,35 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     }>;
     update(id: string, dto: UpdatePaymentInstrumentDto, req: any): Promise<{
         ipo: {
@@ -194,35 +194,35 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     }>;
     open(id: string, req: any): Promise<{
         ipo: {
@@ -235,35 +235,35 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     }>;
     settle(id: string, req: any): Promise<{
         ipo: {
@@ -276,35 +276,35 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     }>;
     cancel(id: string, req: any): Promise<{
         ipo: {
@@ -317,34 +317,34 @@ export declare class PaymentInstrumentController {
             ipoNumber: string;
         };
         pi: {
-            piNumber: string;
             vendorPiNumber: string;
+            piNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        bankName: string;
         status: string;
         currency: string;
         notes: string | null;
-        expiryDate: Date | null;
+        bankName: string;
         amount: number;
         ipoId: string;
-        issueDate: Date;
-        amountInr: number;
-        presentationDays: number | null;
         piId: string | null;
-        instrumentNumber: string;
         instrumentType: string;
         bankReference: string | null;
         vendorBankName: string | null;
         vendorSwiftCode: string | null;
+        amountInr: number;
+        issueDate: Date;
+        expiryDate: Date | null;
         latestShipmentDate: Date | null;
+        presentationDays: number | null;
+        instrumentNumber: string;
     }>;
 }

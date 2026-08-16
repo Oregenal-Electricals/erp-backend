@@ -12,9 +12,9 @@ export declare class ProductionQcService {
     create(dto: CreateProductionQcDto, user: any): Promise<{
         passRate: number;
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -46,9 +46,9 @@ export declare class ProductionQcService {
     }>;
     complete(id: string, dto: CompleteQcDto, user: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
@@ -82,9 +82,9 @@ export declare class ProductionQcService {
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
             };
             productionEntry: {
                 shift: string;
@@ -122,9 +122,9 @@ export declare class ProductionQcService {
     }>;
     findOne(id: string, user: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;

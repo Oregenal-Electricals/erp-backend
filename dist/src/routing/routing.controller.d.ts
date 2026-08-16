@@ -4,10 +4,6 @@ export declare class RoutingController {
     private readonly routingService;
     constructor(routingService: RoutingService);
     findAll(req: any): Promise<({
-        finalProduct: {
-            name: string;
-            code: string;
-        };
         stages: ({
             bom: {
                 bomNumber: string;
@@ -15,35 +11,35 @@ export declare class RoutingController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             warehouseId: string | null;
-            bomId: string;
-            stageName: string;
             sequence: number;
+            stageName: string;
+            bomId: string;
             routingId: string;
         })[];
+        finalProduct: {
+            name: string;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         finalProductId: string;
         routingName: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
-        finalProduct: {
-            name: string;
-            code: string;
-        };
         stages: ({
             bom: {
                 bomNumber: string;
@@ -51,27 +47,31 @@ export declare class RoutingController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             warehouseId: string | null;
-            bomId: string;
-            stageName: string;
             sequence: number;
+            stageName: string;
+            bomId: string;
             routingId: string;
         })[];
+        finalProduct: {
+            name: string;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         finalProductId: string;
         routingName: string;
     }>;
@@ -85,63 +85,63 @@ export declare class RoutingController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        priority: string;
         remarks: string | null;
+        uom: string;
         warehouseId: string;
-        woNumber: string;
+        stageName: string | null;
         productCode: string;
         productName: string;
-        uom: string;
         bomId: string | null;
+        rejectedQty: number;
+        woNumber: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
-        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
-        rejectedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-        priority: string;
     })[]>;
     create(dto: CreateRoutingDto, req: any): Promise<{
-        finalProduct: {
-            name: string;
-            code: string;
-        };
         stages: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             warehouseId: string | null;
-            bomId: string;
-            stageName: string;
             sequence: number;
+            stageName: string;
+            bomId: string;
             routingId: string;
         }[];
+        finalProduct: {
+            name: string;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         finalProductId: string;
         routingName: string;
     }>;

@@ -20,9 +20,9 @@ export declare class ComplaintService {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
-        invoiceNumber: string | null;
         itemCode: string;
         itemName: string;
+        invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
         customerId: string | null;
@@ -33,11 +33,11 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     update(id: string, dto: UpdateComplaintDto, user: any): Promise<{
@@ -54,9 +54,9 @@ export declare class ComplaintService {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
-        invoiceNumber: string | null;
         itemCode: string;
         itemName: string;
+        invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
         customerId: string | null;
@@ -67,11 +67,11 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     respond(id: string, dto: RespondComplaintDto, user: any): Promise<{
@@ -88,9 +88,9 @@ export declare class ComplaintService {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
-        invoiceNumber: string | null;
         itemCode: string;
         itemName: string;
+        invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
         customerId: string | null;
@@ -101,11 +101,11 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     close(id: string, user: any): Promise<{
@@ -122,9 +122,9 @@ export declare class ComplaintService {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
-        invoiceNumber: string | null;
         itemCode: string;
         itemName: string;
+        invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
         customerId: string | null;
@@ -135,11 +135,11 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -157,9 +157,9 @@ export declare class ComplaintService {
             customerPo: string | null;
             remarks: string | null;
             customerName: string;
-            invoiceNumber: string | null;
             itemCode: string;
             itemName: string;
+            invoiceNumber: string | null;
             closedBy: string | null;
             receivedDate: Date;
             customerId: string | null;
@@ -170,11 +170,11 @@ export declare class ComplaintService {
             qtyAffected: number;
             closedDate: Date | null;
             rootCause: string | null;
-            complaintNumber: string;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;
             eighthDNumber: string | null;
+            complaintNumber: string;
             responseDate: Date | null;
         }[];
         total: number;
@@ -195,9 +195,9 @@ export declare class ComplaintService {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
-        invoiceNumber: string | null;
         itemCode: string;
         itemName: string;
+        invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
         customerId: string | null;
@@ -208,11 +208,11 @@ export declare class ComplaintService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
-        complaintNumber: string;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
+        complaintNumber: string;
         responseDate: Date | null;
     }>;
     getStats(user: any): Promise<{

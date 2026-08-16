@@ -19,10 +19,10 @@ export declare class QuotationsService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
+            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -36,8 +36,8 @@ export declare class QuotationsService {
             igst: number;
         }[];
         lead: {
-            leadNumber: string;
             companyName: string;
+            leadNumber: string;
         };
     } & {
         id: string;
@@ -57,8 +57,8 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
-        quotationNumber: string;
         validUntil: Date;
+        quotationNumber: string;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -80,10 +80,10 @@ export declare class QuotationsService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
+            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -97,8 +97,8 @@ export declare class QuotationsService {
             igst: number;
         }[];
         lead: {
-            leadNumber: string;
             companyName: string;
+            leadNumber: string;
         };
     } & {
         id: string;
@@ -118,8 +118,8 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
-        quotationNumber: string;
         validUntil: Date;
+        quotationNumber: string;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -141,10 +141,10 @@ export declare class QuotationsService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
+            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -158,8 +158,8 @@ export declare class QuotationsService {
             igst: number;
         }[];
         lead: {
-            leadNumber: string;
             companyName: string;
+            leadNumber: string;
         };
     } & {
         id: string;
@@ -179,8 +179,8 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
-        quotationNumber: string;
         validUntil: Date;
+        quotationNumber: string;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -202,10 +202,10 @@ export declare class QuotationsService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
+            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -219,8 +219,8 @@ export declare class QuotationsService {
             igst: number;
         }[];
         lead: {
-            leadNumber: string;
             companyName: string;
+            leadNumber: string;
         };
     } & {
         id: string;
@@ -240,8 +240,8 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
-        quotationNumber: string;
         validUntil: Date;
+        quotationNumber: string;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -263,10 +263,10 @@ export declare class QuotationsService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
+            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -280,8 +280,8 @@ export declare class QuotationsService {
             igst: number;
         }[];
         lead: {
-            leadNumber: string;
             companyName: string;
+            leadNumber: string;
         };
     } & {
         id: string;
@@ -301,8 +301,8 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
-        quotationNumber: string;
         validUntil: Date;
+        quotationNumber: string;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -340,8 +340,8 @@ export declare class QuotationsService {
             notes: string | null;
             termsConditions: string | null;
             revision: number;
-            quotationNumber: string;
             validUntil: Date;
+            quotationNumber: string;
             customerEmail: string | null;
             customerPhone: string | null;
             totalGst: number;
@@ -367,10 +367,10 @@ export declare class QuotationsService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
+            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -384,8 +384,8 @@ export declare class QuotationsService {
             igst: number;
         }[];
         lead: {
-            leadNumber: string;
             companyName: string;
+            leadNumber: string;
         };
     } & {
         id: string;
@@ -405,8 +405,8 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
-        quotationNumber: string;
         validUntil: Date;
+        quotationNumber: string;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;

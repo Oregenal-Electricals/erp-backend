@@ -32,19 +32,19 @@ export declare class RejectedStockController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             remarks: string | null;
             warehouseId: string;
             grnId: string;
-            totalRejectedQty: number;
             iqcId: string;
             rejectionNumber: string;
+            totalRejectedQty: number;
         })[];
         total: number;
         page: number;
@@ -55,31 +55,31 @@ export declare class RejectedStockController {
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
-            rejectedQty: number;
             rejectionReason: string | null;
+            rejectedQty: number;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -87,49 +87,49 @@ export declare class RejectedStockController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
     createFromIqc(iqcId: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
-            rejectedQty: number;
             rejectionReason: string | null;
+            rejectedQty: number;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -137,49 +137,49 @@ export declare class RejectedStockController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
     disposeItem(id: string, itemId: string, dto: DisposeItemDto, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
-            rejectedQty: number;
             rejectionReason: string | null;
+            rejectedQty: number;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -187,49 +187,49 @@ export declare class RejectedStockController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
     close(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
             uom: string;
-            rejectedQty: number;
             rejectionReason: string | null;
+            rejectedQty: number;
             disposition: string;
-            rejectedStockId: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
-            dispositionBy: string | null;
-            dispositionNotes: string | null;
+            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -237,18 +237,18 @@ export declare class RejectedStockController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        totalRejectedQty: number;
         iqcId: string;
         rejectionNumber: string;
+        totalRejectedQty: number;
     }>;
 }

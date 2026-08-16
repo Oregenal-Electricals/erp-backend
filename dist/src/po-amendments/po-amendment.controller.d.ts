@@ -25,23 +25,23 @@ export declare class PoAmendmentController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
+            reason: string;
+            requestedBy: string;
+            poId: string;
+            rejectionReason: string | null;
             approvedBy: string | null;
             approvedAt: Date | null;
-            poId: string;
-            reason: string;
-            rejectionReason: string | null;
-            requestedBy: string;
             rejectedBy: string | null;
-            amendmentNumber: string;
             amendmentType: string;
             changes: import("@prisma/client/runtime/library").JsonValue | null;
+            amendmentNumber: string;
         })[];
         total: number;
         page: number;
@@ -55,23 +55,23 @@ export declare class PoAmendmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
+        requestedBy: string;
+        poId: string;
+        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        poId: string;
-        reason: string;
-        rejectionReason: string | null;
-        requestedBy: string;
         rejectedBy: string | null;
-        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
+        amendmentNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         po: {
@@ -80,29 +80,29 @@ export declare class PoAmendmentController {
                 name: string;
                 code: string;
             };
-            totalAmount: number;
             poNumber: string;
+            totalAmount: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
+        requestedBy: string;
+        poId: string;
+        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        poId: string;
-        reason: string;
-        rejectionReason: string | null;
-        requestedBy: string;
         rejectedBy: string | null;
-        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
+        amendmentNumber: string;
     }>;
     create(dto: CreatePoAmendmentDto, req: any): Promise<{
         po: {
@@ -111,29 +111,29 @@ export declare class PoAmendmentController {
                 name: string;
                 code: string;
             };
-            totalAmount: number;
             poNumber: string;
+            totalAmount: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
+        requestedBy: string;
+        poId: string;
+        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        poId: string;
-        reason: string;
-        rejectionReason: string | null;
-        requestedBy: string;
         rejectedBy: string | null;
-        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
+        amendmentNumber: string;
     }>;
     submit(id: string, req: any): Promise<{
         po: {
@@ -145,23 +145,23 @@ export declare class PoAmendmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
+        requestedBy: string;
+        poId: string;
+        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        poId: string;
-        reason: string;
-        rejectionReason: string | null;
-        requestedBy: string;
         rejectedBy: string | null;
-        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
+        amendmentNumber: string;
     }>;
     approve(id: string, req: any): Promise<{
         po: {
@@ -173,23 +173,23 @@ export declare class PoAmendmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
+        requestedBy: string;
+        poId: string;
+        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        poId: string;
-        reason: string;
-        rejectionReason: string | null;
-        requestedBy: string;
         rejectedBy: string | null;
-        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
+        amendmentNumber: string;
     }>;
     reject(id: string, dto: RejectAmendmentDto, req: any): Promise<{
         po: {
@@ -198,22 +198,22 @@ export declare class PoAmendmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
+        requestedBy: string;
+        poId: string;
+        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        poId: string;
-        reason: string;
-        rejectionReason: string | null;
-        requestedBy: string;
         rejectedBy: string | null;
-        amendmentNumber: string;
         amendmentType: string;
         changes: import("@prisma/client/runtime/library").JsonValue | null;
+        amendmentNumber: string;
     }>;
 }

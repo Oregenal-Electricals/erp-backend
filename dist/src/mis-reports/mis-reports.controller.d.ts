@@ -25,11 +25,11 @@ export declare class MisReportsController {
         invoices: {
             status: string;
             customerName: string;
-            subtotal: number;
-            totalGst: number;
-            totalAmount: number;
             invoiceNumber: string;
             invoiceDate: Date;
+            subtotal: number;
+            totalAmount: number;
+            totalGst: number;
             outstandingAmount: number;
         }[];
     }>;
@@ -52,20 +52,20 @@ export declare class MisReportsController {
             vendor: {
                 name: string;
             };
+            poNumber: string;
             poDate: Date;
             deliveryDate: Date;
             totalAmount: number;
-            poNumber: string;
         }[];
         bills: {
             status: string;
             subtotal: number;
-            totalGst: number;
             totalAmount: number;
-            outstandingAmount: number;
-            billNumber: string;
             vendorName: string;
+            totalGst: number;
+            outstandingAmount: number;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
     getStockPosition(req: any, query: any): Promise<{
@@ -101,11 +101,11 @@ export declare class MisReportsController {
             daysOverdue: number;
             isOverdue: boolean;
             status: string;
+            dueDate: Date;
             customerName: string;
-            totalAmount: number;
             invoiceNumber: string;
             invoiceDate: Date;
-            dueDate: Date;
+            totalAmount: number;
             outstandingAmount: number;
         }[];
     }>;
@@ -121,12 +121,12 @@ export declare class MisReportsController {
             daysOverdue: number;
             isOverdue: boolean;
             status: string;
-            totalAmount: number;
             dueDate: Date;
-            outstandingAmount: number;
-            billNumber: string;
+            totalAmount: number;
             vendorName: string;
+            outstandingAmount: number;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
     getNcrSummary(req: any, query: any): Promise<{
@@ -145,10 +145,10 @@ export declare class MisReportsController {
             status: string;
             itemCode: string;
             itemName: string;
-            severity: string;
-            ncrNumber: string;
             source: string;
+            severity: string;
             detectedDate: Date;
+            ncrNumber: string;
         }[];
     }>;
     getProductionSummary(req: any, query: any): Promise<{
@@ -167,12 +167,12 @@ export declare class MisReportsController {
         };
         items: {
             status: string;
-            woNumber: string;
             productCode: string;
             productName: string;
+            rejectedQty: number;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
-            rejectedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;
             actualStartDate: Date;
@@ -196,17 +196,17 @@ export declare class MisReportsController {
         };
         salesData: {
             customerName: string;
-            subtotal: number;
-            totalGst: number;
             invoiceNumber: string;
             invoiceDate: Date;
+            subtotal: number;
+            totalGst: number;
         }[];
         purchaseData: {
             subtotal: number;
-            totalGst: number;
-            billNumber: string;
             vendorName: string;
+            totalGst: number;
             billDate: Date;
+            billNumber: string;
         }[];
     }>;
 }

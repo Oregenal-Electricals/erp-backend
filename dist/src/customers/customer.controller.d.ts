@@ -16,16 +16,16 @@ export declare class CustomerController {
         } & {
             id: string;
             companyId: string;
+            name: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            name: string;
             code: string;
-            email: string | null;
             phone: string | null;
+            email: string | null;
         })[];
         total: number;
         page: number;
@@ -36,32 +36,32 @@ export declare class CustomerController {
         addresses: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             city: string | null;
             state: string | null;
             pincode: string | null;
-            customerId: string;
             isDefault: boolean;
+            customerId: string;
             addressType: string;
             addressLine: string;
         }[];
         contacts: {
             id: string;
             companyId: string;
+            name: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            name: string;
-            email: string | null;
             phone: string | null;
+            email: string | null;
             designation: string | null;
             customerId: string;
             isPrimary: boolean;
@@ -69,12 +69,12 @@ export declare class CustomerController {
         gstNumbers: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             customerId: string;
             gstNumber: string;
             branchLabel: string | null;
@@ -82,47 +82,47 @@ export declare class CustomerController {
     } & {
         id: string;
         companyId: string;
+        name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        name: string;
         code: string;
-        email: string | null;
         phone: string | null;
+        email: string | null;
     }>;
     create(dto: CreateCustomerDto, req: any): Promise<{
         addresses: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             city: string | null;
             state: string | null;
             pincode: string | null;
-            customerId: string;
             isDefault: boolean;
+            customerId: string;
             addressType: string;
             addressLine: string;
         }[];
         contacts: {
             id: string;
             companyId: string;
+            name: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            name: string;
-            email: string | null;
             phone: string | null;
+            email: string | null;
             designation: string | null;
             customerId: string;
             isPrimary: boolean;
@@ -130,12 +130,12 @@ export declare class CustomerController {
         gstNumbers: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             customerId: string;
             gstNumber: string;
             branchLabel: string | null;
@@ -143,16 +143,16 @@ export declare class CustomerController {
     } & {
         id: string;
         companyId: string;
+        name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        name: string;
         code: string;
-        email: string | null;
         phone: string | null;
+        email: string | null;
     }>;
     quickCreate(dto: {
         name: string;
@@ -161,47 +161,47 @@ export declare class CustomerController {
     }, req: any): Promise<{
         id: string;
         companyId: string;
+        name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        name: string;
         code: string;
-        email: string | null;
         phone: string | null;
+        email: string | null;
     }>;
     update(id: string, dto: UpdateCustomerDto, req: any): Promise<{
         addresses: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             city: string | null;
             state: string | null;
             pincode: string | null;
-            customerId: string;
             isDefault: boolean;
+            customerId: string;
             addressType: string;
             addressLine: string;
         }[];
         contacts: {
             id: string;
             companyId: string;
+            name: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            name: string;
-            email: string | null;
             phone: string | null;
+            email: string | null;
             designation: string | null;
             customerId: string;
             isPrimary: boolean;
@@ -209,12 +209,12 @@ export declare class CustomerController {
         gstNumbers: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             customerId: string;
             gstNumber: string;
             branchLabel: string | null;
@@ -222,16 +222,16 @@ export declare class CustomerController {
     } & {
         id: string;
         companyId: string;
+        name: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        name: string;
         code: string;
-        email: string | null;
         phone: string | null;
+        email: string | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

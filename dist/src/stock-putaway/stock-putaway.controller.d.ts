@@ -23,18 +23,18 @@ export declare class StockPutawayController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             remarks: string | null;
             warehouseId: string;
             grnId: string;
-            putawayNumber: string;
             iqcId: string | null;
+            putawayNumber: string;
         })[];
         total: number;
         page: number;
@@ -43,27 +43,27 @@ export declare class StockPutawayController {
     }>;
     getPendingIqcs(req: any): Promise<({
         grn: {
-            warehouseId: string;
             warehouse: {
                 name: string;
             };
+            warehouseId: string;
             grnNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         grnId: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
         iqcNumber: string;
-        inspectedBy: string | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: ({
@@ -74,27 +74,27 @@ export declare class StockPutawayController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
-            putawayId: string;
             binId: string;
+            putawayId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -102,18 +102,18 @@ export declare class StockPutawayController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        putawayNumber: string;
         iqcId: string | null;
+        putawayNumber: string;
     }>;
     create(dto: CreatePutawayDto, req: any): Promise<{
         items: ({
@@ -124,27 +124,27 @@ export declare class StockPutawayController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
-            putawayId: string;
             binId: string;
+            putawayId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -152,18 +152,18 @@ export declare class StockPutawayController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        putawayNumber: string;
         iqcId: string | null;
+        putawayNumber: string;
     }>;
     updateItems(id: string, dto: UpdatePutawayItemsDto, req: any): Promise<{
         items: ({
@@ -174,27 +174,27 @@ export declare class StockPutawayController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
-            putawayId: string;
             binId: string;
+            putawayId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -202,18 +202,18 @@ export declare class StockPutawayController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        putawayNumber: string;
         iqcId: string | null;
+        putawayNumber: string;
     }>;
     complete(id: string, req: any): Promise<{
         items: ({
@@ -224,27 +224,27 @@ export declare class StockPutawayController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             qty: number;
-            putawayId: string;
             binId: string;
+            putawayId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -252,17 +252,17 @@ export declare class StockPutawayController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
         grnId: string;
-        putawayNumber: string;
         iqcId: string | null;
+        putawayNumber: string;
     }>;
 }

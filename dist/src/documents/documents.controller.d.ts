@@ -17,23 +17,23 @@ export declare class DocumentsController {
     findAll(req: any, query: any): Promise<{
         data: {
             id: string;
+            description: string;
             createdAt: Date;
             createdBy: string;
             _count: {
                 versions: number;
             };
-            description: string;
-            title: string;
             category: string;
+            tags: string;
+            title: string;
+            version: number;
+            documentNumber: string;
+            referenceType: string;
+            referenceNumber: string;
+            fileType: string;
             fileName: string;
             fileSize: number;
             mimeType: string;
-            documentNumber: string;
-            fileType: string;
-            version: number;
-            referenceType: string;
-            referenceNumber: string;
-            tags: string;
         }[];
         total: number;
         page: number;

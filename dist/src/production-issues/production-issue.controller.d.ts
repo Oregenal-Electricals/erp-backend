@@ -18,18 +18,18 @@ export declare class ProductionIssueController {
                 name: string;
             };
             workOrder: {
-                woNumber: string;
                 productName: string;
+                woNumber: string;
             };
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             remarks: string | null;
             warehouseId: string;
@@ -51,40 +51,40 @@ export declare class ProductionIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
             issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -101,40 +101,40 @@ export declare class ProductionIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
             issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -151,40 +151,40 @@ export declare class ProductionIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
             issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
@@ -201,40 +201,40 @@ export declare class ProductionIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
+            unitCost: number;
             requiredQty: number;
-            productionIssueId: string;
-            batchId: string | null;
             issuedQty: number;
+            batchId: string | null;
+            productionIssueId: string;
         })[];
         warehouse: {
             name: string;
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;

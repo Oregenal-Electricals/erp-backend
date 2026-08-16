@@ -11,9 +11,9 @@ export declare class RcaService {
         ncr: {
             description: string;
             itemCode: string;
-            ncrNumber: string;
             source: string;
             severity: string;
+            ncrNumber: string;
         };
     } & {
         id: string;
@@ -28,7 +28,6 @@ export declare class RcaService {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
-        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -44,15 +43,16 @@ export declare class RcaService {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
+        rcaNumber: string;
         conductedDate: Date;
     }>;
     update(id: string, dto: UpdateRcaDto, user: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
-            ncrNumber: string;
             source: string;
             severity: string;
+            ncrNumber: string;
         };
     } & {
         id: string;
@@ -67,7 +67,6 @@ export declare class RcaService {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
-        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -83,15 +82,16 @@ export declare class RcaService {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
+        rcaNumber: string;
         conductedDate: Date;
     }>;
     complete(id: string, user: any): Promise<{
         ncr: {
             description: string;
             itemCode: string;
-            ncrNumber: string;
             source: string;
             severity: string;
+            ncrNumber: string;
         };
     } & {
         id: string;
@@ -106,7 +106,6 @@ export declare class RcaService {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
-        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -122,6 +121,7 @@ export declare class RcaService {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
+        rcaNumber: string;
         conductedDate: Date;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -129,9 +129,9 @@ export declare class RcaService {
             ncr: {
                 description: string;
                 itemCode: string;
-                ncrNumber: string;
                 source: string;
                 severity: string;
+                ncrNumber: string;
             };
         } & {
             id: string;
@@ -146,7 +146,6 @@ export declare class RcaService {
             remarks: string | null;
             ncrId: string;
             rootCause: string | null;
-            rcaNumber: string;
             method: string;
             problem: string;
             why1: string | null;
@@ -162,6 +161,7 @@ export declare class RcaService {
             fishboneMeasurement: string | null;
             conclusion: string | null;
             conductedBy: string | null;
+            rcaNumber: string;
             conductedDate: Date;
         })[];
         total: number;
@@ -172,9 +172,9 @@ export declare class RcaService {
         ncr: {
             description: string;
             itemCode: string;
-            ncrNumber: string;
             source: string;
             severity: string;
+            ncrNumber: string;
         };
     } & {
         id: string;
@@ -189,7 +189,6 @@ export declare class RcaService {
         remarks: string | null;
         ncrId: string;
         rootCause: string | null;
-        rcaNumber: string;
         method: string;
         problem: string;
         why1: string | null;
@@ -205,6 +204,7 @@ export declare class RcaService {
         fishboneMeasurement: string | null;
         conclusion: string | null;
         conductedBy: string | null;
+        rcaNumber: string;
         conductedDate: Date;
     }>;
     getStats(user: any): Promise<{

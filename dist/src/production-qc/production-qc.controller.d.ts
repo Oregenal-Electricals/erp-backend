@@ -16,38 +16,38 @@ export declare class ProductionQcController {
     findAll(req: any, query: any): Promise<{
         data: ({
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
             };
             productionEntry: {
                 shift: string;
-                entryNumber: string;
                 goodQty: number;
+                entryNumber: string;
             };
         } & {
             result: string;
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             remarks: string | null;
-            correctiveAction: string | null;
             workOrderId: string;
-            inspectionDate: Date;
-            inspectorName: string | null;
-            sampleSize: number;
-            passQty: number;
-            failQty: number;
             qcNumber: string;
             productionEntryId: string | null;
             inspectionStage: string;
+            inspectorName: string | null;
+            inspectionDate: Date;
+            sampleSize: number;
+            passQty: number;
+            failQty: number;
             defectDescription: string | null;
+            correctiveAction: string | null;
         })[];
         total: number;
         page: number;
@@ -56,107 +56,107 @@ export declare class ProductionQcController {
     }>;
     findOne(id: string, req: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
-            entryNumber: string;
             goodQty: number;
+            entryNumber: string;
         };
     } & {
         result: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
-        correctiveAction: string | null;
         workOrderId: string;
-        inspectionDate: Date;
-        inspectorName: string | null;
-        sampleSize: number;
-        passQty: number;
-        failQty: number;
         qcNumber: string;
         productionEntryId: string | null;
         inspectionStage: string;
+        inspectorName: string | null;
+        inspectionDate: Date;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
         defectDescription: string | null;
+        correctiveAction: string | null;
     }>;
     create(dto: CreateProductionQcDto, req: any): Promise<{
         passRate: number;
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
-            entryNumber: string;
             goodQty: number;
+            entryNumber: string;
         };
         result: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
-        correctiveAction: string | null;
         workOrderId: string;
-        inspectionDate: Date;
-        inspectorName: string | null;
-        sampleSize: number;
-        passQty: number;
-        failQty: number;
         qcNumber: string;
         productionEntryId: string | null;
         inspectionStage: string;
+        inspectorName: string | null;
+        inspectionDate: Date;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
         defectDescription: string | null;
+        correctiveAction: string | null;
     }>;
     complete(id: string, dto: CompleteQcDto, req: any): Promise<{
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
         };
         productionEntry: {
             shift: string;
-            entryNumber: string;
             goodQty: number;
+            entryNumber: string;
         };
     } & {
         result: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
-        correctiveAction: string | null;
         workOrderId: string;
-        inspectionDate: Date;
-        inspectorName: string | null;
-        sampleSize: number;
-        passQty: number;
-        failQty: number;
         qcNumber: string;
         productionEntryId: string | null;
         inspectionStage: string;
+        inspectorName: string | null;
+        inspectionDate: Date;
+        sampleSize: number;
+        passQty: number;
+        failQty: number;
         defectDescription: string | null;
+        correctiveAction: string | null;
     }>;
 }

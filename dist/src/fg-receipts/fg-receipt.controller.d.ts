@@ -21,35 +21,35 @@ export declare class FgReceiptController {
                 code: string;
             };
             workOrder: {
-                woNumber: string;
                 productCode: string;
                 productName: string;
+                woNumber: string;
                 plannedQty: number;
                 completedQty: number;
             };
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             remarks: string | null;
             itemCode: string;
             itemName: string;
+            uom: string;
             warehouseId: string;
             unitCost: number;
-            uom: string;
-            plannedQty: number;
-            rejectedQty: number;
-            batchNumber: string | null;
-            receivedQty: number;
-            workOrderId: string;
-            receiptNumber: string;
             totalCost: number;
+            receivedQty: number;
+            rejectedQty: number;
+            plannedQty: number;
+            workOrderId: string;
+            batchNumber: string | null;
+            receiptNumber: string;
         })[];
         total: number;
         page: number;
@@ -62,35 +62,35 @@ export declare class FgReceiptController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
+        uom: string;
         warehouseId: string;
         unitCost: number;
-        uom: string;
-        plannedQty: number;
-        rejectedQty: number;
-        batchNumber: string | null;
-        receivedQty: number;
-        workOrderId: string;
-        receiptNumber: string;
         totalCost: number;
+        receivedQty: number;
+        rejectedQty: number;
+        plannedQty: number;
+        workOrderId: string;
+        batchNumber: string | null;
+        receiptNumber: string;
     }>;
     create(dto: CreateFgReceiptDto, req: any): Promise<{
         warehouse: {
@@ -98,35 +98,35 @@ export declare class FgReceiptController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
+        uom: string;
         warehouseId: string;
         unitCost: number;
-        uom: string;
-        plannedQty: number;
-        rejectedQty: number;
-        batchNumber: string | null;
-        receivedQty: number;
-        workOrderId: string;
-        receiptNumber: string;
         totalCost: number;
+        receivedQty: number;
+        rejectedQty: number;
+        plannedQty: number;
+        workOrderId: string;
+        batchNumber: string | null;
+        receiptNumber: string;
     }>;
     createFromWo(woId: string, req: any): Promise<{
         warehouse: {
@@ -134,35 +134,35 @@ export declare class FgReceiptController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
+        uom: string;
         warehouseId: string;
         unitCost: number;
-        uom: string;
-        plannedQty: number;
-        rejectedQty: number;
-        batchNumber: string | null;
-        receivedQty: number;
-        workOrderId: string;
-        receiptNumber: string;
         totalCost: number;
+        receivedQty: number;
+        rejectedQty: number;
+        plannedQty: number;
+        workOrderId: string;
+        batchNumber: string | null;
+        receiptNumber: string;
     }>;
     confirm(id: string, req: any): Promise<{
         warehouse: {
@@ -170,34 +170,34 @@ export declare class FgReceiptController {
             code: string;
         };
         workOrder: {
-            woNumber: string;
             productCode: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
+        uom: string;
         warehouseId: string;
         unitCost: number;
-        uom: string;
-        plannedQty: number;
-        rejectedQty: number;
-        batchNumber: string | null;
-        receivedQty: number;
-        workOrderId: string;
-        receiptNumber: string;
         totalCost: number;
+        receivedQty: number;
+        rejectedQty: number;
+        plannedQty: number;
+        workOrderId: string;
+        batchNumber: string | null;
+        receiptNumber: string;
     }>;
 }

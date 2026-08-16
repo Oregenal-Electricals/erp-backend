@@ -17,16 +17,16 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
-            iqcItemId: string | null;
             disposition: string;
-            dispositionDate: Date | null;
-            dispositionBy: string | null;
             dispositionNotes: string | null;
+            dispositionBy: string | null;
+            iqcItemId: string | null;
+            dispositionDate: Date | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -34,8 +34,8 @@ export declare class RejectedStockService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -103,16 +103,16 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
-            iqcItemId: string | null;
             disposition: string;
-            dispositionDate: Date | null;
-            dispositionBy: string | null;
             dispositionNotes: string | null;
+            dispositionBy: string | null;
+            iqcItemId: string | null;
+            dispositionDate: Date | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -120,8 +120,8 @@ export declare class RejectedStockService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -153,16 +153,16 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
-            iqcItemId: string | null;
             disposition: string;
-            dispositionDate: Date | null;
-            dispositionBy: string | null;
             dispositionNotes: string | null;
+            dispositionBy: string | null;
+            iqcItemId: string | null;
+            dispositionDate: Date | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -170,8 +170,8 @@ export declare class RejectedStockService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;
@@ -203,16 +203,16 @@ export declare class RejectedStockService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            rejectionReason: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            rejectionReason: string | null;
             rejectedQty: number;
-            iqcItemId: string | null;
             disposition: string;
-            dispositionDate: Date | null;
-            dispositionBy: string | null;
             dispositionNotes: string | null;
+            dispositionBy: string | null;
+            iqcItemId: string | null;
+            dispositionDate: Date | null;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -220,8 +220,8 @@ export declare class RejectedStockService {
             code: string;
         };
         grn: {
-            grnNumber: string;
             grnType: string;
+            grnNumber: string;
         };
         iqc: {
             iqcNumber: string;

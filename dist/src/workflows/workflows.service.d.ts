@@ -37,8 +37,8 @@ export declare class WorkflowsService {
         createdBy: string | null;
         updatedBy: string | null;
         documentType: string;
-        triggerAmount: number | null;
         triggerCondition: string;
+        triggerAmount: number | null;
         levels: number;
     }>;
     submit(dto: SubmitForApprovalDto, user: any): Promise<{
@@ -98,8 +98,8 @@ export declare class WorkflowsService {
             remarks: string | null;
             amount: number | null;
             documentNumber: string;
-            workflowId: string | null;
             documentId: string;
+            workflowId: string | null;
             currentLevel: number;
             totalLevels: number;
         };
@@ -141,8 +141,8 @@ export declare class WorkflowsService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        workflowId: string | null;
         documentId: string;
+        workflowId: string | null;
         currentLevel: number;
         totalLevels: number;
     }>;
@@ -161,8 +161,8 @@ export declare class WorkflowsService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        workflowId: string | null;
         documentId: string;
+        workflowId: string | null;
         currentLevel: number;
         totalLevels: number;
     }>;
@@ -197,8 +197,8 @@ export declare class WorkflowsService {
         createdBy: string | null;
         updatedBy: string | null;
         documentType: string;
-        triggerAmount: number | null;
         triggerCondition: string;
+        triggerAmount: number | null;
         levels: number;
     })[]>;
     findAllRequests(user: any, query: any): Promise<{
@@ -237,8 +237,8 @@ export declare class WorkflowsService {
             remarks: string | null;
             amount: number | null;
             documentNumber: string;
-            workflowId: string | null;
             documentId: string;
+            workflowId: string | null;
             currentLevel: number;
             totalLevels: number;
         })[];
@@ -275,8 +275,8 @@ export declare class WorkflowsService {
             createdBy: string | null;
             updatedBy: string | null;
             documentType: string;
-            triggerAmount: number | null;
             triggerCondition: string;
+            triggerAmount: number | null;
             levels: number;
         };
         actions: {
@@ -310,8 +310,8 @@ export declare class WorkflowsService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        workflowId: string | null;
         documentId: string;
+        workflowId: string | null;
         currentLevel: number;
         totalLevels: number;
     }>;

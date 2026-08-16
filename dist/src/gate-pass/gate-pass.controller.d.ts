@@ -5,22 +5,17 @@ export declare class GatePassController {
     private readonly service;
     constructor(service: GatePassService);
     create(dto: CreateGatePassDto, user: any): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -37,63 +32,63 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
     findAll(user: any, status?: GatePassStatus, type?: string, plantId?: string, search?: string): Promise<({
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -110,44 +105,49 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     })[]>;
     getStats(user: any): Promise<{
@@ -163,22 +163,17 @@ export declare class GatePassController {
         staffExit: number;
     }>;
     findOne(id: string): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -195,63 +190,63 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
     approve(id: string, dto: ApproveGatePassDto, user: any): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -268,63 +263,63 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
     issue(id: string, user: any): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -341,63 +336,63 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
     markReturned(id: string, dto: ReturnGatePassDto, user: any): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -414,63 +409,63 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
     close(id: string, user: any): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -487,63 +482,63 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
     cancel(id: string, dto: CancelGatePassDto, user: any): Promise<{
-        employee: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-            employeeCode: string;
-        };
-        closedBy: {
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         plant: {
             id: string;
             name: string;
             code: string;
+        };
+        employee: {
+            role: string;
+            id: string;
+            employeeCode: string;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: {
             id: string;
@@ -560,44 +555,49 @@ export declare class GatePassController {
             firstName: string;
             lastName: string;
         };
+        closedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isActive: boolean;
-        isTestData: boolean;
+        plantId: string;
         type: import(".prisma/client").$Enums.GatePassType;
         status: import(".prisma/client").$Enums.GatePassStatus;
-        employeeId: string | null;
-        remarks: string | null;
         unit: string;
-        cancelReason: string | null;
-        vehicleNumber: string | null;
-        closedAt: Date | null;
-        plantId: string;
-        estimatedValue: number | null;
-        quantity: number;
-        carrierName: string;
-        validFrom: Date | null;
-        validTo: Date | null;
+        requestedById: string;
         purpose: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
         passNumber: string;
-        authorizedById: string | null;
+        quantity: number;
+        cancelReason: string | null;
         authorizedAt: Date | null;
+        authorizedById: string | null;
+        carrierName: string;
         carrierMobile: string | null;
         carrierIdProof: string | null;
         itemDescription: string;
-        returnedAt: Date | null;
+        estimatedValue: number | null;
+        validFrom: Date | null;
+        validTo: Date | null;
+        employeeId: string | null;
         exitType: string | null;
         expectedReturnTime: Date | null;
-        actualReturnTime: Date | null;
         departmentName: string | null;
-        requestedById: string;
-        issuedById: string | null;
+        returnedAt: Date | null;
+        actualReturnTime: Date | null;
         issuedAt: Date | null;
+        closedAt: Date | null;
+        issuedById: string | null;
         closedById: string | null;
     }>;
 }

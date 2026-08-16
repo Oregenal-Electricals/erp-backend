@@ -217,8 +217,8 @@ export declare class AnalyticsService {
         overdueWos: {
             status: string;
             priority: string;
-            woNumber: string;
             productName: string;
+            woNumber: string;
             plannedQty: number;
             completedQty: number;
             plannedEndDate: Date;

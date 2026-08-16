@@ -26,18 +26,18 @@ export declare class StockAdjustmentController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
+            reason: string;
             remarks: string | null;
             warehouseId: string;
-            reason: string;
-            adjustmentNumber: string;
             adjustmentType: string;
+            adjustmentNumber: string;
         })[];
         total: number;
         page: number;
@@ -48,20 +48,20 @@ export declare class StockAdjustmentController {
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            adjustmentId: string;
+            unitCost: number;
             systemQty: number;
             physicalQty: number;
             adjustmentQty: number;
+            adjustmentId: string;
         }[];
         warehouse: {
             name: string;
@@ -70,37 +70,37 @@ export declare class StockAdjustmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
         remarks: string | null;
         warehouseId: string;
-        reason: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     create(dto: CreateAdjustmentDto, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            adjustmentId: string;
+            unitCost: number;
             systemQty: number;
             physicalQty: number;
             adjustmentQty: number;
+            adjustmentId: string;
         }[];
         warehouse: {
             name: string;
@@ -109,37 +109,37 @@ export declare class StockAdjustmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
         remarks: string | null;
         warehouseId: string;
-        reason: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     approve(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            adjustmentId: string;
+            unitCost: number;
             systemQty: number;
             physicalQty: number;
             adjustmentQty: number;
+            adjustmentId: string;
         }[];
         warehouse: {
             name: string;
@@ -148,37 +148,37 @@ export declare class StockAdjustmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
         remarks: string | null;
         warehouseId: string;
-        reason: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
     cancel(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            adjustmentId: string;
+            unitCost: number;
             systemQty: number;
             physicalQty: number;
             adjustmentQty: number;
+            adjustmentId: string;
         }[];
         warehouse: {
             name: string;
@@ -187,17 +187,17 @@ export declare class StockAdjustmentController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
+        reason: string;
         remarks: string | null;
         warehouseId: string;
-        reason: string;
-        adjustmentNumber: string;
         adjustmentType: string;
+        adjustmentNumber: string;
     }>;
 }

@@ -6,11 +6,11 @@ export declare class SalarySlipController {
     getHistory(empId: string, req: any): Promise<{
         id: string;
         status: string;
-        payrollRunId: string;
-        month: number;
         year: number;
+        month: number;
         grossEarnings: number;
         netPay: number;
+        payrollRunId: string;
     }[]>;
     downloadSlip(empId: string, month: string, year: string, req: any, res: Response): Promise<void>;
     downloadBulk(runId: string, req: any, res: Response): Promise<void>;

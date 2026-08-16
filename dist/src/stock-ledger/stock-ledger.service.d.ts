@@ -34,8 +34,8 @@ export declare class StockLedgerService {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
@@ -68,9 +68,9 @@ export declare class StockLedgerService {
         status: string;
         remarks: string | null;
         grnId: string;
+        inspectedBy: string | null;
         inspectionDate: Date;
         iqcNumber: string;
-        inspectedBy: string | null;
     })[]>;
     receiveFromIqc(iqcId: string, user: any): Promise<{
         message: string;
@@ -91,8 +91,8 @@ export declare class StockLedgerService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            totalCost: number;
             unitCost: number;
+            totalCost: number;
             transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
@@ -122,8 +122,8 @@ export declare class StockLedgerService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            totalCost: number;
             unitCost: number;
+            totalCost: number;
             transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
@@ -186,8 +186,8 @@ export declare class StockLedgerService {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
@@ -210,8 +210,8 @@ export declare class StockLedgerService {
         itemCode: string;
         itemName: string;
         warehouseId: string;
-        totalCost: number;
         unitCost: number;
+        totalCost: number;
         transactionType: string;
         referenceType: string | null;
         referenceId: string | null;

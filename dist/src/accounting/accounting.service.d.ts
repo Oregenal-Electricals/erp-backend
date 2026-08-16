@@ -28,8 +28,8 @@ export declare class AccountingService {
         code: string;
         type: string;
         nature: string;
-        isSystemGroup: boolean;
         parentGroupId: string | null;
+        isSystemGroup: boolean;
     }>;
     updateGroup(id: string, dto: any, user: any): Promise<{
         id: string;
@@ -45,8 +45,8 @@ export declare class AccountingService {
         code: string;
         type: string;
         nature: string;
-        isSystemGroup: boolean;
         parentGroupId: string | null;
+        isSystemGroup: boolean;
     }>;
     findAllGroups(user: any): Promise<({
         _count: {
@@ -71,8 +71,8 @@ export declare class AccountingService {
         code: string;
         type: string;
         nature: string;
-        isSystemGroup: boolean;
         parentGroupId: string | null;
+        isSystemGroup: boolean;
     })[]>;
     createAccount(dto: CreateAccountDto, user: any): Promise<{
         group: {
@@ -97,15 +97,15 @@ export declare class AccountingService {
         taxRate: number | null;
         bankAccountNumber: string | null;
         bankIfscCode: string | null;
-        isSystemAccount: boolean;
         openingBalance: number;
+        isSystemAccount: boolean;
         currentBalance: number;
-        gstApplicable: boolean;
+        nature: string;
+        groupId: string;
+        openingBalanceType: string;
         isBankAccount: boolean;
         isCashAccount: boolean;
-        nature: string;
-        openingBalanceType: string;
-        groupId: string;
+        gstApplicable: boolean;
     }>;
     updateAccount(id: string, dto: any, user: any): Promise<{
         group: {
@@ -128,15 +128,15 @@ export declare class AccountingService {
         taxRate: number | null;
         bankAccountNumber: string | null;
         bankIfscCode: string | null;
-        isSystemAccount: boolean;
         openingBalance: number;
+        isSystemAccount: boolean;
         currentBalance: number;
-        gstApplicable: boolean;
+        nature: string;
+        groupId: string;
+        openingBalanceType: string;
         isBankAccount: boolean;
         isCashAccount: boolean;
-        nature: string;
-        openingBalanceType: string;
-        groupId: string;
+        gstApplicable: boolean;
     }>;
     findAllAccounts(user: any, query: any): Promise<{
         data: ({
@@ -162,15 +162,15 @@ export declare class AccountingService {
             taxRate: number | null;
             bankAccountNumber: string | null;
             bankIfscCode: string | null;
-            isSystemAccount: boolean;
             openingBalance: number;
+            isSystemAccount: boolean;
             currentBalance: number;
-            gstApplicable: boolean;
+            nature: string;
+            groupId: string;
+            openingBalanceType: string;
             isBankAccount: boolean;
             isCashAccount: boolean;
-            nature: string;
-            openingBalanceType: string;
-            groupId: string;
+            gstApplicable: boolean;
         })[];
         total: number;
         page: number;
@@ -200,15 +200,15 @@ export declare class AccountingService {
         taxRate: number | null;
         bankAccountNumber: string | null;
         bankIfscCode: string | null;
-        isSystemAccount: boolean;
         openingBalance: number;
+        isSystemAccount: boolean;
         currentBalance: number;
-        gstApplicable: boolean;
+        nature: string;
+        groupId: string;
+        openingBalanceType: string;
         isBankAccount: boolean;
         isCashAccount: boolean;
-        nature: string;
-        openingBalanceType: string;
-        groupId: string;
+        gstApplicable: boolean;
     }>;
     getStats(user: any): Promise<{
         totalGroups: number;

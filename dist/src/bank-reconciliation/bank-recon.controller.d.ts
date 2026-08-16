@@ -11,9 +11,9 @@ export declare class BankReconController {
     }>;
     getBankAccounts(req: any): Promise<{
         id: string;
-        currentBalance: number;
         accountCode: string;
         accountName: string;
+        currentBalance: number;
     }[]>;
     getSuggestions(lineId: string, req: any): Promise<({
         account: {
@@ -22,25 +22,25 @@ export declare class BankReconController {
         };
         voucher: {
             referenceNumber: string;
-            voucherNumber: string;
             voucherType: string;
             voucherDate: Date;
             partyName: string;
+            voucherNumber: string;
         };
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        voucherId: string;
         amount: number;
         accountId: string;
         entryType: string;
         narration: string | null;
+        voucherId: string;
     })[]>;
     findAll(req: any, query: any): Promise<({
         lines: {
@@ -52,19 +52,19 @@ export declare class BankReconController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        openingBalance: number;
         status: string;
         remarks: string | null;
-        closingBalance: number;
+        period: string;
+        openingBalance: number;
         bankAccountId: string;
         bankAccountName: string;
-        period: string;
+        closingBalance: number;
         totalCredits: number;
         totalDebits: number;
         reconciledCount: number;
@@ -74,40 +74,40 @@ export declare class BankReconController {
         lines: {
             id: string;
             companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string;
             referenceNumber: string | null;
-            balance: number;
-            statementId: string;
             transactionDate: Date;
+            balance: number;
             debitAmount: number;
             creditAmount: number;
-            isReconciled: boolean;
             voucherEntryId: string | null;
+            isReconciled: boolean;
             reconciledDate: Date | null;
             reconciledBy: string | null;
+            statementId: string;
         }[];
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        openingBalance: number;
         status: string;
         remarks: string | null;
-        closingBalance: number;
+        period: string;
+        openingBalance: number;
         bankAccountId: string;
         bankAccountName: string;
-        period: string;
+        closingBalance: number;
         totalCredits: number;
         totalDebits: number;
         reconciledCount: number;
@@ -117,40 +117,40 @@ export declare class BankReconController {
         lines: {
             id: string;
             companyId: string;
+            description: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            description: string;
             referenceNumber: string | null;
-            balance: number;
-            statementId: string;
             transactionDate: Date;
+            balance: number;
             debitAmount: number;
             creditAmount: number;
-            isReconciled: boolean;
             voucherEntryId: string | null;
+            isReconciled: boolean;
             reconciledDate: Date | null;
             reconciledBy: string | null;
+            statementId: string;
         }[];
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        openingBalance: number;
         status: string;
         remarks: string | null;
-        closingBalance: number;
+        period: string;
+        openingBalance: number;
         bankAccountId: string;
         bankAccountName: string;
-        period: string;
+        closingBalance: number;
         totalCredits: number;
         totalDebits: number;
         reconciledCount: number;

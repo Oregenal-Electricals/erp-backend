@@ -35,19 +35,19 @@ export declare class StockIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             remarks: string | null;
             warehouseId: string;
-            referenceType: string;
-            referenceId: string | null;
             issueNumber: string;
             issueMethod: string;
+            referenceType: string;
+            referenceId: string | null;
             issuedTo: string;
         })[];
         total: number;
@@ -58,27 +58,27 @@ export declare class StockIssueController {
     findOne(id: string, req: any): Promise<{
         items: ({
             batch: {
-                batchNumber: string;
                 receivedDate: Date;
+                batchNumber: string;
                 lotNumber: string;
             };
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            batchId: string | null;
+            unitCost: number;
             issuedQty: number;
-            issueId: string;
             requestedQty: number;
+            batchId: string | null;
+            issueId: string;
         })[];
         warehouse: {
             name: string;
@@ -86,19 +86,19 @@ export declare class StockIssueController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        referenceType: string;
-        referenceId: string | null;
         issueNumber: string;
         issueMethod: string;
+        referenceType: string;
+        referenceId: string | null;
         issuedTo: string;
     }>;
     create(dto: CreateStockIssueDto, req: any): Promise<{
@@ -110,20 +110,20 @@ export declare class StockIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            batchId: string | null;
+            unitCost: number;
             issuedQty: number;
-            issueId: string;
             requestedQty: number;
+            batchId: string | null;
+            issueId: string;
         })[];
         warehouse: {
             name: string;
@@ -131,19 +131,19 @@ export declare class StockIssueController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        referenceType: string;
-        referenceId: string | null;
         issueNumber: string;
         issueMethod: string;
+        referenceType: string;
+        referenceId: string | null;
         issuedTo: string;
     }>;
     confirm(id: string, req: any): Promise<{
@@ -155,20 +155,20 @@ export declare class StockIssueController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             itemCode: string;
             itemName: string;
-            unitCost: number;
             uom: string;
-            batchId: string | null;
+            unitCost: number;
             issuedQty: number;
-            issueId: string;
             requestedQty: number;
+            batchId: string | null;
+            issueId: string;
         })[];
         warehouse: {
             name: string;
@@ -176,19 +176,19 @@ export declare class StockIssueController {
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         warehouseId: string;
-        referenceType: string;
-        referenceId: string | null;
         issueNumber: string;
         issueMethod: string;
+        referenceType: string;
+        referenceId: string | null;
         issuedTo: string;
     }>;
 }

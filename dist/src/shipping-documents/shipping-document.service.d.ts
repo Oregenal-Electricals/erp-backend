@@ -10,9 +10,9 @@ export declare class ShippingDocumentService {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -54,9 +54,9 @@ export declare class ShippingDocumentService {
             shipment: {
                 status: string;
                 carrierName: string;
-                shipmentNumber: string;
                 shipmentMode: string;
                 vesselName: string;
+                shipmentNumber: string;
             };
             ipo: {
                 vendor: {
@@ -102,9 +102,9 @@ export declare class ShippingDocumentService {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -145,9 +145,9 @@ export declare class ShippingDocumentService {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -188,9 +188,9 @@ export declare class ShippingDocumentService {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -231,9 +231,9 @@ export declare class ShippingDocumentService {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -274,9 +274,9 @@ export declare class ShippingDocumentService {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {

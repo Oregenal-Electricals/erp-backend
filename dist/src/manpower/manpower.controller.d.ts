@@ -6,21 +6,9 @@ export declare class ManpowerController {
     findAll(req: any, query: any): Promise<({
         workOrder: {
             id: string;
-            woNumber: string;
-            productName: string;
             stageName: string;
-        };
-        fromUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-        };
-        toUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
+            productName: string;
+            woNumber: string;
         };
         queries: ({
             raisedBy: {
@@ -34,64 +22,64 @@ export declare class ManpowerController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             message: string;
             allocationId: string;
+            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
-            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         workOrder: {
             id: string;
-            woNumber: string;
-            productName: string;
             stageName: string;
+            productName: string;
+            woNumber: string;
         };
         children: ({
             workOrder: {
                 id: string;
-                woNumber: string;
-                productName: string;
                 stageName: string;
-            };
-            fromUser: {
-                id: string;
-                firstName: string;
-                lastName: string;
-                role: string;
-            };
-            toUser: {
-                id: string;
-                firstName: string;
-                lastName: string;
-                role: string;
+                productName: string;
+                woNumber: string;
             };
             queries: ({
                 raisedBy: {
@@ -105,51 +93,51 @@ export declare class ManpowerController {
             } & {
                 id: string;
                 companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
-                isActive: boolean;
-                isTestData: boolean;
                 status: string;
                 message: string;
                 allocationId: string;
+                response: string | null;
                 raisedByUserId: string;
                 raisedToUserId: string;
-                response: string | null;
             })[];
+            fromUser: {
+                role: string;
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
+            toUser: {
+                role: string;
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
         } & {
             level: string;
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            count: number;
             status: string;
-            remarks: string | null;
             category: string | null;
-            workOrderId: string | null;
-            parentId: string | null;
+            remarks: string | null;
             date: Date;
-            fromUserId: string;
+            parentId: string | null;
+            count: number;
+            workOrderId: string | null;
             toUserId: string | null;
+            fromUserId: string;
         })[];
-        fromUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-        };
-        toUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-        };
         queries: ({
             raisedBy: {
                 firstName: string;
@@ -162,57 +150,57 @@ export declare class ManpowerController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             message: string;
             allocationId: string;
+            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
-            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     }>;
     getChain(id: string, req: any): Promise<{
         workOrder: {
             id: string;
-            woNumber: string;
-            productName: string;
             stageName: string;
-        };
-        fromUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-        };
-        toUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
+            productName: string;
+            woNumber: string;
         };
         queries: ({
             raisedBy: {
@@ -226,57 +214,57 @@ export declare class ManpowerController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             message: string;
             allocationId: string;
+            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
-            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     }>;
     create(dto: CreateManpowerAllocationDto, req: any): Promise<{
         workOrder: {
             id: string;
-            woNumber: string;
-            productName: string;
             stageName: string;
-        };
-        fromUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-        };
-        toUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
+            productName: string;
+            woNumber: string;
         };
         queries: ({
             raisedBy: {
@@ -290,57 +278,57 @@ export declare class ManpowerController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             message: string;
             allocationId: string;
+            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
-            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     }>;
     accept(id: string, req: any): Promise<{
         workOrder: {
             id: string;
-            woNumber: string;
-            productName: string;
             stageName: string;
-        };
-        fromUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
-        };
-        toUser: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            role: string;
+            productName: string;
+            woNumber: string;
         };
         queries: ({
             raisedBy: {
@@ -354,38 +342,50 @@ export declare class ManpowerController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
             message: string;
             allocationId: string;
+            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
-            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     }>;
     distribute(dto: DistributeManpowerDto, req: any): Promise<{
         children: any[];
@@ -396,54 +396,54 @@ export declare class ManpowerController {
     raiseQuery(dto: RaiseManpowerQueryDto, req: any): Promise<{
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         message: string;
         allocationId: string;
+        response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
-        response: string | null;
     }>;
     resolveQuery(id: string, dto: ResolveManpowerQueryDto, req: any): Promise<{
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         message: string;
         allocationId: string;
+        response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
-        response: string | null;
     }>;
     adjust(dto: AdjustManpowerDto, req: any): Promise<{
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -453,21 +453,21 @@ export declare class ManpowerController {
         level: string;
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        count: number;
         status: string;
-        remarks: string | null;
         category: string | null;
-        workOrderId: string | null;
-        parentId: string | null;
+        remarks: string | null;
         date: Date;
-        fromUserId: string;
+        parentId: string | null;
+        count: number;
+        workOrderId: string | null;
         toUserId: string | null;
+        fromUserId: string;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -481,37 +481,37 @@ export declare class ManpowerController {
             level: number;
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             comments: string | null;
-            requestId: string;
             action: string;
             actionBy: string;
             actionDate: Date;
+            requestId: string;
         }[];
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
-        remarks: string | null;
         documentType: string;
-        documentNumber: string;
-        amount: number | null;
-        documentId: string;
         requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
         currentLevel: number;
         totalLevels: number;
-        workflowId: string | null;
     }>;
     rejectRequest(requestId: string, dto: {
         comments?: string;
@@ -523,36 +523,36 @@ export declare class ManpowerController {
             level: number;
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             comments: string | null;
-            requestId: string;
             action: string;
             actionBy: string;
             actionDate: Date;
+            requestId: string;
         }[];
     } & {
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
-        remarks: string | null;
         documentType: string;
-        documentNumber: string;
-        amount: number | null;
-        documentId: string;
         requestedBy: string;
+        remarks: string | null;
+        amount: number | null;
+        documentNumber: string;
+        documentId: string;
+        workflowId: string | null;
         currentLevel: number;
         totalLevels: number;
-        workflowId: string | null;
     }>;
 }

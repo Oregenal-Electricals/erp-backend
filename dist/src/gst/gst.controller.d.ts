@@ -47,28 +47,28 @@ export declare class GstController {
         } & {
             id: string;
             companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             status: string;
-            paymentTerms: string;
-            notes: string | null;
-            customerName: string;
-            subtotal: number;
-            totalGst: number;
-            totalAmount: number;
-            soId: string | null;
-            invoiceNumber: string;
-            dispatchId: string | null;
             customerAddress: string | null;
-            invoiceDate: Date;
             dueDate: Date;
+            customerName: string;
+            invoiceNumber: string;
+            invoiceDate: Date;
+            paymentTerms: string;
+            subtotal: number;
+            totalAmount: number;
+            notes: string | null;
+            totalGst: number;
+            soId: string | null;
+            dispatchId: string | null;
+            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
-            voucherId: string | null;
         })[];
     }>;
     getGstr3b(req: any, period: string): Promise<{
@@ -98,12 +98,12 @@ export declare class GstController {
     findAll(req: any): Promise<{
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         fromDate: Date;
@@ -127,12 +127,12 @@ export declare class GstController {
     generate(dto: GenerateGstReturnDto, req: any): Promise<{
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         fromDate: Date;
@@ -156,12 +156,12 @@ export declare class GstController {
     file(id: string, dto: FileGstReturnDto, req: any): Promise<{
         id: string;
         companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         status: string;
         remarks: string | null;
         fromDate: Date;
