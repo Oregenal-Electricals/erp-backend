@@ -51,6 +51,7 @@ export class UpsertOverrideDto {
   @IsBoolean() isVisible: boolean;
   @IsOptional() @IsString() customLabel?: string;
   @IsOptional() @IsString() parentKeyOverride?: string;
+  @IsOptional() @IsString() customPage?: string;
   @IsOptional() @IsInt() sortOrderOverride?: number;
 }
 

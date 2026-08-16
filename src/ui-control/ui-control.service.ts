@@ -136,7 +136,7 @@ export class UiControlService {
    * scope; any other override value moves it under a different section;
    * no override at all keeps its original section membership.
    */
-  private buildRoleAwareSidebar(elements: any[], effectiveFn: (key: string) => { visible?: boolean; label?: string; sortOrder?: number; parentKeyOverride?: string | null } | undefined) {
+  private buildRoleAwareSidebar(elements: any[], effectiveFn: (key: string) => { visible?: boolean; label?: string; sortOrder?: number; parentKeyOverride?: string | null; page?: string | null } | undefined) {
     const sections = elements.filter((e) => e.elementType === 'SIDEBAR_SECTION');
     const items = elements.filter((e) => e.elementType === 'SIDEBAR_ITEM');
     const effectiveParent = (item: any) => {
@@ -148,18 +148,18 @@ export class UiControlService {
     const sectionNodes = sections
       .filter((s) => effectiveFn(s.key)?.visible !== false)
       .map((s) => ({
-        key: s.key, label: effectiveFn(s.key)?.label || s.label, icon: s.icon, page: s.page,
+        key: s.key, label: effectiveFn(s.key)?.label || s.label, icon: s.icon, page: effectiveFn(s.key)?.page || s.page,
         sortOrder: effectiveFn(s.key)?.sortOrder ?? s.sortOrder,
         items: items
           .filter((i) => effectiveParent(i) === s.key && effectiveFn(i.key)?.visible !== false)
           .sort((a, b) => (effectiveFn(a.key)?.sortOrder ?? 0) - (effectiveFn(b.key)?.sortOrder ?? 0))
-          .map((i) => ({ key: i.key, label: effectiveFn(i.key)?.label || i.label, icon: i.icon, page: i.page })),
+          .map((i) => ({ key: i.key, label: effectiveFn(i.key)?.label || i.label, icon: i.icon, page: effectiveFn(i.key)?.page || i.page })),
       }))
       .filter((s) => s.items.length > 0 || s.page);
     const standaloneNodes = items
       .filter((i) => effectiveParent(i) === null && effectiveFn(i.key)?.visible !== false)
       .map((i) => ({
-        key: i.key, label: effectiveFn(i.key)?.label || i.label, icon: i.icon, page: i.page,
+        key: i.key, label: effectiveFn(i.key)?.label || i.label, icon: i.icon, page: effectiveFn(i.key)?.page || i.page,
         sortOrder: effectiveFn(i.key)?.sortOrder ?? i.sortOrder,
         items: [],
       }));
@@ -197,6 +197,7 @@ export class UiControlService {
           sortOrderOverride: dto.sortOrderOverride,
           customLabel: dto.customLabel !== undefined ? (dto.customLabel || null) : existing.customLabel,
           parentKeyOverride: dto.parentKeyOverride !== undefined ? (dto.parentKeyOverride || null) : existing.parentKeyOverride,
+          customPage: dto.customPage !== undefined ? (dto.customPage || null) : existing.customPage,
           updatedBy: userId,
         },
       });
@@ -213,6 +214,7 @@ export class UiControlService {
         isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride,
         customLabel: dto.customLabel || null,
         parentKeyOverride: dto.parentKeyOverride || null,
+        customPage: dto.customPage || null,
         createdBy: userId, updatedBy: userId,
       },
     });
@@ -242,12 +244,13 @@ export class UiControlService {
         },
       },
     });
-    const map: Record<string, { visible: boolean; sortOrder: number; label: string; parentKeyOverride?: string | null }> = {};
+    const map: Record<string, { visible: boolean; sortOrder: number; label: string; parentKeyOverride?: string | null; page?: string | null }> = {};
     for (const el of elements) {
       let visible = el.defaultVisible;
       let sortOrder = el.sortOrder;
       let label = el.label;
       let parentKeyOverride: string | null | undefined = undefined;
+      let page: string | null | undefined = undefined;
       const roleOverrides = el.overrides.filter((o) => o.scopeType === 'ROLE');
       if (roleOverrides.length > 0) {
         visible = roleOverrides.every((o) => o.isVisible);
@@ -257,6 +260,8 @@ export class UiControlService {
         if (withLabel) label = withLabel.customLabel;
         const withParent = roleOverrides.find((o) => o.parentKeyOverride);
         if (withParent) parentKeyOverride = withParent.parentKeyOverride;
+        const withPage = roleOverrides.find((o) => o.customPage);
+        if (withPage) page = withPage.customPage;
       }
       const userOverride = el.overrides.find((o) => o.scopeType === 'USER' && o.userId === userId);
       if (userOverride) {
@@ -264,8 +269,9 @@ export class UiControlService {
         if (userOverride.sortOrderOverride != null) sortOrder = userOverride.sortOrderOverride;
         if (userOverride.customLabel) label = userOverride.customLabel;
         if (userOverride.parentKeyOverride) parentKeyOverride = userOverride.parentKeyOverride;
+        if (userOverride.customPage) page = userOverride.customPage;
       }
-      map[el.key] = { visible, sortOrder, label, parentKeyOverride };
+      map[el.key] = { visible, sortOrder, label, parentKeyOverride, page };
     }
     return map;
   }
@@ -278,7 +284,7 @@ export class UiControlService {
     if (roleName === 'SUPER_ADMIN') {
       return this.buildRoleAwareSidebar(elements, () => ({ visible: true }));
     }
-    const effectiveByKey: Record<string, { visible: boolean; label: string; sortOrder: number; parentKeyOverride?: string | null }> = {};
+    const effectiveByKey: Record<string, { visible: boolean; label: string; sortOrder: number; parentKeyOverride?: string | null; page?: string | null }> = {};
     for (const el of elements) {
       const ov = el.overrides[0];
       effectiveByKey[el.key] = {
@@ -286,6 +292,7 @@ export class UiControlService {
         label: ov?.customLabel || el.label,
         sortOrder: ov?.sortOrderOverride ?? el.sortOrder,
         parentKeyOverride: ov?.parentKeyOverride,
+        page: ov?.customPage,
       };
     }
     return this.buildRoleAwareSidebar(elements, (key) => effectiveByKey[key]);

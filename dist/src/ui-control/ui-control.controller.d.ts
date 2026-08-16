@@ -8,6 +8,7 @@ export declare class UiControlController {
         sortOrder: number;
         label: string;
         parentKeyOverride?: string | null;
+        page?: string | null;
     }>>;
     mySidebar(user: any): Promise<any[]>;
     previewSidebar(user: any, roleName: string): Promise<any[]>;
@@ -28,6 +29,7 @@ export declare class UiControlController {
             isVisible: boolean;
             customLabel: string | null;
             parentKeyOverride: string | null;
+            customPage: string | null;
             sortOrderOverride: number | null;
         }[];
     } & {
@@ -67,6 +69,7 @@ export declare class UiControlController {
             isVisible: boolean;
             customLabel: string | null;
             parentKeyOverride: string | null;
+            customPage: string | null;
             sortOrderOverride: number | null;
         }[];
         id: string;
@@ -171,6 +174,7 @@ export declare class UiControlController {
         isVisible: boolean;
         customLabel: string | null;
         parentKeyOverride: string | null;
+        customPage: string | null;
         sortOrderOverride: number | null;
     }>;
 }

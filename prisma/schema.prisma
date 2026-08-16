@@ -5417,6 +5417,7 @@ model UiControlOverride {
   sortOrderOverride Int?     @map("sort_order_override")
   customLabel       String?  @map("custom_label")
   parentKeyOverride String?  @map("parent_key_override")
+  customPage        String?  @map("custom_page")
 
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

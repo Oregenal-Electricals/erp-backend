@@ -134,24 +134,24 @@ let UiControlService = class UiControlService {
         const sectionNodes = sections
             .filter((s) => { var _a; return ((_a = effectiveFn(s.key)) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
             .map((s) => {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             return ({
-                key: s.key, label: ((_a = effectiveFn(s.key)) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: s.page,
-                sortOrder: (_c = (_b = effectiveFn(s.key)) === null || _b === void 0 ? void 0 : _b.sortOrder) !== null && _c !== void 0 ? _c : s.sortOrder,
+                key: s.key, label: ((_a = effectiveFn(s.key)) === null || _a === void 0 ? void 0 : _a.label) || s.label, icon: s.icon, page: ((_b = effectiveFn(s.key)) === null || _b === void 0 ? void 0 : _b.page) || s.page,
+                sortOrder: (_d = (_c = effectiveFn(s.key)) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : s.sortOrder,
                 items: items
                     .filter((i) => { var _a; return effectiveParent(i) === s.key && ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
                     .sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = effectiveFn(a.key)) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = effectiveFn(b.key)) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); })
-                    .map((i) => { var _a; return ({ key: i.key, label: ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page }); }),
+                    .map((i) => { var _a, _b; return ({ key: i.key, label: ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: ((_b = effectiveFn(i.key)) === null || _b === void 0 ? void 0 : _b.page) || i.page }); }),
             });
         })
             .filter((s) => s.items.length > 0 || s.page);
         const standaloneNodes = items
             .filter((i) => { var _a; return effectiveParent(i) === null && ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.visible) !== false; })
             .map((i) => {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             return ({
-                key: i.key, label: ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: i.page,
-                sortOrder: (_c = (_b = effectiveFn(i.key)) === null || _b === void 0 ? void 0 : _b.sortOrder) !== null && _c !== void 0 ? _c : i.sortOrder,
+                key: i.key, label: ((_a = effectiveFn(i.key)) === null || _a === void 0 ? void 0 : _a.label) || i.label, icon: i.icon, page: ((_b = effectiveFn(i.key)) === null || _b === void 0 ? void 0 : _b.page) || i.page,
+                sortOrder: (_d = (_c = effectiveFn(i.key)) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : i.sortOrder,
                 items: [],
             });
         });
@@ -190,6 +190,7 @@ let UiControlService = class UiControlService {
                     sortOrderOverride: dto.sortOrderOverride,
                     customLabel: dto.customLabel !== undefined ? (dto.customLabel || null) : existing.customLabel,
                     parentKeyOverride: dto.parentKeyOverride !== undefined ? (dto.parentKeyOverride || null) : existing.parentKeyOverride,
+                    customPage: dto.customPage !== undefined ? (dto.customPage || null) : existing.customPage,
                     updatedBy: userId,
                 },
             });
@@ -205,6 +206,7 @@ let UiControlService = class UiControlService {
                 isVisible: dto.isVisible, sortOrderOverride: dto.sortOrderOverride,
                 customLabel: dto.customLabel || null,
                 parentKeyOverride: dto.parentKeyOverride || null,
+                customPage: dto.customPage || null,
                 createdBy: userId, updatedBy: userId,
             },
         });
@@ -236,6 +238,7 @@ let UiControlService = class UiControlService {
             let sortOrder = el.sortOrder;
             let label = el.label;
             let parentKeyOverride = undefined;
+            let page = undefined;
             const roleOverrides = el.overrides.filter((o) => o.scopeType === 'ROLE');
             if (roleOverrides.length > 0) {
                 visible = roleOverrides.every((o) => o.isVisible);
@@ -248,6 +251,9 @@ let UiControlService = class UiControlService {
                 const withParent = roleOverrides.find((o) => o.parentKeyOverride);
                 if (withParent)
                     parentKeyOverride = withParent.parentKeyOverride;
+                const withPage = roleOverrides.find((o) => o.customPage);
+                if (withPage)
+                    page = withPage.customPage;
             }
             const userOverride = el.overrides.find((o) => o.scopeType === 'USER' && o.userId === userId);
             if (userOverride) {
@@ -258,8 +264,10 @@ let UiControlService = class UiControlService {
                     label = userOverride.customLabel;
                 if (userOverride.parentKeyOverride)
                     parentKeyOverride = userOverride.parentKeyOverride;
+                if (userOverride.customPage)
+                    page = userOverride.customPage;
             }
-            map[el.key] = { visible, sortOrder, label, parentKeyOverride };
+            map[el.key] = { visible, sortOrder, label, parentKeyOverride, page };
         }
         return map;
     }
@@ -280,6 +288,7 @@ let UiControlService = class UiControlService {
                 label: (ov === null || ov === void 0 ? void 0 : ov.customLabel) || el.label,
                 sortOrder: (_a = ov === null || ov === void 0 ? void 0 : ov.sortOrderOverride) !== null && _a !== void 0 ? _a : el.sortOrder,
                 parentKeyOverride: ov === null || ov === void 0 ? void 0 : ov.parentKeyOverride,
+                page: ov === null || ov === void 0 ? void 0 : ov.customPage,
             };
         }
         return this.buildRoleAwareSidebar(elements, (key) => effectiveByKey[key]);
