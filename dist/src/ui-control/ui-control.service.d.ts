@@ -82,10 +82,10 @@ export declare class UiControlService {
             elementId: string;
             scopeType: string;
             isVisible: boolean;
+            sortOrderOverride: number | null;
             customLabel: string | null;
             parentKeyOverride: string | null;
             customPage: string | null;
-            sortOrderOverride: number | null;
         }[];
     } & {
         id: string;
@@ -122,10 +122,10 @@ export declare class UiControlService {
             elementId: string;
             scopeType: string;
             isVisible: boolean;
+            sortOrderOverride: number | null;
             customLabel: string | null;
             parentKeyOverride: string | null;
             customPage: string | null;
-            sortOrderOverride: number | null;
         }[];
         id: string;
         companyId: string;
@@ -162,10 +162,10 @@ export declare class UiControlService {
         elementId: string;
         scopeType: string;
         isVisible: boolean;
+        sortOrderOverride: number | null;
         customLabel: string | null;
         parentKeyOverride: string | null;
         customPage: string | null;
-        sortOrderOverride: number | null;
     }>;
     bulkUpsertOverrides(companyId: string, overrides: UpsertOverrideDto[], userId: string): Promise<{
         updated: number;
@@ -184,10 +184,10 @@ export declare class UiControlService {
         elementId: string;
         scopeType: string;
         isVisible: boolean;
+        sortOrderOverride: number | null;
         customLabel: string | null;
         parentKeyOverride: string | null;
         customPage: string | null;
-        sortOrderOverride: number | null;
     }>;
     getEffectiveVisibility(companyId: string, userId: string, allRoles: string[]): Promise<Record<string, {
         visible: boolean;

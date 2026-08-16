@@ -101,6 +101,8 @@ var Permission;
     Permission["WAREHOUSE_VIEW"] = "WAREHOUSE_VIEW";
     Permission["BOM_VIEW"] = "BOM_VIEW";
     Permission["BOM_REVISION_VIEW"] = "BOM_REVISION_VIEW";
+    Permission["BOM_VERIFY"] = "BOM_VERIFY";
+    Permission["BOM_APPROVE"] = "BOM_APPROVE";
     Permission["GRN_VIEW"] = "GRN_VIEW";
     Permission["IQC_VIEW"] = "IQC_VIEW";
     Permission["STOCK_LEDGER_VIEW"] = "STOCK_LEDGER_VIEW";

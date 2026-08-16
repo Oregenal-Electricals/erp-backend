@@ -32,10 +32,10 @@ export declare class CustomerPortalService {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
+                totalAmount: number;
                 itemCode: string;
                 itemName: string;
                 uom: string;
-                totalAmount: number;
                 gstRate: number;
                 qty: number;
                 unitPrice: number;
@@ -64,10 +64,10 @@ export declare class CustomerPortalService {
             subtotal: number;
             totalAmount: number;
             cancelReason: string | null;
-            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
             soNumber: string;
+            cpoId: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
         })[];
@@ -94,10 +94,10 @@ export declare class CustomerPortalService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }[]>;
     getCustomerComplaints(customerId: string, companyId: string): Promise<{
         id: string;
@@ -113,9 +113,9 @@ export declare class CustomerPortalService {
         customerPo: string | null;
         remarks: string | null;
         customerName: string;
+        invoiceNumber: string | null;
         itemCode: string;
         itemName: string;
-        invoiceNumber: string | null;
         closedBy: string | null;
         receivedDate: Date;
         customerId: string | null;
@@ -126,11 +126,11 @@ export declare class CustomerPortalService {
         qtyAffected: number;
         closedDate: Date | null;
         rootCause: string | null;
+        complaintNumber: string;
         complaintDate: Date;
         complaintType: string;
         customerRequest: string | null;
         eighthDNumber: string | null;
-        complaintNumber: string;
         responseDate: Date | null;
     }[]>;
 }

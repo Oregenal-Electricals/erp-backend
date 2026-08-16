@@ -8,27 +8,27 @@ export declare class SettingsController {
     }>;
     getAllSettings(category?: string): Promise<{
         id: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
+        key: string;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        key: string;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         value: string;
         category: string;
     }[]>;
     getSetting(key: string): Promise<{
         id: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
+        key: string;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        key: string;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         value: string;
         category: string;
     }>;
@@ -38,14 +38,14 @@ export declare class SettingsController {
     }>;
     updateSetting(key: string, dto: UpdateSystemSettingDto, user: any): Promise<{
         id: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
+        key: string;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        key: string;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         value: string;
         category: string;
     }>;
@@ -61,14 +61,14 @@ export declare class SettingsController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isLocked: boolean;
+        isActive: boolean;
+        isTestData: boolean;
         documentType: string;
+        isLocked: boolean;
         prefix: string;
         separator: string;
         includeYear: boolean;
@@ -94,14 +94,14 @@ export declare class SettingsController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isLocked: boolean;
+        isActive: boolean;
+        isTestData: boolean;
         documentType: string;
+        isLocked: boolean;
         prefix: string;
         separator: string;
         includeYear: boolean;
@@ -113,14 +113,14 @@ export declare class SettingsController {
     createSeries(dto: CreateNumberingSeriesDto, user: any): Promise<{
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isLocked: boolean;
+        isActive: boolean;
+        isTestData: boolean;
         documentType: string;
+        isLocked: boolean;
         prefix: string;
         separator: string;
         includeYear: boolean;
@@ -132,14 +132,14 @@ export declare class SettingsController {
     updateSeries(id: string, dto: UpdateNumberingSeriesDto, user: any): Promise<{
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        isLocked: boolean;
+        isActive: boolean;
+        isTestData: boolean;
         documentType: string;
+        isLocked: boolean;
         prefix: string;
         separator: string;
         includeYear: boolean;

@@ -13,21 +13,9 @@ export declare class ManpowerService {
     create(dto: CreateManpowerAllocationDto, user: any): Promise<{
         workOrder: {
             id: string;
-            stageName: string;
-            productName: string;
             woNumber: string;
-        };
-        fromUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
-        toUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
+            productName: string;
+            stageName: string;
         };
         queries: ({
             raisedBy: {
@@ -50,10 +38,22 @@ export declare class ManpowerService {
             status: string;
             message: string;
             allocationId: string;
-            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
+            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
@@ -71,27 +71,15 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     }>;
     accept(id: string, user: any): Promise<{
         workOrder: {
             id: string;
-            stageName: string;
-            productName: string;
             woNumber: string;
-        };
-        fromUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
-        toUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
+            productName: string;
+            stageName: string;
         };
         queries: ({
             raisedBy: {
@@ -114,10 +102,22 @@ export declare class ManpowerService {
             status: string;
             message: string;
             allocationId: string;
-            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
+            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
@@ -135,8 +135,8 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     }>;
     distribute(dto: DistributeManpowerDto, user: any): Promise<{
         children: any[];
@@ -147,21 +147,9 @@ export declare class ManpowerService {
     findAll(user: any, query: any): Promise<({
         workOrder: {
             id: string;
-            stageName: string;
-            productName: string;
             woNumber: string;
-        };
-        fromUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
-        toUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
+            productName: string;
+            stageName: string;
         };
         queries: ({
             raisedBy: {
@@ -184,10 +172,22 @@ export declare class ManpowerService {
             status: string;
             message: string;
             allocationId: string;
-            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
+            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
@@ -205,34 +205,22 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     })[]>;
     findOne(id: string, user: any): Promise<{
         workOrder: {
             id: string;
-            stageName: string;
-            productName: string;
             woNumber: string;
+            productName: string;
+            stageName: string;
         };
         children: ({
             workOrder: {
                 id: string;
-                stageName: string;
-                productName: string;
                 woNumber: string;
-            };
-            fromUser: {
-                role: string;
-                id: string;
-                firstName: string;
-                lastName: string;
-            };
-            toUser: {
-                role: string;
-                id: string;
-                firstName: string;
-                lastName: string;
+                productName: string;
+                stageName: string;
             };
             queries: ({
                 raisedBy: {
@@ -255,10 +243,22 @@ export declare class ManpowerService {
                 status: string;
                 message: string;
                 allocationId: string;
-                response: string | null;
                 raisedByUserId: string;
                 raisedToUserId: string;
+                response: string | null;
             })[];
+            fromUser: {
+                role: string;
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
+            toUser: {
+                role: string;
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
         } & {
             level: string;
             id: string;
@@ -276,21 +276,9 @@ export declare class ManpowerService {
             parentId: string | null;
             count: number;
             workOrderId: string | null;
-            toUserId: string | null;
             fromUserId: string;
+            toUserId: string | null;
         })[];
-        fromUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
-        toUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
         queries: ({
             raisedBy: {
                 firstName: string;
@@ -312,10 +300,22 @@ export declare class ManpowerService {
             status: string;
             message: string;
             allocationId: string;
-            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
+            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
@@ -333,27 +333,15 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     }>;
     getChain(rootId: string, user: any): Promise<{
         workOrder: {
             id: string;
-            stageName: string;
-            productName: string;
             woNumber: string;
-        };
-        fromUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
-        };
-        toUser: {
-            role: string;
-            id: string;
-            firstName: string;
-            lastName: string;
+            productName: string;
+            stageName: string;
         };
         queries: ({
             raisedBy: {
@@ -376,10 +364,22 @@ export declare class ManpowerService {
             status: string;
             message: string;
             allocationId: string;
-            response: string | null;
             raisedByUserId: string;
             raisedToUserId: string;
+            response: string | null;
         })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         level: string;
         id: string;
@@ -397,8 +397,8 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     }>;
     raiseQuery(dto: RaiseManpowerQueryDto, user: any): Promise<{
         id: string;
@@ -412,9 +412,9 @@ export declare class ManpowerService {
         status: string;
         message: string;
         allocationId: string;
-        response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
+        response: string | null;
     }>;
     resolveQuery(id: string, dto: ResolveManpowerQueryDto, user: any): Promise<{
         id: string;
@@ -428,9 +428,9 @@ export declare class ManpowerService {
         status: string;
         message: string;
         allocationId: string;
-        response: string | null;
         raisedByUserId: string;
         raisedToUserId: string;
+        response: string | null;
     }>;
     requestAdjust(dto: AdjustManpowerDto, user: any): Promise<{
         level: string;
@@ -449,8 +449,8 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -473,8 +473,8 @@ export declare class ManpowerService {
         parentId: string | null;
         count: number;
         workOrderId: string | null;
-        toUserId: string | null;
         fromUserId: string;
+        toUserId: string | null;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -516,8 +516,8 @@ export declare class ManpowerService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        documentId: string;
         workflowId: string | null;
+        documentId: string;
         currentLevel: number;
         totalLevels: number;
     }>;
@@ -556,8 +556,8 @@ export declare class ManpowerService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        documentId: string;
         workflowId: string | null;
+        documentId: string;
         currentLevel: number;
         totalLevels: number;
     }>;

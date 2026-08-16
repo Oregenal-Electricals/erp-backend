@@ -35,12 +35,12 @@ export declare class TdsService {
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
-        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
+        regime: string;
     }>;
     getTdsChallan(month: number, year: number, user: any): Promise<{
         reportType: string;
@@ -127,11 +127,11 @@ export declare class TdsService {
         section80E: number;
         rentPaid: number;
         isMetroCity: boolean;
-        regime: string;
         hraExemption: number;
         standardDeduction: number;
         taxableIncome: number;
         annualTax: number;
         monthlyTds: number;
+        regime: string;
     })[]>;
 }

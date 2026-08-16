@@ -327,6 +327,7 @@ model Company {
   customFieldValues      CustomFieldValue[]
   manpowerAllocations    ManpowerAllocation[]
   manpowerQueries        ManpowerQuery[]
+  bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
 
   @@map("companies")
@@ -508,6 +509,8 @@ model User {
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
+  bomQueryRaisedBy BomQuery[] @relation("BomQueryRaisedBy")
+  bomQueryRaisedTo BomQuery[] @relation("BomQueryRaisedTo")
   transfersGiven    StageTransferNote[] @relation("TransferGivenBy")
   transfersReceived StageTransferNote[] @relation("TransferReceivedBy")
 
@@ -1534,6 +1537,31 @@ model ProductRevision {
 
 // MODULE 21 — BOM MANAGEMENT
 // ============================================================
+model BomQuery {
+  id             String   @id @default(uuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id])
+  bomId          String
+  bom            Bom      @relation(fields: [bomId], references: [id])
+  raisedByUserId String
+  raisedBy       User     @relation("BomQueryRaisedBy", fields: [raisedByUserId], references: [id])
+  raisedToUserId String
+  raisedTo       User     @relation("BomQueryRaisedTo", fields: [raisedToUserId], references: [id])
+  message        String
+  response       String?
+  status         String   @default("OPEN") // OPEN, RESOLVED
+  isActive       Boolean  @default(true)
+  isTestData     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  @@map("bom_queries")
+  @@index([companyId])
+  @@index([bomId])
+}
+
 model Bom {
   id            String    @id @default(uuid())
   companyId     String
@@ -1551,9 +1579,12 @@ model Bom {
   description   String?
   effectiveFrom DateTime  @default(now())
   effectiveTo   DateTime?
-  status        String    @default("DRAFT") // DRAFT, APPROVED, OBSOLETE
+  status        String    @default("DRAFT") // DRAFT, VERIFIED, APPROVED, OBSOLETE
+  verifiedBy    String?
+  verifiedAt    DateTime?
   approvedBy    String?
   approvedAt    DateTime?
+  queries       BomQuery[]
   totalCost     Float?
   isActive      Boolean   @default(true)
   isTestData    Boolean   @default(false)

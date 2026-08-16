@@ -13,15 +13,15 @@ export declare class LeaveManagementController {
     getTypes(req: any): Promise<{
         id: string;
         companyId: string;
-        name: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        name: string;
         code: string;
+        description: string | null;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -32,15 +32,15 @@ export declare class LeaveManagementController {
     createType(dto: CreateLeaveTypeDto, req: any): Promise<{
         id: string;
         companyId: string;
-        name: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        name: string;
         code: string;
+        description: string | null;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -51,15 +51,15 @@ export declare class LeaveManagementController {
     updateType(id: string, dto: any, req: any): Promise<{
         id: string;
         companyId: string;
-        name: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        name: string;
         code: string;
+        description: string | null;
         daysAllowed: number;
         isPaid: boolean;
         carryForward: boolean;
@@ -70,20 +70,20 @@ export declare class LeaveManagementController {
     allocate(dto: AllocateLeaveDto, req: any): Promise<{
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        year: number;
-        pending: number;
+        isActive: boolean;
+        isTestData: boolean;
         employeeId: string;
-        available: number;
+        year: number;
         carryForward: number;
         leaveTypeId: string;
         allocated: number;
         used: number;
+        pending: number;
+        available: number;
     }>;
     bulkAllocate(body: any, req: any): Promise<{
         message: string;
@@ -100,30 +100,30 @@ export declare class LeaveManagementController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        year: number;
-        pending: number;
+        isActive: boolean;
+        isTestData: boolean;
         employeeId: string;
-        available: number;
+        year: number;
         carryForward: number;
         leaveTypeId: string;
         allocated: number;
         used: number;
+        pending: number;
+        available: number;
     })[]>;
     findAll(req: any, query: any): Promise<{
         data: ({
             employee: {
+                employeeNumber: string;
                 firstName: string;
                 lastName: string;
                 department: {
                     name: string;
                 };
-                employeeNumber: string;
             };
             leaveType: {
                 name: string;
@@ -133,24 +133,24 @@ export declare class LeaveManagementController {
         } & {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             status: string;
-            reason: string;
-            days: number;
+            employeeId: string;
             remarks: string | null;
-            rejectionReason: string | null;
             approvedBy: string | null;
             approvedAt: Date | null;
-            employeeId: string;
+            leaveTypeId: string;
+            reason: string;
+            applicationNumber: string;
             fromDate: Date;
             toDate: Date;
-            leaveTypeId: string;
-            applicationNumber: string;
+            days: number;
+            rejectionReason: string | null;
         })[];
         total: number;
         page: number;
@@ -167,30 +167,30 @@ export declare class LeaveManagementController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         status: string;
-        reason: string;
-        days: number;
+        employeeId: string;
         remarks: string | null;
-        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        employeeId: string;
+        leaveTypeId: string;
+        reason: string;
+        applicationNumber: string;
         fromDate: Date;
         toDate: Date;
-        leaveTypeId: string;
-        applicationNumber: string;
+        days: number;
+        rejectionReason: string | null;
     }>;
     approve(id: string, dto: ApproveLeaveDto, req: any): Promise<{
         employee: {
+            employeeNumber: string;
             firstName: string;
             lastName: string;
-            employeeNumber: string;
         };
         leaveType: {
             name: string;
@@ -198,24 +198,24 @@ export declare class LeaveManagementController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         status: string;
-        reason: string;
-        days: number;
+        employeeId: string;
         remarks: string | null;
-        rejectionReason: string | null;
         approvedBy: string | null;
         approvedAt: Date | null;
-        employeeId: string;
+        leaveTypeId: string;
+        reason: string;
+        applicationNumber: string;
         fromDate: Date;
         toDate: Date;
-        leaveTypeId: string;
-        applicationNumber: string;
+        days: number;
+        rejectionReason: string | null;
     }>;
     cancel(id: string, req: any): Promise<{
         message: string;

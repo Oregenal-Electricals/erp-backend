@@ -12,8 +12,8 @@ export declare class OqcService {
     create(dto: CreateOqcDto, user: any): Promise<{
         passRate: number;
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -56,8 +56,8 @@ export declare class OqcService {
     }>;
     complete(id: string, dto: CompleteOqcDto, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -101,8 +101,8 @@ export declare class OqcService {
     }>;
     release(id: string, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;
@@ -147,8 +147,8 @@ export declare class OqcService {
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
             fgReceipt: {
                 receivedQty: number;
@@ -196,8 +196,8 @@ export declare class OqcService {
     }>;
     findOne(id: string, user: any): Promise<{
         workOrder: {
-            productName: string;
             woNumber: string;
+            productName: string;
         };
         fgReceipt: {
             receivedQty: number;

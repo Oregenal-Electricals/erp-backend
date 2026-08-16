@@ -51,12 +51,12 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     confirm(id: string, user: any): Promise<{
         items: ({
@@ -100,12 +100,12 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     cancel(id: string, user: any): Promise<{
         items: ({
@@ -149,12 +149,12 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -178,12 +178,12 @@ export declare class StockTransferService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
+            transferNumber: string;
             transferType: string;
-            fromWarehouseId: string;
-            toWarehouseId: string;
             fromBinId: string | null;
             toBinId: string | null;
-            transferNumber: string;
+            fromWarehouseId: string;
+            toWarehouseId: string;
         })[];
         total: number;
         page: number;
@@ -232,12 +232,12 @@ export declare class StockTransferService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        transferNumber: string;
         transferType: string;
-        fromWarehouseId: string;
-        toWarehouseId: string;
         fromBinId: string | null;
         toBinId: string | null;
-        transferNumber: string;
+        fromWarehouseId: string;
+        toWarehouseId: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

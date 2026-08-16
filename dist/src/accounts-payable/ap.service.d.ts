@@ -38,9 +38,9 @@ export declare class ApService {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
             billId: string;
         }[];
     } & {
@@ -65,9 +65,9 @@ export declare class ApService {
         voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        billNumber: string;
         vendorBillNumber: string;
         billDate: Date;
-        billNumber: string;
     }>;
     private createBillVoucher;
     recordPayment(dto: CreateApPaymentDto, user: any): Promise<{
@@ -84,9 +84,9 @@ export declare class ApService {
         paymentMode: string;
         referenceNumber: string | null;
         voucherId: string | null;
+        paymentNumber: string;
         paymentDate: Date;
         bankAccountId: string | null;
-        paymentNumber: string;
         billId: string;
     }>;
     private createPaymentVoucher;
@@ -126,9 +126,9 @@ export declare class ApService {
             voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            billNumber: string;
             vendorBillNumber: string;
             billDate: Date;
-            billNumber: string;
         })[];
         total: number;
         page: number;
@@ -156,9 +156,9 @@ export declare class ApService {
             paymentMode: string;
             referenceNumber: string | null;
             voucherId: string | null;
+            paymentNumber: string;
             paymentDate: Date;
             bankAccountId: string | null;
-            paymentNumber: string;
             billId: string;
         }[];
     } & {
@@ -183,9 +183,9 @@ export declare class ApService {
         voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        billNumber: string;
         vendorBillNumber: string;
         billDate: Date;
-        billNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;
@@ -230,9 +230,9 @@ export declare class ApService {
             voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            billNumber: string;
             vendorBillNumber: string;
             billDate: Date;
-            billNumber: string;
         }[];
     }>;
 }

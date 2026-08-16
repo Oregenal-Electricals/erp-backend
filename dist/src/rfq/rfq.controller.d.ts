@@ -23,22 +23,22 @@ export declare class RfqController {
         } & {
             id: string;
             companyId: string;
-            description: string | null;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            description: string | null;
             status: string;
-            title: string;
-            prId: string;
             paymentTerms: string | null;
             notes: string | null;
-            closedAt: Date | null;
+            prId: string;
+            rfqNumber: string;
+            title: string;
             responseDeadline: Date;
             deliveryLocation: string | null;
-            rfqNumber: string;
+            closedAt: Date | null;
         })[];
         total: number;
         page: number;
@@ -49,379 +49,379 @@ export declare class RfqController {
         items: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
+            notes: string | null;
             uom: string;
             rfqId: string;
-            notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
-        vendors: ({
-            vendor: {
-                name: string;
-                code: string;
-                phone: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            rfqId: string;
-            vendorId: string;
-        })[];
         pr: {
             status: string;
             title: string;
             prNumber: string;
         };
+        vendors: ({
+            vendor: {
+                name: string;
+                code: string;
+                email: string;
+                phone: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            status: string;
+            rfqId: string;
+            vendorId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         status: string;
-        title: string;
-        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        closedAt: Date | null;
+        prId: string;
+        rfqNumber: string;
+        title: string;
         responseDeadline: Date;
         deliveryLocation: string | null;
-        rfqNumber: string;
+        closedAt: Date | null;
     }>;
     create(dto: CreateRfqDto, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
+            notes: string | null;
             uom: string;
             rfqId: string;
-            notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
-        vendors: ({
-            vendor: {
-                name: string;
-                code: string;
-                phone: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            rfqId: string;
-            vendorId: string;
-        })[];
         pr: {
             status: string;
             title: string;
             prNumber: string;
         };
+        vendors: ({
+            vendor: {
+                name: string;
+                code: string;
+                email: string;
+                phone: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            status: string;
+            rfqId: string;
+            vendorId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         status: string;
-        title: string;
-        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        closedAt: Date | null;
+        prId: string;
+        rfqNumber: string;
+        title: string;
         responseDeadline: Date;
         deliveryLocation: string | null;
-        rfqNumber: string;
+        closedAt: Date | null;
     }>;
     update(id: string, dto: UpdateRfqDto, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
+            notes: string | null;
             uom: string;
             rfqId: string;
-            notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
-        vendors: ({
-            vendor: {
-                name: string;
-                code: string;
-                phone: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            rfqId: string;
-            vendorId: string;
-        })[];
         pr: {
             status: string;
             title: string;
             prNumber: string;
         };
+        vendors: ({
+            vendor: {
+                name: string;
+                code: string;
+                email: string;
+                phone: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            status: string;
+            rfqId: string;
+            vendorId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         status: string;
-        title: string;
-        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        closedAt: Date | null;
+        prId: string;
+        rfqNumber: string;
+        title: string;
         responseDeadline: Date;
         deliveryLocation: string | null;
-        rfqNumber: string;
+        closedAt: Date | null;
     }>;
     send(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
+            notes: string | null;
             uom: string;
             rfqId: string;
-            notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
-        vendors: ({
-            vendor: {
-                name: string;
-                code: string;
-                phone: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            rfqId: string;
-            vendorId: string;
-        })[];
         pr: {
             status: string;
             title: string;
             prNumber: string;
         };
+        vendors: ({
+            vendor: {
+                name: string;
+                code: string;
+                email: string;
+                phone: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            status: string;
+            rfqId: string;
+            vendorId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         status: string;
-        title: string;
-        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        closedAt: Date | null;
+        prId: string;
+        rfqNumber: string;
+        title: string;
         responseDeadline: Date;
         deliveryLocation: string | null;
-        rfqNumber: string;
+        closedAt: Date | null;
     }>;
     close(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
+            notes: string | null;
             uom: string;
             rfqId: string;
-            notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
-        vendors: ({
-            vendor: {
-                name: string;
-                code: string;
-                phone: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            rfqId: string;
-            vendorId: string;
-        })[];
         pr: {
             status: string;
             title: string;
             prNumber: string;
         };
+        vendors: ({
+            vendor: {
+                name: string;
+                code: string;
+                email: string;
+                phone: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            status: string;
+            rfqId: string;
+            vendorId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         status: string;
-        title: string;
-        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        closedAt: Date | null;
+        prId: string;
+        rfqNumber: string;
+        title: string;
         responseDeadline: Date;
         deliveryLocation: string | null;
-        rfqNumber: string;
+        closedAt: Date | null;
     }>;
     cancel(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
+            notes: string | null;
             uom: string;
             rfqId: string;
-            notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
-        vendors: ({
-            vendor: {
-                name: string;
-                code: string;
-                phone: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            rfqId: string;
-            vendorId: string;
-        })[];
         pr: {
             status: string;
             title: string;
             prNumber: string;
         };
+        vendors: ({
+            vendor: {
+                name: string;
+                code: string;
+                email: string;
+                phone: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            status: string;
+            rfqId: string;
+            vendorId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string | null;
         status: string;
-        title: string;
-        prId: string;
         paymentTerms: string | null;
         notes: string | null;
-        closedAt: Date | null;
+        prId: string;
+        rfqNumber: string;
+        title: string;
         responseDeadline: Date;
         deliveryLocation: string | null;
-        rfqNumber: string;
+        closedAt: Date | null;
     }>;
     addVendor(id: string, dto: AddRfqVendorDto, req: any): Promise<{
         vendor: {
@@ -431,12 +431,12 @@ export declare class RfqController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         status: string;
         rfqId: string;
         vendorId: string;

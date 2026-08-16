@@ -5,41 +5,41 @@ export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
     createUser(dto: CreateUserDto, user: any): Promise<{
-        role: string;
         id: string;
         companyId: string;
-        isActive: boolean;
         createdAt: Date;
+        isActive: boolean;
         company: {
             id: string;
             name: string;
             code: string;
         };
-        phone: string;
-        email: string;
-        employeeCode: string;
         firstName: string;
         lastName: string;
+        email: string;
+        phone: string;
+        role: string;
+        employeeCode: string;
         additionalRoles: string[];
         mustChangePwd: boolean;
         isLocked: boolean;
     }>;
     findAllUsers(companyId?: string, role?: UserRole, isActive?: string, search?: string): Promise<{
-        role: string;
         id: string;
         companyId: string;
-        isActive: boolean;
         createdAt: Date;
+        isActive: boolean;
         company: {
             id: string;
             name: string;
             code: string;
         };
-        phone: string;
-        email: string;
-        employeeCode: string;
         firstName: string;
         lastName: string;
+        email: string;
+        phone: string;
+        role: string;
+        employeeCode: string;
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
@@ -48,23 +48,23 @@ export declare class UsersController {
         message: string;
     };
     findOneUser(id: string): Promise<{
-        role: string;
         id: string;
         companyId: string;
-        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string;
+        isActive: boolean;
         company: {
             id: string;
             name: string;
             code: string;
         };
-        phone: string;
-        email: string;
-        employeeCode: string;
         firstName: string;
         lastName: string;
+        email: string;
+        phone: string;
+        role: string;
+        employeeCode: string;
         assignedStage: string;
         mustChangePwd: boolean;
         lastLoginAt: Date;
@@ -72,27 +72,27 @@ export declare class UsersController {
         loginAttempts: number;
     }>;
     updateUser(id: string, dto: UpdateUserDto, user: any): Promise<{
-        role: string;
         id: string;
         isActive: boolean;
         company: {
             id: string;
             name: string;
         };
-        phone: string;
-        email: string;
-        employeeCode: string;
         firstName: string;
         lastName: string;
+        email: string;
+        phone: string;
+        role: string;
+        employeeCode: string;
         assignedStage: string;
     }>;
     toggleUserStatus(id: string, user: any): Promise<{
-        role: string;
         id: string;
         isActive: boolean;
-        email: string;
         firstName: string;
         lastName: string;
+        email: string;
+        role: string;
     }>;
     unlockUser(id: string, user: any): Promise<{
         id: string;

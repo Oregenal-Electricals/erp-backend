@@ -29,9 +29,9 @@ export declare class StockPutawayService {
         status: string;
         remarks: string | null;
         grnId: string;
-        inspectedBy: string | null;
         inspectionDate: Date;
         iqcNumber: string;
+        inspectedBy: string | null;
     })[]>;
     create(dto: CreatePutawayDto, user: any): Promise<{
         items: ({
@@ -61,8 +61,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -143,8 +143,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -193,8 +193,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -243,8 +243,8 @@ export declare class StockPutawayService {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;

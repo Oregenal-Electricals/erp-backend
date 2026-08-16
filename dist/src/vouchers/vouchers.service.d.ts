@@ -24,9 +24,9 @@ export declare class VouchersService {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            accountId: string;
-            entryType: string;
             narration: string | null;
+            entryType: string;
+            accountId: string;
             voucherId: string;
         })[];
     } & {
@@ -45,11 +45,11 @@ export declare class VouchersService {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        narration: string | null;
+        voucherNumber: string;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        voucherNumber: string;
+        narration: string | null;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -70,9 +70,9 @@ export declare class VouchersService {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            accountId: string;
-            entryType: string;
             narration: string | null;
+            entryType: string;
+            accountId: string;
             voucherId: string;
         })[];
     } & {
@@ -91,11 +91,11 @@ export declare class VouchersService {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        narration: string | null;
+        voucherNumber: string;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        voucherNumber: string;
+        narration: string | null;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -116,9 +116,9 @@ export declare class VouchersService {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            accountId: string;
-            entryType: string;
             narration: string | null;
+            entryType: string;
+            accountId: string;
             voucherId: string;
         })[];
     } & {
@@ -137,11 +137,11 @@ export declare class VouchersService {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        narration: string | null;
+        voucherNumber: string;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        voucherNumber: string;
+        narration: string | null;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -171,11 +171,11 @@ export declare class VouchersService {
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            narration: string | null;
+            voucherNumber: string;
             voucherType: string;
             voucherDate: Date;
             partyName: string | null;
-            voucherNumber: string;
+            narration: string | null;
             postedDate: Date | null;
             postedBy: string | null;
         })[];
@@ -200,9 +200,9 @@ export declare class VouchersService {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            accountId: string;
-            entryType: string;
             narration: string | null;
+            entryType: string;
+            accountId: string;
             voucherId: string;
         })[];
     } & {
@@ -221,11 +221,11 @@ export declare class VouchersService {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        narration: string | null;
+        voucherNumber: string;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        voucherNumber: string;
+        narration: string | null;
         postedDate: Date | null;
         postedBy: string | null;
     }>;
@@ -258,9 +258,9 @@ export declare class VouchersService {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
-            accountId: string;
-            entryType: string;
             narration: string | null;
+            entryType: string;
+            accountId: string;
             voucherId: string;
         })[];
     } & {
@@ -279,11 +279,11 @@ export declare class VouchersService {
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        narration: string | null;
+        voucherNumber: string;
         voucherType: string;
         voucherDate: Date;
         partyName: string | null;
-        voucherNumber: string;
+        narration: string | null;
         postedDate: Date | null;
         postedBy: string | null;
     }>;

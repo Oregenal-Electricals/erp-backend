@@ -18,10 +18,10 @@ export declare class HsnSacService {
         code: string;
         gstRate: number;
         codeType: string;
-        cessRate: number | null;
         igstRate: number;
         cgstRate: number;
         sgstRate: number;
+        cessRate: number | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: {
@@ -37,10 +37,10 @@ export declare class HsnSacService {
             code: string;
             gstRate: number;
             codeType: string;
-            cessRate: number | null;
             igstRate: number;
             cgstRate: number;
             sgstRate: number;
+            cessRate: number | null;
         }[];
         total: number;
         page: number;
@@ -60,10 +60,10 @@ export declare class HsnSacService {
         code: string;
         gstRate: number;
         codeType: string;
-        cessRate: number | null;
         igstRate: number;
         cgstRate: number;
         sgstRate: number;
+        cessRate: number | null;
     }>;
     update(id: string, dto: UpdateHsnSacDto, user: any): Promise<{
         id: string;
@@ -78,10 +78,10 @@ export declare class HsnSacService {
         code: string;
         gstRate: number;
         codeType: string;
-        cessRate: number | null;
         igstRate: number;
         cgstRate: number;
         sgstRate: number;
+        cessRate: number | null;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;

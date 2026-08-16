@@ -29,9 +29,9 @@ export declare class InventoryDashboardController {
         expiringBatches: {
             itemCode: string;
             itemName: string;
-            expiryDate: Date;
             availableQty: number;
             batchNumber: string;
+            expiryDate: Date;
         }[];
         expiredBatches: number;
         pendingGrns: {
@@ -52,26 +52,26 @@ export declare class InventoryDashboardController {
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         remarks: string | null;
         itemCode: string;
         itemName: string;
         warehouseId: string;
         unitCost: number;
-        totalCost: number;
-        transactionType: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
+        transactionDate: Date;
+        totalCost: number;
         inQty: number;
         outQty: number;
         balanceQty: number;
-        transactionDate: Date;
+        transactionType: string;
     })[]>;
     getTopItems(req: any): Promise<{
         data: {
@@ -81,20 +81,20 @@ export declare class InventoryDashboardController {
             };
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
-            totalValue: number;
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            unitCost: number;
+            totalValue: number;
             lastUpdated: Date;
         }[];
         totalValue: number;

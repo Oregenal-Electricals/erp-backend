@@ -18,10 +18,10 @@ export declare class DispatchService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             unitPrice: number;
             gstAmount: number;
@@ -34,13 +34,13 @@ export declare class DispatchService {
             customerName: string;
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
@@ -61,10 +61,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -98,10 +98,10 @@ export declare class DispatchService {
             transporterName: string | null;
             driverPhone: string | null;
             planId: string;
+            dispatchNumber: string;
             dispatchDate: Date;
             lrNumber: string | null;
             ewayBillNumber: string | null;
-            dispatchNumber: string;
         })[];
         total: number;
         page: number;
@@ -116,10 +116,10 @@ export declare class DispatchService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             unitPrice: number;
             gstAmount: number;
@@ -132,13 +132,13 @@ export declare class DispatchService {
             customerName: string;
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
@@ -159,10 +159,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     markDelivered(id: string, user: any): Promise<{
         items: {
@@ -173,10 +173,10 @@ export declare class DispatchService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             unitPrice: number;
             gstAmount: number;
@@ -189,13 +189,13 @@ export declare class DispatchService {
             customerName: string;
             soNumber: string;
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         };
         dispatchPlan: {
-            transportMode: string;
             planNumber: string;
+            transportMode: string;
         };
     } & {
         id: string;
@@ -216,10 +216,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

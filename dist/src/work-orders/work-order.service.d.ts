@@ -20,8 +20,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -37,15 +37,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -62,8 +62,8 @@ export declare class WorkOrderService {
             };
             bom: {
                 status: string;
-                version: string;
                 bomNumber: string;
+                version: string;
             };
         } & {
             id: string;
@@ -79,15 +79,15 @@ export declare class WorkOrderService {
             remarks: string | null;
             uom: string;
             warehouseId: string;
-            stageName: string | null;
-            productCode: string;
-            productName: string;
             bomId: string | null;
             rejectedQty: number;
             woNumber: string;
+            productCode: string;
+            productName: string;
             salesOrderId: string | null;
             routingGroupId: string | null;
             stageSequence: number | null;
+            stageName: string | null;
             parentWorkOrderId: string | null;
             plannedQty: number;
             completedQty: number;
@@ -116,21 +116,21 @@ export declare class WorkOrderService {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
+                quantity: number;
+                notes: string | null;
                 itemCode: string;
                 itemName: string;
                 uom: string;
-                quantity: number;
-                notes: string | null;
                 itemType: string;
+                totalCost: number | null;
+                bomId: string;
                 sequence: number;
                 section: string | null;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
+                effectiveQty: number;
                 unitCost: number | null;
                 isCritical: boolean;
-                totalCost: number | null;
-                bomId: string;
-                effectiveQty: number;
             }[];
         } & {
             id: string;
@@ -143,16 +143,18 @@ export declare class WorkOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            verifiedAt: Date | null;
+            verifiedBy: string | null;
             approvedBy: string | null;
             approvedAt: Date | null;
             productId: string;
             revisionId: string | null;
-            version: string;
-            effectiveFrom: Date;
-            effectiveTo: Date | null;
             bomNumber: string;
+            version: string;
             bomType: string;
             sourceBomId: string | null;
+            effectiveFrom: Date;
+            effectiveTo: Date | null;
             totalCost: number | null;
         };
     } & {
@@ -169,15 +171,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -193,8 +195,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -210,15 +212,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -235,8 +237,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
         id: string;
         companyId: string;
@@ -251,15 +253,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -275,8 +277,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -292,15 +294,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -326,21 +328,21 @@ export declare class WorkOrderService {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
+                quantity: number;
+                notes: string | null;
                 itemCode: string;
                 itemName: string;
                 uom: string;
-                quantity: number;
-                notes: string | null;
                 itemType: string;
+                totalCost: number | null;
+                bomId: string;
                 sequence: number;
                 section: string | null;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
+                effectiveQty: number;
                 unitCost: number | null;
                 isCritical: boolean;
-                totalCost: number | null;
-                bomId: string;
-                effectiveQty: number;
             }[];
         } & {
             id: string;
@@ -353,16 +355,18 @@ export declare class WorkOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            verifiedAt: Date | null;
+            verifiedBy: string | null;
             approvedBy: string | null;
             approvedAt: Date | null;
             productId: string;
             revisionId: string | null;
-            version: string;
-            effectiveFrom: Date;
-            effectiveTo: Date | null;
             bomNumber: string;
+            version: string;
             bomType: string;
             sourceBomId: string | null;
+            effectiveFrom: Date;
+            effectiveTo: Date | null;
             totalCost: number | null;
         };
         id: string;
@@ -378,15 +382,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -402,8 +406,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -419,15 +423,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -443,8 +447,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -460,15 +464,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -494,21 +498,21 @@ export declare class WorkOrderService {
                 updatedAt: Date;
                 createdBy: string | null;
                 updatedBy: string | null;
+                quantity: number;
+                notes: string | null;
                 itemCode: string;
                 itemName: string;
                 uom: string;
-                quantity: number;
-                notes: string | null;
                 itemType: string;
+                totalCost: number | null;
+                bomId: string;
                 sequence: number;
                 section: string | null;
                 rawMaterialId: string | null;
                 wastagePercent: number | null;
+                effectiveQty: number;
                 unitCost: number | null;
                 isCritical: boolean;
-                totalCost: number | null;
-                bomId: string;
-                effectiveQty: number;
             }[];
         } & {
             id: string;
@@ -521,16 +525,18 @@ export declare class WorkOrderService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            verifiedAt: Date | null;
+            verifiedBy: string | null;
             approvedBy: string | null;
             approvedAt: Date | null;
             productId: string;
             revisionId: string | null;
-            version: string;
-            effectiveFrom: Date;
-            effectiveTo: Date | null;
             bomNumber: string;
+            version: string;
             bomType: string;
             sourceBomId: string | null;
+            effectiveFrom: Date;
+            effectiveTo: Date | null;
             totalCost: number | null;
         };
         id: string;
@@ -546,15 +552,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -598,8 +604,8 @@ export declare class WorkOrderService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        documentId: string;
         workflowId: string | null;
+        documentId: string;
         currentLevel: number;
         totalLevels: number;
     }>;
@@ -638,8 +644,8 @@ export declare class WorkOrderService {
         remarks: string | null;
         amount: number | null;
         documentNumber: string;
-        documentId: string;
         workflowId: string | null;
+        documentId: string;
         currentLevel: number;
         totalLevels: number;
     }>;
@@ -654,8 +660,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -671,15 +677,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;
@@ -695,8 +701,8 @@ export declare class WorkOrderService {
         };
         bom: {
             status: string;
-            version: string;
             bomNumber: string;
+            version: string;
         };
     } & {
         id: string;
@@ -712,15 +718,15 @@ export declare class WorkOrderService {
         remarks: string | null;
         uom: string;
         warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
         bomId: string | null;
         rejectedQty: number;
         woNumber: string;
+        productCode: string;
+        productName: string;
         salesOrderId: string | null;
         routingGroupId: string | null;
         stageSequence: number | null;
+        stageName: string | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
         completedQty: number;

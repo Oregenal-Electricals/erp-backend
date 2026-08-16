@@ -49,8 +49,8 @@ export declare class ProductionDashboardService {
     getToday(user: any): Promise<{
         entries: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             id: string;
@@ -66,12 +66,12 @@ export declare class ProductionDashboardService {
             remarks: string | null;
             workOrderId: string;
             totalQty: number;
-            entryDate: Date;
-            operatorName: string | null;
-            machineName: string | null;
             goodQty: number;
             scrapQty: number;
             entryNumber: string;
+            entryDate: Date;
+            operatorName: string | null;
+            machineName: string | null;
         })[];
         byShift: {
             shift: string;
@@ -85,19 +85,19 @@ export declare class ProductionDashboardService {
     getAlerts(user: any): Promise<{
         overdueWos: {
             status: string;
-            productName: string;
             woNumber: string;
+            productName: string;
             plannedEndDate: Date;
         }[];
         releasedNoIssue: {
-            productName: string;
             woNumber: string;
+            productName: string;
             plannedStartDate: Date;
         }[];
         failedQc: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             result: string;
@@ -124,8 +124,8 @@ export declare class ProductionDashboardService {
             correctiveAction: string | null;
         })[];
         pendingFgr: {
-            productName: string;
             woNumber: string;
+            productName: string;
             completedQty: number;
         }[];
         totalAlerts: number;
@@ -133,8 +133,8 @@ export declare class ProductionDashboardService {
     getQualityMetrics(user: any): Promise<{
         inspections: ({
             workOrder: {
-                productName: string;
                 woNumber: string;
+                productName: string;
             };
         } & {
             result: string;

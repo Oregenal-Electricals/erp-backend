@@ -10,20 +10,20 @@ export declare class NotificationsController {
         data: {
             id: string;
             companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            type: string;
-            title: string;
+            isActive: boolean;
+            isTestData: boolean;
             userId: string;
+            type: string;
             priority: string;
+            message: string;
+            title: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            message: string;
             isRead: boolean;
             readAt: Date | null;
         }[];

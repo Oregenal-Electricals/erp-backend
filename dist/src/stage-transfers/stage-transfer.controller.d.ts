@@ -4,135 +4,135 @@ export declare class StageTransferController {
     private stageTransferService;
     constructor(stageTransferService: StageTransferService);
     findAll(req: any, query: any): Promise<({
-        receivedBy: {
-            firstName: string;
-            lastName: string;
-        };
         fromWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         toWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         givenBy: {
+            firstName: string;
+            lastName: string;
+        };
+        receivedBy: {
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
         qty: number;
-        toWorkOrderId: string;
         fromWorkOrderId: string;
-        givenAt: Date;
-        receivedAt: Date | null;
+        toWorkOrderId: string;
         givenByUserId: string;
+        givenAt: Date;
         receivedByUserId: string | null;
+        receivedAt: Date | null;
     })[]>;
     give(dto: GiveTransferDto, req: any): Promise<{
-        receivedBy: {
-            firstName: string;
-            lastName: string;
-        };
         fromWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         toWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         givenBy: {
+            firstName: string;
+            lastName: string;
+        };
+        receivedBy: {
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
         qty: number;
-        toWorkOrderId: string;
         fromWorkOrderId: string;
-        givenAt: Date;
-        receivedAt: Date | null;
+        toWorkOrderId: string;
         givenByUserId: string;
+        givenAt: Date;
         receivedByUserId: string | null;
+        receivedAt: Date | null;
     }>;
     receive(id: string, req: any): Promise<{
-        receivedBy: {
-            firstName: string;
-            lastName: string;
-        };
         fromWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         toWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         givenBy: {
+            firstName: string;
+            lastName: string;
+        };
+        receivedBy: {
             firstName: string;
             lastName: string;
         };
     } & {
         id: string;
         companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
         status: string;
         remarks: string | null;
         itemCode: string;
         itemName: string;
         qty: number;
-        toWorkOrderId: string;
         fromWorkOrderId: string;
-        givenAt: Date;
-        receivedAt: Date | null;
+        toWorkOrderId: string;
         givenByUserId: string;
+        givenAt: Date;
         receivedByUserId: string | null;
+        receivedAt: Date | null;
     }>;
 }

@@ -21,8 +21,8 @@ export declare class StockReportsService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             transactionType: string;
             referenceType: string | null;
             referenceId: string | null;
@@ -108,8 +108,8 @@ export declare class StockReportsService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             transactionType: string;
             referenceType: string | null;
             referenceId: string | null;

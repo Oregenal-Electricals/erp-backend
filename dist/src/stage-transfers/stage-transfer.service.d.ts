@@ -13,17 +13,17 @@ export declare class StageTransferService {
         };
         fromWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         toWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         givenBy: {
             firstName: string;
@@ -44,9 +44,9 @@ export declare class StageTransferService {
         itemName: string;
         qty: number;
         toWorkOrderId: string;
-        fromWorkOrderId: string;
         givenAt: Date;
         receivedAt: Date | null;
+        fromWorkOrderId: string;
         givenByUserId: string;
         receivedByUserId: string | null;
     }>;
@@ -57,17 +57,17 @@ export declare class StageTransferService {
         };
         fromWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         toWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         givenBy: {
             firstName: string;
@@ -88,9 +88,9 @@ export declare class StageTransferService {
         itemName: string;
         qty: number;
         toWorkOrderId: string;
-        fromWorkOrderId: string;
         givenAt: Date;
         receivedAt: Date | null;
+        fromWorkOrderId: string;
         givenByUserId: string;
         receivedByUserId: string | null;
     }>;
@@ -101,17 +101,17 @@ export declare class StageTransferService {
         };
         fromWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         toWorkOrder: {
             id: string;
-            stageName: string;
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
+            stageName: string;
         };
         givenBy: {
             firstName: string;
@@ -132,9 +132,9 @@ export declare class StageTransferService {
         itemName: string;
         qty: number;
         toWorkOrderId: string;
-        fromWorkOrderId: string;
         givenAt: Date;
         receivedAt: Date | null;
+        fromWorkOrderId: string;
         givenByUserId: string;
         receivedByUserId: string | null;
     })[]>;

@@ -14,198 +14,198 @@ export declare class NcrController {
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
+            workOrder: {
+                woNumber: string;
+            };
             capaRecords: {
                 id: string;
                 status: string;
             }[];
-            workOrder: {
-                woNumber: string;
-            };
         } & {
             id: string;
             companyId: string;
-            description: string;
-            isActive: boolean;
-            isTestData: boolean;
             createdAt: Date;
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            description: string;
             status: string;
             remarks: string | null;
             itemCode: string | null;
             itemName: string | null;
+            severity: string;
+            qtyAffected: number;
+            closedDate: Date | null;
             closedBy: string | null;
-            workOrderId: string | null;
-            disposition: string | null;
+            ncrNumber: string;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
-            severity: string;
-            qtyAffected: number;
+            workOrderId: string | null;
             detectedBy: string | null;
             detectedDate: Date;
-            ncrNumber: string;
-            closedDate: Date | null;
+            disposition: string | null;
         })[];
         total: number;
         page: number;
         totalPages: number;
     }>;
     findOne(id: string, req: any): Promise<{
+        workOrder: {
+            woNumber: string;
+            productName: string;
+        };
         capaRecords: {
             id: string;
             status: string;
-            dueDate: Date;
             assignedTo: string;
+            dueDate: Date;
             capaNumber: string;
         }[];
-        workOrder: {
-            productName: string;
-            woNumber: string;
-        };
     } & {
         id: string;
         companyId: string;
-        description: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string;
         status: string;
         remarks: string | null;
         itemCode: string | null;
         itemName: string | null;
+        severity: string;
+        qtyAffected: number;
+        closedDate: Date | null;
         closedBy: string | null;
-        workOrderId: string | null;
-        disposition: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
-        severity: string;
-        qtyAffected: number;
+        workOrderId: string | null;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
-        closedDate: Date | null;
+        disposition: string | null;
     }>;
     create(dto: CreateNcrDto, req: any): Promise<{
+        workOrder: {
+            woNumber: string;
+            productName: string;
+        };
         capaRecords: {
             id: string;
             status: string;
-            dueDate: Date;
             assignedTo: string;
+            dueDate: Date;
             capaNumber: string;
         }[];
-        workOrder: {
-            productName: string;
-            woNumber: string;
-        };
     } & {
         id: string;
         companyId: string;
-        description: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string;
         status: string;
         remarks: string | null;
         itemCode: string | null;
         itemName: string | null;
+        severity: string;
+        qtyAffected: number;
+        closedDate: Date | null;
         closedBy: string | null;
-        workOrderId: string | null;
-        disposition: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
-        severity: string;
-        qtyAffected: number;
+        workOrderId: string | null;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
-        closedDate: Date | null;
+        disposition: string | null;
     }>;
     update(id: string, dto: UpdateNcrDto, req: any): Promise<{
+        workOrder: {
+            woNumber: string;
+            productName: string;
+        };
         capaRecords: {
             id: string;
             status: string;
-            dueDate: Date;
             assignedTo: string;
+            dueDate: Date;
             capaNumber: string;
         }[];
-        workOrder: {
-            productName: string;
-            woNumber: string;
-        };
     } & {
         id: string;
         companyId: string;
-        description: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string;
         status: string;
         remarks: string | null;
         itemCode: string | null;
         itemName: string | null;
+        severity: string;
+        qtyAffected: number;
+        closedDate: Date | null;
         closedBy: string | null;
-        workOrderId: string | null;
-        disposition: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
-        severity: string;
-        qtyAffected: number;
+        workOrderId: string | null;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
-        closedDate: Date | null;
+        disposition: string | null;
     }>;
     close(id: string, req: any): Promise<{
+        workOrder: {
+            woNumber: string;
+            productName: string;
+        };
         capaRecords: {
             id: string;
             status: string;
-            dueDate: Date;
             assignedTo: string;
+            dueDate: Date;
             capaNumber: string;
         }[];
-        workOrder: {
-            productName: string;
-            woNumber: string;
-        };
     } & {
         id: string;
         companyId: string;
-        description: string;
-        isActive: boolean;
-        isTestData: boolean;
         createdAt: Date;
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        description: string;
         status: string;
         remarks: string | null;
         itemCode: string | null;
         itemName: string | null;
+        severity: string;
+        qtyAffected: number;
+        closedDate: Date | null;
         closedBy: string | null;
-        workOrderId: string | null;
-        disposition: string | null;
+        ncrNumber: string;
         source: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
-        severity: string;
-        qtyAffected: number;
+        workOrderId: string | null;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
-        closedDate: Date | null;
+        disposition: string | null;
     }>;
 }

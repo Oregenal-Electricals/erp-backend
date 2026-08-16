@@ -15,9 +15,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -36,8 +36,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         plannedQty: number;
@@ -51,9 +51,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -72,8 +72,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         plannedQty: number;
@@ -87,9 +87,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -108,8 +108,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         plannedQty: number;
@@ -124,9 +124,9 @@ export declare class FgReceiptService {
                 code: string;
             };
             workOrder: {
+                woNumber: string;
                 productCode: string;
                 productName: string;
-                woNumber: string;
                 plannedQty: number;
                 completedQty: number;
             };
@@ -145,8 +145,8 @@ export declare class FgReceiptService {
             itemName: string;
             uom: string;
             warehouseId: string;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             receivedQty: number;
             rejectedQty: number;
             plannedQty: number;
@@ -165,9 +165,9 @@ export declare class FgReceiptService {
             code: string;
         };
         workOrder: {
+            woNumber: string;
             productCode: string;
             productName: string;
-            woNumber: string;
             plannedQty: number;
             completedQty: number;
         };
@@ -186,8 +186,8 @@ export declare class FgReceiptService {
         itemName: string;
         uom: string;
         warehouseId: string;
-        unitCost: number;
         totalCost: number;
+        unitCost: number;
         receivedQty: number;
         rejectedQty: number;
         plannedQty: number;

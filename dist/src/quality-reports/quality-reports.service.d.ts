@@ -29,6 +29,7 @@ export declare class QualityReportsService {
             closedBy: string | null;
             workOrderId: string | null;
             disposition: string | null;
+            ncrNumber: string;
             source: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
@@ -36,7 +37,6 @@ export declare class QualityReportsService {
             qtyAffected: number;
             detectedBy: string | null;
             detectedDate: Date;
-            ncrNumber: string;
             closedDate: Date | null;
         }[];
         total: number;
@@ -59,9 +59,9 @@ export declare class QualityReportsService {
             isOverdue: boolean;
             daysToComplete: number;
             ncr: {
+                ncrNumber: string;
                 source: string;
                 severity: string;
-                ncrNumber: string;
             };
             id: string;
             companyId: string;
@@ -168,10 +168,10 @@ export declare class QualityReportsService {
             periodType: string;
             totalReceived: number;
             totalRejected: number;
-            onTimeDelivery: number;
             defectRate: number;
             ncrCount: number;
             carCount: number;
+            onTimeDelivery: number;
             qualityScore: number;
             avlStatus: string;
         })[];
@@ -203,10 +203,10 @@ export declare class QualityReportsService {
             closedDate: Date | null;
             ncrId: string | null;
             verifiedDate: Date | null;
+            carNumber: string;
             supplierResponse: string | null;
             supplierRootCause: string | null;
             supplierAction: string | null;
-            carNumber: string;
             respondedDate: Date | null;
         })[];
         totalCars: number;
@@ -228,9 +228,9 @@ export declare class QualityReportsService {
             customerPo: string | null;
             remarks: string | null;
             customerName: string;
+            invoiceNumber: string | null;
             itemCode: string;
             itemName: string;
-            invoiceNumber: string | null;
             closedBy: string | null;
             receivedDate: Date;
             customerId: string | null;
@@ -241,11 +241,11 @@ export declare class QualityReportsService {
             qtyAffected: number;
             closedDate: Date | null;
             rootCause: string | null;
+            complaintNumber: string;
             complaintDate: Date;
             complaintType: string;
             customerRequest: string | null;
             eighthDNumber: string | null;
-            complaintNumber: string;
             responseDate: Date | null;
         }[];
         total: number;
