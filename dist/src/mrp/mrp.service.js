@@ -366,6 +366,7 @@ let MrpService = class MrpService {
         if (!dto.warehouseId)
             throw new common_1.BadRequestException('warehouseId is required');
         const resolved = [];
+        const skipped = [];
         for (const a of active) {
             const soItem = await this.prisma.salesOrderItem.findFirst({
                 where: { id: a.soItemId, salesOrder: { companyId } },
@@ -374,11 +375,23 @@ let MrpService = class MrpService {
             if (!soItem)
                 throw new common_1.NotFoundException(`Sales order item ${a.soItemId} not found`);
             const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
-            if (!product)
-                throw new common_1.BadRequestException(`No product master found for item code ${soItem.itemCode}`);
+            if (!product) {
+                skipped.push({
+                    soItemId: soItem.id, itemCode: soItem.itemCode, itemName: soItem.itemName,
+                    soNumber: soItem.salesOrder.soNumber, requestedQty: a.buildQty,
+                    reason: 'Not a manufactured product - likely a raw material sold directly, fulfill from stock instead of building a Work Order',
+                });
+                continue;
+            }
             const bom = await this.findProducingBom(companyId, product.id);
-            if (!bom)
-                throw new common_1.BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
+            if (!bom) {
+                skipped.push({
+                    soItemId: soItem.id, itemCode: soItem.itemCode, itemName: soItem.itemName,
+                    soNumber: soItem.salesOrder.soNumber, requestedQty: a.buildQty,
+                    reason: 'No approved BOM for this product yet',
+                });
+                continue;
+            }
             const alreadyPlanned = await this.prisma.workOrder.aggregate({
                 where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: { not: 'CANCELLED' } },
                 _sum: { plannedQty: true },
@@ -392,7 +405,6 @@ let MrpService = class MrpService {
         const consumedSoFar = new Map();
         const createdWorkOrders = [];
         const partiallyFulfilled = [];
-        const skipped = [];
         for (const r of resolved) {
             const rawNeed = await this.explodeMaterialNeeds(companyId, dto.warehouseId, [{ itemCode: r.soItem.itemCode, itemName: r.soItem.itemName, uom: r.soItem.uom, qty: r.buildQty }]);
             let minRatio = 1;

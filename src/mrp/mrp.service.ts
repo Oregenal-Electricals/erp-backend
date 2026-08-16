@@ -470,20 +470,41 @@ export class MrpService {
     if (!dto.warehouseId) throw new BadRequestException('warehouseId is required');
 
     const resolved: any[] = [];
+    // A true raw material (sold as-is, never manufactured) has no Product
+    // master and no BOM to speak of - that's not an error, it's just not
+    // the kind of item this Work-Order-building flow applies to. Such
+    // items are skipped here rather than blocking the whole batch; they
+    // belong to a direct-from-stock fulfillment path, not production
+    // planning.
+    const skipped: any[] = [];
     for (const a of active) {
       const soItem = await this.prisma.salesOrderItem.findFirst({
         where: { id: a.soItemId, salesOrder: { companyId } },
         include: { salesOrder: true },
       });
       if (!soItem) throw new NotFoundException(`Sales order item ${a.soItemId} not found`);
-      const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode }});
-      if (!product) throw new BadRequestException(`No product master found for item code ${soItem.itemCode}`);
+      const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
+      if (!product) {
+        skipped.push({
+          soItemId: soItem.id, itemCode: soItem.itemCode, itemName: soItem.itemName,
+          soNumber: soItem.salesOrder.soNumber, requestedQty: a.buildQty,
+          reason: 'Not a manufactured product - likely a raw material sold directly, fulfill from stock instead of building a Work Order',
+        });
+        continue;
+      }
 
       const bom = await this.findProducingBom(companyId, product.id);
-      if (!bom) throw new BadRequestException(`No approved BOM found for ${soItem.itemCode}`);
+      if (!bom) {
+        skipped.push({
+          soItemId: soItem.id, itemCode: soItem.itemCode, itemName: soItem.itemName,
+          soNumber: soItem.salesOrder.soNumber, requestedQty: a.buildQty,
+          reason: 'No approved BOM for this product yet',
+        });
+        continue;
+      }
 
       const alreadyPlanned = await this.prisma.workOrder.aggregate({
-        where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: {not: 'CANCELLED' } },
+        where: { companyId, salesOrderId: soItem.salesOrder.id, productCode: soItem.itemCode, status: { not: 'CANCELLED' } },
         _sum: { plannedQty: true },
       });
       const remainingToPlan = Math.max(0, soItem.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
@@ -497,7 +518,6 @@ export class MrpService {
     const consumedSoFar = new Map<string, number>();
     const createdWorkOrders = [];
     const partiallyFulfilled = [];
-    const skipped = [];
 
     for (const r of resolved) {
       const rawNeed = await this.explodeMaterialNeeds(
