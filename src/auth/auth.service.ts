@@ -96,6 +96,39 @@ export class AuthService {
     };
   }
 
+  /**
+   * Preview as ONE SPECIFIC named person (not just "the role" generically).
+   * Same trust model as previewLoginAsRole - SUPER_ADMIN-only, no password
+   * needed since it's a deliberate in-session admin action - but logs in as
+   * exactly the chosen user rather than the first seeded user matching a role.
+   */
+  async previewLoginAsUser(userId: string, requestingUser: any) {
+    if (requestingUser.role !== 'SUPER_ADMIN') {
+      throw new UnauthorizedException('Only SUPER_ADMIN can start a preview');
+    }
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, companyId: requestingUser.companyId, isActive: true },
+      include: { company: { select: { id: true, name: true, code: true } } },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found or not active');
+    }
+    const allRoles = [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i);
+    const payload = {
+      sub: user.id, email: user.email, role: user.role,
+      additionalRoles: user.additionalRoles || [], allRoles, companyId: user.companyId,
+    };
+    const accessToken = this.jwt.sign(payload);
+    return {
+      accessToken,
+      user: {
+        id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+        role: user.role, additionalRoles: user.additionalRoles || [], allRoles,
+        companyId: user.companyId, company: user.company, mustChangePwd: user.mustChangePwd,
+      },
+    };
+  }
+
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

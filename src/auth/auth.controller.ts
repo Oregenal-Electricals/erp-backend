@@ -24,6 +24,14 @@ export class AuthController {
   async previewLogin(@Body('roleName') roleName: string, @CurrentUser() user: any) {
     return this.authService.previewLoginAsRole(roleName, user);
   }
+  @Post('preview-login-user')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'SUPER_ADMIN only: log in as one specific named person, for previewing exactly their experience' })
+  async previewLoginUser(@Body('userId') userId: string, @CurrentUser() user: any) {
+    return this.authService.previewLoginAsUser(userId, user);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

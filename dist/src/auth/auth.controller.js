@@ -31,6 +31,9 @@ let AuthController = class AuthController {
     async previewLogin(roleName, user) {
         return this.authService.previewLoginAsRole(roleName, user);
     }
+    async previewLoginUser(userId, user) {
+        return this.authService.previewLoginAsUser(userId, user);
+    }
     async me(user) {
         return this.authService.me(user.id);
     }
@@ -58,6 +61,17 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "previewLogin", null);
+__decorate([
+    (0, common_1.Post)('preview-login-user'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'SUPER_ADMIN only: log in as one specific named person, for previewing exactly their experience' }),
+    __param(0, (0, common_1.Body)('userId')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "previewLoginUser", null);
 __decorate([
     (0, common_1.Get)('me'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

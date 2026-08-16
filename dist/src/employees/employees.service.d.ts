@@ -145,9 +145,9 @@ export declare class EmployeesService {
         status: string;
         firstName: string;
         lastName: string;
+        userId: string | null;
         remarks: string | null;
         bankName: string | null;
-        userId: string | null;
         employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
@@ -218,9 +218,9 @@ export declare class EmployeesService {
         status: string;
         firstName: string;
         lastName: string;
+        userId: string | null;
         remarks: string | null;
         bankName: string | null;
-        userId: string | null;
         employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
@@ -271,9 +271,9 @@ export declare class EmployeesService {
             status: string;
             firstName: string;
             lastName: string;
+            userId: string | null;
             remarks: string | null;
             bankName: string | null;
-            userId: string | null;
             employeeNumber: string;
             dateOfBirth: Date | null;
             dateOfJoining: Date;
@@ -355,9 +355,9 @@ export declare class EmployeesService {
         status: string;
         firstName: string;
         lastName: string;
+        userId: string | null;
         remarks: string | null;
         bankName: string | null;
-        userId: string | null;
         employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;
@@ -434,9 +434,9 @@ export declare class EmployeesService {
         status: string;
         firstName: string;
         lastName: string;
+        userId: string | null;
         remarks: string | null;
         bankName: string | null;
-        userId: string | null;
         employeeNumber: string;
         dateOfBirth: Date | null;
         dateOfJoining: Date;

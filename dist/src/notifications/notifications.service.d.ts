@@ -14,12 +14,12 @@ export declare class NotificationsService {
         updatedBy: string | null;
         type: string;
         title: string;
+        userId: string;
         priority: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
         message: string;
-        userId: string;
         isRead: boolean;
         readAt: Date | null;
     }>;
@@ -37,12 +37,12 @@ export declare class NotificationsService {
             updatedBy: string | null;
             type: string;
             title: string;
+            userId: string;
             priority: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
             message: string;
-            userId: string;
             isRead: boolean;
             readAt: Date | null;
         }[];
