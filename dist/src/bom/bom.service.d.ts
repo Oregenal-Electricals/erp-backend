@@ -130,6 +130,11 @@ export declare class BomService {
         totalCost: number | null;
     })[]>;
     findOne(id: string, user: any): Promise<{
+        approvalUserNames: Record<string, {
+            firstName: string | null;
+            lastName: string | null;
+            email: string;
+        }>;
         items: {
             id: string;
             companyId: string;
@@ -192,7 +197,6 @@ export declare class BomService {
             response: string | null;
             raisedByUserId: string;
         })[];
-    } & {
         id: string;
         companyId: string;
         description: string | null;
@@ -482,6 +486,11 @@ export declare class BomService {
         totalCost: number | null;
     }>;
     clone(id: string, user: any): Promise<{
+        approvalUserNames: Record<string, {
+            firstName: string | null;
+            lastName: string | null;
+            email: string;
+        }>;
         items: {
             id: string;
             companyId: string;
@@ -544,7 +553,6 @@ export declare class BomService {
             response: string | null;
             raisedByUserId: string;
         })[];
-    } & {
         id: string;
         companyId: string;
         description: string | null;

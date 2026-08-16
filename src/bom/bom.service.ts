@@ -148,11 +148,6 @@ export class BomService {
       include: {
         product: { select: { code: true, name: true, brand: true } },
         revision: { select: { revisionNumber: true } },
-        // Created By / Verified By / Approved By are plain ID strings
-        // (same convention as every other audit column in this project) -
-        // the frontend resolves them to names against the /users list it
-        // already fetches elsewhere. The query thread's raisedBy/raisedTo
-        // DO have real relations, so those come back with names directly.
         queries: {
           where: { isActive: true },
           orderBy: { createdAt: 'asc' as const },
@@ -165,7 +160,23 @@ export class BomService {
       },
     });
     if (!bom) throw new NotFoundException('BOM not found');
-    return bom;
+    // Created By / Verified By / Approved By are plain ID strings (same
+    // convention as every other audit column in this project). Resolving
+    // them here rather than making the frontend cross-reference the
+    // general /users list means this page works correctly for a viewer
+    // who lacks USER_VIEW (e.g. an Operator raising a query) - the
+    // general user directory stays correctly permission-gated, and this
+    // BOM-specific response just carries the three names it needs.
+    const approvalUserIds = [bom.createdBy, bom.verifiedBy, bom.approvedBy].filter((v): v is string => !!v);
+    const approvalUsers = approvalUserIds.length
+      ? await this.prisma.user.findMany({
+          where: { id: { in: approvalUserIds } },
+          select: { id: true, firstName: true, lastName: true, email: true },
+        })
+      : [];
+    const approvalUserNames: Record<string, { firstName: string | null; lastName: string | null; email: string }> = {};
+    for (const u of approvalUsers) approvalUserNames[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email };
+    return { ...bom, approvalUserNames };
   }
 
   async findByProduct(productId: string, user: any) {

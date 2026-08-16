@@ -148,7 +148,17 @@ let BomService = class BomService {
         });
         if (!bom)
             throw new common_1.NotFoundException('BOM not found');
-        return bom;
+        const approvalUserIds = [bom.createdBy, bom.verifiedBy, bom.approvedBy].filter((v) => !!v);
+        const approvalUsers = approvalUserIds.length
+            ? await this.prisma.user.findMany({
+                where: { id: { in: approvalUserIds } },
+                select: { id: true, firstName: true, lastName: true, email: true },
+            })
+            : [];
+        const approvalUserNames = {};
+        for (const u of approvalUsers)
+            approvalUserNames[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email };
+        return Object.assign(Object.assign({}, bom), { approvalUserNames });
     }
     async findByProduct(productId, user) {
         const where = { productId };
