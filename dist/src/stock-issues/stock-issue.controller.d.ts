@@ -44,10 +44,10 @@ export declare class StockIssueController {
             status: string;
             remarks: string | null;
             warehouseId: string;
-            issueNumber: string;
-            issueMethod: string;
             referenceType: string;
             referenceId: string | null;
+            issueNumber: string;
+            issueMethod: string;
             issuedTo: string;
         })[];
         total: number;
@@ -95,10 +95,10 @@ export declare class StockIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueNumber: string;
-        issueMethod: string;
         referenceType: string;
         referenceId: string | null;
+        issueNumber: string;
+        issueMethod: string;
         issuedTo: string;
     }>;
     create(dto: CreateStockIssueDto, req: any): Promise<{
@@ -140,10 +140,10 @@ export declare class StockIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueNumber: string;
-        issueMethod: string;
         referenceType: string;
         referenceId: string | null;
+        issueNumber: string;
+        issueMethod: string;
         issuedTo: string;
     }>;
     confirm(id: string, req: any): Promise<{
@@ -185,10 +185,10 @@ export declare class StockIssueController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        issueNumber: string;
-        issueMethod: string;
         referenceType: string;
         referenceId: string | null;
+        issueNumber: string;
+        issueMethod: string;
         issuedTo: string;
     }>;
 }

@@ -31,9 +31,9 @@ export declare class ArService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
+            referenceNumber: string | null;
             amount: number;
             paymentMode: string;
-            referenceNumber: string | null;
             voucherId: string | null;
             invoiceId: string;
             paymentDate: Date;
@@ -88,9 +88,9 @@ export declare class ArService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
+            referenceNumber: string | null;
             amount: number;
             paymentMode: string;
-            referenceNumber: string | null;
             voucherId: string | null;
             invoiceId: string;
             paymentDate: Date;
@@ -134,9 +134,9 @@ export declare class ArService {
         createdBy: string | null;
         updatedBy: string | null;
         remarks: string | null;
+        referenceNumber: string | null;
         amount: number;
         paymentMode: string;
-        referenceNumber: string | null;
         voucherId: string | null;
         invoiceId: string;
         paymentDate: Date;
@@ -209,9 +209,9 @@ export declare class ArService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
+            referenceNumber: string | null;
             amount: number;
             paymentMode: string;
-            referenceNumber: string | null;
             voucherId: string | null;
             invoiceId: string;
             paymentDate: Date;

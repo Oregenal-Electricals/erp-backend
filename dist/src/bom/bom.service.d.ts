@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 export declare class BomService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private notifications;
+    constructor(prisma: PrismaService, audit: AuditService, notifications: NotificationsService);
     private itemIncludes;
     private sanitizeBrandPrefix;
     private generateBomNumber;
@@ -191,9 +193,9 @@ export declare class BomService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            message: string;
             bomId: string;
             raisedToUserId: string;
-            message: string;
             response: string | null;
             raisedByUserId: string;
         })[];
@@ -381,9 +383,9 @@ export declare class BomService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        message: string;
         bomId: string;
         raisedToUserId: string;
-        message: string;
         response: string | null;
         raisedByUserId: string;
     }>;
@@ -399,9 +401,9 @@ export declare class BomService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        message: string;
         bomId: string;
         raisedToUserId: string;
-        message: string;
         response: string | null;
         raisedByUserId: string;
     }>;
@@ -547,9 +549,9 @@ export declare class BomService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            message: string;
             bomId: string;
             raisedToUserId: string;
-            message: string;
             response: string | null;
             raisedByUserId: string;
         })[];

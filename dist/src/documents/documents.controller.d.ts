@@ -26,10 +26,10 @@ export declare class DocumentsController {
             category: string;
             tags: string;
             title: string;
-            version: number;
-            documentNumber: string;
             referenceType: string;
             referenceNumber: string;
+            version: number;
+            documentNumber: string;
             fileType: string;
             fileName: string;
             fileSize: number;

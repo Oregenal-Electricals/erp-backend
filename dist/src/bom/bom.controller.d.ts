@@ -142,9 +142,9 @@ export declare class BomController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            message: string;
             bomId: string;
             raisedToUserId: string;
-            message: string;
             response: string | null;
             raisedByUserId: string;
         })[];
@@ -405,9 +405,9 @@ export declare class BomController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        message: string;
         bomId: string;
         raisedToUserId: string;
-        message: string;
         response: string | null;
         raisedByUserId: string;
     }>;
@@ -421,9 +421,9 @@ export declare class BomController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        message: string;
         bomId: string;
         raisedToUserId: string;
-        message: string;
         response: string | null;
         raisedByUserId: string;
     }>;
@@ -514,9 +514,9 @@ export declare class BomController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            message: string;
             bomId: string;
             raisedToUserId: string;
-            message: string;
             response: string | null;
             raisedByUserId: string;
         })[];

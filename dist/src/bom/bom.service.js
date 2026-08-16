@@ -13,10 +13,12 @@ exports.BomService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 let BomService = class BomService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, notifications) {
         this.prisma = prisma;
         this.audit = audit;
+        this.notifications = notifications;
     }
     itemIncludes() {
         return { items: { where: { isActive: true }, orderBy: { sequence: 'asc' } } };
@@ -231,10 +233,15 @@ let BomService = class BomService {
             },
         });
         await this.audit.log({ tableName: 'bom_queries', recordId: created.id, action: 'CREATE', newValues: created, changedBy: user.id });
+        await this.notifications.create({
+            userId: dto.raisedToUserId, type: 'BOM_QUERY', title: 'New query on a BOM',
+            message: `A query was raised on BOM ${bom.bomNumber}: "${dto.message}"`,
+            referenceType: 'BOM', referenceId: bom.id, referenceNumber: bom.bomNumber, priority: 'MEDIUM',
+        }, user.companyId, user.id);
         return created;
     }
     async resolveQuery(id, dto, user) {
-        const query = await this.prisma.bomQuery.findFirst({ where: { id, companyId: user.companyId } });
+        const query = await this.prisma.bomQuery.findFirst({ where: { id, companyId: user.companyId }, include: { bom: { select: { bomNumber: true } } } });
         if (!query)
             throw new common_1.NotFoundException('Query not found');
         if (query.raisedToUserId !== user.id)
@@ -243,6 +250,11 @@ let BomService = class BomService {
             where: { id }, data: { status: 'RESOLVED', response: dto.response, updatedBy: user.id },
         });
         await this.audit.log({ tableName: 'bom_queries', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        await this.notifications.create({
+            userId: query.raisedByUserId, type: 'BOM_QUERY', title: 'Your BOM query was answered',
+            message: `Reply on BOM ${query.bom.bomNumber}: "${dto.response}"`,
+            referenceType: 'BOM', referenceId: query.bomId, referenceNumber: query.bom.bomNumber, priority: 'MEDIUM',
+        }, user.companyId, user.id);
         return updated;
     }
     async approve(id, user) {
@@ -586,6 +598,6 @@ let BomService = class BomService {
 exports.BomService = BomService;
 exports.BomService = BomService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, notifications_service_1.NotificationsService])
 ], BomService);
 //# sourceMappingURL=bom.service.js.map

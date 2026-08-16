@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 
 @Injectable()
 export class BomService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private notifications: NotificationsService) {}
 
   private itemIncludes() {
     return { items: { where: { isActive: true }, orderBy: { sequence: 'asc' as const } } };
@@ -269,17 +270,32 @@ export class BomService {
       },
     });
     await this.audit.log({ tableName: 'bom_queries', recordId: created.id, action: 'CREATE', newValues: created, changedBy: user.id });
+    // Real-time notification so the recipient doesn't have to guess to
+    // refresh the page - matches how every other query/approval system
+    // in this project (Manpower, PO approvals, etc.) already works.
+    await this.notifications.create({
+      userId: dto.raisedToUserId, type: 'BOM_QUERY', title: 'New query on a BOM',
+      message: `A query was raised on BOM ${bom.bomNumber}: "${dto.message}"`,
+      referenceType: 'BOM', referenceId: bom.id, referenceNumber: bom.bomNumber, priority: 'MEDIUM',
+    }, user.companyId, user.id);
     return created;
   }
 
   async resolveQuery(id: string, dto: { response: string }, user: any) {
-    const query = await this.prisma.bomQuery.findFirst({ where: { id, companyId: user.companyId } });
+    const query = await this.prisma.bomQuery.findFirst({ where: { id, companyId: user.companyId }, include: { bom: { select: { bomNumber: true } } } });
     if (!query) throw new NotFoundException('Query not found');
     if (query.raisedToUserId !== user.id) throw new ForbiddenException('Only the person the query was raised to can resolve it');
     const updated = await this.prisma.bomQuery.update({
       where: { id }, data: { status: 'RESOLVED', response: dto.response, updatedBy: user.id },
     });
     await this.audit.log({ tableName: 'bom_queries', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+    // Notify the original asker that their query was answered - same
+    // pattern as raiseQuery above, so both directions are covered.
+    await this.notifications.create({
+      userId: query.raisedByUserId, type: 'BOM_QUERY', title: 'Your BOM query was answered',
+      message: `Reply on BOM ${query.bom.bomNumber}: "${dto.response}"`,
+      referenceType: 'BOM', referenceId: query.bomId, referenceNumber: query.bom.bomNumber, priority: 'MEDIUM',
+    }, user.companyId, user.id);
     return updated;
   }
 
