@@ -63,6 +63,11 @@ export class SalesOrdersService {
     const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
     const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
 
+    // Auto-confirmed at creation - a CPO-originated Sales Order no longer
+    // sits in DRAFT waiting for a separate manual confirm step. This is
+    // scoped to createFromCpo() specifically, so manually created Sales
+    // Orders elsewhere are unaffected and still go through confirm()
+    // themselves as before.
     const so = await tx.salesOrder.create({
       data: {
         soNumber,
@@ -77,6 +82,9 @@ export class SalesOrdersService {
         companyId: user.companyId,
         createdBy: user.id,
         updatedBy: user.id,
+        status: 'CONFIRMED',
+        confirmedDate: new Date(),
+        confirmedBy: user.id,
         items: { create: calcItems },
       },
       include: this.includes(),
