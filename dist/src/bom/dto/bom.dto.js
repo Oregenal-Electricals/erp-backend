@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GenerateStagesDto = exports.GenerateStageDto = exports.UpdateBomItemDto = exports.CreateBomItemDto = exports.UpdateBomDto = exports.CreateBomDto = void 0;
+exports.ResolveBomQueryDto = exports.RaiseBomQueryDto = exports.GenerateStagesDto = exports.GenerateStageDto = exports.UpdateBomItemDto = exports.CreateBomItemDto = exports.UpdateBomDto = exports.CreateBomDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class CreateBomDto {
@@ -242,4 +242,26 @@ __decorate([
     (0, class_transformer_1.Type)(() => GenerateStageDto),
     __metadata("design:type", Array)
 ], GenerateStagesDto.prototype, "stages", void 0);
+class RaiseBomQueryDto {
+}
+exports.RaiseBomQueryDto = RaiseBomQueryDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RaiseBomQueryDto.prototype, "bomId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RaiseBomQueryDto.prototype, "raisedToUserId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RaiseBomQueryDto.prototype, "message", void 0);
+class ResolveBomQueryDto {
+}
+exports.ResolveBomQueryDto = ResolveBomQueryDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveBomQueryDto.prototype, "response", void 0);
 //# sourceMappingURL=bom.dto.js.map

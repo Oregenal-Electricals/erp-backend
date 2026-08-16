@@ -29,11 +29,11 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -100,11 +100,11 @@ export declare class ManpowerController {
                 createdBy: string | null;
                 updatedBy: string | null;
                 status: string;
+                raisedToUserId: string;
                 message: string;
-                allocationId: string;
                 response: string | null;
                 raisedByUserId: string;
-                raisedToUserId: string;
+                allocationId: string;
             })[];
             fromUser: {
                 role: string;
@@ -157,11 +157,11 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -221,11 +221,11 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -285,11 +285,11 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -349,11 +349,11 @@ export declare class ManpowerController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -403,11 +403,11 @@ export declare class ManpowerController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        raisedToUserId: string;
         message: string;
-        allocationId: string;
         response: string | null;
         raisedByUserId: string;
-        raisedToUserId: string;
+        allocationId: string;
     }>;
     resolveQuery(id: string, dto: ResolveManpowerQueryDto, req: any): Promise<{
         id: string;
@@ -419,11 +419,11 @@ export declare class ManpowerController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        raisedToUserId: string;
         message: string;
-        allocationId: string;
         response: string | null;
         raisedByUserId: string;
-        raisedToUserId: string;
+        allocationId: string;
     }>;
     adjust(dto: AdjustManpowerDto, req: any): Promise<{
         level: string;

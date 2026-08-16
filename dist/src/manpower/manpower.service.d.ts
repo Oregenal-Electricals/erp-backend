@@ -36,11 +36,11 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -100,11 +100,11 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -170,11 +170,11 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -241,11 +241,11 @@ export declare class ManpowerService {
                 createdBy: string | null;
                 updatedBy: string | null;
                 status: string;
+                raisedToUserId: string;
                 message: string;
-                allocationId: string;
                 response: string | null;
                 raisedByUserId: string;
-                raisedToUserId: string;
+                allocationId: string;
             })[];
             fromUser: {
                 role: string;
@@ -298,11 +298,11 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -362,11 +362,11 @@ export declare class ManpowerService {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            raisedToUserId: string;
             message: string;
-            allocationId: string;
             response: string | null;
             raisedByUserId: string;
-            raisedToUserId: string;
+            allocationId: string;
         })[];
         fromUser: {
             role: string;
@@ -410,11 +410,11 @@ export declare class ManpowerService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        raisedToUserId: string;
         message: string;
-        allocationId: string;
         response: string | null;
         raisedByUserId: string;
-        raisedToUserId: string;
+        allocationId: string;
     }>;
     resolveQuery(id: string, dto: ResolveManpowerQueryDto, user: any): Promise<{
         id: string;
@@ -426,11 +426,11 @@ export declare class ManpowerService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        raisedToUserId: string;
         message: string;
-        allocationId: string;
         response: string | null;
         raisedByUserId: string;
-        raisedToUserId: string;
+        allocationId: string;
     }>;
     requestAdjust(dto: AdjustManpowerDto, user: any): Promise<{
         level: string;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
@@ -145,7 +145,24 @@ export class BomService {
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     const bom = await this.prisma.bom.findFirst({
       where,
-      include: { product: { select: { code: true, name: true, brand: true } }, revision: { select: { revisionNumber: true } }, ...this.itemIncludes() },
+      include: {
+        product: { select: { code: true, name: true, brand: true } },
+        revision: { select: { revisionNumber: true } },
+        // Created By / Verified By / Approved By are plain ID strings
+        // (same convention as every other audit column in this project) -
+        // the frontend resolves them to names against the /users list it
+        // already fetches elsewhere. The query thread's raisedBy/raisedTo
+        // DO have real relations, so those come back with names directly.
+        queries: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' as const },
+          include: {
+            raisedBy: { select: { id: true, firstName: true, lastName: true, email: true } },
+            raisedTo: { select: { id: true, firstName: true, lastName: true, email: true } },
+          },
+        },
+        ...this.itemIncludes(),
+      },
     });
     if (!bom) throw new NotFoundException('BOM not found');
     return bom;
@@ -179,10 +196,72 @@ export class BomService {
     return { message: 'BOM deactivated' };
   }
 
+  /**
+   * DRAFT -> VERIFIED, the first of two required gates before a BOM can
+   * ever actually be used in production (approve() below still requires
+   * VERIFIED, so this is a genuine second pair of eyes, not a rename of
+   * the old single-step approval). Blocked while any query on this BOM
+   * is still unresolved - an open question must be answered before the
+   * BOM can move forward at all.
+   */
+  async verify(id: string, user: any) {
+    const bom = await this.findOne(id, user);
+    if (bom.status !== 'DRAFT') throw new BadRequestException('Only DRAFT BOMs can be verified');
+    if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot verify BOM with no items');
+    const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
+    if (openQuery) throw new BadRequestException('Cannot verify this BOM while a query on it is still open');
+    const updated = await this.prisma.bom.update({
+      where: { id },
+      data: { status: 'VERIFIED', verifiedBy: user.id, verifiedAt: new Date(), updatedBy: user.id },
+      include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
+    });
+    await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
+  /**
+   * A query can be raised to whichever of the two people is relevant at
+   * this BOM's current stage - its creator or its verifier. Explicitly
+   * validated server-side against those two specific people rather than
+   * allowing a query to any arbitrary user, so this stays a real,
+   * accountable exchange between the two parties who actually worked on
+   * the BOM.
+   */
+  async raiseQuery(dto: { bomId: string; raisedToUserId: string; message: string }, user: any) {
+    const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
+    if (!bom) throw new NotFoundException('BOM not found');
+    const validTargets = [bom.createdBy, bom.verifiedBy].filter(Boolean);
+    if (!validTargets.includes(dto.raisedToUserId)) {
+      throw new BadRequestException('Queries on this BOM can only be raised to its creator or verifier');
+    }
+    const created = await this.prisma.bomQuery.create({
+      data: {
+        companyId: user.companyId, bomId: dto.bomId,
+        raisedByUserId: user.id, raisedToUserId: dto.raisedToUserId, message: dto.message,
+        createdBy: user.id, updatedBy: user.id,
+      },
+    });
+    await this.audit.log({ tableName: 'bom_queries', recordId: created.id, action: 'CREATE', newValues: created, changedBy: user.id });
+    return created;
+  }
+
+  async resolveQuery(id: string, dto: { response: string }, user: any) {
+    const query = await this.prisma.bomQuery.findFirst({ where: { id, companyId: user.companyId } });
+    if (!query) throw new NotFoundException('Query not found');
+    if (query.raisedToUserId !== user.id) throw new ForbiddenException('Only the person the query was raised to can resolve it');
+    const updated = await this.prisma.bomQuery.update({
+      where: { id }, data: { status: 'RESOLVED', response: dto.response, updatedBy: user.id },
+    });
+    await this.audit.log({ tableName: 'bom_queries', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
   async approve(id: string, user: any) {
     const bom = await this.findOne(id, user);
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Only DRAFT BOMs can be approved');
+    if (bom.status !== 'VERIFIED') throw new BadRequestException('Only VERIFIED BOMs can be approved');
     if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot approve BOM with no items');
+    const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
+    if (openQuery) throw new BadRequestException('Cannot approve this BOM while a query on it is still open');
     const updated = await this.prisma.bom.update({
       where: { id },
       data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },

@@ -137,7 +137,14 @@ let BomService = class BomService {
             where.companyId = user.companyId;
         const bom = await this.prisma.bom.findFirst({
             where,
-            include: Object.assign({ product: { select: { code: true, name: true, brand: true } }, revision: { select: { revisionNumber: true } } }, this.itemIncludes()),
+            include: Object.assign({ product: { select: { code: true, name: true, brand: true } }, revision: { select: { revisionNumber: true } }, queries: {
+                    where: { isActive: true },
+                    orderBy: { createdAt: 'asc' },
+                    include: {
+                        raisedBy: { select: { id: true, firstName: true, lastName: true, email: true } },
+                        raisedTo: { select: { id: true, firstName: true, lastName: true, email: true } },
+                    },
+                } }, this.itemIncludes()),
         });
         if (!bom)
             throw new common_1.NotFoundException('BOM not found');
@@ -171,12 +178,62 @@ let BomService = class BomService {
         await this.audit.log({ tableName: 'boms', recordId: id, action: 'DELETE', oldValues: bom, newValues: updated, changedBy: user.id });
         return { message: 'BOM deactivated' };
     }
-    async approve(id, user) {
+    async verify(id, user) {
         const bom = await this.findOne(id, user);
         if (bom.status !== 'DRAFT')
-            throw new common_1.BadRequestException('Only DRAFT BOMs can be approved');
+            throw new common_1.BadRequestException('Only DRAFT BOMs can be verified');
+        if (!bom.items || bom.items.length === 0)
+            throw new common_1.BadRequestException('Cannot verify BOM with no items');
+        const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
+        if (openQuery)
+            throw new common_1.BadRequestException('Cannot verify this BOM while a query on it is still open');
+        const updated = await this.prisma.bom.update({
+            where: { id },
+            data: { status: 'VERIFIED', verifiedBy: user.id, verifiedAt: new Date(), updatedBy: user.id },
+            include: Object.assign({ product: { select: { code: true, name: true } } }, this.itemIncludes()),
+        });
+        await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+        return updated;
+    }
+    async raiseQuery(dto, user) {
+        const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
+        if (!bom)
+            throw new common_1.NotFoundException('BOM not found');
+        const validTargets = [bom.createdBy, bom.verifiedBy].filter(Boolean);
+        if (!validTargets.includes(dto.raisedToUserId)) {
+            throw new common_1.BadRequestException('Queries on this BOM can only be raised to its creator or verifier');
+        }
+        const created = await this.prisma.bomQuery.create({
+            data: {
+                companyId: user.companyId, bomId: dto.bomId,
+                raisedByUserId: user.id, raisedToUserId: dto.raisedToUserId, message: dto.message,
+                createdBy: user.id, updatedBy: user.id,
+            },
+        });
+        await this.audit.log({ tableName: 'bom_queries', recordId: created.id, action: 'CREATE', newValues: created, changedBy: user.id });
+        return created;
+    }
+    async resolveQuery(id, dto, user) {
+        const query = await this.prisma.bomQuery.findFirst({ where: { id, companyId: user.companyId } });
+        if (!query)
+            throw new common_1.NotFoundException('Query not found');
+        if (query.raisedToUserId !== user.id)
+            throw new common_1.ForbiddenException('Only the person the query was raised to can resolve it');
+        const updated = await this.prisma.bomQuery.update({
+            where: { id }, data: { status: 'RESOLVED', response: dto.response, updatedBy: user.id },
+        });
+        await this.audit.log({ tableName: 'bom_queries', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        return updated;
+    }
+    async approve(id, user) {
+        const bom = await this.findOne(id, user);
+        if (bom.status !== 'VERIFIED')
+            throw new common_1.BadRequestException('Only VERIFIED BOMs can be approved');
         if (!bom.items || bom.items.length === 0)
             throw new common_1.BadRequestException('Cannot approve BOM with no items');
+        const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
+        if (openQuery)
+            throw new common_1.BadRequestException('Cannot approve this BOM while a query on it is still open');
         const updated = await this.prisma.bom.update({
             where: { id },
             data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },

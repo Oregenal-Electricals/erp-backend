@@ -113,8 +113,8 @@ export declare class WorkOrderController {
                 wastagePercent: number | null;
                 unitCost: number | null;
                 isCritical: boolean;
-                totalCost: number | null;
                 bomId: string;
+                totalCost: number | null;
                 effectiveQty: number;
             }[];
         } & {
@@ -383,8 +383,8 @@ export declare class WorkOrderController {
                 wastagePercent: number | null;
                 unitCost: number | null;
                 isCritical: boolean;
-                totalCost: number | null;
                 bomId: string;
+                totalCost: number | null;
                 effectiveQty: number;
             }[];
         } & {
@@ -635,8 +635,8 @@ export declare class WorkOrderController {
                 wastagePercent: number | null;
                 unitCost: number | null;
                 isCritical: boolean;
-                totalCost: number | null;
                 bomId: string;
+                totalCost: number | null;
                 effectiveQty: number;
             }[];
         } & {

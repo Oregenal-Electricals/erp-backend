@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { BomService } from './bom.service';
-import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
+import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto, RaiseBomQueryDto, ResolveBomQueryDto } from './dto/bom.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -47,9 +47,18 @@ export class BomController {
   @RequirePermissions(Permission.INVENTORY_EDIT)
   remove(@Param('id') id: string, @Request() req: any) { return this.bomService.remove(id, req.user); }
 
+  @Post(':id/verify')
+  @RequirePermissions(Permission.BOM_VERIFY)
+  verify(@Param('id') id: string, @Request() req: any) { return this.bomService.verify(id, req.user); }
   @Post(':id/approve')
-  @RequirePermissions(Permission.INVENTORY_EDIT)
+  @RequirePermissions(Permission.BOM_APPROVE)
   approve(@Param('id') id: string, @Request() req: any) { return this.bomService.approve(id, req.user); }
+  @Post('queries')
+  @RequirePermissions(Permission.BOM_VIEW)
+  raiseQuery(@Body() dto: RaiseBomQueryDto, @Request() req: any) { return this.bomService.raiseQuery(dto, req.user); }
+  @Post('queries/:id/resolve')
+  @RequirePermissions(Permission.BOM_VIEW)
+  resolveQuery(@Param('id') id: string, @Body() dto: ResolveBomQueryDto, @Request() req: any) { return this.bomService.resolveQuery(id, dto, req.user); }
 
   @Post(':id/obsolete')
   @RequirePermissions(Permission.INVENTORY_EDIT)

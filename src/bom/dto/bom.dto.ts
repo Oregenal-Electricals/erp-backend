@@ -60,3 +60,12 @@ export class GenerateStagesDto {
   @IsArray() @ValidateNested({ each: true }) @Type(() => GenerateStageDto)
   stages: GenerateStageDto[];
 }
+
+export class RaiseBomQueryDto {
+  @IsString() bomId: string;
+  @IsString() raisedToUserId: string;
+  @IsString() message: string;
+}
+export class ResolveBomQueryDto {
+  @IsString() response: string;
+}

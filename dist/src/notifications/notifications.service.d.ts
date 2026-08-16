@@ -16,10 +16,10 @@ export declare class NotificationsService {
         title: string;
         userId: string;
         priority: string;
+        message: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
-        message: string;
         isRead: boolean;
         readAt: Date | null;
     }>;
@@ -39,10 +39,10 @@ export declare class NotificationsService {
             title: string;
             userId: string;
             priority: string;
+            message: string;
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            message: string;
             isRead: boolean;
             readAt: Date | null;
         }[];

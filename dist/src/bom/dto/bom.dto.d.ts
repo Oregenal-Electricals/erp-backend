@@ -51,3 +51,11 @@ export declare class GenerateStageDto {
 export declare class GenerateStagesDto {
     stages: GenerateStageDto[];
 }
+export declare class RaiseBomQueryDto {
+    bomId: string;
+    raisedToUserId: string;
+    message: string;
+}
+export declare class ResolveBomQueryDto {
+    response: string;
+}

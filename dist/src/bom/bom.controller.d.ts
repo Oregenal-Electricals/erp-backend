@@ -1,5 +1,5 @@
 import { BomService } from './bom.service';
-import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
+import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto, RaiseBomQueryDto, ResolveBomQueryDto } from './dto/bom.dto';
 export declare class BomController {
     private readonly bomService;
     constructor(bomService: BomService);
@@ -102,8 +102,8 @@ export declare class BomController {
             wastagePercent: number | null;
             unitCost: number | null;
             isCritical: boolean;
-            totalCost: number | null;
             bomId: string;
+            totalCost: number | null;
             effectiveQty: number;
         }[];
         product: {
@@ -114,6 +114,35 @@ export declare class BomController {
         revision: {
             revisionNumber: string;
         };
+        queries: ({
+            raisedBy: {
+                id: string;
+                email: string;
+                firstName: string;
+                lastName: string;
+            };
+            raisedTo: {
+                id: string;
+                email: string;
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            bomId: string;
+            raisedToUserId: string;
+            message: string;
+            response: string | null;
+            raisedByUserId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
@@ -161,8 +190,8 @@ export declare class BomController {
             wastagePercent: number | null;
             unitCost: number | null;
             isCritical: boolean;
-            totalCost: number | null;
             bomId: string;
+            totalCost: number | null;
             effectiveQty: number;
         }[];
         product: {
@@ -216,8 +245,8 @@ export declare class BomController {
             wastagePercent: number | null;
             unitCost: number | null;
             isCritical: boolean;
-            totalCost: number | null;
             bomId: string;
+            totalCost: number | null;
             effectiveQty: number;
         }[];
         product: {
@@ -252,7 +281,7 @@ export declare class BomController {
     remove(id: string, req: any): Promise<{
         message: string;
     }>;
-    approve(id: string, req: any): Promise<{
+    verify(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;
@@ -274,8 +303,8 @@ export declare class BomController {
             wastagePercent: number | null;
             unitCost: number | null;
             isCritical: boolean;
-            totalCost: number | null;
             bomId: string;
+            totalCost: number | null;
             effectiveQty: number;
         }[];
         product: {
@@ -306,6 +335,93 @@ export declare class BomController {
         bomType: string;
         sourceBomId: string | null;
         totalCost: number | null;
+    }>;
+    approve(id: string, req: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            notes: string | null;
+            itemType: string;
+            sequence: number;
+            section: string | null;
+            rawMaterialId: string | null;
+            wastagePercent: number | null;
+            unitCost: number | null;
+            isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
+        }[];
+        product: {
+            name: string;
+            code: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        verifiedAt: Date | null;
+        verifiedBy: string | null;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        productId: string;
+        revisionId: string | null;
+        version: string;
+        effectiveFrom: Date;
+        effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
+        totalCost: number | null;
+    }>;
+    raiseQuery(dto: RaiseBomQueryDto, req: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        bomId: string;
+        raisedToUserId: string;
+        message: string;
+        response: string | null;
+        raisedByUserId: string;
+    }>;
+    resolveQuery(id: string, dto: ResolveBomQueryDto, req: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        bomId: string;
+        raisedToUserId: string;
+        message: string;
+        response: string | null;
+        raisedByUserId: string;
     }>;
     obsolete(id: string, req: any): Promise<{
         id: string;
@@ -354,8 +470,8 @@ export declare class BomController {
             wastagePercent: number | null;
             unitCost: number | null;
             isCritical: boolean;
-            totalCost: number | null;
             bomId: string;
+            totalCost: number | null;
             effectiveQty: number;
         }[];
         product: {
@@ -366,6 +482,35 @@ export declare class BomController {
         revision: {
             revisionNumber: string;
         };
+        queries: ({
+            raisedBy: {
+                id: string;
+                email: string;
+                firstName: string;
+                lastName: string;
+            };
+            raisedTo: {
+                id: string;
+                email: string;
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            bomId: string;
+            raisedToUserId: string;
+            message: string;
+            response: string | null;
+            raisedByUserId: string;
+        })[];
     } & {
         id: string;
         companyId: string;
@@ -417,8 +562,8 @@ export declare class BomController {
         wastagePercent: number | null;
         unitCost: number | null;
         isCritical: boolean;
-        totalCost: number | null;
         bomId: string;
+        totalCost: number | null;
         effectiveQty: number;
     }>;
     removeItem(id: string, itemId: string, req: any): Promise<{
