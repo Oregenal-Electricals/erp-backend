@@ -243,9 +243,12 @@ export class BomService {
   async raiseQuery(dto: { bomId: string; raisedToUserId: string; message: string }, user: any) {
     const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
     if (!bom) throw new NotFoundException('BOM not found');
-    const validTargets = [bom.createdBy, bom.verifiedBy].filter(Boolean);
+    // Any of the three parties on this BOM's chain - creator, verifier,
+    // approver - can ask any of the others a question. Whoever raises it
+    // is automatically excluded as a target, so nobody can query themselves.
+    const validTargets = [bom.createdBy, bom.verifiedBy, bom.approvedBy].filter((id) => id && id !== user.id);
     if (!validTargets.includes(dto.raisedToUserId)) {
-      throw new BadRequestException('Queries on this BOM can only be raised to its creator or verifier');
+      throw new BadRequestException('Queries on this BOM can only be raised to its creator, verifier, or approver');
     }
     const created = await this.prisma.bomQuery.create({
       data: {

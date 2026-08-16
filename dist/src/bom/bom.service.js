@@ -209,9 +209,9 @@ let BomService = class BomService {
         const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
         if (!bom)
             throw new common_1.NotFoundException('BOM not found');
-        const validTargets = [bom.createdBy, bom.verifiedBy].filter(Boolean);
+        const validTargets = [bom.createdBy, bom.verifiedBy, bom.approvedBy].filter((id) => id && id !== user.id);
         if (!validTargets.includes(dto.raisedToUserId)) {
-            throw new common_1.BadRequestException('Queries on this BOM can only be raised to its creator or verifier');
+            throw new common_1.BadRequestException('Queries on this BOM can only be raised to its creator, verifier, or approver');
         }
         const created = await this.prisma.bomQuery.create({
             data: {
