@@ -19,7 +19,7 @@ let ProductService = class ProductService {
         this.audit = audit;
     }
     includes() {
-        return { category: true, uom: true };
+        return { category: true, uom: true, family: true };
     }
     async create(dto, user) {
         const exists = await this.prisma.product.findUnique({

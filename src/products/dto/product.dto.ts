@@ -6,6 +6,7 @@ export class CreateProductDto {
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsString() productType?: string;
   @IsOptional() @IsString() categoryId?: string;
+  @IsOptional() @IsString() familyId?: string;
   @IsOptional() @IsString() uomId?: string;
   @IsOptional() @IsString() hsnCode?: string;
   @IsOptional() @IsNumber() gstRate?: number;
@@ -23,6 +24,7 @@ export class UpdateProductDto {
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsString() productType?: string;
   @IsOptional() @IsString() categoryId?: string;
+  @IsOptional() @IsString() familyId?: string;
   @IsOptional() @IsString() uomId?: string;
   @IsOptional() @IsString() hsnCode?: string;
   @IsOptional() @IsNumber() gstRate?: number;

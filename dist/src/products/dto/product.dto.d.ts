@@ -4,6 +4,7 @@ export declare class CreateProductDto {
     description?: string;
     productType?: string;
     categoryId?: string;
+    familyId?: string;
     uomId?: string;
     hsnCode?: string;
     gstRate?: number;
@@ -20,6 +21,7 @@ export declare class UpdateProductDto {
     description?: string;
     productType?: string;
     categoryId?: string;
+    familyId?: string;
     uomId?: string;
     hsnCode?: string;
     gstRate?: number;

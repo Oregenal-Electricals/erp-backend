@@ -137,10 +137,10 @@ export declare class ProductFamilyController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         productType: string;
+        familyId: string | null;
         brand: string | null;
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
-        familyId: string | null;
     }>;
 }

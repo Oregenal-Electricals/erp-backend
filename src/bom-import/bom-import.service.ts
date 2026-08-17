@@ -217,6 +217,12 @@ export class BomImportService {
       }
     }
 
+    const possibleFamilyMatches = await this.findPossibleFamilyMatches(
+      companyId,
+      parsed.sections,
+      existingProduct?.id,
+    );
+
     return {
       product: parsed.product,
       docInfo: parsed.docInfo,
@@ -227,7 +233,86 @@ export class BomImportService {
       newRawMaterialsCount: newCount,
       existingRawMaterialsCount: totalItems - newCount,
       isTestSession: isTestSessionActive(),
+      possibleFamilyMatches,
     };
+  }
+
+  /**
+   * Suggests other Products this upload might belong in the same Product
+   * Family as - never links anything automatically. Compares the parsed
+   * BOM's items against every other active MASTER BOM in the company,
+   * excluding items in a "Packaging"-named section on both sides, since
+   * Packaging is deliberately allowed to differ between family members
+   * (that's the whole point of a family: same build through Assembly,
+   * different branding/labeling at Packaging).
+   *
+   * Deliberately conservative: full auto-detection by BOM-content
+   * comparison was considered and rejected earlier in this project as
+   * fragile (naming drift, near-duplicate BOMs, false positives). This
+   * only ever produces a suggestion for a human to confirm or dismiss -
+   * nothing here writes to familyId.
+   *
+   * Jaccard similarity (intersection / union) on itemCode sets, not a
+   * simple containment ratio - a partial/smaller BOM matching 100% of a
+   * much larger one would otherwise score as a perfect match despite
+   * being a poor real-world fit.
+   */
+  private async findPossibleFamilyMatches(
+    companyId: string,
+    sections: ParsedSection[],
+    excludeProductId?: string,
+  ): Promise<Array<{ productId: string; productCode: string; productName: string; familyId: string | null; matchPercent: number }>> {
+    const isPackagingSection = (name: string) => /packag/i.test(name || '');
+
+    const newItemCodes = new Set(
+      sections
+        .filter((s) => !isPackagingSection(s.name))
+        .flatMap((s) => s.items.map((i) => i.partCode))
+        .filter(Boolean),
+    );
+    if (newItemCodes.size === 0) return [];
+
+    const candidateBoms = await this.prisma.bom.findMany({
+      where: {
+        companyId,
+        bomType: 'MASTER',
+        isActive: true,
+        status: { not: 'OBSOLETE' },
+        ...(excludeProductId ? { productId: { not: excludeProductId } } : {}),
+      },
+      include: {
+        items: { where: { isActive: true }, select: { itemCode: true, section: true } },
+        product: { select: { id: true, code: true, name: true, familyId: true } },
+      },
+    });
+
+    const MATCH_THRESHOLD = 0.6;
+    const scored: Array<{ productId: string; productCode: string; productName: string; familyId: string | null; matchPercent: number }> = [];
+
+    for (const bom of candidateBoms) {
+      const existingItemCodes = new Set(
+        bom.items.filter((i) => !isPackagingSection(i.section || '')).map((i) => i.itemCode),
+      );
+      if (existingItemCodes.size === 0) continue;
+
+      let intersection = 0;
+      for (const code of newItemCodes) if (existingItemCodes.has(code)) intersection++;
+      const union = newItemCodes.size + existingItemCodes.size - intersection;
+      const matchPercent = union > 0 ? Math.round((intersection / union) * 100) : 0;
+
+      if (matchPercent >= MATCH_THRESHOLD * 100) {
+        scored.push({
+          productId: bom.product.id,
+          productCode: bom.product.code,
+          productName: bom.product.name,
+          familyId: bom.product.familyId,
+          matchPercent,
+        });
+      }
+    }
+
+    scored.sort((a, b) => b.matchPercent - a.matchPercent);
+    return scored.slice(0, 3);
   }
 
   /**

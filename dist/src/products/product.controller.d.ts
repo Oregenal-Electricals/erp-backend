@@ -41,6 +41,19 @@ export declare class ProductController {
                 code: string;
                 isBase: boolean;
             };
+            family: {
+                id: string;
+                companyId: string;
+                name: string;
+                description: string | null;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                code: string;
+            };
         } & {
             id: string;
             companyId: string;
@@ -61,11 +74,11 @@ export declare class ProductController {
             leadTimeDays: number | null;
             specifications: import("@prisma/client/runtime/library").JsonValue | null;
             productType: string;
+            familyId: string | null;
             brand: string | null;
             model: string | null;
             revision: string | null;
             drawingNumber: string | null;
-            familyId: string | null;
         })[];
         total: number;
         page: number;
@@ -101,6 +114,19 @@ export declare class ProductController {
             code: string;
             isBase: boolean;
         };
+        family: {
+            id: string;
+            companyId: string;
+            name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -121,11 +147,11 @@ export declare class ProductController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         productType: string;
+        familyId: string | null;
         brand: string | null;
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
-        familyId: string | null;
     }>;
     create(dto: CreateProductDto, req: any): Promise<{
         category: {
@@ -156,6 +182,19 @@ export declare class ProductController {
             code: string;
             isBase: boolean;
         };
+        family: {
+            id: string;
+            companyId: string;
+            name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -176,11 +215,11 @@ export declare class ProductController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         productType: string;
+        familyId: string | null;
         brand: string | null;
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
-        familyId: string | null;
     }>;
     update(id: string, dto: UpdateProductDto, req: any): Promise<{
         category: {
@@ -211,6 +250,19 @@ export declare class ProductController {
             code: string;
             isBase: boolean;
         };
+        family: {
+            id: string;
+            companyId: string;
+            name: string;
+            description: string | null;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            code: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -231,11 +283,11 @@ export declare class ProductController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         productType: string;
+        familyId: string | null;
         brand: string | null;
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
-        familyId: string | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

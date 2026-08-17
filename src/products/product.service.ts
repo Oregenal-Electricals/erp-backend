@@ -8,7 +8,7 @@ export class ProductService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
   private includes() {
-    return { category: true, uom: true };
+    return { category: true, uom: true, family: true };
   }
 
   async create(dto: CreateProductDto, user: any) {

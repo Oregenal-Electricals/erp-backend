@@ -208,6 +208,7 @@ let BomImportService = class BomImportService {
                     newCount++;
             }
         }
+        const possibleFamilyMatches = await this.findPossibleFamilyMatches(companyId, parsed.sections, existingProduct === null || existingProduct === void 0 ? void 0 : existingProduct.id);
         return {
             product: parsed.product,
             docInfo: parsed.docInfo,
@@ -218,7 +219,48 @@ let BomImportService = class BomImportService {
             newRawMaterialsCount: newCount,
             existingRawMaterialsCount: totalItems - newCount,
             isTestSession: (0, test_session_context_1.isTestSessionActive)(),
+            possibleFamilyMatches,
         };
+    }
+    async findPossibleFamilyMatches(companyId, sections, excludeProductId) {
+        const isPackagingSection = (name) => /packag/i.test(name || '');
+        const newItemCodes = new Set(sections
+            .filter((s) => !isPackagingSection(s.name))
+            .flatMap((s) => s.items.map((i) => i.partCode))
+            .filter(Boolean));
+        if (newItemCodes.size === 0)
+            return [];
+        const candidateBoms = await this.prisma.bom.findMany({
+            where: Object.assign({ companyId, bomType: 'MASTER', isActive: true, status: { not: 'OBSOLETE' } }, (excludeProductId ? { productId: { not: excludeProductId } } : {})),
+            include: {
+                items: { where: { isActive: true }, select: { itemCode: true, section: true } },
+                product: { select: { id: true, code: true, name: true, familyId: true } },
+            },
+        });
+        const MATCH_THRESHOLD = 0.6;
+        const scored = [];
+        for (const bom of candidateBoms) {
+            const existingItemCodes = new Set(bom.items.filter((i) => !isPackagingSection(i.section || '')).map((i) => i.itemCode));
+            if (existingItemCodes.size === 0)
+                continue;
+            let intersection = 0;
+            for (const code of newItemCodes)
+                if (existingItemCodes.has(code))
+                    intersection++;
+            const union = newItemCodes.size + existingItemCodes.size - intersection;
+            const matchPercent = union > 0 ? Math.round((intersection / union) * 100) : 0;
+            if (matchPercent >= MATCH_THRESHOLD * 100) {
+                scored.push({
+                    productId: bom.product.id,
+                    productCode: bom.product.code,
+                    productName: bom.product.name,
+                    familyId: bom.product.familyId,
+                    matchPercent,
+                });
+            }
+        }
+        scored.sort((a, b) => b.matchPercent - a.matchPercent);
+        return scored.slice(0, 3);
     }
     async confirmImport(dto, user) {
         const flatItems = dto.sections.flatMap((s) => s.items.map((item) => (Object.assign(Object.assign({}, item), { section: s.name }))));

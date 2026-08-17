@@ -36,8 +36,16 @@ export declare class BomImportService {
         newRawMaterialsCount: number;
         existingRawMaterialsCount: number;
         isTestSession: boolean;
+        possibleFamilyMatches: {
+            productId: string;
+            productCode: string;
+            productName: string;
+            familyId: string | null;
+            matchPercent: number;
+        }[];
     }>;
     private buildPreview;
+    private findPossibleFamilyMatches;
     confirmImport(dto: ConfirmBomImportDto, user: any): Promise<{
         bomId: string;
         bomNumber: string;
