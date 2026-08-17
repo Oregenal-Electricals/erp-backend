@@ -33,6 +33,7 @@ const item_master_module_1 = require("./item-master/item-master.module");
 const warehouse_module_1 = require("./warehouse/warehouse.module");
 const vendor_module_1 = require("./vendors/vendor.module");
 const product_module_1 = require("./products/product.module");
+const product_family_module_1 = require("./product-families/product-family.module");
 const raw_material_module_1 = require("./raw-materials/raw-material.module");
 const hsn_sac_module_1 = require("./hsn-sac/hsn-sac.module");
 const price_list_module_1 = require("./price-lists/price-list.module");
@@ -169,6 +170,7 @@ exports.AppModule = AppModule = __decorate([
             warehouse_module_1.WarehouseModule,
             vendor_module_1.VendorModule,
             product_module_1.ProductModule,
+            product_family_module_1.ProductFamilyModule,
             raw_material_module_1.RawMaterialModule,
             hsn_sac_module_1.HsnSacModule,
             price_list_module_1.PriceListModule,

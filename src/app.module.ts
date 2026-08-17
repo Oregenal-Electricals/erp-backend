@@ -21,6 +21,7 @@ import { ItemMasterModule } from './item-master/item-master.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { VendorModule } from './vendors/vendor.module';
 import { ProductModule } from './products/product.module';
+import { ProductFamilyModule } from './product-families/product-family.module';
 import { RawMaterialModule } from './raw-materials/raw-material.module';
 import { HsnSacModule } from './hsn-sac/hsn-sac.module';
 import { PriceListModule } from './price-lists/price-list.module';
@@ -151,6 +152,7 @@ import configuration from './config/configuration';
     WarehouseModule,
     VendorModule,
     ProductModule,
+    ProductFamilyModule,
     RawMaterialModule,
     HsnSacModule,
     PriceListModule,
