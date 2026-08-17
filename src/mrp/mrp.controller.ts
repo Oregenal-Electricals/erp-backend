@@ -20,6 +20,9 @@ export class MrpController {
   @Get('planning-board')
   @RequirePermissions(Permission.MRP_VIEW)
   planningBoard(@Request() req: any, @Query('warehouseId') warehouseId: string) { return this.mrpService.getPlanningBoard(req.user, warehouseId); }
+  @Get('planning-board-by-family')
+  @RequirePermissions(Permission.MRP_VIEW)
+  planningBoardByFamily(@Request() req: any, @Query('warehouseId') warehouseId: string) { return this.mrpService.getPlanningBoardByFamily(req.user, warehouseId); }
   @Post('run-allocation')
   @RequirePermissions(Permission.PRODUCTION_CREATE)
   runAllocation(@Body() dto: any, @Request() req: any) { return this.mrpService.runAllocation(dto, req.user); }

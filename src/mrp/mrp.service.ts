@@ -388,9 +388,17 @@ export class MrpService {
     return { data, totalWOs: wos.length, totalItems: data.length };
   }
 
-  async getPlanningBoard(user: any, warehouseId: string) {
+  /**
+   * Flat, one-row-per-(SalesOrder, line item) view of everything still
+   * open to plan - the shared data source behind both the per-SO Planning
+   * Board and the per-Family consolidated view below. Deliberately does
+   * NOT explode material needs here: that has to happen differently for
+   * the two callers (one item at a time for the per-SO board, vs. as a
+   * shared priority-ordered pool for the family view) - computing it here
+   * would force one or the other into the wrong shape.
+   */
+  private async getOpenSoLineItems(user: any, warehouseId: string) {
     const companyId = user.companyId;
-    if (!warehouseId) throw new BadRequestException('warehouseId is required');
     const testFlag = isTestSessionActive();
 
     const sos = await this.prisma.salesOrder.findMany({
@@ -399,10 +407,8 @@ export class MrpService {
       orderBy: { deliveryDate: 'asc' },
     });
 
-    const board = [];
+    const flat: any[] = [];
     for (const so of sos) {
-      if (so.items.length === 0) continue;
-      const itemsOut = [];
       for (const item of so.items) {
         const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
         const bom = product ? await this.findProducingBom(companyId, product.id) : null;
@@ -413,34 +419,172 @@ export class MrpService {
         });
         const remainingToPlan = Math.max(0, item.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
 
-        // Fully-exploded, true-leaf material shortages for the remaining
-        // unplanned quantity - an intermediate item like an SMT board or
-        // MI assembly is invisible here entirely if its own stock already
-        // covers what's needed; only genuine raw-material gaps show up.
-        const rawRmRequirements = bom && remainingToPlan > 0
-          ? await this.explodeMaterialNeeds(companyId, warehouseId, [
-              { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: remainingToPlan },
-            ])
-          : [];
-        const rmRequirements = rawRmRequirements.map(s => ({
-          itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
-          totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
-        }));
-
-        itemsOut.push({
-          soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName,
-          pendingQty: item.pendingQty, alreadyPlannedQty: alreadyPlanned._sum.plannedQty || 0,
-          remainingToPlan, hasBom: !!bom, bomId: bom?.id || null, rmRequirements,
-        });
-      }
-      if (itemsOut.some(i => i.remainingToPlan > 0)) {
-        board.push({
-          soId: so.id, soNumber: so.soNumber, customerName: so.customerName,
-          deliveryDate: so.deliveryDate, items: itemsOut,
+        flat.push({
+          soId: so.id, soNumber: so.soNumber, customerName: so.customerName, deliveryDate: so.deliveryDate,
+          soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
+          pendingQty: item.pendingQty, alreadyPlannedQty: alreadyPlanned._sum.plannedQty || 0, remainingToPlan,
+          productId: product?.id || null, familyId: (product as any)?.familyId || null,
+          hasBom: !!bom, bomId: bom?.id || null,
         });
       }
     }
-    return board;
+    return flat;
+  }
+
+  async getPlanningBoard(user: any, warehouseId: string) {
+    if (!warehouseId) throw new BadRequestException('warehouseId is required');
+    const companyId = user.companyId;
+    const flatItems = await this.getOpenSoLineItems(user, warehouseId);
+
+    const bySo = new Map<string, any>();
+    for (const item of flatItems) {
+      if (!bySo.has(item.soId)) {
+        bySo.set(item.soId, {
+          soId: item.soId, soNumber: item.soNumber, customerName: item.customerName,
+          deliveryDate: item.deliveryDate, items: [],
+        });
+      }
+
+      // Fully-exploded, true-leaf material shortages for the remaining
+      // unplanned quantity - an intermediate item like an SMT board or
+      // MI assembly is invisible here entirely if its own stock already
+      // covers what's needed; only genuine raw-material gaps show up.
+      const rawRmRequirements = item.hasBom && item.remainingToPlan > 0
+        ? await this.explodeMaterialNeeds(companyId, warehouseId, [
+            { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: item.remainingToPlan },
+          ])
+        : [];
+      const rmRequirements = rawRmRequirements.map(s => ({
+        itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+        totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+      }));
+
+      bySo.get(item.soId).items.push({
+        soItemId: item.soItemId, itemCode: item.itemCode, itemName: item.itemName,
+        pendingQty: item.pendingQty, alreadyPlannedQty: item.alreadyPlannedQty,
+        remainingToPlan: item.remainingToPlan, hasBom: item.hasBom, bomId: item.bomId, rmRequirements,
+      });
+    }
+
+    return Array.from(bySo.values()).filter((so: any) => so.items.some((i: any) => i.remainingToPlan > 0));
+  }
+
+  /**
+   * Consolidated multi-customer view: groups the same open-to-plan line
+   * items by Product Family instead of by Sales Order, so demand for
+   * physically-identical builds ordered by different customers shows up
+   * as ONE shared pool instead of N independent guesses.
+   *
+   * Reuses explodeMultiCpoMaterialNeeds - the same priority-ordered,
+   * shared-stock-pool engine already proven for the multi-CPO shortage
+   * check - passing one bucket per family member's Sales Order line, in
+   * delivery-date order (oldest first, matching this system's existing
+   * FIFO convention everywhere else). This is NOT a sum of independently
+   * computed per-item shortages, which would double-count shared stock;
+   * it's the true remaining shortfall after each higher-priority member
+   * has already taken its share, exactly like Run Allocation does for a
+   * single order today - just extended across the whole family at once.
+   *
+   * runAllocation() itself needs no changes: it already accepts a flat
+   * {soItemId, buildQty}[] regardless of how the frontend grouped things
+   * for display, so this view's "Confirm" action submits to the exact
+   * same endpoint the per-SO board already uses.
+   *
+   * Items whose product has no family are still shown, under a single
+   * "ungrouped" bucket, computed the same individual way as the regular
+   * Planning Board - there's no shared pool to speak of between unrelated
+   * products, so nothing is lost by treating them independently here too.
+   * Items with no approved BOM yet are omitted entirely (nothing to
+   * explode) - they still show up on the regular per-SO Planning Board.
+   */
+  async getPlanningBoardByFamily(user: any, warehouseId: string) {
+    if (!warehouseId) throw new BadRequestException('warehouseId is required');
+    const companyId = user.companyId;
+    const flatItems = (await this.getOpenSoLineItems(user, warehouseId))
+      .filter(i => i.remainingToPlan > 0 && i.hasBom);
+
+    const byFamily = new Map<string, any[]>();
+    const ungrouped: any[] = [];
+    for (const item of flatItems) {
+      if (item.familyId) {
+        if (!byFamily.has(item.familyId)) byFamily.set(item.familyId, []);
+        byFamily.get(item.familyId)!.push(item);
+      } else {
+        ungrouped.push(item);
+      }
+    }
+
+    const families: any[] = [];
+    for (const [familyId, items] of byFamily) {
+      const family = await this.prisma.productFamily.findFirst({ where: { id: familyId, companyId } });
+      const sortedItems = [...items].sort(
+        (a, b) => new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime(),
+      );
+      const bucketOrder = sortedItems.map(i => i.soItemId);
+      const buckets = sortedItems.map(i => ({
+        bucketKey: i.soItemId, itemCode: i.itemCode, itemName: i.itemName, uom: i.uom, qty: i.remainingToPlan,
+      }));
+
+      const { leafShortages } = await this.explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder, warehouseId);
+
+      const members = sortedItems.map(i => ({
+        soId: i.soId, soNumber: i.soNumber, customerName: i.customerName, deliveryDate: i.deliveryDate,
+        soItemId: i.soItemId, itemCode: i.itemCode, itemName: i.itemName,
+        pendingQty: i.pendingQty, alreadyPlannedQty: i.alreadyPlannedQty, remainingToPlan: i.remainingToPlan,
+        bomId: i.bomId,
+        rmRequirements: (leafShortages.get(i.soItemId) || []).map(s => ({
+          itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+          totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+        })),
+      }));
+
+      // Family-level totals: summed ACROSS the priority-ordered buckets
+      // above, not recomputed independently - see method doc.
+      const sharedShortageMap = new Map<string, { itemCode: string; itemName: string; uom: string; totalNeeded: number; available: number; shortfall: number }>();
+      for (const i of sortedItems) {
+        for (const s of leafShortages.get(i.soItemId) || []) {
+          const existing = sharedShortageMap.get(s.itemCode);
+          if (existing) {
+            existing.totalNeeded += s.netRequired;
+            existing.shortfall += s.shortage;
+          } else {
+            sharedShortageMap.set(s.itemCode, {
+              itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+              totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+            });
+          }
+        }
+      }
+
+      families.push({
+        familyId, familyCode: family?.code || null, familyName: family?.name || 'Unknown Family',
+        totalRemainingToPlan: sortedItems.reduce((s, i) => s + i.remainingToPlan, 0),
+        memberCount: sortedItems.length,
+        sharedRmRequirements: Array.from(sharedShortageMap.values()),
+        members,
+      });
+    }
+    families.sort((a, b) => b.memberCount - a.memberCount);
+
+    const ungroupedOut = [];
+    for (const i of ungrouped) {
+      const rawRmRequirements = await this.explodeMaterialNeeds(
+        companyId, warehouseId,
+        [{ itemCode: i.itemCode, itemName: i.itemName, uom: i.uom, qty: i.remainingToPlan }],
+      );
+      ungroupedOut.push({
+        soId: i.soId, soNumber: i.soNumber, customerName: i.customerName, deliveryDate: i.deliveryDate,
+        soItemId: i.soItemId, itemCode: i.itemCode, itemName: i.itemName,
+        pendingQty: i.pendingQty, alreadyPlannedQty: i.alreadyPlannedQty, remainingToPlan: i.remainingToPlan,
+        bomId: i.bomId,
+        rmRequirements: rawRmRequirements.map(s => ({
+          itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+          totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+        })),
+      });
+    }
+
+    return { families, ungrouped: ungroupedOut };
   }
 
   /**

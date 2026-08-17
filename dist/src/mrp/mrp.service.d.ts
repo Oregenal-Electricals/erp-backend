@@ -70,7 +70,12 @@ export declare class MrpService {
         totalWOs: number;
         totalItems: number;
     }>;
+    private getOpenSoLineItems;
     getPlanningBoard(user: any, warehouseId: string): Promise<any[]>;
+    getPlanningBoardByFamily(user: any, warehouseId: string): Promise<{
+        families: any[];
+        ungrouped: any[];
+    }>;
     runAllocation(dto: {
         warehouseId: string;
         allocations: {

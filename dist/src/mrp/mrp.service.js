@@ -311,21 +311,16 @@ let MrpService = class MrpService {
         const data = Object.values(aggregate).sort((a, b) => b.totalShortage - a.totalShortage);
         return { data, totalWOs: wos.length, totalItems: data.length };
     }
-    async getPlanningBoard(user, warehouseId) {
+    async getOpenSoLineItems(user, warehouseId) {
         const companyId = user.companyId;
-        if (!warehouseId)
-            throw new common_1.BadRequestException('warehouseId is required');
         const testFlag = (0, test_session_context_1.isTestSessionActive)();
         const sos = await this.prisma.salesOrder.findMany({
             where: { companyId, status: { in: ['CONFIRMED', 'IN_PRODUCTION'] }, isTestData: testFlag },
             include: { items: { where: { isActive: true, pendingQty: { gt: 0 }, isTestData: testFlag } } },
             orderBy: { deliveryDate: 'asc' },
         });
-        const board = [];
+        const flat = [];
         for (const so of sos) {
-            if (so.items.length === 0)
-                continue;
-            const itemsOut = [];
             for (const item of so.items) {
                 const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
                 const bom = product ? await this.findProducingBom(companyId, product.id) : null;
@@ -334,29 +329,124 @@ let MrpService = class MrpService {
                     _sum: { plannedQty: true },
                 });
                 const remainingToPlan = Math.max(0, item.pendingQty - (alreadyPlanned._sum.plannedQty || 0));
-                const rawRmRequirements = bom && remainingToPlan > 0
-                    ? await this.explodeMaterialNeeds(companyId, warehouseId, [
-                        { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: remainingToPlan },
-                    ])
-                    : [];
-                const rmRequirements = rawRmRequirements.map(s => ({
-                    itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
-                    totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
-                }));
-                itemsOut.push({
-                    soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName,
-                    pendingQty: item.pendingQty, alreadyPlannedQty: alreadyPlanned._sum.plannedQty || 0,
-                    remainingToPlan, hasBom: !!bom, bomId: (bom === null || bom === void 0 ? void 0 : bom.id) || null, rmRequirements,
-                });
-            }
-            if (itemsOut.some(i => i.remainingToPlan > 0)) {
-                board.push({
-                    soId: so.id, soNumber: so.soNumber, customerName: so.customerName,
-                    deliveryDate: so.deliveryDate, items: itemsOut,
+                flat.push({
+                    soId: so.id, soNumber: so.soNumber, customerName: so.customerName, deliveryDate: so.deliveryDate,
+                    soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
+                    pendingQty: item.pendingQty, alreadyPlannedQty: alreadyPlanned._sum.plannedQty || 0, remainingToPlan,
+                    productId: (product === null || product === void 0 ? void 0 : product.id) || null, familyId: (product === null || product === void 0 ? void 0 : product.familyId) || null,
+                    hasBom: !!bom, bomId: (bom === null || bom === void 0 ? void 0 : bom.id) || null,
                 });
             }
         }
-        return board;
+        return flat;
+    }
+    async getPlanningBoard(user, warehouseId) {
+        if (!warehouseId)
+            throw new common_1.BadRequestException('warehouseId is required');
+        const companyId = user.companyId;
+        const flatItems = await this.getOpenSoLineItems(user, warehouseId);
+        const bySo = new Map();
+        for (const item of flatItems) {
+            if (!bySo.has(item.soId)) {
+                bySo.set(item.soId, {
+                    soId: item.soId, soNumber: item.soNumber, customerName: item.customerName,
+                    deliveryDate: item.deliveryDate, items: [],
+                });
+            }
+            const rawRmRequirements = item.hasBom && item.remainingToPlan > 0
+                ? await this.explodeMaterialNeeds(companyId, warehouseId, [
+                    { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: item.remainingToPlan },
+                ])
+                : [];
+            const rmRequirements = rawRmRequirements.map(s => ({
+                itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+                totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+            }));
+            bySo.get(item.soId).items.push({
+                soItemId: item.soItemId, itemCode: item.itemCode, itemName: item.itemName,
+                pendingQty: item.pendingQty, alreadyPlannedQty: item.alreadyPlannedQty,
+                remainingToPlan: item.remainingToPlan, hasBom: item.hasBom, bomId: item.bomId, rmRequirements,
+            });
+        }
+        return Array.from(bySo.values()).filter((so) => so.items.some((i) => i.remainingToPlan > 0));
+    }
+    async getPlanningBoardByFamily(user, warehouseId) {
+        if (!warehouseId)
+            throw new common_1.BadRequestException('warehouseId is required');
+        const companyId = user.companyId;
+        const flatItems = (await this.getOpenSoLineItems(user, warehouseId))
+            .filter(i => i.remainingToPlan > 0 && i.hasBom);
+        const byFamily = new Map();
+        const ungrouped = [];
+        for (const item of flatItems) {
+            if (item.familyId) {
+                if (!byFamily.has(item.familyId))
+                    byFamily.set(item.familyId, []);
+                byFamily.get(item.familyId).push(item);
+            }
+            else {
+                ungrouped.push(item);
+            }
+        }
+        const families = [];
+        for (const [familyId, items] of byFamily) {
+            const family = await this.prisma.productFamily.findFirst({ where: { id: familyId, companyId } });
+            const sortedItems = [...items].sort((a, b) => new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime());
+            const bucketOrder = sortedItems.map(i => i.soItemId);
+            const buckets = sortedItems.map(i => ({
+                bucketKey: i.soItemId, itemCode: i.itemCode, itemName: i.itemName, uom: i.uom, qty: i.remainingToPlan,
+            }));
+            const { leafShortages } = await this.explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder, warehouseId);
+            const members = sortedItems.map(i => ({
+                soId: i.soId, soNumber: i.soNumber, customerName: i.customerName, deliveryDate: i.deliveryDate,
+                soItemId: i.soItemId, itemCode: i.itemCode, itemName: i.itemName,
+                pendingQty: i.pendingQty, alreadyPlannedQty: i.alreadyPlannedQty, remainingToPlan: i.remainingToPlan,
+                bomId: i.bomId,
+                rmRequirements: (leafShortages.get(i.soItemId) || []).map(s => ({
+                    itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+                    totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+                })),
+            }));
+            const sharedShortageMap = new Map();
+            for (const i of sortedItems) {
+                for (const s of leafShortages.get(i.soItemId) || []) {
+                    const existing = sharedShortageMap.get(s.itemCode);
+                    if (existing) {
+                        existing.totalNeeded += s.netRequired;
+                        existing.shortfall += s.shortage;
+                    }
+                    else {
+                        sharedShortageMap.set(s.itemCode, {
+                            itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+                            totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+                        });
+                    }
+                }
+            }
+            families.push({
+                familyId, familyCode: (family === null || family === void 0 ? void 0 : family.code) || null, familyName: (family === null || family === void 0 ? void 0 : family.name) || 'Unknown Family',
+                totalRemainingToPlan: sortedItems.reduce((s, i) => s + i.remainingToPlan, 0),
+                memberCount: sortedItems.length,
+                sharedRmRequirements: Array.from(sharedShortageMap.values()),
+                members,
+            });
+        }
+        families.sort((a, b) => b.memberCount - a.memberCount);
+        const ungroupedOut = [];
+        for (const i of ungrouped) {
+            const rawRmRequirements = await this.explodeMaterialNeeds(companyId, warehouseId, [{ itemCode: i.itemCode, itemName: i.itemName, uom: i.uom, qty: i.remainingToPlan }]);
+            ungroupedOut.push({
+                soId: i.soId, soNumber: i.soNumber, customerName: i.customerName, deliveryDate: i.deliveryDate,
+                soItemId: i.soItemId, itemCode: i.itemCode, itemName: i.itemName,
+                pendingQty: i.pendingQty, alreadyPlannedQty: i.alreadyPlannedQty, remainingToPlan: i.remainingToPlan,
+                bomId: i.bomId,
+                rmRequirements: rawRmRequirements.map(s => ({
+                    itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+                    totalNeeded: s.netRequired, available: s.availableQty, shortfall: s.shortage,
+                })),
+            });
+        }
+        return { families, ungrouped: ungroupedOut };
     }
     async runAllocation(dto, user) {
         const companyId = user.companyId;
