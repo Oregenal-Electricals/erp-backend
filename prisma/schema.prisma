@@ -228,6 +228,7 @@ model Company {
   warehouses         Warehouse[]
   vendors            Vendor[]
   products           Product[]
+  productFamilies    ProductFamily[]
   rawMaterials       RawMaterial[]
   hsnSacCodes        HsnSacCode[]
   priceLists         PriceList[]
@@ -1340,6 +1341,8 @@ model Product {
   productType     String        @default("FINISHED_GOOD") // FINISHED_GOOD, SEMI_FINISHED, BY_PRODUCT
   categoryId      String?
   category        ItemCategory? @relation(fields: [categoryId], references: [id])
+  familyId        String?
+  family          ProductFamily? @relation(fields: [familyId], references: [id])
   uomId           String?
   uom             UnitOfMeasure? @relation(fields: [uomId], references: [id])
   hsnCode         String?
@@ -1365,6 +1368,33 @@ model Product {
 
   @@unique([companyId, code])
   @@map("products")
+}
+
+// Product Family - links Products that are physically identical through
+// Assembly (same raw materials, SMT, MI) but differ only at the final
+// Packaging stage (customer-specific branding/labeling). Each customer's
+// order still uses its own separate Product/BOM/routing end to end;
+// this is purely a grouping link the user sets up manually, used by the
+// consolidated multi-customer planning view to aggregate demand and
+// available material across every Product in the family.
+model ProductFamily {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  products    Product[]
+
+  @@unique([companyId, code])
+  @@map("product_families")
 }
 
 // MODULE 16 — RAW MATERIAL MASTER

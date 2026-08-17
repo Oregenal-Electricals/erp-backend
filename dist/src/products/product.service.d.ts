@@ -59,6 +59,7 @@ export declare class ProductService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        familyId: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -114,6 +115,7 @@ export declare class ProductService {
             model: string | null;
             revision: string | null;
             drawingNumber: string | null;
+            familyId: string | null;
         })[];
         total: number;
         page: number;
@@ -173,6 +175,7 @@ export declare class ProductService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        familyId: string | null;
     }>;
     update(id: string, dto: UpdateProductDto, user: any): Promise<{
         category: {
@@ -227,6 +230,7 @@ export declare class ProductService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        familyId: string | null;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;
