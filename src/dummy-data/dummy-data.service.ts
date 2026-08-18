@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { HAS_COMPANY_ID, IS_TEST_DATA_COLUMN, COMPANY_ID_COLUMN, getTableNamesWithField } from '../common/utils/schema-columns.util';
 
 // Table (not model) names for every model that has an isTestData field,
 // computed once from Prisma's own schema metadata rather than hardcoded -
@@ -12,36 +13,7 @@ import * as bcrypt from 'bcryptjs';
 // PROJECT_STATUS.md item 21). Company itself is deliberately excluded -
 // purging a whole Company is far too destructive for this tool and was
 // never something Test Mode creates anyway.
-const TEST_DATA_TABLES: string[] = Prisma.dmmf.datamodel.models
-  .filter((m) => m.fields.some((f) => f.name === 'isTestData') && m.name !== 'Company')
-  .map((m) => m.dbName || m.name);
-
-const HAS_COMPANY_ID: Set<string> = new Set(
-  Prisma.dmmf.datamodel.models
-    .filter((m) => m.fields.some((f) => f.name === 'companyId'))
-    .map((m) => m.dbName || m.name),
-);
-
-// Real database column name per table for the isTestData/companyId fields -
-// most models use plain camelCase columns (no @map on the field itself), but
-// a few older ones (e.g. UiControlElement/UiControlOverride) map every field
-// individually to snake_case. Hardcoding "isTestData"/"companyId" as literal
-// column names broke silently on exactly those tables: the raw SQL below
-// would throw "column does not exist", and the self-ordering retry loop
-// would report them as permanently "blocked" even when they had zero test
-// rows and zero real blockers - a false positive baked into every purge run.
-// Resolved from Prisma's own DMMF field metadata instead, the same way the
-// table names above are already resolved via model.dbName.
-function buildColumnMap(fieldName: string): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const model of Prisma.dmmf.datamodel.models) {
-    const field = model.fields.find((f) => f.name === fieldName);
-    if (field) map.set(model.dbName || model.name, (field as any).dbName || field.name);
-  }
-  return map;
-}
-const IS_TEST_DATA_COLUMN = buildColumnMap('isTestData');
-const COMPANY_ID_COLUMN = buildColumnMap('companyId');
+const TEST_DATA_TABLES: string[] = getTableNamesWithField('isTestData', ['Company']);
 
 // ── Full-wipe-except-master-data support ──
 // Model names (not table names) considered "master data" - protected from

@@ -213,6 +213,7 @@ model Company {
   departments        Department[]
   financialYears     FinancialYear[]
   users              User[]
+  deleteRequests     DeleteRequest[]
   numberingSeries    NumberingSeries[]
   changeRequests     ChangeRequest[]
   visitors           Visitor[]
@@ -4552,6 +4553,37 @@ model AlertLog {
   @@index([companyId, status])
   @@index([companyId, eventType])
   @@map("alert_logs")
+}
+
+// GENERIC DELETE-WITH-APPROVAL - works for any table via tableName/recordId
+// rather than a per-module model. Real users' deletions become a request a
+// supervisor (Plant Head+, same STAGE_BYPASS_ROLES gate used everywhere
+// else) reviews and either approves (executes the soft-deactivation) or
+// rejects (nothing happens). Test accounts and supervisors skip the queue
+// entirely - status still records AUTO_EXECUTED so there's a full audit
+// trail either way. See DeleteRequestService.
+model DeleteRequest {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  tableName         String
+  recordId          String
+  recordLabel       String
+  reason            String
+  status            String    @default("PENDING") // PENDING | APPROVED | REJECTED | AUTO_EXECUTED
+  approvalRequestId String?
+  requestedBy       String
+  decidedBy         String?
+  decidedAt         DateTime?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@index([companyId, status])
+  @@map("delete_requests")
 }
 
 // MODULE 112 — APPROVAL WORKFLOWS

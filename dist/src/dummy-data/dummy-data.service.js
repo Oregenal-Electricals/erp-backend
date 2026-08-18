@@ -47,23 +47,8 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcryptjs"));
-const TEST_DATA_TABLES = client_1.Prisma.dmmf.datamodel.models
-    .filter((m) => m.fields.some((f) => f.name === 'isTestData') && m.name !== 'Company')
-    .map((m) => m.dbName || m.name);
-const HAS_COMPANY_ID = new Set(client_1.Prisma.dmmf.datamodel.models
-    .filter((m) => m.fields.some((f) => f.name === 'companyId'))
-    .map((m) => m.dbName || m.name));
-function buildColumnMap(fieldName) {
-    const map = new Map();
-    for (const model of client_1.Prisma.dmmf.datamodel.models) {
-        const field = model.fields.find((f) => f.name === fieldName);
-        if (field)
-            map.set(model.dbName || model.name, field.dbName || field.name);
-    }
-    return map;
-}
-const IS_TEST_DATA_COLUMN = buildColumnMap('isTestData');
-const COMPANY_ID_COLUMN = buildColumnMap('companyId');
+const schema_columns_util_1 = require("../common/utils/schema-columns.util");
+const TEST_DATA_TABLES = (0, schema_columns_util_1.getTableNamesWithField)('isTestData', ['Company']);
 const KEEP_MODEL_NAMES = new Set([
     'Company', 'Plant', 'Unit', 'Department', 'Branch', 'Warehouse', 'FinancialYear',
     'User', 'Role', 'RolePermission', 'NumberingSeries', 'SystemSetting',
@@ -313,9 +298,9 @@ let DummyDataService = class DummyDataService {
         const results = {};
         for (const table of TEST_DATA_TABLES) {
             try {
-                const scoped = companyId && HAS_COMPANY_ID.has(table);
-                const testCol = IS_TEST_DATA_COLUMN.get(table) || 'isTestData';
-                const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
+                const scoped = companyId && schema_columns_util_1.HAS_COMPANY_ID.has(table);
+                const testCol = schema_columns_util_1.IS_TEST_DATA_COLUMN.get(table) || 'isTestData';
+                const compCol = schema_columns_util_1.COMPANY_ID_COLUMN.get(table) || 'companyId';
                 const sql = scoped
                     ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${testCol}" = true AND "${compCol}" = $1`
                     : `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${testCol}" = true`;
@@ -341,9 +326,9 @@ let DummyDataService = class DummyDataService {
             const stillBlocked = [];
             for (const table of remaining) {
                 try {
-                    const scoped = companyId && HAS_COMPANY_ID.has(table);
-                    const testCol = IS_TEST_DATA_COLUMN.get(table) || 'isTestData';
-                    const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
+                    const scoped = companyId && schema_columns_util_1.HAS_COMPANY_ID.has(table);
+                    const testCol = schema_columns_util_1.IS_TEST_DATA_COLUMN.get(table) || 'isTestData';
+                    const compCol = schema_columns_util_1.COMPANY_ID_COLUMN.get(table) || 'companyId';
                     const sql = scoped
                         ? `DELETE FROM "${table}" WHERE "${testCol}" = true AND "${compCol}" = $1`
                         : `DELETE FROM "${table}" WHERE "${testCol}" = true`;
@@ -376,8 +361,8 @@ let DummyDataService = class DummyDataService {
         const keepCounts = {};
         for (const table of KEEP_TABLES) {
             try {
-                const scoped = companyId && HAS_COMPANY_ID.has(table);
-                const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
+                const scoped = companyId && schema_columns_util_1.HAS_COMPANY_ID.has(table);
+                const compCol = schema_columns_util_1.COMPANY_ID_COLUMN.get(table) || 'companyId';
                 const sql = scoped
                     ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${compCol}" = $1`
                     : `SELECT COUNT(*)::int AS count FROM "${table}"`;
@@ -393,8 +378,8 @@ let DummyDataService = class DummyDataService {
         const wipeCounts = {};
         for (const table of WIPE_TABLES) {
             try {
-                const scoped = companyId && HAS_COMPANY_ID.has(table);
-                const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
+                const scoped = companyId && schema_columns_util_1.HAS_COMPANY_ID.has(table);
+                const compCol = schema_columns_util_1.COMPANY_ID_COLUMN.get(table) || 'companyId';
                 const sql = scoped
                     ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${compCol}" = $1`
                     : `SELECT COUNT(*)::int AS count FROM "${table}"`;
@@ -437,8 +422,8 @@ let DummyDataService = class DummyDataService {
             const stillBlocked = [];
             for (const table of remaining) {
                 try {
-                    const scoped = companyId && HAS_COMPANY_ID.has(table);
-                    const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
+                    const scoped = companyId && schema_columns_util_1.HAS_COMPANY_ID.has(table);
+                    const compCol = schema_columns_util_1.COMPANY_ID_COLUMN.get(table) || 'companyId';
                     const sql = scoped
                         ? `DELETE FROM "${table}" WHERE "${compCol}" = $1`
                         : `DELETE FROM "${table}"`;

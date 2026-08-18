@@ -111,6 +111,7 @@ const credit_control_module_1 = require("./credit-control/credit-control.module"
 const notifications_module_1 = require("./notifications/notifications.module");
 const alerts_module_1 = require("./alerts/alerts.module");
 const workflows_module_1 = require("./workflows/workflows.module");
+const delete_request_module_1 = require("./delete-requests/delete-request.module");
 const tasks_module_1 = require("./tasks/tasks.module");
 const documents_module_1 = require("./documents/documents.module");
 const pdf_engine_module_1 = require("./pdf-engine/pdf-engine.module");
@@ -261,6 +262,7 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             alerts_module_1.AlertsModule,
             workflows_module_1.WorkflowsModule,
+            delete_request_module_1.DeleteRequestModule,
             tasks_module_1.TasksModule,
             documents_module_1.DocumentsModule,
             pdf_engine_module_1.PdfEngineModule,
