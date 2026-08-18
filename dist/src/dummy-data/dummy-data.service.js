@@ -53,6 +53,17 @@ const TEST_DATA_TABLES = client_1.Prisma.dmmf.datamodel.models
 const HAS_COMPANY_ID = new Set(client_1.Prisma.dmmf.datamodel.models
     .filter((m) => m.fields.some((f) => f.name === 'companyId'))
     .map((m) => m.dbName || m.name));
+function buildColumnMap(fieldName) {
+    const map = new Map();
+    for (const model of client_1.Prisma.dmmf.datamodel.models) {
+        const field = model.fields.find((f) => f.name === fieldName);
+        if (field)
+            map.set(model.dbName || model.name, field.dbName || field.name);
+    }
+    return map;
+}
+const IS_TEST_DATA_COLUMN = buildColumnMap('isTestData');
+const COMPANY_ID_COLUMN = buildColumnMap('companyId');
 const KEEP_MODEL_NAMES = new Set([
     'Company', 'Plant', 'Unit', 'Department', 'Branch', 'Warehouse', 'FinancialYear',
     'User', 'Role', 'RolePermission', 'NumberingSeries', 'SystemSetting',
@@ -303,9 +314,11 @@ let DummyDataService = class DummyDataService {
         for (const table of TEST_DATA_TABLES) {
             try {
                 const scoped = companyId && HAS_COMPANY_ID.has(table);
+                const testCol = IS_TEST_DATA_COLUMN.get(table) || 'isTestData';
+                const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
                 const sql = scoped
-                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "isTestData" = true AND "companyId" = $1`
-                    : `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "isTestData" = true`;
+                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${testCol}" = true AND "${compCol}" = $1`
+                    : `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${testCol}" = true`;
                 const rows = scoped
                     ? await this.prisma.$queryRawUnsafe(sql, companyId)
                     : await this.prisma.$queryRawUnsafe(sql);
@@ -329,9 +342,11 @@ let DummyDataService = class DummyDataService {
             for (const table of remaining) {
                 try {
                     const scoped = companyId && HAS_COMPANY_ID.has(table);
+                    const testCol = IS_TEST_DATA_COLUMN.get(table) || 'isTestData';
+                    const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
                     const sql = scoped
-                        ? `DELETE FROM "${table}" WHERE "isTestData" = true AND "companyId" = $1`
-                        : `DELETE FROM "${table}" WHERE "isTestData" = true`;
+                        ? `DELETE FROM "${table}" WHERE "${testCol}" = true AND "${compCol}" = $1`
+                        : `DELETE FROM "${table}" WHERE "${testCol}" = true`;
                     const count = scoped
                         ? await this.prisma.$executeRawUnsafe(sql, companyId)
                         : await this.prisma.$executeRawUnsafe(sql);
@@ -362,8 +377,9 @@ let DummyDataService = class DummyDataService {
         for (const table of KEEP_TABLES) {
             try {
                 const scoped = companyId && HAS_COMPANY_ID.has(table);
+                const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
                 const sql = scoped
-                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "companyId" = $1`
+                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${compCol}" = $1`
                     : `SELECT COUNT(*)::int AS count FROM "${table}"`;
                 const rows = scoped
                     ? await this.prisma.$queryRawUnsafe(sql, companyId)
@@ -378,8 +394,9 @@ let DummyDataService = class DummyDataService {
         for (const table of WIPE_TABLES) {
             try {
                 const scoped = companyId && HAS_COMPANY_ID.has(table);
+                const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
                 const sql = scoped
-                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "companyId" = $1`
+                    ? `SELECT COUNT(*)::int AS count FROM "${table}" WHERE "${compCol}" = $1`
                     : `SELECT COUNT(*)::int AS count FROM "${table}"`;
                 const rows = scoped
                     ? await this.prisma.$queryRawUnsafe(sql, companyId)
@@ -421,8 +438,9 @@ let DummyDataService = class DummyDataService {
             for (const table of remaining) {
                 try {
                     const scoped = companyId && HAS_COMPANY_ID.has(table);
+                    const compCol = COMPANY_ID_COLUMN.get(table) || 'companyId';
                     const sql = scoped
-                        ? `DELETE FROM "${table}" WHERE "companyId" = $1`
+                        ? `DELETE FROM "${table}" WHERE "${compCol}" = $1`
                         : `DELETE FROM "${table}"`;
                     const count = scoped
                         ? await this.prisma.$executeRawUnsafe(sql, companyId)
