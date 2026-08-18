@@ -52,6 +52,16 @@ export class WorkOrderController {
   @Post(':id/restart')
   @RequirePermissions(Permission.PRODUCTION_EDIT)
   restart(@Param('id') id: string, @Request() req: any) { return this.woService.restart(id, req.user); }
+  @Get(':id/reassign-preview')
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
+  reassignPreview(@Param('id') id: string, @Query('newPlannedQty') newPlannedQty: string, @Request() req: any) {
+    return this.woService.previewReassignQty(id, Number(newPlannedQty), req.user);
+  }
+  @Post(':id/reassign-qty')
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
+  reassignQty(@Param('id') id: string, @Body() dto: { newPlannedQty: number; remarks?: string }, @Request() req: any) {
+    return this.woService.reassignQty(id, Number(dto.newPlannedQty), dto.remarks, req.user);
+  }
   @Post('approvals/:requestId/approve')
   @RequirePermissions(Permission.WORK_ORDER_APPROVE)
   approveRequest(@Param('requestId') requestId: string, @Request() req: any) { return this.woService.approveRequest(requestId, req.user); }

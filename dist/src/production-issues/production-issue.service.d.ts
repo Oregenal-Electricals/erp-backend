@@ -32,8 +32,8 @@ export declare class ProductionIssueService {
             unitCost: number;
             requiredQty: number;
             issuedQty: number;
-            batchId: string | null;
             productionIssueId: string;
+            batchId: string | null;
         })[];
         warehouse: {
             name: string;
@@ -82,8 +82,8 @@ export declare class ProductionIssueService {
             unitCost: number;
             requiredQty: number;
             issuedQty: number;
-            batchId: string | null;
             productionIssueId: string;
+            batchId: string | null;
         })[];
         warehouse: {
             name: string;
@@ -132,8 +132,8 @@ export declare class ProductionIssueService {
             unitCost: number;
             requiredQty: number;
             issuedQty: number;
-            batchId: string | null;
             productionIssueId: string;
+            batchId: string | null;
         })[];
         warehouse: {
             name: string;
@@ -215,8 +215,8 @@ export declare class ProductionIssueService {
             unitCost: number;
             requiredQty: number;
             issuedQty: number;
-            batchId: string | null;
             productionIssueId: string;
+            batchId: string | null;
         })[];
         warehouse: {
             name: string;

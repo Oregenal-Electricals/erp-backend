@@ -147,6 +147,7 @@ export declare class RoutingService {
         stageSequence: number | null;
         parentWorkOrderId: string | null;
         plannedQty: number;
+        pendingReassignQty: number | null;
         completedQty: number;
         plannedStartDate: Date;
         plannedEndDate: Date;

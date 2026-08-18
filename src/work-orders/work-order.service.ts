@@ -184,13 +184,118 @@ export class WorkOrderService {
     if (actionResult.status === 'APPROVED') {
       if (actionResult.documentType === 'WO_START') await this.start(actionResult.documentId, user);
       else if (actionResult.documentType === 'WO_RESTART') await this.update(actionResult.documentId, { status: 'IN_PROGRESS' }, user);
+      else if (actionResult.documentType === 'WO_REASSIGN_QTY') await this.applyPendingReassign(actionResult.documentId, user);
       await this.notifyAdmins(user, actionResult, `${actionResult.documentType.replace(/_/g, ' ')} approved`);
     }
     return actionResult;
   }
 
   async rejectRequest(requestId: string, user: any, comments?: string) {
-    return this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+    const result = await this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+    if (result.documentType === 'WO_REASSIGN_QTY') {
+      // Clear the parked target quantity - the WO stays at its current
+      // plannedQty, nothing was ever actually applied.
+      await this.prisma.workOrder.update({ where: { id: result.documentId }, data: { pendingReassignQty: null, updatedBy: user.id } });
+    }
+    return result;
+  }
+
+  private async applyPendingReassign(id: string, user: any) {
+    const wo = await this.prisma.workOrder.findUnique({ where: { id } });
+    if (wo?.pendingReassignQty == null) return;
+    const oldQty = wo.plannedQty;
+    await this.prisma.workOrder.update({
+      where: { id }, data: { plannedQty: wo.pendingReassignQty, pendingReassignQty: null, updatedBy: user.id },
+    });
+    await this.audit.log({
+      tableName: 'work_orders', recordId: id, action: 'UPDATE',
+      oldValues: { plannedQty: oldQty }, newValues: { plannedQty: wo.pendingReassignQty },
+      changedBy: user.id, reason: 'Quantity reassignment approved',
+    });
+  }
+
+  /**
+   * Read-only. Shows exactly what a quantity reassignment would mean before
+   * anything changes: the hard floor (can never go below completedQty -
+   * you can't un-produce what's already been made), and for every raw
+   * material already issued to this WO, how much was issued for the
+   * CURRENT quantity vs. how much the NEW quantity actually needs. That
+   * gap is informational only - this never touches the stock ledger. If
+   * the gap is real (material genuinely still sitting untouched) it's the
+   * caller's job to return it via Stock Adjustment or Rejected Stock,
+   * exactly like any other physical correction in this system.
+   */
+  async previewReassignQty(id: string, newPlannedQty: number, user: any) {
+    const wo = await this.findOne(id, user);
+    if (newPlannedQty < wo.completedQty) {
+      throw new BadRequestException(`Cannot reassign below ${wo.completedQty} - that many units are already completed`);
+    }
+
+    const items: Array<{ itemCode: string; itemName: string; uom: string; issuedForCurrentQty: number; neededForNewQty: number; excess: number }> = [];
+    if (wo.bom?.items?.length) {
+      const issuedRows = await this.prisma.productionIssueItem.groupBy({
+        by: ['itemCode'],
+        where: { productionIssue: { workOrderId: id, status: 'ISSUED' }, isActive: true },
+        _sum: { issuedQty: true },
+      });
+      const issuedMap = new Map<string, number>(issuedRows.map((r) => [r.itemCode, Number(r._sum.issuedQty) || 0]));
+
+      for (const bi of wo.bom.items) {
+        const issuedForCurrentQty = issuedMap.get(bi.itemCode) || 0;
+        if (issuedForCurrentQty === 0) continue; // nothing issued yet for this item - no gap to show
+        const neededForNewQty = Math.round(bi.effectiveQty * newPlannedQty * 100) / 100;
+        const excess = Math.max(0, Math.round((issuedForCurrentQty - neededForNewQty) * 100) / 100);
+        items.push({ itemCode: bi.itemCode, itemName: bi.itemName, uom: bi.uom, issuedForCurrentQty, neededForNewQty, excess });
+      }
+    }
+
+    return {
+      currentPlannedQty: wo.plannedQty, newPlannedQty, completedQty: wo.completedQty,
+      floor: wo.completedQty, items,
+    };
+  }
+
+  async reassignQty(id: string, newPlannedQty: number, remarks: string | undefined, user: any) {
+    const wo = await this.findOne(id, user);
+    if (['COMPLETED', 'CANCELLED'].includes(wo.status)) {
+      throw new BadRequestException(`Cannot reassign quantity on a ${wo.status} work order`);
+    }
+    if (newPlannedQty < wo.completedQty) {
+      throw new BadRequestException(`Cannot reassign below ${wo.completedQty} - that many units are already completed`);
+    }
+    if (newPlannedQty === wo.plannedQty) {
+      throw new BadRequestException('New quantity is the same as the current planned quantity');
+    }
+
+    const preview = await this.previewReassignQty(id, newPlannedQty, user);
+    const excessNote = preview.items.some((i) => i.excess > 0)
+      ? ' Issued-material excess: ' + preview.items.filter((i) => i.excess > 0).map((i) => `${i.itemCode} +${i.excess} ${i.uom}`).join(', ') + '.'
+      : '';
+    const fullRemarks = `${remarks || `Reassign ${wo.plannedQty} \u2192 ${newPlannedQty}`} (requested by ${user.firstName || ''} ${user.lastName || ''})`.trim() + excessNote;
+
+    if (STAGE_BYPASS_ROLES.includes(user.role)) {
+      const oldQty = wo.plannedQty;
+      const updated = await this.prisma.workOrder.update({
+        where: { id }, data: { plannedQty: newPlannedQty, updatedBy: user.id }, include: this.includes(),
+      });
+      await this.audit.log({
+        tableName: 'work_orders', recordId: id, action: 'UPDATE',
+        oldValues: { plannedQty: oldQty }, newValues: { plannedQty: newPlannedQty },
+        changedBy: user.id, reason: fullRemarks,
+      });
+      return { ...updated, pendingApproval: false, materialExcess: preview.items.filter((i) => i.excess > 0) };
+    }
+
+    await this.prisma.workOrder.update({ where: { id }, data: { pendingReassignQty: newPlannedQty, updatedBy: user.id } });
+    const { request } = await this.workflows.submit({
+      documentType: 'WO_REASSIGN_QTY', documentId: wo.id, documentNumber: wo.woNumber,
+      remarks: fullRemarks,
+    }, user);
+    return {
+      ...wo, pendingApproval: true, approvalRequestId: request?.id,
+      message: `Submitted for Plant Head approval - still planned at ${wo.plannedQty} until approved`,
+      materialExcess: preview.items.filter((i) => i.excess > 0),
+    };
   }
 
   private async notifyAdmins(actorUser: any, request: any, message: string) {

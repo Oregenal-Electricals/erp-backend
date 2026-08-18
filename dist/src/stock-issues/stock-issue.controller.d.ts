@@ -76,8 +76,8 @@ export declare class StockIssueController {
             uom: string;
             unitCost: number;
             issuedQty: number;
-            requestedQty: number;
             batchId: string | null;
+            requestedQty: number;
             issueId: string;
         })[];
         warehouse: {
@@ -121,8 +121,8 @@ export declare class StockIssueController {
             uom: string;
             unitCost: number;
             issuedQty: number;
-            requestedQty: number;
             batchId: string | null;
+            requestedQty: number;
             issueId: string;
         })[];
         warehouse: {
@@ -166,8 +166,8 @@ export declare class StockIssueController {
             uom: string;
             unitCost: number;
             issuedQty: number;
-            requestedQty: number;
             batchId: string | null;
+            requestedQty: number;
             issueId: string;
         })[];
         warehouse: {

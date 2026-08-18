@@ -3061,6 +3061,7 @@ model WorkOrder {
   parentWorkOrder   WorkOrder? @relation("WorkOrderChain", fields: [parentWorkOrderId], references: [id])
   childWorkOrders   WorkOrder[] @relation("WorkOrderChain")
   plannedQty        Float     @default(0)
+  pendingReassignQty Float?   // set while a WO_REASSIGN_QTY approval is in flight; cleared on approve/reject
   completedQty      Float     @default(0)
   rejectedQty       Float     @default(0)
   plannedStartDate  DateTime

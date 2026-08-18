@@ -157,8 +157,8 @@ export declare class CostSheetService {
             unitCost: number;
             requiredQty: number;
             issuedQty: number;
-            batchId: string | null;
             productionIssueId: string;
+            batchId: string | null;
         }[];
         workOrder: {
             productCode: string;

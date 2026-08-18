@@ -39,6 +39,12 @@ let WorkOrderController = class WorkOrderController {
     cancel(id, req) { return this.woService.cancel(id, req.user); }
     stop(id, req) { return this.woService.stop(id, req.user); }
     restart(id, req) { return this.woService.restart(id, req.user); }
+    reassignPreview(id, newPlannedQty, req) {
+        return this.woService.previewReassignQty(id, Number(newPlannedQty), req.user);
+    }
+    reassignQty(id, dto, req) {
+        return this.woService.reassignQty(id, Number(dto.newPlannedQty), dto.remarks, req.user);
+    }
     approveRequest(requestId, req) { return this.woService.approveRequest(requestId, req.user); }
     rejectRequest(requestId, dto, req) { return this.woService.rejectRequest(requestId, req.user, dto === null || dto === void 0 ? void 0 : dto.comments); }
 };
@@ -160,6 +166,26 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], WorkOrderController.prototype, "restart", null);
+__decorate([
+    (0, common_1.Get)(':id/reassign-preview'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('newPlannedQty')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "reassignPreview", null);
+__decorate([
+    (0, common_1.Post)(':id/reassign-qty'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "reassignQty", null);
 __decorate([
     (0, common_1.Post)('approvals/:requestId/approve'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_APPROVE),

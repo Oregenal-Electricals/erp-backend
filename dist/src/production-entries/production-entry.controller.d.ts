@@ -37,6 +37,7 @@ export declare class ProductionEntryController {
             stageSequence: number | null;
             parentWorkOrderId: string | null;
             plannedQty: number;
+            pendingReassignQty: number | null;
             completedQty: number;
             plannedStartDate: Date;
             plannedEndDate: Date;

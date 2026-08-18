@@ -171,12 +171,95 @@ let WorkOrderService = class WorkOrderService {
                 await this.start(actionResult.documentId, user);
             else if (actionResult.documentType === 'WO_RESTART')
                 await this.update(actionResult.documentId, { status: 'IN_PROGRESS' }, user);
+            else if (actionResult.documentType === 'WO_REASSIGN_QTY')
+                await this.applyPendingReassign(actionResult.documentId, user);
             await this.notifyAdmins(user, actionResult, `${actionResult.documentType.replace(/_/g, ' ')} approved`);
         }
         return actionResult;
     }
     async rejectRequest(requestId, user, comments) {
-        return this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+        const result = await this.workflows.act(requestId, { action: 'REJECTED', comments }, user);
+        if (result.documentType === 'WO_REASSIGN_QTY') {
+            await this.prisma.workOrder.update({ where: { id: result.documentId }, data: { pendingReassignQty: null, updatedBy: user.id } });
+        }
+        return result;
+    }
+    async applyPendingReassign(id, user) {
+        const wo = await this.prisma.workOrder.findUnique({ where: { id } });
+        if ((wo === null || wo === void 0 ? void 0 : wo.pendingReassignQty) == null)
+            return;
+        const oldQty = wo.plannedQty;
+        await this.prisma.workOrder.update({
+            where: { id }, data: { plannedQty: wo.pendingReassignQty, pendingReassignQty: null, updatedBy: user.id },
+        });
+        await this.audit.log({
+            tableName: 'work_orders', recordId: id, action: 'UPDATE',
+            oldValues: { plannedQty: oldQty }, newValues: { plannedQty: wo.pendingReassignQty },
+            changedBy: user.id, reason: 'Quantity reassignment approved',
+        });
+    }
+    async previewReassignQty(id, newPlannedQty, user) {
+        var _a, _b;
+        const wo = await this.findOne(id, user);
+        if (newPlannedQty < wo.completedQty) {
+            throw new common_1.BadRequestException(`Cannot reassign below ${wo.completedQty} - that many units are already completed`);
+        }
+        const items = [];
+        if ((_b = (_a = wo.bom) === null || _a === void 0 ? void 0 : _a.items) === null || _b === void 0 ? void 0 : _b.length) {
+            const issuedRows = await this.prisma.productionIssueItem.groupBy({
+                by: ['itemCode'],
+                where: { productionIssue: { workOrderId: id, status: 'ISSUED' }, isActive: true },
+                _sum: { issuedQty: true },
+            });
+            const issuedMap = new Map(issuedRows.map((r) => [r.itemCode, Number(r._sum.issuedQty) || 0]));
+            for (const bi of wo.bom.items) {
+                const issuedForCurrentQty = issuedMap.get(bi.itemCode) || 0;
+                if (issuedForCurrentQty === 0)
+                    continue;
+                const neededForNewQty = Math.round(bi.effectiveQty * newPlannedQty * 100) / 100;
+                const excess = Math.max(0, Math.round((issuedForCurrentQty - neededForNewQty) * 100) / 100);
+                items.push({ itemCode: bi.itemCode, itemName: bi.itemName, uom: bi.uom, issuedForCurrentQty, neededForNewQty, excess });
+            }
+        }
+        return {
+            currentPlannedQty: wo.plannedQty, newPlannedQty, completedQty: wo.completedQty,
+            floor: wo.completedQty, items,
+        };
+    }
+    async reassignQty(id, newPlannedQty, remarks, user) {
+        const wo = await this.findOne(id, user);
+        if (['COMPLETED', 'CANCELLED'].includes(wo.status)) {
+            throw new common_1.BadRequestException(`Cannot reassign quantity on a ${wo.status} work order`);
+        }
+        if (newPlannedQty < wo.completedQty) {
+            throw new common_1.BadRequestException(`Cannot reassign below ${wo.completedQty} - that many units are already completed`);
+        }
+        if (newPlannedQty === wo.plannedQty) {
+            throw new common_1.BadRequestException('New quantity is the same as the current planned quantity');
+        }
+        const preview = await this.previewReassignQty(id, newPlannedQty, user);
+        const excessNote = preview.items.some((i) => i.excess > 0)
+            ? ' Issued-material excess: ' + preview.items.filter((i) => i.excess > 0).map((i) => `${i.itemCode} +${i.excess} ${i.uom}`).join(', ') + '.'
+            : '';
+        const fullRemarks = `${remarks || `Reassign ${wo.plannedQty} \u2192 ${newPlannedQty}`} (requested by ${user.firstName || ''} ${user.lastName || ''})`.trim() + excessNote;
+        if (STAGE_BYPASS_ROLES.includes(user.role)) {
+            const oldQty = wo.plannedQty;
+            const updated = await this.prisma.workOrder.update({
+                where: { id }, data: { plannedQty: newPlannedQty, updatedBy: user.id }, include: this.includes(),
+            });
+            await this.audit.log({
+                tableName: 'work_orders', recordId: id, action: 'UPDATE',
+                oldValues: { plannedQty: oldQty }, newValues: { plannedQty: newPlannedQty },
+                changedBy: user.id, reason: fullRemarks,
+            });
+            return Object.assign(Object.assign({}, updated), { pendingApproval: false, materialExcess: preview.items.filter((i) => i.excess > 0) });
+        }
+        await this.prisma.workOrder.update({ where: { id }, data: { pendingReassignQty: newPlannedQty, updatedBy: user.id } });
+        const { request } = await this.workflows.submit({
+            documentType: 'WO_REASSIGN_QTY', documentId: wo.id, documentNumber: wo.woNumber,
+            remarks: fullRemarks,
+        }, user);
+        return Object.assign(Object.assign({}, wo), { pendingApproval: true, approvalRequestId: request === null || request === void 0 ? void 0 : request.id, message: `Submitted for Plant Head approval - still planned at ${wo.plannedQty} until approved`, materialExcess: preview.items.filter((i) => i.excess > 0) });
     }
     async notifyAdmins(actorUser, request, message) {
         const admins = await this.prisma.user.findMany({
