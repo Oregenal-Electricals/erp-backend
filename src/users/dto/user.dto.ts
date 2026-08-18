@@ -72,6 +72,11 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   assignedStage?: string;
+
+  @ApiPropertyOptional({ description: 'Every entry this account creates is always auto-tagged as test data, regardless of any Test Mode setting' })
+  @IsOptional()
+  @IsBoolean()
+  isTestUser?: boolean;
 }
 
 export class UpdateUserDto {
@@ -107,6 +112,11 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   assignedStage?: string;
+
+  @ApiPropertyOptional({ description: 'Every entry this account creates is always auto-tagged as test data, regardless of any Test Mode setting' })
+  @IsOptional()
+  @IsBoolean()
+  isTestUser?: boolean;
 }
 
 export class ResetPasswordDto {

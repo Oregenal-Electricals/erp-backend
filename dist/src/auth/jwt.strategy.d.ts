@@ -13,7 +13,9 @@ export declare class JwtStrategy extends JwtStrategy_base {
         email: string;
         role: string;
         companyId: string;
+        previewMode?: boolean;
     }): Promise<{
+        previewMode: boolean;
         role: string;
         id: string;
         companyId: string;
@@ -23,6 +25,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
         lastName: string;
         assignedStage: string;
         isLocked: boolean;
+        isTestUser: boolean;
     }>;
 }
 export {};

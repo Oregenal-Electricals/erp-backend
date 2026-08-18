@@ -84,6 +84,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "assignedStage", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Every entry this account creates is always auto-tagged as test data, regardless of any Test Mode setting' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateUserDto.prototype, "isTestUser", void 0);
 class UpdateUserDto {
 }
 exports.UpdateUserDto = UpdateUserDto;
@@ -126,6 +132,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "assignedStage", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Every entry this account creates is always auto-tagged as test data, regardless of any Test Mode setting' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateUserDto.prototype, "isTestUser", void 0);
 class ResetPasswordDto {
 }
 exports.ResetPasswordDto = ResetPasswordDto;

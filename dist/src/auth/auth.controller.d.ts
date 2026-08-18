@@ -21,6 +21,7 @@ export declare class AuthController {
                 code: string;
             };
             mustChangePwd: boolean;
+            isTestUser: boolean;
         };
     }>;
     previewLogin(roleName: string, user: any): Promise<{
@@ -77,5 +78,6 @@ export declare class AuthController {
         additionalRoles: string[];
         mustChangePwd: boolean;
         lastLoginAt: Date;
+        isTestUser: boolean;
     }>;
 }

@@ -22,6 +22,7 @@ export declare class AuthService {
                 code: string;
             };
             mustChangePwd: boolean;
+            isTestUser: boolean;
         };
     }>;
     previewLoginAsRole(roleName: string, requestingUser: any): Promise<{
@@ -78,5 +79,6 @@ export declare class AuthService {
         additionalRoles: string[];
         mustChangePwd: boolean;
         lastLoginAt: Date;
+        isTestUser: boolean;
     }>;
 }

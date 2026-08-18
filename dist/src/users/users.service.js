@@ -54,7 +54,7 @@ let UsersService = class UsersService {
         this.audit = audit;
     }
     async createUser(dto, requestingUser) {
-        var _a;
+        var _a, _b;
         if (dto.role === client_1.UserRole.SUPER_ADMIN &&
             requestingUser.role !== client_1.UserRole.SUPER_ADMIN) {
             throw new common_1.ForbiddenException('Only SUPER_ADMIN can assign SUPER_ADMIN role');
@@ -100,6 +100,7 @@ let UsersService = class UsersService {
                 companyId: dto.companyId,
                 mustChangePwd: (_a = dto.mustChangePwd) !== null && _a !== void 0 ? _a : true,
                 assignedStage: dto.assignedStage,
+                isTestUser: (_b = dto.isTestUser) !== null && _b !== void 0 ? _b : false,
                 createdBy: requestingUser.id,
                 updatedBy: requestingUser.id,
             },
@@ -116,6 +117,7 @@ let UsersService = class UsersService {
                 mustChangePwd: true,
                 isActive: true,
                 isLocked: true,
+                isTestUser: true,
                 createdAt: true,
                 company: { select: { id: true, name: true, code: true } },
             },
@@ -159,6 +161,7 @@ let UsersService = class UsersService {
                 mustChangePwd: true,
                 isActive: true,
                 isLocked: true,
+                isTestUser: true,
                 lastLoginAt: true,
                 createdAt: true,
                 company: { select: { id: true, name: true, code: true } },
@@ -182,6 +185,7 @@ let UsersService = class UsersService {
                 mustChangePwd: true,
                 isActive: true,
                 isLocked: true,
+                isTestUser: true,
                 loginAttempts: true,
                 lastLoginAt: true,
                 createdAt: true,
@@ -230,6 +234,7 @@ let UsersService = class UsersService {
                 role: true,
                 assignedStage: true,
                 isActive: true,
+                isTestUser: true,
                 company: { select: { id: true, name: true } },
             },
         });

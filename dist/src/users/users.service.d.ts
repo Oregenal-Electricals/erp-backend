@@ -25,6 +25,7 @@ export declare class UsersService {
         additionalRoles: string[];
         mustChangePwd: boolean;
         isLocked: boolean;
+        isTestUser: boolean;
     }>;
     findAllUsers(filters: {
         companyId?: string;
@@ -50,6 +51,7 @@ export declare class UsersService {
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
+        isTestUser: boolean;
     }[]>;
     findOneUser(id: string): Promise<{
         role: string;
@@ -74,6 +76,7 @@ export declare class UsersService {
         lastLoginAt: Date;
         isLocked: boolean;
         loginAttempts: number;
+        isTestUser: boolean;
     }>;
     updateUser(id: string, dto: UpdateUserDto, requestingUser: any): Promise<{
         role: string;
@@ -89,6 +92,7 @@ export declare class UsersService {
         firstName: string;
         lastName: string;
         assignedStage: string;
+        isTestUser: boolean;
     }>;
     toggleUserStatus(id: string, requestingUser: any): Promise<{
         role: string;

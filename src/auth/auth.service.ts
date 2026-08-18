@@ -63,6 +63,7 @@ export class AuthService {
         companyId: user.companyId,
         company: user.company,
         mustChangePwd: user.mustChangePwd,
+        isTestUser: user.isTestUser,
       },
     };
   }
@@ -84,6 +85,7 @@ export class AuthService {
     const payload = {
       sub: user.id, email: user.email, role: user.role,
       additionalRoles: user.additionalRoles || [], allRoles, companyId: user.companyId,
+      previewMode: true,
     };
     const accessToken = this.jwt.sign(payload);
     return {
@@ -117,6 +119,7 @@ export class AuthService {
     const payload = {
       sub: user.id, email: user.email, role: user.role,
       additionalRoles: user.additionalRoles || [], allRoles, companyId: user.companyId,
+      previewMode: true,
     };
     const accessToken = this.jwt.sign(payload);
     return {
@@ -136,6 +139,7 @@ export class AuthService {
         id: true, email: true, firstName: true, lastName: true,
         role: true, additionalRoles: true,
         companyId: true, mustChangePwd: true, lastLoginAt: true,
+        isTestUser: true,
         company: { select: { id: true, name: true, code: true } },
       },
     });

@@ -120,7 +120,6 @@ import { IotModule } from './iot/iot.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { UiControlModule } from './ui-control/ui-control.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { TestSessionMiddleware } from './common/middleware/test-session.middleware';
 import configuration from './config/configuration';
 
 @Module({
@@ -267,6 +266,6 @@ import configuration from './config/configuration';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TestSessionMiddleware, LoggerMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/audit.interceptor';
+import { TestSessionInterceptor } from './common/interceptors/test-session.interceptor';
 
 async function bootstrap() {
   const compression = require('compression');
@@ -46,7 +47,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global interceptors
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(new LoggingInterceptor(), new TestSessionInterceptor());
 
   // Swagger
   if (environment !== 'production') {

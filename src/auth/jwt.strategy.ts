@@ -22,6 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     email: string;
     role: string;
     companyId: string;
+    previewMode?: boolean;
   }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
@@ -34,6 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         companyId: true,
         isActive: true,
         isLocked: true,
+        isTestUser: true,
         assignedStage: true,
       },
     });
@@ -50,6 +52,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Account is locked');
     }
 
-    return user;
+    // previewMode is a JWT-only claim (set exclusively by
+    // previewLoginAsRole/previewLoginAsUser, never by a normal login) -
+    // it deliberately never touches the DB, so exiting a preview needs no
+    // cleanup. Merged in here rather than re-derived, since this is the
+    // one place that already verifies the token's signature.
+    return { ...user, previewMode: payload.previewMode === true };
   }
 }

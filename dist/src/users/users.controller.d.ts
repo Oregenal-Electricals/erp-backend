@@ -23,6 +23,7 @@ export declare class UsersController {
         additionalRoles: string[];
         mustChangePwd: boolean;
         isLocked: boolean;
+        isTestUser: boolean;
     }>;
     findAllUsers(companyId?: string, role?: UserRole, isActive?: string, search?: string): Promise<{
         role: string;
@@ -43,6 +44,7 @@ export declare class UsersController {
         mustChangePwd: boolean;
         lastLoginAt: Date;
         isLocked: boolean;
+        isTestUser: boolean;
     }[]>;
     changePwdInfo(): {
         message: string;
@@ -70,6 +72,7 @@ export declare class UsersController {
         lastLoginAt: Date;
         isLocked: boolean;
         loginAttempts: number;
+        isTestUser: boolean;
     }>;
     updateUser(id: string, dto: UpdateUserDto, user: any): Promise<{
         role: string;
@@ -85,6 +88,7 @@ export declare class UsersController {
         firstName: string;
         lastName: string;
         assignedStage: string;
+        isTestUser: boolean;
     }>;
     toggleUserStatus(id: string, user: any): Promise<{
         role: string;

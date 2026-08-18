@@ -37,6 +37,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
                 companyId: true,
                 isActive: true,
                 isLocked: true,
+                isTestUser: true,
                 assignedStage: true,
             },
         });
@@ -49,7 +50,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         if (user.isLocked) {
             throw new common_1.UnauthorizedException('Account is locked');
         }
-        return user;
+        return Object.assign(Object.assign({}, user), { previewMode: payload.previewMode === true });
     }
 };
 exports.JwtStrategy = JwtStrategy;

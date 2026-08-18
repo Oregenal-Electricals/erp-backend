@@ -487,6 +487,7 @@ model User {
   updatedBy  String   @default("system")
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
+  isTestUser Boolean  @default(false) // this account's entries are ALWAYS auto-tagged test data, regardless of any header
 
   requestsMade     ChangeRequest[]    @relation("RequestedBy")
   requestsReviewed ChangeRequest[]    @relation("ReviewedBy")

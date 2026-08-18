@@ -11,6 +11,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const app_module_1 = require("./app.module");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
 const audit_interceptor_1 = require("./common/interceptors/audit.interceptor");
+const test_session_interceptor_1 = require("./common/interceptors/test-session.interceptor");
 async function bootstrap() {
     const compression = require('compression');
     const logger = new common_1.Logger('Bootstrap');
@@ -35,7 +36,7 @@ async function bootstrap() {
         transformOptions: { enableImplicitConversion: true },
     }));
     app.useGlobalFilters(new http_exception_filter_1.HttpExceptionFilter());
-    app.useGlobalInterceptors(new audit_interceptor_1.LoggingInterceptor());
+    app.useGlobalInterceptors(new audit_interceptor_1.LoggingInterceptor(), new test_session_interceptor_1.TestSessionInterceptor());
     if (environment !== 'production') {
         const config = new swagger_1.DocumentBuilder()
             .setTitle('ERP Manufacturing API')
