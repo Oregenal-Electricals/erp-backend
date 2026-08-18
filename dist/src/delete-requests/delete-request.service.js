@@ -144,11 +144,23 @@ let DeleteRequestService = class DeleteRequestService {
             where: { id }, data: { status: 'REJECTED', decidedBy: user.id, decidedAt: new Date(), updatedBy: user.id },
         });
     }
+    async attachRequesterNames(requests) {
+        const userIds = [...new Set(requests.map((r) => r.requestedBy))];
+        if (userIds.length === 0)
+            return requests;
+        const users = await this.prisma.user.findMany({
+            where: { id: { in: userIds } },
+            select: { id: true, firstName: true, lastName: true },
+        });
+        const nameMap = new Map(users.map((u) => [u.id, `${u.firstName} ${u.lastName}`.trim()]));
+        return requests.map((r) => (Object.assign(Object.assign({}, r), { requestedByName: nameMap.get(r.requestedBy) || 'Unknown' })));
+    }
     async listPending(user) {
-        return this.prisma.deleteRequest.findMany({
+        const requests = await this.prisma.deleteRequest.findMany({
             where: { companyId: user.companyId, status: 'PENDING' },
             orderBy: { createdAt: 'asc' },
         });
+        return this.attachRequesterNames(requests);
     }
     async listMine(user) {
         return this.prisma.deleteRequest.findMany({

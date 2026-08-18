@@ -87,25 +87,8 @@ export declare class DeleteRequestService {
         decidedBy: string | null;
         decidedAt: Date | null;
     }>;
-    listPending(user: any): Promise<{
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        tableName: string;
-        recordId: string;
-        reason: string;
-        requestedBy: string;
-        approvalRequestId: string | null;
-        recordLabel: string;
-        decidedBy: string | null;
-        decidedAt: Date | null;
-    }[]>;
+    private attachRequesterNames;
+    listPending(user: any): Promise<any[]>;
     listMine(user: any): Promise<{
         id: string;
         companyId: string;
