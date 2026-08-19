@@ -71,11 +71,30 @@ export class PurchaseOrderService {
    * gets established from this PO's price.
    */
   private async applyApproval(po: any, user: any) {
+    const affectedBomIds = new Set<string>();
     for (const item of po.items || []) {
       const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
       if (rm && rm.referenceRate == null) {
         await this.prisma.rawMaterial.update({ where: { id: rm.id }, data: { referenceRate: item.unitPrice, updatedBy: user.id } });
+
+        // A BOM's costing only means anything once its raw materials have
+        // a real purchased price - propagate this newly-established rate
+        // into every BOM item that uses this material (across every
+        // product's BOM, not just the one this PO happened to be for),
+        // so "what does this product actually cost to build" becomes
+        // answerable instead of every BOM sitting at totalCost: 0.
+        const bomItems = await this.prisma.bomItem.findMany({ where: { rawMaterialId: rm.id, isActive: true } });
+        for (const bi of bomItems) {
+          const totalCost = item.unitPrice * bi.effectiveQty;
+          await this.prisma.bomItem.update({ where: { id: bi.id }, data: { unitCost: item.unitPrice, totalCost, updatedBy: user.id } });
+          affectedBomIds.add(bi.bomId);
+        }
       }
+    }
+    for (const bomId of affectedBomIds) {
+      const items = await this.prisma.bomItem.findMany({ where: { bomId, isActive: true } });
+      const totalCost = items.reduce((s, i) => s + (i.totalCost || 0), 0);
+      await this.prisma.bom.update({ where: { id: bomId }, data: { totalCost } });
     }
     return this.prisma.purchaseOrder.update({
       where: { id: po.id },

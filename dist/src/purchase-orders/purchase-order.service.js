@@ -73,11 +73,23 @@ let PurchaseOrderService = class PurchaseOrderService {
         return { needsApproval: reasons.length > 0, reasons };
     }
     async applyApproval(po, user) {
+        const affectedBomIds = new Set();
         for (const item of po.items || []) {
             const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
             if (rm && rm.referenceRate == null) {
                 await this.prisma.rawMaterial.update({ where: { id: rm.id }, data: { referenceRate: item.unitPrice, updatedBy: user.id } });
+                const bomItems = await this.prisma.bomItem.findMany({ where: { rawMaterialId: rm.id, isActive: true } });
+                for (const bi of bomItems) {
+                    const totalCost = item.unitPrice * bi.effectiveQty;
+                    await this.prisma.bomItem.update({ where: { id: bi.id }, data: { unitCost: item.unitPrice, totalCost, updatedBy: user.id } });
+                    affectedBomIds.add(bi.bomId);
+                }
             }
+        }
+        for (const bomId of affectedBomIds) {
+            const items = await this.prisma.bomItem.findMany({ where: { bomId, isActive: true } });
+            const totalCost = items.reduce((s, i) => s + (i.totalCost || 0), 0);
+            await this.prisma.bom.update({ where: { id: bomId }, data: { totalCost } });
         }
         return this.prisma.purchaseOrder.update({
             where: { id: po.id },
