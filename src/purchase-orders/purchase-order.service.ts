@@ -125,12 +125,15 @@ export class PurchaseOrderService {
     await this.audit.log({ tableName: 'purchase_orders', recordId: po.id, action: 'CREATE', newValues: po, changedBy: user.id });
 
     const { needsApproval, reasons } = await this.computePriceApprovalNeed(user.companyId, itemsData);
-    if (!needsApproval) {
+    // An empty PO has nothing to price-check, but that's not the same as
+    // "cleared the check" - it must never auto-approve. Matches the same
+    // rule approve() already enforces for a manual click.
+    if (!needsApproval && itemsData.length > 0) {
       return this.applyApproval(po, user);
     }
     return this.prisma.purchaseOrder.update({
       where: { id: po.id },
-      data: { priceApprovalReason: reasons.join('; ') },
+      data: { priceApprovalReason: itemsData.length === 0 ? 'No items yet - add items before this can be approved' : reasons.join('; ') },
       include: this.includes(),
     });
   }
@@ -244,6 +247,14 @@ export class PurchaseOrderService {
       },
     });
     await this.recalculateTotals(id);
+
+    const updatedPo = await this.findOne(id, user);
+    const { needsApproval, reasons } = await this.computePriceApprovalNeed(user.companyId, updatedPo.items);
+    if (!needsApproval) {
+      await this.applyApproval(updatedPo, user);
+    } else {
+      await this.prisma.purchaseOrder.update({ where: { id }, data: { priceApprovalReason: reasons.join('; ') } });
+    }
     return item;
   }
 
