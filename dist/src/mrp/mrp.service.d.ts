@@ -71,6 +71,7 @@ export declare class MrpService {
         totalItems: number;
     }>;
     private getOpenSoLineItems;
+    private clusterProductsBySimilarity;
     getPlanningBoard(user: any, warehouseId: string): Promise<any[]>;
     getPlanningBoardByFamily(user: any, warehouseId: string): Promise<{
         families: any[];

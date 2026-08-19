@@ -423,12 +423,65 @@ export class MrpService {
           soId: so.id, soNumber: so.soNumber, customerName: so.customerName, deliveryDate: so.deliveryDate,
           soItemId: item.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
           pendingQty: item.pendingQty, alreadyPlannedQty: alreadyPlanned._sum.plannedQty || 0, remainingToPlan,
-          productId: product?.id || null, familyId: (product as any)?.familyId || null,
+          productId: product?.id || null,
           hasBom: !!bom, bomId: bom?.id || null,
         });
       }
     }
     return flat;
+  }
+
+  /**
+   * Groups distinct products by BOM similarity (same Jaccard-on-itemCodes
+   * math as the BOM upload suggestion, same 0.5 threshold - see
+   * bom-import.service.ts) computed fresh every call. There is no
+   * persisted "family" to name or manage; a product's clustermates can
+   * shift as BOMs change, which is exactly the point - nothing to keep
+   * in sync by hand.
+   */
+  private async clusterProductsBySimilarity(companyId: string, bomIds: string[]): Promise<Map<string, number>> {
+    const isPackagingSection = (name: string) => /packag/i.test(name || '');
+    const uniqueBomIds = [...new Set(bomIds)];
+    if (uniqueBomIds.length === 0) return new Map();
+
+    const boms = await this.prisma.bom.findMany({
+      where: { id: { in: uniqueBomIds }, companyId },
+      include: { items: { where: { isActive: true }, select: { itemCode: true, section: true } } },
+    });
+
+    const codeSets = new Map<string, Set<string>>();
+    for (const bom of boms) {
+      codeSets.set(
+        bom.id,
+        new Set(bom.items.filter((i) => !isPackagingSection(i.section || '')).map((i) => i.itemCode)),
+      );
+    }
+
+    const THRESHOLD = 0.5;
+    const clusterOf = new Map<string, number>();
+    let nextCluster = 0;
+
+    for (const bomId of uniqueBomIds) {
+      if (clusterOf.has(bomId)) continue;
+      const mySet = codeSets.get(bomId);
+      const clusterId = nextCluster++;
+      clusterOf.set(bomId, clusterId);
+      if (!mySet || mySet.size === 0) continue;
+
+      for (const otherBomId of uniqueBomIds) {
+        if (clusterOf.has(otherBomId)) continue;
+        const otherSet = codeSets.get(otherBomId);
+        if (!otherSet || otherSet.size === 0) continue;
+
+        let intersection = 0;
+        for (const code of mySet) if (otherSet.has(code)) intersection++;
+        const union = mySet.size + otherSet.size - intersection;
+        const similarity = union > 0 ? intersection / union : 0;
+        if (similarity >= THRESHOLD) clusterOf.set(otherBomId, clusterId);
+      }
+    }
+
+    return clusterOf;
   }
 
   async getPlanningBoard(user: any, warehouseId: string) {
@@ -471,31 +524,35 @@ export class MrpService {
 
   /**
    * Consolidated multi-customer view: groups the same open-to-plan line
-   * items by Product Family instead of by Sales Order, so demand for
-   * physically-identical builds ordered by different customers shows up
-   * as ONE shared pool instead of N independent guesses.
+   * items by BOM similarity instead of by Sales Order, so demand for
+   * physically-identical (or near-identical) builds ordered by different
+   * customers shows up as ONE shared pool instead of N independent
+   * guesses. Grouping is computed fresh on every call from the BOMs
+   * themselves (see clusterProductsBySimilarity) - there is no persisted
+   * "family" record to create, name, or keep in sync by hand.
    *
    * Reuses explodeMultiCpoMaterialNeeds - the same priority-ordered,
    * shared-stock-pool engine already proven for the multi-CPO shortage
-   * check - passing one bucket per family member's Sales Order line, in
+   * check - passing one bucket per member's Sales Order line, in
    * delivery-date order (oldest first, matching this system's existing
    * FIFO convention everywhere else). This is NOT a sum of independently
    * computed per-item shortages, which would double-count shared stock;
    * it's the true remaining shortfall after each higher-priority member
    * has already taken its share, exactly like Run Allocation does for a
-   * single order today - just extended across the whole family at once.
+   * single order today - just extended across the whole cluster at once.
    *
    * runAllocation() itself needs no changes: it already accepts a flat
    * {soItemId, buildQty}[] regardless of how the frontend grouped things
    * for display, so this view's "Confirm" action submits to the exact
    * same endpoint the per-SO board already uses.
    *
-   * Items whose product has no family are still shown, under a single
-   * "ungrouped" bucket, computed the same individual way as the regular
-   * Planning Board - there's no shared pool to speak of between unrelated
-   * products, so nothing is lost by treating them independently here too.
-   * Items with no approved BOM yet are omitted entirely (nothing to
-   * explode) - they still show up on the regular per-SO Planning Board.
+   * Any group ending up with only a single order in it (whether that's
+   * because nothing else matches, or because it's the only open order for
+   * that product right now) is shown under "ungrouped" instead - pooling
+   * only matters once there's actually more than one order to share
+   * across. Items with no approved BOM yet are omitted entirely (nothing
+   * to explode or compare) - they still show up on the regular per-SO
+   * Planning Board.
    */
   async getPlanningBoardByFamily(user: any, warehouseId: string) {
     if (!warehouseId) throw new BadRequestException('warehouseId is required');
@@ -503,20 +560,21 @@ export class MrpService {
     const flatItems = (await this.getOpenSoLineItems(user, warehouseId))
       .filter(i => i.remainingToPlan > 0 && i.hasBom);
 
-    const byFamily = new Map<string, any[]>();
-    const ungrouped: any[] = [];
+    const clusterOf = await this.clusterProductsBySimilarity(companyId, flatItems.map(i => i.bomId));
+
+    const byCluster = new Map<number, any[]>();
     for (const item of flatItems) {
-      if (item.familyId) {
-        if (!byFamily.has(item.familyId)) byFamily.set(item.familyId, []);
-        byFamily.get(item.familyId)!.push(item);
-      } else {
-        ungrouped.push(item);
-      }
+      const clusterId = clusterOf.get(item.bomId);
+      if (clusterId === undefined) continue;
+      if (!byCluster.has(clusterId)) byCluster.set(clusterId, []);
+      byCluster.get(clusterId)!.push(item);
     }
 
     const families: any[] = [];
-    for (const [familyId, items] of byFamily) {
-      const family = await this.prisma.productFamily.findFirst({ where: { id: familyId, companyId } });
+    const ungroupedSingles: any[] = [];
+    for (const [, items] of byCluster) {
+      if (items.length < 2) { ungroupedSingles.push(...items); continue; }
+
       const sortedItems = [...items].sort(
         (a, b) => new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime(),
       );
@@ -538,7 +596,7 @@ export class MrpService {
         })),
       }));
 
-      // Family-level totals: summed ACROSS the priority-ordered buckets
+      // Group-level totals: summed ACROSS the priority-ordered buckets
       // above, not recomputed independently - see method doc.
       const sharedShortageMap = new Map<string, { itemCode: string; itemName: string; uom: string; totalNeeded: number; available: number; shortfall: number }>();
       for (const i of sortedItems) {
@@ -556,8 +614,12 @@ export class MrpService {
         }
       }
 
+      const distinctItemCodes = [...new Set(sortedItems.map(i => i.itemCode))];
+      const distinctItemNames = [...new Set(sortedItems.map(i => i.itemName))];
+
       families.push({
-        familyId, familyCode: family?.code || null, familyName: family?.name || 'Unknown Family',
+        groupLabel: distinctItemNames.length === 1 ? distinctItemNames[0] : `${distinctItemNames[0]} + ${distinctItemNames.length - 1} similar`,
+        productCodes: distinctItemCodes,
         totalRemainingToPlan: sortedItems.reduce((s, i) => s + i.remainingToPlan, 0),
         memberCount: sortedItems.length,
         sharedRmRequirements: Array.from(sharedShortageMap.values()),
@@ -567,7 +629,7 @@ export class MrpService {
     families.sort((a, b) => b.memberCount - a.memberCount);
 
     const ungroupedOut = [];
-    for (const i of ungrouped) {
+    for (const i of ungroupedSingles) {
       const rawRmRequirements = await this.explodeMaterialNeeds(
         companyId, warehouseId,
         [{ itemCode: i.itemCode, itemName: i.itemName, uom: i.uom, qty: i.remainingToPlan }],
