@@ -1422,6 +1422,13 @@ model RawMaterial {
   maxStockLevel   Float?
   reorderQty      Float?
   leadTimeDays    Int?
+  // Baseline unit price, set automatically the first time a PO for this
+  // material is approved - null until then. Every later PO compares its
+  // unit price against this to decide whether it needs manual approval
+  // (see PurchaseOrderService.computePriceApprovalNeed) - a price at or
+  // below this rate proceeds straight through, a price above it, or a
+  // still-unset rate on a first purchase, requires a human to approve.
+  referenceRate   Float?
   isActive        Boolean       @default(true)
   isTestData      Boolean       @default(false)
   createdAt       DateTime      @default(now())
@@ -1997,6 +2004,12 @@ model PurchaseOrder {
   approvedBy       String?
   approvedAt       DateTime?
   notes            String?
+  // System-computed explanation for why this PO couldn't auto-approve on
+  // creation - a per-item note (first purchase with no reference rate
+  // yet, or a price above the established reference rate). Null once
+  // approved, or if every item cleared the check on creation. Separate
+  // from `notes` (freeform, user-entered) so neither overwrites the other.
+  priceApprovalReason String?
   termsConditions  String?
   isActive         Boolean   @default(true)
   isTestData       Boolean   @default(false)

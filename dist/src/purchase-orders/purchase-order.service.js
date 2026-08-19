@@ -57,6 +57,34 @@ let PurchaseOrderService = class PurchaseOrderService {
         const totalPrice = afterDiscount + taxAmount;
         return Object.assign({ taxAmount, totalPrice }, gst);
     }
+    async computePriceApprovalNeed(companyId, items) {
+        const reasons = [];
+        for (const item of items) {
+            const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId, code: item.itemCode } });
+            if (!rm)
+                continue;
+            if (rm.referenceRate == null) {
+                reasons.push(`${item.itemCode}: first purchase, no reference rate yet`);
+            }
+            else if (item.unitPrice > rm.referenceRate) {
+                reasons.push(`${item.itemCode}: \u20b9${item.unitPrice} exceeds reference rate \u20b9${rm.referenceRate}`);
+            }
+        }
+        return { needsApproval: reasons.length > 0, reasons };
+    }
+    async applyApproval(po, user) {
+        for (const item of po.items || []) {
+            const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode } });
+            if (rm && rm.referenceRate == null) {
+                await this.prisma.rawMaterial.update({ where: { id: rm.id }, data: { referenceRate: item.unitPrice, updatedBy: user.id } });
+            }
+        }
+        return this.prisma.purchaseOrder.update({
+            where: { id: po.id },
+            data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), priceApprovalReason: null, updatedBy: user.id },
+            include: this.includes(),
+        });
+    }
     async create(dto, user) {
         const vendor = await this.prisma.vendor.findFirst({ where: { id: dto.vendorId, companyId: user.companyId } });
         if (!vendor)
@@ -76,7 +104,15 @@ let PurchaseOrderService = class PurchaseOrderService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'purchase_orders', recordId: po.id, action: 'CREATE', newValues: po, changedBy: user.id });
-        return po;
+        const { needsApproval, reasons } = await this.computePriceApprovalNeed(user.companyId, itemsData);
+        if (!needsApproval) {
+            return this.applyApproval(po, user);
+        }
+        return this.prisma.purchaseOrder.update({
+            where: { id: po.id },
+            data: { priceApprovalReason: reasons.join('; ') },
+            include: this.includes(),
+        });
     }
     async findAll(user, query) {
         const { page = 1, limit = 20, search, status, vendorId, excludeGateInwarded } = query;
@@ -144,11 +180,7 @@ let PurchaseOrderService = class PurchaseOrderService {
             throw new common_1.BadRequestException('Only DRAFT POs can be approved');
         if (!po.items || po.items.length === 0)
             throw new common_1.BadRequestException('Cannot approve PO with no items');
-        const updated = await this.prisma.purchaseOrder.update({
-            where: { id },
-            data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
-            include: this.includes(),
-        });
+        const updated = await this.applyApproval(po, user);
         await this.audit.log({ tableName: 'purchase_orders', recordId: id, action: 'UPDATE', oldValues: po, newValues: updated, changedBy: user.id });
         return updated;
     }

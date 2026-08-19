@@ -101,6 +101,7 @@ export declare class PoApprovalController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }[]>;
     getHistory(poId: string, req: any): Promise<{

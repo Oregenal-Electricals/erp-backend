@@ -47,6 +47,7 @@ export declare class PurchaseOrderController {
             approvedBy: string | null;
             approvedAt: Date | null;
             notes: string | null;
+            priceApprovalReason: string | null;
             termsConditions: string | null;
         })[];
         total: number;
@@ -87,6 +88,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
@@ -160,6 +162,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     create(dto: CreatePurchaseOrderDto, req: any): Promise<{
@@ -233,6 +236,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     update(id: string, dto: UpdatePurchaseOrderDto, req: any): Promise<{
@@ -306,6 +310,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     approve(id: string, req: any): Promise<{
@@ -379,6 +384,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     send(id: string, req: any): Promise<{
@@ -452,6 +458,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     cancel(id: string, req: any): Promise<{
@@ -525,6 +532,7 @@ export declare class PurchaseOrderController {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     addItem(id: string, dto: PoItemDto, req: any): Promise<{

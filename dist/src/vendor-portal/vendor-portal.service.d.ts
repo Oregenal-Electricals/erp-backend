@@ -78,6 +78,7 @@ export declare class VendorPortalService {
             approvedBy: string | null;
             approvedAt: Date | null;
             notes: string | null;
+            priceApprovalReason: string | null;
             termsConditions: string | null;
         })[];
         total: number;

@@ -66,6 +66,7 @@ export declare class RawMaterialController {
             partNumber: string | null;
             minStockLevel: number | null;
             maxStockLevel: number | null;
+            referenceRate: number | null;
         })[];
         total: number;
         page: number;
@@ -125,6 +126,7 @@ export declare class RawMaterialController {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        referenceRate: number | null;
     }>;
     create(dto: CreateRawMaterialDto, req: any): Promise<{
         category: {
@@ -179,6 +181,7 @@ export declare class RawMaterialController {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        referenceRate: number | null;
     }>;
     update(id: string, dto: UpdateRawMaterialDto, req: any): Promise<{
         category: {
@@ -233,6 +236,7 @@ export declare class RawMaterialController {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        referenceRate: number | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

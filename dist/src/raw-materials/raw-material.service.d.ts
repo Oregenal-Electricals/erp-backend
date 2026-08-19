@@ -59,6 +59,7 @@ export declare class RawMaterialService {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        referenceRate: number | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -114,6 +115,7 @@ export declare class RawMaterialService {
             partNumber: string | null;
             minStockLevel: number | null;
             maxStockLevel: number | null;
+            referenceRate: number | null;
         })[];
         total: number;
         page: number;
@@ -173,6 +175,7 @@ export declare class RawMaterialService {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        referenceRate: number | null;
     }>;
     update(id: string, dto: UpdateRawMaterialDto, user: any): Promise<{
         category: {
@@ -227,6 +230,7 @@ export declare class RawMaterialService {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        referenceRate: number | null;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;

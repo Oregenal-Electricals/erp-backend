@@ -9,6 +9,8 @@ export declare class PurchaseOrderService {
     private includes;
     private calcGst;
     private calcItemAmounts;
+    private computePriceApprovalNeed;
+    private applyApproval;
     create(dto: CreatePurchaseOrderDto, user: any): Promise<{
         items: {
             id: string;
@@ -80,6 +82,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -116,6 +119,7 @@ export declare class PurchaseOrderService {
             approvedBy: string | null;
             approvedAt: Date | null;
             notes: string | null;
+            priceApprovalReason: string | null;
             termsConditions: string | null;
         })[];
         total: number;
@@ -194,6 +198,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     findByVendor(vendorId: string, user: any): Promise<({
@@ -229,6 +234,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     })[]>;
     update(id: string, dto: UpdatePurchaseOrderDto, user: any): Promise<{
@@ -302,6 +308,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     approve(id: string, user: any): Promise<{
@@ -375,6 +382,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     send(id: string, user: any): Promise<{
@@ -448,6 +456,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     cancel(id: string, user: any): Promise<{
@@ -521,6 +530,7 @@ export declare class PurchaseOrderService {
         approvedBy: string | null;
         approvedAt: Date | null;
         notes: string | null;
+        priceApprovalReason: string | null;
         termsConditions: string | null;
     }>;
     addItem(id: string, dto: PoItemDto, user: any): Promise<{
