@@ -142,6 +142,36 @@ export class MrpService {
    * (Run Allocation, the Planning board). Omitted, it checks company-wide
    * stock (the CPO shortage check, matching its existing behaviour).
    */
+  /**
+   * Every DRAFT-status Work Order stage has a certain, upcoming claim on
+   * raw material that release() will reserve the moment it happens - it
+   * just hasn't yet. Treating today's free stock as if that claim doesn't
+   * exist risks exactly the double-booking this was built to catch: a
+   * still-open Sales Order's shortage check assumes stock is free that a
+   * DIFFERENT order's already-in-production Work Order will come back for
+   * the instant its next stage releases. RELEASED/IN_PROGRESS stages are
+   * excluded here on purpose - their material is already reflected in
+   * StockBalance.reservedQty (see MaterialReservationService), so counting
+   * them again here would double-subtract.
+   */
+  private async getPendingWoMaterialNeeds(companyId: string, warehouseId?: string): Promise<Map<string, number>> {
+    const draftWOs = await this.prisma.workOrder.findMany({
+      where: { companyId, status: 'DRAFT', isActive: true, ...(warehouseId ? { warehouseId } : {}) },
+      select: { id: true, bomId: true, plannedQty: true },
+    });
+    const needs = new Map<string, number>();
+    for (const wo of draftWOs) {
+      if (!wo.bomId || !wo.plannedQty) continue;
+      const bomItems = await this.prisma.bomItem.findMany({ where: { bomId: wo.bomId, isActive: true } });
+      for (const item of bomItems) {
+        const grossQty = item.effectiveQty * wo.plannedQty;
+        const wasteQty = (item.wastagePercent || 0) / 100 * grossQty;
+        needs.set(item.itemCode, (needs.get(item.itemCode) || 0) + grossQty + wasteQty);
+      }
+    }
+    return needs;
+  }
+
   async explodeMultiCpoMaterialNeeds(
     companyId: string,
     buckets: { bucketKey: string; itemCode: string; itemName: string; uom: string; qty: number }[],
@@ -152,6 +182,8 @@ export class MrpService {
     const { lowLevelCode, bomOf, itemMeta: discoveredMeta, leavesOf } = await this.discoverBomTree(companyId, rootItemCodes);
     const itemMeta = discoveredMeta;
     for (const b of buckets) itemMeta.set(b.itemCode, { itemName: b.itemName, uom: b.uom });
+
+    const pendingWoNeeds = await this.getPendingWoMaterialNeeds(companyId, warehouseId);
 
     let currentQueue = new Map<string, Map<string, number>>(); // itemCode -> bucketKey -> qty
     for (const b of buckets) {
@@ -187,7 +219,7 @@ export class MrpService {
           });
           onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
         }
-        let runningStock = (balance?.availableQty || 0) + onOrderQty;
+        let runningStock = Math.max(0, (balance?.availableQty || 0) - (pendingWoNeeds.get(itemCode) || 0)) + onOrderQty;
         const totalStock = runningStock;
 
         for (const bucketKey of bucketOrder) {

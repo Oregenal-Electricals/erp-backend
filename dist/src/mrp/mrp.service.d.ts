@@ -10,6 +10,7 @@ export declare class MrpService {
     constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, routingService: RoutingService);
     private findProducingBom;
     private discoverBomTree;
+    private getPendingWoMaterialNeeds;
     explodeMultiCpoMaterialNeeds(companyId: string, buckets: {
         bucketKey: string;
         itemCode: string;

@@ -96,12 +96,31 @@ let MrpService = class MrpService {
             leavesOf.set(code, collectLeaves(code, new Set()));
         return { lowLevelCode, bomOf, itemMeta, leavesOf };
     }
+    async getPendingWoMaterialNeeds(companyId, warehouseId) {
+        const draftWOs = await this.prisma.workOrder.findMany({
+            where: Object.assign({ companyId, status: 'DRAFT', isActive: true }, (warehouseId ? { warehouseId } : {})),
+            select: { id: true, bomId: true, plannedQty: true },
+        });
+        const needs = new Map();
+        for (const wo of draftWOs) {
+            if (!wo.bomId || !wo.plannedQty)
+                continue;
+            const bomItems = await this.prisma.bomItem.findMany({ where: { bomId: wo.bomId, isActive: true } });
+            for (const item of bomItems) {
+                const grossQty = item.effectiveQty * wo.plannedQty;
+                const wasteQty = (item.wastagePercent || 0) / 100 * grossQty;
+                needs.set(item.itemCode, (needs.get(item.itemCode) || 0) + grossQty + wasteQty);
+            }
+        }
+        return needs;
+    }
     async explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder, warehouseId) {
         const rootItemCodes = Array.from(new Set(buckets.map(b => b.itemCode)));
         const { lowLevelCode, bomOf, itemMeta: discoveredMeta, leavesOf } = await this.discoverBomTree(companyId, rootItemCodes);
         const itemMeta = discoveredMeta;
         for (const b of buckets)
             itemMeta.set(b.itemCode, { itemName: b.itemName, uom: b.uom });
+        const pendingWoNeeds = await this.getPendingWoMaterialNeeds(companyId, warehouseId);
         let currentQueue = new Map();
         for (const b of buckets) {
             if (!currentQueue.has(b.itemCode))
@@ -133,7 +152,7 @@ let MrpService = class MrpService {
                     });
                     onOrderQty = onOrderItems.reduce((sum, i) => sum + (i.pendingQty || 0), 0);
                 }
-                let runningStock = ((balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0) + onOrderQty;
+                let runningStock = Math.max(0, ((balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0) - (pendingWoNeeds.get(itemCode) || 0)) + onOrderQty;
                 const totalStock = runningStock;
                 for (const bucketKey of bucketOrder) {
                     const required = bucketQtyMap.get(bucketKey);
