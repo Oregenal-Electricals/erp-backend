@@ -1,5 +1,5 @@
 import { RejectedStockService } from './rejected-stock.service';
-import { DisposeItemDto } from './dto/rejected-stock.dto';
+import { DisposeItemDto, CreateFromFgReceiptDto } from './dto/rejected-stock.dto';
 export declare class RejectedStockController {
     private readonly rsService;
     constructor(rsService: RejectedStockService);
@@ -41,8 +41,9 @@ export declare class RejectedStockController {
             status: string;
             remarks: string | null;
             warehouseId: string;
-            grnId: string;
-            iqcId: string;
+            grnId: string | null;
+            iqcId: string | null;
+            fgReceiptId: string | null;
             rejectionNumber: string;
             totalRejectedQty: number;
         })[];
@@ -77,6 +78,13 @@ export declare class RejectedStockController {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -96,8 +104,9 @@ export declare class RejectedStockController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
@@ -127,6 +136,13 @@ export declare class RejectedStockController {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -146,8 +162,67 @@ export declare class RejectedStockController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
+        rejectionNumber: string;
+        totalRejectedQty: number;
+    }>;
+    createFromFgReceipt(fgReceiptId: string, dto: CreateFromFgReceiptDto, req: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            rejectionReason: string | null;
+            rejectedQty: number;
+            disposition: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
+            iqcItemId: string | null;
+            dispositionDate: Date | null;
+            rejectedStockId: string;
+        }[];
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
+        grn: {
+            grnType: string;
+            grnNumber: string;
+        };
+        iqc: {
+            iqcNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        warehouseId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
@@ -177,6 +252,13 @@ export declare class RejectedStockController {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -196,8 +278,9 @@ export declare class RejectedStockController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
@@ -227,6 +310,13 @@ export declare class RejectedStockController {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -246,8 +336,9 @@ export declare class RejectedStockController {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;

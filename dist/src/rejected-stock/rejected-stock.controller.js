@@ -28,6 +28,7 @@ let RejectedStockController = class RejectedStockController {
     findAll(req, query) { return this.rsService.findAll(req.user, query); }
     findOne(id, req) { return this.rsService.findOne(id, req.user); }
     createFromIqc(iqcId, req) { return this.rsService.createFromIqc(iqcId, req.user); }
+    createFromFgReceipt(fgReceiptId, dto, req) { return this.rsService.createFromFgReceipt(fgReceiptId, dto, req.user); }
     disposeItem(id, itemId, dto, req) { return this.rsService.disposeItem(id, itemId, dto, req.user); }
     close(id, req) { return this.rsService.close(id, req.user); }
 };
@@ -67,6 +68,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], RejectedStockController.prototype, "createFromIqc", null);
+__decorate([
+    (0, common_1.Post)('from-fg-receipt/:fgReceiptId'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_CREATE),
+    __param(0, (0, common_1.Param)('fgReceiptId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, rejected_stock_dto_1.CreateFromFgReceiptDto, Object]),
+    __metadata("design:returntype", void 0)
+], RejectedStockController.prototype, "createFromFgReceipt", null);
 __decorate([
     (0, common_1.Put)(':id/items/:itemId/dispose'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_EDIT),

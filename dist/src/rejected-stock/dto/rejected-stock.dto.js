@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DisposeItemDto = void 0;
+exports.CreateFromFgReceiptDto = exports.DisposeItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const DISPOSITIONS = ['RTV', 'SCRAPPED', 'REWORK', 'ACCEPTED'];
 class DisposeItemDto {
@@ -30,4 +30,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DisposeItemDto.prototype, "dispositionBy", void 0);
+class CreateFromFgReceiptDto {
+}
+exports.CreateFromFgReceiptDto = CreateFromFgReceiptDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(3, { message: 'Give a real reason (at least 3 characters) for the rejection' }),
+    __metadata("design:type", String)
+], CreateFromFgReceiptDto.prototype, "reason", void 0);
 //# sourceMappingURL=rejected-stock.dto.js.map

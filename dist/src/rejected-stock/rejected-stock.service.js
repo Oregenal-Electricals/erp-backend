@@ -27,9 +27,51 @@ let RejectedStockService = class RejectedStockService {
         return {
             iqc: { select: { iqcNumber: true } },
             grn: { select: { grnNumber: true, grnType: true } },
+            fgReceipt: { select: { receiptNumber: true, workOrder: { select: { woNumber: true, stageName: true } } } },
             warehouse: { select: { name: true, code: true } },
             items: { where: { isActive: true } },
         };
+    }
+    async createFromFgReceipt(fgReceiptId, dto, user) {
+        const fgReceipt = await this.prisma.fgReceipt.findFirst({
+            where: { id: fgReceiptId, companyId: user.companyId },
+            include: { workOrder: { select: { woNumber: true, stageName: true } } },
+        });
+        if (!fgReceipt)
+            throw new common_1.NotFoundException('FG Receipt not found');
+        if (fgReceipt.rejectedQty <= 0)
+            throw new common_1.BadRequestException('This FG Receipt has no rejected quantity');
+        if (!dto.reason || !dto.reason.trim())
+            throw new common_1.BadRequestException('A rejection reason is required');
+        const existing = await this.prisma.rejectedStock.findFirst({ where: { fgReceiptId, companyId: user.companyId } });
+        if (existing)
+            throw new common_1.BadRequestException('Rejection record already exists for this FG Receipt');
+        const rejectionNumber = await this.generateNumber(user.companyId);
+        const rejected = await this.prisma.rejectedStock.create({
+            data: {
+                rejectionNumber,
+                fgReceiptId,
+                warehouseId: fgReceipt.warehouseId,
+                totalRejectedQty: fgReceipt.rejectedQty,
+                remarks: `From ${fgReceipt.workOrder.woNumber} (${fgReceipt.workOrder.stageName})`,
+                companyId: user.companyId,
+                createdBy: user.id, updatedBy: user.id,
+                items: {
+                    create: [{
+                            itemCode: fgReceipt.itemCode,
+                            itemName: fgReceipt.itemName,
+                            uom: fgReceipt.uom,
+                            rejectedQty: fgReceipt.rejectedQty,
+                            rejectionReason: dto.reason.trim(),
+                            companyId: user.companyId,
+                            createdBy: user.id, updatedBy: user.id,
+                        }],
+                },
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'rejected_stock', recordId: rejected.id, action: 'CREATE', newValues: rejected, changedBy: user.id });
+        return rejected;
     }
     async createFromIqc(iqcId, user) {
         const iqc = await this.prisma.iqcInspection.findFirst({

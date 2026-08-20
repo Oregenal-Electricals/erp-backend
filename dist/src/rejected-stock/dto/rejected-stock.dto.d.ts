@@ -3,3 +3,6 @@ export declare class DisposeItemDto {
     dispositionNotes?: string;
     dispositionBy?: string;
 }
+export declare class CreateFromFgReceiptDto {
+    reason: string;
+}

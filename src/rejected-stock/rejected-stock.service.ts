@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { DisposeItemDto } from './dto/rejected-stock.dto';
+import { DisposeItemDto, CreateFromFgReceiptDto } from './dto/rejected-stock.dto';
 
 @Injectable()
 export class RejectedStockService {
@@ -17,9 +17,61 @@ export class RejectedStockService {
     return {
       iqc: { select: { iqcNumber: true } },
       grn: { select: { grnNumber: true, grnType: true } },
+      fgReceipt: { select: { receiptNumber: true, workOrder: { select: { woNumber: true, stageName: true } } } },
       warehouse: { select: { name: true, code: true } },
       items: { where: { isActive: true } },
     };
+  }
+
+  /**
+   * A production reject, not a purchasing one - a Work Order's FG Receipt
+   * came back with some quantity that didn't pass, and unlike an IQC
+   * rejection there's no incoming inspection item to pull a reason from,
+   * so the reason has to be supplied here directly. Reuses the exact same
+   * RejectedStock/RejectedStockItem tables and disposition workflow as an
+   * IQC rejection - store doesn't need a second, parallel system to track
+   * "material that didn't pass" depending on which direction it came from.
+   */
+  async createFromFgReceipt(fgReceiptId: string, dto: CreateFromFgReceiptDto, user: any) {
+    const fgReceipt = await this.prisma.fgReceipt.findFirst({
+      where: { id: fgReceiptId, companyId: user.companyId },
+      include: { workOrder: { select: { woNumber: true, stageName: true } } },
+    });
+    if (!fgReceipt) throw new NotFoundException('FG Receipt not found');
+    if (fgReceipt.rejectedQty <= 0) throw new BadRequestException('This FG Receipt has no rejected quantity');
+    if (!dto.reason || !dto.reason.trim()) throw new BadRequestException('A rejection reason is required');
+
+    const existing = await this.prisma.rejectedStock.findFirst({ where: { fgReceiptId, companyId: user.companyId } });
+    if (existing) throw new BadRequestException('Rejection record already exists for this FG Receipt');
+
+    const rejectionNumber = await this.generateNumber(user.companyId);
+
+    const rejected = await this.prisma.rejectedStock.create({
+      data: {
+        rejectionNumber,
+        fgReceiptId,
+        warehouseId: fgReceipt.warehouseId,
+        totalRejectedQty: fgReceipt.rejectedQty,
+        remarks: `From ${fgReceipt.workOrder.woNumber} (${fgReceipt.workOrder.stageName})`,
+        companyId: user.companyId,
+        createdBy: user.id, updatedBy: user.id,
+        items: {
+          create: [{
+            itemCode: fgReceipt.itemCode,
+            itemName: fgReceipt.itemName,
+            uom: fgReceipt.uom,
+            rejectedQty: fgReceipt.rejectedQty,
+            rejectionReason: dto.reason.trim(),
+            companyId: user.companyId,
+            createdBy: user.id, updatedBy: user.id,
+          }],
+        },
+      },
+      include: this.includes(),
+    });
+
+    await this.audit.log({ tableName: 'rejected_stock', recordId: rejected.id, action: 'CREATE', newValues: rejected, changedBy: user.id });
+    return rejected;
   }
 
   async createFromIqc(iqcId: string, user: any) {

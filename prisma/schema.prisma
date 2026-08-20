@@ -2690,10 +2690,17 @@ model RejectedStock {
   companyId         String
   company           Company        @relation(fields: [companyId], references: [id])
   rejectionNumber   String
-  iqcId             String
-  iqc               IqcInspection  @relation(fields: [iqcId], references: [id])
-  grnId             String
-  grn               GrnHeader      @relation(fields: [grnId], references: [id])
+  // Origin is either an IQC (incoming raw material rejected on inspection)
+  // or an FgReceipt (finished goods a Work Order produced that didn't pass
+  // - a real production reject, not a purchasing one). Exactly one of
+  // these two should be set; both optional since neither origin implies
+  // the other exists.
+  iqcId             String?
+  iqc               IqcInspection? @relation(fields: [iqcId], references: [id])
+  grnId             String?
+  grn               GrnHeader?     @relation(fields: [grnId], references: [id])
+  fgReceiptId       String?
+  fgReceipt         FgReceipt?     @relation(fields: [fgReceiptId], references: [id])
   warehouseId       String
   warehouse         Warehouse      @relation(fields: [warehouseId], references: [id])
   status            String         @default("QUARANTINED") // QUARANTINED, PARTIALLY_DISPOSITIONED, CLOSED
@@ -3322,6 +3329,7 @@ model FgReceipt {
   updatedBy     String?
 
   oqcInspections OqcInspection[]
+  rejectedStockRecords RejectedStock[]
   @@unique([companyId, receiptNumber])
   @@index([companyId, workOrderId])
   @@map("fg_receipts")

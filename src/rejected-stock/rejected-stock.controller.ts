@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { RejectedStockService } from './rejected-stock.service';
-import { DisposeItemDto } from './dto/rejected-stock.dto';
+import { DisposeItemDto, CreateFromFgReceiptDto } from './dto/rejected-stock.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -26,6 +26,10 @@ export class RejectedStockController {
   @Post('from-iqc/:iqcId')
   @RequirePermissions(Permission.INVENTORY_CREATE)
   createFromIqc(@Param('iqcId') iqcId: string, @Request() req: any) { return this.rsService.createFromIqc(iqcId, req.user); }
+
+  @Post('from-fg-receipt/:fgReceiptId')
+  @RequirePermissions(Permission.INVENTORY_CREATE)
+  createFromFgReceipt(@Param('fgReceiptId') fgReceiptId: string, @Body() dto: CreateFromFgReceiptDto, @Request() req: any) { return this.rsService.createFromFgReceipt(fgReceiptId, dto, req.user); }
 
   @Put(':id/items/:itemId/dispose')
   @RequirePermissions(Permission.INVENTORY_EDIT)

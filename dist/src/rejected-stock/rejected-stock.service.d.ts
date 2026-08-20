@@ -1,12 +1,70 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { DisposeItemDto } from './dto/rejected-stock.dto';
+import { DisposeItemDto, CreateFromFgReceiptDto } from './dto/rejected-stock.dto';
 export declare class RejectedStockService {
     private prisma;
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     private generateNumber;
     private includes;
+    createFromFgReceipt(fgReceiptId: string, dto: CreateFromFgReceiptDto, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            rejectionReason: string | null;
+            rejectedQty: number;
+            disposition: string;
+            dispositionNotes: string | null;
+            dispositionBy: string | null;
+            iqcItemId: string | null;
+            dispositionDate: Date | null;
+            rejectedStockId: string;
+        }[];
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
+        grn: {
+            grnType: string;
+            grnNumber: string;
+        };
+        iqc: {
+            iqcNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        warehouseId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
+        rejectionNumber: string;
+        totalRejectedQty: number;
+    }>;
     createFromIqc(iqcId: string, user: any): Promise<{
         items: {
             id: string;
@@ -33,6 +91,13 @@ export declare class RejectedStockService {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -52,8 +117,9 @@ export declare class RejectedStockService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
@@ -83,8 +149,9 @@ export declare class RejectedStockService {
             status: string;
             remarks: string | null;
             warehouseId: string;
-            grnId: string;
-            iqcId: string;
+            grnId: string | null;
+            iqcId: string | null;
+            fgReceiptId: string | null;
             rejectionNumber: string;
             totalRejectedQty: number;
         })[];
@@ -119,6 +186,13 @@ export declare class RejectedStockService {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -138,8 +212,9 @@ export declare class RejectedStockService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
@@ -169,6 +244,13 @@ export declare class RejectedStockService {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -188,8 +270,9 @@ export declare class RejectedStockService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
@@ -219,6 +302,13 @@ export declare class RejectedStockService {
             name: string;
             code: string;
         };
+        fgReceipt: {
+            workOrder: {
+                stageName: string;
+                woNumber: string;
+            };
+            receiptNumber: string;
+        };
         grn: {
             grnType: string;
             grnNumber: string;
@@ -238,8 +328,9 @@ export declare class RejectedStockService {
         status: string;
         remarks: string | null;
         warehouseId: string;
-        grnId: string;
-        iqcId: string;
+        grnId: string | null;
+        iqcId: string | null;
+        fgReceiptId: string | null;
         rejectionNumber: string;
         totalRejectedQty: number;
     }>;
