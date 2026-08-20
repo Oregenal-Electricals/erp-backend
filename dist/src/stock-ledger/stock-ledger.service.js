@@ -228,10 +228,20 @@ let StockLedgerService = class StockLedgerService {
         for (const rm of rawMaterials)
             if (rm.minStockLevel != null)
                 minLevelByCode.set(rm.code, rm.minStockLevel);
+        const bins = await this.prisma.warehouseBin.findMany({
+            where: Object.assign({ itemCode: { in: codes }, currentQty: { gt: 0 }, isActive: true }, (warehouseId ? { warehouseId } : {})),
+            select: { itemCode: true, code: true, currentQty: true, warehouseId: true },
+        });
+        const binsByCode = new Map();
+        for (const b of bins) {
+            if (!binsByCode.has(b.itemCode))
+                binsByCode.set(b.itemCode, []);
+            binsByCode.get(b.itemCode).push({ code: b.code, currentQty: b.currentQty });
+        }
         const enriched = data.map(row => {
             var _a;
             const minStockLevel = (_a = minLevelByCode.get(row.itemCode)) !== null && _a !== void 0 ? _a : null;
-            return Object.assign(Object.assign({}, row), { minStockLevel, isLowStock: minStockLevel != null && row.availableQty < minStockLevel });
+            return Object.assign(Object.assign({}, row), { minStockLevel, isLowStock: minStockLevel != null && row.availableQty < minStockLevel, bins: binsByCode.get(row.itemCode) || [] });
         });
         return { data: enriched, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
     }

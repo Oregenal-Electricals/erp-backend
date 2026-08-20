@@ -20,6 +20,10 @@ export declare class StockLedgerController {
         data: {
             minStockLevel: number;
             isLowStock: boolean;
+            bins: {
+                code: string;
+                currentQty: number;
+            }[];
             warehouse: {
                 name: string;
                 code: string;

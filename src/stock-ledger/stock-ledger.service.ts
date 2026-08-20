@@ -272,12 +272,27 @@ export class StockLedgerService {
     const minLevelByCode = new Map<string, number>();
     for (const rm of rawMaterials) if (rm.minStockLevel != null) minLevelByCode.set(rm.code, rm.minStockLevel);
 
+    // Where physically is this stock right now - a store person managing
+    // shelf space needs the bin location as much as the quantity. A bin
+    // holds one item at a time (see WarehouseBin.itemCode), so this is a
+    // straight lookup, not an aggregation.
+    const bins = await this.prisma.warehouseBin.findMany({
+      where: { itemCode: { in: codes }, currentQty: { gt: 0 }, isActive: true, ...(warehouseId ? { warehouseId } : {}) },
+      select: { itemCode: true, code: true, currentQty: true, warehouseId: true },
+    });
+    const binsByCode = new Map<string, { code: string; currentQty: number }[]>();
+    for (const b of bins) {
+      if (!binsByCode.has(b.itemCode!)) binsByCode.set(b.itemCode!, []);
+      binsByCode.get(b.itemCode!)!.push({ code: b.code, currentQty: b.currentQty });
+    }
+
     const enriched = data.map(row => {
       const minStockLevel = minLevelByCode.get(row.itemCode) ?? null;
       return {
         ...row,
         minStockLevel,
         isLowStock: minStockLevel != null && row.availableQty < minStockLevel,
+        bins: binsByCode.get(row.itemCode) || [],
       };
     });
 

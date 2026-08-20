@@ -142,6 +142,10 @@ export declare class StockLedgerService {
         data: {
             minStockLevel: number;
             isLowStock: boolean;
+            bins: {
+                code: string;
+                currentQty: number;
+            }[];
             warehouse: {
                 name: string;
                 code: string;
