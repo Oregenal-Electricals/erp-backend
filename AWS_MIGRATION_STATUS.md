@@ -1,0 +1,159 @@
+# AWS Migration Status
+
+Read this first in any new session about the AWS migration - it has everything
+needed to pick up exactly where the last session left off.
+
+## Goal
+Move the full stack (frontend, backend, database) from Render/Vercel/Neon to
+AWS, with two environments (dev, staging), connected to a GoDaddy domain, with
+the guarantee that a deploy never touches/deletes data.
+
+## Account
+- AWS Account ID: 166468354805
+- Region: ap-south-1 (Mumbai) - always use this region for every resource
+- IAM admin user: sidartha-admin (root login not used day-to-day)
+- AWS CLI is configured locally (`aws sts get-caller-identity` confirms)
+
+## Completed
+
+### 1. Database - AWS RDS PostgreSQL (DONE, verified)
+Two separate `db.t3.micro` instances, ~$21.60/month each:
+- `oregenal-dev` - endpoint: `oregenal-dev.cfk4yqe0a3yo.ap-south-1.rds.amazonaws.com:5432`, db name `erp_development`
+- `oregenal-staging` - endpoint: `oregenal-staging.cfk4yqe0a3yo.ap-south-1.rds.amazonaws.com:5432`, db name `erp_staging`
+- Master username on both: `postgres`
+- Passwords: saved locally when created (not repeated here) - IMPORTANT: both
+  passwords contain a literal `#` character, which MUST be URL-encoded as
+  `%23` in any connection string (Prisma's URL parser treats a raw `#` as a
+  URL fragment delimiter and silently truncates/corrupts the connection
+  string otherwise - psql tolerates it, Prisma does not).
+- Security groups: `oregenal-dev-sg` (sg-078f68ffeb38acdfa) and
+  `oregenal-staging-sg` (its own SG) - both currently allow inbound 5432 from
+  a) the developer's home IP (for psql/local testing) and b) the ECS
+  service's security group (sg-082197bd1fc409e3a for dev) so the deployed
+  backend can actually reach the database. **If a new ECS service or a new
+  developer IP needs DB access, add an inbound rule on the RDS security
+  group for it - this is the #1 thing that silently breaks deployments.**
+
+**Data migration**: fully done and row-count verified table-by-table (boms,
+bom_items, raw_materials, users, customers, vendors, purchase_orders,
+sales_orders, work_orders - all exact matches between Neon and RDS). Neon
+dev was already empty of real BOM data (confirmed both sides show 0), so
+that "empty" migration is correct, not a bug. Neon staging had the real test
+data (61 BOMs, 1125 bom_items, etc.) and every count matched exactly.
+
+Migration method used (repeatable if ever needed again):
+```bash
+# Local pg_dump/pg_restore must be v16+ to match Neon's server version -
+# installed via `brew install postgresql@17`, called by full path since it's
+# keg-only (not symlinked over the existing older postgresql@14):
+/opt/homebrew/opt/postgresql@17/bin/pg_dump "<neon-connection-string>" -F c -f backup.dump
+/opt/homebrew/opt/postgresql@17/bin/pg_restore -d "<rds-connection-string>" -v backup.dump
+```
+The restore reports ~190 "errors" every time - all of them are Neon-specific
+role references (`neondb_owner`, `neon_superuser`) that don't exist on RDS.
+These are harmless; verify with
+`grep "error: could not execute query" log | grep -v "neondb_owner\|neon_superuser"`
+- if that returns nothing, the restore is clean.
+
+### 2. Backend - Docker + ECR + ECS Express Mode (DONE for dev, verified working)
+
+**AWS App Runner is deprecated** (stopped accepting new customers April 30,
+2026) - AWS's replacement is **ECS Express Mode**, which requires a real
+Docker image pushed to ECR (no more direct source-code/buildpack deploys
+like Render or the old App Runner did). This is why the setup below exists.
+
+**Dockerfile** (repo root of erp-backend, already committed): multi-stage
+build - builder stage installs full deps + runs `prisma generate` +
+`nest build`, production stage reinstalls only prod deps and copies in the
+compiled `dist/`, the generated Prisma client, and the schema. Entry point is
+`node dist/src/main.js` - **not** `dist/main.js` as the (unused) `start:prod`
+npm script assumes; verified directly against real build output.
+
+**Critical gotcha - CPU architecture**: Docker on an Apple Silicon Mac builds
+ARM64 images by default. ECS Fargate expects X86_64 (amd64) unless the task
+definition is explicitly set otherwise, and ECS's automatic "architecture
+override" turned out to be unreliable in practice (it announced an override
+to ARM64 after a failed deploy, but the next deploy attempt still tried to
+pull `linux/amd64` and failed identically). **The fix that actually worked**:
+always build explicitly for the target platform:
+```bash
+docker build --platform linux/amd64 -t erp-backend:amd64 .
+```
+Do this for every image pushed to ECR going forward.
+
+**ECR repositories** (both in ap-south-1):
+- `166468354805.dkr.ecr.ap-south-1.amazonaws.com/oregenal-backend-dev`
+- `166468354805.dkr.ecr.ap-south-1.amazonaws.com/oregenal-backend-staging`
+
+Push flow:
+```bash
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 166468354805.dkr.ecr.ap-south-1.amazonaws.com
+docker build --platform linux/amd64 -t erp-backend:amd64 .
+docker tag erp-backend:amd64 166468354805.dkr.ecr.ap-south-1.amazonaws.com/oregenal-backend-dev:latest
+docker push 166468354805.dkr.ecr.ap-south-1.amazonaws.com/oregenal-backend-dev:latest
+# repeat tag+push for -staging if updating both
+```
+
+**ECS Express Mode service - dev** (LIVE and verified working):
+- Service name: `oregenal-backend-dev`, cluster: `default`
+- Application URL: `https://or-c3bff864ef5c4c41a76b3e3218c00236.ecs.ap-south-1.on.aws`
+- Confirmed via `curl .../api/v1/health` → `{"status":"ok", "database":{"status":"ok"}...}`
+- Container port 3001, health check path `/api/v1/health`
+- Environment variables set: `PORT=3001`, `NODE_ENV=production`,
+  `DATABASE_URL` (with `%23`-encoded password, pointing at oregenal-dev RDS),
+  `JWT_SECRET` (same value the app already used on Render - note the value
+  itself has an old copy-paste accident baked in, literally starting with
+  "JWT_SECRET=" as PART of the secret string; left as-is since changing it
+  would invalidate every existing login session - not fixed, just noted)
+- Compute: 1 vCPU / 2GB, autoscaling 1-20 tasks on 60% CPU target (all
+  Express Mode defaults, untouched)
+
+To redeploy after pushing a new image:
+```bash
+aws ecs update-service --cluster default --service oregenal-backend-dev --force-new-deployment --region ap-south-1
+```
+Check rollout status:
+```bash
+aws ecs describe-services --cluster default --services oregenal-backend-dev --region ap-south-1 --query "services[0].{runningCount:runningCount,desiredCount:desiredCount,deployments:deployments[*].{status:status,rolloutState:rolloutState,failedTasks:failedTasks}}"
+```
+If a task fails, find the reason with:
+```bash
+aws ecs list-tasks --cluster default --service-name oregenal-backend-dev --desired-status STOPPED --region ap-south-1 --query "taskArns[0]" --output text
+aws ecs describe-tasks --cluster default --tasks <arn-from-above> --region ap-south-1 --query "tasks[0].stoppedReason"
+```
+Application logs (CloudWatch): log group name follows the pattern
+`/aws/ecs/default/oregenal-backend-dev-XXXX` (the suffix is assigned by AWS
+per service, find it with `aws logs describe-log-groups --region ap-south-1`).
+```bash
+aws logs tail "<log-group-name>" --region ap-south-1 --since 10m
+```
+
+## Not started yet
+
+1. **ECS Express Mode service - staging**: same steps as dev above, but
+   pointing at the `oregenal-backend-staging` ECR repo and the
+   `oregenal-staging` RDS database (remember: URL-encode its own `#`
+   password too, and add its own ECS service's security group to the
+   staging RDS security group's inbound rules once created).
+2. **Frontend on AWS Amplify** (both dev and staging environments) - not
+   started at all.
+3. **GoDaddy domain connection** - keep DNS management at GoDaddy, just add
+   records (CNAME/A) pointing subdomains at the AWS resources once frontend
+   and backend are both live. Not started.
+4. **Cleanup**: local test Docker images/containers (`erp-backend:test`,
+   `erp-backend:amd64`) are just local artifacts, safe to remove any time;
+   nothing in AWS depends on them once pushed to ECR.
+
+## Key lessons if picking this up fresh
+- Always build Docker images with `--platform linux/amd64` on this Apple
+  Silicon Mac before pushing to ECR - the default build silently produces an
+  incompatible image that fails at deploy time, not build time.
+- Any password with a `#` in it needs `%23` in a Prisma/connection-string
+  context, even though `psql` alone tolerates the raw character.
+- A new ECS service can build and pull its image fine but still crash on
+  startup with "Can't reach database server" if its security group isn't
+  explicitly allowed into the RDS security group's inbound rules - this is
+  a separate step from creating the RDS instance itself.
+- AWS App Runner is gone for new setups; ECS Express Mode is the direct
+  replacement and requires a container image workflow, not source-code
+  auto-build.
