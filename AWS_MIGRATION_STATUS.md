@@ -239,3 +239,83 @@ branch (`main`) - environments are switched via separate ECR images/ECS
 services, not branches, so there's no backend code-sync question at all.
 If `main` gets ahead of `dev` on the frontend in a future session, that's
 when an actual merge/rebase would be needed - not yet.
+
+## Update - Custom domain live, CORS fixed, two critical deploy gotchas found and fixed (2026-08-21)
+
+### Custom domain (dev) - DONE and verified working
+
+`dev.oregenalelectrical.com` is live, serving the dev frontend, and login
+against the dev backend fully works end-to-end. Root domain and `www` were
+NOT touched - this business's real live site keeps working exactly as
+before. Chosen approach: "Manual configuration" (not Route 53), which keeps
+GoDaddy in control of all existing DNS. Two CNAME records were needed at
+GoDaddy for this one subdomain (both required - easy to add only one and
+get confused when things don't work):
+1. SSL validation CNAME (proves domain ownership so Amplify can issue a
+   certificate) - shown under the domain's "Domain configuration" screen.
+2. Routing CNAME (`dev` → `dev.d1u2wcgsqf829g.amplifyapp.com`) - this is
+   what actually makes the subdomain resolve to the app; it does NOT show
+   up automatically after step 1, has to be added separately once the
+   subdomain mapping is saved in Amplify's "Add new" subdomain flow.
+
+Next subdomain requested: `essenpro.oregenalelectrical.com` for staging -
+not started yet, same two-CNAME process, targeting the staging Amplify
+app's default URL instead.
+
+### Two critical ECS deploy gotchas found and fixed - apply to EVERY future backend deploy
+
+**1. Docker build cache can silently produce the wrong architecture even
+with `--platform linux/amd64` specified.** If a previous build on this
+machine produced an ARM64 image, Docker may reuse those cached layers
+across a differently-platformed build, producing a broken image that LOOKS
+like it built for amd64 but isn't. Always verify after building:
+```bash
+docker inspect erp-backend:amd64 --format '{{.Architecture}}'
+```
+should print `amd64`. If unsure, or after any doubt, force a truly clean
+build:
+```bash
+docker build --no-cache --platform linux/amd64 -t erp-backend:amd64 .
+```
+
+**2. ECS Express Mode, when the image was originally selected by "Image
+digest" (the AWS-recommended default) rather than by tag, pins the task
+definition to that EXACT digest forever - pushing a new image to the
+`:latest` tag and running `--force-new-deployment` does NOT pick up the new
+image, because the task definition never referenced the tag in the first
+place, only that one specific digest.** This cost real time today - CORS
+and other backend code fixes were pushed and "successfully redeployed"
+multiple times while the running containers were silently still serving
+the very first image ever pushed.
+
+**The fix, done once for both dev and staging**: re-registered a new task
+definition revision with the container image changed from the pinned
+digest to the floating tag (`...oregenal-backend-dev:latest` /
+`...oregenal-backend-staging:latest`), then pointed the service at that new
+revision:
+```bash
+aws ecs describe-task-definition --task-definition default-oregenal-backend-dev:N --region ap-south-1 --query "taskDefinition" > /tmp/taskdef.json
+# edit containerDefinitions[0].image to end in :latest instead of @sha256:..., strip the read-only fields (taskDefinitionArn, revision, status, requiresAttributes, compatibilities, registeredAt, registeredBy)
+aws ecs register-task-definition --cli-input-json file:///tmp/taskdef-new.json --region ap-south-1
+aws ecs update-service --cluster default --service oregenal-backend-dev --task-definition default-oregenal-backend-dev:<new-revision> --force-new-deployment --region ap-south-1
+```
+Both dev and staging now correctly track `:latest`, so a normal
+`docker push ... :latest` + `aws ecs update-service --force-new-deployment`
+is sufficient for every future deploy - this was a one-time fix.
+
+**How to verify a deploy actually picked up a new image, going forward**:
+don't just check `rolloutState: COMPLETED` - that was true even when
+serving the stale image. Instead confirm behavior that only the NEW code
+would produce (e.g. the CORS header test used here), or check task uptime
+via the health endpoint immediately after a deploy to confirm it's a freshly
+started container, not one that's been running since before the fix.
+
+### CORS - fixed in code, applies everywhere going forward
+
+`erp-backend/src/main.ts` CORS origin allowlist now includes
+`/\.amplifyapp\.com$/` and `/\.oregenalelectrical\.com$/` regex patterns
+(alongside the existing `frontendUrl`, `localhost:3000`, and `/\.vercel\.app$/`),
+so any Amplify default URL or any subdomain of the real domain will work
+automatically without needing a code change for each new subdomain added
+later (e.g. `essenpro.oregenalelectrical.com` for staging will already be
+covered by this same regex - no separate CORS fix needed for it).
