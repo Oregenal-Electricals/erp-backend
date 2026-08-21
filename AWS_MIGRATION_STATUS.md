@@ -152,16 +152,45 @@ the `oregenal-staging` RDS database:
   there's no ACM cert step to reverse-engineer it from) - easiest to just
   read "Application URL" directly off the service's console overview page.
 
+### 4. Frontend - AWS Amplify (DONE for both environments, verified working)
+
+**Key thing to understand**: Next.js reads `NEXT_PUBLIC_API_URL` at BUILD
+TIME, not runtime - it gets compiled into the app. That means dev and
+staging genuinely need two separate deployments (unlike the backend, which
+can share one image across environments via runtime env vars) - one build
+per backend it needs to point at.
+
+A `dev` branch was created on `erp-frontend` (did not exist before - the
+repo previously only had `main`, which had been serving as the de facto
+staging branch all along). **Do not confuse this with the unused `dev`
+branch that got accidentally created on `erp-backend` too** - that one is
+harmless but not used for anything; backend environments are switched via
+separate ECR images/ECS services, not branches.
+
+- **erp-frontend-dev** (Amplify app, tracks the `dev` branch): live at
+  `https://dev.d1u2wcgsqf829g.amplifyapp.com/` - `NEXT_PUBLIC_API_URL` set
+  to the dev ECS backend URL + `/api/v1`. Confirmed loading the login page
+  correctly in browser.
+- **erp-frontend-staging** (Amplify app, tracks the `main` branch): live at
+  `https://main.d1jdq2r1dclqd0.amplifyapp.com/` - `NEXT_PUBLIC_API_URL` set
+  to the staging ECS backend URL + `/api/v1`. Confirmed loading the login
+  page correctly in browser.
+
+Both auto-deploy on push to their respective branch, same as Vercel did -
+push to `dev` updates the dev Amplify app, push to `main` updates staging.
+
 ## Not started yet
 
-1. **Frontend on AWS Amplify** (both dev and staging environments) - not
-   started at all.
-2. **GoDaddy domain connection** - keep DNS management at GoDaddy, just add
-   records (CNAME/A) pointing subdomains at the AWS resources once frontend
-   and backend are both live. Not started.
-3. **Cleanup**: local test Docker images/containers (`erp-backend:test`,
+1. **GoDaddy domain connection** - keep DNS management at GoDaddy, just add
+   records (CNAME/A) pointing subdomains at the AWS resources once ready.
+   Not started. Will need one subdomain per environment per layer (e.g.
+   app-dev / app / api-dev / api), pointing at the Amplify apps' and ECS
+   Application URLs' actual hostnames respectively.
+2. **Cleanup**: local test Docker images/containers (`erp-backend:test`,
    `erp-backend:amd64`) are just local artifacts, safe to remove any time;
-   nothing in AWS depends on them once pushed to ECR.
+   nothing in AWS depends on them once pushed to ECR. The unused `dev`
+   branch on `erp-backend` can also be deleted whenever convenient - it was
+   an accidental creation, nothing depends on it.
 
 ## Key lessons if picking this up fresh
 - Always build Docker images with `--platform linux/amd64` on this Apple
