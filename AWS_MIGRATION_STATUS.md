@@ -205,3 +205,37 @@ push to `dev` updates the dev Amplify app, push to `main` updates staging.
 - AWS App Runner is gone for new setups; ECS Express Mode is the direct
   replacement and requires a container image workflow, not source-code
   auto-build.
+
+## Update - dev database refreshed from staging (2026-08-21)
+
+Dev's RDS database was completely wiped and replaced with a fresh copy of
+staging's current data (staging has all the real test data; dev was mostly
+empty). Row counts verified matching exactly across all key tables after
+restore (users, boms, bom_items, products, raw_materials, customers,
+vendors, purchase_orders, sales_orders, work_orders - all identical).
+
+Method: same pg_dump/pg_restore approach as the original Neon migration, but
+RDS-to-RDS this time (dev's DB dropped and recreated first, since it can't
+be dropped while ECS has an active connection - had to
+`SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '...'`
+first). This restore came back with 0 errors (cleaner than the original
+Neon migration, since there were no more Neon-specific role references to
+trip over).
+
+**New gotcha**: RDS is running PostgreSQL 18, which needed yet another local
+client upgrade (`brew install postgresql@18`, called by full path same as
+the v17 one) - pg_dump/pg_restore refuse to run against a newer major server
+version than themselves. If this happens again, check the actual server
+version in the error message and install a matching or newer local version.
+
+Dev's ECS backend confirmed still healthy after the database swap (Prisma
+reconnects transparently, no redeploy needed) - `curl .../api/v1/health`
+still returns `{"status":"ok", "database":{"status":"ok"}...}`.
+
+**Code sync**: `erp-frontend`'s `dev` and `main` branches are currently
+identical (dev was branched from main today and nothing has been committed
+to either since) - no drift to worry about yet. `erp-backend` only has one
+branch (`main`) - environments are switched via separate ECR images/ECS
+services, not branches, so there's no backend code-sync question at all.
+If `main` gets ahead of `dev` on the frontend in a future session, that's
+when an actual merge/rebase would be needed - not yet.
