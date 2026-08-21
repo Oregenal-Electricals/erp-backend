@@ -319,3 +319,35 @@ so any Amplify default URL or any subdomain of the real domain will work
 automatically without needing a code change for each new subdomain added
 later (e.g. `essenpro.oregenalelectrical.com` for staging will already be
 covered by this same regex - no separate CORS fix needed for it).
+
+## Update - staging custom domain live, migration essentially complete (2026-08-21)
+
+`essenpro.oregenalelectrical.com` is now live (staging Amplify app, `main`
+branch), same setup as dev - same two CNAME records at GoDaddy, root domain
+and `www` untouched. Login confirmed working end-to-end. No CORS fix needed
+for this one specifically, since the regex added earlier
+(`/\.oregenalelectrical\.com$/`) already covers any subdomain of the real
+domain.
+
+## Current full picture
+
+| Layer | Dev | Staging |
+|---|---|---|
+| Database | RDS `oregenal-dev` | RDS `oregenal-staging` |
+| Backend | ECS `oregenal-backend-dev` | ECS `oregenal-backend-staging` |
+| Frontend | Amplify `erp-frontend-dev` | Amplify `erp-frontend-staging` |
+| Custom domain | dev.oregenalelectrical.com | essenpro.oregenalelectrical.com |
+
+All four layers, both environments, fully verified working end-to-end
+including real login. The original goal from the start of this migration -
+full stack on AWS, two environments, connected to the GoDaddy domain,
+without ever touching the business's live main site - is complete.
+
+## Still worth doing at some point (not urgent)
+
+- Delete the now-unused local test images/containers on this Mac
+  (`erp-backend:test`, `erp-backend:amd64`) - harmless to leave, but easy
+  cleanup whenever convenient.
+- Consider whether Render/Vercel/Neon (the original hosting) should be
+  decommissioned now that AWS is fully verified working, or kept running in
+  parallel for a while as a safety net before fully cutting over.
