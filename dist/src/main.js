@@ -23,7 +23,7 @@ async function bootstrap() {
     app.use((0, helmet_1.default)());
     app.use(compression());
     app.enableCors({
-        origin: [frontendUrl, 'http://localhost:3000', /\.vercel\.app$/],
+        origin: [frontendUrl, 'http://localhost:3000', /\.vercel\.app$/, /\.amplifyapp\.com$/, /\.oregenalelectrical\.com$/],
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Test-Session'],
         credentials: true,
