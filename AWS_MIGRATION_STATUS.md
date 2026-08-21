@@ -128,19 +128,38 @@ per service, find it with `aws logs describe-log-groups --region ap-south-1`).
 aws logs tail "<log-group-name>" --region ap-south-1 --since 10m
 ```
 
+### 3. Backend - ECS Express Mode service - staging (DONE, verified working)
+
+Same setup as dev, pointing at the `oregenal-backend-staging` ECR repo and
+the `oregenal-staging` RDS database:
+- Service name: `oregenal-backend-staging`, cluster: `default`
+- Application URL: `https://or-ce4f5a84b93a4c84af1b202632b8a14b.ecs.ap-south-1.on.aws`
+- Confirmed via `curl .../api/v1/health` → `{"status":"ok", "database":{"status":"ok"}...}`
+- Same env vars as dev but pointing at staging's own DATABASE_URL (its `#`
+  password also URL-encoded to `%23`)
+- Staging's ECS service security group: `sg-041469bca05cdfb2b`
+  (name: `default-oregenal-backend-staging-vpc-05b969e1a2f4c1fdb`) - this had
+  to be found via the task's network interface (`aws ecs describe-tasks`
+  → `attachments[0].details` → `networkInterfaceId`, then
+  `aws ec2 describe-network-interfaces` - though the ENI gets torn down fast
+  once a task stops, so if that lookup 404s, search security groups by name
+  instead: `aws ec2 describe-security-groups --query "SecurityGroups[?contains(GroupName, '<service-name>')]"`)
+  - added as an inbound rule on `oregenal-staging-sg` (sg-0181127670334fa4d)
+    for port 5432, exact same "Can't reach database server" failure as dev
+    hit first, same fix.
+- Getting the Application URL via CLI is unreliable right after creation
+  (service-level `networkConfiguration.securityGroups` can show empty, and
+  there's no ACM cert step to reverse-engineer it from) - easiest to just
+  read "Application URL" directly off the service's console overview page.
+
 ## Not started yet
 
-1. **ECS Express Mode service - staging**: same steps as dev above, but
-   pointing at the `oregenal-backend-staging` ECR repo and the
-   `oregenal-staging` RDS database (remember: URL-encode its own `#`
-   password too, and add its own ECS service's security group to the
-   staging RDS security group's inbound rules once created).
-2. **Frontend on AWS Amplify** (both dev and staging environments) - not
+1. **Frontend on AWS Amplify** (both dev and staging environments) - not
    started at all.
-3. **GoDaddy domain connection** - keep DNS management at GoDaddy, just add
+2. **GoDaddy domain connection** - keep DNS management at GoDaddy, just add
    records (CNAME/A) pointing subdomains at the AWS resources once frontend
    and backend are both live. Not started.
-4. **Cleanup**: local test Docker images/containers (`erp-backend:test`,
+3. **Cleanup**: local test Docker images/containers (`erp-backend:test`,
    `erp-backend:amd64`) are just local artifacts, safe to remove any time;
    nothing in AWS depends on them once pushed to ECR.
 
