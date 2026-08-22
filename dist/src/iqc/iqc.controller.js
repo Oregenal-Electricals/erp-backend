@@ -14,19 +14,30 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IqcController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const iqc_service_1 = require("./iqc.service");
 const iqc_escalation_service_1 = require("./iqc-escalation.service");
+const iqc_template_import_service_1 = require("./iqc-template-import.service");
 const iqc_dto_1 = require("./dto/iqc.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const permissions_guard_1 = require("../common/guards/permissions.guard");
 const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
 const permissions_enum_1 = require("../common/permissions/permissions.enum");
 let IqcController = class IqcController {
-    constructor(iqcService, escalation) {
+    constructor(iqcService, escalation, templateImport) {
         this.iqcService = iqcService;
         this.escalation = escalation;
+        this.templateImport = templateImport;
     }
     getStats(req) { return this.iqcService.getStats(req.user); }
+    parseTemplateImport(file) {
+        if (!file)
+            throw new common_1.BadRequestException('No file uploaded');
+        return this.templateImport.parseWorkbook(file);
+    }
+    confirmTemplateImport(dto, req) {
+        return this.templateImport.confirmImport(dto.templates, req.user);
+    }
     findAllTemplates(req, query) { return this.escalation.findAllTemplates(req.user, query); }
     findOneTemplate(id, req) { return this.escalation.findOneTemplate(id, req.user); }
     createTemplate(dto, req) { return this.escalation.createTemplate(dto, req.user); }
@@ -51,6 +62,24 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], IqcController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Post)('templates/import/parse'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], IqcController.prototype, "parseTemplateImport", null);
+__decorate([
+    (0, common_1.Post)('templates/import/confirm'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [iqc_dto_1.ConfirmTemplateImportDto, Object]),
+    __metadata("design:returntype", void 0)
+], IqcController.prototype, "confirmTemplateImport", null);
 __decorate([
     (0, common_1.Get)('templates'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
@@ -185,6 +214,8 @@ __decorate([
 exports.IqcController = IqcController = __decorate([
     (0, common_1.Controller)('iqc'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    __metadata("design:paramtypes", [iqc_service_1.IqcService, iqc_escalation_service_1.IqcEscalationService])
+    __metadata("design:paramtypes", [iqc_service_1.IqcService,
+        iqc_escalation_service_1.IqcEscalationService,
+        iqc_template_import_service_1.IqcTemplateImportService])
 ], IqcController);
 //# sourceMappingURL=iqc.controller.js.map

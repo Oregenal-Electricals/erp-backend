@@ -14,8 +14,11 @@ const audit_interceptor_1 = require("./common/interceptors/audit.interceptor");
 const test_session_interceptor_1 = require("./common/interceptors/test-session.interceptor");
 async function bootstrap() {
     const compression = require('compression');
+    const express = require('express');
     const logger = new common_1.Logger('Bootstrap');
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.use(express.json({ limit: '10mb' }));
+    app.use(express.urlencoded({ limit: '10mb', extended: true }));
     const configService = app.get(config_1.ConfigService);
     const port = configService.get('port') || 3001;
     const environment = configService.get('environment');

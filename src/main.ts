@@ -10,8 +10,15 @@ import { TestSessionInterceptor } from './common/interceptors/test-session.inter
 
 async function bootstrap() {
   const compression = require('compression');
+  const express = require('express');
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+
+  // Default body-parser limit (100kb) is too small for bulk imports -
+  // e.g. confirming an IQC template import sends back the full parsed
+  // data for 150+ check sheets in one request.
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') || 3001;

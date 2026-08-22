@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { IqcService } from './iqc.service';
 import { IqcEscalationService } from './iqc-escalation.service';
+import { IqcTemplateImportService } from './iqc-template-import.service';
 import {
   CreateIqcDto, UpdateIqcItemsDto,
   CreateIqcCheckTemplateDto, UpdateIqcCheckTemplateDto,
-  AttachTemplateDto, SubmitIqcStageResultDto,
+  AttachTemplateDto, SubmitIqcStageResultDto, ConfirmTemplateImportDto,
 } from './dto/iqc.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -14,11 +16,29 @@ import { Permission } from '../common/permissions/permissions.enum';
 @Controller('iqc')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class IqcController {
-  constructor(private readonly iqcService: IqcService, private readonly escalation: IqcEscalationService) {}
+  constructor(
+    private readonly iqcService: IqcService,
+    private readonly escalation: IqcEscalationService,
+    private readonly templateImport: IqcTemplateImportService,
+  ) {}
 
   @Get('stats')
   @RequirePermissions(Permission.QUALITY_VIEW)
   getStats(@Request() req: any) { return this.iqcService.getStats(req.user); }
+
+  @Post('templates/import/parse')
+  @RequirePermissions(Permission.QUALITY_CREATE)
+  @UseInterceptors(FileInterceptor('file'))
+  parseTemplateImport(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    return this.templateImport.parseWorkbook(file);
+  }
+
+  @Post('templates/import/confirm')
+  @RequirePermissions(Permission.QUALITY_CREATE)
+  confirmTemplateImport(@Body() dto: ConfirmTemplateImportDto, @Request() req: any) {
+    return this.templateImport.confirmImport(dto.templates, req.user);
+  }
 
   @Get('templates')
   @RequirePermissions(Permission.QUALITY_VIEW)

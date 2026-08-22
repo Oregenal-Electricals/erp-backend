@@ -2643,6 +2643,14 @@ model IqcItem {
 // Parameter / Specification / S1-S5 samples / Remark). Items snapshot
 // which template they used, so a later edit to a template never
 // changes the meaning of a past inspection.
+// Templates are versioned and immutable once created: editing a
+// template never modifies the row in place - it creates a new row
+// with version+1 and marks the old one isCurrent=false. Items
+// reference a specific template row by id, so a later edit never
+// changes what an already-completed inspection actually used - the
+// same principle as BOM revisions and price history elsewhere in
+// this app. Only the isCurrent=true row for a given name is offered
+// when starting a new inspection.
 model IqcCheckTemplate {
   id              String    @id @default(uuid())
   companyId       String
@@ -2652,6 +2660,8 @@ model IqcCheckTemplate {
   name            String
   docCode         String?
   revision        String?
+  version         Int       @default(1)
+  isCurrent       Boolean   @default(true)
   isActive        Boolean   @default(true)
   isTestData      Boolean   @default(false)
   createdAt       DateTime  @default(now())

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SubmitIqcStageResultDto = exports.IqcParameterResultDto = exports.UpdateIqcCheckTemplateDto = exports.CreateIqcCheckTemplateDto = exports.IqcCheckParameterDto = exports.AttachTemplateDto = exports.UpdateIqcItemsDto = exports.CreateIqcDto = exports.IqcItemUpdateDto = void 0;
+exports.ConfirmTemplateImportDto = exports.ImportedTemplateDto = exports.ImportedTemplateParameterDto = exports.SubmitIqcStageResultDto = exports.IqcParameterResultDto = exports.UpdateIqcCheckTemplateDto = exports.CreateIqcCheckTemplateDto = exports.IqcCheckParameterDto = exports.AttachTemplateDto = exports.UpdateIqcItemsDto = exports.CreateIqcDto = exports.IqcItemUpdateDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class IqcItemUpdateDto {
@@ -210,4 +210,59 @@ __decorate([
     (0, class_transformer_1.Type)(() => IqcParameterResultDto),
     __metadata("design:type", Array)
 ], SubmitIqcStageResultDto.prototype, "parameterResults", void 0);
+class ImportedTemplateParameterDto {
+}
+exports.ImportedTemplateParameterDto = ImportedTemplateParameterDto;
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], ImportedTemplateParameterDto.prototype, "sNo", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateParameterDto.prototype, "category", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateParameterDto.prototype, "parameterName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateParameterDto.prototype, "specification", void 0);
+class ImportedTemplateDto {
+}
+exports.ImportedTemplateDto = ImportedTemplateDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateDto.prototype, "sheetName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateDto.prototype, "docCode", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ImportedTemplateParameterDto),
+    __metadata("design:type", Array)
+], ImportedTemplateDto.prototype, "parameters", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ImportedTemplateDto.prototype, "error", void 0);
+class ConfirmTemplateImportDto {
+}
+exports.ConfirmTemplateImportDto = ConfirmTemplateImportDto;
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ImportedTemplateDto),
+    __metadata("design:type", Array)
+], ConfirmTemplateImportDto.prototype, "templates", void 0);
 //# sourceMappingURL=iqc.dto.js.map

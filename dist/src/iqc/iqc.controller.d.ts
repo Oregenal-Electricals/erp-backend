@@ -1,15 +1,27 @@
 import { IqcService } from './iqc.service';
 import { IqcEscalationService } from './iqc-escalation.service';
-import { CreateIqcDto, UpdateIqcItemsDto, CreateIqcCheckTemplateDto, UpdateIqcCheckTemplateDto, AttachTemplateDto, SubmitIqcStageResultDto } from './dto/iqc.dto';
+import { IqcTemplateImportService } from './iqc-template-import.service';
+import { CreateIqcDto, UpdateIqcItemsDto, CreateIqcCheckTemplateDto, UpdateIqcCheckTemplateDto, AttachTemplateDto, SubmitIqcStageResultDto, ConfirmTemplateImportDto } from './dto/iqc.dto';
 export declare class IqcController {
     private readonly iqcService;
     private readonly escalation;
-    constructor(iqcService: IqcService, escalation: IqcEscalationService);
+    private readonly templateImport;
+    constructor(iqcService: IqcService, escalation: IqcEscalationService, templateImport: IqcTemplateImportService);
     getStats(req: any): Promise<{
         total: number;
         pending: number;
         inProgress: number;
         approved: number;
+    }>;
+    parseTemplateImport(file: Express.Multer.File): import("./iqc-template-import.service").ParsedTemplate[];
+    confirmTemplateImport(dto: ConfirmTemplateImportDto, req: any): Promise<{
+        createdCount: number;
+        created: string[];
+        skippedCount: number;
+        skipped: {
+            sheetName: string;
+            reason: string;
+        }[];
     }>;
     findAllTemplates(req: any, query: any): Promise<({
         _count: {
@@ -30,8 +42,10 @@ export declare class IqcController {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     })[]>;
     findOneTemplate(id: string, req: any): Promise<{
         rawMaterial: {
@@ -65,8 +79,10 @@ export declare class IqcController {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     createTemplate(dto: CreateIqcCheckTemplateDto, req: any): Promise<{
         parameters: {
@@ -96,14 +112,12 @@ export declare class IqcController {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     updateTemplate(id: string, dto: UpdateIqcCheckTemplateDto, req: any): Promise<{
-        rawMaterial: {
-            name: string;
-            code: string;
-        };
         parameters: {
             id: string;
             companyId: string;
@@ -131,8 +145,10 @@ export declare class IqcController {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     cloneTemplate(id: string, name: string, req: any): Promise<{
         parameters: {
@@ -162,8 +178,10 @@ export declare class IqcController {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
@@ -336,8 +354,10 @@ export declare class IqcController {
             createdBy: string | null;
             updatedBy: string | null;
             revision: string | null;
+            version: number;
             rawMaterialId: string | null;
             docCode: string | null;
+            isCurrent: boolean;
         };
         stageResults: ({
             parameterResults: ({
@@ -600,8 +620,10 @@ export declare class IqcController {
             createdBy: string | null;
             updatedBy: string | null;
             revision: string | null;
+            version: number;
             rawMaterialId: string | null;
             docCode: string | null;
+            isCurrent: boolean;
         };
         stageResults: ({
             parameterResults: ({
@@ -720,8 +742,10 @@ export declare class IqcController {
             createdBy: string | null;
             updatedBy: string | null;
             revision: string | null;
+            version: number;
             rawMaterialId: string | null;
             docCode: string | null;
+            isCurrent: boolean;
         };
         stageResults: ({
             parameterResults: ({

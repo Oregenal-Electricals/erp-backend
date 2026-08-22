@@ -39,8 +39,10 @@ export declare class IqcEscalationService {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     findAllTemplates(user: any, query: any): Promise<({
         _count: {
@@ -61,8 +63,10 @@ export declare class IqcEscalationService {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     })[]>;
     findOneTemplate(id: string, user: any): Promise<{
         rawMaterial: {
@@ -96,14 +100,12 @@ export declare class IqcEscalationService {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     updateTemplate(id: string, dto: UpdateIqcCheckTemplateDto, user: any): Promise<{
-        rawMaterial: {
-            name: string;
-            code: string;
-        };
         parameters: {
             id: string;
             companyId: string;
@@ -131,8 +133,10 @@ export declare class IqcEscalationService {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     cloneTemplate(id: string, newName: string, user: any): Promise<{
         parameters: {
@@ -162,8 +166,10 @@ export declare class IqcEscalationService {
         createdBy: string | null;
         updatedBy: string | null;
         revision: string | null;
+        version: number;
         rawMaterialId: string | null;
         docCode: string | null;
+        isCurrent: boolean;
     }>;
     private itemIncludes;
     attachTemplate(itemId: string, dto: AttachTemplateDto, user: any): Promise<{
@@ -208,8 +214,10 @@ export declare class IqcEscalationService {
             createdBy: string | null;
             updatedBy: string | null;
             revision: string | null;
+            version: number;
             rawMaterialId: string | null;
             docCode: string | null;
+            isCurrent: boolean;
         };
         stageResults: ({
             parameterResults: ({
@@ -328,8 +336,10 @@ export declare class IqcEscalationService {
             createdBy: string | null;
             updatedBy: string | null;
             revision: string | null;
+            version: number;
             rawMaterialId: string | null;
             docCode: string | null;
+            isCurrent: boolean;
         };
         stageResults: ({
             parameterResults: ({
@@ -448,8 +458,10 @@ export declare class IqcEscalationService {
             createdBy: string | null;
             updatedBy: string | null;
             revision: string | null;
+            version: number;
             rawMaterialId: string | null;
             docCode: string | null;
+            isCurrent: boolean;
         };
         stageResults: ({
             parameterResults: ({

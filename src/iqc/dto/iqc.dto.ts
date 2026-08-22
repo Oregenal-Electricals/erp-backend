@@ -66,3 +66,24 @@ export class SubmitIqcStageResultDto {
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => IqcParameterResultDto)
   parameterResults?: IqcParameterResultDto[];
 }
+
+export class ImportedTemplateParameterDto {
+  @IsNumber() sNo: number;
+  @IsString() category: string;
+  @IsString() parameterName: string;
+  @IsString() specification: string;
+}
+
+export class ImportedTemplateDto {
+  @IsString() sheetName: string;
+  @IsString() name: string;
+  @IsOptional() @IsString() docCode?: string;
+  @IsArray() @ValidateNested({ each: true }) @Type(() => ImportedTemplateParameterDto)
+  parameters: ImportedTemplateParameterDto[];
+  @IsOptional() @IsString() error?: string;
+}
+
+export class ConfirmTemplateImportDto {
+  @IsArray() @ValidateNested({ each: true }) @Type(() => ImportedTemplateDto)
+  templates: ImportedTemplateDto[];
+}

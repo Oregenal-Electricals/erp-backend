@@ -43,6 +43,17 @@ export class IqcEscalationService {
   ) {}
 
   async createTemplate(dto: CreateIqcCheckTemplateDto, user: any) {
+    // A name is a template "family" - only one CURRENT version of a
+    // given name can exist at a time. Creating brand new under a name
+    // that already has a current version is rejected; use Edit on the
+    // existing one instead, which creates the next version properly.
+    const existingCurrent = await this.prisma.iqcCheckTemplate.findFirst({
+      where: { companyId: user.companyId, name: dto.name, isActive: true, isCurrent: true },
+    });
+    if (existingCurrent) {
+      throw new BadRequestException(`A template named "${dto.name}" already exists (version ${(existingCurrent as any).version}). Edit it instead to create a new version.`);
+    }
+
     const template = await this.prisma.iqcCheckTemplate.create({
       data: {
         companyId: user.companyId,
@@ -50,6 +61,8 @@ export class IqcEscalationService {
         name: dto.name,
         docCode: dto.docCode,
         revision: dto.revision,
+        version: 1,
+        isCurrent: true,
         createdBy: user.id, updatedBy: user.id,
         parameters: {
           create: dto.parameters.map((p, idx) => ({
@@ -71,7 +84,10 @@ export class IqcEscalationService {
 
   async findAllTemplates(user: any, query: any) {
     const { search, rawMaterialId } = query;
-    const where: any = { companyId: user.companyId, isActive: true };
+    // Only the current version of each named template - past versions
+    // remain in the database (referenced by past inspections) but are
+    // never offered when starting new work.
+    const where: any = { companyId: user.companyId, isActive: true, isCurrent: true };
     if (rawMaterialId) where.rawMaterialId = rawMaterialId;
     if (search) where.name = { contains: search, mode: 'insensitive' };
     return this.prisma.iqcCheckTemplate.findMany({
@@ -89,26 +105,46 @@ export class IqcEscalationService {
     return template;
   }
 
+  // Editing never mutates the existing row - it creates a new one
+  // with version+1, and flips the old row's isCurrent off. Any
+  // inspection item that already points at the old row's id keeps
+  // seeing exactly what it always saw; nothing about a completed or
+  // in-progress inspection silently changes underneath it.
   async updateTemplate(id: string, dto: UpdateIqcCheckTemplateDto, user: any) {
-    await this.findOneTemplate(id, user);
-    await this.prisma.iqcCheckTemplate.update({
-      where: { id },
-      data: { name: dto.name, docCode: dto.docCode, revision: dto.revision, updatedBy: user.id },
-    });
-    if (dto.parameters) {
-      await this.prisma.iqcCheckParameter.updateMany({ where: { templateId: id }, data: { isActive: false } });
-      await this.prisma.iqcCheckParameter.createMany({
-        data: dto.parameters.map((p, idx) => ({
-          companyId: user.companyId, templateId: id,
-          sNo: p.sNo, category: p.category, parameterName: p.parameterName,
-          specification: p.specification, sortOrder: p.sortOrder ?? idx,
-          createdBy: user.id, updatedBy: user.id,
-        })),
-      });
+    const current = await this.findOneTemplate(id, user);
+    if (!(current as any).isCurrent) {
+      throw new BadRequestException('This is a past version and cannot be edited directly - edit the current version instead.');
     }
-    const result = await this.findOneTemplate(id, user);
-    await this.audit.log({ tableName: 'iqc_check_templates', recordId: id, action: 'UPDATE', newValues: result, changedBy: user.id });
-    return result;
+
+    const newVersion = await this.prisma.iqcCheckTemplate.create({
+      data: {
+        companyId: user.companyId,
+        rawMaterialId: (current as any).rawMaterialId ?? undefined,
+        name: dto.name ?? current.name,
+        docCode: dto.docCode ?? (current as any).docCode ?? undefined,
+        revision: dto.revision ?? (current as any).revision ?? undefined,
+        version: (current as any).version + 1,
+        isCurrent: true,
+        createdBy: user.id, updatedBy: user.id,
+        parameters: {
+          create: (dto.parameters ?? (current.parameters as any[]).map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification, sortOrder: p.sortOrder }))).map((p, idx) => ({
+            companyId: user.companyId,
+            sNo: p.sNo,
+            category: p.category,
+            parameterName: p.parameterName,
+            specification: p.specification,
+            sortOrder: p.sortOrder ?? idx,
+            createdBy: user.id, updatedBy: user.id,
+          })),
+        },
+      },
+      include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
+    });
+
+    await this.prisma.iqcCheckTemplate.update({ where: { id }, data: { isCurrent: false, updatedBy: user.id } });
+
+    await this.audit.log({ tableName: 'iqc_check_templates', recordId: newVersion.id, action: 'CREATE', newValues: { ...newVersion, supersedes: id }, changedBy: user.id });
+    return newVersion;
   }
 
   async cloneTemplate(id: string, newName: string, user: any) {

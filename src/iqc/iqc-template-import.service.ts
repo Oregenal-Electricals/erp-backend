@@ -1,0 +1,131 @@
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import * as XLSX from 'xlsx';
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+
+export interface ParsedTemplate {
+  sheetName: string;
+  name: string;
+  docCode: string | null;
+  parameters: { sNo: number; category: string; parameterName: string; specification: string }[];
+  error: string | null;
+}
+
+const TITLE_ROW_INDEX = 1;
+const DOC_CODE_COL_INDEX = 7;
+const DATA_START_ROW_INDEX = 6;
+const STOP_MARKERS = ['Final Status', 'Prepd. By', 'Prepared By', 'Checked By'];
+
+@Injectable()
+export class IqcTemplateImportService {
+  constructor(private prisma: PrismaService, private audit: AuditService) {}
+
+  parseWorkbook(file: Express.Multer.File): ParsedTemplate[] {
+    const ext = file.originalname.toLowerCase().split('.').pop();
+    if (ext !== 'xlsx' && ext !== 'xls') {
+      throw new BadRequestException(`Unsupported file type ".${ext}" - please upload .xlsx or .xls`);
+    }
+
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+    const results: ParsedTemplate[] = [];
+
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName];
+      const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+
+      try {
+        results.push(this.parseSheet(sheetName, rows));
+      } catch (e: any) {
+        results.push({ sheetName, name: sheetName, docCode: null, parameters: [], error: e.message || 'Could not parse this sheet' });
+      }
+    }
+
+    return results;
+  }
+
+  private parseSheet(sheetName: string, rows: any[][]): ParsedTemplate {
+    const titleRow = rows[TITLE_ROW_INDEX];
+    if (!titleRow) throw new Error('Sheet is empty or too short to be a check sheet');
+
+    const rawTitle = String(titleRow[0] || '').trim();
+    const name = rawTitle.replace(/^IQC INSPECTION OF\s*/i, '').trim() || sheetName;
+    const docCode = titleRow[DOC_CODE_COL_INDEX] ? String(titleRow[DOC_CODE_COL_INDEX]).trim() : null;
+
+    const parameters: ParsedTemplate['parameters'] = [];
+    for (let r = DATA_START_ROW_INDEX; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row) continue;
+      const firstCellText = String(row[0] || '').trim();
+      if (STOP_MARKERS.some(marker => firstCellText.toLowerCase().startsWith(marker.toLowerCase()))) break;
+
+      const sNoRaw = row[1];
+      const category = row[2] ? String(row[2]).trim() : null;
+      const parameterName = row[3] ? String(row[3]).trim() : null;
+      const specification = row[4] ? String(row[4]).trim() : null;
+
+      if (sNoRaw == null && !category && !parameterName && !specification) continue;
+      if (!parameterName || !specification) continue;
+
+      parameters.push({
+        sNo: Number(sNoRaw) || parameters.length + 1,
+        category: category || 'Major',
+        parameterName,
+        specification,
+      });
+    }
+
+    if (parameters.length === 0) throw new Error('No parameter rows found - check the sheet matches the expected format');
+
+    return { sheetName, name, docCode, parameters, error: null };
+  }
+
+  async confirmImport(parsed: { sheetName: string; name: string; docCode?: string | null; parameters: { sNo: number; category: string; parameterName: string; specification: string }[]; error?: string | null }[], user: any) {
+    const created: string[] = [];
+    const skipped: { sheetName: string; reason: string }[] = [];
+    // Names already used in THIS import batch, so two sheets that both
+    // extract to the same material name don't collide with each other
+    // either, not just with what's already in the database.
+    const namesUsedThisBatch = new Set<string>();
+
+    for (const t of parsed) {
+      if (t.error || t.parameters.length === 0) {
+        skipped.push({ sheetName: t.sheetName, reason: t.error || 'No parameters' });
+        continue;
+      }
+
+      // A duplicate name should never silently drop a real sheet of
+      // data - disambiguate with the sheet name instead, and let the
+      // person clean up naming afterward via Edit if they want to.
+      let finalName = t.name;
+      const existing = await this.prisma.iqcCheckTemplate.findFirst({ where: { companyId: user.companyId, name: finalName, isActive: true } });
+      if (existing || namesUsedThisBatch.has(finalName)) {
+        finalName = `${t.name} — ${t.sheetName}`;
+      }
+      namesUsedThisBatch.add(finalName);
+
+      const template = await this.prisma.iqcCheckTemplate.create({
+        data: {
+          companyId: user.companyId,
+          name: finalName,
+          docCode: t.docCode,
+          createdBy: user.id, updatedBy: user.id,
+          parameters: {
+            create: t.parameters.map((p, idx) => ({
+              companyId: user.companyId,
+              sNo: p.sNo,
+              category: p.category,
+              parameterName: p.parameterName,
+              specification: p.specification,
+              sortOrder: idx,
+              createdBy: user.id, updatedBy: user.id,
+            })),
+          },
+        },
+      });
+      created.push(template.name);
+      await this.audit.log({ tableName: 'iqc_check_templates', recordId: template.id, action: 'CREATE', newValues: template, changedBy: user.id });
+    }
+
+    return { createdCount: created.length, created, skippedCount: skipped.length, skipped };
+  }
+}

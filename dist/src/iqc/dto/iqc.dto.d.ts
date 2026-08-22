@@ -51,3 +51,19 @@ export declare class SubmitIqcStageResultDto {
     remarks: string;
     parameterResults?: IqcParameterResultDto[];
 }
+export declare class ImportedTemplateParameterDto {
+    sNo: number;
+    category: string;
+    parameterName: string;
+    specification: string;
+}
+export declare class ImportedTemplateDto {
+    sheetName: string;
+    name: string;
+    docCode?: string;
+    parameters: ImportedTemplateParameterDto[];
+    error?: string;
+}
+export declare class ConfirmTemplateImportDto {
+    templates: ImportedTemplateDto[];
+}
