@@ -105,6 +105,39 @@ export declare class IqcEscalationService {
         docCode: string | null;
         isCurrent: boolean;
     }>;
+    getVersionHistory(id: string, user: any): Promise<({
+        parameters: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            sortOrder: number;
+            category: string;
+            templateId: string;
+            sNo: number;
+            parameterName: string;
+            specification: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        name: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        revision: string | null;
+        version: number;
+        rawMaterialId: string | null;
+        docCode: string | null;
+        isCurrent: boolean;
+    })[]>;
     updateTemplate(id: string, dto: UpdateIqcCheckTemplateDto, user: any): Promise<{
         parameters: {
             id: string;

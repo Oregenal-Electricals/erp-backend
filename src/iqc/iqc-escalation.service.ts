@@ -105,6 +105,19 @@ export class IqcEscalationService {
     return template;
   }
 
+  // Every past version of this template's name, oldest first, each
+  // with its own frozen parameters - so a person can see exactly what
+  // a checklist looked like at any point, e.g. to understand what an
+  // old inspection actually used.
+  async getVersionHistory(id: string, user: any) {
+    const template = await this.findOneTemplate(id, user);
+    return this.prisma.iqcCheckTemplate.findMany({
+      where: { companyId: user.companyId, name: template.name, isActive: true },
+      orderBy: { version: 'asc' },
+      include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
+    });
+  }
+
   // Editing never mutates the existing row - it creates a new one
   // with version+1, and flips the old row's isCurrent off. Any
   // inspection item that already points at the old row's id keeps

@@ -40,6 +40,7 @@ let IqcController = class IqcController {
     }
     findAllTemplates(req, query) { return this.escalation.findAllTemplates(req.user, query); }
     findOneTemplate(id, req) { return this.escalation.findOneTemplate(id, req.user); }
+    getVersionHistory(id, req) { return this.escalation.getVersionHistory(id, req.user); }
     createTemplate(dto, req) { return this.escalation.createTemplate(dto, req.user); }
     updateTemplate(id, dto, req) { return this.escalation.updateTemplate(id, dto, req.user); }
     cloneTemplate(id, name, req) { return this.escalation.cloneTemplate(id, name, req.user); }
@@ -98,6 +99,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], IqcController.prototype, "findOneTemplate", null);
+__decorate([
+    (0, common_1.Get)('templates/:id/history'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], IqcController.prototype, "getVersionHistory", null);
 __decorate([
     (0, common_1.Post)('templates'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),

@@ -101,6 +101,14 @@ let IqcEscalationService = class IqcEscalationService {
             throw new common_1.NotFoundException('Check template not found');
         return template;
     }
+    async getVersionHistory(id, user) {
+        const template = await this.findOneTemplate(id, user);
+        return this.prisma.iqcCheckTemplate.findMany({
+            where: { companyId: user.companyId, name: template.name, isActive: true },
+            orderBy: { version: 'asc' },
+            include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
+        });
+    }
     async updateTemplate(id, dto, user) {
         var _a, _b, _c, _d, _e, _f;
         const current = await this.findOneTemplate(id, user);

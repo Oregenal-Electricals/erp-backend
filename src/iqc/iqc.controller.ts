@@ -48,6 +48,10 @@ export class IqcController {
   @RequirePermissions(Permission.QUALITY_VIEW)
   findOneTemplate(@Param('id') id: string, @Request() req: any) { return this.escalation.findOneTemplate(id, req.user); }
 
+  @Get('templates/:id/history')
+  @RequirePermissions(Permission.QUALITY_VIEW)
+  getVersionHistory(@Param('id') id: string, @Request() req: any) { return this.escalation.getVersionHistory(id, req.user); }
+
   @Post('templates')
   @RequirePermissions(Permission.QUALITY_CREATE)
   createTemplate(@Body() dto: CreateIqcCheckTemplateDto, @Request() req: any) { return this.escalation.createTemplate(dto, req.user); }
