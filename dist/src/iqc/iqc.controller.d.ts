@@ -32,10 +32,17 @@ export declare class IqcController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
+            supplierName: string | null;
             grnId: string;
             inspectedBy: string | null;
             inspectionDate: Date;
+            sampleSize: number | null;
             iqcNumber: string;
+            templateId: string | null;
+            lotQuantity: number | null;
+            mrirNo: string | null;
+            currentStage: string;
+            finalOutcome: string;
         })[];
         total: number;
         page: number;
@@ -81,10 +88,17 @@ export declare class IqcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: {
@@ -125,10 +139,17 @@ export declare class IqcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     create(dto: CreateIqcDto, req: any): Promise<{
         items: {
@@ -169,10 +190,17 @@ export declare class IqcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     updateItems(id: string, dto: UpdateIqcItemsDto, req: any): Promise<{
         items: {
@@ -213,10 +241,17 @@ export declare class IqcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     approve(id: string, req: any): Promise<{
         items: {
@@ -257,9 +292,16 @@ export declare class IqcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
 }

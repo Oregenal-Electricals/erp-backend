@@ -72,6 +72,9 @@ export declare class RejectedStockController {
             dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
+            vendorPickupDeadline: Date | null;
+            vendorNotifiedAt: Date | null;
+            disposalEligible: boolean;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -130,6 +133,9 @@ export declare class RejectedStockController {
             dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
+            vendorPickupDeadline: Date | null;
+            vendorNotifiedAt: Date | null;
+            disposalEligible: boolean;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -188,6 +194,9 @@ export declare class RejectedStockController {
             dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
+            vendorPickupDeadline: Date | null;
+            vendorNotifiedAt: Date | null;
+            disposalEligible: boolean;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -246,6 +255,9 @@ export declare class RejectedStockController {
             dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
+            vendorPickupDeadline: Date | null;
+            vendorNotifiedAt: Date | null;
+            disposalEligible: boolean;
             rejectedStockId: string;
         }[];
         warehouse: {
@@ -304,6 +316,9 @@ export declare class RejectedStockController {
             dispositionBy: string | null;
             iqcItemId: string | null;
             dispositionDate: Date | null;
+            vendorPickupDeadline: Date | null;
+            vendorNotifiedAt: Date | null;
+            disposalEligible: boolean;
             rejectedStockId: string;
         }[];
         warehouse: {

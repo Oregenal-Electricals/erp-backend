@@ -48,10 +48,17 @@ export declare class IqcService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -76,10 +83,17 @@ export declare class IqcService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
+            supplierName: string | null;
             grnId: string;
             inspectedBy: string | null;
             inspectionDate: Date;
+            sampleSize: number | null;
             iqcNumber: string;
+            templateId: string | null;
+            lotQuantity: number | null;
+            mrirNo: string | null;
+            currentStage: string;
+            finalOutcome: string;
         })[];
         total: number;
         page: number;
@@ -125,10 +139,17 @@ export declare class IqcService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     findByGrn(grnId: string, user: any): Promise<({
         items: {
@@ -169,10 +190,17 @@ export declare class IqcService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     })[]>;
     updateItems(id: string, dto: UpdateIqcItemsDto, user: any): Promise<{
         items: {
@@ -213,10 +241,17 @@ export declare class IqcService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     approve(id: string, user: any): Promise<{
         items: {
@@ -257,10 +292,17 @@ export declare class IqcService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

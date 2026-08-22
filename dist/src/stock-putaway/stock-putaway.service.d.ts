@@ -28,10 +28,17 @@ export declare class StockPutawayService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+        sampleSize: number | null;
         iqcNumber: string;
+        templateId: string | null;
+        lotQuantity: number | null;
+        mrirNo: string | null;
+        currentStage: string;
+        finalOutcome: string;
     })[]>;
     create(dto: CreatePutawayDto, user: any): Promise<{
         items: ({

@@ -83,6 +83,7 @@ export declare class AlertsService {
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
+            templateId: string | null;
             eventType: string;
             channel: string;
             subject: string | null;
@@ -90,7 +91,6 @@ export declare class AlertsService {
             body: string;
             errorMessage: string | null;
             sentAt: Date | null;
-            templateId: string | null;
         }[];
         total: number;
         page: number;
