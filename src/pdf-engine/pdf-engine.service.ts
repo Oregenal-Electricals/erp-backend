@@ -291,4 +291,99 @@ export class PdfEngineService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
     });
   }
+
+  // One PDF per stage result - IQC, Quality Manager, Plant Head, or
+  // Final Authority - matching the company's existing Excel check
+  // sheet layout: Part Name / S.No. / Category / Parameter /
+  // Specification / S1-S5 samples / Remark, plus who reviewed it and
+  // why (the mandatory remark on every decision).
+  async generateIqcStagePdf(iqcId: string, stageResultId: string, companyId: string): Promise<Buffer> {
+    const iqc = await this.prisma.iqcInspection.findFirst({
+      where: { id: iqcId, companyId },
+      include: {
+        company: true,
+        grn: { select: { grnNumber: true } },
+        template: true,
+      },
+    });
+    if (!iqc) throw new NotFoundException('IQC inspection not found');
+
+    const stageResult = await this.prisma.iqcStageResult.findFirst({
+      where: { id: stageResultId, iqcId },
+      include: { parameterResults: { include: { parameter: true } } },
+    });
+    if (!stageResult) throw new NotFoundException('Stage result not found');
+
+    const doc = this.createDoc();
+    const chunks: Buffer[] = [];
+    doc.on('data', chunk => chunks.push(chunk));
+
+    const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    const template: any = (iqc as any).template;
+    const stageLabel = stageResult.stage.replace(/_/g, ' ');
+
+    let y = this.addHeader(doc, template ? `IQC INSPECTION OF ${template.name}` : 'IQC INSPECTION', (iqc as any).iqcNumber, fmtDate(stageResult.reviewedAt), (iqc as any).company?.name);
+
+    y = this.addTwoCol(doc, y, {
+      'Lot Quantity': (iqc as any).lotQuantity != null ? String((iqc as any).lotQuantity) : '—',
+      'Sample Size': (iqc as any).sampleSize != null ? String((iqc as any).sampleSize) : '—',
+      'Supplier': (iqc as any).supplierName || '—',
+    }, {
+      'MRIR No.': (iqc as any).mrirNo || '—',
+      'GRN': (iqc as any).grn?.grnNumber || '—',
+      'Doc Code': template?.docCode || '—',
+    });
+
+    doc.fontSize(10).font('Helvetica-Bold').fillColor('#1e40af').text(`Stage: ${stageLabel}  —  Outcome: ${stageResult.outcome}`, 40, y);
+    y += 20;
+
+    const cols = [
+      { text: 'S.No', x: 40, width: 25 },
+      { text: 'Category', x: 65, width: 45 },
+      { text: 'Parameter', x: 110, width: 90 },
+      { text: 'Specification', x: 200, width: 100 },
+      { text: 'S1', x: 300, width: 35 },
+      { text: 'S2', x: 335, width: 35 },
+      { text: 'S3', x: 370, width: 35 },
+      { text: 'S4', x: 405, width: 35 },
+      { text: 'S5', x: 440, width: 35 },
+      { text: 'Remark', x: 475, width: 80 },
+    ];
+    y = this.addTableHeader(doc, y, cols);
+
+    const results = stageResult.parameterResults as any[];
+    results.sort((a, b) => (a.parameter?.sortOrder ?? 0) - (b.parameter?.sortOrder ?? 0));
+    results.forEach((pr, idx) => {
+      if (y > 700) { doc.addPage(); y = 40; y = this.addTableHeader(doc, y, cols); }
+      const p = pr.parameter;
+      y = this.addTableRow(doc, y, [
+        { text: String(p?.sNo ?? ''), x: 40, width: 25 },
+        { text: p?.category || '', x: 65, width: 45 },
+        { text: p?.parameterName || '', x: 110, width: 90 },
+        { text: p?.specification || '', x: 200, width: 100 },
+        { text: pr.s1 || '', x: 300, width: 35 },
+        { text: pr.s2 || '', x: 335, width: 35 },
+        { text: pr.s3 || '', x: 370, width: 35 },
+        { text: pr.s4 || '', x: 405, width: 35 },
+        { text: pr.s5 || '', x: 440, width: 35 },
+        { text: pr.remark || '', x: 475, width: 80 },
+      ], idx % 2 === 1);
+    });
+
+    y += 15;
+    if (y > 680) { doc.addPage(); y = 40; }
+    doc.fontSize(8).font('Helvetica-Bold').fillColor('#6b7280').text('Remarks (why this decision was made):', 40, y);
+    doc.fontSize(9).font('Helvetica').fillColor('#111827').text(stageResult.remarks, 40, y + 12, { width: 515 });
+    y += Math.max(30, doc.heightOfString(stageResult.remarks, { width: 515 }) + 20);
+
+    if (y > 700) { doc.addPage(); y = 40; }
+    doc.fontSize(8).font('Helvetica').fillColor('#6b7280').text(`Reviewed by: ${stageResult.reviewedBy}  |  Date: ${fmtDate(stageResult.reviewedAt)}`, 40, y);
+
+    this.addFooter(doc, (iqc as any).company?.name);
+    doc.end();
+
+    return new Promise((resolve) => {
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+  }
 }

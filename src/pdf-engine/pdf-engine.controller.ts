@@ -46,4 +46,13 @@ export class PdfEngineController {
     res.setHeader('Content-Disposition', `attachment; filename="NCR-${id}.pdf"`);
     res.send(pdf);
   }
+
+  @Get('iqc/:iqcId/stage/:stageResultId')
+  @RequirePermissions(Permission.REPORTS_VIEW)
+  async iqcStagePdf(@Param('iqcId') iqcId: string, @Param('stageResultId') stageResultId: string, @Request() req: any, @Res() res: Response) {
+    const pdf = await this.pdfService.generateIqcStagePdf(iqcId, stageResultId, req.user.companyId);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="IQC-${iqcId}-${stageResultId}.pdf"`);
+    res.send(pdf);
+  }
 }

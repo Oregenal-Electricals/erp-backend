@@ -13,4 +13,5 @@ export declare class PdfEngineService {
     generateArInvoicePdf(id: string, companyId: string): Promise<Buffer>;
     generateDispatchPdf(id: string, companyId: string): Promise<Buffer>;
     generateNcrPdf(id: string, companyId: string): Promise<Buffer>;
+    generateIqcStagePdf(iqcId: string, stageResultId: string, companyId: string): Promise<Buffer>;
 }

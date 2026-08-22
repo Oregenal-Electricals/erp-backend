@@ -265,6 +265,97 @@ let PdfEngineService = class PdfEngineService {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
         });
     }
+    async generateIqcStagePdf(iqcId, stageResultId, companyId) {
+        var _a, _b, _c;
+        const iqc = await this.prisma.iqcInspection.findFirst({
+            where: { id: iqcId, companyId },
+            include: {
+                company: true,
+                grn: { select: { grnNumber: true } },
+                template: true,
+            },
+        });
+        if (!iqc)
+            throw new common_1.NotFoundException('IQC inspection not found');
+        const stageResult = await this.prisma.iqcStageResult.findFirst({
+            where: { id: stageResultId, iqcId },
+            include: { parameterResults: { include: { parameter: true } } },
+        });
+        if (!stageResult)
+            throw new common_1.NotFoundException('Stage result not found');
+        const doc = this.createDoc();
+        const chunks = [];
+        doc.on('data', chunk => chunks.push(chunk));
+        const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+        const template = iqc.template;
+        const stageLabel = stageResult.stage.replace(/_/g, ' ');
+        let y = this.addHeader(doc, template ? `IQC INSPECTION OF ${template.name}` : 'IQC INSPECTION', iqc.iqcNumber, fmtDate(stageResult.reviewedAt), (_a = iqc.company) === null || _a === void 0 ? void 0 : _a.name);
+        y = this.addTwoCol(doc, y, {
+            'Lot Quantity': iqc.lotQuantity != null ? String(iqc.lotQuantity) : '—',
+            'Sample Size': iqc.sampleSize != null ? String(iqc.sampleSize) : '—',
+            'Supplier': iqc.supplierName || '—',
+        }, {
+            'MRIR No.': iqc.mrirNo || '—',
+            'GRN': ((_b = iqc.grn) === null || _b === void 0 ? void 0 : _b.grnNumber) || '—',
+            'Doc Code': (template === null || template === void 0 ? void 0 : template.docCode) || '—',
+        });
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#1e40af').text(`Stage: ${stageLabel}  —  Outcome: ${stageResult.outcome}`, 40, y);
+        y += 20;
+        const cols = [
+            { text: 'S.No', x: 40, width: 25 },
+            { text: 'Category', x: 65, width: 45 },
+            { text: 'Parameter', x: 110, width: 90 },
+            { text: 'Specification', x: 200, width: 100 },
+            { text: 'S1', x: 300, width: 35 },
+            { text: 'S2', x: 335, width: 35 },
+            { text: 'S3', x: 370, width: 35 },
+            { text: 'S4', x: 405, width: 35 },
+            { text: 'S5', x: 440, width: 35 },
+            { text: 'Remark', x: 475, width: 80 },
+        ];
+        y = this.addTableHeader(doc, y, cols);
+        const results = stageResult.parameterResults;
+        results.sort((a, b) => { var _a, _b, _c, _d; return ((_b = (_a = a.parameter) === null || _a === void 0 ? void 0 : _a.sortOrder) !== null && _b !== void 0 ? _b : 0) - ((_d = (_c = b.parameter) === null || _c === void 0 ? void 0 : _c.sortOrder) !== null && _d !== void 0 ? _d : 0); });
+        results.forEach((pr, idx) => {
+            var _a;
+            if (y > 700) {
+                doc.addPage();
+                y = 40;
+                y = this.addTableHeader(doc, y, cols);
+            }
+            const p = pr.parameter;
+            y = this.addTableRow(doc, y, [
+                { text: String((_a = p === null || p === void 0 ? void 0 : p.sNo) !== null && _a !== void 0 ? _a : ''), x: 40, width: 25 },
+                { text: (p === null || p === void 0 ? void 0 : p.category) || '', x: 65, width: 45 },
+                { text: (p === null || p === void 0 ? void 0 : p.parameterName) || '', x: 110, width: 90 },
+                { text: (p === null || p === void 0 ? void 0 : p.specification) || '', x: 200, width: 100 },
+                { text: pr.s1 || '', x: 300, width: 35 },
+                { text: pr.s2 || '', x: 335, width: 35 },
+                { text: pr.s3 || '', x: 370, width: 35 },
+                { text: pr.s4 || '', x: 405, width: 35 },
+                { text: pr.s5 || '', x: 440, width: 35 },
+                { text: pr.remark || '', x: 475, width: 80 },
+            ], idx % 2 === 1);
+        });
+        y += 15;
+        if (y > 680) {
+            doc.addPage();
+            y = 40;
+        }
+        doc.fontSize(8).font('Helvetica-Bold').fillColor('#6b7280').text('Remarks (why this decision was made):', 40, y);
+        doc.fontSize(9).font('Helvetica').fillColor('#111827').text(stageResult.remarks, 40, y + 12, { width: 515 });
+        y += Math.max(30, doc.heightOfString(stageResult.remarks, { width: 515 }) + 20);
+        if (y > 700) {
+            doc.addPage();
+            y = 40;
+        }
+        doc.fontSize(8).font('Helvetica').fillColor('#6b7280').text(`Reviewed by: ${stageResult.reviewedBy}  |  Date: ${fmtDate(stageResult.reviewedAt)}`, 40, y);
+        this.addFooter(doc, (_c = iqc.company) === null || _c === void 0 ? void 0 : _c.name);
+        doc.end();
+        return new Promise((resolve) => {
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+        });
+    }
 };
 exports.PdfEngineService = PdfEngineService;
 exports.PdfEngineService = PdfEngineService = __decorate([
