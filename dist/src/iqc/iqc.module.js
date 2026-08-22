@@ -10,18 +10,21 @@ exports.IqcModule = void 0;
 const common_1 = require("@nestjs/common");
 const iqc_controller_1 = require("./iqc.controller");
 const iqc_service_1 = require("./iqc.service");
+const iqc_escalation_service_1 = require("./iqc-escalation.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
+const notifications_module_1 = require("../notifications/notifications.module");
+const rejected_stock_module_1 = require("../rejected-stock/rejected-stock.module");
 let IqcModule = class IqcModule {
 };
 exports.IqcModule = IqcModule;
 exports.IqcModule = IqcModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, notifications_module_1.NotificationsModule, rejected_stock_module_1.RejectedStockModule],
         controllers: [iqc_controller_1.IqcController],
-        providers: [iqc_service_1.IqcService],
-        exports: [iqc_service_1.IqcService],
+        providers: [iqc_service_1.IqcService, iqc_escalation_service_1.IqcEscalationService],
+        exports: [iqc_service_1.IqcService, iqc_escalation_service_1.IqcEscalationService],
     })
 ], IqcModule);
 //# sourceMappingURL=iqc.module.js.map

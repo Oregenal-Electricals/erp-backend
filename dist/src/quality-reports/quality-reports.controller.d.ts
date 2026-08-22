@@ -114,10 +114,10 @@ export declare class QualityReportsController {
             itemCode: string;
             itemName: string;
             uom: string;
+            sampleSize: number;
             workOrderId: string | null;
             inspectorName: string | null;
             inspectionDate: Date;
-            sampleSize: number;
             passQty: number;
             failQty: number;
             batchNumber: string | null;

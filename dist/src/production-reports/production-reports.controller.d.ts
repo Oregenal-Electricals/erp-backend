@@ -116,13 +116,13 @@ export declare class ProductionReportsController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
+            sampleSize: number;
             workOrderId: string;
             qcNumber: string;
             productionEntryId: string | null;
             inspectionStage: string;
             inspectorName: string | null;
             inspectionDate: Date;
-            sampleSize: number;
             passQty: number;
             failQty: number;
             defectDescription: string | null;

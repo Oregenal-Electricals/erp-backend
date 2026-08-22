@@ -70,12 +70,12 @@ export declare class StockLedgerService {
         supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
-        inspectionDate: Date;
-        sampleSize: number | null;
-        iqcNumber: string;
         templateId: string | null;
         lotQuantity: number | null;
+        sampleSize: number | null;
         mrirNo: string | null;
+        inspectionDate: Date;
+        iqcNumber: string;
         currentStage: string;
         finalOutcome: string;
     })[]>;

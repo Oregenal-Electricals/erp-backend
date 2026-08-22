@@ -117,10 +117,10 @@ export declare class IotService {
             status: string;
             value: number | null;
             message: string;
+            parameter: string | null;
             severity: string;
             machineId: string;
             alertType: string;
-            parameter: string | null;
             threshold: number | null;
             resolvedAt: Date | null;
             resolvedBy: string | null;
@@ -199,10 +199,10 @@ export declare class IotService {
         status: string;
         value: number | null;
         message: string;
+        parameter: string | null;
         severity: string;
         machineId: string;
         alertType: string;
-        parameter: string | null;
         threshold: number | null;
         resolvedAt: Date | null;
         resolvedBy: string | null;
@@ -219,10 +219,10 @@ export declare class IotService {
         status: string;
         value: number | null;
         message: string;
+        parameter: string | null;
         severity: string;
         machineId: string;
         alertType: string;
-        parameter: string | null;
         threshold: number | null;
         resolvedAt: Date | null;
         resolvedBy: string | null;
