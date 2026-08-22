@@ -72,23 +72,7 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], AttachTemplateDto.prototype, "lotQuantity", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
 ], AttachTemplateDto.prototype, "sampleSize", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], AttachTemplateDto.prototype, "mrirNo", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], AttachTemplateDto.prototype, "supplierName", void 0);
 class IqcCheckParameterDto {
 }
 exports.IqcCheckParameterDto = IqcCheckParameterDto;

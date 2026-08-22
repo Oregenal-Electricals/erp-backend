@@ -265,20 +265,19 @@ let PdfEngineService = class PdfEngineService {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
         });
     }
-    async generateIqcStagePdf(iqcId, stageResultId, companyId) {
-        var _a, _b, _c;
-        const iqc = await this.prisma.iqcInspection.findFirst({
-            where: { id: iqcId, companyId },
+    async generateIqcStagePdf(itemId, stageResultId, companyId) {
+        var _a, _b, _c, _d, _e, _f;
+        const item = await this.prisma.iqcItem.findFirst({
+            where: { id: itemId, companyId },
             include: {
-                company: true,
-                grn: { select: { grnNumber: true } },
                 template: true,
+                iqc: { include: { company: true, grn: { select: { grnNumber: true, po: { select: { vendor: { select: { name: true } } } } } } } },
             },
         });
-        if (!iqc)
-            throw new common_1.NotFoundException('IQC inspection not found');
+        if (!item)
+            throw new common_1.NotFoundException('IQC item not found');
         const stageResult = await this.prisma.iqcStageResult.findFirst({
-            where: { id: stageResultId, iqcId },
+            where: { id: stageResultId, iqcItemId: itemId },
             include: { parameterResults: { include: { parameter: true } } },
         });
         if (!stageResult)
@@ -287,16 +286,17 @@ let PdfEngineService = class PdfEngineService {
         const chunks = [];
         doc.on('data', chunk => chunks.push(chunk));
         const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-        const template = iqc.template;
+        const template = item.template;
+        const iqc = item.iqc;
         const stageLabel = stageResult.stage.replace(/_/g, ' ');
-        let y = this.addHeader(doc, template ? `IQC INSPECTION OF ${template.name}` : 'IQC INSPECTION', iqc.iqcNumber, fmtDate(stageResult.reviewedAt), (_a = iqc.company) === null || _a === void 0 ? void 0 : _a.name);
+        let y = this.addHeader(doc, template ? `IQC INSPECTION OF ${template.name}` : `IQC INSPECTION OF ${item.itemName}`, iqc.iqcNumber, fmtDate(stageResult.reviewedAt), (_a = iqc.company) === null || _a === void 0 ? void 0 : _a.name);
         y = this.addTwoCol(doc, y, {
-            'Lot Quantity': iqc.lotQuantity != null ? String(iqc.lotQuantity) : '—',
-            'Sample Size': iqc.sampleSize != null ? String(iqc.sampleSize) : '—',
-            'Supplier': iqc.supplierName || '—',
+            'Item': `${item.itemCode} — ${item.itemName}`,
+            'Lot Quantity': String(item.receivedQty),
+            'Sample Size': item.sampleSize != null ? String(item.sampleSize) : '—',
         }, {
-            'MRIR No.': iqc.mrirNo || '—',
-            'GRN': ((_b = iqc.grn) === null || _b === void 0 ? void 0 : _b.grnNumber) || '—',
+            'MRIR No. (GRN)': ((_b = iqc.grn) === null || _b === void 0 ? void 0 : _b.grnNumber) || '—',
+            'Supplier': ((_e = (_d = (_c = iqc.grn) === null || _c === void 0 ? void 0 : _c.po) === null || _d === void 0 ? void 0 : _d.vendor) === null || _e === void 0 ? void 0 : _e.name) || '—',
             'Doc Code': (template === null || template === void 0 ? void 0 : template.docCode) || '—',
         });
         doc.fontSize(10).font('Helvetica-Bold').fillColor('#1e40af').text(`Stage: ${stageLabel}  —  Outcome: ${stageResult.outcome}`, 40, y);
@@ -350,7 +350,7 @@ let PdfEngineService = class PdfEngineService {
             y = 40;
         }
         doc.fontSize(8).font('Helvetica').fillColor('#6b7280').text(`Reviewed by: ${stageResult.reviewedBy}  |  Date: ${fmtDate(stageResult.reviewedAt)}`, 40, y);
-        this.addFooter(doc, (_c = iqc.company) === null || _c === void 0 ? void 0 : _c.name);
+        this.addFooter(doc, (_f = iqc.company) === null || _f === void 0 ? void 0 : _f.name);
         doc.end();
         return new Promise((resolve) => {
             doc.on('end', () => resolve(Buffer.concat(chunks)));

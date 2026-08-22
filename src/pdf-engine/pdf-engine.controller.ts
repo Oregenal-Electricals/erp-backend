@@ -47,12 +47,12 @@ export class PdfEngineController {
     res.send(pdf);
   }
 
-  @Get('iqc/:iqcId/stage/:stageResultId')
+  @Get('iqc/:itemId/stage/:stageResultId')
   @RequirePermissions(Permission.REPORTS_VIEW)
-  async iqcStagePdf(@Param('iqcId') iqcId: string, @Param('stageResultId') stageResultId: string, @Request() req: any, @Res() res: Response) {
-    const pdf = await this.pdfService.generateIqcStagePdf(iqcId, stageResultId, req.user.companyId);
+  async iqcStagePdf(@Param('itemId') itemId: string, @Param('stageResultId') stageResultId: string, @Request() req: any, @Res() res: Response) {
+    const pdf = await this.pdfService.generateIqcStagePdf(itemId, stageResultId, req.user.companyId);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="IQC-${iqcId}-${stageResultId}.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="IQC-${itemId}-${stageResultId}.pdf"`);
     res.send(pdf);
   }
 }

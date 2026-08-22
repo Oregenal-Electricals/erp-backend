@@ -52,9 +52,9 @@ export class IqcController {
   @RequirePermissions(Permission.QUALITY_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.iqcService.findOne(id, req.user); }
 
-  @Get(':id/escalation')
+  @Get('items/:itemId/escalation')
   @RequirePermissions(Permission.QUALITY_VIEW)
-  getEscalationDetail(@Param('id') id: string, @Request() req: any) { return this.escalation.getEscalationDetail(id, req.user); }
+  getItemEscalationDetail(@Param('itemId') itemId: string, @Request() req: any) { return this.escalation.getItemEscalationDetail(itemId, req.user); }
 
   @Post()
   @RequirePermissions(Permission.QUALITY_CREATE)
@@ -68,11 +68,11 @@ export class IqcController {
   @RequirePermissions(Permission.QUALITY_EDIT)
   approve(@Param('id') id: string, @Request() req: any) { return this.iqcService.approve(id, req.user); }
 
-  @Post(':id/attach-template')
+  @Post('items/:itemId/attach-template')
   @RequirePermissions(Permission.QUALITY_EDIT)
-  attachTemplate(@Param('id') id: string, @Body() dto: AttachTemplateDto, @Request() req: any) { return this.escalation.attachTemplate(id, dto, req.user); }
+  attachTemplate(@Param('itemId') itemId: string, @Body() dto: AttachTemplateDto, @Request() req: any) { return this.escalation.attachTemplate(itemId, dto, req.user); }
 
-  @Post(':id/stage-result')
+  @Post('items/:itemId/stage-result')
   @RequirePermissions(Permission.QUALITY_EDIT)
-  submitStageResult(@Param('id') id: string, @Body() dto: SubmitIqcStageResultDto, @Request() req: any) { return this.escalation.submitStageResult(id, dto, req.user); }
+  submitStageResult(@Param('itemId') itemId: string, @Body() dto: SubmitIqcStageResultDto, @Request() req: any) { return this.escalation.submitStageResult(itemId, dto, req.user); }
 }

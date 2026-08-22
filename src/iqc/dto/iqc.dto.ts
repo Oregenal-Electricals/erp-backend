@@ -21,10 +21,7 @@ export class UpdateIqcItemsDto {
 
 export class AttachTemplateDto {
   @IsString() templateId: string;
-  @IsOptional() @IsNumber() @Min(0) lotQuantity?: number;
   @IsOptional() @IsNumber() @Min(0) sampleSize?: number;
-  @IsOptional() @IsString() mrirNo?: string;
-  @IsOptional() @IsString() supplierName?: string;
 }
 
 export class IqcCheckParameterDto {

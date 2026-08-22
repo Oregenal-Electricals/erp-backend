@@ -14,10 +14,7 @@ export declare class UpdateIqcItemsDto {
 }
 export declare class AttachTemplateDto {
     templateId: string;
-    lotQuantity?: number;
     sampleSize?: number;
-    mrirNo?: string;
-    supplierName?: string;
 }
 export declare class IqcCheckParameterDto {
     id?: string;

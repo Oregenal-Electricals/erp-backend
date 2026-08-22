@@ -7,5 +7,5 @@ export declare class PdfEngineController {
     invoicePdf(id: string, req: any, res: Response): Promise<void>;
     dispatchPdf(id: string, req: any, res: Response): Promise<void>;
     ncrPdf(id: string, req: any, res: Response): Promise<void>;
-    iqcStagePdf(iqcId: string, stageResultId: string, req: any, res: Response): Promise<void>;
+    iqcStagePdf(itemId: string, stageResultId: string, req: any, res: Response): Promise<void>;
 }

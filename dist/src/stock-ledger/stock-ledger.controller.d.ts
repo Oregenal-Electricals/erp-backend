@@ -73,17 +73,10 @@ export declare class StockLedgerController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        supplierName: string | null;
         grnId: string;
         inspectedBy: string | null;
-        templateId: string | null;
-        lotQuantity: number | null;
-        sampleSize: number | null;
-        mrirNo: string | null;
         inspectionDate: Date;
         iqcNumber: string;
-        currentStage: string;
-        finalOutcome: string;
     })[]>;
     getItemLedger(code: string, req: any): Promise<({
         warehouse: {

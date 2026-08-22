@@ -296,20 +296,20 @@ export class PdfEngineService {
   // Final Authority - matching the company's existing Excel check
   // sheet layout: Part Name / S.No. / Category / Parameter /
   // Specification / S1-S5 samples / Remark, plus who reviewed it and
-  // why (the mandatory remark on every decision).
-  async generateIqcStagePdf(iqcId: string, stageResultId: string, companyId: string): Promise<Buffer> {
-    const iqc = await this.prisma.iqcInspection.findFirst({
-      where: { id: iqcId, companyId },
+  // why (the mandatory remark on every decision), and the full
+  // escalation history so far.
+  async generateIqcStagePdf(itemId: string, stageResultId: string, companyId: string): Promise<Buffer> {
+    const item = await this.prisma.iqcItem.findFirst({
+      where: { id: itemId, companyId },
       include: {
-        company: true,
-        grn: { select: { grnNumber: true } },
         template: true,
+        iqc: { include: { company: true, grn: { select: { grnNumber: true, po: { select: { vendor: { select: { name: true } } } } } } } },
       },
     });
-    if (!iqc) throw new NotFoundException('IQC inspection not found');
+    if (!item) throw new NotFoundException('IQC item not found');
 
     const stageResult = await this.prisma.iqcStageResult.findFirst({
-      where: { id: stageResultId, iqcId },
+      where: { id: stageResultId, iqcItemId: itemId },
       include: { parameterResults: { include: { parameter: true } } },
     });
     if (!stageResult) throw new NotFoundException('Stage result not found');
@@ -319,18 +319,19 @@ export class PdfEngineService {
     doc.on('data', chunk => chunks.push(chunk));
 
     const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-    const template: any = (iqc as any).template;
+    const template: any = (item as any).template;
+    const iqc: any = (item as any).iqc;
     const stageLabel = stageResult.stage.replace(/_/g, ' ');
 
-    let y = this.addHeader(doc, template ? `IQC INSPECTION OF ${template.name}` : 'IQC INSPECTION', (iqc as any).iqcNumber, fmtDate(stageResult.reviewedAt), (iqc as any).company?.name);
+    let y = this.addHeader(doc, template ? `IQC INSPECTION OF ${template.name}` : `IQC INSPECTION OF ${item.itemName}`, iqc.iqcNumber, fmtDate(stageResult.reviewedAt), iqc.company?.name);
 
     y = this.addTwoCol(doc, y, {
-      'Lot Quantity': (iqc as any).lotQuantity != null ? String((iqc as any).lotQuantity) : '—',
-      'Sample Size': (iqc as any).sampleSize != null ? String((iqc as any).sampleSize) : '—',
-      'Supplier': (iqc as any).supplierName || '—',
+      'Item': `${item.itemCode} — ${item.itemName}`,
+      'Lot Quantity': String(item.receivedQty),
+      'Sample Size': item.sampleSize != null ? String(item.sampleSize) : '—',
     }, {
-      'MRIR No.': (iqc as any).mrirNo || '—',
-      'GRN': (iqc as any).grn?.grnNumber || '—',
+      'MRIR No. (GRN)': iqc.grn?.grnNumber || '—',
+      'Supplier': iqc.grn?.po?.vendor?.name || '—',
       'Doc Code': template?.docCode || '—',
     });
 
@@ -379,7 +380,7 @@ export class PdfEngineService {
     if (y > 700) { doc.addPage(); y = 40; }
     doc.fontSize(8).font('Helvetica').fillColor('#6b7280').text(`Reviewed by: ${stageResult.reviewedBy}  |  Date: ${fmtDate(stageResult.reviewedAt)}`, 40, y);
 
-    this.addFooter(doc, (iqc as any).company?.name);
+    this.addFooter(doc, iqc.company?.name);
     doc.end();
 
     return new Promise((resolve) => {

@@ -47,10 +47,10 @@ let PdfEngineController = class PdfEngineController {
         res.setHeader('Content-Disposition', `attachment; filename="NCR-${id}.pdf"`);
         res.send(pdf);
     }
-    async iqcStagePdf(iqcId, stageResultId, req, res) {
-        const pdf = await this.pdfService.generateIqcStagePdf(iqcId, stageResultId, req.user.companyId);
+    async iqcStagePdf(itemId, stageResultId, req, res) {
+        const pdf = await this.pdfService.generateIqcStagePdf(itemId, stageResultId, req.user.companyId);
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="IQC-${iqcId}-${stageResultId}.pdf"`);
+        res.setHeader('Content-Disposition', `attachment; filename="IQC-${itemId}-${stageResultId}.pdf"`);
         res.send(pdf);
     }
 };
@@ -96,9 +96,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PdfEngineController.prototype, "ncrPdf", null);
 __decorate([
-    (0, common_1.Get)('iqc/:iqcId/stage/:stageResultId'),
+    (0, common_1.Get)('iqc/:itemId/stage/:stageResultId'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.REPORTS_VIEW),
-    __param(0, (0, common_1.Param)('iqcId')),
+    __param(0, (0, common_1.Param)('itemId')),
     __param(1, (0, common_1.Param)('stageResultId')),
     __param(2, (0, common_1.Request)()),
     __param(3, (0, common_1.Res)()),

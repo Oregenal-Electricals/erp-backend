@@ -35,12 +35,12 @@ let IqcController = class IqcController {
     findAll(req, query) { return this.iqcService.findAll(req.user, query); }
     findByGrn(grnId, req) { return this.iqcService.findByGrn(grnId, req.user); }
     findOne(id, req) { return this.iqcService.findOne(id, req.user); }
-    getEscalationDetail(id, req) { return this.escalation.getEscalationDetail(id, req.user); }
+    getItemEscalationDetail(itemId, req) { return this.escalation.getItemEscalationDetail(itemId, req.user); }
     create(dto, req) { return this.iqcService.create(dto, req.user); }
     updateItems(id, dto, req) { return this.iqcService.updateItems(id, dto, req.user); }
     approve(id, req) { return this.iqcService.approve(id, req.user); }
-    attachTemplate(id, dto, req) { return this.escalation.attachTemplate(id, dto, req.user); }
-    submitStageResult(id, dto, req) { return this.escalation.submitStageResult(id, dto, req.user); }
+    attachTemplate(itemId, dto, req) { return this.escalation.attachTemplate(itemId, dto, req.user); }
+    submitStageResult(itemId, dto, req) { return this.escalation.submitStageResult(itemId, dto, req.user); }
 };
 exports.IqcController = IqcController;
 __decorate([
@@ -126,14 +126,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], IqcController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Get)(':id/escalation'),
+    (0, common_1.Get)('items/:itemId/escalation'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_VIEW),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('itemId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], IqcController.prototype, "getEscalationDetail", null);
+], IqcController.prototype, "getItemEscalationDetail", null);
 __decorate([
     (0, common_1.Post)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
@@ -163,9 +163,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], IqcController.prototype, "approve", null);
 __decorate([
-    (0, common_1.Post)(':id/attach-template'),
+    (0, common_1.Post)('items/:itemId/attach-template'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('itemId')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -173,9 +173,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], IqcController.prototype, "attachTemplate", null);
 __decorate([
-    (0, common_1.Post)(':id/stage-result'),
+    (0, common_1.Post)('items/:itemId/stage-result'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('itemId')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),

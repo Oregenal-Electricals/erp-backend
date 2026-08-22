@@ -2589,14 +2589,6 @@ model IqcInspection {
   inspectionDate  DateTime  @default(now())
   status          String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, APPROVED
   remarks         String?
-  templateId      String?
-  template        IqcCheckTemplate? @relation(fields: [templateId], references: [id])
-  lotQuantity     Float?
-  sampleSize      Int?
-  mrirNo          String?
-  supplierName    String?
-  currentStage    String    @default("IQC") // IQC, QUALITY_MANAGER, PLANT_HEAD, FINAL_AUTHORITY, CLOSED
-  finalOutcome    String    @default("PENDING") // PENDING, PASS, FAIL
   isActive        Boolean   @default(true)
   isTestData      Boolean   @default(false)
   createdAt       DateTime  @default(now())
@@ -2605,7 +2597,6 @@ model IqcInspection {
   updatedBy       String?
 
   items           IqcItem[]
-  stageResults    IqcStageResult[]
 
   rejectedStocks RejectedStock[]
   stockPutaways StockPutaway[]
@@ -2613,6 +2604,10 @@ model IqcInspection {
   @@map("iqc_inspections")
 }
 
+// The checklist and escalation (template, S1-S5 results, pass/fail
+// chain) live here, not on the parent inspection - one GRN often has
+// many items, and each needs its own independent template and
+// decision chain, not one shared verdict for the whole GRN.
 model IqcItem {
   id               String         @id @default(uuid())
   companyId        String
@@ -2626,6 +2621,11 @@ model IqcItem {
   acceptedQty      Float          @default(0)
   rejectedQty      Float          @default(0)
   rejectionReason  String?
+  templateId       String?
+  template         IqcCheckTemplate? @relation(fields: [templateId], references: [id])
+  sampleSize       Int?
+  currentStage     String         @default("IQC") // IQC, QUALITY_MANAGER, PLANT_HEAD, FINAL_AUTHORITY, CLOSED
+  finalOutcome     String         @default("PENDING") // PENDING, PASS, FAIL
   isActive         Boolean        @default(true)
   isTestData       Boolean        @default(false)
   createdAt        DateTime       @default(now())
@@ -2633,14 +2633,16 @@ model IqcItem {
   createdBy        String?
   updatedBy        String?
 
+  stageResults     IqcStageResult[]
+
   @@map("iqc_items")
 }
 
 // One reusable checklist template per raw material, matching the
 // company's Excel check-sheet format (Part Name / S.No. / Category /
-// Parameter / Specification / S1-S5 samples / Remark). Inspections
-// snapshot which template they used, so a later edit to a template
-// never changes the meaning of a past inspection.
+// Parameter / Specification / S1-S5 samples / Remark). Items snapshot
+// which template they used, so a later edit to a template never
+// changes the meaning of a past inspection.
 model IqcCheckTemplate {
   id              String    @id @default(uuid())
   companyId       String
@@ -2658,7 +2660,7 @@ model IqcCheckTemplate {
   updatedBy       String?
 
   parameters      IqcCheckParameter[]
-  inspections     IqcInspection[]
+  items           IqcItem[]
 
   @@map("iqc_check_templates")
 }
@@ -2685,16 +2687,17 @@ model IqcCheckParameter {
   @@map("iqc_check_parameters")
 }
 
-// One row per stage a given inspection actually goes through - a
-// material that passes at IQC has exactly one row here; one
-// escalated all the way to Final Authority has four. This is the
-// audit trail of who decided what, at which stage, and why - a
-// remark is mandatory on every row regardless of outcome.
+// One row per stage a given item actually goes through - an item
+// that passes at IQC has exactly one row here; one escalated all the
+// way to Final Authority has four. This is the audit trail of who
+// decided what, at which stage, and why - a remark is mandatory on
+// every row regardless of outcome, and the full history of remarks
+// is shown on the form as it escalates, not just the latest one.
 model IqcStageResult {
   id              String    @id @default(uuid())
   companyId       String
-  iqcId           String
-  iqc             IqcInspection @relation(fields: [iqcId], references: [id])
+  iqcItemId       String
+  iqcItem         IqcItem   @relation(fields: [iqcItemId], references: [id])
   stage           String    // IQC, QUALITY_MANAGER, PLANT_HEAD, FINAL_AUTHORITY
   outcome         String    // PASS, FAIL
   remarks         String

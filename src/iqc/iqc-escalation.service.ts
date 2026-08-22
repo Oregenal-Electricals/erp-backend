@@ -125,45 +125,47 @@ export class IqcEscalationService {
     }, user);
   }
 
-  async attachTemplate(iqcId: string, dto: AttachTemplateDto, user: any) {
-    const iqc = await this.prisma.iqcInspection.findFirst({ where: { id: iqcId, companyId: user.companyId } });
-    if (!iqc) throw new NotFoundException('IQC inspection not found');
+  private itemIncludes() {
+    return {
+      template: { include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' as const } } } },
+      stageResults: {
+        where: { isActive: true },
+        orderBy: { reviewedAt: 'asc' as const },
+        include: { parameterResults: { include: { parameter: true } } },
+      },
+      iqc: {
+        select: {
+          iqcNumber: true, inspectionDate: true,
+          grn: { select: { grnNumber: true, warehouseId: true, po: { select: { vendor: { select: { name: true } } } } } },
+        },
+      },
+    };
+  }
+
+  async attachTemplate(itemId: string, dto: AttachTemplateDto, user: any) {
+    const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId, companyId: user.companyId } });
+    if (!item) throw new NotFoundException('IQC item not found');
     await this.findOneTemplate(dto.templateId, user);
 
-    const updated = await this.prisma.iqcInspection.update({
-      where: { id: iqcId },
-      data: {
-        templateId: dto.templateId,
-        lotQuantity: dto.lotQuantity,
-        sampleSize: dto.sampleSize,
-        mrirNo: dto.mrirNo,
-        supplierName: dto.supplierName,
-        updatedBy: user.id,
-      },
+    const updated = await this.prisma.iqcItem.update({
+      where: { id: itemId },
+      data: { templateId: dto.templateId, sampleSize: dto.sampleSize, updatedBy: user.id },
+      include: this.itemIncludes(),
     });
-    await this.audit.log({ tableName: 'iqc_inspections', recordId: iqcId, action: 'UPDATE', newValues: updated, changedBy: user.id });
+    await this.audit.log({ tableName: 'iqc_items', recordId: itemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
   }
 
-  async getEscalationDetail(iqcId: string, user: any) {
-    const iqc = await this.prisma.iqcInspection.findFirst({
-      where: { id: iqcId, companyId: user.companyId },
-      include: {
-        template: { include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } } },
-        stageResults: {
-          where: { isActive: true },
-          orderBy: { reviewedAt: 'asc' },
-          include: { parameterResults: { include: { parameter: true } } },
-        },
-        grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } },
-        items: { where: { isActive: true } },
-      },
+  async getItemEscalationDetail(itemId: string, user: any) {
+    const item = await this.prisma.iqcItem.findFirst({
+      where: { id: itemId, companyId: user.companyId },
+      include: this.itemIncludes(),
     });
-    if (!iqc) throw new NotFoundException('IQC inspection not found');
-    return iqc;
+    if (!item) throw new NotFoundException('IQC item not found');
+    return item;
   }
 
-  async submitStageResult(iqcId: string, dto: SubmitIqcStageResultDto, user: any) {
+  async submitStageResult(itemId: string, dto: SubmitIqcStageResultDto, user: any) {
     if (dto.outcome !== 'PASS' && dto.outcome !== 'FAIL') {
       throw new BadRequestException('outcome must be PASS or FAIL');
     }
@@ -171,17 +173,17 @@ export class IqcEscalationService {
       throw new BadRequestException('A remark explaining this decision is required');
     }
 
-    const iqc = await this.getEscalationDetail(iqcId, user);
-    if (iqc.currentStage === 'CLOSED') throw new BadRequestException('This inspection is already closed');
-    if (!isAuthorizedForStage(iqc.currentStage, user)) {
-      throw new ForbiddenException(`You are not authorized to record a decision at the ${iqc.currentStage} stage`);
+    const item = await this.getItemEscalationDetail(itemId, user);
+    if (item.currentStage === 'CLOSED') throw new BadRequestException('This item is already closed');
+    if (!isAuthorizedForStage(item.currentStage, user)) {
+      throw new ForbiddenException(`You are not authorized to record a decision at the ${item.currentStage} stage`);
     }
 
     const stageResult = await this.prisma.iqcStageResult.create({
       data: {
         companyId: user.companyId,
-        iqcId,
-        stage: iqc.currentStage,
+        iqcItemId: itemId,
+        stage: item.currentStage,
         outcome: dto.outcome,
         remarks: dto.remarks,
         reviewedBy: user.id,
@@ -200,101 +202,110 @@ export class IqcEscalationService {
     });
 
     if (dto.outcome === 'PASS') {
-      await this.closeAsPass(iqcId, user);
+      await this.closeAsPass(itemId, user);
     } else {
-      const currentIdx = STAGE_ORDER.indexOf(iqc.currentStage);
+      const currentIdx = STAGE_ORDER.indexOf(item.currentStage);
       const isTerminal = currentIdx === STAGE_ORDER.length - 1;
       if (isTerminal) {
-        await this.closeAsFail(iqcId, user);
+        await this.closeAsFail(itemId, user);
       } else {
         const nextStage = STAGE_ORDER[currentIdx + 1];
-        await this.prisma.iqcInspection.update({
-          where: { id: iqcId },
-          data: { currentStage: nextStage, updatedBy: user.id },
-        });
-        await this.notifyEscalation(iqcId, nextStage, user);
+        await this.prisma.iqcItem.update({ where: { id: itemId }, data: { currentStage: nextStage, updatedBy: user.id } });
+        await this.notifyEscalation(itemId, nextStage, user);
       }
     }
 
     await this.audit.log({ tableName: 'iqc_stage_results', recordId: stageResult.id, action: 'CREATE', newValues: stageResult, changedBy: user.id });
-    return this.getEscalationDetail(iqcId, user);
+    return this.getItemEscalationDetail(itemId, user);
   }
 
-  private async closeAsPass(iqcId: string, user: any) {
-    const iqc = await this.prisma.iqcInspection.findFirst({ where: { id: iqcId }, include: { items: { where: { isActive: true } } } });
-    if (!iqc) return;
+  private async closeAsPass(itemId: string, user: any) {
+    const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId } });
+    if (!item) return;
 
-    await this.prisma.iqcInspection.update({
-      where: { id: iqcId },
-      data: { currentStage: 'CLOSED', finalOutcome: 'PASS', status: 'APPROVED', updatedBy: user.id },
+    await this.prisma.iqcItem.update({
+      where: { id: itemId },
+      data: {
+        currentStage: 'CLOSED', finalOutcome: 'PASS',
+        acceptedQty: item.acceptedQty === 0 && item.rejectedQty === 0 ? item.receivedQty : item.acceptedQty,
+        updatedBy: user.id,
+      },
     });
 
-    for (const item of iqc.items) {
-      if (item.acceptedQty === 0 && item.rejectedQty === 0) {
-        await this.prisma.iqcItem.update({ where: { id: item.id }, data: { acceptedQty: item.receivedQty, updatedBy: user.id } });
-      }
-    }
+    await this.maybeCloseInspection(item.iqcId, user);
+  }
 
+  private async closeAsFail(itemId: string, user: any) {
+    const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId } });
+    if (!item) return;
+
+    await this.prisma.iqcItem.update({
+      where: { id: itemId },
+      data: { currentStage: 'CLOSED', finalOutcome: 'FAIL', acceptedQty: 0, rejectedQty: item.receivedQty, updatedBy: user.id },
+    });
+
+    await this.maybeCloseInspection(item.iqcId, user);
+  }
+
+  private async maybeCloseInspection(iqcId: string, user: any) {
+    const iqc = await this.prisma.iqcInspection.findFirst({ where: { id: iqcId }, include: { items: { where: { isActive: true } } } });
+    if (!iqc) return;
+    const allClosed = iqc.items.every(i => i.currentStage === 'CLOSED');
+    if (!allClosed) return;
+
+    await this.prisma.iqcInspection.update({ where: { id: iqcId }, data: { status: 'APPROVED', updatedBy: user.id } });
     await this.stockLedger.receiveFromIqc(iqcId, user);
 
     const refreshed = await this.prisma.iqcInspection.findFirst({ where: { id: iqcId }, include: { items: { where: { isActive: true } } } });
-    if (refreshed) {
-      for (const item of refreshed.items) {
-        await this.prisma.grnItem.update({
-          where: { id: item.grnItemId },
-          data: { acceptedQty: item.acceptedQty, rejectedQty: item.rejectedQty, updatedBy: user.id },
-        });
-      }
-      await this.prisma.grnHeader.update({ where: { id: refreshed.grnId }, data: { status: 'ACCEPTED', updatedBy: user.id } });
-    }
-  }
-
-  private async closeAsFail(iqcId: string, user: any) {
-    const iqc = await this.prisma.iqcInspection.findFirst({ where: { id: iqcId }, include: { items: { where: { isActive: true } } } });
-    if (!iqc) return;
-
-    await this.prisma.iqcInspection.update({
-      where: { id: iqcId },
-      data: { currentStage: 'CLOSED', finalOutcome: 'FAIL', status: 'APPROVED', updatedBy: user.id },
-    });
-
-    for (const item of iqc.items) {
-      await this.prisma.iqcItem.update({
-        where: { id: item.id },
-        data: { acceptedQty: 0, rejectedQty: item.receivedQty, updatedBy: user.id },
+    if (!refreshed) return;
+    for (const item of refreshed.items) {
+      await this.prisma.grnItem.update({
+        where: { id: item.grnItemId },
+        data: { acceptedQty: item.acceptedQty, rejectedQty: item.rejectedQty, updatedBy: user.id },
       });
     }
+    const totalAccepted = refreshed.items.reduce((s, i) => s + i.acceptedQty, 0);
+    const totalReceived = refreshed.items.reduce((s, i) => s + i.receivedQty, 0);
+    const totalRejected = refreshed.items.reduce((s, i) => s + i.rejectedQty, 0);
+    let grnStatus = 'ACCEPTED';
+    if (totalRejected > 0 && totalAccepted > 0) grnStatus = 'PARTIALLY_ACCEPTED';
+    else if (totalRejected === totalReceived) grnStatus = 'ACCEPTED';
+    await this.prisma.grnHeader.update({ where: { id: refreshed.grnId }, data: { status: grnStatus, updatedBy: user.id } });
 
-    const rejected = await this.rejectedStock.createFromIqc(iqcId, user);
+    if (totalRejected > 0) {
+      const existing = await this.prisma.rejectedStock.findFirst({ where: { iqcId, companyId: user.companyId } });
+      if (!existing) {
+        const rejected = await this.rejectedStock.createFromIqc(iqcId, user);
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + VENDOR_PICKUP_DAYS);
+        await this.prisma.rejectedStockItem.updateMany({
+          where: { rejectedStockId: rejected.id },
+          data: { disposition: 'RTV', vendorPickupDeadline: deadline, vendorNotifiedAt: new Date(), updatedBy: user.id },
+        });
 
-    const deadline = new Date();
-    deadline.setDate(deadline.getDate() + VENDOR_PICKUP_DAYS);
-    await this.prisma.rejectedStockItem.updateMany({
-      where: { rejectedStockId: rejected.id },
-      data: { disposition: 'RTV', vendorPickupDeadline: deadline, vendorNotifiedAt: new Date(), updatedBy: user.id },
-    });
-
-    const targets = await this.prisma.user.findMany({
-      where: { companyId: user.companyId, isActive: true, role: { in: ['FINANCE_MANAGER', 'PURCHASE_MANAGER'] } },
-      select: { id: true },
-    });
-    if (targets.length > 0) {
-      await this.notifications.createBulk(
-        targets.map(t => ({
-          userId: t.id,
-          type: 'QUALITY_ALERT',
-          title: `Material rejected — vendor return required`,
-          message: `${(rejected as any).rejectionNumber} failed final IQC review and is dead stock pending vendor pickup within ${VENDOR_PICKUP_DAYS} days.`,
-          referenceType: 'REJECTED_STOCK', referenceId: rejected.id, referenceNumber: (rejected as any).rejectionNumber,
-          priority: 'HIGH',
-        })) as any,
-        user.companyId, user.id,
-      );
+        const targets = await this.prisma.user.findMany({
+          where: { companyId: user.companyId, isActive: true, role: { in: ['FINANCE_MANAGER', 'PURCHASE_MANAGER'] } },
+          select: { id: true },
+        });
+        if (targets.length > 0) {
+          await this.notifications.createBulk(
+            targets.map(t => ({
+              userId: t.id,
+              type: 'QUALITY_ALERT',
+              title: `Material rejected — vendor return required`,
+              message: `${(rejected as any).rejectionNumber} failed final IQC review and is dead stock pending vendor pickup within ${VENDOR_PICKUP_DAYS} days.`,
+              referenceType: 'REJECTED_STOCK', referenceId: rejected.id, referenceNumber: (rejected as any).rejectionNumber,
+              priority: 'HIGH',
+            })) as any,
+            user.companyId, user.id,
+          );
+        }
+      }
     }
   }
 
-  private async notifyEscalation(iqcId: string, nextStage: string, user: any) {
-    const iqc = await this.prisma.iqcInspection.findFirst({ where: { id: iqcId } });
+  private async notifyEscalation(itemId: string, nextStage: string, user: any) {
+    const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId }, include: { iqc: { select: { iqcNumber: true } } } });
     const roleForStage: Record<string, string[]> = {
       QUALITY_MANAGER: ['QC_MANAGER'],
       PLANT_HEAD: ['PLANT_HEAD'],
@@ -311,8 +322,8 @@ export class IqcEscalationService {
         userId: t.id,
         type: 'QUALITY_ALERT',
         title: `IQC escalated to ${nextStage.replace('_', ' ')}`,
-        message: `${(iqc as any)?.iqcNumber} failed review and needs your decision.`,
-        referenceType: 'IQC', referenceId: iqcId, referenceNumber: (iqc as any)?.iqcNumber,
+        message: `${(item as any)?.iqc?.iqcNumber} — ${item?.itemName} failed review and needs your decision.`,
+        referenceType: 'IQC_ITEM', referenceId: itemId, referenceNumber: (item as any)?.iqc?.iqcNumber,
         priority: 'HIGH',
       })) as any,
       user.companyId, user.id,
