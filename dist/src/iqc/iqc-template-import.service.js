@@ -79,8 +79,7 @@ let IqcTemplateImportService = class IqcTemplateImportService {
         const titleRow = rows[TITLE_ROW_INDEX];
         if (!titleRow)
             throw new Error('Sheet is empty or too short to be a check sheet');
-        const rawTitle = String(titleRow[0] || '').trim();
-        const name = rawTitle.replace(/^IQC INSPECTION OF\s*/i, '').trim() || sheetName;
+        const name = sheetName.trim();
         const docCode = titleRow[DOC_CODE_COL_INDEX] ? String(titleRow[DOC_CODE_COL_INDEX]).trim() : null;
         const parameters = [];
         for (let r = DATA_START_ROW_INDEX; r < rows.length; r++) {
@@ -98,12 +97,7 @@ let IqcTemplateImportService = class IqcTemplateImportService {
                 continue;
             if (!parameterName || !specification)
                 continue;
-            parameters.push({
-                sNo: Number(sNoRaw) || parameters.length + 1,
-                category: category || 'Major',
-                parameterName,
-                specification,
-            });
+            parameters.push({ sNo: Number(sNoRaw) || parameters.length + 1, category: category || 'Major', parameterName, specification });
         }
         if (parameters.length === 0)
             throw new Error('No parameter rows found - check the sheet matches the expected format');
@@ -112,22 +106,20 @@ let IqcTemplateImportService = class IqcTemplateImportService {
     async confirmImport(parsed, user) {
         const created = [];
         const skipped = [];
-        const namesUsedThisBatch = new Set();
         for (const t of parsed) {
             if (t.error || t.parameters.length === 0) {
                 skipped.push({ sheetName: t.sheetName, reason: t.error || 'No parameters' });
                 continue;
             }
-            let finalName = t.name;
-            const existing = await this.prisma.iqcCheckTemplate.findFirst({ where: { companyId: user.companyId, name: finalName, isActive: true } });
-            if (existing || namesUsedThisBatch.has(finalName)) {
-                finalName = `${t.name} — ${t.sheetName}`;
+            const existing = await this.prisma.iqcCheckTemplate.findFirst({ where: { companyId: user.companyId, name: t.name, isActive: true, isCurrent: true } });
+            if (existing) {
+                skipped.push({ sheetName: t.sheetName, reason: `A template named "${t.name}" already exists` });
+                continue;
             }
-            namesUsedThisBatch.add(finalName);
             const template = await this.prisma.iqcCheckTemplate.create({
                 data: {
                     companyId: user.companyId,
-                    name: finalName,
+                    name: t.name,
                     docCode: t.docCode,
                     createdBy: user.id, updatedBy: user.id,
                     parameters: {

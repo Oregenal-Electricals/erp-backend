@@ -120,7 +120,9 @@ export class IqcEscalationService {
       data: {
         companyId: user.companyId,
         rawMaterialId: (current as any).rawMaterialId ?? undefined,
-        name: dto.name ?? current.name,
+        // Name is locked after the first save/import - only the checklist
+        // content can change on later versions.
+        name: current.name,
         docCode: dto.docCode ?? (current as any).docCode ?? undefined,
         revision: dto.revision ?? (current as any).revision ?? undefined,
         version: (current as any).version + 1,

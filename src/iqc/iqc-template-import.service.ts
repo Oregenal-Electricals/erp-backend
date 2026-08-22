@@ -32,14 +32,12 @@ export class IqcTemplateImportService {
     for (const sheetName of workbook.SheetNames) {
       const sheet = workbook.Sheets[sheetName];
       const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
-
       try {
         results.push(this.parseSheet(sheetName, rows));
       } catch (e: any) {
         results.push({ sheetName, name: sheetName, docCode: null, parameters: [], error: e.message || 'Could not parse this sheet' });
       }
     }
-
     return results;
   }
 
@@ -47,8 +45,12 @@ export class IqcTemplateImportService {
     const titleRow = rows[TITLE_ROW_INDEX];
     if (!titleRow) throw new Error('Sheet is empty or too short to be a check sheet');
 
-    const rawTitle = String(titleRow[0] || '').trim();
-    const name = rawTitle.replace(/^IQC INSPECTION OF\s*/i, '').trim() || sheetName;
+    // The sheet tab name is the canonical template name - Excel
+    // guarantees tab names are unique within a workbook, so this
+    // avoids any name-collision handling entirely. The "IQC
+    // INSPECTION OF ..." title text in the sheet itself is
+    // display-only and not used for identity.
+    const name = sheetName.trim();
     const docCode = titleRow[DOC_CODE_COL_INDEX] ? String(titleRow[DOC_CODE_COL_INDEX]).trim() : null;
 
     const parameters: ParsedTemplate['parameters'] = [];
@@ -62,30 +64,19 @@ export class IqcTemplateImportService {
       const category = row[2] ? String(row[2]).trim() : null;
       const parameterName = row[3] ? String(row[3]).trim() : null;
       const specification = row[4] ? String(row[4]).trim() : null;
-
       if (sNoRaw == null && !category && !parameterName && !specification) continue;
       if (!parameterName || !specification) continue;
 
-      parameters.push({
-        sNo: Number(sNoRaw) || parameters.length + 1,
-        category: category || 'Major',
-        parameterName,
-        specification,
-      });
+      parameters.push({ sNo: Number(sNoRaw) || parameters.length + 1, category: category || 'Major', parameterName, specification });
     }
 
     if (parameters.length === 0) throw new Error('No parameter rows found - check the sheet matches the expected format');
-
     return { sheetName, name, docCode, parameters, error: null };
   }
 
   async confirmImport(parsed: { sheetName: string; name: string; docCode?: string | null; parameters: { sNo: number; category: string; parameterName: string; specification: string }[]; error?: string | null }[], user: any) {
     const created: string[] = [];
     const skipped: { sheetName: string; reason: string }[] = [];
-    // Names already used in THIS import batch, so two sheets that both
-    // extract to the same material name don't collide with each other
-    // either, not just with what's already in the database.
-    const namesUsedThisBatch = new Set<string>();
 
     for (const t of parsed) {
       if (t.error || t.parameters.length === 0) {
@@ -93,20 +84,21 @@ export class IqcTemplateImportService {
         continue;
       }
 
-      // A duplicate name should never silently drop a real sheet of
-      // data - disambiguate with the sheet name instead, and let the
-      // person clean up naming afterward via Edit if they want to.
-      let finalName = t.name;
-      const existing = await this.prisma.iqcCheckTemplate.findFirst({ where: { companyId: user.companyId, name: finalName, isActive: true } });
-      if (existing || namesUsedThisBatch.has(finalName)) {
-        finalName = `${t.name} — ${t.sheetName}`;
+      // Sheet names are the canonical template name and Excel
+      // guarantees they're unique within a workbook, so a real
+      // collision here only means this exact template was already
+      // imported before - skip it rather than create a confusing
+      // duplicate under a modified name.
+      const existing = await this.prisma.iqcCheckTemplate.findFirst({ where: { companyId: user.companyId, name: t.name, isActive: true, isCurrent: true } });
+      if (existing) {
+        skipped.push({ sheetName: t.sheetName, reason: `A template named "${t.name}" already exists` });
+        continue;
       }
-      namesUsedThisBatch.add(finalName);
 
       const template = await this.prisma.iqcCheckTemplate.create({
         data: {
           companyId: user.companyId,
-          name: finalName,
+          name: t.name,
           docCode: t.docCode,
           createdBy: user.id, updatedBy: user.id,
           parameters: {

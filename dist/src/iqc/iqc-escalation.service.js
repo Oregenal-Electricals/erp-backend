@@ -102,7 +102,7 @@ let IqcEscalationService = class IqcEscalationService {
         return template;
     }
     async updateTemplate(id, dto, user) {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e, _f;
         const current = await this.findOneTemplate(id, user);
         if (!current.isCurrent) {
             throw new common_1.BadRequestException('This is a past version and cannot be edited directly - edit the current version instead.');
@@ -111,14 +111,14 @@ let IqcEscalationService = class IqcEscalationService {
             data: {
                 companyId: user.companyId,
                 rawMaterialId: (_a = current.rawMaterialId) !== null && _a !== void 0 ? _a : undefined,
-                name: (_b = dto.name) !== null && _b !== void 0 ? _b : current.name,
-                docCode: (_d = (_c = dto.docCode) !== null && _c !== void 0 ? _c : current.docCode) !== null && _d !== void 0 ? _d : undefined,
-                revision: (_f = (_e = dto.revision) !== null && _e !== void 0 ? _e : current.revision) !== null && _f !== void 0 ? _f : undefined,
+                name: current.name,
+                docCode: (_c = (_b = dto.docCode) !== null && _b !== void 0 ? _b : current.docCode) !== null && _c !== void 0 ? _c : undefined,
+                revision: (_e = (_d = dto.revision) !== null && _d !== void 0 ? _d : current.revision) !== null && _e !== void 0 ? _e : undefined,
                 version: current.version + 1,
                 isCurrent: true,
                 createdBy: user.id, updatedBy: user.id,
                 parameters: {
-                    create: ((_g = dto.parameters) !== null && _g !== void 0 ? _g : current.parameters.map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification, sortOrder: p.sortOrder }))).map((p, idx) => {
+                    create: ((_f = dto.parameters) !== null && _f !== void 0 ? _f : current.parameters.map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification, sortOrder: p.sortOrder }))).map((p, idx) => {
                         var _a;
                         return ({
                             companyId: user.companyId,
