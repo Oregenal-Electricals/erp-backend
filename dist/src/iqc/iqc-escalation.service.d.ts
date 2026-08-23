@@ -43,6 +43,7 @@ export declare class IqcEscalationService {
         rawMaterialId: string | null;
         docCode: string | null;
         isCurrent: boolean;
+        reviewed: boolean;
     }>;
     findAllTemplates(user: any, query: any): Promise<({
         _count: {
@@ -67,6 +68,7 @@ export declare class IqcEscalationService {
         rawMaterialId: string | null;
         docCode: string | null;
         isCurrent: boolean;
+        reviewed: boolean;
     })[]>;
     findOneTemplate(id: string, user: any): Promise<{
         rawMaterial: {
@@ -104,6 +106,7 @@ export declare class IqcEscalationService {
         rawMaterialId: string | null;
         docCode: string | null;
         isCurrent: boolean;
+        reviewed: boolean;
     }>;
     getVersionHistory(id: string, user: any): Promise<({
         parameters: {
@@ -137,7 +140,9 @@ export declare class IqcEscalationService {
         rawMaterialId: string | null;
         docCode: string | null;
         isCurrent: boolean;
+        reviewed: boolean;
     })[]>;
+    private parametersEqual;
     updateTemplate(id: string, dto: UpdateIqcCheckTemplateDto, user: any): Promise<{
         parameters: {
             id: string;
@@ -170,6 +175,7 @@ export declare class IqcEscalationService {
         rawMaterialId: string | null;
         docCode: string | null;
         isCurrent: boolean;
+        reviewed: boolean;
     }>;
     cloneTemplate(id: string, newName: string, user: any): Promise<{
         parameters: {
@@ -203,6 +209,7 @@ export declare class IqcEscalationService {
         rawMaterialId: string | null;
         docCode: string | null;
         isCurrent: boolean;
+        reviewed: boolean;
     }>;
     private itemIncludes;
     attachTemplate(itemId: string, dto: AttachTemplateDto, user: any): Promise<{
@@ -251,6 +258,7 @@ export declare class IqcEscalationService {
             rawMaterialId: string | null;
             docCode: string | null;
             isCurrent: boolean;
+            reviewed: boolean;
         };
         stageResults: ({
             parameterResults: ({
@@ -373,6 +381,7 @@ export declare class IqcEscalationService {
             rawMaterialId: string | null;
             docCode: string | null;
             isCurrent: boolean;
+            reviewed: boolean;
         };
         stageResults: ({
             parameterResults: ({
@@ -495,6 +504,7 @@ export declare class IqcEscalationService {
             rawMaterialId: string | null;
             docCode: string | null;
             isCurrent: boolean;
+            reviewed: boolean;
         };
         stageResults: ({
             parameterResults: ({

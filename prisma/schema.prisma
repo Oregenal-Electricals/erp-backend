@@ -2662,6 +2662,13 @@ model IqcCheckTemplate {
   revision        String?
   version         Int       @default(1)
   isCurrent       Boolean   @default(true)
+  // False only right after a bulk import, before anyone has opened it
+  // and saved for the first time - the name can still be freely
+  // changed while unreviewed. The first save (regardless of what
+  // changed) locks the name and flips this true. Manually-created
+  // templates start reviewed=true since creating one already is that
+  // first review.
+  reviewed        Boolean   @default(true)
   isActive        Boolean   @default(true)
   isTestData      Boolean   @default(false)
   createdAt       DateTime  @default(now())

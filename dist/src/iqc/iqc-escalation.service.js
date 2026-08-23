@@ -109,35 +109,71 @@ let IqcEscalationService = class IqcEscalationService {
             include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
         });
     }
+    parametersEqual(a, b) {
+        if (a.length !== b.length)
+            return false;
+        const norm = (list) => list
+            .map(p => `${p.sNo}|${p.category}|${p.parameterName}|${p.specification}`)
+            .sort();
+        const na = norm(a), nb = norm(b);
+        return na.every((v, i) => v === nb[i]);
+    }
     async updateTemplate(id, dto, user) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
         const current = await this.findOneTemplate(id, user);
         if (!current.isCurrent) {
             throw new common_1.BadRequestException('This is a past version and cannot be edited directly - edit the current version instead.');
         }
+        const submittedParameters = (_a = dto.parameters) !== null && _a !== void 0 ? _a : current.parameters.map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification }));
+        if (!current.reviewed) {
+            await this.prisma.iqcCheckTemplate.update({
+                where: { id },
+                data: {
+                    name: (_b = dto.name) !== null && _b !== void 0 ? _b : current.name,
+                    docCode: (_d = (_c = dto.docCode) !== null && _c !== void 0 ? _c : current.docCode) !== null && _d !== void 0 ? _d : undefined,
+                    revision: (_f = (_e = dto.revision) !== null && _e !== void 0 ? _e : current.revision) !== null && _f !== void 0 ? _f : undefined,
+                    reviewed: true,
+                    updatedBy: user.id,
+                },
+            });
+            await this.prisma.iqcCheckParameter.updateMany({ where: { templateId: id }, data: { isActive: false } });
+            await this.prisma.iqcCheckParameter.createMany({
+                data: submittedParameters.map((p, idx) => ({
+                    companyId: user.companyId, templateId: id,
+                    sNo: p.sNo, category: p.category, parameterName: p.parameterName,
+                    specification: p.specification, sortOrder: idx,
+                    createdBy: user.id, updatedBy: user.id,
+                })),
+            });
+            const result = await this.findOneTemplate(id, user);
+            await this.audit.log({ tableName: 'iqc_check_templates', recordId: id, action: 'UPDATE', newValues: Object.assign(Object.assign({}, result), { firstReview: true }), changedBy: user.id });
+            return result;
+        }
+        const unchanged = this.parametersEqual(current.parameters, submittedParameters);
+        if (unchanged) {
+            return current;
+        }
         const newVersion = await this.prisma.iqcCheckTemplate.create({
             data: {
                 companyId: user.companyId,
-                rawMaterialId: (_a = current.rawMaterialId) !== null && _a !== void 0 ? _a : undefined,
+                rawMaterialId: (_g = current.rawMaterialId) !== null && _g !== void 0 ? _g : undefined,
                 name: current.name,
-                docCode: (_c = (_b = dto.docCode) !== null && _b !== void 0 ? _b : current.docCode) !== null && _c !== void 0 ? _c : undefined,
-                revision: (_e = (_d = dto.revision) !== null && _d !== void 0 ? _d : current.revision) !== null && _e !== void 0 ? _e : undefined,
+                docCode: (_j = (_h = dto.docCode) !== null && _h !== void 0 ? _h : current.docCode) !== null && _j !== void 0 ? _j : undefined,
+                revision: (_l = (_k = dto.revision) !== null && _k !== void 0 ? _k : current.revision) !== null && _l !== void 0 ? _l : undefined,
                 version: current.version + 1,
                 isCurrent: true,
+                reviewed: true,
                 createdBy: user.id, updatedBy: user.id,
                 parameters: {
-                    create: ((_f = dto.parameters) !== null && _f !== void 0 ? _f : current.parameters.map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification, sortOrder: p.sortOrder }))).map((p, idx) => {
-                        var _a;
-                        return ({
-                            companyId: user.companyId,
-                            sNo: p.sNo,
-                            category: p.category,
-                            parameterName: p.parameterName,
-                            specification: p.specification,
-                            sortOrder: (_a = p.sortOrder) !== null && _a !== void 0 ? _a : idx,
-                            createdBy: user.id, updatedBy: user.id,
-                        });
-                    }),
+                    create: submittedParameters.map((p, idx) => ({
+                        companyId: user.companyId,
+                        sNo: p.sNo,
+                        category: p.category,
+                        parameterName: p.parameterName,
+                        specification: p.specification,
+                        sortOrder: idx,
+                        createdBy: user.id, updatedBy: user.id,
+                    })),
                 },
             },
             include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },

@@ -120,6 +120,7 @@ let IqcTemplateImportService = class IqcTemplateImportService {
                 data: {
                     companyId: user.companyId,
                     name: t.name,
+                    reviewed: false,
                     docCode: t.docCode,
                     createdBy: user.id, updatedBy: user.id,
                     parameters: {

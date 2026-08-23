@@ -117,47 +117,96 @@ export class IqcEscalationService {
       include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
     });
   }
+  // Comparison ignores id/sortOrder/timestamps - only the fields that
+  // actually define a check meaningfully changed.
+  private parametersEqual(a: any[], b: any[]): boolean {
+    if (a.length !== b.length) return false;
+    const norm = (list: any[]) => list
+      .map(p => `${p.sNo}|${p.category}|${p.parameterName}|${p.specification}`)
+      .sort();
+    const na = norm(a), nb = norm(b);
+    return na.every((v, i) => v === nb[i]);
+  }
 
-  // Editing never mutates the existing row - it creates a new one
-  // with version+1, and flips the old row's isCurrent off. Any
-  // inspection item that already points at the old row's id keeps
-  // seeing exactly what it always saw; nothing about a completed or
-  // in-progress inspection silently changes underneath it.
+  // Two modes, depending on whether this template has ever been
+  // reviewed:
+  //
+  // 1. Unreviewed (fresh off a bulk import, never opened and saved
+  //    before): this save IS the first review. It updates the row in
+  //    place - no new version - and locks the name from here on by
+  //    flipping reviewed=true.
+  //
+  // 2. Reviewed (already been through at least one save): the name is
+  //    locked and edits only affect checklist content. If the
+  //    submitted parameters are identical to what's already there,
+  //    nothing happens - no pointless version is created just because
+  //    someone opened and re-saved without changing anything. If they
+  //    genuinely differ, a new version is created and the old one is
+  //    frozen exactly as it was, same as before.
   async updateTemplate(id: string, dto: UpdateIqcCheckTemplateDto, user: any) {
     const current = await this.findOneTemplate(id, user);
     if (!(current as any).isCurrent) {
       throw new BadRequestException('This is a past version and cannot be edited directly - edit the current version instead.');
     }
 
+    const submittedParameters = dto.parameters ?? (current.parameters as any[]).map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification }));
+
+    if (!(current as any).reviewed) {
+      await this.prisma.iqcCheckTemplate.update({
+        where: { id },
+        data: {
+          name: dto.name ?? current.name,
+          docCode: dto.docCode ?? (current as any).docCode ?? undefined,
+          revision: dto.revision ?? (current as any).revision ?? undefined,
+          reviewed: true,
+          updatedBy: user.id,
+        },
+      });
+      await this.prisma.iqcCheckParameter.updateMany({ where: { templateId: id }, data: { isActive: false } });
+      await this.prisma.iqcCheckParameter.createMany({
+        data: submittedParameters.map((p, idx) => ({
+          companyId: user.companyId, templateId: id,
+          sNo: p.sNo, category: p.category, parameterName: p.parameterName,
+          specification: p.specification, sortOrder: idx,
+          createdBy: user.id, updatedBy: user.id,
+        })),
+      });
+      const result = await this.findOneTemplate(id, user);
+      await this.audit.log({ tableName: 'iqc_check_templates', recordId: id, action: 'UPDATE', newValues: { ...result, firstReview: true }, changedBy: user.id });
+      return result;
+    }
+
+    const unchanged = this.parametersEqual(current.parameters as any[], submittedParameters);
+    if (unchanged) {
+      return current;
+    }
+
     const newVersion = await this.prisma.iqcCheckTemplate.create({
       data: {
         companyId: user.companyId,
         rawMaterialId: (current as any).rawMaterialId ?? undefined,
-        // Name is locked after the first save/import - only the checklist
-        // content can change on later versions.
         name: current.name,
         docCode: dto.docCode ?? (current as any).docCode ?? undefined,
         revision: dto.revision ?? (current as any).revision ?? undefined,
         version: (current as any).version + 1,
         isCurrent: true,
+        reviewed: true,
         createdBy: user.id, updatedBy: user.id,
         parameters: {
-          create: (dto.parameters ?? (current.parameters as any[]).map(p => ({ sNo: p.sNo, category: p.category, parameterName: p.parameterName, specification: p.specification, sortOrder: p.sortOrder }))).map((p, idx) => ({
+          create: submittedParameters.map((p, idx) => ({
             companyId: user.companyId,
             sNo: p.sNo,
             category: p.category,
             parameterName: p.parameterName,
             specification: p.specification,
-            sortOrder: p.sortOrder ?? idx,
+            sortOrder: idx,
             createdBy: user.id, updatedBy: user.id,
           })),
         },
       },
       include: { parameters: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
     });
-
     await this.prisma.iqcCheckTemplate.update({ where: { id }, data: { isCurrent: false, updatedBy: user.id } });
-
     await this.audit.log({ tableName: 'iqc_check_templates', recordId: newVersion.id, action: 'CREATE', newValues: { ...newVersion, supersedes: id }, changedBy: user.id });
     return newVersion;
   }
