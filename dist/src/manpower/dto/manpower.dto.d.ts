@@ -4,7 +4,7 @@ export declare class CreateManpowerAllocationDto {
     category?: string;
     toUserId: string;
     parentId?: string;
-    count: number;
+    count?: number;
     remarks?: string;
 }
 export declare class DistributeManpowerDto {

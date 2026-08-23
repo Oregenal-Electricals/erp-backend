@@ -8,7 +8,7 @@ export class CreateManpowerAllocationDto {
   @IsOptional() @IsString() category?: string;
   @IsString() toUserId: string;
   @IsOptional() @IsString() parentId?: string;
-  @IsInt() @Min(1) count: number;
+  @IsOptional() @IsInt() @Min(1) count?: number; // ignored for HR_TO_PLANT - always computed from Attendance
   @IsOptional() @IsString() remarks?: string;
 }
 

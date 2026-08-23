@@ -40,6 +40,32 @@ export class ManpowerService {
     if (dto.level !== 'HR_TO_PLANT' && !dto.parentId) {
       throw new BadRequestException('parentId is required for this level - use the distribute endpoint instead');
     }
+
+    let count = dto.count;
+    if (dto.level !== 'HR_TO_PLANT' && (count == null || count < 1)) {
+      throw new BadRequestException('count is required for this level');
+    }
+    if (dto.level === 'HR_TO_PLANT') {
+      // Never manually typed - always computed from today's actual
+      // Attendance, so the top of the chain can't silently drift from
+      // what HR actually recorded.
+      const day = new Date(dto.date);
+      const dayStart = new Date(day); dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(day); dayEnd.setHours(23, 59, 59, 999);
+      count = await this.prisma.attendance.count({
+        where: { companyId: user.companyId, attendanceDate: { gte: dayStart, lte: dayEnd }, status: { in: ['PRESENT', 'HALF_DAY'] } },
+      });
+      if (count === 0) {
+        throw new BadRequestException('No attendance marked as Present for this date yet - mark attendance first');
+      }
+      const existing = await this.prisma.manpowerAllocation.findFirst({
+        where: { companyId: user.companyId, level: 'HR_TO_PLANT', date: { gte: dayStart, lte: dayEnd }, toUserId: dto.toUserId, isActive: true },
+      });
+      if (existing) {
+        throw new BadRequestException(`Today's manpower has already been sent to this Plant Head (${existing.count} people) - use adjust if the count needs to change`);
+      }
+    }
+
     const allocation = await this.prisma.manpowerAllocation.create({
       data: {
         companyId: user.companyId,
@@ -49,7 +75,7 @@ export class ManpowerService {
         fromUserId: user.id,
         toUserId: dto.toUserId,
         parentId: dto.parentId,
-        count: dto.count,
+        count,
         remarks: dto.remarks,
         createdBy: user.id, updatedBy: user.id,
       },
