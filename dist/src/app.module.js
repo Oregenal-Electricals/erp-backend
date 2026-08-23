@@ -13,6 +13,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const throttler_1 = require("@nestjs/throttler");
+const schedule_1 = require("@nestjs/schedule");
 const prisma_module_1 = require("./prisma/prisma.module");
 const common_module_1 = require("./common/common.module");
 const health_module_1 = require("./health/health.module");
@@ -149,6 +150,7 @@ exports.AppModule = AppModule = __decorate([
                 envFilePath: ['.env'],
             }),
             throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+            schedule_1.ScheduleModule.forRoot(),
             prisma_module_1.PrismaModule,
             common_module_1.CommonModule,
             health_module_1.HealthModule,

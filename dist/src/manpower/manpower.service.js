@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ManpowerService = void 0;
 const common_1 = require("@nestjs/common");
+const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const workflows_service_1 = require("../workflows/workflows.service");
@@ -414,26 +415,29 @@ let ManpowerService = class ManpowerService {
         return setting ? parseInt(setting.value, 10) : 15;
     }
     async getReconciliation(date, user) {
+        const graceMinutes = await this.getGracePeriodMinutes(user);
+        return this.computeReconciliation(date, user.companyId, graceMinutes);
+    }
+    async computeReconciliation(date, companyId, graceMinutes) {
         const day = date ? new Date(date) : new Date();
         const dayStart = new Date(day);
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(day);
         dayEnd.setHours(23, 59, 59, 999);
         const now = new Date();
-        const graceMinutes = await this.getGracePeriodMinutes(user);
         const graceThreshold = new Date(now.getTime() - graceMinutes * 60 * 1000);
         const presentAttendance = await this.prisma.attendance.findMany({
-            where: { companyId: user.companyId, attendanceDate: { gte: dayStart, lte: dayEnd }, status: { in: ['PRESENT', 'HALF_DAY'] } },
+            where: { companyId, attendanceDate: { gte: dayStart, lte: dayEnd }, status: { in: ['PRESENT', 'HALF_DAY'] } },
             include: { employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true, departmentId: true } } },
         });
         const activeAssignments = await this.prisma.manpowerAssignment.findMany({
-            where: { companyId: user.companyId, endTime: null, isActive: true },
+            where: { companyId, endTime: null, isActive: true },
             include: this.assignmentIncludes(),
         });
         const activeByEmployee = new Map(activeAssignments.map(a => [a.employeeId, a]));
         const recentlyEndedByEmployee = new Map();
         const recentlyEnded = await this.prisma.manpowerAssignment.findMany({
-            where: { companyId: user.companyId, isActive: true, endTime: { gte: graceThreshold, lte: now } },
+            where: { companyId, isActive: true, endTime: { gte: graceThreshold, lte: now } },
             orderBy: { endTime: 'desc' },
         });
         for (const a of recentlyEnded) {
@@ -473,8 +477,49 @@ let ManpowerService = class ManpowerService {
             graceMinutes,
         };
     }
+    async checkUnallocatedExceptions() {
+        const companies = await this.prisma.company.findMany({ where: { isActive: true }, select: { id: true } });
+        const REPEAT_SUPPRESS_MINUTES = 60;
+        for (const company of companies) {
+            const graceSetting = await this.prisma.systemSetting.findFirst({ where: { key: 'MANPOWER_GRACE_PERIOD_MINUTES' } });
+            const graceMinutes = graceSetting ? parseInt(graceSetting.value, 10) : 15;
+            const today = new Date().toISOString().slice(0, 10);
+            const recon = await this.computeReconciliation(today, company.id, graceMinutes);
+            if (recon.unallocatedEmployees.length === 0)
+                continue;
+            const targets = await this.prisma.user.findMany({
+                where: { companyId: company.id, isActive: true, role: { in: ['PLANT_HEAD', 'PRODUCTION_HEAD', 'UNIT_HEAD', 'SUPER_ADMIN'] } },
+                select: { id: true },
+            });
+            if (targets.length === 0)
+                continue;
+            const systemActor = targets[0].id;
+            const suppressSince = new Date(Date.now() - REPEAT_SUPPRESS_MINUTES * 60 * 1000);
+            for (const u of recon.unallocatedEmployees) {
+                const alreadyNotified = await this.prisma.notification.findFirst({
+                    where: { companyId: company.id, type: 'MANPOWER_UNALLOCATED', referenceId: u.employee.id, createdAt: { gte: suppressSince } },
+                });
+                if (alreadyNotified)
+                    continue;
+                await this.notifications.createBulk(targets.map(t => ({
+                    userId: t.id,
+                    type: 'MANPOWER_UNALLOCATED',
+                    title: 'Present but unallocated',
+                    message: `${u.employee.employeeNumber} — ${u.employee.firstName} ${u.employee.lastName} is marked present but has no active assignment (beyond the ${graceMinutes}-minute grace period).`,
+                    referenceType: 'EMPLOYEE', referenceId: u.employee.id, referenceNumber: u.employee.employeeNumber,
+                    priority: 'HIGH',
+                })), company.id, systemActor);
+            }
+        }
+    }
 };
 exports.ManpowerService = ManpowerService;
+__decorate([
+    (0, schedule_1.Cron)('*/5 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManpowerService.prototype, "checkUnallocatedExceptions", null);
 exports.ManpowerService = ManpowerService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,

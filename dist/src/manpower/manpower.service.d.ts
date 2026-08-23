@@ -779,4 +779,6 @@ export declare class ManpowerService {
         unallocatedEmployees: any[];
         graceMinutes: number;
     }>;
+    private computeReconciliation;
+    checkUnallocatedExceptions(): Promise<void>;
 }

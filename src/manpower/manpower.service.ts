@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { WorkflowsService } from '../workflows/workflows.service';
@@ -451,30 +452,39 @@ export class ManpowerService {
   // last assignment ended within the grace period isn't flagged yet -
   // only someone with no active assignment AND no recently-ended one
   // counts as a real, actionable exception.
+  // The core answer to "of everyone HR says is present, where is
+  // everyone right now" (spec sections 4, 9, 50-53). An employee whose
+  // last assignment ended within the grace period isn't flagged yet -
+  // only someone with no active assignment AND no recently-ended one
+  // counts as a real, actionable exception.
   async getReconciliation(date: string, user: any) {
+    const graceMinutes = await this.getGracePeriodMinutes(user);
+    return this.computeReconciliation(date, user.companyId, graceMinutes);
+  }
+
+  // Company-scoped core so the scheduled exception check below can
+  // reuse the exact same logic without needing a real request user.
+  private async computeReconciliation(date: string, companyId: string, graceMinutes: number) {
     const day = date ? new Date(date) : new Date();
     const dayStart = new Date(day); dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(day); dayEnd.setHours(23, 59, 59, 999);
     const now = new Date();
-    const graceMinutes = await this.getGracePeriodMinutes(user);
     const graceThreshold = new Date(now.getTime() - graceMinutes * 60 * 1000);
 
     const presentAttendance = await this.prisma.attendance.findMany({
-      where: { companyId: user.companyId, attendanceDate: { gte: dayStart, lte: dayEnd }, status: { in: ['PRESENT', 'HALF_DAY'] } },
+      where: { companyId, attendanceDate: { gte: dayStart, lte: dayEnd }, status: { in: ['PRESENT', 'HALF_DAY'] } },
       include: { employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true, departmentId: true } } },
     });
 
     const activeAssignments = await this.prisma.manpowerAssignment.findMany({
-      where: { companyId: user.companyId, endTime: null, isActive: true },
+      where: { companyId, endTime: null, isActive: true },
       include: this.assignmentIncludes(),
     });
     const activeByEmployee = new Map(activeAssignments.map(a => [a.employeeId, a]));
 
-    // Employees whose most recent assignment ended within the grace
-    // window - not currently active, but not an exception yet either.
     const recentlyEndedByEmployee = new Map<string, Date>();
     const recentlyEnded = await this.prisma.manpowerAssignment.findMany({
-      where: { companyId: user.companyId, isActive: true, endTime: { gte: graceThreshold, lte: now } },
+      where: { companyId, isActive: true, endTime: { gte: graceThreshold, lte: now } },
       orderBy: { endTime: 'desc' },
     });
     for (const a of recentlyEnded) {
@@ -492,7 +502,6 @@ export class ManpowerService {
         const key = active.stageName || active.activityType;
         stageBreakdown.set(key, (stageBreakdown.get(key) || 0) + 1);
       } else if (recentlyEndedByEmployee.has(att.employeeId)) {
-        // In grace period - not flagged, but not double-counted either.
         continue;
       } else {
         unallocated.push({ employee: att.employee });
@@ -515,5 +524,52 @@ export class ManpowerService {
       unallocatedEmployees: unallocated,
       graceMinutes,
     };
+  }
+
+  // Runs every 5 minutes. For each active company, checks who's
+  // currently present-but-unallocated beyond the grace period and
+  // notifies Plant-tier roles - so an exception surfaces even if
+  // nobody happens to have the dashboard open when it occurs. Avoids
+  // repeat-notifying for the same ongoing gap by checking whether one
+  // was already sent for that employee recently.
+  @Cron('*/5 * * * *')
+  async checkUnallocatedExceptions() {
+    const companies = await this.prisma.company.findMany({ where: { isActive: true }, select: { id: true } });
+    const REPEAT_SUPPRESS_MINUTES = 60;
+
+    for (const company of companies) {
+      const graceSetting = await this.prisma.systemSetting.findFirst({ where: { key: 'MANPOWER_GRACE_PERIOD_MINUTES' } });
+      const graceMinutes = graceSetting ? parseInt(graceSetting.value, 10) : 15;
+      const today = new Date().toISOString().slice(0, 10);
+      const recon = await this.computeReconciliation(today, company.id, graceMinutes);
+      if (recon.unallocatedEmployees.length === 0) continue;
+
+      const targets = await this.prisma.user.findMany({
+        where: { companyId: company.id, isActive: true, role: { in: ['PLANT_HEAD', 'PRODUCTION_HEAD', 'UNIT_HEAD', 'SUPER_ADMIN'] } },
+        select: { id: true },
+      });
+      if (targets.length === 0) continue;
+      const systemActor = targets[0].id;
+      const suppressSince = new Date(Date.now() - REPEAT_SUPPRESS_MINUTES * 60 * 1000);
+
+      for (const u of recon.unallocatedEmployees) {
+        const alreadyNotified = await this.prisma.notification.findFirst({
+          where: { companyId: company.id, type: 'MANPOWER_UNALLOCATED', referenceId: u.employee.id, createdAt: { gte: suppressSince } },
+        });
+        if (alreadyNotified) continue;
+
+        await this.notifications.createBulk(
+          targets.map(t => ({
+            userId: t.id,
+            type: 'MANPOWER_UNALLOCATED',
+            title: 'Present but unallocated',
+            message: `${u.employee.employeeNumber} — ${u.employee.firstName} ${u.employee.lastName} is marked present but has no active assignment (beyond the ${graceMinutes}-minute grace period).`,
+            referenceType: 'EMPLOYEE', referenceId: u.employee.id, referenceNumber: u.employee.employeeNumber,
+            priority: 'HIGH',
+          })) as any,
+          company.id, systemActor,
+        );
+      }
+    }
   }
 }
