@@ -63,6 +63,12 @@ export class IqcParameterResultDto {
 export class SubmitIqcStageResultDto {
   @IsString() outcome: string;
   @IsString() remarks: string;
+  // Only meaningful when submitted at the item's terminal decision
+  // point (i.e. what actually closes it PASS/FAIL) - optional
+  // otherwise, since intermediate escalation stages don't move stock.
+  @IsOptional() @IsNumber() @Min(0) acceptedQty?: number;
+  @IsOptional() @IsNumber() @Min(0) rejectedQty?: number;
+  @IsOptional() @IsString() rejectionReason?: string;
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => IqcParameterResultDto)
   parameterResults?: IqcParameterResultDto[];
 }

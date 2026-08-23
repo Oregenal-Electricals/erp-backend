@@ -247,6 +247,12 @@ let IqcEscalationService = class IqcEscalationService {
         if (!isAuthorizedForStage(item.currentStage, user)) {
             throw new common_1.ForbiddenException(`You are not authorized to record a decision at the ${item.currentStage} stage`);
         }
+        if (dto.acceptedQty != null && dto.rejectedQty != null && dto.acceptedQty + dto.rejectedQty > item.receivedQty) {
+            throw new common_1.BadRequestException(`Accepted (${dto.acceptedQty}) + Rejected (${dto.rejectedQty}) cannot exceed received quantity (${item.receivedQty})`);
+        }
+        if (dto.rejectedQty && dto.rejectedQty > 0 && (!dto.rejectionReason || !dto.rejectionReason.trim())) {
+            throw new common_1.BadRequestException('A rejection reason is required when any quantity is rejected');
+        }
         const stageResult = await this.prisma.iqcStageResult.create({
             data: {
                 companyId: user.companyId,
@@ -269,13 +275,13 @@ let IqcEscalationService = class IqcEscalationService {
             include: { parameterResults: true },
         });
         if (dto.outcome === 'PASS') {
-            await this.closeAsPass(itemId, user);
+            await this.closeAsPass(itemId, user, dto.acceptedQty, dto.rejectedQty);
         }
         else {
             const currentIdx = STAGE_ORDER.indexOf(item.currentStage);
             const isTerminal = currentIdx === STAGE_ORDER.length - 1;
             if (isTerminal) {
-                await this.closeAsFail(itemId, user);
+                await this.closeAsFail(itemId, user, dto.acceptedQty, dto.rejectedQty, dto.rejectionReason);
             }
             else {
                 const nextStage = STAGE_ORDER[currentIdx + 1];
@@ -286,7 +292,7 @@ let IqcEscalationService = class IqcEscalationService {
         await this.audit.log({ tableName: 'iqc_stage_results', recordId: stageResult.id, action: 'CREATE', newValues: stageResult, changedBy: user.id });
         return this.getItemEscalationDetail(itemId, user);
     }
-    async closeAsPass(itemId, user) {
+    async closeAsPass(itemId, user, acceptedQty, rejectedQty) {
         const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId } });
         if (!item)
             return;
@@ -294,19 +300,26 @@ let IqcEscalationService = class IqcEscalationService {
             where: { id: itemId },
             data: {
                 currentStage: 'CLOSED', finalOutcome: 'PASS',
-                acceptedQty: item.acceptedQty === 0 && item.rejectedQty === 0 ? item.receivedQty : item.acceptedQty,
+                acceptedQty: acceptedQty !== null && acceptedQty !== void 0 ? acceptedQty : item.receivedQty,
+                rejectedQty: rejectedQty !== null && rejectedQty !== void 0 ? rejectedQty : 0,
                 updatedBy: user.id,
             },
         });
         await this.maybeCloseInspection(item.iqcId, user);
     }
-    async closeAsFail(itemId, user) {
+    async closeAsFail(itemId, user, acceptedQty, rejectedQty, rejectionReason) {
         const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId } });
         if (!item)
             return;
         await this.prisma.iqcItem.update({
             where: { id: itemId },
-            data: { currentStage: 'CLOSED', finalOutcome: 'FAIL', acceptedQty: 0, rejectedQty: item.receivedQty, updatedBy: user.id },
+            data: {
+                currentStage: 'CLOSED', finalOutcome: 'FAIL',
+                acceptedQty: acceptedQty !== null && acceptedQty !== void 0 ? acceptedQty : 0,
+                rejectedQty: rejectedQty !== null && rejectedQty !== void 0 ? rejectedQty : item.receivedQty,
+                rejectionReason: rejectionReason !== null && rejectionReason !== void 0 ? rejectionReason : undefined,
+                updatedBy: user.id,
+            },
         });
         await this.maybeCloseInspection(item.iqcId, user);
     }

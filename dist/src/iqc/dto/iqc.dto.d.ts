@@ -49,6 +49,9 @@ export declare class IqcParameterResultDto {
 export declare class SubmitIqcStageResultDto {
     outcome: string;
     remarks: string;
+    acceptedQty?: number;
+    rejectedQty?: number;
+    rejectionReason?: string;
     parameterResults?: IqcParameterResultDto[];
 }
 export declare class ImportedTemplateParameterDto {
