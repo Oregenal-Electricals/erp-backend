@@ -439,7 +439,7 @@ let ManpowerService = class ManpowerService {
         const unallocatedCount = unallocated.length;
         const inGraceCount = hrPresent - accountedCount - unallocatedCount;
         return {
-            date: dayStart.toISOString().slice(0, 10),
+            date: `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`,
             hrPresent,
             accounted: accountedCount,
             unallocated: unallocatedCount,
