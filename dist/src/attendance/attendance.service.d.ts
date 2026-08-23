@@ -21,10 +21,10 @@ export declare class AttendanceService {
         code: string;
         startTime: string;
         endTime: string;
+        lunchMinutes: number;
         shiftHours: number;
         lunchStartTime: string | null;
         lunchEndTime: string | null;
-        lunchMinutes: number;
         weeklyOff: string;
         otMultiplier: number;
         holidayMultiplier: number;
@@ -42,10 +42,10 @@ export declare class AttendanceService {
         code: string;
         startTime: string;
         endTime: string;
+        lunchMinutes: number;
         shiftHours: number;
         lunchStartTime: string | null;
         lunchEndTime: string | null;
-        lunchMinutes: number;
         weeklyOff: string;
         otMultiplier: number;
         holidayMultiplier: number;
@@ -63,10 +63,10 @@ export declare class AttendanceService {
         code: string;
         startTime: string;
         endTime: string;
+        lunchMinutes: number;
         shiftHours: number;
         lunchStartTime: string | null;
         lunchEndTime: string | null;
-        lunchMinutes: number;
         weeklyOff: string;
         otMultiplier: number;
         holidayMultiplier: number;
@@ -94,12 +94,11 @@ export declare class AttendanceService {
         checkIn: Date | null;
         checkOut: Date | null;
         employeeId: string;
-        lunchMinutes: number;
-        attendanceDate: Date;
         shiftId: string | null;
+        attendanceDate: Date;
         lunchOut: Date | null;
         lunchIn: Date | null;
-        isHoliday: boolean;
+        lunchMinutes: number;
         grossWorkedMinutes: number;
         netWorkedMinutes: number;
         netWorkedRounded: number;
@@ -107,6 +106,7 @@ export declare class AttendanceService {
         otHours: number;
         otRate: number;
         otAmount: number;
+        isHoliday: boolean;
         markedBy: string | null;
     }>;
     updateAttendance(id: string, dto: UpdateAttendanceDto, user: any): Promise<{
@@ -132,12 +132,11 @@ export declare class AttendanceService {
         checkIn: Date | null;
         checkOut: Date | null;
         employeeId: string;
-        lunchMinutes: number;
-        attendanceDate: Date;
         shiftId: string | null;
+        attendanceDate: Date;
         lunchOut: Date | null;
         lunchIn: Date | null;
-        isHoliday: boolean;
+        lunchMinutes: number;
         grossWorkedMinutes: number;
         netWorkedMinutes: number;
         netWorkedRounded: number;
@@ -145,6 +144,7 @@ export declare class AttendanceService {
         otHours: number;
         otRate: number;
         otAmount: number;
+        isHoliday: boolean;
         markedBy: string | null;
     }>;
     bulkMarkAttendance(dto: BulkAttendanceDto, user: any): Promise<{
@@ -183,12 +183,11 @@ export declare class AttendanceService {
             checkIn: Date | null;
             checkOut: Date | null;
             employeeId: string;
-            lunchMinutes: number;
-            attendanceDate: Date;
             shiftId: string | null;
+            attendanceDate: Date;
             lunchOut: Date | null;
             lunchIn: Date | null;
-            isHoliday: boolean;
+            lunchMinutes: number;
             grossWorkedMinutes: number;
             netWorkedMinutes: number;
             netWorkedRounded: number;
@@ -196,6 +195,7 @@ export declare class AttendanceService {
             otHours: number;
             otRate: number;
             otAmount: number;
+            isHoliday: boolean;
             markedBy: string | null;
         })[];
         total: number;
@@ -235,12 +235,11 @@ export declare class AttendanceService {
             checkIn: Date | null;
             checkOut: Date | null;
             employeeId: string;
-            lunchMinutes: number;
-            attendanceDate: Date;
             shiftId: string | null;
+            attendanceDate: Date;
             lunchOut: Date | null;
             lunchIn: Date | null;
-            isHoliday: boolean;
+            lunchMinutes: number;
             grossWorkedMinutes: number;
             netWorkedMinutes: number;
             netWorkedRounded: number;
@@ -248,6 +247,7 @@ export declare class AttendanceService {
             otHours: number;
             otRate: number;
             otAmount: number;
+            isHoliday: boolean;
             markedBy: string | null;
         })[];
     }>;

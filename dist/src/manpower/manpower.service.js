@@ -285,6 +285,171 @@ let ManpowerService = class ManpowerService {
             }, actorUser.companyId, actorUser.id);
         }
     }
+    assignmentIncludes() {
+        return {
+            employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true, departmentId: true, designationId: true } },
+            workOrder: { select: { id: true, woNumber: true, productName: true, stageName: true } },
+            assignedBy: { select: { id: true, firstName: true, lastName: true } },
+        };
+    }
+    async assignEmployees(dto, user) {
+        if (!dto.employeeIds || dto.employeeIds.length === 0) {
+            throw new common_1.BadRequestException('Provide at least one employee to assign');
+        }
+        const startTime = dto.startTime ? new Date(dto.startTime) : new Date();
+        const dayStart = new Date(startTime);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(startTime);
+        dayEnd.setHours(23, 59, 59, 999);
+        const created = [];
+        const skipped = [];
+        for (const employeeId of dto.employeeIds) {
+            const employee = await this.prisma.employee.findFirst({ where: { id: employeeId, companyId: user.companyId, isActive: true } });
+            if (!employee) {
+                skipped.push({ employeeId, reason: 'Employee not found' });
+                continue;
+            }
+            const attendance = await this.prisma.attendance.findFirst({
+                where: { companyId: user.companyId, employeeId, attendanceDate: { gte: dayStart, lte: dayEnd } },
+            });
+            if (!attendance || !['PRESENT', 'HALF_DAY'].includes(attendance.status)) {
+                skipped.push({ employeeId, reason: `Not marked present today (${(attendance === null || attendance === void 0 ? void 0 : attendance.status) || 'no attendance record'})` });
+                continue;
+            }
+            const openAssignment = await this.prisma.manpowerAssignment.findFirst({
+                where: { companyId: user.companyId, employeeId, endTime: null, isActive: true },
+            });
+            if (openAssignment) {
+                await this.prisma.manpowerAssignment.update({ where: { id: openAssignment.id }, data: { endTime: startTime, updatedBy: user.id } });
+            }
+            const assignment = await this.prisma.manpowerAssignment.create({
+                data: {
+                    companyId: user.companyId,
+                    employeeId,
+                    allocationId: dto.allocationId,
+                    workOrderId: dto.workOrderId,
+                    stageName: dto.stageName,
+                    activityType: dto.activityType || 'PRODUCTION',
+                    startTime,
+                    assignedByUserId: user.id,
+                    remarks: dto.remarks,
+                    createdBy: user.id, updatedBy: user.id,
+                },
+                include: this.assignmentIncludes(),
+            });
+            created.push(assignment);
+        }
+        await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped }, changedBy: user.id });
+        return { created, createdCount: created.length, skipped, skippedCount: skipped.length };
+    }
+    async endAssignment(id, dto, user) {
+        const assignment = await this.prisma.manpowerAssignment.findFirst({ where: { id, companyId: user.companyId } });
+        if (!assignment)
+            throw new common_1.NotFoundException('Assignment not found');
+        if (assignment.endTime)
+            throw new common_1.BadRequestException('This assignment has already ended');
+        const updated = await this.prisma.manpowerAssignment.update({
+            where: { id },
+            data: { endTime: dto.endTime ? new Date(dto.endTime) : new Date(), updatedBy: user.id },
+            include: this.assignmentIncludes(),
+        });
+        await this.audit.log({ tableName: 'manpower_assignments', recordId: id, action: 'UPDATE', newValues: { endTime: updated.endTime }, changedBy: user.id });
+        return updated;
+    }
+    async getCurrentRoster(query, user) {
+        const { stageName, workOrderId, allocationId, activityType } = query;
+        const where = { companyId: user.companyId, endTime: null, isActive: true };
+        if (stageName)
+            where.stageName = stageName;
+        if (workOrderId)
+            where.workOrderId = workOrderId;
+        if (allocationId)
+            where.allocationId = allocationId;
+        if (activityType)
+            where.activityType = activityType;
+        return this.prisma.manpowerAssignment.findMany({ where, include: this.assignmentIncludes(), orderBy: { startTime: 'asc' } });
+    }
+    async getEmployeeTimeline(employeeId, date, user) {
+        const day = date ? new Date(date) : new Date();
+        const dayStart = new Date(day);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(day);
+        dayEnd.setHours(23, 59, 59, 999);
+        const employee = await this.prisma.employee.findFirst({ where: { id: employeeId, companyId: user.companyId } });
+        if (!employee)
+            throw new common_1.NotFoundException('Employee not found');
+        const assignments = await this.prisma.manpowerAssignment.findMany({
+            where: { companyId: user.companyId, employeeId, startTime: { gte: dayStart, lte: dayEnd }, isActive: true },
+            include: this.assignmentIncludes(),
+            orderBy: { startTime: 'asc' },
+        });
+        const attendance = await this.prisma.attendance.findFirst({ where: { companyId: user.companyId, employeeId, attendanceDate: { gte: dayStart, lte: dayEnd } } });
+        return { employee, attendance, assignments };
+    }
+    async getGracePeriodMinutes(user) {
+        const setting = await this.prisma.systemSetting.findFirst({ where: { key: 'MANPOWER_GRACE_PERIOD_MINUTES' } });
+        return setting ? parseInt(setting.value, 10) : 15;
+    }
+    async getReconciliation(date, user) {
+        const day = date ? new Date(date) : new Date();
+        const dayStart = new Date(day);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(day);
+        dayEnd.setHours(23, 59, 59, 999);
+        const now = new Date();
+        const graceMinutes = await this.getGracePeriodMinutes(user);
+        const graceThreshold = new Date(now.getTime() - graceMinutes * 60 * 1000);
+        const presentAttendance = await this.prisma.attendance.findMany({
+            where: { companyId: user.companyId, attendanceDate: { gte: dayStart, lte: dayEnd }, status: { in: ['PRESENT', 'HALF_DAY'] } },
+            include: { employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true, departmentId: true } } },
+        });
+        const activeAssignments = await this.prisma.manpowerAssignment.findMany({
+            where: { companyId: user.companyId, endTime: null, isActive: true },
+            include: this.assignmentIncludes(),
+        });
+        const activeByEmployee = new Map(activeAssignments.map(a => [a.employeeId, a]));
+        const recentlyEndedByEmployee = new Map();
+        const recentlyEnded = await this.prisma.manpowerAssignment.findMany({
+            where: { companyId: user.companyId, isActive: true, endTime: { gte: graceThreshold, lte: now } },
+            orderBy: { endTime: 'desc' },
+        });
+        for (const a of recentlyEnded) {
+            if (!recentlyEndedByEmployee.has(a.employeeId))
+                recentlyEndedByEmployee.set(a.employeeId, a.endTime);
+        }
+        const unallocated = [];
+        const allocated = [];
+        const stageBreakdown = new Map();
+        for (const att of presentAttendance) {
+            const active = activeByEmployee.get(att.employeeId);
+            if (active) {
+                allocated.push({ employee: att.employee, assignment: active });
+                const key = active.stageName || active.activityType;
+                stageBreakdown.set(key, (stageBreakdown.get(key) || 0) + 1);
+            }
+            else if (recentlyEndedByEmployee.has(att.employeeId)) {
+                continue;
+            }
+            else {
+                unallocated.push({ employee: att.employee });
+            }
+        }
+        const hrPresent = presentAttendance.length;
+        const accountedCount = allocated.length;
+        const unallocatedCount = unallocated.length;
+        const inGraceCount = hrPresent - accountedCount - unallocatedCount;
+        return {
+            date: dayStart.toISOString().slice(0, 10),
+            hrPresent,
+            accounted: accountedCount,
+            unallocated: unallocatedCount,
+            inGracePeriod: inGraceCount,
+            accountedPercent: hrPresent > 0 ? Math.round((accountedCount / hrPresent) * 10000) / 100 : 100,
+            stageBreakdown: Array.from(stageBreakdown.entries()).map(([key, count]) => ({ key, count })),
+            unallocatedEmployees: unallocated,
+            graceMinutes,
+        };
+    }
 };
 exports.ManpowerService = ManpowerService;
 exports.ManpowerService = ManpowerService = __decorate([

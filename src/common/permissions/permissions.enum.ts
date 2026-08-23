@@ -165,6 +165,7 @@ export enum Permission {
   MANPOWER_DISTRIBUTE = 'MANPOWER_DISTRIBUTE',
   MANPOWER_QUERY = 'MANPOWER_QUERY',
   MANPOWER_ADJUST = 'MANPOWER_ADJUST',
+  MANPOWER_ASSIGN = 'MANPOWER_ASSIGN', // assign/end an individual employee's assignment
   // Stage-to-stage FG handoff (Give/Receive)
   STAGE_TRANSFER_VIEW = 'STAGE_TRANSFER_VIEW',
   STAGE_TRANSFER_GIVE = 'STAGE_TRANSFER_GIVE',

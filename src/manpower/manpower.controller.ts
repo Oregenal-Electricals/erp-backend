@@ -4,7 +4,7 @@ import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { Permission } from '../common/permissions/permissions.enum';
 import { ManpowerService } from './manpower.service';
-import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto } from './dto/manpower.dto';
+import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto, AssignEmployeesDto, EndAssignmentDto } from './dto/manpower.dto';
 
 @Controller('manpower')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -58,4 +58,24 @@ export class ManpowerController {
   @Post('approvals/:requestId/reject')
   @RequirePermissions(Permission.WORK_ORDER_APPROVE)
   rejectRequest(@Param('requestId') requestId: string, @Body() dto: { comments?: string }, @Request() req: any) { return this.manpowerService.rejectManpowerRequest(requestId, req.user, dto?.comments); }
+
+  @Post('assignments')
+  @RequirePermissions(Permission.MANPOWER_ASSIGN)
+  assignEmployees(@Body() dto: AssignEmployeesDto, @Request() req: any) { return this.manpowerService.assignEmployees(dto, req.user); }
+
+  @Post('assignments/:id/end')
+  @RequirePermissions(Permission.MANPOWER_ASSIGN)
+  endAssignment(@Param('id') id: string, @Body() dto: EndAssignmentDto, @Request() req: any) { return this.manpowerService.endAssignment(id, dto, req.user); }
+
+  @Get('roster')
+  @RequirePermissions(Permission.MANPOWER_VIEW)
+  getCurrentRoster(@Query() query: any, @Request() req: any) { return this.manpowerService.getCurrentRoster(query, req.user); }
+
+  @Get('employees/:employeeId/timeline')
+  @RequirePermissions(Permission.MANPOWER_VIEW)
+  getEmployeeTimeline(@Param('employeeId') employeeId: string, @Query('date') date: string, @Request() req: any) { return this.manpowerService.getEmployeeTimeline(employeeId, date, req.user); }
+
+  @Get('reconciliation')
+  @RequirePermissions(Permission.MANPOWER_VIEW)
+  getReconciliation(@Query('date') date: string, @Request() req: any) { return this.manpowerService.getReconciliation(date, req.user); }
 }

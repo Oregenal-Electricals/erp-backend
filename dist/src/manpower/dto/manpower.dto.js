@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TransferManpowerDto = exports.AdjustManpowerDto = exports.ResolveManpowerQueryDto = exports.RaiseManpowerQueryDto = exports.DistributeManpowerDto = exports.CreateManpowerAllocationDto = void 0;
+exports.EndAssignmentDto = exports.AssignEmployeesDto = exports.TransferManpowerDto = exports.AdjustManpowerDto = exports.ResolveManpowerQueryDto = exports.RaiseManpowerQueryDto = exports.DistributeManpowerDto = exports.CreateManpowerAllocationDto = void 0;
 const class_validator_1 = require("class-validator");
 const LEVELS = ['HR_TO_PLANT', 'PLANT_TO_STAGE', 'STAGE_TO_LINE'];
 class CreateManpowerAllocationDto {
@@ -109,4 +109,56 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], TransferManpowerDto.prototype, "reason", void 0);
+const ACTIVITY_TYPES = [
+    'PRODUCTION', 'QUALITY_INSPECTION', 'REWORK', 'REPAIR', 'MACHINE_SETUP',
+    'LINE_CHANGEOVER', 'MAINTENANCE', 'BREAKDOWN_SUPPORT', 'MATERIAL_HANDLING',
+    'STORE', 'INVENTORY_COUNTING', 'PACKING', 'DISPATCH_SUPPORT', 'LOADING_UNLOADING',
+    'TRAINING', 'MEETING', 'CLEANING_5S', 'TRIAL_PRODUCTION', 'SAMPLE_PRODUCTION',
+    'TEA_BREAK', 'LUNCH_BREAK', 'APPROVED_WAITING', 'OTHER_APPROVED',
+];
+class AssignEmployeesDto {
+}
+exports.AssignEmployeesDto = AssignEmployeesDto;
+__decorate([
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], AssignEmployeesDto.prototype, "employeeIds", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "allocationId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "workOrderId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "stageName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(ACTIVITY_TYPES),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "activityType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "startTime", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "remarks", void 0);
+class EndAssignmentDto {
+}
+exports.EndAssignmentDto = EndAssignmentDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], EndAssignmentDto.prototype, "endTime", void 0);
 //# sourceMappingURL=manpower.dto.js.map

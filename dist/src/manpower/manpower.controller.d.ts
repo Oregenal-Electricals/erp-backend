@@ -1,5 +1,5 @@
 import { ManpowerService } from './manpower.service';
-import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto } from './dto/manpower.dto';
+import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto, AssignEmployeesDto, EndAssignmentDto } from './dto/manpower.dto';
 export declare class ManpowerController {
     private manpowerService;
     constructor(manpowerService: ManpowerService);
@@ -554,5 +554,220 @@ export declare class ManpowerController {
         workflowId: string | null;
         currentLevel: number;
         totalLevels: number;
+    }>;
+    assignEmployees(dto: AssignEmployeesDto, req: any): Promise<{
+        created: any[];
+        createdCount: number;
+        skipped: {
+            employeeId: string;
+            reason: string;
+        }[];
+        skippedCount: number;
+    }>;
+    endAssignment(id: string, dto: EndAssignmentDto, req: any): Promise<{
+        workOrder: {
+            id: string;
+            stageName: string;
+            productName: string;
+            woNumber: string;
+        };
+        employee: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            employeeNumber: string;
+            departmentId: string;
+            designationId: string;
+        };
+        assignedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        remarks: string | null;
+        employeeId: string;
+        stageName: string | null;
+        workOrderId: string | null;
+        allocationId: string | null;
+        activityType: string;
+        startTime: Date;
+        endTime: Date | null;
+        assignedByUserId: string;
+    }>;
+    getCurrentRoster(query: any, req: any): Promise<({
+        workOrder: {
+            id: string;
+            stageName: string;
+            productName: string;
+            woNumber: string;
+        };
+        employee: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            employeeNumber: string;
+            departmentId: string;
+            designationId: string;
+        };
+        assignedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        remarks: string | null;
+        employeeId: string;
+        stageName: string | null;
+        workOrderId: string | null;
+        allocationId: string | null;
+        activityType: string;
+        startTime: Date;
+        endTime: Date | null;
+        assignedByUserId: string;
+    })[]>;
+    getEmployeeTimeline(employeeId: string, date: string, req: any): Promise<{
+        employee: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            address: string | null;
+            city: string | null;
+            state: string | null;
+            pincode: string | null;
+            phone: string;
+            email: string;
+            status: string;
+            firstName: string;
+            lastName: string;
+            userId: string | null;
+            remarks: string | null;
+            bankName: string | null;
+            employeeNumber: string;
+            dateOfBirth: Date | null;
+            dateOfJoining: Date;
+            dateOfLeaving: Date | null;
+            departmentId: string;
+            designationId: string;
+            reportingManagerId: string | null;
+            employmentType: string;
+            gender: string;
+            panNumber: string | null;
+            aadharNumber: string | null;
+            pfNumber: string | null;
+            esiNumber: string | null;
+            bankAccountNumber: string | null;
+            bankIfscCode: string | null;
+            basicSalary: number;
+            hraAmount: number;
+            conveyanceAmount: number;
+            otherAllowances: number;
+            emergencyContact: string | null;
+            emergencyPhone: string | null;
+            profilePhoto: string | null;
+        };
+        attendance: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            remarks: string | null;
+            checkIn: Date | null;
+            checkOut: Date | null;
+            employeeId: string;
+            shiftId: string | null;
+            attendanceDate: Date;
+            lunchOut: Date | null;
+            lunchIn: Date | null;
+            lunchMinutes: number;
+            grossWorkedMinutes: number;
+            netWorkedMinutes: number;
+            netWorkedRounded: number;
+            workedHours: number;
+            otHours: number;
+            otRate: number;
+            otAmount: number;
+            isHoliday: boolean;
+            markedBy: string | null;
+        };
+        assignments: ({
+            workOrder: {
+                id: string;
+                stageName: string;
+                productName: string;
+                woNumber: string;
+            };
+            employee: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                employeeNumber: string;
+                departmentId: string;
+                designationId: string;
+            };
+            assignedBy: {
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            employeeId: string;
+            stageName: string | null;
+            workOrderId: string | null;
+            allocationId: string | null;
+            activityType: string;
+            startTime: Date;
+            endTime: Date | null;
+            assignedByUserId: string;
+        })[];
+    }>;
+    getReconciliation(date: string, req: any): Promise<{
+        date: string;
+        hrPresent: number;
+        accounted: number;
+        unallocated: number;
+        inGracePeriod: number;
+        accountedPercent: number;
+        stageBreakdown: {
+            key: string;
+            count: number;
+        }[];
+        unallocatedEmployees: any[];
+        graceMinutes: number;
     }>;
 }

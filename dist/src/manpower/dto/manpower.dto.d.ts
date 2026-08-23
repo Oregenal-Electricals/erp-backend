@@ -35,3 +35,15 @@ export declare class TransferManpowerDto {
     qty: number;
     reason?: string;
 }
+export declare class AssignEmployeesDto {
+    employeeIds: string[];
+    allocationId?: string;
+    workOrderId?: string;
+    stageName?: string;
+    activityType?: string;
+    startTime?: string;
+    remarks?: string;
+}
+export declare class EndAssignmentDto {
+    endTime?: string;
+}

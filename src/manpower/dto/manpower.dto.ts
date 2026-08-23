@@ -44,3 +44,27 @@ export class TransferManpowerDto {
   @IsInt() @Min(1) qty: number;
   @IsOptional() @IsString() reason?: string;
 }
+
+// ---- Phase 1: employee-level assignment ----
+
+const ACTIVITY_TYPES = [
+  'PRODUCTION', 'QUALITY_INSPECTION', 'REWORK', 'REPAIR', 'MACHINE_SETUP',
+  'LINE_CHANGEOVER', 'MAINTENANCE', 'BREAKDOWN_SUPPORT', 'MATERIAL_HANDLING',
+  'STORE', 'INVENTORY_COUNTING', 'PACKING', 'DISPATCH_SUPPORT', 'LOADING_UNLOADING',
+  'TRAINING', 'MEETING', 'CLEANING_5S', 'TRIAL_PRODUCTION', 'SAMPLE_PRODUCTION',
+  'TEA_BREAK', 'LUNCH_BREAK', 'APPROVED_WAITING', 'OTHER_APPROVED',
+];
+
+export class AssignEmployeesDto {
+  @IsString({ each: true }) employeeIds: string[];
+  @IsOptional() @IsString() allocationId?: string;
+  @IsOptional() @IsString() workOrderId?: string;
+  @IsOptional() @IsString() stageName?: string;
+  @IsOptional() @IsIn(ACTIVITY_TYPES) activityType?: string;
+  @IsOptional() @IsDateString() startTime?: string;
+  @IsOptional() @IsString() remarks?: string;
+}
+
+export class EndAssignmentDto {
+  @IsOptional() @IsDateString() endTime?: string;
+}

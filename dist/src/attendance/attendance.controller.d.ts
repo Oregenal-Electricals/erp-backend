@@ -16,10 +16,10 @@ export declare class AttendanceController {
         code: string;
         startTime: string;
         endTime: string;
+        lunchMinutes: number;
         shiftHours: number;
         lunchStartTime: string | null;
         lunchEndTime: string | null;
-        lunchMinutes: number;
         weeklyOff: string;
         otMultiplier: number;
         holidayMultiplier: number;
@@ -37,10 +37,10 @@ export declare class AttendanceController {
         code: string;
         startTime: string;
         endTime: string;
+        lunchMinutes: number;
         shiftHours: number;
         lunchStartTime: string | null;
         lunchEndTime: string | null;
-        lunchMinutes: number;
         weeklyOff: string;
         otMultiplier: number;
         holidayMultiplier: number;
@@ -58,10 +58,10 @@ export declare class AttendanceController {
         code: string;
         startTime: string;
         endTime: string;
+        lunchMinutes: number;
         shiftHours: number;
         lunchStartTime: string | null;
         lunchEndTime: string | null;
-        lunchMinutes: number;
         weeklyOff: string;
         otMultiplier: number;
         holidayMultiplier: number;
@@ -106,12 +106,11 @@ export declare class AttendanceController {
             checkIn: Date | null;
             checkOut: Date | null;
             employeeId: string;
-            lunchMinutes: number;
-            attendanceDate: Date;
             shiftId: string | null;
+            attendanceDate: Date;
             lunchOut: Date | null;
             lunchIn: Date | null;
-            isHoliday: boolean;
+            lunchMinutes: number;
             grossWorkedMinutes: number;
             netWorkedMinutes: number;
             netWorkedRounded: number;
@@ -119,6 +118,7 @@ export declare class AttendanceController {
             otHours: number;
             otRate: number;
             otAmount: number;
+            isHoliday: boolean;
             markedBy: string | null;
         })[];
         total: number;
@@ -158,12 +158,11 @@ export declare class AttendanceController {
             checkIn: Date | null;
             checkOut: Date | null;
             employeeId: string;
-            lunchMinutes: number;
-            attendanceDate: Date;
             shiftId: string | null;
+            attendanceDate: Date;
             lunchOut: Date | null;
             lunchIn: Date | null;
-            isHoliday: boolean;
+            lunchMinutes: number;
             grossWorkedMinutes: number;
             netWorkedMinutes: number;
             netWorkedRounded: number;
@@ -171,6 +170,7 @@ export declare class AttendanceController {
             otHours: number;
             otRate: number;
             otAmount: number;
+            isHoliday: boolean;
             markedBy: string | null;
         })[];
     }>;
@@ -197,12 +197,11 @@ export declare class AttendanceController {
         checkIn: Date | null;
         checkOut: Date | null;
         employeeId: string;
-        lunchMinutes: number;
-        attendanceDate: Date;
         shiftId: string | null;
+        attendanceDate: Date;
         lunchOut: Date | null;
         lunchIn: Date | null;
-        isHoliday: boolean;
+        lunchMinutes: number;
         grossWorkedMinutes: number;
         netWorkedMinutes: number;
         netWorkedRounded: number;
@@ -210,6 +209,7 @@ export declare class AttendanceController {
         otHours: number;
         otRate: number;
         otAmount: number;
+        isHoliday: boolean;
         markedBy: string | null;
     }>;
     bulkMark(dto: BulkAttendanceDto, req: any): Promise<{
@@ -242,12 +242,11 @@ export declare class AttendanceController {
         checkIn: Date | null;
         checkOut: Date | null;
         employeeId: string;
-        lunchMinutes: number;
-        attendanceDate: Date;
         shiftId: string | null;
+        attendanceDate: Date;
         lunchOut: Date | null;
         lunchIn: Date | null;
-        isHoliday: boolean;
+        lunchMinutes: number;
         grossWorkedMinutes: number;
         netWorkedMinutes: number;
         netWorkedRounded: number;
@@ -255,6 +254,7 @@ export declare class AttendanceController {
         otHours: number;
         otRate: number;
         otAmount: number;
+        isHoliday: boolean;
         markedBy: string | null;
     }>;
 }

@@ -330,6 +330,7 @@ model Company {
   customFieldValues      CustomFieldValue[]
   manpowerAllocations    ManpowerAllocation[]
   manpowerQueries        ManpowerQuery[]
+  manpowerAssignments    ManpowerAssignment[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
 
@@ -511,6 +512,7 @@ model User {
   gpEmployee       GatePass[]         @relation("GPEmployee")
   manpowerFrom     ManpowerAllocation[] @relation("ManpowerFrom")
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
+  manpowerAssignmentsMade ManpowerAssignment[] @relation("ManpowerAssignmentBy")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
   bomQueryRaisedBy BomQuery[] @relation("BomQueryRaisedBy")
@@ -914,6 +916,7 @@ model ManpowerAllocation {
   createdBy  String?
   updatedBy  String?
 
+  assignments ManpowerAssignment[]
   queries    ManpowerQuery[]
 
   @@map("manpower_allocations")
@@ -946,6 +949,54 @@ model ManpowerQuery {
   @@index([companyId])
   @@index([allocationId])
 }
+
+// The employee-level layer beneath ManpowerAllocation. An allocation
+// like "Assembly = 45" is a count Plant Head/Stage Head agreed on; this
+// is the record of which 45 actual people, each with their own
+// start/end time, are what that count is made of. A new row is
+// created every time someone's assignment changes (new stage, new
+// Work Order, a break, a mid-day transfer) rather than overwriting
+// the previous one, so an employee's full-day timeline is always
+// reconstructable. endTime null means the assignment is still active
+// right now - that's what powers live reconciliation and gap
+// detection, not the daily allocation counts.
+model ManpowerAssignment {
+  id             String    @id @default(uuid())
+  companyId      String
+  company        Company   @relation(fields: [companyId], references: [id])
+  employeeId     String
+  employee       Employee  @relation(fields: [employeeId], references: [id])
+  allocationId   String?
+  allocation     ManpowerAllocation? @relation(fields: [allocationId], references: [id])
+  workOrderId    String?
+  workOrder      WorkOrder? @relation(fields: [workOrderId], references: [id])
+  stageName      String?
+  // PRODUCTION, or a non-production activity: QUALITY_INSPECTION,
+  // REWORK, REPAIR, MACHINE_SETUP, LINE_CHANGEOVER, MAINTENANCE,
+  // BREAKDOWN_SUPPORT, MATERIAL_HANDLING, STORE, INVENTORY_COUNTING,
+  // PACKING, DISPATCH_SUPPORT, LOADING_UNLOADING, TRAINING, MEETING,
+  // CLEANING_5S, TRIAL_PRODUCTION, SAMPLE_PRODUCTION, TEA_BREAK,
+  // LUNCH_BREAK, APPROVED_WAITING, OTHER_APPROVED
+  activityType   String    @default("PRODUCTION")
+  startTime      DateTime
+  endTime        DateTime?
+  assignedByUserId String
+  assignedBy       User    @relation("ManpowerAssignmentBy", fields: [assignedByUserId], references: [id])
+  remarks        String?
+  isActive       Boolean   @default(true)
+  isTestData     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  @@map("manpower_assignments")
+  @@index([companyId, employeeId, endTime])
+  @@index([companyId, workOrderId])
+  @@index([companyId, allocationId])
+  @@index([companyId, startTime])
+}
+
 
 // A stage explicitly hands off its finished output to the next stage (or
 // any other stage) instead of that handoff happening invisibly through
@@ -3242,6 +3293,7 @@ model WorkOrder {
   oqcInspections OqcInspection[]
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
+  manpowerAssignments ManpowerAssignment[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   @@unique([companyId, woNumber])
@@ -5025,6 +5077,7 @@ model Employee {
   payrollEntries      PayrollEntry[]
   tdsDeclarations     TdsDeclaration[]
   trainingEnrollments TrainingEnrollment[]
+  manpowerAssignments ManpowerAssignment[]
 
   @@unique([companyId, employeeNumber])
   @@unique([companyId, email])
