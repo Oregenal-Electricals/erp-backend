@@ -75,6 +75,8 @@ const inventory_reports_module_1 = require("./inventory-reports/inventory-report
 const work_order_module_1 = require("./work-orders/work-order.module");
 const manpower_module_1 = require("./manpower/manpower.module");
 const contractors_module_1 = require("./contractors/contractors.module");
+const gate_masters_module_1 = require("./gate-masters/gate-masters.module");
+const gate_events_module_1 = require("./gate-events/gate-events.module");
 const stage_transfer_module_1 = require("./stage-transfers/stage-transfer.module");
 const mrp_module_1 = require("./mrp/mrp.module");
 const routing_module_1 = require("./routing/routing.module");
@@ -228,6 +230,8 @@ exports.AppModule = AppModule = __decorate([
             work_order_module_1.WorkOrderModule,
             manpower_module_1.ManpowerModule,
             contractors_module_1.ContractorsModule,
+            gate_masters_module_1.GateMastersModule,
+            gate_events_module_1.GateEventsModule,
             stage_transfer_module_1.StageTransferModule,
             mrp_module_1.MrpModule,
             routing_module_1.RoutingModule,
