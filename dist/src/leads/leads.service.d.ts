@@ -22,9 +22,9 @@ export declare class LeadsService {
         currency: string;
         estimatedValue: number | null;
         assignedTo: string | null;
+        contactPerson: string;
         source: string;
         companyName: string;
-        contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
@@ -48,9 +48,9 @@ export declare class LeadsService {
         currency: string;
         estimatedValue: number | null;
         assignedTo: string | null;
+        contactPerson: string;
         source: string;
         companyName: string;
-        contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
@@ -74,9 +74,9 @@ export declare class LeadsService {
         currency: string;
         estimatedValue: number | null;
         assignedTo: string | null;
+        contactPerson: string;
         source: string;
         companyName: string;
-        contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;
@@ -101,9 +101,9 @@ export declare class LeadsService {
             currency: string;
             estimatedValue: number | null;
             assignedTo: string | null;
+            contactPerson: string;
             source: string;
             companyName: string;
-            contactPerson: string;
             productInterest: string | null;
             followUpDate: Date | null;
             followUpNotes: string | null;
@@ -131,9 +131,9 @@ export declare class LeadsService {
         currency: string;
         estimatedValue: number | null;
         assignedTo: string | null;
+        contactPerson: string;
         source: string;
         companyName: string;
-        contactPerson: string;
         productInterest: string | null;
         followUpDate: Date | null;
         followUpNotes: string | null;

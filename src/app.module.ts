@@ -62,6 +62,7 @@ import { InventoryDashboardModule } from './inventory-dashboard/inventory-dashbo
 import { InventoryReportsModule } from './inventory-reports/inventory-reports.module';
 import { WorkOrderModule } from './work-orders/work-order.module';
 import { ManpowerModule } from './manpower/manpower.module';
+import { ContractorsModule } from './contractors/contractors.module';
 import { StageTransferModule } from './stage-transfers/stage-transfer.module';
 import { MrpModule } from './mrp/mrp.module';
 import { RoutingModule } from './routing/routing.module';
@@ -208,6 +209,7 @@ import configuration from './config/configuration';
     InventoryReportsModule,
     WorkOrderModule,
     ManpowerModule,
+    ContractorsModule,
     StageTransferModule,
     MrpModule,
     RoutingModule,

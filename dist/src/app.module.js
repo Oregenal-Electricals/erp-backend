@@ -74,6 +74,7 @@ const inventory_dashboard_module_1 = require("./inventory-dashboard/inventory-da
 const inventory_reports_module_1 = require("./inventory-reports/inventory-reports.module");
 const work_order_module_1 = require("./work-orders/work-order.module");
 const manpower_module_1 = require("./manpower/manpower.module");
+const contractors_module_1 = require("./contractors/contractors.module");
 const stage_transfer_module_1 = require("./stage-transfers/stage-transfer.module");
 const mrp_module_1 = require("./mrp/mrp.module");
 const routing_module_1 = require("./routing/routing.module");
@@ -226,6 +227,7 @@ exports.AppModule = AppModule = __decorate([
             inventory_reports_module_1.InventoryReportsModule,
             work_order_module_1.WorkOrderModule,
             manpower_module_1.ManpowerModule,
+            contractors_module_1.ContractorsModule,
             stage_transfer_module_1.StageTransferModule,
             mrp_module_1.MrpModule,
             routing_module_1.RoutingModule,

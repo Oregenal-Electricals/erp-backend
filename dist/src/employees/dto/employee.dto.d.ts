@@ -41,6 +41,12 @@ export declare class CreateEmployeeDto {
     emergencyPhone?: string;
     userId?: string;
     remarks?: string;
+    costType?: string;
+    hourlyRate?: number;
+    contractorId?: string;
+    isTrial?: boolean;
+    trialStartDate?: string;
+    trialEndDate?: string;
 }
 export declare class UpdateEmployeeDto {
     firstName?: string;
@@ -70,4 +76,10 @@ export declare class UpdateEmployeeDto {
     emergencyPhone?: string;
     userId?: string;
     remarks?: string;
+    costType?: string;
+    hourlyRate?: number;
+    contractorId?: string;
+    isTrial?: boolean;
+    trialStartDate?: string;
+    trialEndDate?: string;
 }

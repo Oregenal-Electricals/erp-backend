@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsEmail, IsDateString, IsNumber, IsIn, Min } from 'class-validator';
 
+const COST_TYPES = ['FIXED_SALARY','HOURLY_PAYROLL','CONTRACT_HOURLY'];
 const EMP_TYPES = ['PERMANENT','CONTRACT','PROBATION','INTERN'];
 const GENDERS = ['MALE','FEMALE','OTHER'];
 const STATUSES = ['ACTIVE','INACTIVE','RESIGNED','TERMINATED'];
@@ -49,6 +50,12 @@ export class CreateEmployeeDto {
   @IsOptional() @IsString() emergencyPhone?: string;
   @IsOptional() @IsString() userId?: string;
   @IsOptional() @IsString() remarks?: string;
+  @IsOptional() @IsString() @IsIn(COST_TYPES) costType?: string;
+  @IsOptional() @IsNumber() @Min(0) hourlyRate?: number;
+  @IsOptional() @IsString() contractorId?: string;
+  @IsOptional() isTrial?: boolean;
+  @IsOptional() @IsDateString() trialStartDate?: string;
+  @IsOptional() @IsDateString() trialEndDate?: string;
 }
 
 export class UpdateEmployeeDto {
@@ -79,4 +86,10 @@ export class UpdateEmployeeDto {
   @IsOptional() @IsString() emergencyPhone?: string;
   @IsOptional() @IsString() userId?: string;
   @IsOptional() @IsString() remarks?: string;
+  @IsOptional() @IsString() @IsIn(COST_TYPES) costType?: string;
+  @IsOptional() @IsNumber() @Min(0) hourlyRate?: number;
+  @IsOptional() @IsString() contractorId?: string;
+  @IsOptional() isTrial?: boolean;
+  @IsOptional() @IsDateString() trialStartDate?: string;
+  @IsOptional() @IsDateString() trialEndDate?: string;
 }
