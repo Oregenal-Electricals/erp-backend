@@ -331,6 +331,8 @@ model Company {
   manpowerAllocations    ManpowerAllocation[]
   manpowerQueries        ManpowerQuery[]
   manpowerAssignments    ManpowerAssignment[]
+  contractors             Contractor[]
+  hourlyProductionReports HourlyProductionReport[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
 
@@ -513,6 +515,7 @@ model User {
   manpowerFrom     ManpowerAllocation[] @relation("ManpowerFrom")
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerAssignmentsMade ManpowerAssignment[] @relation("ManpowerAssignmentBy")
+  hourlyProductionReports HourlyProductionReport[] @relation("HourlyReportSupervisor")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
   bomQueryRaisedBy BomQuery[] @relation("BomQueryRaisedBy")
@@ -996,6 +999,66 @@ model ManpowerAssignment {
   @@index([companyId, allocationId])
   @@index([companyId, startTime])
 }
+
+
+model Contractor {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  name            String
+  contactPerson   String?
+  phone           String?
+  email           String?
+  address         String?
+  defaultHourlyRate Float?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  employees       Employee[]
+
+  @@map("contractors")
+  @@index([companyId])
+}
+
+// Supervisor's hour-by-hour target vs actual for a stage/Work Order -
+// the same shape as the physical whiteboard (9-10, 10-11, ... rows
+// with a target and actual per column). Manpower headcount for
+// costing is NOT re-entered here - it's derived from whichever
+// ManpowerAssignment records were active during this exact hour
+// window, since supervisors already shift people within the hour via
+// the existing assignment records and re-typing a count would just
+// invite it to drift from reality.
+model HourlyProductionReport {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  supervisorId    String
+  supervisor      User      @relation("HourlyReportSupervisor", fields: [supervisorId], references: [id])
+  workOrderId     String?
+  workOrder       WorkOrder? @relation(fields: [workOrderId], references: [id])
+  stageName       String
+  hourStart       DateTime
+  hourEnd         DateTime
+  targetQty       Float     @default(0)
+  actualQty       Float     @default(0)
+  gapReason       String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("hourly_production_reports")
+  @@unique([companyId, stageName, workOrderId, hourStart])
+  @@index([companyId, hourStart])
+  @@index([companyId, workOrderId])
+}
+
 
 
 // A stage explicitly hands off its finished output to the next stage (or
@@ -3294,6 +3357,7 @@ model WorkOrder {
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
   manpowerAssignments ManpowerAssignment[]
+  hourlyProductionReports HourlyProductionReport[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   @@unique([companyId, woNumber])
@@ -5042,6 +5106,20 @@ model Employee {
   designation         HrDesignation @relation(fields: [designationId], references: [id])
   reportingManagerId  String?
   employmentType      String    @default("PERMANENT") // PERMANENT, CONTRACT, PROBATION, INTERN
+  // How this person's cost is computed for costing reports -
+  // independent of employmentType, since e.g. a CONTRACT worker's
+  // rate comes from their contractor, not a fixed salary.
+  costType            String    @default("FIXED_SALARY") // FIXED_SALARY, HOURLY_PAYROLL, CONTRACT_HOURLY
+  hourlyRate          Float?
+  contractorId        String?
+  contractor          Contractor? @relation(fields: [contractorId], references: [id])
+  // 3-day trial before a formal hire decision - isTrial true means
+  // still on trial; converting to a hire clears these and updates
+  // employmentType, without losing the trial period on record.
+  isTrial             Boolean   @default(false)
+  trialStartDate      DateTime?
+  trialEndDate        DateTime?
+
   gender              String    @default("MALE") // MALE, FEMALE, OTHER
   panNumber           String?
   aadharNumber        String?

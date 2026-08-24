@@ -680,6 +680,12 @@ export declare class ManpowerService {
             designationId: string;
             reportingManagerId: string | null;
             employmentType: string;
+            costType: string;
+            hourlyRate: number | null;
+            contractorId: string | null;
+            isTrial: boolean;
+            trialStartDate: Date | null;
+            trialEndDate: Date | null;
             gender: string;
             panNumber: string | null;
             aadharNumber: string | null;
