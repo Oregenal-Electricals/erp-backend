@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const client_1 = require("@prisma/client");
 const gate_inward_service_1 = require("./gate-inward.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
+const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const gate_inward_dto_1 = require("./dto/gate-inward.dto");
 let GateInwardController = class GateInwardController {
@@ -55,6 +58,7 @@ let GateInwardController = class GateInwardController {
 exports.GateInwardController = GateInwardController;
 __decorate([
     (0, common_1.Post)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_CREATE),
     (0, swagger_1.ApiOperation)({ summary: 'Create Gate Inward Entry' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -64,6 +68,7 @@ __decorate([
 ], GateInwardController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'List all Gate Inward Entries' }),
     (0, swagger_1.ApiQuery)({ name: 'status', required: false, enum: client_1.GateInwardStatus }),
     (0, swagger_1.ApiQuery)({ name: 'plantId', required: false }),
@@ -80,6 +85,7 @@ __decorate([
 ], GateInwardController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('stats'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get Gate Inward statistics' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -88,6 +94,7 @@ __decorate([
 ], GateInwardController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get Gate Inward Entry by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
@@ -96,6 +103,7 @@ __decorate([
 ], GateInwardController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_CREATE),
     (0, swagger_1.ApiOperation)({ summary: 'Update Gate Inward Entry (PENDING only)' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -106,6 +114,7 @@ __decorate([
 ], GateInwardController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/verify'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
     (0, swagger_1.ApiOperation)({ summary: 'Verify Gate Inward Entry' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -116,6 +125,7 @@ __decorate([
 ], GateInwardController.prototype, "verify", null);
 __decorate([
     (0, common_1.Patch)(':id/send-to-stores'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
     (0, swagger_1.ApiOperation)({ summary: 'Send to Stores department' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -125,6 +135,7 @@ __decorate([
 ], GateInwardController.prototype, "sendToStores", null);
 __decorate([
     (0, common_1.Patch)(':id/complete'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
     (0, swagger_1.ApiOperation)({ summary: 'Mark as Completed' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -134,6 +145,7 @@ __decorate([
 ], GateInwardController.prototype, "complete", null);
 __decorate([
     (0, common_1.Patch)(':id/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
     (0, swagger_1.ApiOperation)({ summary: 'Reject Gate Inward Entry' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -145,7 +157,7 @@ __decorate([
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, common_1.Controller)('gate-inward'),
     __metadata("design:paramtypes", [gate_inward_service_1.GateInwardService])
 ], GateInwardController);

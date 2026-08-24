@@ -20,12 +20,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -66,7 +66,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -74,10 +75,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -99,12 +99,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -146,7 +146,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -154,10 +155,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -174,12 +174,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -221,7 +221,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -229,10 +230,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -249,12 +249,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -296,7 +296,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -304,10 +305,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -324,12 +324,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -371,7 +371,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -379,10 +380,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -399,12 +399,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -446,7 +446,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -454,10 +455,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -474,12 +474,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -521,7 +521,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -529,10 +530,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;
@@ -549,12 +549,12 @@ export declare class GateInwardService {
             createdBy: string | null;
             updatedBy: string | null;
             remarks: string | null;
-            quantity: number;
-            packageCount: number | null;
             poItemId: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            packageCount: number | null;
             gateInwardEntryId: string;
         }[];
         plant: {
@@ -596,7 +596,8 @@ export declare class GateInwardService {
         supplierName: string;
         poNumber: string | null;
         netWeight: number | null;
-        ginNumber: string;
+        quantity: number | null;
+        packageCount: number | null;
         vehicleLogId: string | null;
         supplierMobile: string | null;
         supplierGstin: string | null;
@@ -604,10 +605,9 @@ export declare class GateInwardService {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         invoiceAmount: number | null;
-        quantity: number | null;
         grossWeight: number | null;
-        packageCount: number | null;
         rejectionReason: string | null;
+        ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
         verifiedAt: Date | null;

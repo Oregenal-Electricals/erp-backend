@@ -17,9 +17,9 @@ export declare class ShippingDocumentController {
             shipment: {
                 status: string;
                 carrierName: string;
-                shipmentNumber: string;
                 shipmentMode: string;
                 vesselName: string;
+                shipmentNumber: string;
             };
             ipo: {
                 vendor: {
@@ -65,9 +65,9 @@ export declare class ShippingDocumentController {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -108,9 +108,9 @@ export declare class ShippingDocumentController {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -151,9 +151,9 @@ export declare class ShippingDocumentController {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -194,9 +194,9 @@ export declare class ShippingDocumentController {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -237,9 +237,9 @@ export declare class ShippingDocumentController {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {
@@ -280,9 +280,9 @@ export declare class ShippingDocumentController {
         shipment: {
             status: string;
             carrierName: string;
-            shipmentNumber: string;
             shipmentMode: string;
             vesselName: string;
+            shipmentNumber: string;
         };
         ipo: {
             vendor: {

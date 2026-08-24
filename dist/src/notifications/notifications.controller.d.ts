@@ -17,8 +17,8 @@ export declare class NotificationsController {
             createdBy: string | null;
             updatedBy: string | null;
             type: string;
-            userId: string;
             title: string;
+            userId: string;
             priority: string;
             message: string;
             referenceType: string | null;

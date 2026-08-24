@@ -58,7 +58,7 @@ let GatePassController = class GatePassController {
 exports.GatePassController = GatePassController;
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_PASS_CREATE),
     (0, swagger_1.ApiOperation)({ summary: 'Create Gate Pass request' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -103,7 +103,7 @@ __decorate([
 ], GatePassController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id/approve'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_PASS_APPROVE),
     (0, swagger_1.ApiOperation)({ summary: 'Approve Gate Pass' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -114,7 +114,7 @@ __decorate([
 ], GatePassController.prototype, "approve", null);
 __decorate([
     (0, common_1.Patch)(':id/issue'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_PASS_VERIFY),
     (0, swagger_1.ApiOperation)({ summary: 'Issue Gate Pass (security)' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -124,7 +124,7 @@ __decorate([
 ], GatePassController.prototype, "issue", null);
 __decorate([
     (0, common_1.Patch)(':id/return'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_PASS_VERIFY),
     (0, swagger_1.ApiOperation)({ summary: 'Mark items returned (RETURNABLE only)' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -135,7 +135,7 @@ __decorate([
 ], GatePassController.prototype, "markReturned", null);
 __decorate([
     (0, common_1.Patch)(':id/close'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_PASS_APPROVE),
     (0, swagger_1.ApiOperation)({ summary: 'Close Gate Pass' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -145,7 +145,7 @@ __decorate([
 ], GatePassController.prototype, "close", null);
 __decorate([
     (0, common_1.Patch)(':id/cancel'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SYSTEM_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_PASS_APPROVE),
     (0, swagger_1.ApiOperation)({ summary: 'Cancel Gate Pass' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),

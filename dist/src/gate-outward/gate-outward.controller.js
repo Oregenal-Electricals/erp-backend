@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const client_1 = require("@prisma/client");
 const gate_outward_service_1 = require("./gate-outward.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
+const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const gate_outward_dto_1 = require("./dto/gate-outward.dto");
 let GateOutwardController = class GateOutwardController {
@@ -55,6 +58,7 @@ let GateOutwardController = class GateOutwardController {
 exports.GateOutwardController = GateOutwardController;
 __decorate([
     (0, common_1.Post)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_CREATE),
     (0, swagger_1.ApiOperation)({ summary: 'Create Gate Outward Entry' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -64,6 +68,7 @@ __decorate([
 ], GateOutwardController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'List all Gate Outward Entries' }),
     (0, swagger_1.ApiQuery)({ name: 'status', required: false, enum: client_1.GateOutwardStatus }),
     (0, swagger_1.ApiQuery)({ name: 'plantId', required: false }),
@@ -80,6 +85,7 @@ __decorate([
 ], GateOutwardController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('stats'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get Gate Outward statistics' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -88,6 +94,7 @@ __decorate([
 ], GateOutwardController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get Gate Outward Entry by ID' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
@@ -96,6 +103,7 @@ __decorate([
 ], GateOutwardController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_CREATE),
     (0, swagger_1.ApiOperation)({ summary: 'Update Gate Outward Entry (PENDING only)' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -106,6 +114,7 @@ __decorate([
 ], GateOutwardController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/approve'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_AUTHORIZE),
     (0, swagger_1.ApiOperation)({ summary: 'Approve for dispatch' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -116,6 +125,7 @@ __decorate([
 ], GateOutwardController.prototype, "approve", null);
 __decorate([
     (0, common_1.Patch)(':id/dispatch'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_AUTHORIZE),
     (0, swagger_1.ApiOperation)({ summary: 'Mark as Dispatched' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -125,6 +135,7 @@ __decorate([
 ], GateOutwardController.prototype, "dispatch", null);
 __decorate([
     (0, common_1.Patch)(':id/delivered'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_AUTHORIZE),
     (0, swagger_1.ApiOperation)({ summary: 'Mark as Delivered' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -134,6 +145,7 @@ __decorate([
 ], GateOutwardController.prototype, "markDelivered", null);
 __decorate([
     (0, common_1.Patch)(':id/cancel'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_OUTWARD_AUTHORIZE),
     (0, swagger_1.ApiOperation)({ summary: 'Cancel Gate Outward Entry' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -145,7 +157,7 @@ __decorate([
 exports.GateOutwardController = GateOutwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Outward'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, common_1.Controller)('gate-outward'),
     __metadata("design:paramtypes", [gate_outward_service_1.GateOutwardService])
 ], GateOutwardController);

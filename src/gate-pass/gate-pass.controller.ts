@@ -23,7 +23,7 @@ export class GatePassController {
   constructor(private readonly service: GatePassService) {}
 
   @Post()
-  @RequirePermissions(Permission.SYSTEM_CREATE)
+  @RequirePermissions(Permission.GATE_PASS_CREATE)
   @ApiOperation({ summary: 'Create Gate Pass request' })
   create(@Body() dto: CreateGatePassDto, @CurrentUser() user: any) {
     return this.service.create(dto, user);
@@ -61,7 +61,7 @@ export class GatePassController {
   }
 
   @Patch(':id/approve')
-  @RequirePermissions(Permission.SYSTEM_EDIT)
+  @RequirePermissions(Permission.GATE_PASS_APPROVE)
   @ApiOperation({ summary: 'Approve Gate Pass' })
   approve(
     @Param('id', ParseUUIDPipe) id: string,
@@ -72,14 +72,14 @@ export class GatePassController {
   }
 
   @Patch(':id/issue')
-  @RequirePermissions(Permission.SYSTEM_EDIT)
+  @RequirePermissions(Permission.GATE_PASS_VERIFY)
   @ApiOperation({ summary: 'Issue Gate Pass (security)' })
   issue(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.service.issue(id, user);
   }
 
   @Patch(':id/return')
-  @RequirePermissions(Permission.SYSTEM_EDIT)
+  @RequirePermissions(Permission.GATE_PASS_VERIFY)
   @ApiOperation({ summary: 'Mark items returned (RETURNABLE only)' })
   markReturned(
     @Param('id', ParseUUIDPipe) id: string,
@@ -90,14 +90,14 @@ export class GatePassController {
   }
 
   @Patch(':id/close')
-  @RequirePermissions(Permission.SYSTEM_EDIT)
+  @RequirePermissions(Permission.GATE_PASS_APPROVE)
   @ApiOperation({ summary: 'Close Gate Pass' })
   close(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
     return this.service.close(id, user);
   }
 
   @Patch(':id/cancel')
-  @RequirePermissions(Permission.SYSTEM_EDIT)
+  @RequirePermissions(Permission.GATE_PASS_APPROVE)
   @ApiOperation({ summary: 'Cancel Gate Pass' })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,

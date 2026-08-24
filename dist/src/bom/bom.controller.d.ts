@@ -42,12 +42,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     })[]>;
     getStages(id: string, req: any): Promise<any[]>;
@@ -72,12 +72,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
@@ -95,21 +95,21 @@ export declare class BomController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            quantity: number;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            notes: string | null;
             itemType: string;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -144,9 +144,9 @@ export declare class BomController {
             status: string;
             message: string;
             bomId: string;
-            raisedByUserId: string;
             raisedToUserId: string;
             response: string | null;
+            raisedByUserId: string;
         })[];
         id: string;
         companyId: string;
@@ -164,12 +164,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     create(dto: CreateBomDto, req: any): Promise<{
@@ -182,21 +182,21 @@ export declare class BomController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            quantity: number;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            notes: string | null;
             itemType: string;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -219,12 +219,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     update(id: string, dto: UpdateBomDto, req: any): Promise<{
@@ -237,21 +237,21 @@ export declare class BomController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            quantity: number;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            notes: string | null;
             itemType: string;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -274,12 +274,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     remove(id: string, req: any): Promise<{
@@ -295,21 +295,21 @@ export declare class BomController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            quantity: number;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            notes: string | null;
             itemType: string;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -332,12 +332,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     approve(id: string, req: any): Promise<{
@@ -350,21 +350,21 @@ export declare class BomController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            quantity: number;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            notes: string | null;
             itemType: string;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -387,12 +387,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     raiseQuery(dto: RaiseBomQueryDto, req: any): Promise<{
@@ -407,9 +407,9 @@ export declare class BomController {
         status: string;
         message: string;
         bomId: string;
-        raisedByUserId: string;
         raisedToUserId: string;
         response: string | null;
+        raisedByUserId: string;
     }>;
     resolveQuery(id: string, dto: ResolveBomQueryDto, req: any): Promise<{
         id: string;
@@ -423,9 +423,9 @@ export declare class BomController {
         status: string;
         message: string;
         bomId: string;
-        raisedByUserId: string;
         raisedToUserId: string;
         response: string | null;
+        raisedByUserId: string;
     }>;
     obsolete(id: string, req: any): Promise<{
         id: string;
@@ -444,12 +444,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     clone(id: string, req: any): Promise<{
@@ -467,21 +467,21 @@ export declare class BomController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            quantity: number;
-            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
+            quantity: number;
+            notes: string | null;
             itemType: string;
-            totalCost: number | null;
-            bomId: string;
             sequence: number;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
-            effectiveQty: number;
             unitCost: number | null;
             isCritical: boolean;
+            bomId: string;
+            totalCost: number | null;
+            effectiveQty: number;
         }[];
         product: {
             name: string;
@@ -516,9 +516,9 @@ export declare class BomController {
             status: string;
             message: string;
             bomId: string;
-            raisedByUserId: string;
             raisedToUserId: string;
             response: string | null;
+            raisedByUserId: string;
         })[];
         id: string;
         companyId: string;
@@ -536,12 +536,12 @@ export declare class BomController {
         approvedAt: Date | null;
         productId: string;
         revisionId: string | null;
-        bomNumber: string;
         version: string;
-        bomType: string;
-        sourceBomId: string | null;
         effectiveFrom: Date;
         effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
         totalCost: number | null;
     }>;
     generateStages(id: string, dto: GenerateStagesDto, req: any): Promise<{
@@ -558,21 +558,21 @@ export declare class BomController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        quantity: number;
-        notes: string | null;
         itemCode: string;
         itemName: string;
         uom: string;
+        quantity: number;
+        notes: string | null;
         itemType: string;
-        totalCost: number | null;
-        bomId: string;
         sequence: number;
         section: string | null;
         rawMaterialId: string | null;
         wastagePercent: number | null;
-        effectiveQty: number;
         unitCost: number | null;
         isCritical: boolean;
+        bomId: string;
+        totalCost: number | null;
+        effectiveQty: number;
     }>;
     removeItem(id: string, itemId: string, req: any): Promise<{
         message: string;

@@ -36,7 +36,6 @@ export declare class LandedCostController {
             status: string;
             notes: string | null;
             ipoId: string;
-            lcNumber: string;
             invoiceValue: number;
             customsDuty: number;
             freightCharges: number;
@@ -45,8 +44,9 @@ export declare class LandedCostController {
             bankCharges: number;
             insuranceCharges: number;
             otherCharges: number;
-            totalLandedCost: number;
             allocationMethod: string;
+            lcNumber: string;
+            totalLandedCost: number;
         })[];
         total: number;
         page: number;
@@ -98,7 +98,6 @@ export declare class LandedCostController {
         status: string;
         notes: string | null;
         ipoId: string;
-        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -107,8 +106,9 @@ export declare class LandedCostController {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        totalLandedCost: number;
         allocationMethod: string;
+        lcNumber: string;
+        totalLandedCost: number;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: {
@@ -155,7 +155,6 @@ export declare class LandedCostController {
         status: string;
         notes: string | null;
         ipoId: string;
-        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -164,8 +163,9 @@ export declare class LandedCostController {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        totalLandedCost: number;
         allocationMethod: string;
+        lcNumber: string;
+        totalLandedCost: number;
     }>;
     create(dto: CreateLandedCostDto, req: any): Promise<{
         items: {
@@ -212,7 +212,6 @@ export declare class LandedCostController {
         status: string;
         notes: string | null;
         ipoId: string;
-        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -221,8 +220,9 @@ export declare class LandedCostController {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        totalLandedCost: number;
         allocationMethod: string;
+        lcNumber: string;
+        totalLandedCost: number;
     }>;
     update(id: string, dto: UpdateLandedCostDto, req: any): Promise<{
         items: {
@@ -269,7 +269,6 @@ export declare class LandedCostController {
         status: string;
         notes: string | null;
         ipoId: string;
-        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -278,8 +277,9 @@ export declare class LandedCostController {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        totalLandedCost: number;
         allocationMethod: string;
+        lcNumber: string;
+        totalLandedCost: number;
     }>;
     calculate(id: string, req: any): Promise<{
         items: {
@@ -326,7 +326,6 @@ export declare class LandedCostController {
         status: string;
         notes: string | null;
         ipoId: string;
-        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -335,8 +334,9 @@ export declare class LandedCostController {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        totalLandedCost: number;
         allocationMethod: string;
+        lcNumber: string;
+        totalLandedCost: number;
     }>;
     finalize(id: string, req: any): Promise<{
         items: {
@@ -383,7 +383,6 @@ export declare class LandedCostController {
         status: string;
         notes: string | null;
         ipoId: string;
-        lcNumber: string;
         invoiceValue: number;
         customsDuty: number;
         freightCharges: number;
@@ -392,7 +391,8 @@ export declare class LandedCostController {
         bankCharges: number;
         insuranceCharges: number;
         otherCharges: number;
-        totalLandedCost: number;
         allocationMethod: string;
+        lcNumber: string;
+        totalLandedCost: number;
     }>;
 }
