@@ -129,6 +129,15 @@ let GateDashboardService = class GateDashboardService {
                 badge: l.status, color: 'teal',
             })),
         ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 20);
+        const [peopleInside, contractLabourInside, todayDispatches] = await Promise.all([
+            this.prisma.attendance.count({ where: Object.assign(Object.assign({}, base), { attendanceDate: { gte: today, lt: tomorrow }, status: { in: ['PRESENT', 'HALF_DAY'] } }) }),
+            this.prisma.attendance.count({
+                where: Object.assign(Object.assign({}, base), { attendanceDate: { gte: today, lt: tomorrow }, status: { in: ['PRESENT', 'HALF_DAY'] }, employee: { employmentType: 'CONTRACT' } }),
+            }),
+            this.prisma.gateOutwardEntry.count({ where: Object.assign(Object.assign({}, base), { status: 'DISPATCHED', dispatchedAt: { gte: today, lt: tomorrow } }) }),
+        ]);
+        const visitorVehiclesOutside = 0;
+        const waitingVehicles = 0;
         return {
             liveStats: {
                 visitorsInside, vehiclesInside,
@@ -137,6 +146,9 @@ let GateDashboardService = class GateDashboardService {
                 pendingPasses, issuedPasses,
                 yesterdayVisitors, yesterdayVehicles,
                 returnableOverdue,
+                peopleInside, contractLabourInside, todayDispatches,
+                visitorVehiclesOutside, waitingVehicles,
+                pendingApprovals: pendingGINs + pendingGOEs + pendingPasses,
             },
             activeVisitors,
             activeVehicles,

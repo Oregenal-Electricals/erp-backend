@@ -138,6 +138,20 @@ export class GateDashboardService {
       })),
     ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 20);
 
+    // ── Phase 1 additions: people/manpower + dispatch counts ──────
+    const [peopleInside, contractLabourInside, todayDispatches] = await Promise.all([
+      this.prisma.attendance.count({ where: { ...base, attendanceDate: { gte: today, lt: tomorrow }, status: { in: ['PRESENT', 'HALF_DAY'] } } }),
+      this.prisma.attendance.count({
+        where: { ...base, attendanceDate: { gte: today, lt: tomorrow }, status: { in: ['PRESENT', 'HALF_DAY'] }, employee: { employmentType: 'CONTRACT' } },
+      }),
+      this.prisma.gateOutwardEntry.count({ where: { ...base, status: 'DISPATCHED', dispatchedAt: { gte: today, lt: tomorrow } } }),
+    ]);
+    // Visitor Vehicles Outside / Waiting Vehicles depend on the
+    // Parking workflow, which isn't built yet (Phase 1 is masters +
+    // event log only) - placeholder zero rather than a wrong number.
+    const visitorVehiclesOutside = 0;
+    const waitingVehicles = 0;
+
     return {
       liveStats: {
         visitorsInside, vehiclesInside,
@@ -146,6 +160,9 @@ export class GateDashboardService {
         pendingPasses, issuedPasses,
         yesterdayVisitors, yesterdayVehicles,
         returnableOverdue,
+        peopleInside, contractLabourInside, todayDispatches,
+        visitorVehiclesOutside, waitingVehicles,
+        pendingApprovals: pendingGINs + pendingGOEs + pendingPasses,
       },
       activeVisitors,
       activeVehicles,

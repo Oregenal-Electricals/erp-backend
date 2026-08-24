@@ -15,6 +15,12 @@ export declare class GateDashboardService {
             yesterdayVisitors: number;
             yesterdayVehicles: number;
             returnableOverdue: number;
+            peopleInside: number;
+            contractLabourInside: number;
+            todayDispatches: number;
+            visitorVehiclesOutside: number;
+            waitingVehicles: number;
+            pendingApprovals: number;
         };
         activeVisitors: ({
             plant: {

@@ -29,8 +29,8 @@ export declare class LeadsController {
             remarks: string | null;
             currency: string;
             estimatedValue: number | null;
-            assignedTo: string | null;
             contactPerson: string;
+            assignedTo: string | null;
             source: string;
             companyName: string;
             productInterest: string | null;
@@ -59,8 +59,8 @@ export declare class LeadsController {
         remarks: string | null;
         currency: string;
         estimatedValue: number | null;
-        assignedTo: string | null;
         contactPerson: string;
+        assignedTo: string | null;
         source: string;
         companyName: string;
         productInterest: string | null;
@@ -85,8 +85,8 @@ export declare class LeadsController {
         remarks: string | null;
         currency: string;
         estimatedValue: number | null;
-        assignedTo: string | null;
         contactPerson: string;
+        assignedTo: string | null;
         source: string;
         companyName: string;
         productInterest: string | null;
@@ -111,8 +111,8 @@ export declare class LeadsController {
         remarks: string | null;
         currency: string;
         estimatedValue: number | null;
-        assignedTo: string | null;
         contactPerson: string;
+        assignedTo: string | null;
         source: string;
         companyName: string;
         productInterest: string | null;
@@ -137,8 +137,8 @@ export declare class LeadsController {
         remarks: string | null;
         currency: string;
         estimatedValue: number | null;
-        assignedTo: string | null;
         contactPerson: string;
+        assignedTo: string | null;
         source: string;
         companyName: string;
         productInterest: string | null;

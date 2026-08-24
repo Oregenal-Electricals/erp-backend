@@ -94,9 +94,9 @@ export declare class AccountingService {
         code: string;
         type: string;
         bankName: string | null;
-        taxRate: number | null;
         bankAccountNumber: string | null;
         bankIfscCode: string | null;
+        taxRate: number | null;
         openingBalance: number;
         isSystemAccount: boolean;
         currentBalance: number;
@@ -125,9 +125,9 @@ export declare class AccountingService {
         code: string;
         type: string;
         bankName: string | null;
-        taxRate: number | null;
         bankAccountNumber: string | null;
         bankIfscCode: string | null;
+        taxRate: number | null;
         openingBalance: number;
         isSystemAccount: boolean;
         currentBalance: number;
@@ -159,9 +159,9 @@ export declare class AccountingService {
             code: string;
             type: string;
             bankName: string | null;
-            taxRate: number | null;
             bankAccountNumber: string | null;
             bankIfscCode: string | null;
+            taxRate: number | null;
             openingBalance: number;
             isSystemAccount: boolean;
             currentBalance: number;
@@ -197,9 +197,9 @@ export declare class AccountingService {
         code: string;
         type: string;
         bankName: string | null;
-        taxRate: number | null;
         bankAccountNumber: string | null;
         bankIfscCode: string | null;
+        taxRate: number | null;
         openingBalance: number;
         isSystemAccount: boolean;
         currentBalance: number;
