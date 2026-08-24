@@ -332,6 +332,13 @@ model Company {
   manpowerQueries        ManpowerQuery[]
   manpowerAssignments    ManpowerAssignment[]
   contractors             Contractor[]
+  gateTypes               GateType[]
+  gates                   Gate[]
+  parkingAreas            ParkingArea[]
+  visitPurposes           VisitPurpose[]
+  gatePassTypeMasters     GatePassTypeMaster[]
+  securityReasons         SecurityReason[]
+  gateEvents              GateEvent[]
   hourlyProductionReports HourlyProductionReport[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
@@ -367,6 +374,9 @@ model Plant {
   visitorLogs        VisitorLog[]
   vehicleLogs        VehicleLog[]       @relation("VehiclePlant")
   gateInwardEntries  GateInwardEntry[]  @relation("GateInwardPlant")
+  gates              Gate[]             @relation("PlantGates")
+  parkingAreas       ParkingArea[]      @relation("PlantParkingAreas")
+  gateEvents         GateEvent[]        @relation("PlantGateEvents")
   gateOutwardEntries GateOutwardEntry[] @relation("GateOutwardPlant")
   gatePasses         GatePass[]         @relation("GatePassPlant")
   warehouses         Warehouse[]        @relation("WarehousePlant")
@@ -516,6 +526,7 @@ model User {
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerAssignmentsMade ManpowerAssignment[] @relation("ManpowerAssignmentBy")
   hourlyProductionReports HourlyProductionReport[] @relation("HourlyReportSupervisor")
+  gateEventsRecorded GateEvent[] @relation("GateEventSecurityUser")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
   bomQueryRaisedBy BomQuery[] @relation("BomQueryRaisedBy")
@@ -712,6 +723,7 @@ model Vehicle {
   isTestData Boolean  @default(false)
 
   logs VehicleLog[]
+  gateEvents GateEvent[]
 
   @@map("vehicles")
   @@unique([companyId, vehicleNumber])
@@ -757,6 +769,7 @@ model VehicleLog {
 
   gateInwardEntries  GateInwardEntry[]
   gateOutwardEntries GateOutwardEntry[] @relation("OutwardVehicleLog")
+  parkingSlots       ParkingSlot[]
 
   @@map("vehicle_logs")
   @@index([companyId])
@@ -1058,6 +1071,208 @@ model HourlyProductionReport {
   @@index([companyId, hourStart])
   @@index([companyId, workOrderId])
 }
+
+// ============================================================
+// MAIN GATE MODULE — PHASE 1: MASTERS + UNIVERSAL EVENT LOG
+// ============================================================
+
+model GateType {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  code        String
+  name        String   // e.g. MAIN, MATERIAL, DISPATCH, EMPLOYEE, EMERGENCY
+  description String?
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  gates       Gate[]
+
+  @@unique([companyId, code])
+  @@map("gate_types")
+}
+
+model Gate {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  plantId     String
+  plant       Plant    @relation("PlantGates", fields: [plantId], references: [id])
+  gateTypeId  String?
+  gateType    GateType? @relation(fields: [gateTypeId], references: [id])
+  code        String
+  name        String
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  events      GateEvent[]
+
+  @@unique([companyId, code])
+  @@map("gates")
+  @@index([companyId, plantId])
+}
+
+model ParkingArea {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  plantId     String
+  plant       Plant    @relation("PlantParkingAreas", fields: [plantId], references: [id])
+  code        String
+  name        String
+  areaType    String   // VISITOR, EMPLOYEE, MANAGEMENT, CONTRACTOR, TWO_WHEELER, TRUCK_WAITING_SUPPLIER, TRUCK_WAITING_DISPATCH, TEMPORARY
+  totalSlots  Int      @default(0)
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  slots       ParkingSlot[]
+
+  @@unique([companyId, code])
+  @@map("parking_areas")
+  @@index([companyId, plantId])
+}
+
+model ParkingSlot {
+  id              String      @id @default(uuid())
+  companyId       String
+  parkingAreaId   String
+  parkingArea     ParkingArea @relation(fields: [parkingAreaId], references: [id])
+  slotCode        String
+  vehicleType     String?     // matches the existing VehicleType enum values, kept as a plain string here since a slot may accept more than one type
+  isReserved      Boolean     @default(false)
+  isOccupied      Boolean     @default(false)
+  currentVehicleLogId String?
+  currentVehicleLog   VehicleLog? @relation(fields: [currentVehicleLogId], references: [id])
+  occupiedAt      DateTime?
+  isActive        Boolean     @default(true)
+  isTestData      Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@unique([parkingAreaId, slotCode])
+  @@map("parking_slots")
+  @@index([companyId, parkingAreaId])
+  @@index([companyId, isOccupied])
+}
+
+model VisitPurpose {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, code])
+  @@map("visit_purposes")
+}
+
+// A finer, admin-configurable category layered on top of the existing
+// GatePassType enum (RETURNABLE/NON_RETURNABLE/STAFF_EXIT), which
+// continues to drive actual pass logic - this master is purely for
+// categorization and reporting (e.g. "Tool Loan", "Sample Dispatch",
+// "Machine Repair") without needing a schema change every time a new
+// category is needed.
+model GatePassTypeMaster {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  mapsToType  String   // RETURNABLE, NON_RETURNABLE, STAFF_EXIT - must match GatePassType enum
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, code])
+  @@map("gate_pass_type_masters")
+}
+
+model SecurityReason {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  category    String   @default("DENIAL") // DENIAL, OTHER
+  isActive    Boolean  @default(true)
+  isTestData  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, code])
+  @@map("security_reasons")
+}
+
+// The universal, immutable log of every physical movement at the
+// gate - the single source of truth "who/what is inside right now"
+// is ultimately computed from. Rows are never edited or deleted;
+// a correction is a new event referencing what it corrects via
+// correctionOfEventId, preserving full history either way.
+model GateEvent {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  plantId           String
+  plant             Plant    @relation("PlantGateEvents", fields: [plantId], references: [id])
+  gateId            String?
+  gate              Gate?    @relation(fields: [gateId], references: [id])
+  eventType         String   // PERSON_IN, PERSON_OUT, VEHICLE_ARRIVED, VEHICLE_IN, VEHICLE_OUT, VEHICLE_PREMISES_OUT, VISITOR_IN, VISITOR_OUT, MATERIAL_IN, MATERIAL_OUT, DISPATCH_OUT, RGP_OUT, RGP_RETURN, SCRAP_OUT, DENIED_ENTRY, EMERGENCY_ENTRY
+  referenceType     String?  // e.g. VISITOR_LOG, VEHICLE_LOG, GATE_INWARD_ENTRY, GATE_OUTWARD_ENTRY, GATE_PASS, EMPLOYEE
+  referenceId       String?
+  personId          String?  // loosely-typed - may be an Employee id, a Visitor id, or unset for material/vehicle-only events
+  personName        String?
+  vehicleId         String?
+  vehicle           Vehicle? @relation(fields: [vehicleId], references: [id])
+  vehicleNumber     String?
+  eventTime         DateTime @default(now())
+  securityUserId    String
+  securityUser      User     @relation("GateEventSecurityUser", fields: [securityUserId], references: [id])
+  source            String   @default("MANUAL") // MANUAL, BIOMETRIC, QR, SYSTEM
+  remarks           String?
+  correctionOfEventId String?
+  correctionOfEvent   GateEvent? @relation("GateEventCorrection", fields: [correctionOfEventId], references: [id])
+  corrections         GateEvent[] @relation("GateEventCorrection")
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@map("gate_events")
+  @@index([companyId, plantId, eventTime])
+  @@index([companyId, eventType])
+  @@index([companyId, gateId])
+  @@index([companyId, personId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, referenceType, referenceId])
+}
+
 
 
 

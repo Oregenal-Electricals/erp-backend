@@ -39,9 +39,9 @@ export declare class VendorQuotationController {
             currency: string;
             totalAmount: number | null;
             notes: string | null;
+            quotationNumber: string;
             validUntil: Date;
             deliveryDays: number;
-            quotationNumber: string;
         })[];
         total: number;
         page: number;
@@ -58,10 +58,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -92,9 +92,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: {
@@ -106,10 +106,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -147,9 +147,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     create(dto: CreateVendorQuotationDto, req: any): Promise<{
         items: {
@@ -161,10 +161,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -202,9 +202,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     update(id: string, dto: UpdateVendorQuotationDto, req: any): Promise<{
         items: {
@@ -216,10 +216,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -257,9 +257,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     submit(id: string, req: any): Promise<{
         items: {
@@ -271,10 +271,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -312,9 +312,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     finalize(id: string, req: any): Promise<{
         items: {
@@ -326,10 +326,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -367,9 +367,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     reject(id: string, req: any): Promise<{
         items: {
@@ -381,10 +381,10 @@ export declare class VendorQuotationController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            notes: string | null;
             itemCode: string;
             itemName: string;
             uom: string;
-            notes: string | null;
             requiredQty: number;
             rfqItemId: string | null;
             deliveryDays: number | null;
@@ -422,9 +422,9 @@ export declare class VendorQuotationController {
         currency: string;
         totalAmount: number | null;
         notes: string | null;
+        quotationNumber: string;
         validUntil: Date;
         deliveryDays: number;
-        quotationNumber: string;
     }>;
     updateItem(id: string, itemId: string, dto: UpdateQuotationItemDto, req: any): Promise<{
         id: string;
@@ -435,10 +435,10 @@ export declare class VendorQuotationController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        notes: string | null;
         itemCode: string;
         itemName: string;
         uom: string;
-        notes: string | null;
         requiredQty: number;
         rfqItemId: string | null;
         deliveryDays: number | null;

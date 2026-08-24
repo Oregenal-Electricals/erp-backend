@@ -24,8 +24,8 @@ export declare class StockReportsController {
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             transactionType: string;
             inQty: number;
             outQty: number;
@@ -111,8 +111,8 @@ export declare class StockReportsController {
             referenceType: string | null;
             referenceId: string | null;
             referenceNumber: string | null;
-            unitCost: number;
             totalCost: number;
+            unitCost: number;
             transactionType: string;
             inQty: number;
             outQty: number;

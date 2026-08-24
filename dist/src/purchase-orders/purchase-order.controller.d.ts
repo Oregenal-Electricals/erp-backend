@@ -102,10 +102,10 @@ export declare class PurchaseOrderController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             uom: string;
-            poId: string;
             hsnCode: string | null;
             igstRate: number;
             cgstRate: number;
@@ -117,9 +117,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
         }[];
         vendor: {
@@ -176,10 +176,10 @@ export declare class PurchaseOrderController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             uom: string;
-            poId: string;
             hsnCode: string | null;
             igstRate: number;
             cgstRate: number;
@@ -191,9 +191,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
         }[];
         vendor: {
@@ -250,10 +250,10 @@ export declare class PurchaseOrderController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             uom: string;
-            poId: string;
             hsnCode: string | null;
             igstRate: number;
             cgstRate: number;
@@ -265,9 +265,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
         }[];
         vendor: {
@@ -324,10 +324,10 @@ export declare class PurchaseOrderController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             uom: string;
-            poId: string;
             hsnCode: string | null;
             igstRate: number;
             cgstRate: number;
@@ -339,9 +339,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
         }[];
         vendor: {
@@ -398,10 +398,10 @@ export declare class PurchaseOrderController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             uom: string;
-            poId: string;
             hsnCode: string | null;
             igstRate: number;
             cgstRate: number;
@@ -413,9 +413,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
         }[];
         vendor: {
@@ -472,10 +472,10 @@ export declare class PurchaseOrderController {
             createdBy: string | null;
             updatedBy: string | null;
             status: string;
+            poId: string;
             itemCode: string;
             itemName: string;
             uom: string;
-            poId: string;
             hsnCode: string | null;
             igstRate: number;
             cgstRate: number;
@@ -487,9 +487,9 @@ export declare class PurchaseOrderController {
             taxRate: number;
             totalPrice: number;
             quotationItemId: string | null;
-            orderedQty: number;
             pendingQty: number;
             taxAmount: number;
+            orderedQty: number;
             receivedQty: number;
         }[];
         vendor: {
@@ -545,10 +545,10 @@ export declare class PurchaseOrderController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        poId: string;
         itemCode: string;
         itemName: string;
         uom: string;
-        poId: string;
         hsnCode: string | null;
         igstRate: number;
         cgstRate: number;
@@ -560,9 +560,9 @@ export declare class PurchaseOrderController {
         taxRate: number;
         totalPrice: number;
         quotationItemId: string | null;
-        orderedQty: number;
         pendingQty: number;
         taxAmount: number;
+        orderedQty: number;
         receivedQty: number;
     }>;
     updateItem(id: string, itemId: string, dto: UpdatePoItemDto, req: any): Promise<{
@@ -575,10 +575,10 @@ export declare class PurchaseOrderController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
+        poId: string;
         itemCode: string;
         itemName: string;
         uom: string;
-        poId: string;
         hsnCode: string | null;
         igstRate: number;
         cgstRate: number;
@@ -590,9 +590,9 @@ export declare class PurchaseOrderController {
         taxRate: number;
         totalPrice: number;
         quotationItemId: string | null;
-        orderedQty: number;
         pendingQty: number;
         taxAmount: number;
+        orderedQty: number;
         receivedQty: number;
     }>;
     removeItem(id: string, itemId: string, req: any): Promise<{

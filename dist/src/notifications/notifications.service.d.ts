@@ -13,8 +13,8 @@ export declare class NotificationsService {
         createdBy: string | null;
         updatedBy: string | null;
         type: string;
-        title: string;
         userId: string;
+        title: string;
         priority: string;
         message: string;
         referenceType: string | null;
@@ -36,8 +36,8 @@ export declare class NotificationsService {
             createdBy: string | null;
             updatedBy: string | null;
             type: string;
-            title: string;
             userId: string;
+            title: string;
             priority: string;
             message: string;
             referenceType: string | null;

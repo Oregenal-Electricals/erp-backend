@@ -19,10 +19,10 @@ export declare class SalesOrdersService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -37,8 +37,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -57,10 +57,10 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -74,10 +74,10 @@ export declare class SalesOrdersService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -92,8 +92,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -112,10 +112,10 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -129,10 +129,10 @@ export declare class SalesOrdersService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -147,8 +147,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -167,10 +167,10 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -184,8 +184,8 @@ export declare class SalesOrdersService {
                 dispatchedQty: number;
             }[];
             cpo: {
-                customerPoNumber: string;
                 cpoNumber: string;
+                customerPoNumber: string;
             };
         } & {
             id: string;
@@ -204,10 +204,10 @@ export declare class SalesOrdersService {
             subtotal: number;
             totalAmount: number;
             cancelReason: string | null;
-            cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
             soNumber: string;
+            cpoId: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
         })[];
@@ -225,10 +225,10 @@ export declare class SalesOrdersService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -243,8 +243,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -263,10 +263,10 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     }>;
@@ -280,10 +280,10 @@ export declare class SalesOrdersService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            totalAmount: number;
             itemCode: string;
             itemName: string;
             uom: string;
-            totalAmount: number;
             gstRate: number;
             qty: number;
             unitPrice: number;
@@ -298,8 +298,8 @@ export declare class SalesOrdersService {
         cpo: {
             status: string;
             deliveryDate: Date;
-            customerPoNumber: string;
             cpoNumber: string;
+            customerPoNumber: string;
         };
     } & {
         id: string;
@@ -318,10 +318,10 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
-        cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
         soNumber: string;
+        cpoId: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     })[]>;
