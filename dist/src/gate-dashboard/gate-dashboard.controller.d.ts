@@ -117,7 +117,9 @@ export declare class GateDashboardController {
             plantId: string;
             status: import(".prisma/client").$Enums.GateInwardStatus;
             unit: string;
+            vehicleNumber: string | null;
             remarks: string | null;
+            driverName: string | null;
             materialDescription: string | null;
             supplierName: string;
             poNumber: string | null;
@@ -137,6 +139,8 @@ export declare class GateDashboardController {
             receivedById: string;
             verifiedById: string | null;
             verifiedAt: Date | null;
+            gateInById: string | null;
+            gateInAt: Date | null;
             completedAt: Date | null;
         })[];
         pendingGOEList: ({

@@ -12,7 +12,7 @@ import { Permission } from '../common/permissions/permissions.enum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   CreateGateInwardDto, UpdateGateInwardDto,
-  VerifyGateInwardDto, RejectGateInwardDto,
+  VerifyGateInwardDto, RejectGateInwardDto, GateInDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -80,6 +80,17 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.verify(id, dto, user);
+  }
+
+  @Patch(':id/gate-in')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'Let the vehicle in at the gate after verification' })
+  gateIn(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: GateInDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.gateIn(id, dto, user);
   }
 
   @Patch(':id/send-to-stores')

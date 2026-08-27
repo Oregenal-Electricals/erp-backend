@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -69,6 +69,18 @@ __decorate([
     (0, class_validator_1.IsUUID)('4'),
     __metadata("design:type", String)
 ], CreateGateInwardDto.prototype, "vehicleLogId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'MH12AB1234' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGateInwardDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Ramesh Kumar' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGateInwardDto.prototype, "driverName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'ABC Steel Suppliers' }),
     (0, class_validator_1.IsString)(),
@@ -225,4 +237,13 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], RejectGateInwardDto.prototype, "rejectionReason", void 0);
+class GateInDto {
+}
+exports.GateInDto = GateInDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GateInDto.prototype, "remarks", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

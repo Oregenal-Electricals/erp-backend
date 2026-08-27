@@ -89,8 +89,9 @@ enum VehiclePurpose {
 }
 
 enum GateInwardStatus {
-  PENDING
+  PENDING // vehicle/material has arrived at the gate, entry created, awaiting verification (= ARRIVED)
   VERIFIED
+  GATE_IN // security has formally let the vehicle in after verification
   SENT_TO_STORES
   COMPLETED
   REJECTED
@@ -514,6 +515,7 @@ model User {
   vehicleExits     VehicleLog[]       @relation("VehicleExitBy")
   ginReceived      GateInwardEntry[]  @relation("GINReceivedBy")
   ginVerified      GateInwardEntry[]  @relation("GINVerifiedBy")
+  ginGateIn        GateInwardEntry[]  @relation("GINGateInBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -788,6 +790,11 @@ model GateInwardEntry {
   plant        Plant            @relation("GateInwardPlant", fields: [plantId], references: [id])
   vehicleLogId String?
   vehicleLog   VehicleLog?      @relation(fields: [vehicleLogId], references: [id])
+  // Denormalized so a driver/vehicle can be captured directly on a
+  // routine vendor arrival without first creating a full VehicleLog -
+  // vehicleLogId above remains available when one already exists.
+  driverName    String?
+  vehicleNumber String?
   supplierName    String
   supplierMobile  String?
   supplierGstin   String?
@@ -811,6 +818,9 @@ model GateInwardEntry {
   verifiedById  String?
   verifiedBy    User?            @relation("GINVerifiedBy", fields: [verifiedById], references: [id])
   verifiedAt    DateTime?
+  gateInById    String?
+  gateInBy      User?            @relation("GINGateInBy", fields: [gateInById], references: [id])
+  gateInAt      DateTime?
   completedAt   DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

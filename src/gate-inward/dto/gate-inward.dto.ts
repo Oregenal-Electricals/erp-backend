@@ -40,6 +40,14 @@ export class CreateGateInwardDto {
   @IsOptional()
   @IsUUID('4')
   vehicleLogId?: string;
+  @ApiPropertyOptional({ example: 'MH12AB1234' })
+  @IsOptional()
+  @IsString()
+  vehicleNumber?: string;
+  @ApiPropertyOptional({ example: 'Ramesh Kumar' })
+  @IsOptional()
+  @IsString()
+  driverName?: string;
   @ApiProperty({ example: 'ABC Steel Suppliers' })
   @IsString()
   @MinLength(2)
@@ -145,4 +153,11 @@ export class RejectGateInwardDto {
   @IsString()
   @MinLength(5)
   rejectionReason: string;
+}
+
+export class GateInDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  remarks?: string;
 }

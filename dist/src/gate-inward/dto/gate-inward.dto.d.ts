@@ -10,6 +10,8 @@ export declare class GateInwardItemDto {
 export declare class CreateGateInwardDto {
     plantId: string;
     vehicleLogId?: string;
+    vehicleNumber?: string;
+    driverName?: string;
     supplierName: string;
     supplierMobile?: string;
     supplierGstin?: string;
@@ -40,4 +42,7 @@ export declare class VerifyGateInwardDto {
 }
 export declare class RejectGateInwardDto {
     rejectionReason: string;
+}
+export declare class GateInDto {
+    remarks?: string;
 }

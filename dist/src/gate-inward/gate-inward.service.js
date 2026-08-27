@@ -46,6 +46,19 @@ let GateInwardService = class GateInwardService {
                     `If this is a genuinely separate delivery, please wait a moment and try again.`);
             }
         }
+        if (dto.vehicleNumber) {
+            const activeForVehicle = await this.prisma.gateInwardEntry.findFirst({
+                where: {
+                    companyId: user.companyId,
+                    vehicleNumber: dto.vehicleNumber,
+                    isActive: true,
+                    status: { in: ['PENDING', 'VERIFIED', 'GATE_IN'] },
+                },
+            });
+            if (activeForVehicle) {
+                throw new common_1.BadRequestException(`Vehicle ${dto.vehicleNumber} already has an active Gate Inward entry (${activeForVehicle.ginNumber}, status: ${activeForVehicle.status}). Complete or reject that one first.`);
+            }
+        }
         let ginNumber;
         try {
             ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');
@@ -87,6 +100,8 @@ let GateInwardService = class GateInwardService {
                 companyId: user.companyId,
                 plantId: dto.plantId,
                 vehicleLogId: dto.vehicleLogId,
+                vehicleNumber: dto.vehicleNumber,
+                driverName: dto.driverName,
                 supplierName: dto.supplierName,
                 supplierMobile: dto.supplierMobile,
                 supplierGstin: dto.supplierGstin,
@@ -183,18 +198,32 @@ let GateInwardService = class GateInwardService {
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'PENDING' }, newValues: { status: 'VERIFIED' }, changedBy: user.id });
         return updated;
     }
-    async sendToStores(id, user) {
+    async gateIn(id, dto, user) {
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
         if (!entry)
             throw new common_1.NotFoundException('Gate inward entry not found');
         if (entry.status !== client_1.GateInwardStatus.VERIFIED)
-            throw new common_1.BadRequestException('Only VERIFIED entries can be sent to stores');
+            throw new common_1.BadRequestException('Only VERIFIED entries can be let in at the gate');
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: { status: client_1.GateInwardStatus.GATE_IN, gateInById: user.id, gateInAt: new Date(), remarks: dto.remarks || entry.remarks, updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'VERIFIED' }, newValues: { status: 'GATE_IN' }, changedBy: user.id });
+        return updated;
+    }
+    async sendToStores(id, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.GATE_IN)
+            throw new common_1.BadRequestException('Only GATE_IN entries can be sent to stores');
         const updated = await this.prisma.gateInwardEntry.update({
             where: { id },
             data: { status: client_1.GateInwardStatus.SENT_TO_STORES, updatedBy: user.id },
             include: this.includes(),
         });
-        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'VERIFIED' }, newValues: { status: 'SENT_TO_STORES' }, changedBy: user.id });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'GATE_IN' }, newValues: { status: 'SENT_TO_STORES' }, changedBy: user.id });
         return updated;
     }
     async complete(id, user) {
@@ -247,6 +276,7 @@ let GateInwardService = class GateInwardService {
             plant: { select: { id: true, name: true, code: true } },
             receivedBy: { select: { id: true, firstName: true, lastName: true } },
             verifiedBy: { select: { id: true, firstName: true, lastName: true } },
+            gateInBy: { select: { id: true, firstName: true, lastName: true } },
             vehicleLog: { select: { id: true, logNumber: true, vehicle: { select: { vehicleNumber: true } } } },
             items: { where: { isActive: true } },
         };

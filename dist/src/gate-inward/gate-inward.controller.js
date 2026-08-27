@@ -45,6 +45,9 @@ let GateInwardController = class GateInwardController {
     verify(id, dto, user) {
         return this.service.verify(id, dto, user);
     }
+    gateIn(id, dto, user) {
+        return this.service.gateIn(id, dto, user);
+    }
     sendToStores(id, user) {
         return this.service.sendToStores(id, user);
     }
@@ -123,6 +126,17 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.VerifyGateInwardDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "verify", null);
+__decorate([
+    (0, common_1.Patch)(':id/gate-in'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'Let the vehicle in at the gate after verification' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.GateInDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "gateIn", null);
 __decorate([
     (0, common_1.Patch)(':id/send-to-stores'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
