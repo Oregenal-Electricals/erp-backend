@@ -32,7 +32,7 @@ let HttpExceptionFilter = HttpExceptionFilter_1 = class HttpExceptionFilter {
                 errors = resObj.errors || null;
                 if (Array.isArray(resObj.message)) {
                     errors = resObj.message;
-                    message = 'Validation failed';
+                    message = resObj.message.join('; ');
                 }
             }
         }

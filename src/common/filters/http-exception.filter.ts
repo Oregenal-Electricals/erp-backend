@@ -31,8 +31,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = resObj.message || message;
         errors = resObj.errors || null;
         if (Array.isArray(resObj.message)) {
+          // Keep the specific per-field messages as the visible
+          // message (joined), not a generic "Validation failed" that
+          // hides what actually needs fixing - errors still carries
+          // the raw array for any caller that wants structured access.
           errors = resObj.message;
-          message = 'Validation failed';
+          message = resObj.message.join('; ');
         }
       }
     } else if (exception instanceof Error) {
