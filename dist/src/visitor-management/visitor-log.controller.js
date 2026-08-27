@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const client_1 = require("@prisma/client");
 const visitor_management_service_1 = require("./visitor-management.service");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../common/decorators/permissions.decorator");
+const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const visitor_dto_1 = require("./dto/visitor.dto");
 let VisitorLogController = class VisitorLogController {
@@ -40,6 +43,7 @@ let VisitorLogController = class VisitorLogController {
 exports.VisitorLogController = VisitorLogController;
 __decorate([
     (0, common_1.Post)('check-in'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.VISITOR_CHECKIN),
     (0, swagger_1.ApiOperation)({ summary: 'Check in a visitor' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -49,6 +53,7 @@ __decorate([
 ], VisitorLogController.prototype, "checkIn", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.VISITOR_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'List all visitor logs' }),
     (0, swagger_1.ApiQuery)({ name: 'plantId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'status', required: false, enum: client_1.VisitorStatus }),
@@ -63,6 +68,7 @@ __decorate([
 ], VisitorLogController.prototype, "findAllLogs", null);
 __decorate([
     (0, common_1.Get)('active'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.VISITOR_VIEW),
     (0, swagger_1.ApiOperation)({ summary: 'Get currently checked-in visitors' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -71,6 +77,7 @@ __decorate([
 ], VisitorLogController.prototype, "getActiveVisitors", null);
 __decorate([
     (0, common_1.Patch)(':id/checkout'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.VISITOR_CHECKIN),
     (0, swagger_1.ApiOperation)({ summary: 'Check out a visitor' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
@@ -82,7 +89,7 @@ __decorate([
 exports.VisitorLogController = VisitorLogController = __decorate([
     (0, swagger_1.ApiTags)('Visitor Logs'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     (0, common_1.Controller)('visitor-logs'),
     __metadata("design:paramtypes", [visitor_management_service_1.VisitorManagementService])
 ], VisitorLogController);
