@@ -204,6 +204,72 @@ export class VehicleManagementService {
     return { totalVehicles, insideNow, todayIn, todayOut, totalLogs };
   }
 
+  // Shared entry point for other modules (Gate Inward, Visitor
+  // check-in, etc.) that capture a vehicle number as part of their
+  // own flow. Finds or creates the Vehicle master record, reuses an
+  // already-active INSIDE log for that vehicle if one exists, or
+  // creates a new one - so a vehicle log is never something a person
+  // has to remember to create separately.
+  async findOrCreateActiveLog(params: {
+    vehicleNumber: string;
+    driverName?: string;
+    plantId: string;
+    purpose: string;
+    companyId: string;
+    userId: string;
+    materialDescription?: string;
+    supplierName?: string;
+    customerName?: string;
+    poNumber?: string;
+  }) {
+    const upperNumber = params.vehicleNumber.toUpperCase().trim();
+    let vehicle = await this.prisma.vehicle.findUnique({
+      where: { companyId_vehicleNumber: { companyId: params.companyId, vehicleNumber: upperNumber } },
+    });
+    if (!vehicle) {
+      vehicle = await this.prisma.vehicle.create({
+        data: { vehicleNumber: upperNumber, companyId: params.companyId, createdBy: params.userId, updatedBy: params.userId },
+      });
+      await this.audit.log({ tableName: 'vehicles', recordId: vehicle.id, action: 'CREATE', newValues: { vehicleNumber: upperNumber, autoCreated: true }, changedBy: params.userId });
+    }
+
+    const existingActive = await this.prisma.vehicleLog.findFirst({
+      where: { vehicleId: vehicle.id, status: VehicleLogStatus.INSIDE },
+    });
+    if (existingActive) return existingActive;
+
+    let logNumber: string;
+    try {
+      logNumber = await this.settings.getNextNumber(params.companyId, 'VEH');
+    } catch {
+      const count = await this.prisma.vehicleLog.count({ where: { companyId: params.companyId } });
+      const now = new Date();
+      const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+      logNumber = `VEH-${String(fy).slice(2)}-${String(fy + 1).slice(2)}-${String(count + 1).padStart(4, '0')}`;
+    }
+
+    const log = await this.prisma.vehicleLog.create({
+      data: {
+        logNumber,
+        companyId: params.companyId,
+        vehicleId: vehicle.id,
+        plantId: params.plantId,
+        driverName: params.driverName || 'Not captured',
+        purpose: params.purpose as any,
+        materialDescription: params.materialDescription,
+        supplierName: params.supplierName,
+        customerName: params.customerName,
+        poNumber: params.poNumber,
+        entryById: params.userId,
+        createdBy: params.userId,
+        updatedBy: params.userId,
+      },
+      include: this.logIncludes(),
+    });
+    await this.audit.log({ tableName: 'vehicle_logs', recordId: log.id, action: 'CREATE', newValues: { logNumber, autoCreated: true, vehicleNumber: upperNumber }, changedBy: params.userId });
+    return log;
+  }
+
   private logIncludes() {
     return {
       vehicle: { select: { id: true, vehicleNumber: true, vehicleType: true, ownerName: true } },

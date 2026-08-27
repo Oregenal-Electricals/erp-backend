@@ -343,5 +343,47 @@ export declare class VehicleManagementService {
         todayOut: number;
         totalLogs: number;
     }>;
+    findOrCreateActiveLog(params: {
+        vehicleNumber: string;
+        driverName?: string;
+        plantId: string;
+        purpose: string;
+        companyId: string;
+        userId: string;
+        materialDescription?: string;
+        supplierName?: string;
+        customerName?: string;
+        poNumber?: string;
+    }): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string;
+        updatedBy: string;
+        plantId: string;
+        status: import(".prisma/client").$Enums.VehicleLogStatus;
+        purpose: import(".prisma/client").$Enums.VehiclePurpose;
+        remarks: string | null;
+        logNumber: string;
+        vehicleId: string;
+        driverName: string;
+        driverMobile: string | null;
+        driverLicense: string | null;
+        inWeight: number | null;
+        materialDescription: string | null;
+        supplierName: string | null;
+        customerName: string | null;
+        poNumber: string | null;
+        expectedExitTime: Date | null;
+        outWeight: number | null;
+        entryTime: Date;
+        netWeight: number | null;
+        exitTime: Date | null;
+        entryById: string;
+        exitById: string | null;
+    }>;
     private logIncludes;
 }

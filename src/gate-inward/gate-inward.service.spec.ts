@@ -6,6 +6,7 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
   let prisma: any;
   let audit: any;
   let settings: any;
+  let vehicleManagement: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const plant = { id: 'plant-1' };
@@ -24,7 +25,8 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     settings = { getNextNumber: jest.fn().mockResolvedValue('GIN-25-26-0001') };
-    service = new GateInwardService(prisma, audit, settings);
+    vehicleManagement = { findOrCreateActiveLog: jest.fn().mockResolvedValue({ id: 'vehicle-log-1' }) };
+    service = new GateInwardService(prisma, audit, settings, vehicleManagement);
   });
 
   describe('create — capturing vehicle/driver, generating a Gate-In number', () => {
@@ -165,6 +167,53 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({
         tableName: 'gate_inward_entries', action: 'UPDATE', changedBy: user.id,
       }));
+    });
+  });
+
+  describe('auto-creating a Vehicle Log for a routine arrival', () => {
+    it('calls findOrCreateActiveLog and links the resulting vehicleLogId when a vehicleNumber is given with no vehicleLogId', async () => {
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', vehicleNumber: 'MH12AB1234',
+        driverName: 'Ramesh Kumar', materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001', vehicleLogId: 'vehicle-log-1' });
+
+      const result = await service.create(dto, user);
+
+      expect(vehicleManagement.findOrCreateActiveLog).toHaveBeenCalledWith(
+        expect.objectContaining({ vehicleNumber: 'MH12AB1234', driverName: 'Ramesh Kumar', purpose: 'INWARD' }),
+      );
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ vehicleLogId: 'vehicle-log-1' }) }),
+      );
+      expect(result.vehicleLogId).toBe('vehicle-log-1');
+    });
+
+    it('does not call findOrCreateActiveLog when an explicit vehicleLogId is already provided', async () => {
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', vehicleLogId: 'existing-log-1',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001', vehicleLogId: 'existing-log-1' });
+
+      await service.create(dto, user);
+
+      expect(vehicleManagement.findOrCreateActiveLog).not.toHaveBeenCalled();
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ vehicleLogId: 'existing-log-1' }) }),
+      );
+    });
+
+    it('does not call findOrCreateActiveLog when neither vehicleLogId nor vehicleNumber is given', async () => {
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001' });
+
+      await service.create(dto, user);
+
+      expect(vehicleManagement.findOrCreateActiveLog).not.toHaveBeenCalled();
     });
   });
 });

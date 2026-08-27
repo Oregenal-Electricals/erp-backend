@@ -14,12 +14,14 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const settings_service_1 = require("../settings/settings.service");
+const vehicle_management_service_1 = require("../vehicle-management/vehicle-management.service");
 const client_1 = require("@prisma/client");
 let GateInwardService = class GateInwardService {
-    constructor(prisma, audit, settings) {
+    constructor(prisma, audit, settings, vehicleManagement) {
         this.prisma = prisma;
         this.audit = audit;
         this.settings = settings;
+        this.vehicleManagement = vehicleManagement;
     }
     async create(dto, user) {
         var _a, _b, _c, _d;
@@ -58,6 +60,21 @@ let GateInwardService = class GateInwardService {
             if (activeForVehicle) {
                 throw new common_1.BadRequestException(`Vehicle ${dto.vehicleNumber} already has an active Gate Inward entry (${activeForVehicle.ginNumber}, status: ${activeForVehicle.status}). Complete or reject that one first.`);
             }
+        }
+        let resolvedVehicleLogId = dto.vehicleLogId;
+        if (!resolvedVehicleLogId && dto.vehicleNumber) {
+            const autoLog = await this.vehicleManagement.findOrCreateActiveLog({
+                vehicleNumber: dto.vehicleNumber,
+                driverName: dto.driverName,
+                plantId: dto.plantId,
+                purpose: 'INWARD',
+                companyId: user.companyId,
+                userId: user.id,
+                materialDescription: dto.materialDescription,
+                supplierName: dto.supplierName,
+                poNumber: dto.poNumber,
+            });
+            resolvedVehicleLogId = autoLog.id;
         }
         let ginNumber;
         try {
@@ -99,7 +116,7 @@ let GateInwardService = class GateInwardService {
                 ginNumber,
                 companyId: user.companyId,
                 plantId: dto.plantId,
-                vehicleLogId: dto.vehicleLogId,
+                vehicleLogId: resolvedVehicleLogId,
                 vehicleNumber: dto.vehicleNumber,
                 driverName: dto.driverName,
                 supplierName: dto.supplierName,
@@ -287,6 +304,7 @@ exports.GateInwardService = GateInwardService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        settings_service_1.SettingsService])
+        settings_service_1.SettingsService,
+        vehicle_management_service_1.VehicleManagementService])
 ], GateInwardService);
 //# sourceMappingURL=gate-inward.service.js.map

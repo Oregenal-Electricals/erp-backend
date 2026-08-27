@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { SettingsService } from '../settings/settings.service';
+import { VehicleManagementService } from '../vehicle-management/vehicle-management.service';
 import {
   CreateGateInwardDto,
   UpdateGateInwardDto,
@@ -20,6 +21,7 @@ export class GateInwardService {
     private prisma: PrismaService,
     private audit: AuditService,
     private settings: SettingsService,
+    private vehicleManagement: VehicleManagementService,
   ) {}
   async create(dto: CreateGateInwardDto, user: any) {
     const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
@@ -70,6 +72,26 @@ export class GateInwardService {
         );
       }
     }
+    // A routine vendor arrival shouldn't require security to first
+    // go create a separate Vehicle Log - if a vehicleNumber was
+    // given and no explicit vehicleLogId, find-or-create the Vehicle
+    // master and an active VehicleLog for it automatically.
+    let resolvedVehicleLogId = dto.vehicleLogId;
+    if (!resolvedVehicleLogId && dto.vehicleNumber) {
+      const autoLog = await this.vehicleManagement.findOrCreateActiveLog({
+        vehicleNumber: dto.vehicleNumber,
+        driverName: dto.driverName,
+        plantId: dto.plantId,
+        purpose: 'INWARD',
+        companyId: user.companyId,
+        userId: user.id,
+        materialDescription: dto.materialDescription,
+        supplierName: dto.supplierName,
+        poNumber: dto.poNumber,
+      });
+      resolvedVehicleLogId = autoLog.id;
+    }
+
     let ginNumber: string;
     try {
       ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');
@@ -116,7 +138,7 @@ export class GateInwardService {
         ginNumber,
         companyId:   user.companyId,
         plantId:     dto.plantId,
-        vehicleLogId: dto.vehicleLogId,
+        vehicleLogId: resolvedVehicleLogId,
         vehicleNumber: dto.vehicleNumber,
         driverName:    dto.driverName,
         supplierName:  dto.supplierName,

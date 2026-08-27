@@ -1,13 +1,15 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { SettingsService } from '../settings/settings.service';
+import { VehicleManagementService } from '../vehicle-management/vehicle-management.service';
 import { CreateGateInwardDto, UpdateGateInwardDto, VerifyGateInwardDto, RejectGateInwardDto, GateInDto } from './dto/gate-inward.dto';
 import { GateInwardStatus } from '@prisma/client';
 export declare class GateInwardService {
     private prisma;
     private audit;
     private settings;
-    constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService);
+    private vehicleManagement;
+    constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService, vehicleManagement: VehicleManagementService);
     create(dto: CreateGateInwardDto, user: any): Promise<{
         vendorMismatchWarning: string;
         items: {
