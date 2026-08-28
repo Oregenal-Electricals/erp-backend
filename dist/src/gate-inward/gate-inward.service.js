@@ -15,13 +15,15 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const settings_service_1 = require("../settings/settings.service");
 const vehicle_management_service_1 = require("../vehicle-management/vehicle-management.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const client_1 = require("@prisma/client");
 let GateInwardService = class GateInwardService {
-    constructor(prisma, audit, settings, vehicleManagement) {
+    constructor(prisma, audit, settings, vehicleManagement, notifications) {
         this.prisma = prisma;
         this.audit = audit;
         this.settings = settings;
         this.vehicleManagement = vehicleManagement;
+        this.notifications = notifications;
     }
     async create(dto, user) {
         var _a, _b, _c, _d;
@@ -202,17 +204,38 @@ let GateInwardService = class GateInwardService {
         return updated;
     }
     async verify(id, dto, user) {
-        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        var _a, _b, _c, _d;
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: { po: true } });
         if (!entry)
             throw new common_1.NotFoundException('Gate inward entry not found');
         if (entry.status !== client_1.GateInwardStatus.PENDING)
             throw new common_1.BadRequestException('Only PENDING entries can be verified');
+        const missing = [];
+        if (!((_a = entry.supplierName) === null || _a === void 0 ? void 0 : _a.trim()))
+            missing.push('Vendor');
+        if (!((_b = entry.invoiceNumber) === null || _b === void 0 ? void 0 : _b.trim()))
+            missing.push('Challan/Invoice Number');
+        if (!entry.vehicleLogId && !entry.vehicleNumber)
+            missing.push('Vehicle');
+        const hasMaterialRef = !!((_c = entry.materialDescription) === null || _c === void 0 ? void 0 : _c.trim()) || (await this.prisma.gateInwardItem.count({ where: { gateInwardEntryId: id, isActive: true } })) > 0;
+        if (!hasMaterialRef)
+            missing.push('Material reference');
+        if (entry.poId) {
+            if (!entry.po)
+                missing.push('PO (linked PO no longer found)');
+            else if (!['SENT', 'PARTIALLY_RECEIVED'].includes(entry.po.status)) {
+                throw new common_1.BadRequestException(`Cannot verify - PO ${entry.po.poNumber} is now ${entry.po.status}, no longer valid for receiving. Reject this entry or contact Purchase.`);
+            }
+        }
+        if (missing.length > 0) {
+            throw new common_1.BadRequestException(`Cannot mark Document Verified - missing or invalid: ${missing.join(', ')}`);
+        }
         const updated = await this.prisma.gateInwardEntry.update({
             where: { id },
             data: { status: client_1.GateInwardStatus.VERIFIED, verifiedById: user.id, verifiedAt: new Date(), remarks: dto.remarks || entry.remarks, updatedBy: user.id },
             include: this.includes(),
         });
-        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'PENDING' }, newValues: { status: 'VERIFIED' }, changedBy: user.id });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'PENDING' }, newValues: { status: 'VERIFIED', documentChecks: { vendor: true, challan: true, vehicle: true, materialReference: true, poStatus: entry.poId ? (_d = entry.po) === null || _d === void 0 ? void 0 : _d.status : 'N/A' } }, changedBy: user.id });
         return updated;
     }
     async gateIn(id, dto, user) {
@@ -227,7 +250,24 @@ let GateInwardService = class GateInwardService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'VERIFIED' }, newValues: { status: 'GATE_IN' }, changedBy: user.id });
+        await this.notifyStoreReceivingReference(updated, user);
         return updated;
+    }
+    async notifyStoreReceivingReference(entry, actorUser) {
+        const storeUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['STORE_MANAGER', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (storeUsers.length === 0)
+            return;
+        await this.notifications.createBulk(storeUsers.map(u => ({
+            userId: u.id,
+            type: 'GATE_INWARD_READY_FOR_STORE',
+            title: 'Material ready for receiving',
+            message: `${entry.ginNumber} — ${entry.supplierName} — has cleared the gate and is ready for Store to receive.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'MEDIUM',
+        })), actorUser.companyId, actorUser.id);
     }
     async sendToStores(id, user) {
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
@@ -305,6 +345,7 @@ exports.GateInwardService = GateInwardService = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
         settings_service_1.SettingsService,
-        vehicle_management_service_1.VehicleManagementService])
+        vehicle_management_service_1.VehicleManagementService,
+        notifications_service_1.NotificationsService])
 ], GateInwardService);
 //# sourceMappingURL=gate-inward.service.js.map

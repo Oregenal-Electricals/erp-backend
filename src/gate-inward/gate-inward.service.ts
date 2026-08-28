@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { SettingsService } from '../settings/settings.service';
 import { VehicleManagementService } from '../vehicle-management/vehicle-management.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   CreateGateInwardDto,
   UpdateGateInwardDto,
@@ -22,6 +23,7 @@ export class GateInwardService {
     private audit: AuditService,
     private settings: SettingsService,
     private vehicleManagement: VehicleManagementService,
+    private notifications: NotificationsService,
   ) {}
   async create(dto: CreateGateInwardDto, user: any) {
     const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
@@ -214,16 +216,43 @@ export class GateInwardService {
     await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: entry, newValues: dto, changedBy: user.id });
     return updated;
   }
+  // GATE-002: Valid PO and Challan Verification. Document checks are
+  // enforced here rather than trusted from creation time, since the
+  // PO's status especially can change between when the entry was
+  // created and when security is actually verifying it at the gate
+  // (e.g. cancelled or fully received in the meantime). Never writes
+  // to PurchaseOrder itself - security can only ever affect this
+  // GateInwardEntry, so PO quantities/prices/terms are structurally
+  // untouchable from this action.
   async verify(id: string, dto: VerifyGateInwardDto, user: any) {
-    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: { po: true } });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
     if (entry.status !== GateInwardStatus.PENDING) throw new BadRequestException('Only PENDING entries can be verified');
+
+    const missing: string[] = [];
+    if (!entry.supplierName?.trim()) missing.push('Vendor');
+    if (!entry.invoiceNumber?.trim()) missing.push('Challan/Invoice Number');
+    if (!entry.vehicleLogId && !entry.vehicleNumber) missing.push('Vehicle');
+    const hasMaterialRef = !!entry.materialDescription?.trim() || (await this.prisma.gateInwardItem.count({ where: { gateInwardEntryId: id, isActive: true } })) > 0;
+    if (!hasMaterialRef) missing.push('Material reference');
+
+    if (entry.poId) {
+      if (!entry.po) missing.push('PO (linked PO no longer found)');
+      else if (!['SENT', 'PARTIALLY_RECEIVED'].includes(entry.po.status)) {
+        throw new BadRequestException(`Cannot verify - PO ${entry.po.poNumber} is now ${entry.po.status}, no longer valid for receiving. Reject this entry or contact Purchase.`);
+      }
+    }
+
+    if (missing.length > 0) {
+      throw new BadRequestException(`Cannot mark Document Verified - missing or invalid: ${missing.join(', ')}`);
+    }
+
     const updated = await this.prisma.gateInwardEntry.update({
       where: { id },
       data: { status: GateInwardStatus.VERIFIED, verifiedById: user.id, verifiedAt: new Date(), remarks: dto.remarks || entry.remarks, updatedBy: user.id },
       include: this.includes(),
     });
-    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'PENDING' }, newValues: { status: 'VERIFIED' }, changedBy: user.id });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'PENDING' }, newValues: { status: 'VERIFIED', documentChecks: { vendor: true, challan: true, vehicle: true, materialReference: true, poStatus: entry.poId ? entry.po?.status : 'N/A' } }, changedBy: user.id });
     return updated;
   }
   async gateIn(id: string, dto: GateInDto, user: any) {
@@ -236,7 +265,31 @@ export class GateInwardService {
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: 'VERIFIED' }, newValues: { status: 'GATE_IN' }, changedBy: user.id });
+    await this.notifyStoreReceivingReference(updated, user);
     return updated;
+  }
+
+  // "Create Store receiving reference" per GATE-002 - not a GRN
+  // (Store still independently receives the material and creates
+  // that themselves), just an alert pointing Store at the GIN number
+  // now that the vehicle has physically been let in.
+  private async notifyStoreReceivingReference(entry: any, actorUser: any) {
+    const storeUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['STORE_MANAGER', 'SUPER_ADMIN'] } },
+      select: { id: true },
+    });
+    if (storeUsers.length === 0) return;
+    await this.notifications.createBulk(
+      storeUsers.map(u => ({
+        userId: u.id,
+        type: 'GATE_INWARD_READY_FOR_STORE',
+        title: 'Material ready for receiving',
+        message: `${entry.ginNumber} — ${entry.supplierName} — has cleared the gate and is ready for Store to receive.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'MEDIUM',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
   }
   async sendToStores(id: string, user: any) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });

@@ -62,9 +62,9 @@ export declare class StockIssueService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        warehouseId: string;
         referenceType: string;
         referenceId: string | null;
+        warehouseId: string;
         issueNumber: string;
         issueMethod: string;
         issuedTo: string;
@@ -107,9 +107,9 @@ export declare class StockIssueService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        warehouseId: string;
         referenceType: string;
         referenceId: string | null;
+        warehouseId: string;
         issueNumber: string;
         issueMethod: string;
         issuedTo: string;
@@ -133,9 +133,9 @@ export declare class StockIssueService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            warehouseId: string;
             referenceType: string;
             referenceId: string | null;
+            warehouseId: string;
             issueNumber: string;
             issueMethod: string;
             issuedTo: string;
@@ -184,9 +184,9 @@ export declare class StockIssueService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        warehouseId: string;
         referenceType: string;
         referenceId: string | null;
+        warehouseId: string;
         issueNumber: string;
         issueMethod: string;
         issuedTo: string;

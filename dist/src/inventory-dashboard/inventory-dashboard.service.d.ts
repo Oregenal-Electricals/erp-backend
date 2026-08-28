@@ -59,12 +59,12 @@ export declare class InventoryDashboardService {
         createdBy: string | null;
         updatedBy: string | null;
         remarks: string | null;
-        itemCode: string;
-        itemName: string;
-        warehouseId: string;
         referenceType: string | null;
         referenceId: string | null;
         referenceNumber: string | null;
+        itemCode: string;
+        itemName: string;
+        warehouseId: string;
         unitCost: number;
         totalCost: number;
         transactionType: string;

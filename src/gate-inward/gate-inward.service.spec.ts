@@ -7,6 +7,7 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
   let audit: any;
   let settings: any;
   let vehicleManagement: any;
+  let notifications: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const plant = { id: 'plant-1' };
@@ -21,12 +22,15 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
         update: jest.fn(),
         count: jest.fn().mockResolvedValue(0),
       },
+      gateInwardItem: { count: jest.fn().mockResolvedValue(0) },
       purchaseOrder: { findFirst: jest.fn() },
+      user: { findMany: jest.fn().mockResolvedValue([{ id: 'store-user-1' }]) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     settings = { getNextNumber: jest.fn().mockResolvedValue('GIN-25-26-0001') };
     vehicleManagement = { findOrCreateActiveLog: jest.fn().mockResolvedValue({ id: 'vehicle-log-1' }) };
-    service = new GateInwardService(prisma, audit, settings, vehicleManagement);
+    notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
+    service = new GateInwardService(prisma, audit, settings, vehicleManagement, notifications);
   });
 
   describe('create — capturing vehicle/driver, generating a Gate-In number', () => {
@@ -89,8 +93,15 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
   });
 
   describe('status flow — ARRIVED (PENDING) → VERIFIED → GATE_IN → SENT_TO_STORES', () => {
-    it('verify() moves PENDING to VERIFIED', async () => {
-      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', remarks: null });
+    const fullyValidEntry = {
+      id: 'gin-1', status: 'PENDING', remarks: null,
+      supplierName: 'ABC Steel', invoiceNumber: 'INV-001',
+      vehicleLogId: 'vehicle-log-1', vehicleNumber: null,
+      materialDescription: 'Steel Rods', poId: null, po: null,
+    };
+
+    it('verify() moves PENDING to VERIFIED when all GATE-002 document checks pass', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue(fullyValidEntry);
       prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED' });
 
       const result = await service.verify('gin-1', {}, user);
@@ -106,9 +117,37 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
     });
 
-    it('gateIn() moves VERIFIED to GATE_IN', async () => {
+    it('verify() (GATE-002) rejects when the challan/invoice number is missing', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ ...fullyValidEntry, invoiceNumber: null });
+      await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
+      expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+    });
+
+    it('verify() (GATE-002) rejects when no vehicle is on record', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ ...fullyValidEntry, vehicleLogId: null, vehicleNumber: null });
+      await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('verify() (GATE-002) rejects when the linked PO is no longer SENT or PARTIALLY_RECEIVED', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({
+        ...fullyValidEntry, poId: 'po-1', po: { poNumber: 'PO-001', status: 'CANCELLED' },
+      });
+      await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
+      expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+    });
+
+    it('verify() (GATE-002) passes when the linked PO is still SENT', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({
+        ...fullyValidEntry, poId: 'po-1', po: { poNumber: 'PO-001', status: 'SENT' },
+      });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED' });
+      const result = await service.verify('gin-1', {}, user);
+      expect(result.status).toBe('VERIFIED');
+    });
+
+    it('gateIn() moves VERIFIED to GATE_IN and notifies Store (GATE-002 receiving reference)', async () => {
       prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED', remarks: null });
-      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', status: 'GATE_IN' });
 
       const result = await service.gateIn('gin-1', {}, user);
 
@@ -116,6 +155,13 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
         expect.objectContaining({ data: expect.objectContaining({ status: 'GATE_IN', gateInById: user.id }) }),
       );
       expect(result.status).toBe('GATE_IN');
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ role: { in: ['STORE_MANAGER', 'SUPER_ADMIN'] } }) }),
+      );
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ referenceNumber: 'GIN-25-26-0001', type: 'GATE_INWARD_READY_FOR_STORE' })]),
+        user.companyId, user.id,
+      );
     });
 
     it('gateIn() rejects an entry that is not VERIFIED', async () => {
@@ -145,6 +191,34 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
     });
   });
 
+  describe('GATE-002: Security can never change PO quantities, prices, or terms', () => {
+    it('verify() never calls purchaseOrder.update, even when a PO is linked and valid', async () => {
+      prisma.purchaseOrder.update = jest.fn();
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({
+        id: 'gin-1', status: 'PENDING', remarks: null,
+        supplierName: 'ABC Steel', invoiceNumber: 'INV-001',
+        vehicleLogId: 'vehicle-log-1', vehicleNumber: null,
+        materialDescription: 'Steel Rods',
+        poId: 'po-1', po: { poNumber: 'PO-001', status: 'SENT' },
+      });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED' });
+
+      await service.verify('gin-1', {}, user);
+
+      expect(prisma.purchaseOrder.update).not.toHaveBeenCalled();
+    });
+
+    it('GateInwardEntry has no price field at all, so nothing gate-side can carry a price change to the PO', () => {
+      // Structural guarantee, not runtime behavior: CreateGateInwardDto
+      // exposes quantity/materialDescription/weights, never a price -
+      // this test exists as documentation should that ever change.
+      const dtoModule = require('./dto/gate-inward.dto');
+      const dtoInstance = new dtoModule.CreateGateInwardDto();
+      expect('price' in dtoInstance).toBe(false);
+      expect('unitPrice' in dtoInstance).toBe(false);
+    });
+  });
+
   describe('Gate-In must never create inventory or GRN itself', () => {
     it('sendToStores() only changes status - it does not touch stockBalance, stockLedger, or grnHeader', async () => {
       prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
@@ -161,7 +235,12 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
 
   describe('audit logging', () => {
     it('logs every status transition', async () => {
-      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', remarks: null });
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({
+        id: 'gin-1', status: 'PENDING', remarks: null,
+        supplierName: 'ABC Steel', invoiceNumber: 'INV-001',
+        vehicleLogId: 'vehicle-log-1', vehicleNumber: null,
+        materialDescription: 'Steel Rods', poId: null, po: null,
+      });
       prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED' });
       await service.verify('gin-1', {}, user);
       expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({

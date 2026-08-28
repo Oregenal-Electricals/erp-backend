@@ -12,12 +12,13 @@ const gate_inward_controller_1 = require("./gate-inward.controller");
 const gate_inward_service_1 = require("./gate-inward.service");
 const settings_module_1 = require("../settings/settings.module");
 const vehicle_management_module_1 = require("../vehicle-management/vehicle-management.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let GateInwardModule = class GateInwardModule {
 };
 exports.GateInwardModule = GateInwardModule;
 exports.GateInwardModule = GateInwardModule = __decorate([
     (0, common_1.Module)({
-        imports: [settings_module_1.SettingsModule, vehicle_management_module_1.VehicleManagementModule],
+        imports: [settings_module_1.SettingsModule, vehicle_management_module_1.VehicleManagementModule, notifications_module_1.NotificationsModule],
         controllers: [gate_inward_controller_1.GateInwardController],
         providers: [gate_inward_service_1.GateInwardService],
         exports: [gate_inward_service_1.GateInwardService],

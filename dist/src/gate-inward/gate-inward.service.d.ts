@@ -2,6 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { SettingsService } from '../settings/settings.service';
 import { VehicleManagementService } from '../vehicle-management/vehicle-management.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateGateInwardDto, UpdateGateInwardDto, VerifyGateInwardDto, RejectGateInwardDto, GateInDto } from './dto/gate-inward.dto';
 import { GateInwardStatus } from '@prisma/client';
 export declare class GateInwardService {
@@ -9,7 +10,8 @@ export declare class GateInwardService {
     private audit;
     private settings;
     private vehicleManagement;
-    constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService, vehicleManagement: VehicleManagementService);
+    private notifications;
+    constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService, vehicleManagement: VehicleManagementService, notifications: NotificationsService);
     create(dto: CreateGateInwardDto, user: any): Promise<{
         vendorMismatchWarning: string;
         items: {
@@ -519,6 +521,7 @@ export declare class GateInwardService {
         gateInAt: Date | null;
         completedAt: Date | null;
     }>;
+    private notifyStoreReceivingReference;
     sendToStores(id: string, user: any): Promise<{
         items: {
             id: string;
