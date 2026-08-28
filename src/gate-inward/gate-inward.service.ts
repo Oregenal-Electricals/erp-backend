@@ -104,7 +104,19 @@ export class GateInwardService {
       ginNumber = `GIN-${String(fy).slice(2)}-${String(fy + 1).slice(2)}-${String(count + 1).padStart(4, '0')}`;
     }
     let resolvedPoNumber = dto.poNumber;
+    let resolvedPoId = dto.poId;
     let vendorMismatchWarning: string | undefined;
+    // GATE-003: a PO number was referenced (typed or otherwise) but
+    // doesn't resolve to a real PO - this is not an error to reject
+    // the arrival outright (material has physically arrived either
+    // way), it's a hold: the entry is still created so there's a
+    // record, but it never enters the normal verify/gate-in/GRN flow
+    // until Purchase resolves it. Gate/Security can never fabricate
+    // a PO to work around this - only Purchase can identify the
+    // correct one, authorize a non-PO exception, or reject.
+    let initialStatus: GateInwardStatus = GateInwardStatus.PENDING;
+    let holdBecausePoNotFound = false;
+
     if (dto.poId) {
       const po = await this.prisma.purchaseOrder.findFirst({
         where: { id: dto.poId, companyId: user.companyId },
@@ -119,6 +131,17 @@ export class GateInwardService {
       const vendorLower = po.vendor.name.trim().toLowerCase();
       if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
         vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
+      }
+    } else if (dto.poNumber?.trim()) {
+      const matchedPo = await this.prisma.purchaseOrder.findFirst({
+        where: { companyId: user.companyId, poNumber: dto.poNumber.trim() },
+      });
+      if (matchedPo) {
+        resolvedPoId = matchedPo.id;
+        resolvedPoNumber = matchedPo.poNumber;
+      } else {
+        holdBecausePoNotFound = true;
+        initialStatus = GateInwardStatus.GATE_HOLD_PO_NOT_FOUND;
       }
     }
 
@@ -146,8 +169,9 @@ export class GateInwardService {
         supplierName:  dto.supplierName,
         supplierMobile: dto.supplierMobile,
         supplierGstin:  dto.supplierGstin,
-        poId:          dto.poId,
+        poId:          resolvedPoId,
         poNumber:      resolvedPoNumber,
+        status:        initialStatus,
         invoiceNumber: dto.invoiceNumber,
         invoiceDate:   dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
         invoiceAmount: dto.invoiceAmount,
@@ -179,7 +203,32 @@ export class GateInwardService {
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'gate_inward_entries', recordId: entry.id, action: 'CREATE', newValues: { ginNumber, supplierName: dto.supplierName }, changedBy: user.id });
+    if (holdBecausePoNotFound) {
+      await this.notifyPurchaseOfHold(entry, user);
+    }
     return { ...entry, vendorMismatchWarning };
+  }
+
+  // GATE-003: notify Purchase the moment a hold is created - they
+  // need to act on this quickly since material is physically sitting
+  // at the gate.
+  private async notifyPurchaseOfHold(entry: any, actorUser: any) {
+    const purchaseUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'SUPER_ADMIN'] } },
+      select: { id: true },
+    });
+    if (purchaseUsers.length === 0) return;
+    await this.notifications.createBulk(
+      purchaseUsers.map(u => ({
+        userId: u.id,
+        type: 'GATE_HOLD_PO_NOT_FOUND',
+        title: 'Gate Hold — PO Not Found',
+        message: `${entry.ginNumber} — ${entry.supplierName} — references PO "${entry.poNumber}" which could not be found. Material is on hold at the gate pending your decision.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'URGENT',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
   }
   async findAll(user: any, filters: { status?: GateInwardStatus; plantId?: string; date?: string; search?: string }) {
     const where: any = { companyId: user.companyId };
@@ -227,6 +276,9 @@ export class GateInwardService {
   async verify(id: string, dto: VerifyGateInwardDto, user: any) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: { po: true } });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.status === GateInwardStatus.GATE_HOLD_PO_NOT_FOUND) {
+      throw new BadRequestException('This entry is on a Gate Hold — PO Not Found. It cannot be verified until Purchase resolves the hold.');
+    }
     if (entry.status !== GateInwardStatus.PENDING) throw new BadRequestException('Only PENDING entries can be verified');
 
     const missing: string[] = [];
@@ -327,6 +379,79 @@ export class GateInwardService {
     await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', rejectionReason: dto.rejectionReason }, changedBy: user.id });
     return updated;
   }
+
+  // GATE-003: the three ways Purchase can resolve a PO Not Found
+  // hold. Never callable by Gate/Security - gated behind
+  // GATE_INWARD_RESOLVE_HOLD, held only by Purchase Manager/Super
+  // Admin, so Gate genuinely cannot manufacture its own way out of a
+  // hold.
+  private async assertOnHold(id: string) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.status !== GateInwardStatus.GATE_HOLD_PO_NOT_FOUND) {
+      throw new BadRequestException('This entry is not currently on a PO Not Found hold');
+    }
+    return entry;
+  }
+
+  // Option 1: Purchase identifies the correct PO. Returns the entry
+  // to the normal flow (PENDING) so GATE-002's verify step can run
+  // against it like any other PO-linked arrival.
+  async resolveHoldWithPo(id: string, poId: string, remarks: string | undefined, user: any) {
+    const entry = await this.assertOnHold(id);
+    const po = await this.prisma.purchaseOrder.findFirst({ where: { id: poId, companyId: user.companyId } });
+    if (!po) throw new NotFoundException('Purchase Order not found');
+    if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+      throw new BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+    }
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING, poId: po.id, poNumber: po.poNumber,
+        holdResolution: 'PO_IDENTIFIED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: remarks, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, holdResolution: 'PO_IDENTIFIED' }, changedBy: user.id });
+    return updated;
+  }
+
+  // Option 2: Purchase authorizes this as a legitimate non-PO
+  // receipt per business policy - returns to PENDING with no PO
+  // link, same as any other non-PO delivery GATE-001 already
+  // supports, just with an explicit authorization on record.
+  async resolveHoldAsNonPo(id: string, remarks: string, user: any) {
+    const entry = await this.assertOnHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING,
+        holdResolution: 'NON_PO_AUTHORIZED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: remarks, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'NON_PO_AUTHORIZED', remarks }, changedBy: user.id });
+    return updated;
+  }
+
+  // Option 3: Purchase rejects the material outright.
+  async resolveHoldAsRejected(id: string, rejectionReason: string, user: any) {
+    const entry = await this.assertOnHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.REJECTED, rejectionReason,
+        holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: rejectionReason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', rejectionReason }, changedBy: user.id });
+    return updated;
+  }
+
   async getStats(user: any) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
@@ -348,6 +473,7 @@ export class GateInwardService {
       receivedBy: { select: { id: true, firstName: true, lastName: true } },
       verifiedBy: { select: { id: true, firstName: true, lastName: true } },
       gateInBy:   { select: { id: true, firstName: true, lastName: true } },
+      holdResolvedBy: { select: { id: true, firstName: true, lastName: true } },
       vehicleLog: { select: { id: true, logNumber: true, vehicle: { select: { vehicleNumber: true } } } },
       items:      { where: { isActive: true } },
     };

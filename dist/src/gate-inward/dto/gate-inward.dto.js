@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -246,4 +246,36 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], GateInDto.prototype, "remarks", void 0);
+class ResolveHoldWithPoDto {
+}
+exports.ResolveHoldWithPoDto = ResolveHoldWithPoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-purchase-order' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveHoldWithPoDto.prototype, "poId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveHoldWithPoDto.prototype, "remarks", void 0);
+class ResolveHoldAsNonPoDto {
+}
+exports.ResolveHoldAsNonPoDto = ResolveHoldAsNonPoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Sample material approved without PO by Purchase Head' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveHoldAsNonPoDto.prototype, "remarks", void 0);
+class ResolveHoldAsRejectedDto {
+}
+exports.ResolveHoldAsRejectedDto = ResolveHoldAsRejectedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'No matching PO found, vendor could not confirm order' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveHoldAsRejectedDto.prototype, "rejectionReason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

@@ -13,6 +13,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   CreateGateInwardDto, UpdateGateInwardDto,
   VerifyGateInwardDto, RejectGateInwardDto, GateInDto,
+  ResolveHoldWithPoDto, ResolveHoldAsNonPoDto, ResolveHoldAsRejectedDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -116,5 +117,40 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.reject(id, dto, user);
+  }
+
+  // GATE-003: PO Not Found hold resolution - Purchase only, never
+  // Gate/Security.
+  @Patch(':id/resolve-hold/identify-po')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-003: Purchase identifies the correct PO for a held entry' })
+  resolveHoldWithPo(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveHoldWithPoDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveHoldWithPo(id, dto.poId, dto.remarks, user);
+  }
+
+  @Patch(':id/resolve-hold/authorize-non-po')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-003: Purchase authorizes a non-PO receipt exception for a held entry' })
+  resolveHoldAsNonPo(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveHoldAsNonPoDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveHoldAsNonPo(id, dto.remarks, user);
+  }
+
+  @Patch(':id/resolve-hold/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-003: Purchase rejects the material for a held entry' })
+  resolveHoldAsRejected(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveHoldAsRejectedDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveHoldAsRejected(id, dto.rejectionReason, user);
   }
 }

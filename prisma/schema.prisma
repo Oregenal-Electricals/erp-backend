@@ -95,6 +95,7 @@ enum GateInwardStatus {
   SENT_TO_STORES
   COMPLETED
   REJECTED
+  GATE_HOLD_PO_NOT_FOUND // GATE-003: a PO number was referenced but not found - blocked from the normal flow until Purchase resolves it
 }
 
 enum GateOutwardStatus {
@@ -516,6 +517,7 @@ model User {
   ginReceived      GateInwardEntry[]  @relation("GINReceivedBy")
   ginVerified      GateInwardEntry[]  @relation("GINVerifiedBy")
   ginGateIn        GateInwardEntry[]  @relation("GINGateInBy")
+  ginHoldResolved  GateInwardEntry[]  @relation("GINHoldResolvedBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -822,6 +824,14 @@ model GateInwardEntry {
   gateInBy      User?            @relation("GINGateInBy", fields: [gateInById], references: [id])
   gateInAt      DateTime?
   completedAt   DateTime?
+  // GATE-003: PO Not Found hold resolution - Purchase's decision,
+  // never Gate/Security's. holdResolution is one of PO_IDENTIFIED,
+  // NON_PO_AUTHORIZED, REJECTED.
+  holdResolution       String?
+  holdResolvedById     String?
+  holdResolvedBy       User?      @relation("GINHoldResolvedBy", fields: [holdResolvedById], references: [id])
+  holdResolvedAt       DateTime?
+  holdResolutionRemarks String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String

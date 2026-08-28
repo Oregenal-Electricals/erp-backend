@@ -57,6 +57,15 @@ let GateInwardController = class GateInwardController {
     reject(id, dto, user) {
         return this.service.reject(id, dto, user);
     }
+    resolveHoldWithPo(id, dto, user) {
+        return this.service.resolveHoldWithPo(id, dto.poId, dto.remarks, user);
+    }
+    resolveHoldAsNonPo(id, dto, user) {
+        return this.service.resolveHoldAsNonPo(id, dto.remarks, user);
+    }
+    resolveHoldAsRejected(id, dto, user) {
+        return this.service.resolveHoldAsRejected(id, dto.rejectionReason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -168,6 +177,39 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.RejectGateInwardDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "reject", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-hold/identify-po'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-003: Purchase identifies the correct PO for a held entry' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveHoldWithPoDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveHoldWithPo", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-hold/authorize-non-po'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-003: Purchase authorizes a non-PO receipt exception for a held entry' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveHoldAsNonPoDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveHoldAsNonPo", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-hold/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-003: Purchase rejects the material for a held entry' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveHoldAsRejectedDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveHoldAsRejected", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),

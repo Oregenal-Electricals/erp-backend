@@ -161,3 +161,27 @@ export class GateInDto {
   @IsString()
   remarks?: string;
 }
+
+export class ResolveHoldWithPoDto {
+  @ApiProperty({ example: 'uuid-of-purchase-order' })
+  @IsString()
+  poId: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  remarks?: string;
+}
+
+export class ResolveHoldAsNonPoDto {
+  @ApiProperty({ example: 'Sample material approved without PO by Purchase Head' })
+  @IsString()
+  @MinLength(5)
+  remarks: string;
+}
+
+export class ResolveHoldAsRejectedDto {
+  @ApiProperty({ example: 'No matching PO found, vendor could not confirm order' })
+  @IsString()
+  @MinLength(5)
+  rejectionReason: string;
+}

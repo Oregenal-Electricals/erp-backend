@@ -26,7 +26,7 @@ let GateInwardService = class GateInwardService {
         this.notifications = notifications;
     }
     async create(dto, user) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         const plant = await this.prisma.plant.findUnique({ where: { id: dto.plantId } });
         if (!plant)
             throw new common_1.NotFoundException('Plant not found');
@@ -82,14 +82,17 @@ let GateInwardService = class GateInwardService {
         try {
             ginNumber = await this.settings.getNextNumber(user.companyId, 'GIN');
         }
-        catch (_e) {
+        catch (_f) {
             const count = await this.prisma.gateInwardEntry.count({ where: { companyId: user.companyId } });
             const now = new Date();
             const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
             ginNumber = `GIN-${String(fy).slice(2)}-${String(fy + 1).slice(2)}-${String(count + 1).padStart(4, '0')}`;
         }
         let resolvedPoNumber = dto.poNumber;
+        let resolvedPoId = dto.poId;
         let vendorMismatchWarning;
+        let initialStatus = client_1.GateInwardStatus.PENDING;
+        let holdBecausePoNotFound = false;
         if (dto.poId) {
             const po = await this.prisma.purchaseOrder.findFirst({
                 where: { id: dto.poId, companyId: user.companyId },
@@ -107,12 +110,25 @@ let GateInwardService = class GateInwardService {
                 vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
             }
         }
-        const materialDescription = (_a = dto.materialDescription) !== null && _a !== void 0 ? _a : (hasItems ? dto.items.map((i) => i.itemName).join(', ') : undefined);
-        const quantity = (_b = dto.quantity) !== null && _b !== void 0 ? _b : (hasItems ? dto.items.reduce((s, i) => s + i.quantity, 0) : undefined);
+        else if ((_a = dto.poNumber) === null || _a === void 0 ? void 0 : _a.trim()) {
+            const matchedPo = await this.prisma.purchaseOrder.findFirst({
+                where: { companyId: user.companyId, poNumber: dto.poNumber.trim() },
+            });
+            if (matchedPo) {
+                resolvedPoId = matchedPo.id;
+                resolvedPoNumber = matchedPo.poNumber;
+            }
+            else {
+                holdBecausePoNotFound = true;
+                initialStatus = client_1.GateInwardStatus.GATE_HOLD_PO_NOT_FOUND;
+            }
+        }
+        const materialDescription = (_b = dto.materialDescription) !== null && _b !== void 0 ? _b : (hasItems ? dto.items.map((i) => i.itemName).join(', ') : undefined);
+        const quantity = (_c = dto.quantity) !== null && _c !== void 0 ? _c : (hasItems ? dto.items.reduce((s, i) => s + i.quantity, 0) : undefined);
         const itemsPackageTotal = hasItems
             ? dto.items.reduce((s, i) => s + (i.packageCount || 0), 0)
             : 0;
-        const packageCount = (_c = dto.packageCount) !== null && _c !== void 0 ? _c : (itemsPackageTotal > 0 ? itemsPackageTotal : undefined);
+        const packageCount = (_d = dto.packageCount) !== null && _d !== void 0 ? _d : (itemsPackageTotal > 0 ? itemsPackageTotal : undefined);
         const entry = await this.prisma.gateInwardEntry.create({
             data: {
                 ginNumber,
@@ -124,14 +140,15 @@ let GateInwardService = class GateInwardService {
                 supplierName: dto.supplierName,
                 supplierMobile: dto.supplierMobile,
                 supplierGstin: dto.supplierGstin,
-                poId: dto.poId,
+                poId: resolvedPoId,
                 poNumber: resolvedPoNumber,
+                status: initialStatus,
                 invoiceNumber: dto.invoiceNumber,
                 invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
                 invoiceAmount: dto.invoiceAmount,
                 materialDescription,
                 quantity,
-                unit: (_d = dto.unit) !== null && _d !== void 0 ? _d : 'NOS',
+                unit: (_e = dto.unit) !== null && _e !== void 0 ? _e : 'NOS',
                 grossWeight: dto.grossWeight,
                 netWeight: dto.netWeight,
                 packageCount,
@@ -160,7 +177,26 @@ let GateInwardService = class GateInwardService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: entry.id, action: 'CREATE', newValues: { ginNumber, supplierName: dto.supplierName }, changedBy: user.id });
+        if (holdBecausePoNotFound) {
+            await this.notifyPurchaseOfHold(entry, user);
+        }
         return Object.assign(Object.assign({}, entry), { vendorMismatchWarning });
+    }
+    async notifyPurchaseOfHold(entry, actorUser) {
+        const purchaseUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (purchaseUsers.length === 0)
+            return;
+        await this.notifications.createBulk(purchaseUsers.map(u => ({
+            userId: u.id,
+            type: 'GATE_HOLD_PO_NOT_FOUND',
+            title: 'Gate Hold — PO Not Found',
+            message: `${entry.ginNumber} — ${entry.supplierName} — references PO "${entry.poNumber}" which could not be found. Material is on hold at the gate pending your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
     }
     async findAll(user, filters) {
         const where = { companyId: user.companyId };
@@ -208,6 +244,9 @@ let GateInwardService = class GateInwardService {
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: { po: true } });
         if (!entry)
             throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status === client_1.GateInwardStatus.GATE_HOLD_PO_NOT_FOUND) {
+            throw new common_1.BadRequestException('This entry is on a Gate Hold — PO Not Found. It cannot be verified until Purchase resolves the hold.');
+        }
         if (entry.status !== client_1.GateInwardStatus.PENDING)
             throw new common_1.BadRequestException('Only PENDING entries can be verified');
         const missing = [];
@@ -311,6 +350,63 @@ let GateInwardService = class GateInwardService {
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', rejectionReason: dto.rejectionReason }, changedBy: user.id });
         return updated;
     }
+    async assertOnHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.GATE_HOLD_PO_NOT_FOUND) {
+            throw new common_1.BadRequestException('This entry is not currently on a PO Not Found hold');
+        }
+        return entry;
+    }
+    async resolveHoldWithPo(id, poId, remarks, user) {
+        const entry = await this.assertOnHold(id);
+        const po = await this.prisma.purchaseOrder.findFirst({ where: { id: poId, companyId: user.companyId } });
+        if (!po)
+            throw new common_1.NotFoundException('Purchase Order not found');
+        if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+            throw new common_1.BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING, poId: po.id, poNumber: po.poNumber,
+                holdResolution: 'PO_IDENTIFIED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: remarks, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, holdResolution: 'PO_IDENTIFIED' }, changedBy: user.id });
+        return updated;
+    }
+    async resolveHoldAsNonPo(id, remarks, user) {
+        const entry = await this.assertOnHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'NON_PO_AUTHORIZED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: remarks, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'NON_PO_AUTHORIZED', remarks }, changedBy: user.id });
+        return updated;
+    }
+    async resolveHoldAsRejected(id, rejectionReason, user) {
+        const entry = await this.assertOnHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason,
+                holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: rejectionReason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', rejectionReason }, changedBy: user.id });
+        return updated;
+    }
     async getStats(user) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -334,6 +430,7 @@ let GateInwardService = class GateInwardService {
             receivedBy: { select: { id: true, firstName: true, lastName: true } },
             verifiedBy: { select: { id: true, firstName: true, lastName: true } },
             gateInBy: { select: { id: true, firstName: true, lastName: true } },
+            holdResolvedBy: { select: { id: true, firstName: true, lastName: true } },
             vehicleLog: { select: { id: true, logNumber: true, vehicle: { select: { vehicleNumber: true } } } },
             items: { where: { isActive: true } },
         };

@@ -142,6 +142,10 @@ export declare class GateDashboardController {
             gateInById: string | null;
             gateInAt: Date | null;
             completedAt: Date | null;
+            holdResolution: string | null;
+            holdResolvedById: string | null;
+            holdResolvedAt: Date | null;
+            holdResolutionRemarks: string | null;
         })[];
         pendingGOEList: ({
             plant: {

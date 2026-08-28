@@ -46,3 +46,13 @@ export declare class RejectGateInwardDto {
 export declare class GateInDto {
     remarks?: string;
 }
+export declare class ResolveHoldWithPoDto {
+    poId: string;
+    remarks?: string;
+}
+export declare class ResolveHoldAsNonPoDto {
+    remarks: string;
+}
+export declare class ResolveHoldAsRejectedDto {
+    rejectionReason: string;
+}

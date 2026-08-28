@@ -295,4 +295,132 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       expect(vehicleManagement.findOrCreateActiveLog).not.toHaveBeenCalled();
     });
   });
+
+  describe('GATE-003: Incoming Material PO Not Found', () => {
+    it('creates the entry with GATE_HOLD_PO_NOT_FOUND when a typed poNumber matches no real PO, instead of accepting it silently', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue(null); // no PO matches this number
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', poNumber: 'PO-DOES-NOT-EXIST',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', poNumber: 'PO-DOES-NOT-EXIST',
+        status: 'GATE_HOLD_PO_NOT_FOUND',
+      });
+
+      const result = await service.create(dto, user);
+
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: 'GATE_HOLD_PO_NOT_FOUND', poId: undefined }) }),
+      );
+      expect(result.status).toBe('GATE_HOLD_PO_NOT_FOUND');
+    });
+
+    it('notifies Purchase Manager + Super Admin immediately when a hold is created', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue(null);
+      prisma.user.findMany.mockResolvedValue([{ id: 'purchase-user-1' }]);
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', poNumber: 'PO-DOES-NOT-EXIST',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', poNumber: 'PO-DOES-NOT-EXIST',
+        status: 'GATE_HOLD_PO_NOT_FOUND',
+      });
+
+      await service.create(dto, user);
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ role: { in: ['PURCHASE_MANAGER', 'SUPER_ADMIN'] } }) }),
+      );
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_PO_NOT_FOUND', priority: 'URGENT' })]),
+        user.companyId, user.id,
+      );
+    });
+
+    it('resolves a typed poNumber to the real PO automatically when one does match, no hold created', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-001', status: 'SENT' });
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', poNumber: 'PO-001',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001', status: 'PENDING' });
+
+      const result = await service.create(dto, user);
+
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', poId: 'po-1', poNumber: 'PO-001' }) }),
+      );
+      expect(result.status).toBe('PENDING');
+      expect(notifications.createBulk).not.toHaveBeenCalled();
+    });
+
+    it('verify() refuses an entry that is on hold, with a clear reason', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_PO_NOT_FOUND' });
+      await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
+      expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+    });
+
+    describe('resolution — Purchase only, three options', () => {
+      const heldEntry = { id: 'gin-1', status: 'GATE_HOLD_PO_NOT_FOUND', poId: null };
+
+      it('Option 1 — identify the correct PO returns the entry to PENDING', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-001', status: 'SENT' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', poId: 'po-1', holdResolution: 'PO_IDENTIFIED' });
+
+        const result = await service.resolveHoldWithPo('gin-1', 'po-1', 'Found it, vendor confirmed', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', poId: 'po-1', holdResolution: 'PO_IDENTIFIED', holdResolvedById: user.id }) }),
+        );
+        expect(result.holdResolution).toBe('PO_IDENTIFIED');
+      });
+
+      it('Option 1 rejects an invalid/non-SENT PO', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-001', status: 'CANCELLED' });
+        await expect(service.resolveHoldWithPo('gin-1', 'po-1', undefined, user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('Option 2 — authorize non-PO receipt returns the entry to PENDING with no PO link', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'NON_PO_AUTHORIZED' });
+
+        const result = await service.resolveHoldAsNonPo('gin-1', 'Approved as sample material per policy', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', holdResolution: 'NON_PO_AUTHORIZED' }) }),
+        );
+        expect(result.holdResolution).toBe('NON_PO_AUTHORIZED');
+      });
+
+      it('Option 3 — reject the material', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED' });
+
+        const result = await service.resolveHoldAsRejected('gin-1', 'Vendor could not confirm order exists', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'REJECTED', holdResolution: 'REJECTED' }) }),
+        );
+        expect(result.status).toBe('REJECTED');
+      });
+
+      it('all three resolution methods reject an entry that is not currently on hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveHoldWithPo('gin-1', 'po-1', undefined, user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveHoldAsNonPo('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveHoldAsRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    it('Gate cannot create a fake PO - resolveHoldWithPo only ever links an existing, real PurchaseOrder row, never creates one', () => {
+      // Structural guarantee: no method on GateInwardService calls
+      // prisma.purchaseOrder.create anywhere.
+      const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+      expect(serviceSource).not.toContain('purchaseOrder.create');
+    });
+  });
 });
