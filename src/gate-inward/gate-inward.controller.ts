@@ -14,6 +14,7 @@ import {
   CreateGateInwardDto, UpdateGateInwardDto,
   VerifyGateInwardDto, RejectGateInwardDto, GateInDto,
   ResolveHoldWithPoDto, ResolveHoldAsNonPoDto, ResolveHoldAsRejectedDto,
+  ReturnMaterialDto, ApprovedExceptionDto, CorrectPoReferenceDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -152,5 +153,41 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.resolveHoldAsRejected(id, dto.rejectionReason, user);
+  }
+
+  // GATE-004/005: PO Cancelled/Closed hold resolution - Purchase
+  // only. Same permission as GATE-003's resolve-hold routes, since
+  // it's the same actors making the same kind of call.
+  @Patch(':id/resolve-status-hold/return-material')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-004/005: Purchase returns the material for a Cancelled/Closed PO hold' })
+  resolveReturnMaterial(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReturnMaterialDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveReturnMaterial(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-status-hold/approved-exception')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-004/005: Purchase approves an exception to receive despite Cancelled/Closed PO' })
+  resolveApprovedException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ApprovedExceptionDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveApprovedException(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-status-hold/correct-po')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-004/005: Purchase corrects the PO reference for a Cancelled/Closed PO hold' })
+  resolveCorrectPoReference(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CorrectPoReferenceDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveCorrectPoReference(id, dto.poId, dto.reason, user);
   }
 }

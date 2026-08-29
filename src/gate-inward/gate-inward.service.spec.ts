@@ -128,9 +128,9 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
     });
 
-    it('verify() (GATE-002) rejects when the linked PO is no longer SENT or PARTIALLY_RECEIVED', async () => {
+    it('verify() (GATE-002) rejects when the linked PO status is genuinely invalid (not yet SENT)', async () => {
       prisma.gateInwardEntry.findUnique.mockResolvedValue({
-        ...fullyValidEntry, poId: 'po-1', po: { poNumber: 'PO-001', status: 'CANCELLED' },
+        ...fullyValidEntry, poId: 'po-1', po: { poNumber: 'PO-001', status: 'DRAFT' },
       });
       await expect(service.verify('gin-1', {}, user)).rejects.toThrow(BadRequestException);
       expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
@@ -421,6 +421,146 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       // prisma.purchaseOrder.create anywhere.
       const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
       expect(serviceSource).not.toContain('purchaseOrder.create');
+    });
+  });
+
+  describe('GATE-004/005: Incoming Material for Cancelled or Closed PO', () => {
+    it('create() puts the entry on GATE_HOLD_PO_CANCELLED when the linked poId resolves to a CANCELLED PO, does not hard-reject', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue({
+        id: 'po-1', poNumber: 'PO-001', status: 'CANCELLED', vendor: { name: 'ABC Steel' },
+      });
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', poId: 'po-1',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', poNumber: 'PO-001',
+        status: 'GATE_HOLD_PO_CANCELLED',
+      });
+
+      const result = await service.create(dto, user);
+
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: 'GATE_HOLD_PO_CANCELLED', poId: 'po-1' }) }),
+      );
+      expect(result.status).toBe('GATE_HOLD_PO_CANCELLED');
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_PO_CANCELLED', priority: 'URGENT' })]),
+        user.companyId, user.id,
+      );
+    });
+
+    it('create() puts the entry on GATE_HOLD_PO_CLOSED when the linked poId resolves to a CLOSED PO', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue({
+        id: 'po-1', poNumber: 'PO-001', status: 'CLOSED', vendor: { name: 'ABC Steel' },
+      });
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', poId: 'po-1',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', status: 'GATE_HOLD_PO_CLOSED',
+      });
+
+      const result = await service.create(dto, user);
+
+      expect(result.status).toBe('GATE_HOLD_PO_CLOSED');
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_PO_CLOSED' })]),
+        user.companyId, user.id,
+      );
+    });
+
+    it('create() still hard-rejects a genuinely invalid PO status (DRAFT) - only CANCELLED/CLOSED become holds', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue({
+        id: 'po-1', poNumber: 'PO-001', status: 'DRAFT', vendor: { name: 'ABC Steel' },
+      });
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel', poId: 'po-1',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+
+      await expect(service.create(dto, user)).rejects.toThrow(BadRequestException);
+      expect(prisma.gateInwardEntry.create).not.toHaveBeenCalled();
+    });
+
+    it('verify() transitions a PENDING entry to GATE_HOLD_PO_CANCELLED if the PO was cancelled after arrival, instead of hard-rejecting', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({
+        id: 'gin-1', status: 'PENDING',
+        supplierName: 'ABC Steel', invoiceNumber: 'INV-001', vehicleLogId: 'vehicle-log-1',
+        materialDescription: 'Steel Rods',
+        poId: 'po-1', po: { poNumber: 'PO-001', status: 'CANCELLED' },
+      });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', status: 'GATE_HOLD_PO_CANCELLED' });
+
+      const result = await service.verify('gin-1', {}, user);
+
+      expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: 'GATE_HOLD_PO_CANCELLED' }) }),
+      );
+      expect(result.status).toBe('GATE_HOLD_PO_CANCELLED');
+      expect(notifications.createBulk).toHaveBeenCalled();
+    });
+
+    describe('resolution — Purchase only, three options with mandatory reason', () => {
+      const heldEntry = { id: 'gin-1', status: 'GATE_HOLD_PO_CANCELLED', poId: 'old-po-1' };
+
+      it('RETURN MATERIAL sends the entry to REJECTED with the reason recorded', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'RETURN_MATERIAL' });
+
+        const result = await service.resolveReturnMaterial('gin-1', 'Vendor sent it despite cancellation notice', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'REJECTED', holdResolution: 'RETURN_MATERIAL', holdResolvedById: user.id }) }),
+        );
+        expect(result.holdResolution).toBe('RETURN_MATERIAL');
+      });
+
+      it('APPROVED EXCEPTION returns the entry to PENDING without touching the PO', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.purchaseOrder.update = jest.fn();
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' });
+
+        const result = await service.resolveApprovedException('gin-1', 'Confirmed with vendor - legitimate final shipment against a closed PO', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' }) }),
+        );
+        expect(prisma.purchaseOrder.update).not.toHaveBeenCalled();
+        expect(result.holdResolution).toBe('APPROVED_EXCEPTION');
+      });
+
+      it('CORRECT PO REFERENCE links the real PO and returns the entry to PENDING, reason required', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-correct', poNumber: 'PO-002', status: 'SENT' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', poId: 'po-correct', holdResolution: 'CORRECT_PO_REFERENCE' });
+
+        const result = await service.resolveCorrectPoReference('gin-1', 'po-correct', 'Security transcribed the challan number wrong', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', poId: 'po-correct', holdResolution: 'CORRECT_PO_REFERENCE' }) }),
+        );
+        expect(result.holdResolution).toBe('CORRECT_PO_REFERENCE');
+      });
+
+      it('CORRECT PO REFERENCE rejects a replacement PO that is itself invalid', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-also-bad', poNumber: 'PO-003', status: 'CANCELLED' });
+        await expect(service.resolveCorrectPoReference('gin-1', 'po-also-bad', 'reason here', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('all three resolution methods reject an entry that is not on a Cancelled/Closed hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveReturnMaterial('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveCorrectPoReference('gin-1', 'po-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('none of the three resolution methods ever call purchaseOrder.update - Security/Gate cannot reopen a PO', () => {
+        const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+        expect(serviceSource).not.toContain('purchaseOrder.update');
+      });
     });
   });
 });

@@ -56,3 +56,13 @@ export declare class ResolveHoldAsNonPoDto {
 export declare class ResolveHoldAsRejectedDto {
     rejectionReason: string;
 }
+export declare class ReturnMaterialDto {
+    reason: string;
+}
+export declare class ApprovedExceptionDto {
+    reason: string;
+}
+export declare class CorrectPoReferenceDto {
+    poId: string;
+    reason: string;
+}

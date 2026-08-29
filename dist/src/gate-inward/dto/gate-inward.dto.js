@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -278,4 +278,36 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], ResolveHoldAsRejectedDto.prototype, "rejectionReason", void 0);
+class ReturnMaterialDto {
+}
+exports.ReturnMaterialDto = ReturnMaterialDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'PO was cancelled by Purchase before delivery, vendor sent it anyway' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ReturnMaterialDto.prototype, "reason", void 0);
+class ApprovedExceptionDto {
+}
+exports.ApprovedExceptionDto = ApprovedExceptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'PO shows CLOSED but Purchase confirms this final partial shipment was expected - approved to receive' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ApprovedExceptionDto.prototype, "reason", void 0);
+class CorrectPoReferenceDto {
+}
+exports.CorrectPoReferenceDto = CorrectPoReferenceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-purchase-order' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CorrectPoReferenceDto.prototype, "poId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Security misread the challan - correct PO number is PO-25-26-0088, not 0008' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], CorrectPoReferenceDto.prototype, "reason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

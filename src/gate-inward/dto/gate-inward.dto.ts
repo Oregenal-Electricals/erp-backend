@@ -185,3 +185,27 @@ export class ResolveHoldAsRejectedDto {
   @MinLength(5)
   rejectionReason: string;
 }
+
+export class ReturnMaterialDto {
+  @ApiProperty({ example: 'PO was cancelled by Purchase before delivery, vendor sent it anyway' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ApprovedExceptionDto {
+  @ApiProperty({ example: 'PO shows CLOSED but Purchase confirms this final partial shipment was expected - approved to receive' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class CorrectPoReferenceDto {
+  @ApiProperty({ example: 'uuid-of-purchase-order' })
+  @IsString()
+  poId: string;
+  @ApiProperty({ example: 'Security misread the challan - correct PO number is PO-25-26-0088, not 0008' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}

@@ -93,6 +93,19 @@ let GateInwardService = class GateInwardService {
         let vendorMismatchWarning;
         let initialStatus = client_1.GateInwardStatus.PENDING;
         let holdBecausePoNotFound = false;
+        let holdBecausePoInvalidStatus = false;
+        let resolvedPoForNotification = null;
+        const resolvePoStatusHold = (status) => {
+            if (status === 'CANCELLED') {
+                initialStatus = client_1.GateInwardStatus.GATE_HOLD_PO_CANCELLED;
+                return true;
+            }
+            if (status === 'CLOSED') {
+                initialStatus = client_1.GateInwardStatus.GATE_HOLD_PO_CLOSED;
+                return true;
+            }
+            return false;
+        };
         if (dto.poId) {
             const po = await this.prisma.purchaseOrder.findFirst({
                 where: { id: dto.poId, companyId: user.companyId },
@@ -100,14 +113,22 @@ let GateInwardService = class GateInwardService {
             });
             if (!po)
                 throw new common_1.NotFoundException('Purchase Order not found');
-            if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
-                throw new common_1.BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
-            }
             resolvedPoNumber = po.poNumber;
-            const supplierLower = dto.supplierName.trim().toLowerCase();
-            const vendorLower = po.vendor.name.trim().toLowerCase();
-            if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
-                vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
+            resolvedPoId = po.id;
+            if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+                holdBecausePoInvalidStatus = resolvePoStatusHold(po.status);
+                if (holdBecausePoInvalidStatus)
+                    resolvedPoForNotification = { poNumber: po.poNumber, status: po.status };
+                if (!holdBecausePoInvalidStatus) {
+                    throw new common_1.BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+                }
+            }
+            else {
+                const supplierLower = dto.supplierName.trim().toLowerCase();
+                const vendorLower = po.vendor.name.trim().toLowerCase();
+                if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
+                    vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
+                }
             }
         }
         else if ((_a = dto.poNumber) === null || _a === void 0 ? void 0 : _a.trim()) {
@@ -117,6 +138,14 @@ let GateInwardService = class GateInwardService {
             if (matchedPo) {
                 resolvedPoId = matchedPo.id;
                 resolvedPoNumber = matchedPo.poNumber;
+                if (!['SENT', 'PARTIALLY_RECEIVED'].includes(matchedPo.status)) {
+                    holdBecausePoInvalidStatus = resolvePoStatusHold(matchedPo.status);
+                    if (holdBecausePoInvalidStatus)
+                        resolvedPoForNotification = { poNumber: matchedPo.poNumber, status: matchedPo.status };
+                    if (!holdBecausePoInvalidStatus) {
+                        throw new common_1.BadRequestException(`This PO is ${matchedPo.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+                    }
+                }
             }
             else {
                 holdBecausePoNotFound = true;
@@ -180,6 +209,9 @@ let GateInwardService = class GateInwardService {
         if (holdBecausePoNotFound) {
             await this.notifyPurchaseOfHold(entry, user);
         }
+        if (holdBecausePoInvalidStatus && resolvedPoForNotification) {
+            await this.notifyPurchaseOfPoStatusHold(entry, resolvedPoForNotification, user);
+        }
         return Object.assign(Object.assign({}, entry), { vendorMismatchWarning });
     }
     async notifyPurchaseOfHold(entry, actorUser) {
@@ -194,6 +226,22 @@ let GateInwardService = class GateInwardService {
             type: 'GATE_HOLD_PO_NOT_FOUND',
             title: 'Gate Hold — PO Not Found',
             message: `${entry.ginNumber} — ${entry.supplierName} — references PO "${entry.poNumber}" which could not be found. Material is on hold at the gate pending your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async notifyPurchaseOfPoStatusHold(entry, po, actorUser) {
+        const purchaseUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (purchaseUsers.length === 0)
+            return;
+        await this.notifications.createBulk(purchaseUsers.map(u => ({
+            userId: u.id,
+            type: po.status === 'CANCELLED' ? 'GATE_HOLD_PO_CANCELLED' : 'GATE_HOLD_PO_CLOSED',
+            title: `Gate Hold — PO ${po.status}`,
+            message: `${entry.ginNumber} — ${entry.supplierName} — references PO ${po.poNumber} which is ${po.status}. Material is on hold at the gate pending your decision.`,
             referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
             priority: 'URGENT',
         })), actorUser.companyId, actorUser.id);
@@ -260,9 +308,21 @@ let GateInwardService = class GateInwardService {
         if (!hasMaterialRef)
             missing.push('Material reference');
         if (entry.poId) {
-            if (!entry.po)
+            if (!entry.po) {
                 missing.push('PO (linked PO no longer found)');
+            }
             else if (!['SENT', 'PARTIALLY_RECEIVED'].includes(entry.po.status)) {
+                if (entry.po.status === 'CANCELLED' || entry.po.status === 'CLOSED') {
+                    const holdStatus = entry.po.status === 'CANCELLED' ? client_1.GateInwardStatus.GATE_HOLD_PO_CANCELLED : client_1.GateInwardStatus.GATE_HOLD_PO_CLOSED;
+                    const held = await this.prisma.gateInwardEntry.update({
+                        where: { id },
+                        data: { status: holdStatus, updatedBy: user.id },
+                        include: this.includes(),
+                    });
+                    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: holdStatus, reason: `PO ${entry.po.poNumber} is now ${entry.po.status}` }, changedBy: user.id });
+                    await this.notifyPurchaseOfPoStatusHold(held, entry.po, user);
+                    return held;
+                }
                 throw new common_1.BadRequestException(`Cannot verify - PO ${entry.po.poNumber} is now ${entry.po.status}, no longer valid for receiving. Reject this entry or contact Purchase.`);
             }
         }
@@ -405,6 +465,64 @@ let GateInwardService = class GateInwardService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', rejectionReason }, changedBy: user.id });
+        return updated;
+    }
+    async assertOnPoStatusHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const validHoldStatuses = [client_1.GateInwardStatus.GATE_HOLD_PO_CANCELLED, client_1.GateInwardStatus.GATE_HOLD_PO_CLOSED];
+        if (!validHoldStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('This entry is not currently on a PO Cancelled/Closed hold');
+        }
+        return entry;
+    }
+    async resolveReturnMaterial(id, reason, user) {
+        const entry = await this.assertOnPoStatusHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'RETURN_MATERIAL', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'RETURN_MATERIAL', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveApprovedException(id, reason, user) {
+        const entry = await this.assertOnPoStatusHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'APPROVED_EXCEPTION', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveCorrectPoReference(id, poId, reason, user) {
+        const entry = await this.assertOnPoStatusHold(id);
+        const po = await this.prisma.purchaseOrder.findFirst({ where: { id: poId, companyId: user.companyId } });
+        if (!po)
+            throw new common_1.NotFoundException('Purchase Order not found');
+        if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+            throw new common_1.BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING, poId: po.id, poNumber: po.poNumber,
+                holdResolution: 'CORRECT_PO_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, holdResolution: 'CORRECT_PO_REFERENCE', reason }, changedBy: user.id });
         return updated;
     }
     async getStats(user) {

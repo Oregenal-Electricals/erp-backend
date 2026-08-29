@@ -66,6 +66,15 @@ let GateInwardController = class GateInwardController {
     resolveHoldAsRejected(id, dto, user) {
         return this.service.resolveHoldAsRejected(id, dto.rejectionReason, user);
     }
+    resolveReturnMaterial(id, dto, user) {
+        return this.service.resolveReturnMaterial(id, dto.reason, user);
+    }
+    resolveApprovedException(id, dto, user) {
+        return this.service.resolveApprovedException(id, dto.reason, user);
+    }
+    resolveCorrectPoReference(id, dto, user) {
+        return this.service.resolveCorrectPoReference(id, dto.poId, dto.reason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -210,6 +219,39 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveHoldAsRejectedDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "resolveHoldAsRejected", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-status-hold/return-material'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-004/005: Purchase returns the material for a Cancelled/Closed PO hold' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ReturnMaterialDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveReturnMaterial", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-status-hold/approved-exception'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-004/005: Purchase approves an exception to receive despite Cancelled/Closed PO' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ApprovedExceptionDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveApprovedException", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-status-hold/correct-po'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-004/005: Purchase corrects the PO reference for a Cancelled/Closed PO hold' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.CorrectPoReferenceDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveCorrectPoReference", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),
