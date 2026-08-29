@@ -75,6 +75,18 @@ let GateInwardController = class GateInwardController {
     resolveCorrectPoReference(id, dto, user) {
         return this.service.resolveCorrectPoReference(id, dto.poId, dto.reason, user);
     }
+    flagMismatch(id, dto, user) {
+        return this.service.flagMismatch(id, dto.mismatchType, dto.expectedValue, dto.actualValue, dto.remarks, user);
+    }
+    resolveMismatchCorrectReference(id, dto, user) {
+        return this.service.resolveMismatchCorrectReference(id, dto.correctedValue, dto.reason, user);
+    }
+    resolveMismatchApprovedException(id, dto, user) {
+        return this.service.resolveMismatchApprovedException(id, dto.reason, user);
+    }
+    resolveMismatchRejected(id, dto, user) {
+        return this.service.resolveMismatchRejected(id, dto.reason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -252,6 +264,50 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.CorrectPoReferenceDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "resolveCorrectPoReference", null);
+__decorate([
+    (0, common_1.Patch)(':id/flag-mismatch'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-006/007: Gate flags a vendor or material mismatch, stopping normal Gate-In' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.FlagMismatchDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "flagMismatch", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-mismatch/correct-reference'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-006/007: correct the declared vendor/material and return to normal flow' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMismatchCorrectReferenceDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveMismatchCorrectReference", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-mismatch/approved-exception'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-006/007: approve an exception to receive despite the mismatch' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMismatchApprovedExceptionDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveMismatchApprovedException", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-mismatch/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-006/007: reject the material at the gate' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMismatchRejectedDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveMismatchRejected", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),

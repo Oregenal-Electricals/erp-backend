@@ -135,6 +135,7 @@ export declare class GateDashboardService {
             invoiceAmount: number | null;
             grossWeight: number | null;
             rejectionReason: string | null;
+            mismatchType: string | null;
             ginNumber: string;
             receivedById: string;
             verifiedById: string | null;
@@ -146,6 +147,10 @@ export declare class GateDashboardService {
             holdResolvedById: string | null;
             holdResolvedAt: Date | null;
             holdResolutionRemarks: string | null;
+            mismatchExpectedValue: string | null;
+            mismatchActualValue: string | null;
+            mismatchFlaggedById: string | null;
+            mismatchFlaggedAt: Date | null;
         })[];
         pendingGOEList: ({
             plant: {

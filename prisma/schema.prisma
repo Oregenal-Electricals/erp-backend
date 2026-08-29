@@ -98,6 +98,8 @@ enum GateInwardStatus {
   GATE_HOLD_PO_NOT_FOUND // GATE-003: a PO number was referenced but not found - blocked from the normal flow until Purchase resolves it
   GATE_HOLD_PO_CANCELLED // GATE-004: the referenced PO exists but is CANCELLED - blocked until Purchase resolves it
   GATE_HOLD_PO_CLOSED    // GATE-005: the referenced PO exists but is CLOSED - blocked until Purchase resolves it
+  GATE_HOLD_VENDOR_MISMATCH   // GATE-006: declared vendor does not match the PO's vendor
+  GATE_HOLD_MATERIAL_MISMATCH // GATE-007: declared material does not match the PO's item(s)
 }
 
 enum GateOutwardStatus {
@@ -520,6 +522,7 @@ model User {
   ginVerified      GateInwardEntry[]  @relation("GINVerifiedBy")
   ginGateIn        GateInwardEntry[]  @relation("GINGateInBy")
   ginHoldResolved  GateInwardEntry[]  @relation("GINHoldResolvedBy")
+  ginMismatchFlagged  GateInwardEntry[]  @relation("GINMismatchFlaggedBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -834,6 +837,16 @@ model GateInwardEntry {
   holdResolvedBy       User?      @relation("GINHoldResolvedBy", fields: [holdResolvedById], references: [id])
   holdResolvedAt       DateTime?
   holdResolutionRemarks String?
+  // GATE-006/007: captured when Gate flags a mismatch, or when it's
+  // auto-detected at creation (vendor name vs PO vendor). Evidence
+  // photos use the existing generic Documents module instead of a
+  // dedicated field (referenceType='GATE_INWARD_ENTRY').
+  mismatchType          String?   // 'VENDOR' | 'MATERIAL'
+  mismatchExpectedValue String?
+  mismatchActualValue   String?
+  mismatchFlaggedById   String?
+  mismatchFlaggedBy     User?      @relation("GINMismatchFlaggedBy", fields: [mismatchFlaggedById], references: [id])
+  mismatchFlaggedAt     DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String

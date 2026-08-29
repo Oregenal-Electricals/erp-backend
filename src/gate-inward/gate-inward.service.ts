@@ -105,7 +105,6 @@ export class GateInwardService {
     }
     let resolvedPoNumber = dto.poNumber;
     let resolvedPoId = dto.poId;
-    let vendorMismatchWarning: string | undefined;
     // GATE-003/004/005: a referenced PO can fail to resolve in three
     // distinct ways - not found at all, found but CANCELLED, or found
     // but CLOSED. None of these are an error to reject the arrival
@@ -118,7 +117,24 @@ export class GateInwardService {
     let initialStatus: GateInwardStatus = GateInwardStatus.PENDING;
     let holdBecausePoNotFound = false;
     let holdBecausePoInvalidStatus = false;
+    let holdBecauseVendorMismatch = false;
     let resolvedPoForNotification: { poNumber: string; status: string } | null = null;
+    let mismatchForNotification: { expected: string; actual: string } | null = null;
+
+    // GATE-006: a vendor mismatch used to be a soft warning the
+    // person could just click past - now it stops normal Gate-In the
+    // same as the other PO exceptions, since it's just as real a
+    // control point (wrong vendor material entering under a real PO
+    // number is exactly the kind of thing this gate exists to catch).
+    const checkVendorMismatch = (poVendorName: string) => {
+      const supplierLower = dto.supplierName.trim().toLowerCase();
+      const vendorLower = poVendorName.trim().toLowerCase();
+      if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
+        holdBecauseVendorMismatch = true;
+        initialStatus = GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH;
+        mismatchForNotification = { expected: poVendorName, actual: dto.supplierName };
+      }
+    };
 
     const resolvePoStatusHold = (status: string) => {
       if (status === 'CANCELLED') { initialStatus = GateInwardStatus.GATE_HOLD_PO_CANCELLED; return true; }
@@ -141,15 +157,12 @@ export class GateInwardService {
           throw new BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
         }
       } else {
-        const supplierLower = dto.supplierName.trim().toLowerCase();
-        const vendorLower = po.vendor.name.trim().toLowerCase();
-        if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
-          vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
-        }
+        checkVendorMismatch(po.vendor.name);
       }
     } else if (dto.poNumber?.trim()) {
       const matchedPo = await this.prisma.purchaseOrder.findFirst({
         where: { companyId: user.companyId, poNumber: dto.poNumber.trim() },
+        include: { vendor: { select: { name: true } } },
       });
       if (matchedPo) {
         resolvedPoId = matchedPo.id;
@@ -160,6 +173,8 @@ export class GateInwardService {
           if (!holdBecausePoInvalidStatus) {
             throw new BadRequestException(`This PO is ${matchedPo.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
           }
+        } else {
+          checkVendorMismatch(matchedPo.vendor.name);
         }
       } else {
         holdBecausePoNotFound = true;
@@ -194,6 +209,10 @@ export class GateInwardService {
         poId:          resolvedPoId,
         poNumber:      resolvedPoNumber,
         status:        initialStatus,
+        mismatchType: holdBecauseVendorMismatch ? 'VENDOR' : undefined,
+        mismatchExpectedValue: mismatchForNotification?.expected,
+        mismatchActualValue: mismatchForNotification?.actual,
+        mismatchFlaggedAt: holdBecauseVendorMismatch ? new Date() : undefined,
         invoiceNumber: dto.invoiceNumber,
         invoiceDate:   dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
         invoiceAmount: dto.invoiceAmount,
@@ -231,7 +250,10 @@ export class GateInwardService {
     if (holdBecausePoInvalidStatus && resolvedPoForNotification) {
       await this.notifyPurchaseOfPoStatusHold(entry, resolvedPoForNotification, user);
     }
-    return { ...entry, vendorMismatchWarning };
+    if (holdBecauseVendorMismatch && mismatchForNotification) {
+      await this.notifyOfMismatchHold(entry, 'VENDOR', mismatchForNotification, user);
+    }
+    return entry;
   }
 
   // GATE-003: notify Purchase the moment a hold is created - they
@@ -271,6 +293,30 @@ export class GateInwardService {
         type: po.status === 'CANCELLED' ? 'GATE_HOLD_PO_CANCELLED' : 'GATE_HOLD_PO_CLOSED',
         title: `Gate Hold — PO ${po.status}`,
         message: `${entry.ginNumber} — ${entry.supplierName} — references PO ${po.poNumber} which is ${po.status}. Material is on hold at the gate pending your decision.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'URGENT',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
+  }
+
+  // GATE-006/007: notify Purchase, Corporate Admin, and Super Admin -
+  // a wider approver set than the other gate holds, per this
+  // requirement explicitly naming "purchase, admin, superadmin" as
+  // the people who can decide on a mismatch.
+  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL', values: { expected: string; actual: string }, actorUser: any) {
+    const approverUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+      select: { id: true },
+    });
+    if (approverUsers.length === 0) return;
+    const label = mismatchType === 'VENDOR' ? 'Vendor' : 'Material';
+    await this.notifications.createBulk(
+      approverUsers.map(u => ({
+        userId: u.id,
+        type: mismatchType === 'VENDOR' ? 'GATE_HOLD_VENDOR_MISMATCH' : 'GATE_HOLD_MATERIAL_MISMATCH',
+        title: `Gate Hold — ${label} Mismatch`,
+        message: `${entry.ginNumber} — ${entry.supplierName} — ${label.toLowerCase()} mismatch. Expected: "${values.expected}", Actual: "${values.actual}". Material is on hold at the gate pending your decision.`,
         referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
         priority: 'URGENT',
       })) as any,
@@ -596,6 +642,111 @@ export class GateInwardService {
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, holdResolution: 'CORRECT_PO_REFERENCE', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // GATE-006/007: Gate/Security's own action to STOP a vehicle they
+  // physically observe a mismatch on, even when nothing in the typed
+  // data itself looks wrong (e.g. driver hands over material that
+  // visibly doesn't match the challan). Deliberately uses the same
+  // gate-level permission as verify() (GATE_INWARD_VERIFY), not the
+  // Purchase-only resolve permission - flagging is Gate's job,
+  // deciding what happens next is Purchase/Admin's.
+  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL', expectedValue: string, actualValue: string, remarks: string, user: any) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
+    if (!flaggableStatuses.includes(entry.status)) {
+      throw new BadRequestException('Can only flag a mismatch before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+    }
+    const holdStatus = mismatchType === 'VENDOR' ? GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH : GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH;
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: holdStatus,
+        mismatchType, mismatchExpectedValue: expectedValue, mismatchActualValue: actualValue,
+        mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+        remarks: entry.remarks ? `${entry.remarks} | Mismatch flagged: ${remarks}` : `Mismatch flagged: ${remarks}`,
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: holdStatus, mismatchType, expectedValue, actualValue, remarks }, changedBy: user.id });
+    await this.notifyOfMismatchHold(updated, mismatchType, { expected: expectedValue, actual: actualValue }, user);
+    return updated;
+  }
+
+  // GATE-006/007 resolution - shared by both mismatch types, same
+  // three named outcomes and same wider approver set (Purchase,
+  // Corporate Admin, Super Admin) as the mismatch notification.
+  private async assertOnMismatchHold(id: string) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH];
+    if (!validHoldStatuses.includes(entry.status)) {
+      throw new BadRequestException('This entry is not currently on a Vendor/Material Mismatch hold');
+    }
+    return entry;
+  }
+
+  // Option 1: CORRECT REFERENCE - the declared vendor/material was
+  // simply wrong (data-entry error); correct value is recorded and
+  // the entry returns to normal flow. Does not require re-linking a
+  // PO (unlike GATE-004/005's equivalent) since the PO itself was
+  // never in question here - only what was declared against it.
+  async resolveMismatchCorrectReference(id: string, correctedValue: string, reason: string, user: any) {
+    const entry = await this.assertOnMismatchHold(id);
+    const isVendor = entry.mismatchType === 'VENDOR';
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING,
+        supplierName: isVendor ? correctedValue : entry.supplierName,
+        materialDescription: !isVendor ? correctedValue : entry.materialDescription,
+        holdResolution: 'CORRECT_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'CORRECT_REFERENCE', correctedValue, reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // Option 2: APPROVED EXCEPTION - the mismatch is real but Purchase/
+  // Admin authorizes receiving anyway, per whatever business reason
+  // they record.
+  async resolveMismatchApprovedException(id: string, reason: string, user: any) {
+    const entry = await this.assertOnMismatchHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING,
+        holdResolution: 'APPROVED_EXCEPTION', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // Option 3: REJECTED AT GATE - the material is refused outright.
+  // Same terminal REJECTED status as every other rejection path in
+  // this service, so it inherits the same guarantee: a REJECTED
+  // entry can never reach verify()/gateIn()/sendToStores(), and so
+  // can never create Store inventory or a GRN.
+  async resolveMismatchRejected(id: string, reason: string, user: any) {
+    const entry = await this.assertOnMismatchHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.REJECTED, rejectionReason: reason,
+        holdResolution: 'REJECTED_AT_GATE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE', reason }, changedBy: user.id });
     return updated;
   }
 

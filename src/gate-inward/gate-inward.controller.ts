@@ -15,6 +15,7 @@ import {
   VerifyGateInwardDto, RejectGateInwardDto, GateInDto,
   ResolveHoldWithPoDto, ResolveHoldAsNonPoDto, ResolveHoldAsRejectedDto,
   ReturnMaterialDto, ApprovedExceptionDto, CorrectPoReferenceDto,
+  FlagMismatchDto, ResolveMismatchCorrectReferenceDto, ResolveMismatchApprovedExceptionDto, ResolveMismatchRejectedDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -189,5 +190,53 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.resolveCorrectPoReference(id, dto.poId, dto.reason, user);
+  }
+
+  // GATE-006/007: Gate/Security flags a vendor or material mismatch
+  // themselves - same permission as verify(), since this is Gate's
+  // own action, not an approver decision.
+  @Patch(':id/flag-mismatch')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-006/007: Gate flags a vendor or material mismatch, stopping normal Gate-In' })
+  flagMismatch(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: FlagMismatchDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.flagMismatch(id, dto.mismatchType, dto.expectedValue, dto.actualValue, dto.remarks, user);
+  }
+
+  // GATE-006/007 resolution - Purchase/Admin/SuperAdmin only.
+  @Patch(':id/resolve-mismatch/correct-reference')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-006/007: correct the declared vendor/material and return to normal flow' })
+  resolveMismatchCorrectReference(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveMismatchCorrectReferenceDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveMismatchCorrectReference(id, dto.correctedValue, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-mismatch/approved-exception')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-006/007: approve an exception to receive despite the mismatch' })
+  resolveMismatchApprovedException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveMismatchApprovedExceptionDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveMismatchApprovedException(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-mismatch/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-006/007: reject the material at the gate' })
+  resolveMismatchRejected(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveMismatchRejectedDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveMismatchRejected(id, dto.reason, user);
   }
 }

@@ -340,7 +340,7 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
     });
 
     it('resolves a typed poNumber to the real PO automatically when one does match, no hold created', async () => {
-      prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-001', status: 'SENT' });
+      prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-001', status: 'SENT', vendor: { name: 'ABC Steel' } });
       const dto = {
         plantId: 'plant-1', supplierName: 'ABC Steel', poNumber: 'PO-001',
         materialDescription: 'Steel Rods', quantity: 10,
@@ -561,6 +561,149 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
         const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
         expect(serviceSource).not.toContain('purchaseOrder.update');
       });
+    });
+  });
+
+  describe('GATE-006: Vendor Mismatch', () => {
+    it('create() puts the entry on GATE_HOLD_VENDOR_MISMATCH when the declared supplier does not match the PO vendor - no longer a soft warning', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue({
+        id: 'po-1', poNumber: 'PO-001', status: 'SENT', vendor: { name: 'ABC Steel' },
+      });
+      const dto = {
+        plantId: 'plant-1', supplierName: 'Totally Different Vendor Ltd', poId: 'po-1',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'Totally Different Vendor Ltd',
+        status: 'GATE_HOLD_VENDOR_MISMATCH',
+      });
+
+      const result = await service.create(dto, user);
+
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({
+          status: 'GATE_HOLD_VENDOR_MISMATCH', mismatchType: 'VENDOR',
+          mismatchExpectedValue: 'ABC Steel', mismatchActualValue: 'Totally Different Vendor Ltd',
+        }) }),
+      );
+      expect(result.status).toBe('GATE_HOLD_VENDOR_MISMATCH');
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_VENDOR_MISMATCH', priority: 'URGENT' })]),
+        user.companyId, user.id,
+      );
+      // notifyOfMismatchHold should target the wider approver set
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } }) }),
+      );
+    });
+
+    it('create() does not hold when the declared supplier reasonably matches the PO vendor', async () => {
+      prisma.purchaseOrder.findFirst.mockResolvedValue({
+        id: 'po-1', poNumber: 'PO-001', status: 'SENT', vendor: { name: 'ABC Steel' },
+      });
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel Pvt Ltd', poId: 'po-1',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+
+      const result = await service.create(dto, user);
+      expect(result.status).toBe('PENDING');
+    });
+  });
+
+  describe('GATE-007: Material Mismatch + shared flag/resolve mechanics for GATE-006/007', () => {
+    it('flagMismatch() puts a PENDING entry on GATE_HOLD_MATERIAL_MISMATCH and notifies the wider approver set', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', remarks: null });
+      prisma.gateInwardEntry.update.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', status: 'GATE_HOLD_MATERIAL_MISMATCH',
+      });
+
+      const result = await service.flagMismatch(
+        'gin-1', 'MATERIAL', 'MS Angle 25x25, PO item IT-001', 'MS Angle 40x40, no matching PO item',
+        'Opened the truck and the angle size clearly does not match the challan', user,
+      );
+
+      expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({
+          status: 'GATE_HOLD_MATERIAL_MISMATCH', mismatchType: 'MATERIAL', mismatchFlaggedById: user.id,
+        }) }),
+      );
+      expect(result.status).toBe('GATE_HOLD_MATERIAL_MISMATCH');
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_MATERIAL_MISMATCH' })]),
+        user.companyId, user.id,
+      );
+    });
+
+    it('flagMismatch() also works on a VERIFIED entry (Gate can still stop it before Gate-In)', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED', remarks: null });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_VENDOR_MISMATCH' });
+      const result = await service.flagMismatch('gin-1', 'VENDOR', 'ABC Steel', 'XYZ Traders', 'Driver ID does not match vendor on file', user);
+      expect(result.status).toBe('GATE_HOLD_VENDOR_MISMATCH');
+    });
+
+    it('flagMismatch() refuses once the vehicle has already been let in (GATE_IN or later)', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+      await expect(service.flagMismatch('gin-1', 'MATERIAL', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+      expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+    });
+
+    describe('resolution — Purchase/Admin/SuperAdmin, three named outcomes', () => {
+      const heldEntry = { id: 'gin-1', status: 'GATE_HOLD_MATERIAL_MISMATCH', mismatchType: 'MATERIAL', materialDescription: 'MS Angle 40x40' };
+
+      it('CORRECT REFERENCE updates the declared material and returns to PENDING', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'CORRECT_REFERENCE' });
+
+        const result = await service.resolveMismatchCorrectReference('gin-1', 'MS Angle 25x25', 'Security mis-transcribed the size from the challan', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', materialDescription: 'MS Angle 25x25', holdResolution: 'CORRECT_REFERENCE' }) }),
+        );
+        expect(result.holdResolution).toBe('CORRECT_REFERENCE');
+      });
+
+      it('CORRECT REFERENCE updates supplierName instead of materialDescription for a VENDOR mismatch', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_VENDOR_MISMATCH', mismatchType: 'VENDOR', supplierName: 'Wrong Name Ltd' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'CORRECT_REFERENCE' });
+
+        await service.resolveMismatchCorrectReference('gin-1', 'ABC Steel Pvt Ltd', 'Reason here', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ supplierName: 'ABC Steel Pvt Ltd' }) }),
+        );
+      });
+
+      it('APPROVED EXCEPTION returns to PENDING', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' });
+        const result = await service.resolveMismatchApprovedException('gin-1', 'Confirmed with vendor - this is the correct, if oddly labeled, material', user);
+        expect(result.holdResolution).toBe('APPROVED_EXCEPTION');
+      });
+
+      it('REJECTED AT GATE sends the entry to terminal REJECTED status', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE' });
+        const result = await service.resolveMismatchRejected('gin-1', 'Wrong material entirely, sent back with the driver', user);
+        expect(result.status).toBe('REJECTED');
+        expect(result.holdResolution).toBe('REJECTED_AT_GATE');
+      });
+
+      it('all three resolution methods reject an entry not on a mismatch hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', 'x', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    it('REJECTED AT GATE material can never reach sendToStores() - rejected material never creates Store inventory or a GRN', async () => {
+      // Same terminal-state guarantee already proven for GATE-001's
+      // reject() - REJECTED sits outside the PENDING->VERIFIED->
+      // GATE_IN->SENT_TO_STORES chain, so sendToStores() refuses it.
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
 });

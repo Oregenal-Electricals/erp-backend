@@ -13,7 +13,6 @@ export declare class GateInwardService {
     private notifications;
     constructor(prisma: PrismaService, audit: AuditService, settings: SettingsService, vehicleManagement: VehicleManagementService, notifications: NotificationsService);
     create(dto: CreateGateInwardDto, user: any): Promise<{
-        vendorMismatchWarning: string;
         items: {
             id: string;
             companyId: string;
@@ -64,6 +63,7 @@ export declare class GateInwardService {
             firstName: string;
             lastName: string;
         };
+    } & {
         id: string;
         companyId: string;
         isActive: boolean;
@@ -93,6 +93,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -104,9 +105,14 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     private notifyPurchaseOfHold;
     private notifyPurchaseOfPoStatusHold;
+    private notifyOfMismatchHold;
     findAll(user: any, filters: {
         status?: GateInwardStatus;
         plantId?: string;
@@ -193,6 +199,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -204,6 +211,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     })[]>;
     findOne(id: string): Promise<{
         items: {
@@ -286,6 +297,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -297,6 +309,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     update(id: string, dto: UpdateGateInwardDto, user: any): Promise<{
         items: {
@@ -379,6 +395,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -390,6 +407,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     verify(id: string, dto: VerifyGateInwardDto, user: any): Promise<{
         items: {
@@ -472,6 +493,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -483,6 +505,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     gateIn(id: string, dto: GateInDto, user: any): Promise<{
         items: {
@@ -565,6 +591,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -576,6 +603,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     private notifyStoreReceivingReference;
     sendToStores(id: string, user: any): Promise<{
@@ -659,6 +690,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -670,6 +702,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     complete(id: string, user: any): Promise<{
         items: {
@@ -752,6 +788,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -763,6 +800,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     reject(id: string, dto: RejectGateInwardDto, user: any): Promise<{
         items: {
@@ -845,6 +886,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -856,6 +898,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     private assertOnHold;
     resolveHoldWithPo(id: string, poId: string, remarks: string | undefined, user: any): Promise<{
@@ -939,6 +985,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -950,6 +997,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     resolveHoldAsNonPo(id: string, remarks: string, user: any): Promise<{
         items: {
@@ -1032,6 +1083,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -1043,6 +1095,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     resolveHoldAsRejected(id: string, rejectionReason: string, user: any): Promise<{
         items: {
@@ -1125,6 +1181,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -1136,6 +1193,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     private assertOnPoStatusHold;
     resolveReturnMaterial(id: string, reason: string, user: any): Promise<{
@@ -1219,6 +1280,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -1230,6 +1292,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     resolveApprovedException(id: string, reason: string, user: any): Promise<{
         items: {
@@ -1312,6 +1378,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -1323,6 +1390,10 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     resolveCorrectPoReference(id: string, poId: string, reason: string, user: any): Promise<{
         items: {
@@ -1405,6 +1476,7 @@ export declare class GateInwardService {
         invoiceAmount: number | null;
         grossWeight: number | null;
         rejectionReason: string | null;
+        mismatchType: string | null;
         ginNumber: string;
         receivedById: string;
         verifiedById: string | null;
@@ -1416,6 +1488,403 @@ export declare class GateInwardService {
         holdResolvedById: string | null;
         holdResolvedAt: Date | null;
         holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
+    }>;
+    flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL', expectedValue: string, actualValue: string, remarks: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
+        plant: {
+            id: string;
+            name: string;
+            code: string;
+        };
+        vehicleLog: {
+            id: string;
+            vehicle: {
+                vehicleNumber: string;
+            };
+            logNumber: string;
+        };
+        receivedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        verifiedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        gateInBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        holdResolvedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string;
+        updatedBy: string;
+        plantId: string;
+        status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        materialDescription: string | null;
+        supplierName: string;
+        poNumber: string | null;
+        netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
+        vehicleLogId: string | null;
+        supplierMobile: string | null;
+        supplierGstin: string | null;
+        poId: string | null;
+        invoiceNumber: string | null;
+        invoiceDate: Date | null;
+        invoiceAmount: number | null;
+        grossWeight: number | null;
+        rejectionReason: string | null;
+        mismatchType: string | null;
+        ginNumber: string;
+        receivedById: string;
+        verifiedById: string | null;
+        verifiedAt: Date | null;
+        gateInById: string | null;
+        gateInAt: Date | null;
+        completedAt: Date | null;
+        holdResolution: string | null;
+        holdResolvedById: string | null;
+        holdResolvedAt: Date | null;
+        holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
+    }>;
+    private assertOnMismatchHold;
+    resolveMismatchCorrectReference(id: string, correctedValue: string, reason: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
+        plant: {
+            id: string;
+            name: string;
+            code: string;
+        };
+        vehicleLog: {
+            id: string;
+            vehicle: {
+                vehicleNumber: string;
+            };
+            logNumber: string;
+        };
+        receivedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        verifiedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        gateInBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        holdResolvedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string;
+        updatedBy: string;
+        plantId: string;
+        status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        materialDescription: string | null;
+        supplierName: string;
+        poNumber: string | null;
+        netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
+        vehicleLogId: string | null;
+        supplierMobile: string | null;
+        supplierGstin: string | null;
+        poId: string | null;
+        invoiceNumber: string | null;
+        invoiceDate: Date | null;
+        invoiceAmount: number | null;
+        grossWeight: number | null;
+        rejectionReason: string | null;
+        mismatchType: string | null;
+        ginNumber: string;
+        receivedById: string;
+        verifiedById: string | null;
+        verifiedAt: Date | null;
+        gateInById: string | null;
+        gateInAt: Date | null;
+        completedAt: Date | null;
+        holdResolution: string | null;
+        holdResolvedById: string | null;
+        holdResolvedAt: Date | null;
+        holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
+    }>;
+    resolveMismatchApprovedException(id: string, reason: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
+        plant: {
+            id: string;
+            name: string;
+            code: string;
+        };
+        vehicleLog: {
+            id: string;
+            vehicle: {
+                vehicleNumber: string;
+            };
+            logNumber: string;
+        };
+        receivedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        verifiedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        gateInBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        holdResolvedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string;
+        updatedBy: string;
+        plantId: string;
+        status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        materialDescription: string | null;
+        supplierName: string;
+        poNumber: string | null;
+        netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
+        vehicleLogId: string | null;
+        supplierMobile: string | null;
+        supplierGstin: string | null;
+        poId: string | null;
+        invoiceNumber: string | null;
+        invoiceDate: Date | null;
+        invoiceAmount: number | null;
+        grossWeight: number | null;
+        rejectionReason: string | null;
+        mismatchType: string | null;
+        ginNumber: string;
+        receivedById: string;
+        verifiedById: string | null;
+        verifiedAt: Date | null;
+        gateInById: string | null;
+        gateInAt: Date | null;
+        completedAt: Date | null;
+        holdResolution: string | null;
+        holdResolvedById: string | null;
+        holdResolvedAt: Date | null;
+        holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
+    }>;
+    resolveMismatchRejected(id: string, reason: string, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            quantity: number;
+            packageCount: number | null;
+            gateInwardEntryId: string;
+        }[];
+        plant: {
+            id: string;
+            name: string;
+            code: string;
+        };
+        vehicleLog: {
+            id: string;
+            vehicle: {
+                vehicleNumber: string;
+            };
+            logNumber: string;
+        };
+        receivedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        verifiedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        gateInBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        holdResolvedBy: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string;
+        updatedBy: string;
+        plantId: string;
+        status: import(".prisma/client").$Enums.GateInwardStatus;
+        unit: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        driverName: string | null;
+        materialDescription: string | null;
+        supplierName: string;
+        poNumber: string | null;
+        netWeight: number | null;
+        quantity: number | null;
+        packageCount: number | null;
+        vehicleLogId: string | null;
+        supplierMobile: string | null;
+        supplierGstin: string | null;
+        poId: string | null;
+        invoiceNumber: string | null;
+        invoiceDate: Date | null;
+        invoiceAmount: number | null;
+        grossWeight: number | null;
+        rejectionReason: string | null;
+        mismatchType: string | null;
+        ginNumber: string;
+        receivedById: string;
+        verifiedById: string | null;
+        verifiedAt: Date | null;
+        gateInById: string | null;
+        gateInAt: Date | null;
+        completedAt: Date | null;
+        holdResolution: string | null;
+        holdResolvedById: string | null;
+        holdResolvedAt: Date | null;
+        holdResolutionRemarks: string | null;
+        mismatchExpectedValue: string | null;
+        mismatchActualValue: string | null;
+        mismatchFlaggedById: string | null;
+        mismatchFlaggedAt: Date | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

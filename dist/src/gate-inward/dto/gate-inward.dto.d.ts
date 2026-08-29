@@ -66,3 +66,19 @@ export declare class CorrectPoReferenceDto {
     poId: string;
     reason: string;
 }
+export declare class FlagMismatchDto {
+    mismatchType: 'VENDOR' | 'MATERIAL';
+    expectedValue: string;
+    actualValue: string;
+    remarks: string;
+}
+export declare class ResolveMismatchCorrectReferenceDto {
+    correctedValue: string;
+    reason: string;
+}
+export declare class ResolveMismatchApprovedExceptionDto {
+    reason: string;
+}
+export declare class ResolveMismatchRejectedDto {
+    reason: string;
+}

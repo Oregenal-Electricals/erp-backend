@@ -209,3 +209,46 @@ export class CorrectPoReferenceDto {
   @MinLength(5)
   reason: string;
 }
+
+export class FlagMismatchDto {
+  @ApiProperty({ enum: ['VENDOR', 'MATERIAL'], example: 'MATERIAL' })
+  @IsString()
+  mismatchType: 'VENDOR' | 'MATERIAL';
+  @ApiProperty({ example: 'MS Angle 25x25, PO item IT-001' })
+  @IsString()
+  @MinLength(2)
+  expectedValue: string;
+  @ApiProperty({ example: 'MS Angle 40x40, no matching PO item' })
+  @IsString()
+  @MinLength(2)
+  actualValue: string;
+  @ApiProperty({ example: 'Opened the truck and the angle size clearly does not match the challan' })
+  @IsString()
+  @MinLength(5)
+  remarks: string;
+}
+
+export class ResolveMismatchCorrectReferenceDto {
+  @ApiProperty({ example: 'ABC Steel Pvt Ltd' })
+  @IsString()
+  @MinLength(2)
+  correctedValue: string;
+  @ApiProperty({ example: 'Security misread the company name on the challan' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveMismatchApprovedExceptionDto {
+  @ApiProperty({ example: 'Vendor confirmed this is a subsidiary delivering on their behalf - approved' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveMismatchRejectedDto {
+  @ApiProperty({ example: 'Wrong material entirely, sent back with the driver' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}

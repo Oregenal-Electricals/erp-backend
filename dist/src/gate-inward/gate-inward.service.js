@@ -90,11 +90,21 @@ let GateInwardService = class GateInwardService {
         }
         let resolvedPoNumber = dto.poNumber;
         let resolvedPoId = dto.poId;
-        let vendorMismatchWarning;
         let initialStatus = client_1.GateInwardStatus.PENDING;
         let holdBecausePoNotFound = false;
         let holdBecausePoInvalidStatus = false;
+        let holdBecauseVendorMismatch = false;
         let resolvedPoForNotification = null;
+        let mismatchForNotification = null;
+        const checkVendorMismatch = (poVendorName) => {
+            const supplierLower = dto.supplierName.trim().toLowerCase();
+            const vendorLower = poVendorName.trim().toLowerCase();
+            if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
+                holdBecauseVendorMismatch = true;
+                initialStatus = client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH;
+                mismatchForNotification = { expected: poVendorName, actual: dto.supplierName };
+            }
+        };
         const resolvePoStatusHold = (status) => {
             if (status === 'CANCELLED') {
                 initialStatus = client_1.GateInwardStatus.GATE_HOLD_PO_CANCELLED;
@@ -124,16 +134,13 @@ let GateInwardService = class GateInwardService {
                 }
             }
             else {
-                const supplierLower = dto.supplierName.trim().toLowerCase();
-                const vendorLower = po.vendor.name.trim().toLowerCase();
-                if (!supplierLower.includes(vendorLower) && !vendorLower.includes(supplierLower)) {
-                    vendorMismatchWarning = `Supplier name "${dto.supplierName}" does not match this PO's vendor "${po.vendor.name}" - please verify before accepting.`;
-                }
+                checkVendorMismatch(po.vendor.name);
             }
         }
         else if ((_a = dto.poNumber) === null || _a === void 0 ? void 0 : _a.trim()) {
             const matchedPo = await this.prisma.purchaseOrder.findFirst({
                 where: { companyId: user.companyId, poNumber: dto.poNumber.trim() },
+                include: { vendor: { select: { name: true } } },
             });
             if (matchedPo) {
                 resolvedPoId = matchedPo.id;
@@ -145,6 +152,9 @@ let GateInwardService = class GateInwardService {
                     if (!holdBecausePoInvalidStatus) {
                         throw new common_1.BadRequestException(`This PO is ${matchedPo.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
                     }
+                }
+                else {
+                    checkVendorMismatch(matchedPo.vendor.name);
                 }
             }
             else {
@@ -172,6 +182,10 @@ let GateInwardService = class GateInwardService {
                 poId: resolvedPoId,
                 poNumber: resolvedPoNumber,
                 status: initialStatus,
+                mismatchType: holdBecauseVendorMismatch ? 'VENDOR' : undefined,
+                mismatchExpectedValue: mismatchForNotification === null || mismatchForNotification === void 0 ? void 0 : mismatchForNotification.expected,
+                mismatchActualValue: mismatchForNotification === null || mismatchForNotification === void 0 ? void 0 : mismatchForNotification.actual,
+                mismatchFlaggedAt: holdBecauseVendorMismatch ? new Date() : undefined,
                 invoiceNumber: dto.invoiceNumber,
                 invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
                 invoiceAmount: dto.invoiceAmount,
@@ -212,7 +226,10 @@ let GateInwardService = class GateInwardService {
         if (holdBecausePoInvalidStatus && resolvedPoForNotification) {
             await this.notifyPurchaseOfPoStatusHold(entry, resolvedPoForNotification, user);
         }
-        return Object.assign(Object.assign({}, entry), { vendorMismatchWarning });
+        if (holdBecauseVendorMismatch && mismatchForNotification) {
+            await this.notifyOfMismatchHold(entry, 'VENDOR', mismatchForNotification, user);
+        }
+        return entry;
     }
     async notifyPurchaseOfHold(entry, actorUser) {
         const purchaseUsers = await this.prisma.user.findMany({
@@ -242,6 +259,23 @@ let GateInwardService = class GateInwardService {
             type: po.status === 'CANCELLED' ? 'GATE_HOLD_PO_CANCELLED' : 'GATE_HOLD_PO_CLOSED',
             title: `Gate Hold — PO ${po.status}`,
             message: `${entry.ginNumber} — ${entry.supplierName} — references PO ${po.poNumber} which is ${po.status}. Material is on hold at the gate pending your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async notifyOfMismatchHold(entry, mismatchType, values, actorUser) {
+        const approverUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (approverUsers.length === 0)
+            return;
+        const label = mismatchType === 'VENDOR' ? 'Vendor' : 'Material';
+        await this.notifications.createBulk(approverUsers.map(u => ({
+            userId: u.id,
+            type: mismatchType === 'VENDOR' ? 'GATE_HOLD_VENDOR_MISMATCH' : 'GATE_HOLD_MATERIAL_MISMATCH',
+            title: `Gate Hold — ${label} Mismatch`,
+            message: `${entry.ginNumber} — ${entry.supplierName} — ${label.toLowerCase()} mismatch. Expected: "${values.expected}", Actual: "${values.actual}". Material is on hold at the gate pending your decision.`,
             referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
             priority: 'URGENT',
         })), actorUser.companyId, actorUser.id);
@@ -523,6 +557,85 @@ let GateInwardService = class GateInwardService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, holdResolution: 'CORRECT_PO_REFERENCE', reason }, changedBy: user.id });
+        return updated;
+    }
+    async flagMismatch(id, mismatchType, expectedValue, actualValue, remarks, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const flaggableStatuses = [client_1.GateInwardStatus.PENDING, client_1.GateInwardStatus.VERIFIED];
+        if (!flaggableStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('Can only flag a mismatch before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+        }
+        const holdStatus = mismatchType === 'VENDOR' ? client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH : client_1.GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH;
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: holdStatus,
+                mismatchType, mismatchExpectedValue: expectedValue, mismatchActualValue: actualValue,
+                mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+                remarks: entry.remarks ? `${entry.remarks} | Mismatch flagged: ${remarks}` : `Mismatch flagged: ${remarks}`,
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: holdStatus, mismatchType, expectedValue, actualValue, remarks }, changedBy: user.id });
+        await this.notifyOfMismatchHold(updated, mismatchType, { expected: expectedValue, actual: actualValue }, user);
+        return updated;
+    }
+    async assertOnMismatchHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const validHoldStatuses = [client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, client_1.GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH];
+        if (!validHoldStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('This entry is not currently on a Vendor/Material Mismatch hold');
+        }
+        return entry;
+    }
+    async resolveMismatchCorrectReference(id, correctedValue, reason, user) {
+        const entry = await this.assertOnMismatchHold(id);
+        const isVendor = entry.mismatchType === 'VENDOR';
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                supplierName: isVendor ? correctedValue : entry.supplierName,
+                materialDescription: !isVendor ? correctedValue : entry.materialDescription,
+                holdResolution: 'CORRECT_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'CORRECT_REFERENCE', correctedValue, reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveMismatchApprovedException(id, reason, user) {
+        const entry = await this.assertOnMismatchHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'APPROVED_EXCEPTION', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveMismatchRejected(id, reason, user) {
+        const entry = await this.assertOnMismatchHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'REJECTED_AT_GATE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE', reason }, changedBy: user.id });
         return updated;
     }
     async getStats(user) {

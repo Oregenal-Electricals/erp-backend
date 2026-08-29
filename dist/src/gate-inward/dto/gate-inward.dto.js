@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -310,4 +310,63 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], CorrectPoReferenceDto.prototype, "reason", void 0);
+class FlagMismatchDto {
+}
+exports.FlagMismatchDto = FlagMismatchDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['VENDOR', 'MATERIAL'], example: 'MATERIAL' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FlagMismatchDto.prototype, "mismatchType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'MS Angle 25x25, PO item IT-001' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], FlagMismatchDto.prototype, "expectedValue", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'MS Angle 40x40, no matching PO item' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], FlagMismatchDto.prototype, "actualValue", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Opened the truck and the angle size clearly does not match the challan' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], FlagMismatchDto.prototype, "remarks", void 0);
+class ResolveMismatchCorrectReferenceDto {
+}
+exports.ResolveMismatchCorrectReferenceDto = ResolveMismatchCorrectReferenceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'ABC Steel Pvt Ltd' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], ResolveMismatchCorrectReferenceDto.prototype, "correctedValue", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Security misread the company name on the challan' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveMismatchCorrectReferenceDto.prototype, "reason", void 0);
+class ResolveMismatchApprovedExceptionDto {
+}
+exports.ResolveMismatchApprovedExceptionDto = ResolveMismatchApprovedExceptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Vendor confirmed this is a subsidiary delivering on their behalf - approved' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveMismatchApprovedExceptionDto.prototype, "reason", void 0);
+class ResolveMismatchRejectedDto {
+}
+exports.ResolveMismatchRejectedDto = ResolveMismatchRejectedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Wrong material entirely, sent back with the driver' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveMismatchRejectedDto.prototype, "reason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map
