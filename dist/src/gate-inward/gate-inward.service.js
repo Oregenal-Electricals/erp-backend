@@ -734,6 +734,131 @@ let GateInwardService = class GateInwardService {
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { returnGateOutAt: null }, newValues: { returnGateOutAt: updated.returnGateOutAt, remarks }, changedBy: user.id });
         return updated;
     }
+    async verifyPackageCount(id, actualPackageCount, user) {
+        var _a;
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const flaggableStatuses = [client_1.GateInwardStatus.PENDING, client_1.GateInwardStatus.VERIFIED];
+        if (!flaggableStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('Can only verify package count before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+        }
+        const declared = (_a = entry.packageCount) !== null && _a !== void 0 ? _a : 0;
+        const difference = actualPackageCount - declared;
+        if (difference === 0) {
+            const updated = await this.prisma.gateInwardEntry.update({
+                where: { id },
+                data: { packageCountVerifiedById: user.id, packageCountVerifiedAt: new Date(), updatedBy: user.id },
+                include: this.includes(),
+            });
+            await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: {}, newValues: { packageCountVerified: true, declared, actual: actualPackageCount }, changedBy: user.id });
+            return updated;
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.GATE_HOLD_PACKAGE_COUNT_MISMATCH,
+                packageCountExpected: declared, packageCountActual: actualPackageCount, packageCountDifference: difference,
+                packageCountVerifiedById: user.id, packageCountVerifiedAt: new Date(),
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', expected: declared, actual: actualPackageCount, difference }, changedBy: user.id });
+        await this.notifyOfPackageCountHold(updated, user);
+        return updated;
+    }
+    async notifyOfPackageCountHold(entry, actorUser) {
+        const approverUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (approverUsers.length === 0)
+            return;
+        await this.notifications.createBulk(approverUsers.map(u => ({
+            userId: u.id,
+            type: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH',
+            title: 'Gate Hold — Package Count Mismatch',
+            message: `${entry.ginNumber} — ${entry.supplierName} — declared ${entry.packageCountExpected} packages, ${entry.packageCountActual} counted at the gate (difference: ${entry.packageCountDifference > 0 ? '+' : ''}${entry.packageCountDifference}). Awaiting your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async assertOnPackageCountHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.GATE_HOLD_PACKAGE_COUNT_MISMATCH) {
+            throw new common_1.BadRequestException('This entry is not currently on a Package Count Mismatch hold');
+        }
+        return entry;
+    }
+    async resolvePackageCountRecount(id, newActualCount, remarks, user) {
+        var _a;
+        const entry = await this.assertOnPackageCountHold(id);
+        const declared = (_a = entry.packageCountExpected) !== null && _a !== void 0 ? _a : 0;
+        const difference = newActualCount - declared;
+        if (difference === 0) {
+            const updated = await this.prisma.gateInwardEntry.update({
+                where: { id },
+                data: {
+                    status: client_1.GateInwardStatus.PENDING,
+                    packageCountActual: newActualCount, packageCountDifference: 0,
+                    holdResolution: 'RECOUNT_MATCHED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                    holdResolutionRemarks: remarks, updatedBy: user.id,
+                },
+                include: this.includes(),
+            });
+            await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'RECOUNT_MATCHED', newActualCount, remarks }, changedBy: user.id });
+            return updated;
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: { packageCountActual: newActualCount, packageCountDifference: difference, updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { packageCountActual: entry.packageCountActual }, newValues: { packageCountActual: newActualCount, packageCountDifference: difference, remarks }, changedBy: user.id });
+        return updated;
+    }
+    async resolvePackageCountEscalate(id, remarks, user) {
+        const entry = await this.assertOnPackageCountHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: { packageCountEscalated: true, packageCountEscalatedAt: new Date(), updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { packageCountEscalated: false }, newValues: { packageCountEscalated: true, remarks }, changedBy: user.id });
+        await this.notifyOfPackageCountHold(updated, user);
+        return updated;
+    }
+    async resolvePackageCountApprovedInward(id, reason, user) {
+        const entry = await this.assertOnPackageCountHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'APPROVED_INWARD', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_INWARD', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolvePackageCountRejected(id, reason, user) {
+        const entry = await this.assertOnPackageCountHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+        return updated;
+    }
     async getStats(user) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

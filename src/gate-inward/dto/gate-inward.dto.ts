@@ -1,6 +1,6 @@
 import {
   IsString, IsOptional, IsEnum,
-  IsNumber, IsInt, IsUUID,
+  IsNumber, IsInt, IsUUID, Min,
   IsDateString, MinLength, IsArray, ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -289,4 +289,43 @@ export class RecordReturnGateOutDto {
   @IsString()
   @MinLength(5)
   remarks: string;
+}
+
+export class VerifyPackageCountDto {
+  @ApiProperty({ example: 48 })
+  @IsInt()
+  @Min(0)
+  actualPackageCount: number;
+}
+
+export class ResolvePackageCountRecountDto {
+  @ApiProperty({ example: 50 })
+  @IsInt()
+  @Min(0)
+  newActualCount: number;
+  @ApiProperty({ example: 'Recounted with the driver present, first count missed 2 boxes stacked behind others' })
+  @IsString()
+  @MinLength(5)
+  remarks: string;
+}
+
+export class ResolvePackageCountEscalateDto {
+  @ApiProperty({ example: 'Asked Store to cross-check against the last 3 deliveries from this vendor' })
+  @IsString()
+  @MinLength(5)
+  remarks: string;
+}
+
+export class ResolvePackageCountApprovedInwardDto {
+  @ApiProperty({ example: 'Vendor confirmed partial shipment, remaining packages to follow separately - accepted' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolvePackageCountRejectedDto {
+  @ApiProperty({ example: 'Discrepancy too large to accept, sent back for vendor to reconcile' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
 }

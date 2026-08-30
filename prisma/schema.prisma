@@ -102,6 +102,7 @@ enum GateInwardStatus {
   GATE_HOLD_MATERIAL_MISMATCH // GATE-007: declared material does not match the PO's item(s)
   GATE_HOLD_MATERIAL_DAMAGE   // GATE-008: visible external damage to the material itself
   GATE_HOLD_PACKAGING_DAMAGE  // GATE-009: visible external damage to packaging (material itself not inspected)
+  GATE_HOLD_PACKAGE_COUNT_MISMATCH // GATE-010: declared package count does not match the physical count at the gate
 }
 
 enum GateOutwardStatus {
@@ -527,6 +528,7 @@ model User {
   ginMismatchFlagged  GateInwardEntry[]  @relation("GINMismatchFlaggedBy")
   ginDamageFlagged    GateInwardEntry[]  @relation("GINDamageFlaggedBy")
   ginReturnGateOut    GateInwardEntry[]  @relation("GINReturnGateOutBy")
+  ginPackageCountVerified  GateInwardEntry[]  @relation("GINPackageCountVerifiedBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -874,6 +876,21 @@ model GateInwardEntry {
   returnGateOutBy       User?      @relation("GINReturnGateOutBy", fields: [returnGateOutById], references: [id])
   returnGateOutAt       DateTime?
   returnRemarks         String?
+
+  // GATE-010: packageCountExpected is a snapshot of the declared
+  // packageCount at the moment a mismatch was first detected - it is
+  // never derived by re-reading packageCount later, and packageCount
+  // itself is never edited by any part of this flow. The vendor
+  // challan figure stays exactly what it was; only the comparison
+  // result is recorded.
+  packageCountExpected    Int?
+  packageCountActual      Int?
+  packageCountDifference  Int?
+  packageCountVerifiedById String?
+  packageCountVerifiedBy   User?      @relation("GINPackageCountVerifiedBy", fields: [packageCountVerifiedById], references: [id])
+  packageCountVerifiedAt   DateTime?
+  packageCountEscalated    Boolean    @default(false)
+  packageCountEscalatedAt  DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String

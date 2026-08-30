@@ -160,6 +160,13 @@ export declare class GateDashboardController {
             returnGateOutById: string | null;
             returnGateOutAt: Date | null;
             returnRemarks: string | null;
+            packageCountExpected: number | null;
+            packageCountActual: number | null;
+            packageCountDifference: number | null;
+            packageCountVerifiedById: string | null;
+            packageCountVerifiedAt: Date | null;
+            packageCountEscalated: boolean;
+            packageCountEscalatedAt: Date | null;
         })[];
         pendingGOEList: ({
             plant: {

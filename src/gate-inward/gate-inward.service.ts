@@ -887,6 +887,167 @@ export class GateInwardService {
     return updated;
   }
 
+  // GATE-010: Package/Carton Count Mismatch. Gate's own physical
+  // count-and-compare action, same permission and PENDING/VERIFIED
+  // restriction as flagMismatch/flagDamage. Compares against the
+  // declared packageCount as it already stands on the entry - this
+  // action never writes to packageCount itself, so the vendor
+  // challan figure is never silently corrected to match what was
+  // physically counted; only the comparison result is recorded.
+  async verifyPackageCount(id: string, actualPackageCount: number, user: any) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
+    if (!flaggableStatuses.includes(entry.status)) {
+      throw new BadRequestException('Can only verify package count before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+    }
+    const declared = entry.packageCount ?? 0;
+    const difference = actualPackageCount - declared;
+
+    if (difference === 0) {
+      // Match - continue Gate-In. No status change, just a record
+      // that the physical count was actually performed.
+      const updated = await this.prisma.gateInwardEntry.update({
+        where: { id },
+        data: { packageCountVerifiedById: user.id, packageCountVerifiedAt: new Date(), updatedBy: user.id },
+        include: this.includes(),
+      });
+      await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: {}, newValues: { packageCountVerified: true, declared, actual: actualPackageCount }, changedBy: user.id });
+      return updated;
+    }
+
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.GATE_HOLD_PACKAGE_COUNT_MISMATCH,
+        packageCountExpected: declared, packageCountActual: actualPackageCount, packageCountDifference: difference,
+        packageCountVerifiedById: user.id, packageCountVerifiedAt: new Date(),
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', expected: declared, actual: actualPackageCount, difference }, changedBy: user.id });
+    await this.notifyOfPackageCountHold(updated, user);
+    return updated;
+  }
+
+  private async notifyOfPackageCountHold(entry: any, actorUser: any) {
+    const approverUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+      select: { id: true },
+    });
+    if (approverUsers.length === 0) return;
+    await this.notifications.createBulk(
+      approverUsers.map(u => ({
+        userId: u.id,
+        type: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH',
+        title: 'Gate Hold — Package Count Mismatch',
+        message: `${entry.ginNumber} — ${entry.supplierName} — declared ${entry.packageCountExpected} packages, ${entry.packageCountActual} counted at the gate (difference: ${entry.packageCountDifference > 0 ? '+' : ''}${entry.packageCountDifference}). Awaiting your decision.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'URGENT',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
+  }
+
+  private async assertOnPackageCountHold(id: string) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.status !== GateInwardStatus.GATE_HOLD_PACKAGE_COUNT_MISMATCH) {
+      throw new BadRequestException('This entry is not currently on a Package Count Mismatch hold');
+    }
+    return entry;
+  }
+
+  // Option 1: RECOUNT. Gate-level action (same permission as
+  // verifyPackageCount) - a recount is Gate re-doing their own
+  // physical count, not an approver decision. If the new count now
+  // matches the declared figure, the hold resolves itself back to
+  // PENDING; if it still doesn't match, the recorded actual/
+  // difference is updated and the hold stays open for escalation.
+  async resolvePackageCountRecount(id: string, newActualCount: number, remarks: string, user: any) {
+    const entry = await this.assertOnPackageCountHold(id);
+    const declared = entry.packageCountExpected ?? 0;
+    const difference = newActualCount - declared;
+
+    if (difference === 0) {
+      const updated = await this.prisma.gateInwardEntry.update({
+        where: { id },
+        data: {
+          status: GateInwardStatus.PENDING,
+          packageCountActual: newActualCount, packageCountDifference: 0,
+          holdResolution: 'RECOUNT_MATCHED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+          holdResolutionRemarks: remarks, updatedBy: user.id,
+        },
+        include: this.includes(),
+      });
+      await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'RECOUNT_MATCHED', newActualCount, remarks }, changedBy: user.id });
+      return updated;
+    }
+
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: { packageCountActual: newActualCount, packageCountDifference: difference, updatedBy: user.id },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { packageCountActual: entry.packageCountActual }, newValues: { packageCountActual: newActualCount, packageCountDifference: difference, remarks }, changedBy: user.id });
+    return updated;
+  }
+
+  // Option 2: PURCHASE/STORE VERIFICATION. An escalation, not a
+  // terminal decision - marks that Purchase/Store have been
+  // specifically asked to verify (e.g. check delivery history,
+  // contact the vendor) and re-notifies them, but the hold stays
+  // open until one of the two actual decisions below is made.
+  async resolvePackageCountEscalate(id: string, remarks: string, user: any) {
+    const entry = await this.assertOnPackageCountHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: { packageCountEscalated: true, packageCountEscalatedAt: new Date(), updatedBy: user.id },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { packageCountEscalated: false }, newValues: { packageCountEscalated: true, remarks }, changedBy: user.id });
+    await this.notifyOfPackageCountHold(updated, user);
+    return updated;
+  }
+
+  // Option 3: APPROVED INWARD. Accepts the material despite the
+  // count mismatch, per whatever business reason is recorded (e.g.
+  // partial shipment expected, discrepancy accepted as vendor error
+  // to be resolved via debit note later). Returns to PENDING for the
+  // normal flow - packageCount on the entry is still never touched.
+  async resolvePackageCountApprovedInward(id: string, reason: string, user: any) {
+    const entry = await this.assertOnPackageCountHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING,
+        holdResolution: 'APPROVED_INWARD', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_INWARD', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // Option 4: REJECTION. Terminal REJECTED status - same guarantee as
+  // every other rejection path in this service.
+  async resolvePackageCountRejected(id: string, reason: string, user: any) {
+    const entry = await this.assertOnPackageCountHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.REJECTED, rejectionReason: reason,
+        holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+    return updated;
+  }
+
   async getStats(user: any) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);

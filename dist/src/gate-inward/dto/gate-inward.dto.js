@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -421,4 +421,55 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], RecordReturnGateOutDto.prototype, "remarks", void 0);
+class VerifyPackageCountDto {
+}
+exports.VerifyPackageCountDto = VerifyPackageCountDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 48 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], VerifyPackageCountDto.prototype, "actualPackageCount", void 0);
+class ResolvePackageCountRecountDto {
+}
+exports.ResolvePackageCountRecountDto = ResolvePackageCountRecountDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 50 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ResolvePackageCountRecountDto.prototype, "newActualCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Recounted with the driver present, first count missed 2 boxes stacked behind others' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolvePackageCountRecountDto.prototype, "remarks", void 0);
+class ResolvePackageCountEscalateDto {
+}
+exports.ResolvePackageCountEscalateDto = ResolvePackageCountEscalateDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Asked Store to cross-check against the last 3 deliveries from this vendor' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolvePackageCountEscalateDto.prototype, "remarks", void 0);
+class ResolvePackageCountApprovedInwardDto {
+}
+exports.ResolvePackageCountApprovedInwardDto = ResolvePackageCountApprovedInwardDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Vendor confirmed partial shipment, remaining packages to follow separately - accepted' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolvePackageCountApprovedInwardDto.prototype, "reason", void 0);
+class ResolvePackageCountRejectedDto {
+}
+exports.ResolvePackageCountRejectedDto = ResolvePackageCountRejectedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Discrepancy too large to accept, sent back for vendor to reconcile' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolvePackageCountRejectedDto.prototype, "reason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

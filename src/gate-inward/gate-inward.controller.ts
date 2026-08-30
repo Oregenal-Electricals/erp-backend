@@ -17,6 +17,8 @@ import {
   ReturnMaterialDto, ApprovedExceptionDto, CorrectPoReferenceDto,
   FlagMismatchDto, ResolveMismatchCorrectReferenceDto, ResolveMismatchApprovedExceptionDto, ResolveMismatchRejectedDto,
   FlagDamageDto, ResolveDamageRejectDto, ResolveDamageAcceptExceptionDto, RecordReturnGateOutDto,
+  VerifyPackageCountDto, ResolvePackageCountRecountDto, ResolvePackageCountEscalateDto,
+  ResolvePackageCountApprovedInwardDto, ResolvePackageCountRejectedDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -284,5 +286,61 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.recordReturnGateOut(id, dto.remarks, user);
+  }
+
+  // GATE-010: Package/Carton Count Mismatch.
+  @Patch(':id/verify-package-count')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-010: Gate compares physical package count against the declared figure' })
+  verifyPackageCount(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: VerifyPackageCountDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.verifyPackageCount(id, dto.actualPackageCount, user);
+  }
+
+  @Patch(':id/resolve-package-count/recount')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-010: Gate recounts - resolves automatically if it now matches' })
+  resolvePackageCountRecount(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolvePackageCountRecountDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolvePackageCountRecount(id, dto.newActualCount, dto.remarks, user);
+  }
+
+  @Patch(':id/resolve-package-count/escalate')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-010: escalate to Purchase/Store verification - hold stays open' })
+  resolvePackageCountEscalate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolvePackageCountEscalateDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolvePackageCountEscalate(id, dto.remarks, user);
+  }
+
+  @Patch(':id/resolve-package-count/approved-inward')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-010: approve inward despite the count mismatch' })
+  resolvePackageCountApprovedInward(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolvePackageCountApprovedInwardDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolvePackageCountApprovedInward(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-package-count/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-010: reject the material over the count mismatch' })
+  resolvePackageCountRejected(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolvePackageCountRejectedDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolvePackageCountRejected(id, dto.reason, user);
   }
 }

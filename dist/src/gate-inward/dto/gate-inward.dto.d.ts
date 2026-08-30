@@ -97,3 +97,19 @@ export declare class ResolveDamageAcceptExceptionDto {
 export declare class RecordReturnGateOutDto {
     remarks: string;
 }
+export declare class VerifyPackageCountDto {
+    actualPackageCount: number;
+}
+export declare class ResolvePackageCountRecountDto {
+    newActualCount: number;
+    remarks: string;
+}
+export declare class ResolvePackageCountEscalateDto {
+    remarks: string;
+}
+export declare class ResolvePackageCountApprovedInwardDto {
+    reason: string;
+}
+export declare class ResolvePackageCountRejectedDto {
+    reason: string;
+}

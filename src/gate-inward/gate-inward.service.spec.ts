@@ -808,4 +808,133 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-010: Package/Carton Count Mismatch', () => {
+    it('verifyPackageCount() continues normally (no status change) when the physical count matches the declared figure', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', packageCount: 50 });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', packageCountVerifiedById: user.id });
+
+      const result = await service.verifyPackageCount('gin-1', 50, user);
+
+      expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ packageCountVerifiedById: user.id }) }),
+      );
+      // Crucially: no status field in the update payload, and no notification - a match just continues.
+      const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+      expect(updateCall.data.status).toBeUndefined();
+      expect(notifications.createBulk).not.toHaveBeenCalled();
+    });
+
+    it('verifyPackageCount() sets GATE_HOLD_PACKAGE_COUNT_MISMATCH and records expected/actual/difference on a mismatch, without ever writing to packageCount itself', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', packageCount: 50, ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel' });
+      prisma.gateInwardEntry.update.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+        status: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', packageCountExpected: 50, packageCountActual: 47, packageCountDifference: -3,
+      });
+
+      const result = await service.verifyPackageCount('gin-1', 47, user);
+
+      const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+      expect(updateCall.data.status).toBe('GATE_HOLD_PACKAGE_COUNT_MISMATCH');
+      expect(updateCall.data.packageCountExpected).toBe(50);
+      expect(updateCall.data.packageCountActual).toBe(47);
+      expect(updateCall.data.packageCountDifference).toBe(-3);
+      expect(updateCall.data.packageCount).toBeUndefined(); // never touched
+      expect(result.status).toBe('GATE_HOLD_PACKAGE_COUNT_MISMATCH');
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } }) }),
+      );
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', priority: 'URGENT' })]),
+        user.companyId, user.id,
+      );
+    });
+
+    it('verifyPackageCount() refuses once the vehicle has already been let in', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN', packageCount: 50 });
+      await expect(service.verifyPackageCount('gin-1', 47, user)).rejects.toThrow(BadRequestException);
+    });
+
+    describe('resolution — recount and escalation vs the two terminal decisions', () => {
+      const heldEntry = { id: 'gin-1', status: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', packageCountExpected: 50, packageCountActual: 47, packageCountDifference: -3 };
+
+      it('Option 1 RECOUNT auto-resolves to PENDING when the new count matches the declared figure', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', packageCountDifference: 0, holdResolution: 'RECOUNT_MATCHED' });
+
+        const result = await service.resolvePackageCountRecount('gin-1', 50, 'Recounted, missed 3 boxes stacked behind others', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', packageCountDifference: 0, holdResolution: 'RECOUNT_MATCHED' }) }),
+        );
+        expect(result.status).toBe('PENDING');
+      });
+
+      it('Option 1 RECOUNT stays on hold and updates the figures when the new count still does not match', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', packageCountActual: 48, packageCountDifference: -2 });
+
+        const result = await service.resolvePackageCountRecount('gin-1', 48, 'Recounted again, still short by 2', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.status).toBeUndefined(); // stays on hold, no status change
+        expect(updateCall.data.packageCountActual).toBe(48);
+        expect(updateCall.data.packageCountDifference).toBe(-2);
+      });
+
+      it('Option 2 ESCALATE marks packageCountEscalated true and re-notifies, but stays on hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_PACKAGE_COUNT_MISMATCH', packageCountEscalated: true });
+
+        const result = await service.resolvePackageCountEscalate('gin-1', 'Asked Store to cross-check against the last 3 deliveries', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.status).toBeUndefined();
+        expect(updateCall.data.packageCountEscalated).toBe(true);
+        expect(notifications.createBulk).toHaveBeenCalled();
+      });
+
+      it('Option 3 APPROVED INWARD returns to PENDING, packageCount still never touched', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_INWARD' });
+
+        const result = await service.resolvePackageCountApprovedInward('gin-1', 'Vendor confirmed partial shipment, accepted', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.status).toBe('PENDING');
+        expect(updateCall.data.packageCount).toBeUndefined();
+        expect(result.holdResolution).toBe('APPROVED_INWARD');
+      });
+
+      it('Option 4 REJECTION sends the entry to terminal REJECTED', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED' });
+
+        const result = await service.resolvePackageCountRejected('gin-1', 'Discrepancy too large, sent back for vendor to reconcile', user);
+
+        expect(result.status).toBe('REJECTED');
+      });
+
+      it('all four resolution methods reject an entry not on a package count mismatch hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolvePackageCountRecount('gin-1', 50, 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolvePackageCountEscalate('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolvePackageCountApprovedInward('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolvePackageCountRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    it('none of the GATE-010 methods ever write to the entry\'s own packageCount field - the vendor challan figure is never altered to force a match', () => {
+      const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+      // Extract just the GATE-010 section of the file and confirm it never assigns packageCount (only packageCountExpected/Actual/Difference).
+      const gate010Start = serviceSource.indexOf('GATE-010: Package/Carton Count Mismatch');
+      const gate010Section = serviceSource.slice(gate010Start, gate010Start + 6000);
+      expect(gate010Section).not.toMatch(/[^t]packageCount:/); // "packageCount:" alone (not packageCountExpected:/Actual:/etc) would be a direct write
+    });
+
+    it('rejected package-count-mismatch material can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });

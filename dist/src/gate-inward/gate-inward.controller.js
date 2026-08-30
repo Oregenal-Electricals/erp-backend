@@ -99,6 +99,21 @@ let GateInwardController = class GateInwardController {
     recordReturnGateOut(id, dto, user) {
         return this.service.recordReturnGateOut(id, dto.remarks, user);
     }
+    verifyPackageCount(id, dto, user) {
+        return this.service.verifyPackageCount(id, dto.actualPackageCount, user);
+    }
+    resolvePackageCountRecount(id, dto, user) {
+        return this.service.resolvePackageCountRecount(id, dto.newActualCount, dto.remarks, user);
+    }
+    resolvePackageCountEscalate(id, dto, user) {
+        return this.service.resolvePackageCountEscalate(id, dto.remarks, user);
+    }
+    resolvePackageCountApprovedInward(id, dto, user) {
+        return this.service.resolvePackageCountApprovedInward(id, dto.reason, user);
+    }
+    resolvePackageCountRejected(id, dto, user) {
+        return this.service.resolvePackageCountRejected(id, dto.reason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -364,6 +379,61 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.RecordReturnGateOutDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "recordReturnGateOut", null);
+__decorate([
+    (0, common_1.Patch)(':id/verify-package-count'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-010: Gate compares physical package count against the declared figure' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.VerifyPackageCountDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "verifyPackageCount", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-package-count/recount'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-010: Gate recounts - resolves automatically if it now matches' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolvePackageCountRecountDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolvePackageCountRecount", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-package-count/escalate'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-010: escalate to Purchase/Store verification - hold stays open' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolvePackageCountEscalateDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolvePackageCountEscalate", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-package-count/approved-inward'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-010: approve inward despite the count mismatch' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolvePackageCountApprovedInwardDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolvePackageCountApprovedInward", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-package-count/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-010: reject the material over the count mismatch' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolvePackageCountRejectedDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolvePackageCountRejected", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),
