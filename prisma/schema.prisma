@@ -107,6 +107,7 @@ enum GateInwardStatus {
   GATE_HOLD_DOCUMENT_MISSING // GATE-012: vehicle arrived without a physical challan and/or invoice document
   GATE_HOLD_CHALLAN_MISMATCH // GATE-013: the challan document is present, but its details (number/reference) do not match what was expected
   GATE_HOLD_EXCESS_MATERIAL // GATE-014: arrived quantity appears to exceed what was expected against the PO/challan
+  GATE_HOLD_MIXED_MATERIALS // GATE-015: vehicle contains materials beyond what was declared - an undeclared mix, not simply the wrong single item
 }
 
 enum GateOutwardStatus {

@@ -304,15 +304,15 @@ export class GateInwardService {
   // a wider approver set than the other gate holds, per this
   // requirement explicitly naming "purchase, admin, superadmin" as
   // the people who can decide on a mismatch.
-  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN' | 'QUANTITY_EXCESS', values: { expected: string; actual: string }, actorUser: any) {
+  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN' | 'QUANTITY_EXCESS' | 'MIXED_MATERIALS', values: { expected: string; actual: string }, actorUser: any) {
     const approverUsers = await this.prisma.user.findMany({
       where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
       select: { id: true },
     });
     if (approverUsers.length === 0) return;
-    const labelMap = { VENDOR: 'Vendor', MATERIAL: 'Material', VEHICLE_NUMBER: 'Vehicle Number', CHALLAN: 'Challan', QUANTITY_EXCESS: 'Excess Material' };
+    const labelMap = { VENDOR: 'Vendor', MATERIAL: 'Material', VEHICLE_NUMBER: 'Vehicle Number', CHALLAN: 'Challan', QUANTITY_EXCESS: 'Excess Material', MIXED_MATERIALS: 'Mixed Materials' };
     const label = labelMap[mismatchType];
-    const notifTypeMap = { VENDOR: 'GATE_HOLD_VENDOR_MISMATCH', MATERIAL: 'GATE_HOLD_MATERIAL_MISMATCH', VEHICLE_NUMBER: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', CHALLAN: 'GATE_HOLD_CHALLAN_MISMATCH', QUANTITY_EXCESS: 'GATE_HOLD_EXCESS_MATERIAL' };
+    const notifTypeMap = { VENDOR: 'GATE_HOLD_VENDOR_MISMATCH', MATERIAL: 'GATE_HOLD_MATERIAL_MISMATCH', VEHICLE_NUMBER: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', CHALLAN: 'GATE_HOLD_CHALLAN_MISMATCH', QUANTITY_EXCESS: 'GATE_HOLD_EXCESS_MATERIAL', MIXED_MATERIALS: 'GATE_HOLD_MIXED_MATERIALS' };
     await this.notifications.createBulk(
       approverUsers.map(u => ({
         userId: u.id,
@@ -654,7 +654,7 @@ export class GateInwardService {
   // gate-level permission as verify() (GATE_INWARD_VERIFY), not the
   // Purchase-only resolve permission - flagging is Gate's job,
   // deciding what happens next is Purchase/Admin's.
-  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN' | 'QUANTITY_EXCESS', expectedValue: string, actualValue: string, remarks: string, user: any) {
+  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN' | 'QUANTITY_EXCESS' | 'MIXED_MATERIALS', expectedValue: string, actualValue: string, remarks: string, user: any) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
     const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
@@ -672,6 +672,7 @@ export class GateInwardService {
       VEHICLE_NUMBER: GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH,
       CHALLAN: GateInwardStatus.GATE_HOLD_CHALLAN_MISMATCH,
       QUANTITY_EXCESS: GateInwardStatus.GATE_HOLD_EXCESS_MATERIAL,
+      MIXED_MATERIALS: GateInwardStatus.GATE_HOLD_MIXED_MATERIALS,
     };
     const holdStatus = holdStatusMap[mismatchType];
     const updated = await this.prisma.gateInwardEntry.update({
@@ -696,9 +697,9 @@ export class GateInwardService {
   private async assertOnMismatchHold(id: string) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
-    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH, GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH, GateInwardStatus.GATE_HOLD_CHALLAN_MISMATCH, GateInwardStatus.GATE_HOLD_EXCESS_MATERIAL];
+    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH, GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH, GateInwardStatus.GATE_HOLD_CHALLAN_MISMATCH, GateInwardStatus.GATE_HOLD_EXCESS_MATERIAL, GateInwardStatus.GATE_HOLD_MIXED_MATERIALS];
     if (!validHoldStatuses.includes(entry.status)) {
-      throw new BadRequestException('This entry is not currently on a Vendor/Material/Vehicle Number/Challan/Excess Material Mismatch hold');
+      throw new BadRequestException('This entry is not currently on a recognized Gate Mismatch hold');
     }
     return entry;
   }
@@ -720,6 +721,7 @@ export class GateInwardService {
     else if (entry.mismatchType === 'VEHICLE_NUMBER') correctionData.vehicleNumber = correctedValue;
     else if (entry.mismatchType === 'CHALLAN') correctionData.invoiceNumber = correctedValue;
     else if (entry.mismatchType === 'QUANTITY_EXCESS') correctionData.quantity = parseFloat(correctedValue);
+    else if (entry.mismatchType === 'MIXED_MATERIALS') correctionData.materialDescription = correctedValue;
     const updated = await this.prisma.gateInwardEntry.update({
       where: { id },
       data: correctionData,

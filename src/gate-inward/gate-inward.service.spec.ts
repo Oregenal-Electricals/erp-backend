@@ -1431,4 +1431,121 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-015: Mixed Materials in One Vehicle — independent micro-workflow reusing the mismatch mechanism', () => {
+    describe('positive cases', () => {
+      it('flagMismatch() with MIXED_MATERIALS type puts a PENDING entry on GATE_HOLD_MIXED_MATERIALS', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+          status: 'GATE_HOLD_MIXED_MATERIALS', mismatchType: 'MIXED_MATERIALS',
+        });
+
+        const result = await service.flagMismatch(
+          'gin-1', 'MIXED_MATERIALS', 'Steel Rods only (per challan)', 'Steel Rods + undeclared Aluminum Sheets found on physical inspection',
+          'Opened the vehicle for the routine check and found extra material not on the challan', user,
+        );
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'GATE_HOLD_MIXED_MATERIALS', mismatchType: 'MIXED_MATERIALS',
+            mismatchExpectedValue: 'Steel Rods only (per challan)',
+            mismatchActualValue: 'Steel Rods + undeclared Aluminum Sheets found on physical inspection',
+          }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_MIXED_MATERIALS');
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_MIXED_MATERIALS', title: expect.stringContaining('Mixed Materials') })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveMismatchCorrectReference() for a MIXED_MATERIALS hold updates materialDescription to the reconciled full list', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({
+          id: 'gin-1', status: 'GATE_HOLD_MIXED_MATERIALS', mismatchType: 'MIXED_MATERIALS',
+          materialDescription: 'Steel Rods', supplierName: 'ABC Steel', vehicleNumber: 'MH12AB1234', invoiceNumber: 'CH-001',
+        });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', materialDescription: 'Steel Rods, Aluminum Sheets', holdResolution: 'CORRECT_REFERENCE' });
+
+        const result = await service.resolveMismatchCorrectReference('gin-1', 'Steel Rods, Aluminum Sheets', 'Vendor confirmed both were meant for this delivery, challan was incomplete', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.materialDescription).toBe('Steel Rods, Aluminum Sheets');
+        expect(updateCall.data.supplierName).toBeUndefined();
+        expect(updateCall.data.vehicleNumber).toBeUndefined();
+        expect(updateCall.data.invoiceNumber).toBeUndefined();
+        expect(result.status).toBe('PENDING');
+      });
+
+      it('resolveMismatchApprovedException() and resolveMismatchRejected() both work for a MIXED_MATERIALS hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MIXED_MATERIALS', mismatchType: 'MIXED_MATERIALS' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' });
+        const exceptionResult = await service.resolveMismatchApprovedException('gin-1', 'Purchase confirmed a consolidated delivery was expected, approved to receive both items', user);
+        expect(exceptionResult.holdResolution).toBe('APPROVED_EXCEPTION');
+
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MIXED_MATERIALS', mismatchType: 'MIXED_MATERIALS' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE' });
+        const rejectResult = await service.resolveMismatchRejected('gin-1', 'Undeclared material cannot be verified against any PO, rejected', user);
+        expect(rejectResult.status).toBe('REJECTED');
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagMismatch() with MIXED_MATERIALS refuses once the vehicle has already been let in', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+        await expect(service.flagMismatch('gin-1', 'MIXED_MATERIALS', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('resolveMismatchRejected() rejects an entry whose mismatchType is MIXED_MATERIALS but current status is not a mismatch hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED', mismatchType: 'MIXED_MATERIALS' });
+        await expect(service.resolveMismatchRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag mixed materials a second time on an entry already on that same hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MIXED_MATERIALS' });
+        await expect(service.flagMismatch('gin-1', 'MIXED_MATERIALS', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same mixed materials hold twice', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN', mismatchType: 'MIXED_MATERIALS' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', 'value', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      it('reuses the already-verified flag-mismatch/resolve-mismatch permission boundaries - no new unguarded route was added for MIXED_MATERIALS', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        expect(controllerSource).not.toContain('flag-mixed-materials');
+        expect(controllerSource).not.toContain('resolve-mixed-materials');
+        const flagRouteIdx = controllerSource.indexOf("@Patch(':id/flag-mismatch')");
+        expect(controllerSource.slice(flagRouteIdx, flagRouteIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+        const resolveRouteIdx = controllerSource.indexOf("@Patch(':id/resolve-mismatch/correct-reference')");
+        expect(controllerSource.slice(resolveRouteIdx, resolveRouteIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)');
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagMismatch() with MIXED_MATERIALS throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagMismatch('does-not-exist', 'MIXED_MATERIALS', 'a', 'b', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data - the correction only ever touches this Gate Inward entry, never grnHeader/stockBalance/purchaseOrder', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MIXED_MATERIALS', mismatchType: 'MIXED_MATERIALS', materialDescription: 'Steel Rods', poId: 'po-1' });
+      prisma.purchaseOrder.update = jest.fn();
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+      await service.resolveMismatchCorrectReference('gin-1', 'Steel Rods, Aluminum Sheets', 'reason', user);
+      expect(prisma.purchaseOrder.update).not.toHaveBeenCalled();
+    });
+
+    it('rejected mixed-materials entries can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });
