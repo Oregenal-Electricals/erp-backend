@@ -833,6 +833,89 @@ let GateInwardService = class GateInwardService {
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
         return updated;
     }
+    async flagMultiplePOs(id, poNumbersFound, reason, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const flaggableStatuses = [client_1.GateInwardStatus.PENDING, client_1.GateInwardStatus.VERIFIED];
+        if (!flaggableStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('Can only flag multiple POs before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.GATE_HOLD_MULTIPLE_POS,
+                mismatchExpectedValue: entry.poNumber || 'Single PO', mismatchActualValue: poNumbersFound,
+                mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+                remarks: entry.remarks ? `${entry.remarks} | Multiple POs flagged: ${reason}` : `Multiple POs flagged: ${reason}`,
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_MULTIPLE_POS', poNumbersFound, reason }, changedBy: user.id });
+        await this.notifyOfMultiplePosHold(updated, poNumbersFound, user);
+        return updated;
+    }
+    async notifyOfMultiplePosHold(entry, poNumbersFound, actorUser) {
+        const approverUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (approverUsers.length === 0)
+            return;
+        await this.notifications.createBulk(approverUsers.map(u => ({
+            userId: u.id,
+            type: 'GATE_HOLD_MULTIPLE_POS',
+            title: 'Gate Hold — Multiple POs in One Vehicle',
+            message: `${entry.ginNumber} — ${entry.supplierName} — challan references multiple POs (${poNumbersFound}). This entry can only link one; additional entries are needed for the rest.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async assertOnMultiplePosHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.GATE_HOLD_MULTIPLE_POS) {
+            throw new common_1.BadRequestException('This entry is not currently on a Multiple POs hold');
+        }
+        return entry;
+    }
+    async resolveMultiplePosSplit(id, confirmedPoId, otherPoNumbers, reason, user) {
+        const entry = await this.assertOnMultiplePosHold(id);
+        const po = await this.prisma.purchaseOrder.findFirst({ where: { id: confirmedPoId, companyId: user.companyId } });
+        if (!po)
+            throw new common_1.NotFoundException('Purchase Order not found');
+        if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+            throw new common_1.BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING, poId: po.id, poNumber: po.poNumber,
+                relatedPoNumbers: otherPoNumbers,
+                holdResolution: 'SPLIT_CONFIRMED_PRIMARY', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, relatedPoNumbers: otherPoNumbers, holdResolution: 'SPLIT_CONFIRMED_PRIMARY' }, changedBy: user.id });
+        return updated;
+    }
+    async resolveMultiplePosRejected(id, reason, user) {
+        const entry = await this.assertOnMultiplePosHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+        return updated;
+    }
     async verifyPackageCount(id, actualPackageCount, user) {
         var _a;
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });

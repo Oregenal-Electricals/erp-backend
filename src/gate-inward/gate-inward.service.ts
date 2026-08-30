@@ -1008,6 +1008,110 @@ export class GateInwardService {
     return updated;
   }
 
+  // GATE-016: Multiple POs in One Vehicle. A single Gate Inward entry
+  // can only ever link one PO - it always has, and this workflow
+  // deliberately does not change that (avoiding a much larger data
+  // model change well outside a single micro-workflow's scope). When
+  // Gate observes the challan referencing more than one PO, the
+  // honest resolution is: confirm which PO THIS entry belongs to, and
+  // record the others so Purchase/Store can create separate entries
+  // for them against the same vehicle (findOrCreateActiveLog already
+  // reuses the same VehicleLog for repeat arrivals of the same
+  // vehicle number, so those follow-on entries link up correctly).
+  async flagMultiplePOs(id: string, poNumbersFound: string, reason: string, user: any) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
+    if (!flaggableStatuses.includes(entry.status)) {
+      throw new BadRequestException('Can only flag multiple POs before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+    }
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.GATE_HOLD_MULTIPLE_POS,
+        mismatchExpectedValue: entry.poNumber || 'Single PO', mismatchActualValue: poNumbersFound,
+        mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+        remarks: entry.remarks ? `${entry.remarks} | Multiple POs flagged: ${reason}` : `Multiple POs flagged: ${reason}`,
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_MULTIPLE_POS', poNumbersFound, reason }, changedBy: user.id });
+    await this.notifyOfMultiplePosHold(updated, poNumbersFound, user);
+    return updated;
+  }
+
+  private async notifyOfMultiplePosHold(entry: any, poNumbersFound: string, actorUser: any) {
+    const approverUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+      select: { id: true },
+    });
+    if (approverUsers.length === 0) return;
+    await this.notifications.createBulk(
+      approverUsers.map(u => ({
+        userId: u.id,
+        type: 'GATE_HOLD_MULTIPLE_POS',
+        title: 'Gate Hold — Multiple POs in One Vehicle',
+        message: `${entry.ginNumber} — ${entry.supplierName} — challan references multiple POs (${poNumbersFound}). This entry can only link one; additional entries are needed for the rest.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'URGENT',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
+  }
+
+  private async assertOnMultiplePosHold(id: string) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.status !== GateInwardStatus.GATE_HOLD_MULTIPLE_POS) {
+      throw new BadRequestException('This entry is not currently on a Multiple POs hold');
+    }
+    return entry;
+  }
+
+  // Decision 1: SPLIT - confirm the PO this specific entry belongs
+  // to, record the remaining PO numbers for follow-up. Validates the
+  // confirmed PO exactly as GATE-002/003/004/005 do - it must be a
+  // real, currently receivable PO, never fabricated.
+  async resolveMultiplePosSplit(id: string, confirmedPoId: string, otherPoNumbers: string, reason: string, user: any) {
+    const entry = await this.assertOnMultiplePosHold(id);
+    const po = await this.prisma.purchaseOrder.findFirst({ where: { id: confirmedPoId, companyId: user.companyId } });
+    if (!po) throw new NotFoundException('Purchase Order not found');
+    if (!['SENT', 'PARTIALLY_RECEIVED'].includes(po.status)) {
+      throw new BadRequestException(`This PO is ${po.status} - only SENT or PARTIALLY_RECEIVED POs can receive a gate inward entry.`);
+    }
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING, poId: po.id, poNumber: po.poNumber,
+        relatedPoNumbers: otherPoNumbers,
+        holdResolution: 'SPLIT_CONFIRMED_PRIMARY', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status, poId: entry.poId }, newValues: { status: 'PENDING', poId: po.id, poNumber: po.poNumber, relatedPoNumbers: otherPoNumbers, holdResolution: 'SPLIT_CONFIRMED_PRIMARY' }, changedBy: user.id });
+    return updated;
+  }
+
+  // Decision 2: REJECT - cannot reconcile which POs the material
+  // actually belongs to, terminal REJECTED as with every other
+  // rejection path.
+  async resolveMultiplePosRejected(id: string, reason: string, user: any) {
+    const entry = await this.assertOnMultiplePosHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.REJECTED, rejectionReason: reason,
+        holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+    return updated;
+  }
+
   // GATE-010: Package/Carton Count Mismatch. Gate's own physical
   // count-and-compare action, same permission and PENDING/VERIFIED
   // restriction as flagMismatch/flagDamage. Compares against the

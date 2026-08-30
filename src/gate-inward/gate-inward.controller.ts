@@ -20,6 +20,7 @@ import {
   VerifyPackageCountDto, ResolvePackageCountRecountDto, ResolvePackageCountEscalateDto,
   ResolvePackageCountApprovedInwardDto, ResolvePackageCountRejectedDto,
   FlagDocumentMissingDto, ResolveDocumentMissingExceptionDto, ResolveDocumentMissingRejectDto,
+  FlagMultiplePosDto, ResolveMultiplePosSplitDto, ResolveMultiplePosRejectedDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -377,5 +378,39 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.resolveDocumentMissingReject(id, dto.reason, user);
+  }
+
+  // GATE-016: Multiple POs in One Vehicle.
+  @Patch(':id/flag-multiple-pos')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-016: Gate flags that the challan references more than one PO' })
+  flagMultiplePOs(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: FlagMultiplePosDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.flagMultiplePOs(id, dto.poNumbersFound, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-multiple-pos/split')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-016: confirm which PO this entry belongs to, record the others for follow-up' })
+  resolveMultiplePosSplit(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveMultiplePosSplitDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveMultiplePosSplit(id, dto.confirmedPoId, dto.otherPoNumbers, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-multiple-pos/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-016: reject the material over unreconcilable multiple POs' })
+  resolveMultiplePosRejected(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveMultiplePosRejectedDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveMultiplePosRejected(id, dto.reason, user);
   }
 }

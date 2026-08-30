@@ -123,6 +123,15 @@ let GateInwardController = class GateInwardController {
     resolveDocumentMissingReject(id, dto, user) {
         return this.service.resolveDocumentMissingReject(id, dto.reason, user);
     }
+    flagMultiplePOs(id, dto, user) {
+        return this.service.flagMultiplePOs(id, dto.poNumbersFound, dto.reason, user);
+    }
+    resolveMultiplePosSplit(id, dto, user) {
+        return this.service.resolveMultiplePosSplit(id, dto.confirmedPoId, dto.otherPoNumbers, dto.reason, user);
+    }
+    resolveMultiplePosRejected(id, dto, user) {
+        return this.service.resolveMultiplePosRejected(id, dto.reason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -476,6 +485,39 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveDocumentMissingRejectDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "resolveDocumentMissingReject", null);
+__decorate([
+    (0, common_1.Patch)(':id/flag-multiple-pos'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-016: Gate flags that the challan references more than one PO' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.FlagMultiplePosDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "flagMultiplePOs", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-multiple-pos/split'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-016: confirm which PO this entry belongs to, record the others for follow-up' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMultiplePosSplitDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveMultiplePosSplit", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-multiple-pos/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-016: reject the material over unreconcilable multiple POs' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMultiplePosRejectedDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveMultiplePosRejected", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),

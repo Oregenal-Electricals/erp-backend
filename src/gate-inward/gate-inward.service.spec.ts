@@ -1548,4 +1548,143 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-016: Multiple POs in One Vehicle', () => {
+    describe('positive cases', () => {
+      it('flagMultiplePOs() puts a PENDING entry on GATE_HOLD_MULTIPLE_POS, recording the found PO numbers', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', poNumber: 'PO-25-26-0042', remarks: null });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', status: 'GATE_HOLD_MULTIPLE_POS',
+        });
+
+        const result = await service.flagMultiplePOs('gin-1', 'PO-25-26-0042, PO-25-26-0043', 'Challan lists two PO numbers, one vehicle for both orders', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'GATE_HOLD_MULTIPLE_POS',
+            mismatchExpectedValue: 'PO-25-26-0042', mismatchActualValue: 'PO-25-26-0042, PO-25-26-0043',
+          }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_MULTIPLE_POS');
+        expect(prisma.user.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({ where: expect.objectContaining({ role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } }) }),
+        );
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_MULTIPLE_POS', priority: 'URGENT' })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveMultiplePosSplit() confirms exactly one PO on this entry and records the rest as relatedPoNumbers', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+        prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-25-26-0042', status: 'SENT' });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', status: 'PENDING', poId: 'po-1', poNumber: 'PO-25-26-0042', relatedPoNumbers: 'PO-25-26-0043',
+        });
+
+        const result = await service.resolveMultiplePosSplit('gin-1', 'po-1', 'PO-25-26-0043', 'Confirmed PO-0042 covers this material, PO-0043 needs a separate entry', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'PENDING', poId: 'po-1', poNumber: 'PO-25-26-0042', relatedPoNumbers: 'PO-25-26-0043',
+          }) }),
+        );
+        expect(result.status).toBe('PENDING');
+        expect(result.relatedPoNumbers).toBe('PO-25-26-0043');
+      });
+
+      it('resolveMultiplePosRejected() sends the entry to terminal REJECTED', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED' });
+        const result = await service.resolveMultiplePosRejected('gin-1', 'Could not reconcile which PO the material belongs to', user);
+        expect(result.status).toBe('REJECTED');
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagMultiplePOs() refuses once the vehicle has already been let in', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+        await expect(service.flagMultiplePOs('gin-1', 'PO-1, PO-2', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('resolveMultiplePosSplit() rejects a confirmed PO that is itself invalid (not SENT/PARTIALLY_RECEIVED)', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+        prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-25-26-0042', status: 'CANCELLED' });
+        await expect(service.resolveMultiplePosSplit('gin-1', 'po-1', 'PO-25-26-0043', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('resolveMultiplePosSplit() rejects a confirmed PO id that does not exist', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+        prisma.purchaseOrder.findFirst.mockResolvedValue(null);
+        await expect(service.resolveMultiplePosSplit('gin-1', 'does-not-exist', 'PO-25-26-0043', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag multiple POs a second time on an entry already on that hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+        await expect(service.flagMultiplePOs('gin-1', 'PO-1, PO-2', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same multiple-POs hold twice', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveMultiplePosSplit('gin-1', 'po-1', 'PO-25-26-0043', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMultiplePosRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      it('flag-multiple-pos route requires GATE_INWARD_VERIFY (Gate-level)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Patch(':id/flag-multiple-pos')");
+        expect(routeIdx).toBeGreaterThan(-1);
+        expect(controllerSource.slice(routeIdx, routeIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+      });
+
+      it('resolve-multiple-pos/* routes require GATE_INWARD_RESOLVE_HOLD (Purchase/Admin-level)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        for (const route of ['split', 'reject']) {
+          const routeIdx = controllerSource.indexOf(`@Patch(':id/resolve-multiple-pos/${route}')`);
+          expect(routeIdx).toBeGreaterThan(-1);
+          expect(controllerSource.slice(routeIdx, routeIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)');
+        }
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagMultiplePOs() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagMultiplePOs('does-not-exist', 'PO-1, PO-2', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+
+      it('resolveMultiplePosRejected() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.resolveMultiplePosRejected('does-not-exist', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('the resolved entry always links exactly one PO - relatedPoNumbers is a text note, never a second poId, matching the never-more-than-one-PO-per-entry guarantee this workflow deliberately preserves', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+      prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-25-26-0042', status: 'SENT' });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', poId: 'po-1' });
+      await service.resolveMultiplePosSplit('gin-1', 'po-1', 'PO-25-26-0043', 'reason', user);
+      const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+      expect(typeof updateCall.data.poId).toBe('string');
+      expect(updateCall.data.poIds).toBeUndefined();
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data - only ever links an existing, real PurchaseOrder id, never creates or edits one', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_MULTIPLE_POS' });
+      prisma.purchaseOrder.findFirst.mockResolvedValue({ id: 'po-1', poNumber: 'PO-25-26-0042', status: 'SENT' });
+      prisma.purchaseOrder.update = jest.fn();
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+      await service.resolveMultiplePosSplit('gin-1', 'po-1', 'PO-25-26-0043', 'reason', user);
+      expect(prisma.purchaseOrder.update).not.toHaveBeenCalled();
+    });
+
+    it('rejected multiple-POs entries can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });

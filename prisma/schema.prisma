@@ -108,6 +108,7 @@ enum GateInwardStatus {
   GATE_HOLD_CHALLAN_MISMATCH // GATE-013: the challan document is present, but its details (number/reference) do not match what was expected
   GATE_HOLD_EXCESS_MATERIAL // GATE-014: arrived quantity appears to exceed what was expected against the PO/challan
   GATE_HOLD_MIXED_MATERIALS // GATE-015: vehicle contains materials beyond what was declared - an undeclared mix, not simply the wrong single item
+  GATE_HOLD_MULTIPLE_POS // GATE-016: the vehicle/challan references more than one PO - this entry can only ever link one, additional entries are needed for the rest
 }
 
 enum GateOutwardStatus {
@@ -898,6 +899,13 @@ model GateInwardEntry {
   packageCountEscalatedAt  DateTime?
 
   documentMissingType String?
+
+  // GATE-016: comma-separated PO numbers found beyond the one this
+  // entry is linked to - Purchase/Store use this list to create the
+  // additional Gate Inward entries. This entry itself only ever
+  // carries a single poId, matching every other GRN/inventory
+  // guarantee in this service.
+  relatedPoNumbers String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String

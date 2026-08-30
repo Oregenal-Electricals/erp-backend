@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResolveDocumentMissingRejectDto = exports.ResolveDocumentMissingExceptionDto = exports.FlagDocumentMissingDto = exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.ResolveMultiplePosRejectedDto = exports.ResolveMultiplePosSplitDto = exports.FlagMultiplePosDto = exports.ResolveDocumentMissingRejectDto = exports.ResolveDocumentMissingExceptionDto = exports.FlagDocumentMissingDto = exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -504,4 +504,48 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], ResolveDocumentMissingRejectDto.prototype, "reason", void 0);
+class FlagMultiplePosDto {
+}
+exports.FlagMultiplePosDto = FlagMultiplePosDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'PO-25-26-0042, PO-25-26-0043' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], FlagMultiplePosDto.prototype, "poNumbersFound", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Challan lists two PO numbers, driver confirms one vehicle for both orders' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], FlagMultiplePosDto.prototype, "reason", void 0);
+class ResolveMultiplePosSplitDto {
+}
+exports.ResolveMultiplePosSplitDto = ResolveMultiplePosSplitDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-the-po-this-entry-belongs-to' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveMultiplePosSplitDto.prototype, "confirmedPoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'PO-25-26-0043' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], ResolveMultiplePosSplitDto.prototype, "otherPoNumbers", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Confirmed PO-0042 covers this material, PO-0043 needs a separate gate entry' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveMultiplePosSplitDto.prototype, "reason", void 0);
+class ResolveMultiplePosRejectedDto {
+}
+exports.ResolveMultiplePosRejectedDto = ResolveMultiplePosRejectedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Could not reconcile which PO the material actually belongs to, rejected' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveMultiplePosRejectedDto.prototype, "reason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

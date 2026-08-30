@@ -353,3 +353,35 @@ export class ResolveDocumentMissingRejectDto {
   @MinLength(5)
   reason: string;
 }
+
+export class FlagMultiplePosDto {
+  @ApiProperty({ example: 'PO-25-26-0042, PO-25-26-0043' })
+  @IsString()
+  @MinLength(2)
+  poNumbersFound: string;
+  @ApiProperty({ example: 'Challan lists two PO numbers, driver confirms one vehicle for both orders' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveMultiplePosSplitDto {
+  @ApiProperty({ example: 'uuid-of-the-po-this-entry-belongs-to' })
+  @IsString()
+  confirmedPoId: string;
+  @ApiProperty({ example: 'PO-25-26-0043' })
+  @IsString()
+  @MinLength(2)
+  otherPoNumbers: string;
+  @ApiProperty({ example: 'Confirmed PO-0042 covers this material, PO-0043 needs a separate gate entry' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveMultiplePosRejectedDto {
+  @ApiProperty({ example: 'Could not reconcile which PO the material actually belongs to, rejected' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}

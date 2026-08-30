@@ -123,3 +123,15 @@ export declare class ResolveDocumentMissingExceptionDto {
 export declare class ResolveDocumentMissingRejectDto {
     reason: string;
 }
+export declare class FlagMultiplePosDto {
+    poNumbersFound: string;
+    reason: string;
+}
+export declare class ResolveMultiplePosSplitDto {
+    confirmedPoId: string;
+    otherPoNumbers: string;
+    reason: string;
+}
+export declare class ResolveMultiplePosRejectedDto {
+    reason: string;
+}
