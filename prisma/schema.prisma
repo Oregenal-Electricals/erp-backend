@@ -103,6 +103,7 @@ enum GateInwardStatus {
   GATE_HOLD_MATERIAL_DAMAGE   // GATE-008: visible external damage to the material itself
   GATE_HOLD_PACKAGING_DAMAGE  // GATE-009: visible external damage to packaging (material itself not inspected)
   GATE_HOLD_PACKAGE_COUNT_MISMATCH // GATE-010: declared package count does not match the physical count at the gate
+  GATE_HOLD_VEHICLE_NUMBER_MISMATCH // GATE-011: declared/challan vehicle number does not match the vehicle physically at the gate
 }
 
 enum GateOutwardStatus {

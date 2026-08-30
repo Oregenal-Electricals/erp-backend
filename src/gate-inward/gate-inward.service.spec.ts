@@ -937,4 +937,142 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-011: Vehicle Number Mismatch — independent micro-workflow reusing the GATE-006/007 mismatch mechanism', () => {
+    describe('positive cases', () => {
+      it('flagMismatch() with VEHICLE_NUMBER type puts a PENDING entry on GATE_HOLD_VEHICLE_NUMBER_MISMATCH', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+          status: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', mismatchType: 'VEHICLE_NUMBER',
+        });
+
+        const result = await service.flagMismatch('gin-1', 'VEHICLE_NUMBER', 'MH12AB1234', 'MH12AB5678', 'Different truck arrived than what the challan states', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', mismatchType: 'VEHICLE_NUMBER',
+            mismatchExpectedValue: 'MH12AB1234', mismatchActualValue: 'MH12AB5678',
+          }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_VEHICLE_NUMBER_MISMATCH');
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', title: expect.stringContaining('Vehicle Number'), priority: 'URGENT' })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveMismatchCorrectReference() for a VEHICLE_NUMBER hold updates vehicleNumber, not supplierName or materialDescription', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({
+          id: 'gin-1', status: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', mismatchType: 'VEHICLE_NUMBER',
+          vehicleNumber: 'MH12AB5678', supplierName: 'ABC Steel', materialDescription: 'Steel Rods',
+        });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', vehicleNumber: 'MH12AB1234', holdResolution: 'CORRECT_REFERENCE' });
+
+        const result = await service.resolveMismatchCorrectReference('gin-1', 'MH12AB1234', 'Security re-checked the plate, corrected the typo', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.vehicleNumber).toBe('MH12AB1234');
+        expect(updateCall.data.supplierName).toBeUndefined();
+        expect(updateCall.data.materialDescription).toBeUndefined();
+        expect(result.status).toBe('PENDING');
+      });
+
+      it('resolveMismatchApprovedException() works for a VEHICLE_NUMBER hold via the same shared resolution path', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', mismatchType: 'VEHICLE_NUMBER' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' });
+        const result = await service.resolveMismatchApprovedException('gin-1', 'Transporter confirmed last-minute vehicle swap, approved', user);
+        expect(result.holdResolution).toBe('APPROVED_EXCEPTION');
+      });
+
+      it('resolveMismatchRejected() works for a VEHICLE_NUMBER hold via the same shared resolution path', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', mismatchType: 'VEHICLE_NUMBER' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE' });
+        const result = await service.resolveMismatchRejected('gin-1', 'Unverified vehicle, could not confirm legitimacy, rejected', user);
+        expect(result.status).toBe('REJECTED');
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagMismatch() with VEHICLE_NUMBER refuses once the vehicle has already been let in (GATE_IN)', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+        await expect(service.flagMismatch('gin-1', 'VEHICLE_NUMBER', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+        expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+      });
+
+      it('resolveMismatchCorrectReference() rejects an entry whose mismatchType is VEHICLE_NUMBER but current status is not a mismatch hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'COMPLETED', mismatchType: 'VEHICLE_NUMBER' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', 'MH12AB1234', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag a vehicle number mismatch a second time on an entry already on that same hold', async () => {
+        // First flag succeeds conceptually; simulate the entry now
+        // sitting on the hold status a second flagMismatch call would see.
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH' });
+        await expect(service.flagMismatch('gin-1', 'VEHICLE_NUMBER', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same vehicle number mismatch hold twice - once resolved to PENDING, a second resolution call is rejected', async () => {
+        // Entry has already been resolved (status is PENDING, not the hold status).
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', mismatchType: 'VEHICLE_NUMBER' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', 'MH12AB1234', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      // Role authorization itself is enforced by PermissionsGuard at
+      // the HTTP layer (not re-implemented inside the service), so
+      // this verifies structurally that the correct permission
+      // decorators are actually present on the routes GATE-011 reuses
+      // - Gate-level flagging vs Purchase/Admin-level resolution stay
+      // on their existing, already-tested permissions rather than
+      // silently gaining a new unguarded route.
+      it('flag-mismatch route requires GATE_INWARD_VERIFY (Gate-level, not open to just any authenticated user)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Patch(':id/flag-mismatch')");
+        const nextLines = controllerSource.slice(routeIdx, routeIdx + 200);
+        expect(nextLines).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+      });
+
+      it('resolve-mismatch/* routes require GATE_INWARD_RESOLVE_HOLD (Purchase/Admin-level, not callable by Gate/Security)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        for (const route of ['correct-reference', 'approved-exception', 'reject']) {
+          const routeIdx = controllerSource.indexOf(`@Patch(':id/resolve-mismatch/${route}')`);
+          expect(routeIdx).toBeGreaterThan(-1);
+          const nextLines = controllerSource.slice(routeIdx, routeIdx + 200);
+          expect(nextLines).toContain('@RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)');
+        }
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagMismatch() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagMismatch('does-not-exist', 'VEHICLE_NUMBER', 'a', 'b', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+
+      it('resolveMismatchCorrectReference() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.resolveMismatchCorrectReference('does-not-exist', 'MH12AB1234', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data as part of this workflow - proven, not just claimed', () => {
+      const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+      expect(serviceSource).not.toContain('grnHeader.create');
+      expect(serviceSource).not.toContain('grnHeader.update');
+      expect(serviceSource).not.toContain('stockBalance.update');
+      expect(serviceSource).not.toContain('iqcInspection.update');
+      expect(serviceSource).not.toContain('purchaseOrder.update');
+    });
+
+    it('rejected vehicle-number-mismatch material can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });

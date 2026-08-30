@@ -1733,7 +1733,7 @@ export declare class GateInwardService {
         packageCountEscalated: boolean;
         packageCountEscalatedAt: Date | null;
     }>;
-    flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL', expectedValue: string, actualValue: string, remarks: string, user: any): Promise<{
+    flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER', expectedValue: string, actualValue: string, remarks: string, user: any): Promise<{
         items: {
             id: string;
             companyId: string;

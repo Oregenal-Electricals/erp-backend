@@ -304,17 +304,19 @@ export class GateInwardService {
   // a wider approver set than the other gate holds, per this
   // requirement explicitly naming "purchase, admin, superadmin" as
   // the people who can decide on a mismatch.
-  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL', values: { expected: string; actual: string }, actorUser: any) {
+  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER', values: { expected: string; actual: string }, actorUser: any) {
     const approverUsers = await this.prisma.user.findMany({
       where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
       select: { id: true },
     });
     if (approverUsers.length === 0) return;
-    const label = mismatchType === 'VENDOR' ? 'Vendor' : 'Material';
+    const labelMap = { VENDOR: 'Vendor', MATERIAL: 'Material', VEHICLE_NUMBER: 'Vehicle Number' };
+    const label = labelMap[mismatchType];
+    const notifTypeMap = { VENDOR: 'GATE_HOLD_VENDOR_MISMATCH', MATERIAL: 'GATE_HOLD_MATERIAL_MISMATCH', VEHICLE_NUMBER: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH' };
     await this.notifications.createBulk(
       approverUsers.map(u => ({
         userId: u.id,
-        type: mismatchType === 'VENDOR' ? 'GATE_HOLD_VENDOR_MISMATCH' : 'GATE_HOLD_MATERIAL_MISMATCH',
+        type: notifTypeMap[mismatchType],
         title: `Gate Hold — ${label} Mismatch`,
         message: `${entry.ginNumber} — ${entry.supplierName} — ${label.toLowerCase()} mismatch. Expected: "${values.expected}", Actual: "${values.actual}". Material is on hold at the gate pending your decision.`,
         referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
@@ -652,14 +654,24 @@ export class GateInwardService {
   // gate-level permission as verify() (GATE_INWARD_VERIFY), not the
   // Purchase-only resolve permission - flagging is Gate's job,
   // deciding what happens next is Purchase/Admin's.
-  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL', expectedValue: string, actualValue: string, remarks: string, user: any) {
+  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER', expectedValue: string, actualValue: string, remarks: string, user: any) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
     const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
     if (!flaggableStatuses.includes(entry.status)) {
       throw new BadRequestException('Can only flag a mismatch before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
     }
-    const holdStatus = mismatchType === 'VENDOR' ? GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH : GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH;
+    // GATE-011: vehicle number mismatch reuses the exact same
+    // flag/resolve mechanism as GATE-006/007 (vendor/material), just
+    // with its own hold status and its own correction target -
+    // deliberately not a parallel implementation, per the requirement
+    // not to modify unrelated workflows through duplication.
+    const holdStatusMap = {
+      VENDOR: GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH,
+      MATERIAL: GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH,
+      VEHICLE_NUMBER: GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH,
+    };
+    const holdStatus = holdStatusMap[mismatchType];
     const updated = await this.prisma.gateInwardEntry.update({
       where: { id },
       data: {
@@ -682,9 +694,9 @@ export class GateInwardService {
   private async assertOnMismatchHold(id: string) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
-    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH];
+    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH, GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH];
     if (!validHoldStatuses.includes(entry.status)) {
-      throw new BadRequestException('This entry is not currently on a Vendor/Material Mismatch hold');
+      throw new BadRequestException('This entry is not currently on a Vendor/Material/Vehicle Number Mismatch hold');
     }
     return entry;
   }
@@ -696,16 +708,17 @@ export class GateInwardService {
   // never in question here - only what was declared against it.
   async resolveMismatchCorrectReference(id: string, correctedValue: string, reason: string, user: any) {
     const entry = await this.assertOnMismatchHold(id);
-    const isVendor = entry.mismatchType === 'VENDOR';
+    const correctionData: any = {
+      status: GateInwardStatus.PENDING,
+      holdResolution: 'CORRECT_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+      holdResolutionRemarks: reason, updatedBy: user.id,
+    };
+    if (entry.mismatchType === 'VENDOR') correctionData.supplierName = correctedValue;
+    else if (entry.mismatchType === 'MATERIAL') correctionData.materialDescription = correctedValue;
+    else if (entry.mismatchType === 'VEHICLE_NUMBER') correctionData.vehicleNumber = correctedValue;
     const updated = await this.prisma.gateInwardEntry.update({
       where: { id },
-      data: {
-        status: GateInwardStatus.PENDING,
-        supplierName: isVendor ? correctedValue : entry.supplierName,
-        materialDescription: !isVendor ? correctedValue : entry.materialDescription,
-        holdResolution: 'CORRECT_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
-        holdResolutionRemarks: reason, updatedBy: user.id,
-      },
+      data: correctionData,
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'CORRECT_REFERENCE', correctedValue, reason }, changedBy: user.id });

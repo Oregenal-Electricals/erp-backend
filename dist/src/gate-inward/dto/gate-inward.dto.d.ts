@@ -67,7 +67,7 @@ export declare class CorrectPoReferenceDto {
     reason: string;
 }
 export declare class FlagMismatchDto {
-    mismatchType: 'VENDOR' | 'MATERIAL';
+    mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER';
     expectedValue: string;
     actualValue: string;
     remarks: string;

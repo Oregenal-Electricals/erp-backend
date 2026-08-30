@@ -270,10 +270,12 @@ let GateInwardService = class GateInwardService {
         });
         if (approverUsers.length === 0)
             return;
-        const label = mismatchType === 'VENDOR' ? 'Vendor' : 'Material';
+        const labelMap = { VENDOR: 'Vendor', MATERIAL: 'Material', VEHICLE_NUMBER: 'Vehicle Number' };
+        const label = labelMap[mismatchType];
+        const notifTypeMap = { VENDOR: 'GATE_HOLD_VENDOR_MISMATCH', MATERIAL: 'GATE_HOLD_MATERIAL_MISMATCH', VEHICLE_NUMBER: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH' };
         await this.notifications.createBulk(approverUsers.map(u => ({
             userId: u.id,
-            type: mismatchType === 'VENDOR' ? 'GATE_HOLD_VENDOR_MISMATCH' : 'GATE_HOLD_MATERIAL_MISMATCH',
+            type: notifTypeMap[mismatchType],
             title: `Gate Hold — ${label} Mismatch`,
             message: `${entry.ginNumber} — ${entry.supplierName} — ${label.toLowerCase()} mismatch. Expected: "${values.expected}", Actual: "${values.actual}". Material is on hold at the gate pending your decision.`,
             referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
@@ -567,7 +569,12 @@ let GateInwardService = class GateInwardService {
         if (!flaggableStatuses.includes(entry.status)) {
             throw new common_1.BadRequestException('Can only flag a mismatch before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
         }
-        const holdStatus = mismatchType === 'VENDOR' ? client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH : client_1.GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH;
+        const holdStatusMap = {
+            VENDOR: client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH,
+            MATERIAL: client_1.GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH,
+            VEHICLE_NUMBER: client_1.GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH,
+        };
+        const holdStatus = holdStatusMap[mismatchType];
         const updated = await this.prisma.gateInwardEntry.update({
             where: { id },
             data: {
@@ -587,24 +594,28 @@ let GateInwardService = class GateInwardService {
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
         if (!entry)
             throw new common_1.NotFoundException('Gate inward entry not found');
-        const validHoldStatuses = [client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, client_1.GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH];
+        const validHoldStatuses = [client_1.GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, client_1.GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH, client_1.GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH];
         if (!validHoldStatuses.includes(entry.status)) {
-            throw new common_1.BadRequestException('This entry is not currently on a Vendor/Material Mismatch hold');
+            throw new common_1.BadRequestException('This entry is not currently on a Vendor/Material/Vehicle Number Mismatch hold');
         }
         return entry;
     }
     async resolveMismatchCorrectReference(id, correctedValue, reason, user) {
         const entry = await this.assertOnMismatchHold(id);
-        const isVendor = entry.mismatchType === 'VENDOR';
+        const correctionData = {
+            status: client_1.GateInwardStatus.PENDING,
+            holdResolution: 'CORRECT_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
+            holdResolutionRemarks: reason, updatedBy: user.id,
+        };
+        if (entry.mismatchType === 'VENDOR')
+            correctionData.supplierName = correctedValue;
+        else if (entry.mismatchType === 'MATERIAL')
+            correctionData.materialDescription = correctedValue;
+        else if (entry.mismatchType === 'VEHICLE_NUMBER')
+            correctionData.vehicleNumber = correctedValue;
         const updated = await this.prisma.gateInwardEntry.update({
             where: { id },
-            data: {
-                status: client_1.GateInwardStatus.PENDING,
-                supplierName: isVendor ? correctedValue : entry.supplierName,
-                materialDescription: !isVendor ? correctedValue : entry.materialDescription,
-                holdResolution: 'CORRECT_REFERENCE', holdResolvedById: user.id, holdResolvedAt: new Date(),
-                holdResolutionRemarks: reason, updatedBy: user.id,
-            },
+            data: correctionData,
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'CORRECT_REFERENCE', correctedValue, reason }, changedBy: user.id });
