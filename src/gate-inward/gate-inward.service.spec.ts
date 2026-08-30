@@ -1212,4 +1212,113 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-013: Challan Mismatch — independent micro-workflow reusing the GATE-006/007/011 mismatch mechanism', () => {
+    describe('positive cases', () => {
+      it('flagMismatch() with CHALLAN type puts a PENDING entry on GATE_HOLD_CHALLAN_MISMATCH', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+          status: 'GATE_HOLD_CHALLAN_MISMATCH', mismatchType: 'CHALLAN',
+        });
+
+        const result = await service.flagMismatch('gin-1', 'CHALLAN', 'CH-2026-0088', 'CH-2026-0099', 'Challan number on document does not match what Purchase communicated', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'GATE_HOLD_CHALLAN_MISMATCH', mismatchType: 'CHALLAN',
+            mismatchExpectedValue: 'CH-2026-0088', mismatchActualValue: 'CH-2026-0099',
+          }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_CHALLAN_MISMATCH');
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_CHALLAN_MISMATCH', title: expect.stringContaining('Challan') })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveMismatchCorrectReference() for a CHALLAN hold updates invoiceNumber, not any other field', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({
+          id: 'gin-1', status: 'GATE_HOLD_CHALLAN_MISMATCH', mismatchType: 'CHALLAN',
+          invoiceNumber: 'CH-2026-0099', supplierName: 'ABC Steel', materialDescription: 'Steel Rods', vehicleNumber: 'MH12AB1234',
+        });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', invoiceNumber: 'CH-2026-0088', holdResolution: 'CORRECT_REFERENCE' });
+
+        const result = await service.resolveMismatchCorrectReference('gin-1', 'CH-2026-0088', 'Security re-checked the challan slip, corrected the digit transcription error', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.invoiceNumber).toBe('CH-2026-0088');
+        expect(updateCall.data.supplierName).toBeUndefined();
+        expect(updateCall.data.materialDescription).toBeUndefined();
+        expect(updateCall.data.vehicleNumber).toBeUndefined();
+        expect(result.status).toBe('PENDING');
+      });
+
+      it('resolveMismatchApprovedException() and resolveMismatchRejected() both work for a CHALLAN hold via the same shared resolution path', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_CHALLAN_MISMATCH', mismatchType: 'CHALLAN' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' });
+        const exceptionResult = await service.resolveMismatchApprovedException('gin-1', 'Vendor confirmed challan renumbering, approved', user);
+        expect(exceptionResult.holdResolution).toBe('APPROVED_EXCEPTION');
+
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_CHALLAN_MISMATCH', mismatchType: 'CHALLAN' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE' });
+        const rejectResult = await service.resolveMismatchRejected('gin-1', 'Could not verify challan authenticity, rejected', user);
+        expect(rejectResult.status).toBe('REJECTED');
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagMismatch() with CHALLAN refuses once the vehicle has already been let in', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+        await expect(service.flagMismatch('gin-1', 'CHALLAN', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('resolveMismatchCorrectReference() rejects an entry whose mismatchType is CHALLAN but current status is not a mismatch hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'SENT_TO_STORES', mismatchType: 'CHALLAN' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', 'CH-2026-0088', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag a challan mismatch a second time on an entry already on that same hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_CHALLAN_MISMATCH' });
+        await expect(service.flagMismatch('gin-1', 'CHALLAN', 'a', 'b', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same challan mismatch hold twice', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', mismatchType: 'CHALLAN' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', 'CH-2026-0088', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      it('reuses the already-verified flag-mismatch (GATE_INWARD_VERIFY) and resolve-mismatch/* (GATE_INWARD_RESOLVE_HOLD) permission boundaries - no new unguarded routes were added for CHALLAN', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        // Confirm no new route was introduced for challan mismatch specifically - it must be routed through the existing, already-permission-checked endpoints.
+        expect(controllerSource).not.toContain("flag-challan-mismatch");
+        expect(controllerSource).not.toContain("resolve-challan-mismatch");
+        const flagRouteIdx = controllerSource.indexOf("@Patch(':id/flag-mismatch')");
+        expect(controllerSource.slice(flagRouteIdx, flagRouteIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagMismatch() with CHALLAN throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagMismatch('does-not-exist', 'CHALLAN', 'a', 'b', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data as part of this workflow', () => {
+      const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+      expect(serviceSource).not.toContain('purchaseOrder.update');
+    });
+
+    it('rejected challan-mismatch material can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });

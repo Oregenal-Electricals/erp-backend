@@ -304,15 +304,15 @@ export class GateInwardService {
   // a wider approver set than the other gate holds, per this
   // requirement explicitly naming "purchase, admin, superadmin" as
   // the people who can decide on a mismatch.
-  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER', values: { expected: string; actual: string }, actorUser: any) {
+  private async notifyOfMismatchHold(entry: any, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN', values: { expected: string; actual: string }, actorUser: any) {
     const approverUsers = await this.prisma.user.findMany({
       where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
       select: { id: true },
     });
     if (approverUsers.length === 0) return;
-    const labelMap = { VENDOR: 'Vendor', MATERIAL: 'Material', VEHICLE_NUMBER: 'Vehicle Number' };
+    const labelMap = { VENDOR: 'Vendor', MATERIAL: 'Material', VEHICLE_NUMBER: 'Vehicle Number', CHALLAN: 'Challan' };
     const label = labelMap[mismatchType];
-    const notifTypeMap = { VENDOR: 'GATE_HOLD_VENDOR_MISMATCH', MATERIAL: 'GATE_HOLD_MATERIAL_MISMATCH', VEHICLE_NUMBER: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH' };
+    const notifTypeMap = { VENDOR: 'GATE_HOLD_VENDOR_MISMATCH', MATERIAL: 'GATE_HOLD_MATERIAL_MISMATCH', VEHICLE_NUMBER: 'GATE_HOLD_VEHICLE_NUMBER_MISMATCH', CHALLAN: 'GATE_HOLD_CHALLAN_MISMATCH' };
     await this.notifications.createBulk(
       approverUsers.map(u => ({
         userId: u.id,
@@ -654,7 +654,7 @@ export class GateInwardService {
   // gate-level permission as verify() (GATE_INWARD_VERIFY), not the
   // Purchase-only resolve permission - flagging is Gate's job,
   // deciding what happens next is Purchase/Admin's.
-  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER', expectedValue: string, actualValue: string, remarks: string, user: any) {
+  async flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN', expectedValue: string, actualValue: string, remarks: string, user: any) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
     const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
@@ -670,6 +670,7 @@ export class GateInwardService {
       VENDOR: GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH,
       MATERIAL: GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH,
       VEHICLE_NUMBER: GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH,
+      CHALLAN: GateInwardStatus.GATE_HOLD_CHALLAN_MISMATCH,
     };
     const holdStatus = holdStatusMap[mismatchType];
     const updated = await this.prisma.gateInwardEntry.update({
@@ -694,9 +695,9 @@ export class GateInwardService {
   private async assertOnMismatchHold(id: string) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
-    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH, GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH];
+    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_VENDOR_MISMATCH, GateInwardStatus.GATE_HOLD_MATERIAL_MISMATCH, GateInwardStatus.GATE_HOLD_VEHICLE_NUMBER_MISMATCH, GateInwardStatus.GATE_HOLD_CHALLAN_MISMATCH];
     if (!validHoldStatuses.includes(entry.status)) {
-      throw new BadRequestException('This entry is not currently on a Vendor/Material/Vehicle Number Mismatch hold');
+      throw new BadRequestException('This entry is not currently on a Vendor/Material/Vehicle Number/Challan Mismatch hold');
     }
     return entry;
   }
@@ -716,6 +717,7 @@ export class GateInwardService {
     if (entry.mismatchType === 'VENDOR') correctionData.supplierName = correctedValue;
     else if (entry.mismatchType === 'MATERIAL') correctionData.materialDescription = correctedValue;
     else if (entry.mismatchType === 'VEHICLE_NUMBER') correctionData.vehicleNumber = correctedValue;
+    else if (entry.mismatchType === 'CHALLAN') correctionData.invoiceNumber = correctedValue;
     const updated = await this.prisma.gateInwardEntry.update({
       where: { id },
       data: correctionData,

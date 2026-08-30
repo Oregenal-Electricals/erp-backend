@@ -314,7 +314,7 @@ class FlagMismatchDto {
 }
 exports.FlagMismatchDto = FlagMismatchDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: ['VENDOR', 'MATERIAL', 'VEHICLE_NUMBER'], example: 'MATERIAL' }),
+    (0, swagger_1.ApiProperty)({ enum: ['VENDOR', 'MATERIAL', 'VEHICLE_NUMBER', 'CHALLAN'], example: 'MATERIAL' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], FlagMismatchDto.prototype, "mismatchType", void 0);

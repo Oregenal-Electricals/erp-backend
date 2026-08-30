@@ -105,6 +105,7 @@ enum GateInwardStatus {
   GATE_HOLD_PACKAGE_COUNT_MISMATCH // GATE-010: declared package count does not match the physical count at the gate
   GATE_HOLD_VEHICLE_NUMBER_MISMATCH // GATE-011: declared/challan vehicle number does not match the vehicle physically at the gate
   GATE_HOLD_DOCUMENT_MISSING // GATE-012: vehicle arrived without a physical challan and/or invoice document
+  GATE_HOLD_CHALLAN_MISMATCH // GATE-013: the challan document is present, but its details (number/reference) do not match what was expected
 }
 
 enum GateOutwardStatus {
