@@ -211,9 +211,9 @@ export class CorrectPoReferenceDto {
 }
 
 export class FlagMismatchDto {
-  @ApiProperty({ enum: ['VENDOR', 'MATERIAL', 'VEHICLE_NUMBER', 'CHALLAN'], example: 'MATERIAL' })
+  @ApiProperty({ enum: ['VENDOR', 'MATERIAL', 'VEHICLE_NUMBER', 'CHALLAN', 'QUANTITY_EXCESS'], example: 'MATERIAL' })
   @IsString()
-  mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN';
+  mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN' | 'QUANTITY_EXCESS';
   @ApiProperty({ example: 'MS Angle 25x25, PO item IT-001' })
   @IsString()
   @MinLength(2)

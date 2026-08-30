@@ -1748,7 +1748,7 @@ export declare class GateInwardService {
         packageCountEscalatedAt: Date | null;
         documentMissingType: string | null;
     }>;
-    flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN', expectedValue: string, actualValue: string, remarks: string, user: any): Promise<{
+    flagMismatch(id: string, mismatchType: 'VENDOR' | 'MATERIAL' | 'VEHICLE_NUMBER' | 'CHALLAN' | 'QUANTITY_EXCESS', expectedValue: string, actualValue: string, remarks: string, user: any): Promise<{
         items: {
             id: string;
             companyId: string;

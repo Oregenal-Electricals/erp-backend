@@ -1321,4 +1321,114 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-014: Excess Material Suspected — independent micro-workflow reusing the mismatch mechanism', () => {
+    describe('positive cases', () => {
+      it('flagMismatch() with QUANTITY_EXCESS type puts a PENDING entry on GATE_HOLD_EXCESS_MATERIAL', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+          status: 'GATE_HOLD_EXCESS_MATERIAL', mismatchType: 'QUANTITY_EXCESS',
+        });
+
+        const result = await service.flagMismatch('gin-1', 'QUANTITY_EXCESS', '500', '650', 'Weighbridge shows significantly more than the PO quantity', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'GATE_HOLD_EXCESS_MATERIAL', mismatchType: 'QUANTITY_EXCESS',
+            mismatchExpectedValue: '500', mismatchActualValue: '650',
+          }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_EXCESS_MATERIAL');
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_EXCESS_MATERIAL', title: expect.stringContaining('Excess Material') })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveMismatchCorrectReference() for a QUANTITY_EXCESS hold updates quantity as a parsed number, not any other field', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({
+          id: 'gin-1', status: 'GATE_HOLD_EXCESS_MATERIAL', mismatchType: 'QUANTITY_EXCESS', quantity: 650,
+        });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', quantity: 500, holdResolution: 'CORRECT_REFERENCE' });
+
+        const result = await service.resolveMismatchCorrectReference('gin-1', '500', 'Re-weighed, first reading included the empty vehicle weight error', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.quantity).toBe(500);
+        expect(typeof updateCall.data.quantity).toBe('number');
+        expect(updateCall.data.supplierName).toBeUndefined();
+        expect(updateCall.data.invoiceNumber).toBeUndefined();
+        expect(result.status).toBe('PENDING');
+      });
+
+      it('resolveMismatchApprovedException() and resolveMismatchRejected() both work for a QUANTITY_EXCESS hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_EXCESS_MATERIAL', mismatchType: 'QUANTITY_EXCESS' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_EXCEPTION' });
+        const exceptionResult = await service.resolveMismatchApprovedException('gin-1', 'Vendor confirmed bonus quantity as goodwill, approved to receive full amount', user);
+        expect(exceptionResult.holdResolution).toBe('APPROVED_EXCEPTION');
+
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_EXCESS_MATERIAL', mismatchType: 'QUANTITY_EXCESS' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE' });
+        const rejectResult = await service.resolveMismatchRejected('gin-1', 'Cannot accept unexplained excess quantity, rejected pending vendor clarification', user);
+        expect(rejectResult.status).toBe('REJECTED');
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagMismatch() with QUANTITY_EXCESS refuses once the vehicle has already been let in', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+        await expect(service.flagMismatch('gin-1', 'QUANTITY_EXCESS', '500', '650', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('resolveMismatchApprovedException() rejects an entry whose mismatchType is QUANTITY_EXCESS but current status is not a mismatch hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'COMPLETED', mismatchType: 'QUANTITY_EXCESS' });
+        await expect(service.resolveMismatchApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag excess material a second time on an entry already on that same hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_EXCESS_MATERIAL' });
+        await expect(service.flagMismatch('gin-1', 'QUANTITY_EXCESS', '500', '650', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same excess material hold twice', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', mismatchType: 'QUANTITY_EXCESS' });
+        await expect(service.resolveMismatchCorrectReference('gin-1', '500', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchApprovedException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveMismatchRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      it('reuses the already-verified flag-mismatch/resolve-mismatch permission boundaries - no new unguarded route was added for QUANTITY_EXCESS', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        expect(controllerSource).not.toContain('flag-excess-material');
+        expect(controllerSource).not.toContain('resolve-excess-material');
+        const flagRouteIdx = controllerSource.indexOf("@Patch(':id/flag-mismatch')");
+        expect(controllerSource.slice(flagRouteIdx, flagRouteIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagMismatch() with QUANTITY_EXCESS throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagMismatch('does-not-exist', 'QUANTITY_EXCESS', '500', '650', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data - excess material is corrected on the Gate Inward entry, never the linked PO', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_EXCESS_MATERIAL', mismatchType: 'QUANTITY_EXCESS', quantity: 650, poId: 'po-1' });
+      prisma.purchaseOrder.update = jest.fn();
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', quantity: 500 });
+      await service.resolveMismatchCorrectReference('gin-1', '500', 'reason', user);
+      expect(prisma.purchaseOrder.update).not.toHaveBeenCalled();
+    });
+
+    it('rejected excess-material entries can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });
