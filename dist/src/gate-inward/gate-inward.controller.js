@@ -87,6 +87,18 @@ let GateInwardController = class GateInwardController {
     resolveMismatchRejected(id, dto, user) {
         return this.service.resolveMismatchRejected(id, dto.reason, user);
     }
+    flagDamage(id, dto, user) {
+        return this.service.flagDamage(id, dto.damageType, dto.description, dto.affectedPackages, dto.gateRecommendation, user);
+    }
+    resolveDamageReject(id, dto, user) {
+        return this.service.resolveDamageReject(id, dto.reason, user);
+    }
+    resolveDamageAcceptException(id, dto, user) {
+        return this.service.resolveDamageAcceptException(id, dto.reason, user);
+    }
+    recordReturnGateOut(id, dto, user) {
+        return this.service.recordReturnGateOut(id, dto.remarks, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -308,6 +320,50 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMismatchRejectedDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "resolveMismatchRejected", null);
+__decorate([
+    (0, common_1.Patch)(':id/flag-damage'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-008/009: Gate flags visible material/packaging damage, stopping normal Gate-In' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.FlagDamageDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "flagDamage", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-damage/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-008/009: reject the damaged material at the gate' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveDamageRejectDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveDamageReject", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-damage/accept-exception'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-008/009: accept under exception for detailed Store/QC inspection' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveDamageAcceptExceptionDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveDamageAcceptException", null);
+__decorate([
+    (0, common_1.Patch)(':id/record-return-gate-out'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-008/009: record that rejected damaged material has physically left the gate' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.RecordReturnGateOutDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "recordReturnGateOut", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),

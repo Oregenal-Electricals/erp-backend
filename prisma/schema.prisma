@@ -100,6 +100,8 @@ enum GateInwardStatus {
   GATE_HOLD_PO_CLOSED    // GATE-005: the referenced PO exists but is CLOSED - blocked until Purchase resolves it
   GATE_HOLD_VENDOR_MISMATCH   // GATE-006: declared vendor does not match the PO's vendor
   GATE_HOLD_MATERIAL_MISMATCH // GATE-007: declared material does not match the PO's item(s)
+  GATE_HOLD_MATERIAL_DAMAGE   // GATE-008: visible external damage to the material itself
+  GATE_HOLD_PACKAGING_DAMAGE  // GATE-009: visible external damage to packaging (material itself not inspected)
 }
 
 enum GateOutwardStatus {
@@ -523,6 +525,8 @@ model User {
   ginGateIn        GateInwardEntry[]  @relation("GINGateInBy")
   ginHoldResolved  GateInwardEntry[]  @relation("GINHoldResolvedBy")
   ginMismatchFlagged  GateInwardEntry[]  @relation("GINMismatchFlaggedBy")
+  ginDamageFlagged    GateInwardEntry[]  @relation("GINDamageFlaggedBy")
+  ginReturnGateOut    GateInwardEntry[]  @relation("GINReturnGateOutBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -847,6 +851,29 @@ model GateInwardEntry {
   mismatchFlaggedById   String?
   mismatchFlaggedBy     User?      @relation("GINMismatchFlaggedBy", fields: [mismatchFlaggedById], references: [id])
   mismatchFlaggedAt     DateTime?
+
+  // GATE-008/009: Security's visible-damage inspection - external
+  // only, they never open sealed packaging. gateRecommendation is
+  // Gate's own call (REJECT or ACCEPT_EXCEPTION); the final decision
+  // still goes through holdResolution above, made by an approver -
+  // Gate can recommend, only approvers can confirm.
+  damageType            String?   // 'MATERIAL' | 'PACKAGING'
+  damageDescription     String?
+  affectedPackages      String?
+  gateRecommendation    String?   // 'REJECT' | 'ACCEPT_EXCEPTION'
+  damageFlaggedById     String?
+  damageFlaggedBy       User?      @relation("GINDamageFlaggedBy", fields: [damageFlaggedById], references: [id])
+  damageFlaggedAt       DateTime?
+
+  // Recorded when a damage hold resolves to REJECT - a lightweight
+  // return record on the entry itself rather than a full GateOutward
+  // entry, since GateOutwardEntry is built for customer-facing
+  // dispatch (customerName, salesOrderNumber) and doesn't fit a
+  // vendor return without misusing those fields.
+  returnGateOutById     String?
+  returnGateOutBy       User?      @relation("GINReturnGateOutBy", fields: [returnGateOutById], references: [id])
+  returnGateOutAt       DateTime?
+  returnRemarks         String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   createdBy  String

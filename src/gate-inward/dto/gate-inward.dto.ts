@@ -252,3 +252,41 @@ export class ResolveMismatchRejectedDto {
   @MinLength(5)
   reason: string;
 }
+
+export class FlagDamageDto {
+  @ApiProperty({ enum: ['MATERIAL', 'PACKAGING'], example: 'PACKAGING' })
+  @IsString()
+  damageType: 'MATERIAL' | 'PACKAGING';
+  @ApiProperty({ example: 'Outer cartons crushed on one side, visible tears in 3 boxes' })
+  @IsString()
+  @MinLength(5)
+  description: string;
+  @ApiPropertyOptional({ example: 'Boxes 4, 5, and 7 of 12' })
+  @IsOptional()
+  @IsString()
+  affectedPackages?: string;
+  @ApiProperty({ enum: ['REJECT', 'ACCEPT_EXCEPTION'], example: 'ACCEPT_EXCEPTION' })
+  @IsString()
+  gateRecommendation: 'REJECT' | 'ACCEPT_EXCEPTION';
+}
+
+export class ResolveDamageRejectDto {
+  @ApiProperty({ example: 'Confirmed with Purchase - visible damage too severe, vendor to arrange replacement' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveDamageAcceptExceptionDto {
+  @ApiProperty({ example: 'Only outer packaging affected, material likely intact - Store/QC to inspect thoroughly on receipt' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class RecordReturnGateOutDto {
+  @ApiProperty({ example: 'Loaded back onto the same vehicle, driver signed the return note' })
+  @IsString()
+  @MinLength(5)
+  remarks: string;
+}

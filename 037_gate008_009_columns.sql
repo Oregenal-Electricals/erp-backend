@@ -1,0 +1,11 @@
+ALTER TABLE "gate_inward_entries" ADD COLUMN "damageType" TEXT;
+ALTER TABLE "gate_inward_entries" ADD COLUMN "damageDescription" TEXT;
+ALTER TABLE "gate_inward_entries" ADD COLUMN "affectedPackages" TEXT;
+ALTER TABLE "gate_inward_entries" ADD COLUMN "gateRecommendation" TEXT;
+ALTER TABLE "gate_inward_entries" ADD COLUMN "damageFlaggedById" TEXT;
+ALTER TABLE "gate_inward_entries" ADD COLUMN "damageFlaggedAt" TIMESTAMP(3);
+ALTER TABLE "gate_inward_entries" ADD COLUMN "returnGateOutById" TEXT;
+ALTER TABLE "gate_inward_entries" ADD COLUMN "returnGateOutAt" TIMESTAMP(3);
+ALTER TABLE "gate_inward_entries" ADD COLUMN "returnRemarks" TEXT;
+ALTER TABLE "gate_inward_entries" ADD CONSTRAINT "gate_inward_entries_damageFlaggedById_fkey" FOREIGN KEY ("damageFlaggedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "gate_inward_entries" ADD CONSTRAINT "gate_inward_entries_returnGateOutById_fkey" FOREIGN KEY ("returnGateOutById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

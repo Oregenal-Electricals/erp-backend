@@ -638,6 +638,102 @@ let GateInwardService = class GateInwardService {
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED_AT_GATE', reason }, changedBy: user.id });
         return updated;
     }
+    async flagDamage(id, damageType, description, affectedPackages, gateRecommendation, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const flaggableStatuses = [client_1.GateInwardStatus.PENDING, client_1.GateInwardStatus.VERIFIED];
+        if (!flaggableStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('Can only flag damage before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+        }
+        const holdStatus = damageType === 'MATERIAL' ? client_1.GateInwardStatus.GATE_HOLD_MATERIAL_DAMAGE : client_1.GateInwardStatus.GATE_HOLD_PACKAGING_DAMAGE;
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: holdStatus,
+                damageType, damageDescription: description, affectedPackages, gateRecommendation,
+                damageFlaggedById: user.id, damageFlaggedAt: new Date(),
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: holdStatus, damageType, description, affectedPackages, gateRecommendation }, changedBy: user.id });
+        await this.notifyOfDamageHold(updated, damageType, user);
+        return updated;
+    }
+    async notifyOfDamageHold(entry, damageType, actorUser) {
+        const approverUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['SUPER_ADMIN', 'CORPORATE_ADMIN', 'PURCHASE_MANAGER', 'STORE_MANAGER', 'QC_MANAGER'] } },
+            select: { id: true },
+        });
+        if (approverUsers.length === 0)
+            return;
+        const label = damageType === 'MATERIAL' ? 'Material' : 'Packaging';
+        await this.notifications.createBulk(approverUsers.map(u => ({
+            userId: u.id,
+            type: damageType === 'MATERIAL' ? 'GATE_HOLD_MATERIAL_DAMAGE' : 'GATE_HOLD_PACKAGING_DAMAGE',
+            title: `Gate Hold — Visible ${label} Damage`,
+            message: `${entry.ginNumber} — ${entry.supplierName} — visible ${label.toLowerCase()} damage flagged by Security. Gate recommends: ${entry.gateRecommendation === 'REJECT' ? 'Reject at Gate' : 'Accept under exception for detailed inspection'}. Awaiting your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async assertOnDamageHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const validHoldStatuses = [client_1.GateInwardStatus.GATE_HOLD_MATERIAL_DAMAGE, client_1.GateInwardStatus.GATE_HOLD_PACKAGING_DAMAGE];
+        if (!validHoldStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('This entry is not currently on a Material/Packaging Damage hold');
+        }
+        return entry;
+    }
+    async resolveDamageReject(id, reason, user) {
+        const entry = await this.assertOnDamageHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'REJECT', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECT', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveDamageAcceptException(id, reason, user) {
+        const entry = await this.assertOnDamageHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'ACCEPT_EXCEPTION_FOR_INSPECTION', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'ACCEPT_EXCEPTION_FOR_INSPECTION', reason }, changedBy: user.id });
+        return updated;
+    }
+    async recordReturnGateOut(id, remarks, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.REJECTED || !entry.damageType) {
+            throw new common_1.BadRequestException('Return Gate-Out can only be recorded for a rejected damage-hold entry');
+        }
+        if (entry.returnGateOutAt) {
+            throw new common_1.BadRequestException('Return Gate-Out has already been recorded for this entry');
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: { returnGateOutById: user.id, returnGateOutAt: new Date(), returnRemarks: remarks, updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { returnGateOutAt: null }, newValues: { returnGateOutAt: updated.returnGateOutAt, remarks }, changedBy: user.id });
+        return updated;
+    }
     async getStats(user) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

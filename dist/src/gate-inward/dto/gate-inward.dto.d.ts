@@ -82,3 +82,18 @@ export declare class ResolveMismatchApprovedExceptionDto {
 export declare class ResolveMismatchRejectedDto {
     reason: string;
 }
+export declare class FlagDamageDto {
+    damageType: 'MATERIAL' | 'PACKAGING';
+    description: string;
+    affectedPackages?: string;
+    gateRecommendation: 'REJECT' | 'ACCEPT_EXCEPTION';
+}
+export declare class ResolveDamageRejectDto {
+    reason: string;
+}
+export declare class ResolveDamageAcceptExceptionDto {
+    reason: string;
+}
+export declare class RecordReturnGateOutDto {
+    remarks: string;
+}

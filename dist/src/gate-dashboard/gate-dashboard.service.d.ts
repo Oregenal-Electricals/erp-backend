@@ -136,6 +136,9 @@ export declare class GateDashboardService {
             grossWeight: number | null;
             rejectionReason: string | null;
             mismatchType: string | null;
+            damageType: string | null;
+            affectedPackages: string | null;
+            gateRecommendation: string | null;
             ginNumber: string;
             receivedById: string;
             verifiedById: string | null;
@@ -151,6 +154,12 @@ export declare class GateDashboardService {
             mismatchActualValue: string | null;
             mismatchFlaggedById: string | null;
             mismatchFlaggedAt: Date | null;
+            damageDescription: string | null;
+            damageFlaggedById: string | null;
+            damageFlaggedAt: Date | null;
+            returnGateOutById: string | null;
+            returnGateOutAt: Date | null;
+            returnRemarks: string | null;
         })[];
         pendingGOEList: ({
             plant: {

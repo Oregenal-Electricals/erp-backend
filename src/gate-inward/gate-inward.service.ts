@@ -750,6 +750,143 @@ export class GateInwardService {
     return updated;
   }
 
+  // GATE-008/009: Security's own visible-damage inspection - external
+  // only, packages are never opened at this stage. Same gate-level
+  // permission as flagMismatch(), callable before Gate-In only.
+  // gateRecommendation is Gate's own call (REJECT or
+  // ACCEPT_EXCEPTION) - it's their professional judgment on record,
+  // but it is only a recommendation. The actual decision still
+  // requires an approver via resolveDamage*, matching the
+  // requirement that Gate can 'mark reject and send that for
+  // approval' rather than finalize it unilaterally.
+  async flagDamage(
+    id: string,
+    damageType: 'MATERIAL' | 'PACKAGING',
+    description: string,
+    affectedPackages: string | undefined,
+    gateRecommendation: 'REJECT' | 'ACCEPT_EXCEPTION',
+    user: any,
+  ) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
+    if (!flaggableStatuses.includes(entry.status)) {
+      throw new BadRequestException('Can only flag damage before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+    }
+    const holdStatus = damageType === 'MATERIAL' ? GateInwardStatus.GATE_HOLD_MATERIAL_DAMAGE : GateInwardStatus.GATE_HOLD_PACKAGING_DAMAGE;
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: holdStatus,
+        damageType, damageDescription: description, affectedPackages, gateRecommendation,
+        damageFlaggedById: user.id, damageFlaggedAt: new Date(),
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: holdStatus, damageType, description, affectedPackages, gateRecommendation }, changedBy: user.id });
+    await this.notifyOfDamageHold(updated, damageType, user);
+    return updated;
+  }
+
+  // Notifies the wider policy-defined set: Super Admin, Corporate
+  // Admin, Purchase, Store Manager, and QC Manager - broader than any
+  // other gate hold, since damaged material is simultaneously a
+  // purchasing, quality, and storage concern.
+  private async notifyOfDamageHold(entry: any, damageType: 'MATERIAL' | 'PACKAGING', actorUser: any) {
+    const approverUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['SUPER_ADMIN', 'CORPORATE_ADMIN', 'PURCHASE_MANAGER', 'STORE_MANAGER', 'QC_MANAGER'] } },
+      select: { id: true },
+    });
+    if (approverUsers.length === 0) return;
+    const label = damageType === 'MATERIAL' ? 'Material' : 'Packaging';
+    await this.notifications.createBulk(
+      approverUsers.map(u => ({
+        userId: u.id,
+        type: damageType === 'MATERIAL' ? 'GATE_HOLD_MATERIAL_DAMAGE' : 'GATE_HOLD_PACKAGING_DAMAGE',
+        title: `Gate Hold — Visible ${label} Damage`,
+        message: `${entry.ginNumber} — ${entry.supplierName} — visible ${label.toLowerCase()} damage flagged by Security. Gate recommends: ${entry.gateRecommendation === 'REJECT' ? 'Reject at Gate' : 'Accept under exception for detailed inspection'}. Awaiting your decision.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'URGENT',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
+  }
+
+  private async assertOnDamageHold(id: string) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    const validHoldStatuses: GateInwardStatus[] = [GateInwardStatus.GATE_HOLD_MATERIAL_DAMAGE, GateInwardStatus.GATE_HOLD_PACKAGING_DAMAGE];
+    if (!validHoldStatuses.includes(entry.status)) {
+      throw new BadRequestException('This entry is not currently on a Material/Packaging Damage hold');
+    }
+    return entry;
+  }
+
+  // Decision 1: REJECT AT GATE. No GRN, no inventory, no Store
+  // receipt - same terminal REJECTED guarantee as every other
+  // rejection path. Does NOT itself record the physical return - see
+  // recordReturnGateOut for that, since the approval decision and the
+  // vehicle actually leaving with the material can happen at
+  // different times.
+  async resolveDamageReject(id: string, reason: string, user: any) {
+    const entry = await this.assertOnDamageHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.REJECTED, rejectionReason: reason,
+        holdResolution: 'REJECT', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECT', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // Decision 2: ACCEPT UNDER EXCEPTION FOR DETAILED STORE/QC
+  // INSPECTION. Returns to the normal flow (PENDING), but the
+  // exception is recorded on the entry itself so whoever processes
+  // the resulting GRN/IQC downstream can see it required special
+  // handling - this does not create a separate parallel inspection
+  // workflow, it flags the existing one.
+  async resolveDamageAcceptException(id: string, reason: string, user: any) {
+    const entry = await this.assertOnDamageHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING,
+        holdResolution: 'ACCEPT_EXCEPTION_FOR_INSPECTION', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'ACCEPT_EXCEPTION_FOR_INSPECTION', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // Records the physical return once a damage-hold rejection has
+  // actually left the gate. Gate-level action (same permission as
+  // gateIn/verify), only valid on an entry that was rejected via a
+  // damage hold and hasn't already been recorded as returned.
+  async recordReturnGateOut(id: string, remarks: string, user: any) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.status !== GateInwardStatus.REJECTED || !entry.damageType) {
+      throw new BadRequestException('Return Gate-Out can only be recorded for a rejected damage-hold entry');
+    }
+    if (entry.returnGateOutAt) {
+      throw new BadRequestException('Return Gate-Out has already been recorded for this entry');
+    }
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: { returnGateOutById: user.id, returnGateOutAt: new Date(), returnRemarks: remarks, updatedBy: user.id },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { returnGateOutAt: null }, newValues: { returnGateOutAt: updated.returnGateOutAt, remarks }, changedBy: user.id });
+    return updated;
+  }
+
   async getStats(user: any) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);

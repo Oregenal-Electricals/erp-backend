@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -369,4 +369,56 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], ResolveMismatchRejectedDto.prototype, "reason", void 0);
+class FlagDamageDto {
+}
+exports.FlagDamageDto = FlagDamageDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['MATERIAL', 'PACKAGING'], example: 'PACKAGING' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FlagDamageDto.prototype, "damageType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Outer cartons crushed on one side, visible tears in 3 boxes' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], FlagDamageDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Boxes 4, 5, and 7 of 12' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FlagDamageDto.prototype, "affectedPackages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['REJECT', 'ACCEPT_EXCEPTION'], example: 'ACCEPT_EXCEPTION' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FlagDamageDto.prototype, "gateRecommendation", void 0);
+class ResolveDamageRejectDto {
+}
+exports.ResolveDamageRejectDto = ResolveDamageRejectDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Confirmed with Purchase - visible damage too severe, vendor to arrange replacement' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveDamageRejectDto.prototype, "reason", void 0);
+class ResolveDamageAcceptExceptionDto {
+}
+exports.ResolveDamageAcceptExceptionDto = ResolveDamageAcceptExceptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Only outer packaging affected, material likely intact - Store/QC to inspect thoroughly on receipt' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveDamageAcceptExceptionDto.prototype, "reason", void 0);
+class RecordReturnGateOutDto {
+}
+exports.RecordReturnGateOutDto = RecordReturnGateOutDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Loaded back onto the same vehicle, driver signed the return note' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], RecordReturnGateOutDto.prototype, "remarks", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

@@ -16,6 +16,7 @@ import {
   ResolveHoldWithPoDto, ResolveHoldAsNonPoDto, ResolveHoldAsRejectedDto,
   ReturnMaterialDto, ApprovedExceptionDto, CorrectPoReferenceDto,
   FlagMismatchDto, ResolveMismatchCorrectReferenceDto, ResolveMismatchApprovedExceptionDto, ResolveMismatchRejectedDto,
+  FlagDamageDto, ResolveDamageRejectDto, ResolveDamageAcceptExceptionDto, RecordReturnGateOutDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -238,5 +239,50 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.resolveMismatchRejected(id, dto.reason, user);
+  }
+
+  // GATE-008/009: visible damage flagged by Gate itself.
+  @Patch(':id/flag-damage')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-008/009: Gate flags visible material/packaging damage, stopping normal Gate-In' })
+  flagDamage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: FlagDamageDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.flagDamage(id, dto.damageType, dto.description, dto.affectedPackages, dto.gateRecommendation, user);
+  }
+
+  @Patch(':id/resolve-damage/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-008/009: reject the damaged material at the gate' })
+  resolveDamageReject(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveDamageRejectDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveDamageReject(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-damage/accept-exception')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-008/009: accept under exception for detailed Store/QC inspection' })
+  resolveDamageAcceptException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveDamageAcceptExceptionDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveDamageAcceptException(id, dto.reason, user);
+  }
+
+  @Patch(':id/record-return-gate-out')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-008/009: record that rejected damaged material has physically left the gate' })
+  recordReturnGateOut(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RecordReturnGateOutDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.recordReturnGateOut(id, dto.remarks, user);
   }
 }

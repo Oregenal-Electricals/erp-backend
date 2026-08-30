@@ -706,4 +706,106 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-008/009: Visible Material Damage and Packaging Damage', () => {
+    it('flagDamage() puts a PENDING entry on GATE_HOLD_MATERIAL_DAMAGE and notifies the full policy set', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+      prisma.gateInwardEntry.update.mockResolvedValue({
+        id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+        status: 'GATE_HOLD_MATERIAL_DAMAGE', gateRecommendation: 'REJECT',
+      });
+
+      const result = await service.flagDamage('gin-1', 'MATERIAL', 'Visible corrosion on 40% of the rods', 'Bundle 3 of 5', 'REJECT', user);
+
+      expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({
+          status: 'GATE_HOLD_MATERIAL_DAMAGE', damageType: 'MATERIAL', gateRecommendation: 'REJECT', damageFlaggedById: user.id,
+        }) }),
+      );
+      expect(result.status).toBe('GATE_HOLD_MATERIAL_DAMAGE');
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ role: { in: ['SUPER_ADMIN', 'CORPORATE_ADMIN', 'PURCHASE_MANAGER', 'STORE_MANAGER', 'QC_MANAGER'] } }) }),
+      );
+      expect(notifications.createBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_MATERIAL_DAMAGE', priority: 'URGENT' })]),
+        user.companyId, user.id,
+      );
+    });
+
+    it('flagDamage() with PACKAGING type puts the entry on GATE_HOLD_PACKAGING_DAMAGE', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'VERIFIED' });
+      prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_PACKAGING_DAMAGE' });
+      const result = await service.flagDamage('gin-1', 'PACKAGING', 'Outer cartons crushed', 'Boxes 4, 5, 7', 'ACCEPT_EXCEPTION', user);
+      expect(result.status).toBe('GATE_HOLD_PACKAGING_DAMAGE');
+    });
+
+    it('flagDamage() refuses once the vehicle has already been let in', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+      await expect(service.flagDamage('gin-1', 'MATERIAL', 'desc', undefined, 'REJECT', user)).rejects.toThrow(BadRequestException);
+      expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+    });
+
+    describe('resolution — approvers decide, Gate only recommends', () => {
+      const heldEntry = { id: 'gin-1', status: 'GATE_HOLD_MATERIAL_DAMAGE', damageType: 'MATERIAL' };
+
+      it('REJECT AT GATE sends the entry to terminal REJECTED - no GRN, no inventory, no Store receipt', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECT' });
+
+        const result = await service.resolveDamageReject('gin-1', 'Confirmed with Purchase - damage too severe', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'REJECTED', holdResolution: 'REJECT' }) }),
+        );
+        expect(result.status).toBe('REJECTED');
+      });
+
+      it('ACCEPT UNDER EXCEPTION returns to PENDING with the exception recorded for downstream Store/QC', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(heldEntry);
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'ACCEPT_EXCEPTION_FOR_INSPECTION' });
+
+        const result = await service.resolveDamageAcceptException('gin-1', 'Only packaging affected, Store/QC to inspect thoroughly', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', holdResolution: 'ACCEPT_EXCEPTION_FOR_INSPECTION' }) }),
+        );
+        expect(result.holdResolution).toBe('ACCEPT_EXCEPTION_FOR_INSPECTION');
+      });
+
+      it('both resolution methods reject an entry not on a damage hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveDamageReject('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveDamageAcceptException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('recordReturnGateOut — the physical return record', () => {
+      it('records the return once an entry has been rejected via a damage hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', damageType: 'MATERIAL', returnGateOutAt: null });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', returnGateOutAt: new Date(), returnGateOutById: user.id });
+
+        const result = await service.recordReturnGateOut('gin-1', 'Loaded back onto the same vehicle, driver signed the return note', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ returnGateOutById: user.id }) }),
+        );
+        expect(result.returnGateOutAt).toBeTruthy();
+      });
+
+      it('refuses to record a return for an entry that was not rejected via a damage hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', damageType: null });
+        await expect(service.recordReturnGateOut('gin-1', 'remarks', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('refuses to record a return twice for the same entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', damageType: 'MATERIAL', returnGateOutAt: new Date() });
+        await expect(service.recordReturnGateOut('gin-1', 'remarks', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    it('rejected damage material can never reach sendToStores() - proven, not just claimed', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });
