@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResolveMultiplePosRejectedDto = exports.ResolveMultiplePosSplitDto = exports.FlagMultiplePosDto = exports.ResolveDocumentMissingRejectDto = exports.ResolveDocumentMissingExceptionDto = exports.FlagDocumentMissingDto = exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.ResolveNoPoReferenceRejectedDto = exports.ResolveNoPoReferenceApprovedDto = exports.FlagNoPoReferenceDto = exports.ResolveMultiplePosRejectedDto = exports.ResolveMultiplePosSplitDto = exports.FlagMultiplePosDto = exports.ResolveDocumentMissingRejectDto = exports.ResolveDocumentMissingExceptionDto = exports.FlagDocumentMissingDto = exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -548,4 +548,31 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], ResolveMultiplePosRejectedDto.prototype, "reason", void 0);
+class FlagNoPoReferenceDto {
+}
+exports.FlagNoPoReferenceDto = FlagNoPoReferenceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'New vendor, unusually large value delivery with no PO - flagging for Purchase to confirm this is expected' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], FlagNoPoReferenceDto.prototype, "reason", void 0);
+class ResolveNoPoReferenceApprovedDto {
+}
+exports.ResolveNoPoReferenceApprovedDto = ResolveNoPoReferenceApprovedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Confirmed with Purchase Head - this is a legitimate sample delivery, no PO needed' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveNoPoReferenceApprovedDto.prototype, "reason", void 0);
+class ResolveNoPoReferenceRejectedDto {
+}
+exports.ResolveNoPoReferenceRejectedDto = ResolveNoPoReferenceRejectedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'This should have had a PO raised first, rejected pending proper procurement' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveNoPoReferenceRejectedDto.prototype, "reason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

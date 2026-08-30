@@ -21,6 +21,7 @@ import {
   ResolvePackageCountApprovedInwardDto, ResolvePackageCountRejectedDto,
   FlagDocumentMissingDto, ResolveDocumentMissingExceptionDto, ResolveDocumentMissingRejectDto,
   FlagMultiplePosDto, ResolveMultiplePosSplitDto, ResolveMultiplePosRejectedDto,
+  FlagNoPoReferenceDto, ResolveNoPoReferenceApprovedDto, ResolveNoPoReferenceRejectedDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -412,5 +413,39 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.resolveMultiplePosRejected(id, dto.reason, user);
+  }
+
+  // GATE-015: Material Arrives Without PO - voluntary Gate escalation only.
+  @Patch(':id/flag-no-po-reference')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-015: Gate flags a no-PO delivery for Purchase review' })
+  flagNoPoReference(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: FlagNoPoReferenceDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.flagNoPoReference(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-no-po-reference/approved')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-015: confirm this is a legitimate non-PO delivery' })
+  resolveNoPoReferenceApproved(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveNoPoReferenceApprovedDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveNoPoReferenceApproved(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-no-po-reference/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-015: reject the material for lacking a required PO' })
+  resolveNoPoReferenceRejected(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveNoPoReferenceRejectedDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveNoPoReferenceRejected(id, dto.reason, user);
   }
 }

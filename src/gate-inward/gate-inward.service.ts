@@ -954,7 +954,7 @@ export class GateInwardService {
       approverUsers.map(u => ({
         userId: u.id,
         type: 'GATE_HOLD_DOCUMENT_MISSING',
-        title: 'Gate Hold — Document Missing',
+        title: `Gate Hold — Document Missing (${documentType === 'INVOICE' ? 'GATE-014' : documentType === 'BOTH' ? 'GATE-012/014' : 'GATE-012'})`,
         message: `${entry.ginNumber} — ${entry.supplierName} — arrived without a ${label} document. Material is on hold at the gate pending your decision.`,
         referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
         priority: 'URGENT',
@@ -1099,6 +1099,105 @@ export class GateInwardService {
   // rejection path.
   async resolveMultiplePosRejected(id: string, reason: string, user: any) {
     const entry = await this.assertOnMultiplePosHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.REJECTED, rejectionReason: reason,
+        holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // GATE-015: Material Arrives Without PO. Deliberately NOT
+  // automatic - a non-PO delivery is already a legitimate, normal
+  // case this service has always supported (create() with no poId,
+  // no poNumber). This is a voluntary escalation: Gate noticed
+  // something about a specific no-PO arrival that makes them want
+  // Purchase to review it (unfamiliar vendor, high value, pattern
+  // that usually has a PO, etc.) - flagging never happens by default,
+  // so the existing NORMAL behavior for genuine non-PO deliveries is
+  // completely unchanged unless Gate actively chooses to raise this.
+  async flagNoPoReference(id: string, reason: string, user: any) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.poId) {
+      throw new BadRequestException('This entry already has a linked PO - flagging "no PO reference" only applies to entries with no PO at all');
+    }
+    const flaggableStatuses: GateInwardStatus[] = [GateInwardStatus.PENDING, GateInwardStatus.VERIFIED];
+    if (!flaggableStatuses.includes(entry.status)) {
+      throw new BadRequestException('Can only flag this before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+    }
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.GATE_HOLD_NO_PO_REFERENCE,
+        mismatchExpectedValue: 'PO reference expected', mismatchActualValue: 'No PO reference on this delivery',
+        mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+        remarks: entry.remarks ? `${entry.remarks} | No PO reference flagged for review: ${reason}` : `No PO reference flagged for review: ${reason}`,
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_NO_PO_REFERENCE', reason }, changedBy: user.id });
+    await this.notifyOfNoPoReferenceHold(updated, user);
+    return updated;
+  }
+
+  private async notifyOfNoPoReferenceHold(entry: any, actorUser: any) {
+    const approverUsers = await this.prisma.user.findMany({
+      where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+      select: { id: true },
+    });
+    if (approverUsers.length === 0) return;
+    await this.notifications.createBulk(
+      approverUsers.map(u => ({
+        userId: u.id,
+        type: 'GATE_HOLD_NO_PO_REFERENCE',
+        title: 'Gate Hold — Material Without PO Reference',
+        message: `${entry.ginNumber} — ${entry.supplierName} — Gate has flagged this no-PO delivery for review. Material is on hold pending your decision.`,
+        referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+        priority: 'URGENT',
+      })) as any,
+      actorUser.companyId, actorUser.id,
+    );
+  }
+
+  private async assertOnNoPoReferenceHold(id: string) {
+    const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+    if (!entry) throw new NotFoundException('Gate inward entry not found');
+    if (entry.status !== GateInwardStatus.GATE_HOLD_NO_PO_REFERENCE) {
+      throw new BadRequestException('This entry is not currently on a No PO Reference hold');
+    }
+    return entry;
+  }
+
+  // Decision 1: APPROVED - Purchase confirms this genuinely is a
+  // legitimate non-PO delivery, returns to PENDING for the normal
+  // flow. No PO gets fabricated or linked - the entry proceeds
+  // exactly as any other non-PO delivery already does.
+  async resolveNoPoReferenceApproved(id: string, reason: string, user: any) {
+    const entry = await this.assertOnNoPoReferenceHold(id);
+    const updated = await this.prisma.gateInwardEntry.update({
+      where: { id },
+      data: {
+        status: GateInwardStatus.PENDING,
+        holdResolution: 'APPROVED_NON_PO', holdResolvedById: user.id, holdResolvedAt: new Date(),
+        holdResolutionRemarks: reason, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_NON_PO', reason }, changedBy: user.id });
+    return updated;
+  }
+
+  // Decision 2: REJECT - Purchase determines this should have had a
+  // PO and doesn't, terminal REJECTED as with every other path.
+  async resolveNoPoReferenceRejected(id: string, reason: string, user: any) {
+    const entry = await this.assertOnNoPoReferenceHold(id);
     const updated = await this.prisma.gateInwardEntry.update({
       where: { id },
       data: {

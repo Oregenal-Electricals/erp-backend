@@ -385,3 +385,24 @@ export class ResolveMultiplePosRejectedDto {
   @MinLength(5)
   reason: string;
 }
+
+export class FlagNoPoReferenceDto {
+  @ApiProperty({ example: 'New vendor, unusually large value delivery with no PO - flagging for Purchase to confirm this is expected' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveNoPoReferenceApprovedDto {
+  @ApiProperty({ example: 'Confirmed with Purchase Head - this is a legitimate sample delivery, no PO needed' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveNoPoReferenceRejectedDto {
+  @ApiProperty({ example: 'This should have had a PO raised first, rejected pending proper procurement' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}

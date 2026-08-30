@@ -132,6 +132,15 @@ let GateInwardController = class GateInwardController {
     resolveMultiplePosRejected(id, dto, user) {
         return this.service.resolveMultiplePosRejected(id, dto.reason, user);
     }
+    flagNoPoReference(id, dto, user) {
+        return this.service.flagNoPoReference(id, dto.reason, user);
+    }
+    resolveNoPoReferenceApproved(id, dto, user) {
+        return this.service.resolveNoPoReferenceApproved(id, dto.reason, user);
+    }
+    resolveNoPoReferenceRejected(id, dto, user) {
+        return this.service.resolveNoPoReferenceRejected(id, dto.reason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -518,6 +527,39 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveMultiplePosRejectedDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "resolveMultiplePosRejected", null);
+__decorate([
+    (0, common_1.Patch)(':id/flag-no-po-reference'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-015: Gate flags a no-PO delivery for Purchase review' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.FlagNoPoReferenceDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "flagNoPoReference", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-no-po-reference/approved'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-015: confirm this is a legitimate non-PO delivery' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveNoPoReferenceApprovedDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveNoPoReferenceApproved", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-no-po-reference/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-015: reject the material for lacking a required PO' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveNoPoReferenceRejectedDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveNoPoReferenceRejected", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),

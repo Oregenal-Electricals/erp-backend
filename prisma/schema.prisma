@@ -104,11 +104,12 @@ enum GateInwardStatus {
   GATE_HOLD_PACKAGING_DAMAGE  // GATE-009: visible external damage to packaging (material itself not inspected)
   GATE_HOLD_PACKAGE_COUNT_MISMATCH // GATE-010: declared package count does not match the physical count at the gate
   GATE_HOLD_VEHICLE_NUMBER_MISMATCH // GATE-011: declared/challan vehicle number does not match the vehicle physically at the gate
-  GATE_HOLD_DOCUMENT_MISSING // GATE-012: vehicle arrived without a physical challan and/or invoice document
+  GATE_HOLD_DOCUMENT_MISSING // GATE-012/014: vehicle arrived without a physical challan (GATE-012) and/or invoice (GATE-014) document - one shared status, documentMissingType field distinguishes which
   GATE_HOLD_CHALLAN_MISMATCH // GATE-013: the challan document is present, but its details (number/reference) do not match what was expected
   GATE_HOLD_EXCESS_MATERIAL // GATE-014: arrived quantity appears to exceed what was expected against the PO/challan
   GATE_HOLD_MIXED_MATERIALS // GATE-015: vehicle contains materials beyond what was declared - an undeclared mix, not simply the wrong single item
   GATE_HOLD_MULTIPLE_POS // GATE-016: the vehicle/challan references more than one PO - this entry can only ever link one, additional entries are needed for the rest
+  GATE_HOLD_NO_PO_REFERENCE // GATE-015: material arrived with no PO reference at all - a voluntary Gate escalation for review, since non-PO delivery is otherwise a legitimate, already-supported NORMAL case
 }
 
 enum GateOutwardStatus {

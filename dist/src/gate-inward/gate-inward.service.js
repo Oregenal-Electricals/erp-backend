@@ -790,7 +790,7 @@ let GateInwardService = class GateInwardService {
         await this.notifications.createBulk(approverUsers.map(u => ({
             userId: u.id,
             type: 'GATE_HOLD_DOCUMENT_MISSING',
-            title: 'Gate Hold — Document Missing',
+            title: `Gate Hold — Document Missing (${documentType === 'INVOICE' ? 'GATE-014' : documentType === 'BOTH' ? 'GATE-012/014' : 'GATE-012'})`,
             message: `${entry.ginNumber} — ${entry.supplierName} — arrived without a ${label} document. Material is on hold at the gate pending your decision.`,
             referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
             priority: 'URGENT',
@@ -904,6 +904,85 @@ let GateInwardService = class GateInwardService {
     }
     async resolveMultiplePosRejected(id, reason, user) {
         const entry = await this.assertOnMultiplePosHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+        return updated;
+    }
+    async flagNoPoReference(id, reason, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.poId) {
+            throw new common_1.BadRequestException('This entry already has a linked PO - flagging "no PO reference" only applies to entries with no PO at all');
+        }
+        const flaggableStatuses = [client_1.GateInwardStatus.PENDING, client_1.GateInwardStatus.VERIFIED];
+        if (!flaggableStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('Can only flag this before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+        }
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.GATE_HOLD_NO_PO_REFERENCE,
+                mismatchExpectedValue: 'PO reference expected', mismatchActualValue: 'No PO reference on this delivery',
+                mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+                remarks: entry.remarks ? `${entry.remarks} | No PO reference flagged for review: ${reason}` : `No PO reference flagged for review: ${reason}`,
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_NO_PO_REFERENCE', reason }, changedBy: user.id });
+        await this.notifyOfNoPoReferenceHold(updated, user);
+        return updated;
+    }
+    async notifyOfNoPoReferenceHold(entry, actorUser) {
+        const approverUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (approverUsers.length === 0)
+            return;
+        await this.notifications.createBulk(approverUsers.map(u => ({
+            userId: u.id,
+            type: 'GATE_HOLD_NO_PO_REFERENCE',
+            title: 'Gate Hold — Material Without PO Reference',
+            message: `${entry.ginNumber} — ${entry.supplierName} — Gate has flagged this no-PO delivery for review. Material is on hold pending your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async assertOnNoPoReferenceHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.GATE_HOLD_NO_PO_REFERENCE) {
+            throw new common_1.BadRequestException('This entry is not currently on a No PO Reference hold');
+        }
+        return entry;
+    }
+    async resolveNoPoReferenceApproved(id, reason, user) {
+        const entry = await this.assertOnNoPoReferenceHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'APPROVED_NON_PO', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'APPROVED_NON_PO', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveNoPoReferenceRejected(id, reason, user) {
+        const entry = await this.assertOnNoPoReferenceHold(id);
         const updated = await this.prisma.gateInwardEntry.update({
             where: { id },
             data: {

@@ -135,3 +135,12 @@ export declare class ResolveMultiplePosSplitDto {
 export declare class ResolveMultiplePosRejectedDto {
     reason: string;
 }
+export declare class FlagNoPoReferenceDto {
+    reason: string;
+}
+export declare class ResolveNoPoReferenceApprovedDto {
+    reason: string;
+}
+export declare class ResolveNoPoReferenceRejectedDto {
+    reason: string;
+}

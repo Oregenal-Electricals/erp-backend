@@ -1687,4 +1687,136 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-015: Material Arrives Without PO — a voluntary Gate escalation, never automatic', () => {
+    it('CRITICAL: create() with no PO still lands on plain PENDING - the normal non-PO delivery flow is completely unaffected by this workflow existing', async () => {
+      const dto = {
+        plantId: 'plant-1', supplierName: 'ABC Steel',
+        materialDescription: 'Steel Rods', quantity: 10,
+      } as any;
+      prisma.gateInwardEntry.create.mockResolvedValue({ id: 'gin-1', ginNumber: 'GIN-25-26-0001', status: 'PENDING' });
+
+      const result = await service.create(dto, user);
+
+      expect(prisma.gateInwardEntry.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING' }) }),
+      );
+      expect(result.status).toBe('PENDING');
+      expect(notifications.createBulk).not.toHaveBeenCalled();
+    });
+
+    describe('positive cases', () => {
+      it('flagNoPoReference() puts a PENDING no-PO entry on GATE_HOLD_NO_PO_REFERENCE when Gate chooses to escalate it', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', poId: null, remarks: null });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel', status: 'GATE_HOLD_NO_PO_REFERENCE',
+        });
+
+        const result = await service.flagNoPoReference('gin-1', 'New vendor, unusually large delivery with no PO - flagging for review', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'GATE_HOLD_NO_PO_REFERENCE' }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_NO_PO_REFERENCE');
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_NO_PO_REFERENCE', priority: 'URGENT' })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveNoPoReferenceApproved() confirms it as legitimate and returns to PENDING without linking any PO', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_NO_PO_REFERENCE' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'APPROVED_NON_PO' });
+
+        const result = await service.resolveNoPoReferenceApproved('gin-1', 'Confirmed with Purchase Head - legitimate sample delivery, no PO needed', user);
+
+        const updateCall = prisma.gateInwardEntry.update.mock.calls[0][0];
+        expect(updateCall.data.status).toBe('PENDING');
+        expect(updateCall.data.poId).toBeUndefined();
+        expect(result.holdResolution).toBe('APPROVED_NON_PO');
+      });
+
+      it('resolveNoPoReferenceRejected() sends the entry to terminal REJECTED', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_NO_PO_REFERENCE' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED' });
+        const result = await service.resolveNoPoReferenceRejected('gin-1', 'Should have had a PO raised first, rejected', user);
+        expect(result.status).toBe('REJECTED');
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagNoPoReference() refuses an entry that already has a linked PO - this only applies to genuine no-PO entries', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', poId: 'po-1' });
+        await expect(service.flagNoPoReference('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+      });
+
+      it('flagNoPoReference() refuses once the vehicle has already been let in', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN', poId: null });
+        await expect(service.flagNoPoReference('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('resolveNoPoReferenceApproved() rejects an entry that is not on this hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveNoPoReferenceApproved('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag no-PO-reference a second time on an entry already on that hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_NO_PO_REFERENCE', poId: null });
+        await expect(service.flagNoPoReference('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same no-PO-reference hold twice', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+        await expect(service.resolveNoPoReferenceApproved('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveNoPoReferenceRejected('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      it('flag-no-po-reference route requires GATE_INWARD_VERIFY (Gate-level)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Patch(':id/flag-no-po-reference')");
+        expect(routeIdx).toBeGreaterThan(-1);
+        expect(controllerSource.slice(routeIdx, routeIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+      });
+
+      it('resolve-no-po-reference/* routes require GATE_INWARD_RESOLVE_HOLD (Purchase/Admin-level)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        for (const route of ['approved', 'reject']) {
+          const routeIdx = controllerSource.indexOf(`@Patch(':id/resolve-no-po-reference/${route}')`);
+          expect(routeIdx).toBeGreaterThan(-1);
+          expect(controllerSource.slice(routeIdx, routeIdx + 200)).toContain('@RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)');
+        }
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagNoPoReference() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagNoPoReference('does-not-exist', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+
+      it('resolveNoPoReferenceRejected() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.resolveNoPoReferenceRejected('does-not-exist', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data - no PO is ever created or linked by this workflow', () => {
+      const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+      const gate015Start = serviceSource.indexOf('GATE-015: Material Arrives Without PO');
+      const gate015Section = serviceSource.slice(gate015Start, gate015Start + 4000);
+      expect(gate015Section).not.toContain('purchaseOrder.create');
+      expect(gate015Section).not.toContain('purchaseOrder.update');
+      expect(gate015Section).not.toContain('grnHeader.');
+    });
+
+    it('rejected no-PO-reference entries can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });
