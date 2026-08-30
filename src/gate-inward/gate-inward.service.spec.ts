@@ -792,8 +792,15 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
         expect(result.returnGateOutAt).toBeTruthy();
       });
 
-      it('refuses to record a return for an entry that was not rejected via a damage hold', async () => {
-        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', damageType: null });
+      it('now works for any REJECTED entry, not only damage-hold rejections (generalized for RETURN as a general determination)', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', damageType: null, returnGateOutAt: null });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', returnGateOutAt: new Date(), returnGateOutById: user.id });
+        const result = await service.recordReturnGateOut('gin-1', 'remarks', user);
+        expect(result.returnGateOutAt).toBeTruthy();
+      });
+
+      it('refuses to record a return for an entry that is not REJECTED at all', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
         await expect(service.recordReturnGateOut('gin-1', 'remarks', user)).rejects.toThrow(BadRequestException);
       });
 

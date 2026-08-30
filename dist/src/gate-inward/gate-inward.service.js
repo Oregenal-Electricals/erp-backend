@@ -731,8 +731,8 @@ let GateInwardService = class GateInwardService {
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
         if (!entry)
             throw new common_1.NotFoundException('Gate inward entry not found');
-        if (entry.status !== client_1.GateInwardStatus.REJECTED || !entry.damageType) {
-            throw new common_1.BadRequestException('Return Gate-Out can only be recorded for a rejected damage-hold entry');
+        if (entry.status !== client_1.GateInwardStatus.REJECTED) {
+            throw new common_1.BadRequestException('Return Gate-Out can only be recorded for a rejected entry');
         }
         if (entry.returnGateOutAt) {
             throw new common_1.BadRequestException('Return Gate-Out has already been recorded for this entry');

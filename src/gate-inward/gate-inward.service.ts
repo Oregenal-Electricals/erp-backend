@@ -882,11 +882,16 @@ export class GateInwardService {
   // actually left the gate. Gate-level action (same permission as
   // gateIn/verify), only valid on an entry that was rejected via a
   // damage hold and hasn't already been recorded as returned.
+  // Generalized beyond GATE-008/009: any rejected entry can need a
+  // physical return record, not only damage-hold rejections - the
+  // requirement across GATE-012 onward names RETURN as one of the
+  // five general determinations (NORMAL/HOLD/EXCEPTION/REJECT/RETURN),
+  // not something exclusive to visible damage.
   async recordReturnGateOut(id: string, remarks: string, user: any) {
     const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
     if (!entry) throw new NotFoundException('Gate inward entry not found');
-    if (entry.status !== GateInwardStatus.REJECTED || !entry.damageType) {
-      throw new BadRequestException('Return Gate-Out can only be recorded for a rejected damage-hold entry');
+    if (entry.status !== GateInwardStatus.REJECTED) {
+      throw new BadRequestException('Return Gate-Out can only be recorded for a rejected entry');
     }
     if (entry.returnGateOutAt) {
       throw new BadRequestException('Return Gate-Out has already been recorded for this entry');
