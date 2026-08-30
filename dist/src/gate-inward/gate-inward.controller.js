@@ -114,6 +114,15 @@ let GateInwardController = class GateInwardController {
     resolvePackageCountRejected(id, dto, user) {
         return this.service.resolvePackageCountRejected(id, dto.reason, user);
     }
+    flagDocumentMissing(id, dto, user) {
+        return this.service.flagDocumentMissing(id, dto.documentType, dto.reason, user);
+    }
+    resolveDocumentMissingException(id, dto, user) {
+        return this.service.resolveDocumentMissingException(id, dto.reason, user);
+    }
+    resolveDocumentMissingReject(id, dto, user) {
+        return this.service.resolveDocumentMissingReject(id, dto.reason, user);
+    }
 };
 exports.GateInwardController = GateInwardController;
 __decorate([
@@ -434,6 +443,39 @@ __decorate([
     __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolvePackageCountRejectedDto, Object]),
     __metadata("design:returntype", void 0)
 ], GateInwardController.prototype, "resolvePackageCountRejected", null);
+__decorate([
+    (0, common_1.Patch)(':id/flag-document-missing'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_VERIFY),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-012: Gate flags that the vehicle arrived without a physical challan/invoice document' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.FlagDocumentMissingDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "flagDocumentMissing", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-document-missing/exception'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-012: accept the material on undertaking the document will follow' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveDocumentMissingExceptionDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveDocumentMissingException", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve-document-missing/reject'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GATE_INWARD_RESOLVE_HOLD),
+    (0, swagger_1.ApiOperation)({ summary: 'GATE-012: reject the material over the missing document' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, gate_inward_dto_1.ResolveDocumentMissingRejectDto, Object]),
+    __metadata("design:returntype", void 0)
+], GateInwardController.prototype, "resolveDocumentMissingReject", null);
 exports.GateInwardController = GateInwardController = __decorate([
     (0, swagger_1.ApiTags)('Gate Inward'),
     (0, swagger_1.ApiBearerAuth)(),

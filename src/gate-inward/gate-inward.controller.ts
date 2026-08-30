@@ -19,6 +19,7 @@ import {
   FlagDamageDto, ResolveDamageRejectDto, ResolveDamageAcceptExceptionDto, RecordReturnGateOutDto,
   VerifyPackageCountDto, ResolvePackageCountRecountDto, ResolvePackageCountEscalateDto,
   ResolvePackageCountApprovedInwardDto, ResolvePackageCountRejectedDto,
+  FlagDocumentMissingDto, ResolveDocumentMissingExceptionDto, ResolveDocumentMissingRejectDto,
 } from './dto/gate-inward.dto';
 
 @ApiTags('Gate Inward')
@@ -342,5 +343,39 @@ export class GateInwardController {
     @CurrentUser() user: any,
   ) {
     return this.service.resolvePackageCountRejected(id, dto.reason, user);
+  }
+
+  // GATE-012: Challan / Invoice Document Missing.
+  @Patch(':id/flag-document-missing')
+  @RequirePermissions(Permission.GATE_INWARD_VERIFY)
+  @ApiOperation({ summary: 'GATE-012: Gate flags that the vehicle arrived without a physical challan/invoice document' })
+  flagDocumentMissing(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: FlagDocumentMissingDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.flagDocumentMissing(id, dto.documentType, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-document-missing/exception')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-012: accept the material on undertaking the document will follow' })
+  resolveDocumentMissingException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveDocumentMissingExceptionDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveDocumentMissingException(id, dto.reason, user);
+  }
+
+  @Patch(':id/resolve-document-missing/reject')
+  @RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)
+  @ApiOperation({ summary: 'GATE-012: reject the material over the missing document' })
+  resolveDocumentMissingReject(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResolveDocumentMissingRejectDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.service.resolveDocumentMissingReject(id, dto.reason, user);
   }
 }

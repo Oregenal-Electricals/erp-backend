@@ -329,3 +329,27 @@ export class ResolvePackageCountRejectedDto {
   @MinLength(5)
   reason: string;
 }
+
+export class FlagDocumentMissingDto {
+  @ApiProperty({ enum: ['CHALLAN', 'INVOICE', 'BOTH'], example: 'CHALLAN' })
+  @IsString()
+  documentType: 'CHALLAN' | 'INVOICE' | 'BOTH';
+  @ApiProperty({ example: 'Driver says the challan was left at the vendor office, will send by email' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveDocumentMissingExceptionDto {
+  @ApiProperty({ example: 'Vendor confirmed by phone, document to follow by email within the day - accepted' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}
+
+export class ResolveDocumentMissingRejectDto {
+  @ApiProperty({ example: 'No confirmation from vendor, cannot accept without documentation' })
+  @IsString()
+  @MinLength(5)
+  reason: string;
+}

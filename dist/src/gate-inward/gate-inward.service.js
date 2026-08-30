@@ -745,6 +745,85 @@ let GateInwardService = class GateInwardService {
         await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { returnGateOutAt: null }, newValues: { returnGateOutAt: updated.returnGateOutAt, remarks }, changedBy: user.id });
         return updated;
     }
+    async flagDocumentMissing(id, documentType, reason, user) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        const flaggableStatuses = [client_1.GateInwardStatus.PENDING, client_1.GateInwardStatus.VERIFIED];
+        if (!flaggableStatuses.includes(entry.status)) {
+            throw new common_1.BadRequestException('Can only flag a missing document before the vehicle is let in at the gate (entry must be PENDING or VERIFIED)');
+        }
+        const label = documentType === 'BOTH' ? 'Challan and Invoice' : documentType === 'CHALLAN' ? 'Challan' : 'Invoice';
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.GATE_HOLD_DOCUMENT_MISSING,
+                documentMissingType: documentType,
+                mismatchExpectedValue: `${label} document`, mismatchActualValue: 'Not provided at arrival',
+                mismatchFlaggedById: user.id, mismatchFlaggedAt: new Date(),
+                remarks: entry.remarks ? `${entry.remarks} | Document missing flagged: ${reason}` : `Document missing flagged: ${reason}`,
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'GATE_HOLD_DOCUMENT_MISSING', documentType, reason }, changedBy: user.id });
+        await this.notifyOfDocumentMissingHold(updated, documentType, user);
+        return updated;
+    }
+    async notifyOfDocumentMissingHold(entry, documentType, actorUser) {
+        const approverUsers = await this.prisma.user.findMany({
+            where: { companyId: actorUser.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } },
+            select: { id: true },
+        });
+        if (approverUsers.length === 0)
+            return;
+        const label = documentType === 'BOTH' ? 'Challan and Invoice' : documentType === 'CHALLAN' ? 'Challan' : 'Invoice';
+        await this.notifications.createBulk(approverUsers.map(u => ({
+            userId: u.id,
+            type: 'GATE_HOLD_DOCUMENT_MISSING',
+            title: 'Gate Hold — Document Missing',
+            message: `${entry.ginNumber} — ${entry.supplierName} — arrived without a ${label} document. Material is on hold at the gate pending your decision.`,
+            referenceType: 'GATE_INWARD_ENTRY', referenceId: entry.id, referenceNumber: entry.ginNumber,
+            priority: 'URGENT',
+        })), actorUser.companyId, actorUser.id);
+    }
+    async assertOnDocumentMissingHold(id) {
+        const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id }, include: this.includes() });
+        if (!entry)
+            throw new common_1.NotFoundException('Gate inward entry not found');
+        if (entry.status !== client_1.GateInwardStatus.GATE_HOLD_DOCUMENT_MISSING) {
+            throw new common_1.BadRequestException('This entry is not currently on a Document Missing hold');
+        }
+        return entry;
+    }
+    async resolveDocumentMissingException(id, reason, user) {
+        const entry = await this.assertOnDocumentMissingHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.PENDING,
+                holdResolution: 'ACCEPTED_WITH_UNDERTAKING', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'PENDING', holdResolution: 'ACCEPTED_WITH_UNDERTAKING', reason }, changedBy: user.id });
+        return updated;
+    }
+    async resolveDocumentMissingReject(id, reason, user) {
+        const entry = await this.assertOnDocumentMissingHold(id);
+        const updated = await this.prisma.gateInwardEntry.update({
+            where: { id },
+            data: {
+                status: client_1.GateInwardStatus.REJECTED, rejectionReason: reason,
+                holdResolution: 'REJECTED', holdResolvedById: user.id, holdResolvedAt: new Date(),
+                holdResolutionRemarks: reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'gate_inward_entries', recordId: id, action: 'UPDATE', oldValues: { status: entry.status }, newValues: { status: 'REJECTED', holdResolution: 'REJECTED', reason }, changedBy: user.id });
+        return updated;
+    }
     async verifyPackageCount(id, actualPackageCount, user) {
         var _a;
         const entry = await this.prisma.gateInwardEntry.findUnique({ where: { id } });

@@ -113,3 +113,13 @@ export declare class ResolvePackageCountApprovedInwardDto {
 export declare class ResolvePackageCountRejectedDto {
     reason: string;
 }
+export declare class FlagDocumentMissingDto {
+    documentType: 'CHALLAN' | 'INVOICE' | 'BOTH';
+    reason: string;
+}
+export declare class ResolveDocumentMissingExceptionDto {
+    reason: string;
+}
+export declare class ResolveDocumentMissingRejectDto {
+    reason: string;
+}

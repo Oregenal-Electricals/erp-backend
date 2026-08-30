@@ -167,6 +167,7 @@ export declare class GateDashboardService {
             packageCountVerifiedAt: Date | null;
             packageCountEscalated: boolean;
             packageCountEscalatedAt: Date | null;
+            documentMissingType: string | null;
         })[];
         pendingGOEList: ({
             plant: {

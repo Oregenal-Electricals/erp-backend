@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
+exports.ResolveDocumentMissingRejectDto = exports.ResolveDocumentMissingExceptionDto = exports.FlagDocumentMissingDto = exports.ResolvePackageCountRejectedDto = exports.ResolvePackageCountApprovedInwardDto = exports.ResolvePackageCountEscalateDto = exports.ResolvePackageCountRecountDto = exports.VerifyPackageCountDto = exports.RecordReturnGateOutDto = exports.ResolveDamageAcceptExceptionDto = exports.ResolveDamageRejectDto = exports.FlagDamageDto = exports.ResolveMismatchRejectedDto = exports.ResolveMismatchApprovedExceptionDto = exports.ResolveMismatchCorrectReferenceDto = exports.FlagMismatchDto = exports.CorrectPoReferenceDto = exports.ApprovedExceptionDto = exports.ReturnMaterialDto = exports.ResolveHoldAsRejectedDto = exports.ResolveHoldAsNonPoDto = exports.ResolveHoldWithPoDto = exports.GateInDto = exports.RejectGateInwardDto = exports.VerifyGateInwardDto = exports.UpdateGateInwardDto = exports.CreateGateInwardDto = exports.GateInwardItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
@@ -472,4 +472,36 @@ __decorate([
     (0, class_validator_1.MinLength)(5),
     __metadata("design:type", String)
 ], ResolvePackageCountRejectedDto.prototype, "reason", void 0);
+class FlagDocumentMissingDto {
+}
+exports.FlagDocumentMissingDto = FlagDocumentMissingDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['CHALLAN', 'INVOICE', 'BOTH'], example: 'CHALLAN' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FlagDocumentMissingDto.prototype, "documentType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Driver says the challan was left at the vendor office, will send by email' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], FlagDocumentMissingDto.prototype, "reason", void 0);
+class ResolveDocumentMissingExceptionDto {
+}
+exports.ResolveDocumentMissingExceptionDto = ResolveDocumentMissingExceptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Vendor confirmed by phone, document to follow by email within the day - accepted' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveDocumentMissingExceptionDto.prototype, "reason", void 0);
+class ResolveDocumentMissingRejectDto {
+}
+exports.ResolveDocumentMissingRejectDto = ResolveDocumentMissingRejectDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'No confirmation from vendor, cannot accept without documentation' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(5),
+    __metadata("design:type", String)
+], ResolveDocumentMissingRejectDto.prototype, "reason", void 0);
 //# sourceMappingURL=gate-inward.dto.js.map

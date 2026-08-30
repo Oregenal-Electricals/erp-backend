@@ -1082,4 +1082,134 @@ describe('GateInwardService — GATE-001 Normal Vendor Material Arrival', () => 
       await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('GATE-012: Challan / Invoice Document Missing', () => {
+    describe('positive cases', () => {
+      it('flagDocumentMissing() puts a PENDING entry on GATE_HOLD_DOCUMENT_MISSING and notifies Purchase/Store/Admin', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING', remarks: null });
+        prisma.gateInwardEntry.update.mockResolvedValue({
+          id: 'gin-1', ginNumber: 'GIN-25-26-0001', supplierName: 'ABC Steel',
+          status: 'GATE_HOLD_DOCUMENT_MISSING', documentMissingType: 'CHALLAN',
+        });
+
+        const result = await service.flagDocumentMissing('gin-1', 'CHALLAN', 'Driver has no challan, says it will follow by email', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({
+            status: 'GATE_HOLD_DOCUMENT_MISSING', documentMissingType: 'CHALLAN',
+            mismatchExpectedValue: 'Challan document', mismatchActualValue: 'Not provided at arrival',
+          }) }),
+        );
+        expect(result.status).toBe('GATE_HOLD_DOCUMENT_MISSING');
+        expect(prisma.user.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({ where: expect.objectContaining({ role: { in: ['PURCHASE_MANAGER', 'STORE_MANAGER', 'CORPORATE_ADMIN', 'SUPER_ADMIN'] } }) }),
+        );
+        expect(notifications.createBulk).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ type: 'GATE_HOLD_DOCUMENT_MISSING', priority: 'URGENT' })]),
+          user.companyId, user.id,
+        );
+      });
+
+      it('resolveDocumentMissingException() accepts on undertaking and returns to PENDING', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_DOCUMENT_MISSING', documentMissingType: 'CHALLAN' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'PENDING', holdResolution: 'ACCEPTED_WITH_UNDERTAKING' });
+
+        const result = await service.resolveDocumentMissingException('gin-1', 'Vendor confirmed by phone, document to follow by email', user);
+
+        expect(prisma.gateInwardEntry.update).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ status: 'PENDING', holdResolution: 'ACCEPTED_WITH_UNDERTAKING' }) }),
+        );
+        expect(result.holdResolution).toBe('ACCEPTED_WITH_UNDERTAKING');
+      });
+
+      it('resolveDocumentMissingReject() sends the entry to terminal REJECTED', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_DOCUMENT_MISSING', documentMissingType: 'INVOICE' });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', holdResolution: 'REJECTED' });
+
+        const result = await service.resolveDocumentMissingReject('gin-1', 'No confirmation from vendor, cannot accept without documentation', user);
+
+        expect(result.status).toBe('REJECTED');
+      });
+
+      it('a rejected document-missing entry can then have its physical return recorded via the now-general recordReturnGateOut()', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED', returnGateOutAt: null });
+        prisma.gateInwardEntry.update.mockResolvedValue({ id: 'gin-1', returnGateOutAt: new Date() });
+        const result = await service.recordReturnGateOut('gin-1', 'Sent back with the driver, no documentation available', user);
+        expect(result.returnGateOutAt).toBeTruthy();
+      });
+    });
+
+    describe('negative cases', () => {
+      it('flagDocumentMissing() refuses once the vehicle has already been let in', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_IN' });
+        await expect(service.flagDocumentMissing('gin-1', 'CHALLAN', 'reason', user)).rejects.toThrow(BadRequestException);
+        expect(prisma.gateInwardEntry.update).not.toHaveBeenCalled();
+      });
+
+      it('resolveDocumentMissingException() rejects an entry that is not on a Document Missing hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveDocumentMissingException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('duplicate action attempts', () => {
+      it('cannot flag document missing a second time on an entry already on that hold', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'GATE_HOLD_DOCUMENT_MISSING' });
+        await expect(service.flagDocumentMissing('gin-1', 'CHALLAN', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('cannot resolve the same document-missing hold twice - once resolved to PENDING, a second call is rejected', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'PENDING' });
+        await expect(service.resolveDocumentMissingException('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+        await expect(service.resolveDocumentMissingReject('gin-1', 'reason', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('unauthorized access', () => {
+      it('flag-document-missing route requires GATE_INWARD_VERIFY (Gate-level)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Patch(':id/flag-document-missing')");
+        expect(routeIdx).toBeGreaterThan(-1);
+        const nextLines = controllerSource.slice(routeIdx, routeIdx + 200);
+        expect(nextLines).toContain('@RequirePermissions(Permission.GATE_INWARD_VERIFY)');
+      });
+
+      it('resolve-document-missing/* routes require GATE_INWARD_RESOLVE_HOLD (Purchase/Admin-level)', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./gate-inward.controller.ts'), 'utf8');
+        for (const route of ['exception', 'reject']) {
+          const routeIdx = controllerSource.indexOf(`@Patch(':id/resolve-document-missing/${route}')`);
+          expect(routeIdx).toBeGreaterThan(-1);
+          const nextLines = controllerSource.slice(routeIdx, routeIdx + 200);
+          expect(nextLines).toContain('@RequirePermissions(Permission.GATE_INWARD_RESOLVE_HOLD)');
+        }
+      });
+    });
+
+    describe('exception handling', () => {
+      it('flagDocumentMissing() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.flagDocumentMissing('does-not-exist', 'CHALLAN', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+
+      it('resolveDocumentMissingReject() throws NotFoundException for a non-existent entry', async () => {
+        prisma.gateInwardEntry.findUnique.mockResolvedValue(null);
+        await expect(service.resolveDocumentMissingReject('does-not-exist', 'reason', user)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    it('Gate never modifies GRN, inventory, QC result, or PO commercial data as part of this workflow', () => {
+      const serviceSource = require('fs').readFileSync(require.resolve('./gate-inward.service.ts'), 'utf8');
+      const gate012Start = serviceSource.indexOf('GATE-012: Challan / Invoice Document Missing');
+      const gate012Section = serviceSource.slice(gate012Start, gate012Start + 4000);
+      expect(gate012Section).not.toContain('grnHeader.');
+      expect(gate012Section).not.toContain('stockBalance.');
+      expect(gate012Section).not.toContain('iqcInspection.');
+      expect(gate012Section).not.toContain('purchaseOrder.');
+    });
+
+    it('rejected document-missing material can never reach sendToStores()', async () => {
+      prisma.gateInwardEntry.findUnique.mockResolvedValue({ id: 'gin-1', status: 'REJECTED' });
+      await expect(service.sendToStores('gin-1', user)).rejects.toThrow(BadRequestException);
+    });
+  });
 });
