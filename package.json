@@ -97,5 +97,15 @@
   },
   "engines": {
     "node": "20.x"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "@scarf/scarf",
+      "prisma",
+      "unrs-resolver"
+    ]
   }
 }
