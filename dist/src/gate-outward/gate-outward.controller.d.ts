@@ -49,9 +49,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -112,9 +112,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -184,9 +184,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -247,9 +247,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -310,9 +310,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -373,9 +373,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -436,9 +436,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;
@@ -499,9 +499,9 @@ export declare class GateOutwardController {
         materialDescription: string;
         customerName: string;
         netWeight: number | null;
+        vehicleLogId: string | null;
         quantity: number;
         packageCount: number | null;
-        vehicleLogId: string | null;
         invoiceNumber: string | null;
         invoiceAmount: number | null;
         grossWeight: number | null;

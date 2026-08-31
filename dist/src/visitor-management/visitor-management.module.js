@@ -12,12 +12,13 @@ const visitor_management_controller_1 = require("./visitor-management.controller
 const visitor_log_controller_1 = require("./visitor-log.controller");
 const visitor_management_service_1 = require("./visitor-management.service");
 const settings_module_1 = require("../settings/settings.module");
+const vehicle_management_module_1 = require("../vehicle-management/vehicle-management.module");
 let VisitorManagementModule = class VisitorManagementModule {
 };
 exports.VisitorManagementModule = VisitorManagementModule;
 exports.VisitorManagementModule = VisitorManagementModule = __decorate([
     (0, common_1.Module)({
-        imports: [settings_module_1.SettingsModule],
+        imports: [settings_module_1.SettingsModule, vehicle_management_module_1.VehicleManagementModule],
         controllers: [visitor_management_controller_1.VisitorManagementController, visitor_log_controller_1.VisitorLogController],
         providers: [visitor_management_service_1.VisitorManagementService],
         exports: [visitor_management_service_1.VisitorManagementService],

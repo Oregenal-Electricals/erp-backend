@@ -146,10 +146,17 @@ export class GateDashboardService {
       }),
       this.prisma.gateOutwardEntry.count({ where: { ...base, status: 'DISPATCHED', dispatchedAt: { gte: today, lt: tomorrow } } }),
     ]);
-    // Visitor Vehicles Outside / Waiting Vehicles depend on the
-    // Parking workflow, which isn't built yet (Phase 1 is masters +
-    // event log only) - placeholder zero rather than a wrong number.
-    const visitorVehiclesOutside = 0;
+    // Visitor Vehicles Outside: vehicles that came in for a visitor
+    // (VehicleLog.purpose = VISITOR, wired via Visitor Check-in) and
+    // have since exited today - a real count now that Visitor
+    // Check-in/Check-out link and close their own VehicleLog record.
+    const visitorVehiclesOutside = await this.prisma.vehicleLog.count({
+      where: { ...base, purpose: 'VISITOR', status: 'EXITED', exitTime: { gte: today, lt: tomorrow } },
+    });
+    // Waiting Vehicles (queued outside, not yet let in) still depends
+    // on the Parking/queue workflow, which isn't built yet - genuinely
+    // no backing data source exists for this one, so it stays a
+    // placeholder rather than a wrong number.
     const waitingVehicles = 0;
 
     return {

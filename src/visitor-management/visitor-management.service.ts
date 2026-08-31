@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { SettingsService } from '../settings/settings.service';
+import { VehicleManagementService } from '../vehicle-management/vehicle-management.service';
 import {
   CreateVisitorDto,
   UpdateVisitorDto,
@@ -21,6 +22,7 @@ export class VisitorManagementService {
     private prisma: PrismaService,
     private audit: AuditService,
     private settings: SettingsService,
+    private vehicleManagement: VehicleManagementService,
   ) {}
 
   // ─────────────────────────────────────────────
@@ -181,6 +183,26 @@ export class VisitorManagementService {
       changedBy: user.id,
     });
 
+
+    // Link (or create) the vehicle's own INSIDE record so the Gate
+    // Dashboard's vehicle-tracking stats reflect visitor traffic too,
+    // not just material deliveries. findOrCreateActiveLog reuses an
+    // existing active log for the same physical vehicle if one
+    // already exists (e.g. it also did a delivery today) rather than
+    // creating a duplicate - correct, since only one vehicle is
+    // physically present at a time.
+    if (dto.vehicleNumber?.trim()) {
+      const vehicleLog = await this.vehicleManagement.findOrCreateActiveLog({
+        vehicleNumber: dto.vehicleNumber,
+        plantId: dto.plantId,
+        purpose: 'VISITOR',
+        companyId: user.companyId,
+        userId: user.id,
+      });
+      await this.prisma.visitorLog.update({ where: { id: log.id }, data: { vehicleLogId: vehicleLog.id, updatedBy: user.id } });
+      log.vehicleLogId = vehicleLog.id;
+    }
+
     return log;
   }
 
@@ -210,6 +232,19 @@ export class VisitorManagementService {
       newValues: { status: 'CHECKED_OUT', checkOutTime: new Date() },
       changedBy: user.id,
     });
+
+
+    // Close the linked vehicle record too, if it's still inside.
+    // Wrapped defensively: visitor checkout must never fail just
+    // because the linked vehicle already exited through another
+    // route - a legitimate, if unusual, case.
+    if (log.vehicleLogId) {
+      try {
+        await this.vehicleManagement.logExit(log.vehicleLogId, { remarks: 'Visitor checked out' } as any, user);
+      } catch {
+        // Already exited or otherwise unavailable - not fatal to checkout.
+      }
+    }
 
     return updated;
   }

@@ -51,9 +51,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -124,9 +124,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -209,9 +209,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -282,9 +282,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -355,9 +355,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -428,9 +428,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -501,9 +501,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;
@@ -574,9 +574,9 @@ export declare class GatePassController {
         status: import(".prisma/client").$Enums.GatePassStatus;
         unit: string;
         requestedById: string;
-        purpose: string;
         vehicleNumber: string | null;
         remarks: string | null;
+        purpose: string;
         passNumber: string;
         quantity: number;
         cancelReason: string | null;

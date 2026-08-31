@@ -85,6 +85,7 @@ enum VehiclePurpose {
   OUTWARD
   INTERNAL
   SERVICE
+  VISITOR
   OTHER
 }
 
@@ -704,6 +705,8 @@ model VisitorLog {
   checkedOutBy   User?         @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
   purpose        String
   vehicleNumber  String?
+  vehicleLogId   String?
+  vehicleLog     VehicleLog?   @relation(fields: [vehicleLogId], references: [id])
   itemsCarried   String?
   areasToVisit   String?
   remarks        String?
@@ -790,6 +793,7 @@ model VehicleLog {
   isTestData Boolean  @default(false)
 
   gateInwardEntries  GateInwardEntry[]
+  visitorLogs        VisitorLog[]
   gateOutwardEntries GateOutwardEntry[] @relation("OutwardVehicleLog")
   parkingSlots       ParkingSlot[]
 

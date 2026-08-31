@@ -13,11 +13,11 @@ export declare class VehicleManagementController {
         createdBy: string;
         updatedBy: string;
         vehicleNumber: string;
-        remarks: string | null;
         vehicleType: import(".prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
+        remarks: string | null;
     }>;
     findAllVehicles(user: any, search?: string): Promise<({
         _count: {
@@ -33,11 +33,11 @@ export declare class VehicleManagementController {
         createdBy: string;
         updatedBy: string;
         vehicleNumber: string;
-        remarks: string | null;
         vehicleType: import(".prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
+        remarks: string | null;
     })[]>;
     getStats(user: any): Promise<{
         totalVehicles: number;
@@ -69,13 +69,12 @@ export declare class VehicleManagementController {
             updatedBy: string;
             plantId: string;
             status: import(".prisma/client").$Enums.VehicleLogStatus;
-            purpose: import(".prisma/client").$Enums.VehiclePurpose;
             remarks: string | null;
-            logNumber: string;
             vehicleId: string;
             driverName: string;
             driverMobile: string | null;
             driverLicense: string | null;
+            purpose: import(".prisma/client").$Enums.VehiclePurpose;
             inWeight: number | null;
             materialDescription: string | null;
             supplierName: string | null;
@@ -84,6 +83,7 @@ export declare class VehicleManagementController {
             expectedExitTime: Date | null;
             outWeight: number | null;
             entryTime: Date;
+            logNumber: string;
             netWeight: number | null;
             exitTime: Date | null;
             entryById: string;
@@ -99,11 +99,11 @@ export declare class VehicleManagementController {
         createdBy: string;
         updatedBy: string;
         vehicleNumber: string;
-        remarks: string | null;
         vehicleType: import(".prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
+        remarks: string | null;
     }>;
     updateVehicle(id: string, dto: UpdateVehicleDto, user: any): Promise<{
         id: string;
@@ -115,10 +115,10 @@ export declare class VehicleManagementController {
         createdBy: string;
         updatedBy: string;
         vehicleNumber: string;
-        remarks: string | null;
         vehicleType: import(".prisma/client").$Enums.VehicleType;
         ownerName: string | null;
         ownerMobile: string | null;
         isCompanyVehicle: boolean;
+        remarks: string | null;
     }>;
 }

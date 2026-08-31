@@ -14,12 +14,14 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const settings_service_1 = require("../settings/settings.service");
+const vehicle_management_service_1 = require("../vehicle-management/vehicle-management.service");
 const client_1 = require("@prisma/client");
 let VisitorManagementService = class VisitorManagementService {
-    constructor(prisma, audit, settings) {
+    constructor(prisma, audit, settings, vehicleManagement) {
         this.prisma = prisma;
         this.audit = audit;
         this.settings = settings;
+        this.vehicleManagement = vehicleManagement;
     }
     async createVisitor(dto, user) {
         const visitor = await this.prisma.visitor.create({
@@ -101,6 +103,7 @@ let VisitorManagementService = class VisitorManagementService {
         return updated;
     }
     async checkIn(dto, user) {
+        var _a;
         const visitor = await this.prisma.visitor.findUnique({ where: { id: dto.visitorId } });
         if (!visitor)
             throw new common_1.NotFoundException('Visitor not found');
@@ -118,7 +121,7 @@ let VisitorManagementService = class VisitorManagementService {
         try {
             logNumber = await this.settings.getNextNumber(user.companyId, 'VIS');
         }
-        catch (_a) {
+        catch (_b) {
             const count = await this.prisma.visitorLog.count({ where: { companyId: user.companyId } });
             const now = new Date();
             const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
@@ -150,6 +153,17 @@ let VisitorManagementService = class VisitorManagementService {
             newValues: { logNumber, visitorId: dto.visitorId, plantId: dto.plantId },
             changedBy: user.id,
         });
+        if ((_a = dto.vehicleNumber) === null || _a === void 0 ? void 0 : _a.trim()) {
+            const vehicleLog = await this.vehicleManagement.findOrCreateActiveLog({
+                vehicleNumber: dto.vehicleNumber,
+                plantId: dto.plantId,
+                purpose: 'VISITOR',
+                companyId: user.companyId,
+                userId: user.id,
+            });
+            await this.prisma.visitorLog.update({ where: { id: log.id }, data: { vehicleLogId: vehicleLog.id, updatedBy: user.id } });
+            log.vehicleLogId = vehicleLog.id;
+        }
         return log;
     }
     async checkOut(id, dto, user) {
@@ -177,6 +191,13 @@ let VisitorManagementService = class VisitorManagementService {
             newValues: { status: 'CHECKED_OUT', checkOutTime: new Date() },
             changedBy: user.id,
         });
+        if (log.vehicleLogId) {
+            try {
+                await this.vehicleManagement.logExit(log.vehicleLogId, { remarks: 'Visitor checked out' }, user);
+            }
+            catch (_a) {
+            }
+        }
         return updated;
     }
     async findAllLogs(user, filters) {
@@ -235,6 +256,7 @@ exports.VisitorManagementService = VisitorManagementService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        settings_service_1.SettingsService])
+        settings_service_1.SettingsService,
+        vehicle_management_service_1.VehicleManagementService])
 ], VisitorManagementService);
 //# sourceMappingURL=visitor-management.service.js.map

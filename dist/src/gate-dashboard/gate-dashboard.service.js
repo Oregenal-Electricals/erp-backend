@@ -136,7 +136,9 @@ let GateDashboardService = class GateDashboardService {
             }),
             this.prisma.gateOutwardEntry.count({ where: Object.assign(Object.assign({}, base), { status: 'DISPATCHED', dispatchedAt: { gte: today, lt: tomorrow } }) }),
         ]);
-        const visitorVehiclesOutside = 0;
+        const visitorVehiclesOutside = await this.prisma.vehicleLog.count({
+            where: Object.assign(Object.assign({}, base), { purpose: 'VISITOR', status: 'EXITED', exitTime: { gte: today, lt: tomorrow } }),
+        });
         const waitingVehicles = 0;
         return {
             liveStats: {
