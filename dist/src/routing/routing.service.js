@@ -88,6 +88,8 @@ let RoutingService = class RoutingService {
             const stageProduct = await this.prisma.product.findFirst({ where: { id: bom.productId, companyId: user.companyId } });
             if (!stageProduct)
                 throw new common_1.NotFoundException(`Product not found for stage ${stage.stageName}`);
+            if (!stageProduct.isActive)
+                throw new common_1.BadRequestException(`Product for stage ${stage.stageName} (${stageProduct.code}) is inactive and cannot be released for production`);
             const warehouseId = stage.warehouseId || dto.warehouseId;
             const wo = await this.workOrderService.create({
                 productCode: stageProduct.code, productName: stageProduct.name,
@@ -96,6 +98,8 @@ let RoutingService = class RoutingService {
                 plannedStartDate: startDate.toISOString(), plannedEndDate: endDate.toISOString(),
                 priority: 'MEDIUM',
                 remarks: `Stage ${stage.sequence} (${stage.stageName}) of routing ${routing.routingName}`,
+                salesOrderId: dto.salesOrderId,
+                plannedManpower: dto.plannedManpower,
             }, user);
             if (!rootNumber)
                 rootNumber = wo.woNumber;

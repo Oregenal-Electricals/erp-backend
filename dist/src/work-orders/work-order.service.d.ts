@@ -4,13 +4,15 @@ import { MaterialReservationService } from './material-reservation.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
+import { SettingsService } from '../settings/settings.service';
 export declare class WorkOrderService {
     private prisma;
     private audit;
     private materialReservation;
     private workflows;
     private notifications;
-    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, workflows: WorkflowsService, notifications: NotificationsService);
+    private settings;
+    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, workflows: WorkflowsService, notifications: NotificationsService, settings: SettingsService);
     private generateNumber;
     private includes;
     create(dto: CreateWorkOrderDto, user: any): Promise<{
@@ -41,6 +43,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -54,6 +57,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -84,6 +94,7 @@ export declare class WorkOrderService {
             productCode: string;
             productName: string;
             bomId: string | null;
+            requiredDate: Date | null;
             rejectedQty: number;
             woNumber: string;
             salesOrderId: string | null;
@@ -97,6 +108,13 @@ export declare class WorkOrderService {
             plannedEndDate: Date;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
+            releasedById: string | null;
+            releasedAt: Date | null;
+            materialAvailability: string | null;
+            plannedManpower: number | null;
+            plannedLabourHours: number | null;
+            plannedLabourCost: number | null;
+            plannedLabourCostPerPc: number | null;
         })[];
         total: number;
         page: number;
@@ -177,6 +195,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -190,6 +209,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     update(id: string, dto: UpdateWorkOrderDto, user: any): Promise<{
         warehouse: {
@@ -219,6 +245,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -232,8 +259,76 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     release(id: string, user: any): Promise<{
+        materialCheck: {
+            status: string;
+            shortItems: {
+                itemCode: string;
+                itemName: string;
+                requiredQty: number;
+                availableQty: number;
+                shortQty: number;
+            }[];
+        };
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        bom: {
+            status: string;
+            version: string;
+            bomNumber: string;
+        };
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        priority: string;
+        remarks: string | null;
+        uom: string;
+        warehouseId: string;
+        stageName: string | null;
+        productCode: string;
+        productName: string;
+        bomId: string | null;
+        requiredDate: Date | null;
+        rejectedQty: number;
+        woNumber: string;
+        salesOrderId: string | null;
+        routingGroupId: string | null;
+        stageSequence: number | null;
+        parentWorkOrderId: string | null;
+        plannedQty: number;
+        pendingReassignQty: number | null;
+        completedQty: number;
+        plannedStartDate: Date;
+        plannedEndDate: Date;
+        actualStartDate: Date | null;
+        actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
+    }>;
+    private checkMaterialAvailability;
+    private computePlannedLabourReference;
+    start(id: string, user: any): Promise<{
         materialReservations: any[];
         warehouse: {
             name: string;
@@ -261,6 +356,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -274,49 +370,14 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
-    }>;
-    start(id: string, user: any): Promise<({
-        warehouse: {
-            name: string;
-            code: string;
-        };
-        bom: {
-            status: string;
-            version: string;
-            bomNumber: string;
-        };
-    } & {
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        priority: string;
-        remarks: string | null;
-        uom: string;
-        warehouseId: string;
-        stageName: string | null;
-        productCode: string;
-        productName: string;
-        bomId: string | null;
-        rejectedQty: number;
-        woNumber: string;
-        salesOrderId: string | null;
-        routingGroupId: string | null;
-        stageSequence: number | null;
-        parentWorkOrderId: string | null;
-        plannedQty: number;
-        pendingReassignQty: number | null;
-        completedQty: number;
-        plannedStartDate: Date;
-        plannedEndDate: Date;
-        actualStartDate: Date | null;
-        actualEndDate: Date | null;
-    }) | {
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
+    } | {
         pendingApproval: boolean;
         approvalRequestId: string;
         message: string;
@@ -392,6 +453,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -405,6 +467,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     stop(id: string, user: any): Promise<{
         warehouse: {
@@ -434,6 +503,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -447,6 +517,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     restart(id: string, user: any): Promise<({
         warehouse: {
@@ -476,6 +553,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -489,6 +567,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }) | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -565,6 +650,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -578,6 +664,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     approveRequest(requestId: string, user: any): Promise<{
         workflow: {
@@ -710,6 +803,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -723,6 +817,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -807,6 +908,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -820,6 +922,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     private notifyAdmins;
     complete(id: string, dto: {
@@ -853,6 +962,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -866,6 +976,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     cancel(id: string, user: any): Promise<{
         warehouse: {
@@ -895,6 +1012,7 @@ export declare class WorkOrderService {
         productCode: string;
         productName: string;
         bomId: string | null;
+        requiredDate: Date | null;
         rejectedQty: number;
         woNumber: string;
         salesOrderId: string | null;
@@ -908,6 +1026,13 @@ export declare class WorkOrderService {
         plannedEndDate: Date;
         actualStartDate: Date | null;
         actualEndDate: Date | null;
+        releasedById: string | null;
+        releasedAt: Date | null;
+        materialAvailability: string | null;
+        plannedManpower: number | null;
+        plannedLabourHours: number | null;
+        plannedLabourCost: number | null;
+        plannedLabourCostPerPc: number | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

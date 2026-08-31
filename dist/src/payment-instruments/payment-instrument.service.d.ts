@@ -344,7 +344,7 @@ export declare class PaymentInstrumentService {
         cancelled: number;
         totalValueInr: number;
         totalValueForeign: number;
-        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.PaymentInstrumentGroupByOutputType, "instrumentType"[]> & {
+        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.PaymentInstrumentGroupByOutputType, "instrumentType"[]> & {
             _count: number;
             _sum: {
                 amountInr: number;

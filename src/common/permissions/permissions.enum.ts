@@ -188,6 +188,7 @@ export enum Permission {
   STAGE_TRANSFER_RECEIVE = 'STAGE_TRANSFER_RECEIVE',
   // Plant Head sign-off on production actions (Work Order start, etc.)
   WORK_ORDER_APPROVE = 'WORK_ORDER_APPROVE',
+  WORK_ORDER_RELEASE = 'WORK_ORDER_RELEASE',
   DELETE_APPROVE = 'DELETE_APPROVE',
   // Quality sub-tabs
   QUALITY_DASHBOARD_VIEW = 'QUALITY_DASHBOARD_VIEW',

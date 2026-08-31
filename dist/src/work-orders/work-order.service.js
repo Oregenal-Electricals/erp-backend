@@ -16,15 +16,17 @@ const audit_service_1 = require("../common/services/audit.service");
 const material_reservation_service_1 = require("./material-reservation.service");
 const workflows_service_1 = require("../workflows/workflows.service");
 const notifications_service_1 = require("../notifications/notifications.service");
+const settings_service_1 = require("../settings/settings.service");
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
 const STAGE_BYPASS_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 let WorkOrderService = class WorkOrderService {
-    constructor(prisma, audit, materialReservation, workflows, notifications) {
+    constructor(prisma, audit, materialReservation, workflows, notifications, settings) {
         this.prisma = prisma;
         this.audit = audit;
         this.materialReservation = materialReservation;
         this.workflows = workflows;
         this.notifications = notifications;
+        this.settings = settings;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.workOrder.count({ where: { companyId } });
@@ -49,6 +51,9 @@ let WorkOrderService = class WorkOrderService {
                 warehouseId: dto.warehouseId, plannedQty: dto.plannedQty,
                 plannedStartDate: new Date(dto.plannedStartDate),
                 plannedEndDate: new Date(dto.plannedEndDate),
+                requiredDate: dto.requiredDate ? new Date(dto.requiredDate) : undefined,
+                salesOrderId: dto.salesOrderId,
+                plannedManpower: dto.plannedManpower,
                 priority: dto.priority || 'MEDIUM', remarks: dto.remarks,
                 companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
             },
@@ -108,6 +113,10 @@ let WorkOrderService = class WorkOrderService {
         const updateData = Object.assign(Object.assign({}, dto), { updatedBy: user.id });
         if (dto.actualStartDate)
             updateData.actualStartDate = new Date(dto.actualStartDate);
+        if (dto.releasedAt)
+            updateData.releasedAt = new Date(dto.releasedAt);
+        if (dto.requiredDate)
+            updateData.requiredDate = new Date(dto.requiredDate);
         if (dto.actualEndDate)
             updateData.actualEndDate = new Date(dto.actualEndDate);
         if (dto.status === 'IN_PROGRESS' && !wo.actualStartDate) {
@@ -128,16 +137,96 @@ let WorkOrderService = class WorkOrderService {
         const wo = await this.findOne(id, user);
         if (wo.status !== 'DRAFT')
             throw new common_1.BadRequestException('Only DRAFT work orders can be released');
-        const updated = await this.update(id, { status: 'RELEASED' }, user);
-        const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
-        return Object.assign(Object.assign({}, updated), { materialReservations: reservations });
+        const product = await this.prisma.product.findFirst({ where: { code: wo.productCode, companyId: wo.companyId } });
+        if (!product)
+            throw new common_1.NotFoundException(`Product ${wo.productCode} not found`);
+        if (!product.isActive)
+            throw new common_1.BadRequestException(`Product ${wo.productCode} is inactive and cannot be released for production`);
+        if (!wo.plannedQty || wo.plannedQty <= 0) {
+            throw new common_1.BadRequestException('Planned quantity must be greater than zero to release this Work Order');
+        }
+        if (!wo.bomId)
+            throw new common_1.BadRequestException('A BOM must be attached before this Work Order can be released');
+        const bom = await this.prisma.bom.findFirst({ where: { id: wo.bomId, companyId: wo.companyId } });
+        if (!bom)
+            throw new common_1.NotFoundException('Linked BOM not found');
+        if (!['VERIFIED', 'APPROVED'].includes(bom.status)) {
+            throw new common_1.BadRequestException(`Linked BOM ${bom.bomNumber} is ${bom.status} - only a VERIFIED or APPROVED BOM can be released for production`);
+        }
+        const materialCheck = await this.checkMaterialAvailability(wo, bom);
+        const blockOnShortage = (await this.settings.getSettingValue('WO_BLOCK_RELEASE_ON_SHORTAGE', 'false')) === 'true';
+        if (materialCheck.status === 'SHORTAGE' && blockOnShortage) {
+            const shortList = materialCheck.shortItems.map((i) => i.itemCode).join(', ');
+            throw new common_1.BadRequestException(`Material shortage - release is blocked by the configured business rule (WO_BLOCK_RELEASE_ON_SHORTAGE). Short items: ${shortList}`);
+        }
+        const plannedLabour = await this.computePlannedLabourReference(wo, product);
+        const updated = await this.update(id, {
+            status: 'RELEASED',
+            releasedById: user.id,
+            releasedAt: new Date().toISOString(),
+            materialAvailability: materialCheck.status,
+            plannedManpower: plannedLabour === null || plannedLabour === void 0 ? void 0 : plannedLabour.plannedManpower,
+            plannedLabourHours: plannedLabour === null || plannedLabour === void 0 ? void 0 : plannedLabour.plannedLabourHours,
+            plannedLabourCost: plannedLabour === null || plannedLabour === void 0 ? void 0 : plannedLabour.plannedLabourCost,
+            plannedLabourCostPerPc: plannedLabour === null || plannedLabour === void 0 ? void 0 : plannedLabour.plannedLabourCostPerPc,
+        }, user);
+        await this.audit.log({
+            tableName: 'work_orders', recordId: id, action: 'UPDATE',
+            oldValues: { status: 'DRAFT' },
+            newValues: { status: 'RELEASED', materialAvailability: materialCheck.status, releasedBy: user.id },
+            changedBy: user.id,
+        });
+        return Object.assign(Object.assign({}, updated), { materialCheck });
+    }
+    async checkMaterialAvailability(wo, bom) {
+        var _a, _b;
+        const bomItems = await this.prisma.bomItem.findMany({ where: { bomId: bom.id, isActive: true } });
+        const shortItems = [];
+        for (const item of bomItems) {
+            const requiredQty = ((_a = item.effectiveQty) !== null && _a !== void 0 ? _a : item.quantity) * wo.plannedQty;
+            const stock = await this.prisma.stockBalance.findUnique({
+                where: { companyId_itemCode_warehouseId: { companyId: wo.companyId, itemCode: item.itemCode, warehouseId: wo.warehouseId } },
+            });
+            const availableQty = (_b = stock === null || stock === void 0 ? void 0 : stock.availableQty) !== null && _b !== void 0 ? _b : 0;
+            if (availableQty < requiredQty) {
+                shortItems.push({ itemCode: item.itemCode, itemName: item.itemName, requiredQty, availableQty, shortQty: requiredQty - availableQty });
+            }
+        }
+        return { status: shortItems.length > 0 ? 'SHORTAGE' : 'AVAILABLE', shortItems };
+    }
+    async computePlannedLabourReference(wo, product) {
+        const now = new Date();
+        const productivity = await this.prisma.productStandardProductivity.findFirst({
+            where: {
+                companyId: wo.companyId, productId: product.id, isActive: true,
+                effectiveFrom: { lte: now },
+                OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }],
+            },
+            orderBy: { effectiveFrom: 'desc' },
+        });
+        if (!productivity || productivity.piecesPerManHour <= 0)
+            return null;
+        const plannedManpower = wo.plannedManpower && wo.plannedManpower > 0 ? wo.plannedManpower : 1;
+        const hourlyTarget = plannedManpower * productivity.piecesPerManHour;
+        const plannedProductionHours = wo.plannedQty / hourlyTarget;
+        const plannedLabourHours = plannedManpower * plannedProductionHours;
+        const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+        const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+        if (!rate || rate <= 0)
+            return { plannedManpower, plannedLabourHours, plannedLabourCost: null, plannedLabourCostPerPc: null };
+        const hourlyLabourCost = rate / shiftHours;
+        const plannedLabourCost = plannedLabourHours * hourlyLabourCost;
+        const plannedLabourCostPerPc = wo.plannedQty > 0 ? plannedLabourCost / wo.plannedQty : null;
+        return { plannedManpower, plannedLabourHours, plannedLabourCost, plannedLabourCostPerPc };
     }
     async start(id, user) {
         const wo = await this.findOne(id, user);
         if (wo.status !== 'RELEASED')
             throw new common_1.BadRequestException('Only RELEASED work orders can be started');
         if (STAGE_BYPASS_ROLES.includes(user.role)) {
-            return this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+            const updated = await this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+            const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
+            return Object.assign(Object.assign({}, updated), { materialReservations: reservations });
         }
         const { request } = await this.workflows.submit({
             documentType: 'WO_START', documentId: wo.id, documentNumber: wo.woNumber,
@@ -333,6 +422,7 @@ exports.WorkOrderService = WorkOrderService = __decorate([
         audit_service_1.AuditService,
         material_reservation_service_1.MaterialReservationService,
         workflows_service_1.WorkflowsService,
-        notifications_service_1.NotificationsService])
+        notifications_service_1.NotificationsService,
+        settings_service_1.SettingsService])
 ], WorkOrderService);
 //# sourceMappingURL=work-order.service.js.map

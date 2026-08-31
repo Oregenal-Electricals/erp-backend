@@ -16,7 +16,7 @@ export declare class GateMastersController {
         updatedBy: string | null;
         code: string;
     }>;
-    findAllGateTypes(req: any): import(".prisma/client").Prisma.PrismaPromise<{
+    findAllGateTypes(req: any): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
         companyId: string;
         name: string;
@@ -56,7 +56,7 @@ export declare class GateMastersController {
         plantId: string;
         gateTypeId: string | null;
     }>;
-    findAllGates(req: any, plantId?: string): import(".prisma/client").Prisma.PrismaPromise<({
+    findAllGates(req: any, plantId?: string): import("@prisma/client").Prisma.PrismaPromise<({
         plant: {
             id: string;
             name: string;
@@ -171,7 +171,7 @@ export declare class GateMastersController {
         currentVehicleLogId: string | null;
         occupiedAt: Date | null;
     }>;
-    findAllParkingSlots(req: any, parkingAreaId?: string): import(".prisma/client").Prisma.PrismaPromise<({
+    findAllParkingSlots(req: any, parkingAreaId?: string): import("@prisma/client").Prisma.PrismaPromise<({
         currentVehicleLog: {
             id: string;
             vehicle: {
@@ -226,7 +226,7 @@ export declare class GateMastersController {
         updatedBy: string | null;
         code: string;
     }>;
-    findAllVisitPurposes(req: any): import(".prisma/client").Prisma.PrismaPromise<{
+    findAllVisitPurposes(req: any): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
         companyId: string;
         name: string;
@@ -263,7 +263,7 @@ export declare class GateMastersController {
         code: string;
         mapsToType: string;
     }>;
-    findAllGatePassTypeMasters(req: any): import(".prisma/client").Prisma.PrismaPromise<{
+    findAllGatePassTypeMasters(req: any): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
         companyId: string;
         name: string;
@@ -302,7 +302,7 @@ export declare class GateMastersController {
         code: string;
         category: string;
     }>;
-    findAllSecurityReasons(req: any): import(".prisma/client").Prisma.PrismaPromise<{
+    findAllSecurityReasons(req: any): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
         companyId: string;
         name: string;

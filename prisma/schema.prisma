@@ -283,6 +283,7 @@ model Company {
   workOrders         WorkOrder[]
   materialReservations MaterialReservation[]
   productRoutings    ProductRouting[]
+  productStandardProductivity ProductStandardProductivity[]
   customers          Customer[]
   productionIssues   ProductionIssue[]
   productionEntries  ProductionEntry[]
@@ -537,6 +538,7 @@ model User {
   ginDamageFlagged    GateInwardEntry[]  @relation("GINDamageFlaggedBy")
   ginReturnGateOut    GateInwardEntry[]  @relation("GINReturnGateOutBy")
   ginPackageCountVerified  GateInwardEntry[]  @relation("GINPackageCountVerifiedBy")
+  workOrdersReleased      WorkOrder[]        @relation("WorkOrderReleasedBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -1796,6 +1798,7 @@ model Product {
   boms            Bom[]
   bomRevisions    BomRevision[] @relation("BomRevisionProduct")
   routings        ProductRouting[]
+  standardProductivity ProductStandardProductivity[]
 
   @@unique([companyId, code])
   @@map("products")
@@ -3654,6 +3657,26 @@ model WorkOrder {
   status            String    @default("DRAFT") // DRAFT, RELEASED, IN_PROGRESS, COMPLETED, CANCELLED
   priority          String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
   remarks           String?
+
+  // PROD-001: release tracking
+  requiredDate      DateTime?
+  releasedById      String?
+  releasedBy        User?     @relation("WorkOrderReleasedBy", fields: [releasedById], references: [id])
+  releasedAt        DateTime?
+  // Read-only snapshot from the release-time availability check -
+  // AVAILABLE or SHORTAGE. Never set by any inventory-mutating action;
+  // the release step itself never touches StockBalance.
+  materialAvailability String?
+
+  // PROD-001: planned labour reference, computed once at release and
+  // stored as a snapshot so later productivity/rate master changes
+  // never retroactively alter a historical Work Order's figures.
+  // Actual labour cost lives on ProductionCostSheet and stays 0 until
+  // real production entries exist - these fields are never posted there.
+  plannedManpower        Int?
+  plannedLabourHours     Float?
+  plannedLabourCost      Float?
+  plannedLabourCostPerPc Float?
   isActive          Boolean   @default(true)
   isTestData        Boolean   @default(false)
   createdAt         DateTime  @default(now())
@@ -3745,6 +3768,29 @@ model RoutingStage {
   @@map("routing_stages")
   @@index([routingId])
   @@unique([routingId, sequence])
+}
+
+// PROD-001: standard productivity reference (pcs/man/hour), effective-
+// dated the same way Bom already is, so historical Work Orders keep
+// whatever standard was in effect when they were released even if the
+// master value changes later.
+model ProductStandardProductivity {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  piecesPerManHour Float
+  effectiveFrom   DateTime  @default(now())
+  effectiveTo     DateTime?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+  @@map("product_standard_productivity")
+  @@index([companyId, productId])
 }
 
 // MODULE 56 — PRODUCTION MATERIAL ISSUE

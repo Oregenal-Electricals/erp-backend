@@ -115,6 +115,7 @@ export declare class QualityReportsController {
             itemName: string;
             uom: string;
             sampleSize: number;
+            releasedBy: string | null;
             workOrderId: string | null;
             inspectorName: string | null;
             inspectionDate: Date;
@@ -131,7 +132,6 @@ export declare class QualityReportsController {
             labellingCheck: string | null;
             defectsFound: string | null;
             cocNumber: string | null;
-            releasedBy: string | null;
             releasedDate: Date | null;
         })[];
         total: number;

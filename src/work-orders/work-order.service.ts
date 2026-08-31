@@ -5,6 +5,7 @@ import { MaterialReservationService } from './material-reservation.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
+import { SettingsService } from '../settings/settings.service';
 
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
 const STAGE_BYPASS_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
@@ -17,6 +18,7 @@ export class WorkOrderService {
     private materialReservation: MaterialReservationService,
     private workflows: WorkflowsService,
     private notifications: NotificationsService,
+    private settings: SettingsService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -44,6 +46,9 @@ export class WorkOrderService {
         warehouseId: dto.warehouseId, plannedQty: dto.plannedQty,
         plannedStartDate: new Date(dto.plannedStartDate),
         plannedEndDate: new Date(dto.plannedEndDate),
+        requiredDate: dto.requiredDate ? new Date(dto.requiredDate) : undefined,
+        salesOrderId: dto.salesOrderId,
+        plannedManpower: dto.plannedManpower,
         priority: dto.priority || 'MEDIUM', remarks: dto.remarks,
         companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
       },
@@ -107,6 +112,8 @@ export class WorkOrderService {
 
     const updateData: any = { ...dto, updatedBy: user.id };
     if (dto.actualStartDate) updateData.actualStartDate = new Date(dto.actualStartDate);
+    if ((dto as any).releasedAt) updateData.releasedAt = new Date((dto as any).releasedAt);
+    if ((dto as any).requiredDate) updateData.requiredDate = new Date((dto as any).requiredDate);
     if (dto.actualEndDate) updateData.actualEndDate = new Date(dto.actualEndDate);
 
     if (dto.status === 'IN_PROGRESS' && !wo.actualStartDate) {
@@ -126,12 +133,114 @@ export class WorkOrderService {
     return updated;
   }
 
+  // PROD-001: an approved and valid Work Order can be formally released
+  // into the Production Queue. Every check below is a real gate, not a
+  // formality - a rejection here means the WO stays DRAFT.
   async release(id: string, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'DRAFT') throw new BadRequestException('Only DRAFT work orders can be released');
-    const updated = await this.update(id, { status: 'RELEASED' }, user);
-    const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
-    return { ...updated, materialReservations: reservations };
+
+    // Product must exist and be active
+    const product = await this.prisma.product.findFirst({ where: { code: wo.productCode, companyId: wo.companyId } });
+    if (!product) throw new NotFoundException(`Product ${wo.productCode} not found`);
+    if (!product.isActive) throw new BadRequestException(`Product ${wo.productCode} is inactive and cannot be released for production`);
+
+    // Planned quantity must be greater than zero
+    if (!wo.plannedQty || wo.plannedQty <= 0) {
+      throw new BadRequestException('Planned quantity must be greater than zero to release this Work Order');
+    }
+
+    // A valid, approved BOM must exist
+    if (!wo.bomId) throw new BadRequestException('A BOM must be attached before this Work Order can be released');
+    const bom = await this.prisma.bom.findFirst({ where: { id: wo.bomId, companyId: wo.companyId } });
+    if (!bom) throw new NotFoundException('Linked BOM not found');
+    if (!['VERIFIED', 'APPROVED'].includes(bom.status)) {
+      throw new BadRequestException(`Linked BOM ${bom.bomNumber} is ${bom.status} - only a VERIFIED or APPROVED BOM can be released for production`);
+    }
+
+    // Material availability - read-only check, never mutates inventory.
+    // Actual reservation happens later, at start() - see that method.
+    const materialCheck = await this.checkMaterialAvailability(wo, bom);
+    const blockOnShortage = (await this.settings.getSettingValue('WO_BLOCK_RELEASE_ON_SHORTAGE', 'false')) === 'true';
+    if (materialCheck.status === 'SHORTAGE' && blockOnShortage) {
+      const shortList = materialCheck.shortItems.map((i: any) => i.itemCode).join(', ');
+      throw new BadRequestException(`Material shortage - release is blocked by the configured business rule (WO_BLOCK_RELEASE_ON_SHORTAGE). Short items: ${shortList}`);
+    }
+
+    // Planned labour cost reference - never posted as actual cost.
+    const plannedLabour = await this.computePlannedLabourReference(wo, product);
+
+    const updated = await this.update(id, {
+      status: 'RELEASED',
+      releasedById: user.id,
+      releasedAt: new Date().toISOString(),
+      materialAvailability: materialCheck.status,
+      plannedManpower: plannedLabour?.plannedManpower,
+      plannedLabourHours: plannedLabour?.plannedLabourHours,
+      plannedLabourCost: plannedLabour?.plannedLabourCost,
+      plannedLabourCostPerPc: plannedLabour?.plannedLabourCostPerPc,
+    } as any, user);
+
+    await this.audit.log({
+      tableName: 'work_orders', recordId: id, action: 'UPDATE',
+      oldValues: { status: 'DRAFT' },
+      newValues: { status: 'RELEASED', materialAvailability: materialCheck.status, releasedBy: user.id },
+      changedBy: user.id,
+    });
+
+    return { ...updated, materialCheck };
+  }
+
+  // BOM-item-by-item comparison against current stock. Read-only:
+  // never touches StockBalance. Returns AVAILABLE or SHORTAGE plus the
+  // list of short items so the releasing user sees exactly what's missing.
+  private async checkMaterialAvailability(wo: any, bom: any) {
+    const bomItems = await this.prisma.bomItem.findMany({ where: { bomId: bom.id, isActive: true } });
+    const shortItems: Array<{ itemCode: string; itemName: string; requiredQty: number; availableQty: number; shortQty: number }> = [];
+    for (const item of bomItems) {
+      const requiredQty = (item.effectiveQty ?? item.quantity) * wo.plannedQty;
+      const stock = await this.prisma.stockBalance.findUnique({
+        where: { companyId_itemCode_warehouseId: { companyId: wo.companyId, itemCode: item.itemCode, warehouseId: wo.warehouseId } },
+      });
+      const availableQty = stock?.availableQty ?? 0;
+      if (availableQty < requiredQty) {
+        shortItems.push({ itemCode: item.itemCode, itemName: item.itemName, requiredQty, availableQty, shortQty: requiredQty - availableQty });
+      }
+    }
+    return { status: shortItems.length > 0 ? 'SHORTAGE' : 'AVAILABLE', shortItems };
+  }
+
+  // Planned labour hours/cost, computed once at release and stored as a
+  // snapshot - never posted as actual cost, and never recomputed later
+  // even if the productivity/rate master changes afterward. Returns
+  // null (skipping the planned figures, not blocking release) if no
+  // productivity standard is configured for this product yet.
+  private async computePlannedLabourReference(wo: any, product: any) {
+    const now = new Date();
+    const productivity = await this.prisma.productStandardProductivity.findFirst({
+      where: {
+        companyId: wo.companyId, productId: product.id, isActive: true,
+        effectiveFrom: { lte: now },
+        OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }],
+      },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+    if (!productivity || productivity.piecesPerManHour <= 0) return null;
+
+    const plannedManpower = wo.plannedManpower && wo.plannedManpower > 0 ? wo.plannedManpower : 1;
+    const hourlyTarget = plannedManpower * productivity.piecesPerManHour;
+    const plannedProductionHours = wo.plannedQty / hourlyTarget;
+    const plannedLabourHours = plannedManpower * plannedProductionHours;
+
+    const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+    const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+    if (!rate || rate <= 0) return { plannedManpower, plannedLabourHours, plannedLabourCost: null, plannedLabourCostPerPc: null };
+
+    const hourlyLabourCost = rate / shiftHours;
+    const plannedLabourCost = plannedLabourHours * hourlyLabourCost;
+    const plannedLabourCostPerPc = wo.plannedQty > 0 ? plannedLabourCost / wo.plannedQty : null;
+
+    return { plannedManpower, plannedLabourHours, plannedLabourCost, plannedLabourCostPerPc };
   }
 
   async start(id: string, user: any) {
@@ -143,7 +252,12 @@ export class WorkOrderService {
     // for PO/SO/Voucher approvals, and doesn't take effect until a Plant
     // Head approves it.
     if (STAGE_BYPASS_ROLES.includes(user.role)) {
-      return this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+      const updated = await this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+      // Material reservation moves here from release() (PROD-001) - this
+      // is the point production is actually about to begin consuming
+      // material, not the earlier administrative "approved to exist" step.
+      const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
+      return { ...updated, materialReservations: reservations };
     }
     const { request } = await this.workflows.submit({
       documentType: 'WO_START', documentId: wo.id, documentNumber: wo.woNumber,

@@ -162,6 +162,7 @@ export declare class ProductionEntryService {
             productCode: string;
             productName: string;
             bomId: string | null;
+            requiredDate: Date | null;
             rejectedQty: number;
             woNumber: string;
             salesOrderId: string | null;
@@ -175,6 +176,13 @@ export declare class ProductionEntryService {
             plannedEndDate: Date;
             actualStartDate: Date | null;
             actualEndDate: Date | null;
+            releasedById: string | null;
+            releasedAt: Date | null;
+            materialAvailability: string | null;
+            plannedManpower: number | null;
+            plannedLabourHours: number | null;
+            plannedLabourCost: number | null;
+            plannedLabourCostPerPc: number | null;
         };
         entries: {
             id: string;

@@ -16,7 +16,7 @@ export declare class VisitorLogController {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -43,7 +43,7 @@ export declare class VisitorLogController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         vehicleNumber: string | null;
         remarks: string | null;
         purpose: string;
@@ -72,7 +72,7 @@ export declare class VisitorLogController {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -99,7 +99,7 @@ export declare class VisitorLogController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         vehicleNumber: string | null;
         remarks: string | null;
         purpose: string;
@@ -128,7 +128,7 @@ export declare class VisitorLogController {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -155,7 +155,7 @@ export declare class VisitorLogController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         vehicleNumber: string | null;
         remarks: string | null;
         purpose: string;
@@ -184,7 +184,7 @@ export declare class VisitorLogController {
             lastName: string;
             mobile: string;
             visitorCompany: string;
-            idProofType: import(".prisma/client").$Enums.IdProofType;
+            idProofType: import("@prisma/client").$Enums.IdProofType;
         };
         hostEmployee: {
             id: string;
@@ -211,7 +211,7 @@ export declare class VisitorLogController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        status: import(".prisma/client").$Enums.VisitorStatus;
+        status: import("@prisma/client").$Enums.VisitorStatus;
         vehicleNumber: string | null;
         remarks: string | null;
         purpose: string;

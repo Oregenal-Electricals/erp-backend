@@ -22,6 +22,15 @@ export class WorkOrderController {
   @Get()
   @RequirePermissions(Permission.WORK_ORDER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.woService.findAll(req.user, query); }
+  // PROD-001: Production Queue - released Work Orders visible to Plant
+  // Head and other authorized production users. Thin wrapper over the
+  // already-existing findAll(), filtered to status=RELEASED - no
+  // separate module needed for this.
+  @Get('production-queue')
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  getProductionQueue(@Request() req: any, @Query() query: any) {
+    return this.woService.findAll(req.user, { ...query, status: 'RELEASED' });
+  }
   @Get(':id')
   @RequirePermissions(Permission.PRODUCTION_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.woService.findOne(id, req.user); }
@@ -35,7 +44,7 @@ export class WorkOrderController {
   @RequirePermissions(Permission.PRODUCTION_EDIT)
   update(@Param('id') id: string, @Body() dto: UpdateWorkOrderDto, @Request() req: any) { return this.woService.update(id, dto, req.user); }
   @Post(':id/release')
-  @RequirePermissions(Permission.PRODUCTION_EDIT)
+  @RequirePermissions(Permission.WORK_ORDER_RELEASE)
   release(@Param('id') id: string, @Request() req: any) { return this.woService.release(id, req.user); }
   @Post(':id/start')
   @RequirePermissions(Permission.PRODUCTION_EDIT)

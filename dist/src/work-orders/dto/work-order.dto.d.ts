@@ -7,6 +7,9 @@ export declare class CreateWorkOrderDto {
     plannedQty: number;
     plannedStartDate: string;
     plannedEndDate: string;
+    requiredDate?: string;
+    salesOrderId?: string;
+    plannedManpower?: number;
     priority?: string;
     remarks?: string;
 }
@@ -16,6 +19,8 @@ export declare class UpdateWorkOrderDto {
     rejectedQty?: number;
     actualStartDate?: string;
     actualEndDate?: string;
+    requiredDate?: string;
+    plannedManpower?: number;
     priority?: string;
     remarks?: string;
 }

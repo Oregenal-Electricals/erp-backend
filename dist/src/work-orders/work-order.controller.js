@@ -29,6 +29,9 @@ let WorkOrderController = class WorkOrderController {
     getStats(req) { return this.woService.getStats(req.user); }
     getReservations(req, query) { return this.reservationService.findAll(req.user, query); }
     findAll(req, query) { return this.woService.findAll(req.user, query); }
+    getProductionQueue(req, query) {
+        return this.woService.findAll(req.user, Object.assign(Object.assign({}, query), { status: 'RELEASED' }));
+    }
     findOne(id, req) { return this.woService.findOne(id, req.user); }
     getWoReservations(id) { return this.reservationService.findForWorkOrder(id); }
     create(dto, req) { return this.woService.create(dto, req.user); }
@@ -76,6 +79,15 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WorkOrderController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('production-queue'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], WorkOrderController.prototype, "getProductionQueue", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
     __param(0, (0, common_1.Param)('id')),
@@ -113,7 +125,7 @@ __decorate([
 ], WorkOrderController.prototype, "update", null);
 __decorate([
     (0, common_1.Post)(':id/release'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORK_ORDER_RELEASE),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),

@@ -1,8 +1,6 @@
 import { IsString, IsOptional, IsNumber, IsDateString, IsIn, Min } from 'class-validator';
-
 const STATUSES = ['DRAFT','RELEASED','IN_PROGRESS','COMPLETED','CANCELLED'];
 const PRIORITIES = ['LOW','MEDIUM','HIGH','URGENT'];
-
 export class CreateWorkOrderDto {
   @IsString() productCode: string;
   @IsString() productName: string;
@@ -12,16 +10,20 @@ export class CreateWorkOrderDto {
   @IsNumber() @Min(0) plannedQty: number;
   @IsDateString() plannedStartDate: string;
   @IsDateString() plannedEndDate: string;
+  @IsOptional() @IsDateString() requiredDate?: string;
+  @IsOptional() @IsString() salesOrderId?: string;
+  @IsOptional() @IsNumber() @Min(1) plannedManpower?: number;
   @IsOptional() @IsString() @IsIn(PRIORITIES) priority?: string;
   @IsOptional() @IsString() remarks?: string;
 }
-
 export class UpdateWorkOrderDto {
   @IsOptional() @IsString() @IsIn(STATUSES) status?: string;
   @IsOptional() @IsNumber() @Min(0) completedQty?: number;
   @IsOptional() @IsNumber() @Min(0) rejectedQty?: number;
   @IsOptional() @IsDateString() actualStartDate?: string;
   @IsOptional() @IsDateString() actualEndDate?: string;
+  @IsOptional() @IsDateString() requiredDate?: string;
+  @IsOptional() @IsNumber() @Min(1) plannedManpower?: number;
   @IsOptional() @IsString() @IsIn(PRIORITIES) priority?: string;
   @IsOptional() @IsString() remarks?: string;
 }

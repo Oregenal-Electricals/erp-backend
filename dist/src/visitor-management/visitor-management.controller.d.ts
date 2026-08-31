@@ -18,7 +18,7 @@ export declare class VisitorManagementController {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -43,7 +43,7 @@ export declare class VisitorManagementController {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -84,7 +84,7 @@ export declare class VisitorManagementController {
             createdBy: string;
             updatedBy: string;
             plantId: string;
-            status: import(".prisma/client").$Enums.VisitorStatus;
+            status: import("@prisma/client").$Enums.VisitorStatus;
             vehicleNumber: string | null;
             remarks: string | null;
             purpose: string;
@@ -116,7 +116,7 @@ export declare class VisitorManagementController {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -137,7 +137,7 @@ export declare class VisitorManagementController {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;
@@ -158,7 +158,7 @@ export declare class VisitorManagementController {
         mobile: string;
         visitorCompany: string | null;
         designation: string | null;
-        idProofType: import(".prisma/client").$Enums.IdProofType;
+        idProofType: import("@prisma/client").$Enums.IdProofType;
         idProofNumber: string;
         photoUrl: string | null;
         isBlacklisted: boolean;

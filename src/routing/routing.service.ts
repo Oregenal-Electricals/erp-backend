@@ -86,6 +86,7 @@ export class RoutingService {
       if (!bom) throw new NotFoundException(`BOM not found for stage ${stage.stageName}`);
       const stageProduct = await this.prisma.product.findFirst({ where: { id: bom.productId, companyId: user.companyId } });
       if (!stageProduct) throw new NotFoundException(`Product not found for stage ${stage.stageName}`);
+      if (!stageProduct.isActive) throw new BadRequestException(`Product for stage ${stage.stageName} (${stageProduct.code}) is inactive and cannot be released for production`);
 
       const warehouseId = stage.warehouseId || dto.warehouseId;
       const wo = await this.workOrderService.create({
@@ -95,6 +96,8 @@ export class RoutingService {
         plannedStartDate: startDate.toISOString(), plannedEndDate: endDate.toISOString(),
         priority: 'MEDIUM',
         remarks: `Stage ${stage.sequence} (${stage.stageName}) of routing ${routing.routingName}`,
+        salesOrderId: dto.salesOrderId,
+        plannedManpower: dto.plannedManpower,
       } as any, user);
 
       // The first stage's own auto-generated number becomes the shared

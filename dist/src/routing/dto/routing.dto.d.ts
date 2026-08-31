@@ -13,4 +13,6 @@ export declare class StartProductionDto {
     plannedQty: number;
     warehouseId: string;
     stopAtSequence?: number;
+    salesOrderId?: string;
+    plannedManpower?: number;
 }

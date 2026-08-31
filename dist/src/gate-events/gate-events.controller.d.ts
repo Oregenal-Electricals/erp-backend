@@ -7,7 +7,7 @@ export declare class GateEventsController {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
         };
         gate: {
             id: string;
@@ -52,7 +52,7 @@ export declare class GateEventsController {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
         };
         gate: {
             id: string;
@@ -97,7 +97,7 @@ export declare class GateEventsController {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
         };
         gate: {
             id: string;
@@ -118,7 +118,7 @@ export declare class GateEventsController {
             vehicle: {
                 id: string;
                 vehicleNumber: string;
-                vehicleType: import(".prisma/client").$Enums.VehicleType;
+                vehicleType: import("@prisma/client").$Enums.VehicleType;
             };
             gate: {
                 id: string;
@@ -187,7 +187,7 @@ export declare class GateEventsController {
         vehicle: {
             id: string;
             vehicleNumber: string;
-            vehicleType: import(".prisma/client").$Enums.VehicleType;
+            vehicleType: import("@prisma/client").$Enums.VehicleType;
         };
         gate: {
             id: string;
