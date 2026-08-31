@@ -57,3 +57,38 @@ jobs:
           sleep 90
           curl -f https://erp-backend-ry5v.onrender.com/api/v1/health || exit 1
           echo "Health check passed"
+
+  deploy-aws-ecs:
+    name: Deploy to AWS ECS (Staging)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build, tag, and push image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_REPOSITORY: oregenal-backend-staging
+        run: |
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service --cluster default --service oregenal-backend-staging --force-new-deployment --region ap-south-1
+      - name: Wait for deployment to stabilize
+        run: |
+          aws ecs wait services-stable --cluster default --services oregenal-backend-staging --region ap-south-1
+      - name: Verify health
+        run: |
+          curl -f https://or-c3bff864ef5c4c41a76b3e3218c00236.ecs.ap-south-1.on.aws/api/v1/health || exit 1
+          echo "AWS ECS health check passed"
