@@ -32,21 +32,6 @@ jobs:
         run: pnpm run build
       - name: Run tests
         run: pnpm run test --passWithNoTests
-  deploy-staging:
-    name: Deploy to Render (Staging)
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging'
-    steps:
-      - name: Trigger Render Deploy
-        run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-          echo "Render deployment triggered"
-      - name: Wait and verify health
-        run: |
-          sleep 90
-          curl -f https://erp-backend-ry5v.onrender.com/api/v1/health || exit 1
-          echo "Health check passed"
   deploy-aws-ecs:
     name: Deploy to AWS ECS (Staging)
     needs: test
