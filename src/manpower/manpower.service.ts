@@ -452,6 +452,134 @@ export class ManpowerService {
   // last assignment ended within the grace period isn't flagged yet -
   // only someone with no active assignment AND no recently-ended one
   // counts as a real, actionable exception.
+  // PROD-002: Manpower Available from HR Attendance. A pure read/
+  // status view - never creates, changes, transfers or cancels any
+  // allocation, and never touches WO labour cost. Composes existing
+  // Attendance + Employee + ManpowerAssignment data rather than
+  // duplicating any of it; deliberately separate from
+  // getReconciliation()/getCurrentRoster() above (which stay
+  // untouched) since this serves a different purpose - a filterable
+  // availability dashboard with per-employee detail, not an
+  // exception-alerting tool.
+  async getManpowerAvailability(query: any, user: any) {
+    const { date, shiftId, departmentId, skill, availabilityStatus } = query;
+    const day = date ? new Date(date) : new Date();
+    const dayStart = new Date(day); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(day); dayEnd.setHours(23, 59, 59, 999);
+
+    const attendanceWhere: any = { companyId: user.companyId, attendanceDate: { gte: dayStart, lte: dayEnd } };
+    if (shiftId) attendanceWhere.shiftId = shiftId;
+
+    const allAttendance = await this.prisma.attendance.findMany({
+      where: attendanceWhere,
+      include: {
+        employee: {
+          select: {
+            id: true, employeeNumber: true, firstName: true, lastName: true,
+            departmentId: true, designationId: true, isProductionEligible: true, skill: true,
+            department: { select: { name: true } }, designation: { select: { name: true } },
+          },
+        },
+        shift: { select: { id: true, name: true, startTime: true, endTime: true } },
+      },
+    });
+
+    const totalEmployees = await this.prisma.employee.count({ where: { companyId: user.companyId, isActive: true, status: 'ACTIVE' } });
+
+    const presentAll = allAttendance.filter(a => ['PRESENT', 'HALF_DAY'].includes(a.status));
+    const absentCount = allAttendance.filter(a => a.status === 'ABSENT').length;
+    const leaveCount = allAttendance.filter(a => a.status === 'LEAVE').length;
+    const weekOffCount = allAttendance.filter(a => a.status === 'WEEK_OFF').length;
+    const holidayCount = allAttendance.filter(a => a.status === 'HOLIDAY').length;
+
+    let eligiblePresent = presentAll.filter(a => a.employee.isProductionEligible);
+    if (departmentId) eligiblePresent = eligiblePresent.filter(a => a.employee.departmentId === departmentId);
+    if (skill) eligiblePresent = eligiblePresent.filter(a => a.employee.skill === skill);
+
+    const employeeIds = eligiblePresent.map(a => a.employeeId);
+    const activeAssignments = employeeIds.length > 0 ? await this.prisma.manpowerAssignment.findMany({
+      where: { companyId: user.companyId, employeeId: { in: employeeIds }, endTime: null, isActive: true },
+      include: { workOrder: { select: { id: true, woNumber: true } } },
+    }) : [];
+    const activeByEmployee = new Map(activeAssignments.map(a => [a.employeeId, a]));
+
+    // Activity types that represent a legitimate, approved reason the
+    // employee is temporarily off production (break, meeting, etc.) -
+    // distinct from genuine production allocation. Anything not in
+    // this list but still an active assignment is treated as PRODUCTION.
+    const TEMP_UNAVAILABLE_ACTIVITY_TYPES = new Set([
+      'TEA_BREAK', 'LUNCH_BREAK', 'APPROVED_WAITING', 'MEETING', 'TRAINING',
+    ]);
+
+    let workers = eligiblePresent.map(att => {
+      const emp: any = att.employee;
+      const active = activeByEmployee.get(att.employeeId);
+      let allocationStatus: string;
+      let availStatus: string;
+      if (!active) {
+        allocationStatus = 'UNALLOCATED';
+        availStatus = 'AVAILABLE FOR ALLOCATION';
+      } else if (TEMP_UNAVAILABLE_ACTIVITY_TYPES.has(active.activityType)) {
+        allocationStatus = 'TEMPORARILY_UNAVAILABLE';
+        availStatus = 'NOT AVAILABLE';
+      } else {
+        allocationStatus = 'ALLOCATED';
+        availStatus = 'ALREADY ALLOCATED';
+      }
+      return {
+        employeeId: emp.id, employeeNumber: emp.employeeNumber,
+        employeeName: `${emp.firstName} ${emp.lastName}`,
+        department: emp.department?.name, designation: emp.designation?.name, skill: emp.skill,
+        shift: att.shift ? { id: att.shift.id, name: att.shift.name, startTime: att.shift.startTime, endTime: att.shift.endTime } : null,
+        attendanceStatus: att.status,
+        inTime: att.checkIn, outTime: att.checkOut,
+        allocationStatus, availabilityStatus: availStatus,
+        currentStage: active?.stageName || null,
+        currentWorkOrder: active?.workOrder?.woNumber || null,
+        currentActivityType: active?.activityType || null,
+      };
+    });
+
+    if (availabilityStatus) workers = workers.filter(w => w.availabilityStatus === availabilityStatus);
+
+    const productionEligiblePresent = eligiblePresent.length;
+    const allocatedCount = eligiblePresent.filter(a => {
+      const active = activeByEmployee.get(a.employeeId);
+      return active && !TEMP_UNAVAILABLE_ACTIVITY_TYPES.has(active.activityType);
+    }).length;
+    const unallocatedCount = eligiblePresent.filter(a => !activeByEmployee.has(a.employeeId)).length;
+    const temporarilyUnavailableCount = eligiblePresent.filter(a => {
+      const active = activeByEmployee.get(a.employeeId);
+      return active && TEMP_UNAVAILABLE_ACTIVITY_TYPES.has(active.activityType);
+    }).length;
+
+    // Absent/leave employees are never expected to have an active
+    // production assignment - if one somehow exists, that's a real
+    // data exception, not something PROD-002 silently accepts.
+    const notPresentEmployeeIds = allAttendance.filter(a => ['ABSENT', 'LEAVE', 'WEEK_OFF'].includes(a.status)).map(a => a.employeeId);
+    const exceptionAssignments = notPresentEmployeeIds.length > 0 ? await this.prisma.manpowerAssignment.findMany({
+      where: { companyId: user.companyId, employeeId: { in: notPresentEmployeeIds }, endTime: null, isActive: true },
+      include: { employee: { select: { employeeNumber: true, firstName: true, lastName: true } } },
+    }) : [];
+
+    const reconciles = productionEligiblePresent === (allocatedCount + unallocatedCount + temporarilyUnavailableCount);
+
+    return {
+      date: `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`,
+      totalEmployees,
+      totalPresent: presentAll.length,
+      absent: absentCount, leave: leaveCount, weekOff: weekOffCount, holiday: holidayCount,
+      productionEligiblePresent,
+      allocated: allocatedCount, unallocated: unallocatedCount, temporarilyUnavailable: temporarilyUnavailableCount,
+      reconciles,
+      exceptions: exceptionAssignments.map(a => ({
+        employeeNumber: a.employee.employeeNumber, employeeName: `${a.employee.firstName} ${a.employee.lastName}`,
+        issue: 'Has an active production assignment despite not being present today',
+      })),
+      workers,
+    };
+  }
+
   // The core answer to "of everyone HR says is present, where is
   // everyone right now" (spec sections 4, 9, 50-53). An employee whose
   // last assignment ended within the grace period isn't flagged yet -

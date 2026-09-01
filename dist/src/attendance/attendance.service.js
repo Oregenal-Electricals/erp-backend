@@ -166,7 +166,12 @@ let AttendanceService = class AttendanceService {
             data: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, (dto.shiftId && { shiftId: dto.shiftId })), (dto.checkIn && { checkIn: this.parseTime(dateStr, dto.checkIn) })), (dto.checkOut && { checkOut: this.parseTime(dateStr, dto.checkOut) })), (dto.lunchOut && { lunchOut: this.parseTime(dateStr, dto.lunchOut) })), (dto.lunchIn && { lunchIn: this.parseTime(dateStr, dto.lunchIn) })), (dto.status && { status: dto.status })), (dto.isHoliday !== undefined && { isHoliday: dto.isHoliday })), (dto.remarks && { remarks: dto.remarks })), { markedBy: user.id, updatedBy: user.id }), calc),
             include: { employee: { select: { firstName: true, lastName: true, employeeNumber: true } }, shift: { select: { name: true } } },
         });
-        await this.audit.log({ tableName: 'attendance', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        await this.audit.log({
+            tableName: 'attendance', recordId: id, action: 'UPDATE',
+            oldValues: { status: att.status, checkIn: att.checkIn, checkOut: att.checkOut, remarks: att.remarks },
+            newValues: { status: updated.status, checkIn: updated.checkIn, checkOut: updated.checkOut, remarks: updated.remarks, reason: dto.remarks },
+            changedBy: user.id,
+        });
         return updated;
     }
     async bulkMarkAttendance(dto, user) {

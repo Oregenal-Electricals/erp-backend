@@ -70,6 +70,9 @@ export class ManpowerController {
   @Get('roster')
   @RequirePermissions(Permission.MANPOWER_VIEW)
   getCurrentRoster(@Query() query: any, @Request() req: any) { return this.manpowerService.getCurrentRoster(query, req.user); }
+  @Get('availability')
+  @RequirePermissions(Permission.MANPOWER_VIEW)
+  getManpowerAvailability(@Query() query: any, @Request() req: any) { return this.manpowerService.getManpowerAvailability(query, req.user); }
 
   @Get('employees/:employeeId/timeline')
   @RequirePermissions(Permission.MANPOWER_VIEW)

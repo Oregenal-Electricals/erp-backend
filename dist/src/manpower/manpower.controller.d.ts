@@ -642,6 +642,47 @@ export declare class ManpowerController {
         endTime: Date | null;
         assignedByUserId: string;
     })[]>;
+    getManpowerAvailability(query: any, req: any): Promise<{
+        date: string;
+        totalEmployees: number;
+        totalPresent: number;
+        absent: number;
+        leave: number;
+        weekOff: number;
+        holiday: number;
+        productionEligiblePresent: number;
+        allocated: number;
+        unallocated: number;
+        temporarilyUnavailable: number;
+        reconciles: boolean;
+        exceptions: {
+            employeeNumber: string;
+            employeeName: string;
+            issue: string;
+        }[];
+        workers: {
+            employeeId: any;
+            employeeNumber: any;
+            employeeName: string;
+            department: any;
+            designation: any;
+            skill: any;
+            shift: {
+                id: string;
+                name: string;
+                startTime: string;
+                endTime: string;
+            };
+            attendanceStatus: string;
+            inTime: Date;
+            outTime: Date;
+            allocationStatus: string;
+            availabilityStatus: string;
+            currentStage: string;
+            currentWorkOrder: string;
+            currentActivityType: string;
+        }[];
+    }>;
     getEmployeeTimeline(employeeId: string, date: string, req: any): Promise<{
         employee: {
             id: string;
@@ -691,6 +732,8 @@ export declare class ManpowerController {
             otherAllowances: number;
             emergencyContact: string | null;
             emergencyPhone: string | null;
+            isProductionEligible: boolean;
+            skill: string | null;
             profilePhoto: string | null;
         };
         attendance: {

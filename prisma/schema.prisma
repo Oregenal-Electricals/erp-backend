@@ -5499,6 +5499,12 @@ model Employee {
   emergencyContact    String?
   emergencyPhone      String?
   status              String    @default("ACTIVE") // ACTIVE, INACTIVE, RESIGNED, TERMINATED
+  // PROD-002: production manpower availability. Simple fields rather
+  // than a separate Skill Master, since none exists yet - a text
+  // field is genuinely sufficient for the current need and avoids
+  // building unused master-data infrastructure ahead of demand.
+  isProductionEligible Boolean @default(false)
+  skill               String?
   profilePhoto        String?
   remarks             String?
   isActive            Boolean   @default(true)

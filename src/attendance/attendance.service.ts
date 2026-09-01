@@ -232,7 +232,12 @@ export class AttendanceService {
       },
       include: { employee: { select: { firstName: true, lastName: true, employeeNumber: true } }, shift: { select: { name: true } } },
     });
-    await this.audit.log({ tableName: 'attendance', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+    await this.audit.log({
+      tableName: 'attendance', recordId: id, action: 'UPDATE',
+      oldValues: { status: att.status, checkIn: att.checkIn, checkOut: att.checkOut, remarks: att.remarks },
+      newValues: { status: updated.status, checkIn: updated.checkIn, checkOut: updated.checkOut, remarks: updated.remarks, reason: dto.remarks },
+      changedBy: user.id,
+    });
     return updated;
   }
 

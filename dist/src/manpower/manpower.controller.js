@@ -39,6 +39,7 @@ let ManpowerController = class ManpowerController {
     assignEmployees(dto, req) { return this.manpowerService.assignEmployees(dto, req.user); }
     endAssignment(id, dto, req) { return this.manpowerService.endAssignment(id, dto, req.user); }
     getCurrentRoster(query, req) { return this.manpowerService.getCurrentRoster(query, req.user); }
+    getManpowerAvailability(query, req) { return this.manpowerService.getManpowerAvailability(query, req.user); }
     getEmployeeTimeline(employeeId, date, req) { return this.manpowerService.getEmployeeTimeline(employeeId, date, req.user); }
     getReconciliation(date, req) { return this.manpowerService.getReconciliation(date, req.user); }
 };
@@ -181,6 +182,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], ManpowerController.prototype, "getCurrentRoster", null);
+__decorate([
+    (0, common_1.Get)('availability'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_VIEW),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "getManpowerAvailability", null);
 __decorate([
     (0, common_1.Get)('employees/:employeeId/timeline'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_VIEW),

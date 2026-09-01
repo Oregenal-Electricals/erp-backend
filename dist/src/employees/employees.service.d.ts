@@ -175,6 +175,8 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     update(id: string, dto: UpdateEmployeeDto, user: any): Promise<{
@@ -254,6 +256,8 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -313,6 +317,8 @@ export declare class EmployeesService {
             otherAllowances: number;
             emergencyContact: string | null;
             emergencyPhone: string | null;
+            isProductionEligible: boolean;
+            skill: string | null;
             profilePhoto: string | null;
         })[];
         total: number;
@@ -403,6 +409,8 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     findMe(user: any): Promise<{
@@ -488,6 +496,8 @@ export declare class EmployeesService {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     getStats(user: any): Promise<{

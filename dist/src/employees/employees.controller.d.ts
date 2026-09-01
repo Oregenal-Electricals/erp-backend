@@ -87,6 +87,8 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     getStats(req: any): Promise<{
@@ -246,6 +248,8 @@ export declare class EmployeesController {
             otherAllowances: number;
             emergencyContact: string | null;
             emergencyPhone: string | null;
+            isProductionEligible: boolean;
+            skill: string | null;
             profilePhoto: string | null;
         })[];
         total: number;
@@ -336,6 +340,8 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     create(dto: CreateEmployeeDto, req: any): Promise<{
@@ -415,6 +421,8 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     update(id: string, dto: UpdateEmployeeDto, req: any): Promise<{
@@ -494,6 +502,8 @@ export declare class EmployeesController {
         otherAllowances: number;
         emergencyContact: string | null;
         emergencyPhone: string | null;
+        isProductionEligible: boolean;
+        skill: string | null;
         profilePhoto: string | null;
     }>;
     uploadDoc(id: string, doc: any, req: any): Promise<{
