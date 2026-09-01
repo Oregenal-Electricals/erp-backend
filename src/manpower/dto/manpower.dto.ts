@@ -62,6 +62,7 @@ export class AssignEmployeesDto {
   @IsOptional() @IsString() stageName?: string;
   @IsOptional() @IsIn(ACTIVITY_TYPES) activityType?: string;
   @IsOptional() @IsDateString() startTime?: string;
+  @IsOptional() @IsDateString() plannedEndTime?: string;
   @IsOptional() @IsString() remarks?: string;
 }
 

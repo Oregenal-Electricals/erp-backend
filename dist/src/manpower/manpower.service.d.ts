@@ -3,12 +3,14 @@ import { AuditService } from '../common/services/audit.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto, AssignEmployeesDto, EndAssignmentDto } from './dto/manpower.dto';
+import { SettingsService } from '../settings/settings.service';
 export declare class ManpowerService {
     private prisma;
     private audit;
     private workflows;
     private notifications;
-    constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService, notifications: NotificationsService);
+    private settings;
+    constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService, notifications: NotificationsService, settings: SettingsService);
     private includes;
     create(dto: CreateManpowerAllocationDto, user: any): Promise<{
         workOrder: {
@@ -571,6 +573,11 @@ export declare class ManpowerService {
             reason: string;
         }[];
         skippedCount: number;
+        warnings: {
+            employeeId: string;
+            warning: string;
+        }[];
+        estimatedCost: any;
     }>;
     endAssignment(id: string, dto: EndAssignmentDto, user: any): Promise<{
         workOrder: {
@@ -608,6 +615,7 @@ export declare class ManpowerService {
         allocationId: string | null;
         activityType: string;
         startTime: Date;
+        plannedEndTime: Date | null;
         endTime: Date | null;
         assignedByUserId: string;
     }>;
@@ -647,6 +655,7 @@ export declare class ManpowerService {
         allocationId: string | null;
         activityType: string;
         startTime: Date;
+        plannedEndTime: Date | null;
         endTime: Date | null;
         assignedByUserId: string;
     })[]>;
@@ -768,6 +777,7 @@ export declare class ManpowerService {
             allocationId: string | null;
             activityType: string;
             startTime: Date;
+            plannedEndTime: Date | null;
             endTime: Date | null;
             assignedByUserId: string;
         })[];

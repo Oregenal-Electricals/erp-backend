@@ -151,6 +151,11 @@ __decorate([
 ], AssignEmployeesDto.prototype, "startTime", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], AssignEmployeesDto.prototype, "plannedEndTime", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AssignEmployeesDto.prototype, "remarks", void 0);

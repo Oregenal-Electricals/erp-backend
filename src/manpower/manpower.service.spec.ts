@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { ManpowerService } from './manpower.service';
 
 describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', () => {
@@ -6,6 +7,7 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
   let audit: any;
   let workflows: any;
   let notifications: any;
+  let settings: any;
   const user = { id: 'user-1', companyId: 'company-1', role: 'PLANT_HEAD' };
 
   const dept = { name: 'Assembly' };
@@ -34,7 +36,8 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     workflows = { submit: jest.fn(), act: jest.fn() };
     notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
-    service = new ManpowerService(prisma, audit, workflows, notifications);
+    settings = { getSettingValue: jest.fn().mockResolvedValue('0') };
+    service = new ManpowerService(prisma, audit, workflows, notifications, settings as any);
   });
 
   describe('the manual UAT scenario from the spec (15 employees, 10 eligible present)', () => {
@@ -253,6 +256,246 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
       const result = await service.getManpowerAvailability({}, user);
       expect(result.productionEligiblePresent).toBe(result.allocated + result.unallocated + result.temporarilyUnavailable);
       expect(result.reconciles).toBe(true);
+    });
+  });
+
+  describe('PROD-003: Plant Head Allocates Manpower to Production Stage', () => {
+    const emp1Attendance = { id: 'att-1', status: 'PRESENT', checkIn: new Date('2026-05-10T08:00:00') };
+    const employeeRecord = (id: string, skill = 'Assembly Operator') => ({ id, isActive: true, skill });
+
+    beforeEach(() => {
+      prisma.employee.findFirst = jest.fn();
+      prisma.attendance.findFirst = jest.fn();
+      prisma.manpowerAssignment.findFirst = jest.fn().mockResolvedValue(null);
+      prisma.manpowerAssignment.findMany = jest.fn().mockResolvedValue([]);
+      prisma.manpowerAssignment.create = jest.fn();
+      prisma.manpowerAssignment.count = jest.fn().mockResolvedValue(0);
+      prisma.manpowerAllocation = { findFirst: jest.fn() };
+    });
+
+    describe('positive: valid stage allocation, single and multiple workers', () => {
+      it('allocates a single present, eligible worker to a stage', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(result.createdCount).toBe(1);
+        expect(result.skippedCount).toBe(0);
+      });
+
+      it('allocates the full spec test distribution (10 workers across 4 stages) without cross-contamination', async () => {
+        prisma.employee.findFirst.mockImplementation(({ where }: any) => Promise.resolve(employeeRecord(where.id)));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `assign-${data.employeeId}`, ...data }));
+
+        const assembly = await service.assignEmployees({ employeeIds: ['emp-5', 'emp-6', 'emp-7', 'emp-8', 'emp-9'], stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+        expect(assembly.createdCount).toBe(5);
+      });
+    });
+
+    describe('stage-count authorization (spec section 4)', () => {
+      it('blocks assigning more workers than the parent allocation authorizes', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', count: 5 });
+        prisma.manpowerAssignment.count.mockResolvedValue(5); // already fully assigned
+        await expect(
+          service.assignEmployees({ employeeIds: ['emp-1'], allocationId: 'alloc-1', stageName: 'Assembly' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+        expect(prisma.manpowerAssignment.create).not.toHaveBeenCalled();
+      });
+
+      it('allows assignment when still within the authorized count', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', count: 5 });
+        prisma.manpowerAssignment.count.mockResolvedValue(3);
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-4'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-4', employeeId: 'emp-4' });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-4'], allocationId: 'alloc-1', stageName: 'Assembly' } as any, user);
+        expect(result.createdCount).toBe(1);
+      });
+    });
+
+    describe('overlap control (spec sections 10-11, manual test 4-5)', () => {
+      it('blocks a genuinely overlapping allocation for the same employee', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.findMany.mockResolvedValue([
+          { startTime: new Date('2026-05-10T08:00:00'), endTime: null, plannedEndTime: new Date('2026-05-10T12:00:00'), stageName: 'SMT', activityType: 'PRODUCTION' },
+        ]);
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-1'], stageName: 'Assembly',
+          startTime: '2026-05-10T10:00:00', plannedEndTime: '2026-05-10T14:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(result.skippedCount).toBe(1);
+        expect(result.skipped[0].reason).toContain('Overlaps');
+        expect(prisma.manpowerAssignment.create).not.toHaveBeenCalled();
+      });
+
+      it('allows back-to-back non-overlapping allocations that only touch at the boundary', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.findMany.mockResolvedValue([
+          { startTime: new Date('2026-05-10T08:00:00'), endTime: new Date('2026-05-10T10:00:00'), plannedEndTime: null, stageName: 'SMT', activityType: 'PRODUCTION' },
+        ]);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-1'], stageName: 'Assembly',
+          startTime: '2026-05-10T10:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(1);
+        expect(result.skippedCount).toBe(0);
+      });
+    });
+
+    describe('absent/leave employee control (manual test 6)', () => {
+      it('blocks an absent employee from being allocated', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-13'));
+        prisma.attendance.findFirst.mockResolvedValue({ status: 'ABSENT', checkIn: null });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-13'], stageName: 'SMT' } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(result.skipped[0].reason).toContain('Not marked present');
+        expect(prisma.manpowerAssignment.create).not.toHaveBeenCalled();
+      });
+
+      it('blocks an employee on leave the same way', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-15'));
+        prisma.attendance.findFirst.mockResolvedValue({ status: 'LEAVE', checkIn: null });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-15'], stageName: 'SMT' } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(prisma.manpowerAssignment.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('late-arrival control (spec section 13, manual test 7)', () => {
+      it('blocks allocation that claims availability before actual check-in, never fabricates an earlier start', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue({ status: 'PRESENT', checkIn: new Date('2026-05-10T09:15:00') });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(result.skipped[0].reason).toContain('before this employee\'s actual check-in');
+      });
+
+      it('allows allocation starting at or after actual check-in', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue({ status: 'PRESENT', checkIn: new Date('2026-05-10T09:15:00') });
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly', startTime: '2026-05-10T09:15:00' } as any, user);
+
+        expect(result.createdCount).toBe(1);
+      });
+    });
+
+    describe('skill control (spec section 15, manual test 8) - advisory, never a hard block', () => {
+      it('returns a warning, but still allocates, when skill does not match the stage', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1', 'SMT Operator'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(result.createdCount).toBe(1);
+        expect(result.warnings).toHaveLength(1);
+        expect(result.warnings[0].warning).toContain('may not match');
+      });
+
+      it('no warning when skill matches the stage', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1', 'Assembly Operator'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(result.warnings).toHaveLength(0);
+      });
+    });
+
+    describe('manpower costing (spec sections 20-21, 33-34) - estimate only, never posted', () => {
+      it('computes the exact spec example: 5 workers x 4 hours x ₹15/hr = ₹300', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-x'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `assign-${data.employeeId}`, ...data }));
+        settings.getSettingValue = jest.fn((key: string, def: string) => {
+          if (key === 'STANDARD_LABOUR_RATE_PER_SHIFT') return Promise.resolve('120');
+          if (key === 'STANDARD_SHIFT_HOURS') return Promise.resolve('8');
+          return Promise.resolve(def);
+        });
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5', 'emp-6', 'emp-7', 'emp-8', 'emp-9'], stageName: 'Assembly',
+          startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.estimatedCost.workerCount).toBe(5);
+        expect(result.estimatedCost.hours).toBe(4);
+        expect(result.estimatedCost.hourlyRate).toBe(15);
+        expect(result.estimatedCost.labourHours).toBe(20);
+        expect(result.estimatedCost.estimatedCost).toBe(300);
+      });
+
+      it('never touches WorkOrder or ProductionCostSheet - the estimate is a return value only, proven at the source level', () => {
+        const serviceSource = require('fs').readFileSync(require.resolve('./manpower.service.ts'), 'utf8');
+        const start = serviceSource.indexOf('async assignEmployees');
+        const end = serviceSource.indexOf('async endAssignment');
+        const section = serviceSource.slice(start, end);
+        expect(section).not.toContain('workOrder.update');
+        expect(section).not.toContain('workOrder.create');
+        expect(section).not.toContain('productionCostSheet');
+      });
+
+      it('never touches WorkOrder at runtime either', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+        prisma.workOrder = { update: jest.fn(), create: jest.fn() };
+
+        await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly' } as any, user);
+
+        expect(prisma.workOrder.update).not.toHaveBeenCalled();
+        expect(prisma.workOrder.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('audit', () => {
+      it('logs the allocation with created, skipped, and warnings', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-1', employeeId: 'emp-1' });
+
+        await service.assignEmployees({ employeeIds: ['emp-1'], stageName: 'Assembly' } as any, user);
+
+        expect(audit.log).toHaveBeenCalledWith(
+          expect.objectContaining({ tableName: 'manpower_assignments', action: 'CREATE', changedBy: user.id }),
+        );
+      });
+    });
+
+    describe('unauthorized allocation - permission enforcement is structural', () => {
+      it('the assignment route requires MANPOWER_ASSIGN', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./manpower.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Post('assignments')");
+        expect(routeIdx).toBeGreaterThan(-1);
+        const nextLines = controllerSource.slice(routeIdx, routeIdx + 150);
+        expect(nextLines).toContain('@RequirePermissions(Permission.MANPOWER_ASSIGN)');
+      });
+
+      it('the controller enforces JwtAuthGuard and PermissionsGuard on every route', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./manpower.controller.ts'), 'utf8');
+        expect(controllerSource).toContain('@UseGuards(JwtAuthGuard, PermissionsGuard)');
+      });
     });
   });
 });

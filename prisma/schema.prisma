@@ -1097,6 +1097,12 @@ model ManpowerAssignment {
   activityType   String    @default("PRODUCTION")
   startTime      DateTime
   endTime        DateTime?
+  // PROD-003: forward-scheduled stage allocation end time, distinct
+  // from endTime (when the assignment was actually closed). Used for
+  // overlap detection against other planned/active assignments for
+  // the same employee - endTime remains the actual-close signal that
+  // getCurrentRoster()/getReconciliation() already rely on.
+  plannedEndTime DateTime?
   assignedByUserId String
   assignedBy       User    @relation("ManpowerAssignmentBy", fields: [assignedByUserId], references: [id])
   remarks        String?

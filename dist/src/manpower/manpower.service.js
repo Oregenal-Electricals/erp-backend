@@ -16,17 +16,19 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const workflows_service_1 = require("../workflows/workflows.service");
 const notifications_service_1 = require("../notifications/notifications.service");
+const settings_service_1 = require("../settings/settings.service");
 const SUPERVISOR_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 const NEXT_LEVEL = {
     HR_TO_PLANT: 'PLANT_TO_STAGE',
     PLANT_TO_STAGE: 'STAGE_TO_LINE',
 };
 let ManpowerService = class ManpowerService {
-    constructor(prisma, audit, workflows, notifications) {
+    constructor(prisma, audit, workflows, notifications, settings) {
         this.prisma = prisma;
         this.audit = audit;
         this.workflows = workflows;
         this.notifications = notifications;
+        this.settings = settings;
     }
     includes() {
         return {
@@ -321,12 +323,29 @@ let ManpowerService = class ManpowerService {
             throw new common_1.BadRequestException('Provide at least one employee to assign');
         }
         const startTime = dto.startTime ? new Date(dto.startTime) : new Date();
+        const plannedEndTime = dto.plannedEndTime ? new Date(dto.plannedEndTime) : null;
+        if (plannedEndTime && plannedEndTime <= startTime) {
+            throw new common_1.BadRequestException('Planned end time must be after the start time');
+        }
         const dayStart = new Date(startTime);
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(startTime);
         dayEnd.setHours(23, 59, 59, 999);
+        let allocation = null;
+        if (dto.allocationId) {
+            allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: dto.allocationId, companyId: user.companyId } });
+            if (!allocation)
+                throw new common_1.NotFoundException('Allocation not found');
+            const alreadyAssignedCount = await this.prisma.manpowerAssignment.count({
+                where: { companyId: user.companyId, allocationId: dto.allocationId, endTime: null, isActive: true },
+            });
+            if (alreadyAssignedCount + dto.employeeIds.length > allocation.count) {
+                throw new common_1.BadRequestException(`This allocation authorizes ${allocation.count} workers - ${alreadyAssignedCount} already assigned, cannot assign ${dto.employeeIds.length} more.`);
+            }
+        }
         const created = [];
         const skipped = [];
+        const warnings = [];
         for (const employeeId of dto.employeeIds) {
             const employee = await this.prisma.employee.findFirst({ where: { id: employeeId, companyId: user.companyId, isActive: true } });
             if (!employee) {
@@ -339,6 +358,26 @@ let ManpowerService = class ManpowerService {
             if (!attendance || !['PRESENT', 'HALF_DAY'].includes(attendance.status)) {
                 skipped.push({ employeeId, reason: `Not marked present today (${(attendance === null || attendance === void 0 ? void 0 : attendance.status) || 'no attendance record'})` });
                 continue;
+            }
+            if (attendance.checkIn && startTime < attendance.checkIn) {
+                skipped.push({ employeeId, reason: `Allocation start is before this employee's actual check-in (${attendance.checkIn.toISOString()})` });
+                continue;
+            }
+            const todaysAssignments = await this.prisma.manpowerAssignment.findMany({
+                where: { companyId: user.companyId, employeeId, isActive: true, startTime: { gte: dayStart, lte: dayEnd } },
+            });
+            const newEnd = plannedEndTime || dayEnd;
+            const conflict = todaysAssignments.find(a => {
+                const existingEnd = a.endTime || a.plannedEndTime || dayEnd;
+                return a.startTime < newEnd && startTime < existingEnd;
+            });
+            if (conflict) {
+                const conflictEnd = conflict.endTime || conflict.plannedEndTime;
+                skipped.push({ employeeId, reason: `Overlaps with an existing ${conflict.stageName || conflict.activityType} allocation (${conflict.startTime.toISOString()} - ${conflictEnd ? conflictEnd.toISOString() : 'ongoing'})` });
+                continue;
+            }
+            if (dto.stageName && employee.skill && !employee.skill.toLowerCase().includes(dto.stageName.toLowerCase())) {
+                warnings.push({ employeeId, warning: `${employee.skill} may not match the ${dto.stageName} stage` });
             }
             const openAssignment = await this.prisma.manpowerAssignment.findFirst({
                 where: { companyId: user.companyId, employeeId, endTime: null, isActive: true },
@@ -355,6 +394,7 @@ let ManpowerService = class ManpowerService {
                     stageName: dto.stageName,
                     activityType: dto.activityType || 'PRODUCTION',
                     startTime,
+                    plannedEndTime,
                     assignedByUserId: user.id,
                     remarks: dto.remarks,
                     createdBy: user.id, updatedBy: user.id,
@@ -363,8 +403,24 @@ let ManpowerService = class ManpowerService {
             });
             created.push(assignment);
         }
-        await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped }, changedBy: user.id });
-        return { created, createdCount: created.length, skipped, skippedCount: skipped.length };
+        let estimatedCost = null;
+        if (plannedEndTime && created.length > 0) {
+            const hours = (plannedEndTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+            const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+            const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+            if (rate > 0) {
+                const hourlyRate = rate / shiftHours;
+                estimatedCost = {
+                    workerCount: created.length,
+                    hours: Math.round(hours * 100) / 100,
+                    hourlyRate,
+                    labourHours: Math.round(created.length * hours * 100) / 100,
+                    estimatedCost: Math.round(created.length * hours * hourlyRate * 100) / 100,
+                };
+            }
+        }
+        await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped, warnings }, changedBy: user.id });
+        return { created, createdCount: created.length, skipped, skippedCount: skipped.length, warnings, estimatedCost };
     }
     async endAssignment(id, dto, user) {
         const assignment = await this.prisma.manpowerAssignment.findFirst({ where: { id, companyId: user.companyId } });
@@ -632,6 +688,7 @@ exports.ManpowerService = ManpowerService = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
         workflows_service_1.WorkflowsService,
-        notifications_service_1.NotificationsService])
+        notifications_service_1.NotificationsService,
+        settings_service_1.SettingsService])
 ], ManpowerService);
 //# sourceMappingURL=manpower.service.js.map

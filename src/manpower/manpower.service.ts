@@ -5,6 +5,7 @@ import { AuditService } from '../common/services/audit.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateManpowerAllocationDto, DistributeManpowerDto, RaiseManpowerQueryDto, ResolveManpowerQueryDto, AdjustManpowerDto, TransferManpowerDto, AssignEmployeesDto, EndAssignmentDto } from './dto/manpower.dto';
+import { SettingsService } from '../settings/settings.service';
 
 const SUPERVISOR_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 const NEXT_LEVEL: Record<string, string> = {
@@ -19,6 +20,7 @@ export class ManpowerService {
     private audit: AuditService,
     private workflows: WorkflowsService,
     private notifications: NotificationsService,
+    private settings: SettingsService,
   ) {}
 
   private includes() {
@@ -340,16 +342,42 @@ export class ManpowerService {
   // this is how a mid-day move (Assembly -> Packaging) is represented:
   // never two open-ended assignments for the same person at once, so
   // overlap simply can't happen through this path.
+  // PROD-003: Plant Head Allocates Manpower to Production Stage.
+  // Extended in place (not duplicated) - this is the same method
+  // Phase 1 already used for employee-level assignment; the checks
+  // below are additive validation, not a new allocation mechanism.
   async assignEmployees(dto: AssignEmployeesDto, user: any) {
     if (!dto.employeeIds || dto.employeeIds.length === 0) {
       throw new BadRequestException('Provide at least one employee to assign');
     }
     const startTime = dto.startTime ? new Date(dto.startTime) : new Date();
+    const plannedEndTime = dto.plannedEndTime ? new Date(dto.plannedEndTime) : null;
+    if (plannedEndTime && plannedEndTime <= startTime) {
+      throw new BadRequestException('Planned end time must be after the start time');
+    }
     const dayStart = new Date(startTime); dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(startTime); dayEnd.setHours(23, 59, 59, 999);
 
+    // Stage-count authorization (spec section 4): the number assigned
+    // against a given allocation can never exceed what was authorized
+    // for it. Enforced here, server-side, regardless of who calls this
+    // - Stage Head-tier roles already hold MANPOWER_ASSIGN, so this is
+    // what actually stops "Assembly=5 becomes 6", not RBAC alone.
+    let allocation: any = null;
+    if (dto.allocationId) {
+      allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: dto.allocationId, companyId: user.companyId } });
+      if (!allocation) throw new NotFoundException('Allocation not found');
+      const alreadyAssignedCount = await this.prisma.manpowerAssignment.count({
+        where: { companyId: user.companyId, allocationId: dto.allocationId, endTime: null, isActive: true },
+      });
+      if (alreadyAssignedCount + dto.employeeIds.length > allocation.count) {
+        throw new BadRequestException(`This allocation authorizes ${allocation.count} workers - ${alreadyAssignedCount} already assigned, cannot assign ${dto.employeeIds.length} more.`);
+      }
+    }
+
     const created = [];
     const skipped: { employeeId: string; reason: string }[] = [];
+    const warnings: { employeeId: string; warning: string }[] = [];
 
     for (const employeeId of dto.employeeIds) {
       const employee = await this.prisma.employee.findFirst({ where: { id: employeeId, companyId: user.companyId, isActive: true } });
@@ -361,6 +389,40 @@ export class ManpowerService {
       if (!attendance || !['PRESENT', 'HALF_DAY'].includes(attendance.status)) {
         skipped.push({ employeeId, reason: `Not marked present today (${attendance?.status || 'no attendance record'})` });
         continue;
+      }
+
+      // Late-arrival control (spec section 13): allocation cannot claim
+      // availability earlier than the employee's actual validated
+      // check-in - never fabricate an earlier start.
+      if (attendance.checkIn && startTime < attendance.checkIn) {
+        skipped.push({ employeeId, reason: `Allocation start is before this employee's actual check-in (${attendance.checkIn.toISOString()})` });
+        continue;
+      }
+
+      // Overlap control (spec sections 10-11): reject if this planned
+      // range conflicts with any other assignment for the same
+      // employee today. An assignment with no end yet (still open, or
+      // no plannedEndTime given) is treated as running through the end
+      // of the day for this check. Ranges that merely touch at a
+      // boundary (10:00 end, 10:00 start) do not count as overlapping.
+      const todaysAssignments = await this.prisma.manpowerAssignment.findMany({
+        where: { companyId: user.companyId, employeeId, isActive: true, startTime: { gte: dayStart, lte: dayEnd } },
+      });
+      const newEnd = plannedEndTime || dayEnd;
+      const conflict = todaysAssignments.find(a => {
+        const existingEnd = a.endTime || a.plannedEndTime || dayEnd;
+        return a.startTime < newEnd && startTime < existingEnd;
+      });
+      if (conflict) {
+        const conflictEnd = conflict.endTime || conflict.plannedEndTime;
+        skipped.push({ employeeId, reason: `Overlaps with an existing ${conflict.stageName || conflict.activityType} allocation (${conflict.startTime.toISOString()} - ${conflictEnd ? conflictEnd.toISOString() : 'ongoing'})` });
+        continue;
+      }
+
+      // Skill check (spec section 15): advisory only, since no hard
+      // skill-restriction config exists yet - a warning, never a block.
+      if (dto.stageName && employee.skill && !employee.skill.toLowerCase().includes(dto.stageName.toLowerCase())) {
+        warnings.push({ employeeId, warning: `${employee.skill} may not match the ${dto.stageName} stage` });
       }
 
       // Close any currently-open assignment for this person before
@@ -381,6 +443,7 @@ export class ManpowerService {
           stageName: dto.stageName,
           activityType: dto.activityType || 'PRODUCTION',
           startTime,
+          plannedEndTime,
           assignedByUserId: user.id,
           remarks: dto.remarks,
           createdBy: user.id, updatedBy: user.id,
@@ -390,8 +453,27 @@ export class ManpowerService {
       created.push(assignment);
     }
 
-    await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped }, changedBy: user.id });
-    return { created, createdCount: created.length, skipped, skippedCount: skipped.length };
+    // Estimated stage labour cost - a planning reference only, never
+    // posted anywhere as actual cost (spec sections 19-21).
+    let estimatedCost: any = null;
+    if (plannedEndTime && created.length > 0) {
+      const hours = (plannedEndTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+      const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+      const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+      if (rate > 0) {
+        const hourlyRate = rate / shiftHours;
+        estimatedCost = {
+          workerCount: created.length,
+          hours: Math.round(hours * 100) / 100,
+          hourlyRate,
+          labourHours: Math.round(created.length * hours * 100) / 100,
+          estimatedCost: Math.round(created.length * hours * hourlyRate * 100) / 100,
+        };
+      }
+    }
+
+    await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped, warnings }, changedBy: user.id });
+    return { created, createdCount: created.length, skipped, skippedCount: skipped.length, warnings, estimatedCost };
   }
 
   async endAssignment(id: string, dto: EndAssignmentDto, user: any) {

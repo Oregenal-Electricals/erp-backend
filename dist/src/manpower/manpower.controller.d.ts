@@ -563,6 +563,11 @@ export declare class ManpowerController {
             reason: string;
         }[];
         skippedCount: number;
+        warnings: {
+            employeeId: string;
+            warning: string;
+        }[];
+        estimatedCost: any;
     }>;
     endAssignment(id: string, dto: EndAssignmentDto, req: any): Promise<{
         workOrder: {
@@ -600,6 +605,7 @@ export declare class ManpowerController {
         allocationId: string | null;
         activityType: string;
         startTime: Date;
+        plannedEndTime: Date | null;
         endTime: Date | null;
         assignedByUserId: string;
     }>;
@@ -639,6 +645,7 @@ export declare class ManpowerController {
         allocationId: string | null;
         activityType: string;
         startTime: Date;
+        plannedEndTime: Date | null;
         endTime: Date | null;
         assignedByUserId: string;
     })[]>;
@@ -801,6 +808,7 @@ export declare class ManpowerController {
             allocationId: string | null;
             activityType: string;
             startTime: Date;
+            plannedEndTime: Date | null;
             endTime: Date | null;
             assignedByUserId: string;
         })[];

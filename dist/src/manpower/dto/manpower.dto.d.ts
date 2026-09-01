@@ -42,6 +42,7 @@ export declare class AssignEmployeesDto {
     stageName?: string;
     activityType?: string;
     startTime?: string;
+    plannedEndTime?: string;
     remarks?: string;
 }
 export declare class EndAssignmentDto {
