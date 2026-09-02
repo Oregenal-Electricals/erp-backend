@@ -3905,6 +3905,28 @@ model ProductionEntry {
   machineName   String?
   goodQty       Float     @default(0)
   scrapQty      Float     @default(0)
+  // PROD-007: reject vs rework are kept separate (scrapQty above is
+  // treated as reject) - rework means pieces produced this interval
+  // that require rework, not previously-rejected pieces being
+  // reprocessed, so it counts toward total processed without
+  // double-counting anything from an earlier entry.
+  reworkQty     Float     @default(0)
+  // Manpower is quantity-based per the architecture correction - no
+  // Employee IDs recorded here, matching PROD-003/004/005.
+  manpowerQty   Int?
+  periodStart   DateTime?
+  periodEnd     DateTime?
+  // Snapshots taken at entry time so a later productivity/rate master
+  // change never retroactively alters this historical entry - same
+  // pattern already used in WorkOrder/ManpowerAssignment/ManpowerAllocation.
+  productivityRateSnapshot Float?
+  labourRateSnapshot       Float?
+  targetQty           Float?
+  achievementPercent  Float?
+  actualLabourHours   Float?
+  actualLabourCost    Float?
+  downtimeMinutes     Float     @default(0)
+  downtimeReason      String?
   totalQty      Float     @default(0)
   remarks       String?
   status        String    @default("DRAFT") // DRAFT, CONFIRMED

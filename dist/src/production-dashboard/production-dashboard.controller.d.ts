@@ -65,13 +65,25 @@ export declare class ProductionDashboardController {
             status: string;
             remarks: string | null;
             workOrderId: string;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             goodQty: number;
             scrapQty: number;
+            reworkQty: number;
+            manpowerQty: number | null;
+            periodStart: Date | null;
+            periodEnd: Date | null;
+            downtimeMinutes: number;
+            downtimeReason: string | null;
             entryNumber: string;
+            targetQty: number | null;
+            achievementPercent: number | null;
+            actualLabourHours: number | null;
+            actualLabourCost: number | null;
         })[];
         byShift: {
             shift: string;

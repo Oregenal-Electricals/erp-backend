@@ -1,17 +1,20 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
+import { SettingsService } from '../settings/settings.service';
 import { CreateProductionEntryDto } from './dto/production-entry.dto';
 export declare class ProductionEntryService {
     private prisma;
     private audit;
     private materialReservation;
-    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService);
+    private settings;
+    constructor(prisma: PrismaService, audit: AuditService, materialReservation: MaterialReservationService, settings: SettingsService);
     private generateNumber;
     private includes;
     create(dto: CreateProductionEntryDto, user: any): Promise<{
         workOrder: {
             status: string;
+            stageName: string;
             productCode: string;
             productName: string;
             woNumber: string;
@@ -31,17 +34,30 @@ export declare class ProductionEntryService {
         status: string;
         remarks: string | null;
         workOrderId: string;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         goodQty: number;
         scrapQty: number;
+        reworkQty: number;
+        manpowerQty: number | null;
+        periodStart: Date | null;
+        periodEnd: Date | null;
+        downtimeMinutes: number;
+        downtimeReason: string | null;
         entryNumber: string;
+        targetQty: number | null;
+        achievementPercent: number | null;
+        actualLabourHours: number | null;
+        actualLabourCost: number | null;
     }>;
     confirm(id: string, user: any): Promise<{
         workOrder: {
             status: string;
+            stageName: string;
             productCode: string;
             productName: string;
             woNumber: string;
@@ -61,18 +77,31 @@ export declare class ProductionEntryService {
         status: string;
         remarks: string | null;
         workOrderId: string;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         goodQty: number;
         scrapQty: number;
+        reworkQty: number;
+        manpowerQty: number | null;
+        periodStart: Date | null;
+        periodEnd: Date | null;
+        downtimeMinutes: number;
+        downtimeReason: string | null;
         entryNumber: string;
+        targetQty: number | null;
+        achievementPercent: number | null;
+        actualLabourHours: number | null;
+        actualLabourCost: number | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
             workOrder: {
                 status: string;
+                stageName: string;
                 productCode: string;
                 productName: string;
                 woNumber: string;
@@ -92,13 +121,25 @@ export declare class ProductionEntryService {
             status: string;
             remarks: string | null;
             workOrderId: string;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             goodQty: number;
             scrapQty: number;
+            reworkQty: number;
+            manpowerQty: number | null;
+            periodStart: Date | null;
+            periodEnd: Date | null;
+            downtimeMinutes: number;
+            downtimeReason: string | null;
             entryNumber: string;
+            targetQty: number | null;
+            achievementPercent: number | null;
+            actualLabourHours: number | null;
+            actualLabourCost: number | null;
         })[];
         total: number;
         page: number;
@@ -108,6 +149,7 @@ export declare class ProductionEntryService {
     findOne(id: string, user: any): Promise<{
         workOrder: {
             status: string;
+            stageName: string;
             productCode: string;
             productName: string;
             woNumber: string;
@@ -127,13 +169,25 @@ export declare class ProductionEntryService {
         status: string;
         remarks: string | null;
         workOrderId: string;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         goodQty: number;
         scrapQty: number;
+        reworkQty: number;
+        manpowerQty: number | null;
+        periodStart: Date | null;
+        periodEnd: Date | null;
+        downtimeMinutes: number;
+        downtimeReason: string | null;
         entryNumber: string;
+        targetQty: number | null;
+        achievementPercent: number | null;
+        actualLabourHours: number | null;
+        actualLabourCost: number | null;
     }>;
     getStats(user: any): Promise<{
         total: number;
@@ -142,6 +196,7 @@ export declare class ProductionEntryService {
         totalGoodQty: number;
         totalScrapQty: number;
         totalQty: number;
+        totalActualLabourCost: number;
     }>;
     getWoProgress(workOrderId: string, user: any): Promise<{
         workOrder: {
@@ -201,21 +256,36 @@ export declare class ProductionEntryService {
             status: string;
             remarks: string | null;
             workOrderId: string;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             goodQty: number;
             scrapQty: number;
+            reworkQty: number;
+            manpowerQty: number | null;
+            periodStart: Date | null;
+            periodEnd: Date | null;
+            downtimeMinutes: number;
+            downtimeReason: string | null;
             entryNumber: string;
+            targetQty: number | null;
+            achievementPercent: number | null;
+            actualLabourHours: number | null;
+            actualLabourCost: number | null;
         }[];
         summary: {
             plannedQty: number;
             confirmedGoodQty: number;
             confirmedScrapQty: number;
+            confirmedReworkQty: number;
             pendingQty: number;
             completionPercent: number;
             totalEntries: number;
+            totalActualLabourHours: number;
+            totalActualLabourCost: number;
         };
     }>;
 }

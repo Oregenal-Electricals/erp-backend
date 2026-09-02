@@ -10,6 +10,7 @@ export declare class ProductionEntryController {
         totalGoodQty: number;
         totalScrapQty: number;
         totalQty: number;
+        totalActualLabourCost: number;
     }>;
     getWoProgress(woId: string, req: any): Promise<{
         workOrder: {
@@ -69,27 +70,43 @@ export declare class ProductionEntryController {
             status: string;
             remarks: string | null;
             workOrderId: string;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             goodQty: number;
             scrapQty: number;
+            reworkQty: number;
+            manpowerQty: number | null;
+            periodStart: Date | null;
+            periodEnd: Date | null;
+            downtimeMinutes: number;
+            downtimeReason: string | null;
             entryNumber: string;
+            targetQty: number | null;
+            achievementPercent: number | null;
+            actualLabourHours: number | null;
+            actualLabourCost: number | null;
         }[];
         summary: {
             plannedQty: number;
             confirmedGoodQty: number;
             confirmedScrapQty: number;
+            confirmedReworkQty: number;
             pendingQty: number;
             completionPercent: number;
             totalEntries: number;
+            totalActualLabourHours: number;
+            totalActualLabourCost: number;
         };
     }>;
     findAll(req: any, query: any): Promise<{
         data: ({
             workOrder: {
                 status: string;
+                stageName: string;
                 productCode: string;
                 productName: string;
                 woNumber: string;
@@ -109,13 +126,25 @@ export declare class ProductionEntryController {
             status: string;
             remarks: string | null;
             workOrderId: string;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             totalQty: number;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             goodQty: number;
             scrapQty: number;
+            reworkQty: number;
+            manpowerQty: number | null;
+            periodStart: Date | null;
+            periodEnd: Date | null;
+            downtimeMinutes: number;
+            downtimeReason: string | null;
             entryNumber: string;
+            targetQty: number | null;
+            achievementPercent: number | null;
+            actualLabourHours: number | null;
+            actualLabourCost: number | null;
         })[];
         total: number;
         page: number;
@@ -125,6 +154,7 @@ export declare class ProductionEntryController {
     findOne(id: string, req: any): Promise<{
         workOrder: {
             status: string;
+            stageName: string;
             productCode: string;
             productName: string;
             woNumber: string;
@@ -144,17 +174,30 @@ export declare class ProductionEntryController {
         status: string;
         remarks: string | null;
         workOrderId: string;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         goodQty: number;
         scrapQty: number;
+        reworkQty: number;
+        manpowerQty: number | null;
+        periodStart: Date | null;
+        periodEnd: Date | null;
+        downtimeMinutes: number;
+        downtimeReason: string | null;
         entryNumber: string;
+        targetQty: number | null;
+        achievementPercent: number | null;
+        actualLabourHours: number | null;
+        actualLabourCost: number | null;
     }>;
     create(dto: CreateProductionEntryDto, req: any): Promise<{
         workOrder: {
             status: string;
+            stageName: string;
             productCode: string;
             productName: string;
             woNumber: string;
@@ -174,17 +217,30 @@ export declare class ProductionEntryController {
         status: string;
         remarks: string | null;
         workOrderId: string;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         goodQty: number;
         scrapQty: number;
+        reworkQty: number;
+        manpowerQty: number | null;
+        periodStart: Date | null;
+        periodEnd: Date | null;
+        downtimeMinutes: number;
+        downtimeReason: string | null;
         entryNumber: string;
+        targetQty: number | null;
+        achievementPercent: number | null;
+        actualLabourHours: number | null;
+        actualLabourCost: number | null;
     }>;
     confirm(id: string, req: any): Promise<{
         workOrder: {
             status: string;
+            stageName: string;
             productCode: string;
             productName: string;
             woNumber: string;
@@ -204,12 +260,24 @@ export declare class ProductionEntryController {
         status: string;
         remarks: string | null;
         workOrderId: string;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         totalQty: number;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         goodQty: number;
         scrapQty: number;
+        reworkQty: number;
+        manpowerQty: number | null;
+        periodStart: Date | null;
+        periodEnd: Date | null;
+        downtimeMinutes: number;
+        downtimeReason: string | null;
         entryNumber: string;
+        targetQty: number | null;
+        achievementPercent: number | null;
+        actualLabourHours: number | null;
+        actualLabourCost: number | null;
     }>;
 }

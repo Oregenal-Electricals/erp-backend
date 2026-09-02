@@ -1,0 +1,12 @@
+ALTER TABLE "production_entries" ADD COLUMN "reworkQty" DOUBLE PRECISION NOT NULL DEFAULT 0;
+ALTER TABLE "production_entries" ADD COLUMN "manpowerQty" INTEGER;
+ALTER TABLE "production_entries" ADD COLUMN "periodStart" TIMESTAMP(3);
+ALTER TABLE "production_entries" ADD COLUMN "periodEnd" TIMESTAMP(3);
+ALTER TABLE "production_entries" ADD COLUMN "productivityRateSnapshot" DOUBLE PRECISION;
+ALTER TABLE "production_entries" ADD COLUMN "labourRateSnapshot" DOUBLE PRECISION;
+ALTER TABLE "production_entries" ADD COLUMN "targetQty" DOUBLE PRECISION;
+ALTER TABLE "production_entries" ADD COLUMN "achievementPercent" DOUBLE PRECISION;
+ALTER TABLE "production_entries" ADD COLUMN "actualLabourHours" DOUBLE PRECISION;
+ALTER TABLE "production_entries" ADD COLUMN "actualLabourCost" DOUBLE PRECISION;
+ALTER TABLE "production_entries" ADD COLUMN "downtimeMinutes" DOUBLE PRECISION NOT NULL DEFAULT 0;
+ALTER TABLE "production_entries" ADD COLUMN "downtimeReason" TEXT;

@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const material_reservation_service_1 = require("../work-orders/material-reservation.service");
+const settings_service_1 = require("../settings/settings.service");
 let ProductionEntryService = class ProductionEntryService {
-    constructor(prisma, audit, materialReservation) {
+    constructor(prisma, audit, materialReservation, settings) {
         this.prisma = prisma;
         this.audit = audit;
         this.materialReservation = materialReservation;
+        this.settings = settings;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionEntry.count({ where: { companyId } });
@@ -27,7 +29,7 @@ let ProductionEntryService = class ProductionEntryService {
     }
     includes() {
         return {
-            workOrder: { select: { woNumber: true, productCode: true, productName: true, plannedQty: true, completedQty: true, status: true } },
+            workOrder: { select: { woNumber: true, productCode: true, productName: true, plannedQty: true, completedQty: true, status: true, stageName: true } },
         };
     }
     async create(dto, user) {
@@ -36,18 +38,67 @@ let ProductionEntryService = class ProductionEntryService {
         });
         if (!wo)
             throw new common_1.NotFoundException('Work order not found');
-        if (!['RELEASED', 'IN_PROGRESS'].includes(wo.status)) {
+        if (wo.status !== 'IN_PROGRESS') {
             throw new common_1.BadRequestException('Work order must be IN_PROGRESS to record production');
         }
-        const scrapQty = dto.scrapQty || 0;
-        const totalQty = dto.goodQty + scrapQty;
-        const existingGood = await this.prisma.productionEntry.aggregate({
-            where: { workOrderId: dto.workOrderId, companyId: user.companyId, status: 'CONFIRMED' },
-            _sum: { goodQty: true },
+        const periodStart = new Date(dto.periodStart);
+        const periodEnd = new Date(dto.periodEnd);
+        if (periodEnd <= periodStart)
+            throw new common_1.BadRequestException('Period end must be after period start');
+        const now = new Date();
+        if (periodEnd > now)
+            throw new common_1.BadRequestException('Cannot record production for a future time period');
+        if (wo.actualStartDate && periodStart < wo.actualStartDate) {
+            throw new common_1.BadRequestException(`Entry period cannot start before this stage's actual start time (${wo.actualStartDate.toISOString()})`);
+        }
+        const overlapping = await this.prisma.productionEntry.findFirst({
+            where: {
+                workOrderId: dto.workOrderId, companyId: user.companyId, isActive: true,
+                periodStart: { lt: periodEnd }, periodEnd: { gt: periodStart },
+            },
         });
-        const alreadyProduced = existingGood._sum.goodQty || 0;
-        if (alreadyProduced + dto.goodQty > wo.plannedQty * 1.05) {
-            throw new common_1.BadRequestException(`Total production would exceed planned qty. Planned: ${wo.plannedQty}, Already: ${alreadyProduced}`);
+        if (overlapping)
+            throw new common_1.BadRequestException(`This period overlaps with an existing entry (${overlapping.entryNumber})`);
+        const durationHours = (periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60);
+        let manpowerQty = dto.manpowerQty;
+        if (manpowerQty === undefined) {
+            const approvedAllocation = await this.prisma.manpowerAllocation.findFirst({
+                where: { companyId: user.companyId, workOrderId: dto.workOrderId, status: 'APPROVED', isActive: true },
+            });
+            manpowerQty = (approvedAllocation === null || approvedAllocation === void 0 ? void 0 : approvedAllocation.count) || 0;
+        }
+        const goodQty = dto.goodQty;
+        const scrapQty = dto.scrapQty || 0;
+        const reworkQty = dto.reworkQty || 0;
+        const totalQty = goodQty + scrapQty + reworkQty;
+        if (wo.parentWorkOrderId) {
+            const availableInput = wo.cumulativeInputQty - wo.cumulativeProcessedQty;
+            if (totalQty > availableInput) {
+                throw new common_1.BadRequestException(`Total processed (${totalQty}) exceeds available upstream input (${availableInput})`);
+            }
+        }
+        const product = await this.prisma.product.findFirst({ where: { code: wo.productCode, companyId: user.companyId } });
+        let productivityRateSnapshot = null;
+        let targetQty = null;
+        if (product) {
+            const productivity = await this.prisma.productStandardProductivity.findFirst({
+                where: { companyId: user.companyId, productId: product.id, isActive: true, effectiveFrom: { lte: now }, OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+                orderBy: { effectiveFrom: 'desc' },
+            });
+            if (productivity && productivity.piecesPerManHour > 0) {
+                productivityRateSnapshot = productivity.piecesPerManHour;
+                targetQty = Math.round(manpowerQty * productivity.piecesPerManHour * durationHours * 100) / 100;
+            }
+        }
+        const achievementPercent = targetQty && targetQty > 0 ? Math.round((goodQty / targetQty) * 10000) / 100 : null;
+        const actualLabourHours = Math.round(manpowerQty * durationHours * 10000) / 10000;
+        const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+        const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+        let labourRateSnapshot = null;
+        let actualLabourCost = null;
+        if (rate > 0) {
+            labourRateSnapshot = rate / shiftHours;
+            actualLabourCost = Math.round(actualLabourHours * labourRateSnapshot * 100) / 100;
         }
         const entryNumber = await this.generateNumber(user.companyId);
         const entry = await this.prisma.productionEntry.create({
@@ -56,7 +107,12 @@ let ProductionEntryService = class ProductionEntryService {
                 entryDate: dto.entryDate ? new Date(dto.entryDate) : new Date(),
                 shift: dto.shift || 'MORNING',
                 operatorName: dto.operatorName, machineName: dto.machineName,
-                goodQty: dto.goodQty, scrapQty, totalQty,
+                goodQty, scrapQty, reworkQty, totalQty,
+                manpowerQty, periodStart, periodEnd,
+                productivityRateSnapshot, labourRateSnapshot,
+                targetQty, achievementPercent,
+                actualLabourHours, actualLabourCost,
+                downtimeMinutes: dto.downtimeMinutes || 0, downtimeReason: dto.downtimeReason,
                 remarks: dto.remarks, status: 'DRAFT',
                 companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
             },
@@ -76,21 +132,15 @@ let ProductionEntryService = class ProductionEntryService {
             throw new common_1.BadRequestException('Only DRAFT entries can be confirmed');
         const newCompletedQty = (entry.workOrder.completedQty || 0) + entry.goodQty;
         const newRejectedQty = (entry.workOrder.rejectedQty || 0) + entry.scrapQty;
-        let woStatus = entry.workOrder.status;
-        if (newCompletedQty >= entry.workOrder.plannedQty)
-            woStatus = 'COMPLETED';
+        const totalProcessed = entry.goodQty + entry.scrapQty + entry.reworkQty;
         await this.prisma.workOrder.update({
             where: { id: entry.workOrderId },
             data: {
                 completedQty: newCompletedQty, rejectedQty: newRejectedQty,
-                status: woStatus,
-                actualEndDate: woStatus === 'COMPLETED' ? new Date() : undefined,
+                cumulativeProcessedQty: { increment: totalProcessed },
                 updatedBy: user.id,
             },
         });
-        if (woStatus === 'COMPLETED' && entry.workOrder.status !== 'COMPLETED') {
-            await this.materialReservation.releaseReservations(entry.workOrderId, user, true);
-        }
         const updated = await this.prisma.productionEntry.update({
             where: { id }, data: { status: 'CONFIRMED', updatedBy: user.id }, include: this.includes(),
         });
@@ -138,13 +188,14 @@ let ProductionEntryService = class ProductionEntryService {
         ]);
         const totals = await this.prisma.productionEntry.aggregate({
             where: Object.assign(Object.assign({}, where), { status: 'CONFIRMED' }),
-            _sum: { goodQty: true, scrapQty: true, totalQty: true },
+            _sum: { goodQty: true, scrapQty: true, totalQty: true, actualLabourCost: true },
         });
         return {
             total, draft, confirmed,
             totalGoodQty: totals._sum.goodQty || 0,
             totalScrapQty: totals._sum.scrapQty || 0,
             totalQty: totals._sum.totalQty || 0,
+            totalActualLabourCost: totals._sum.actualLabourCost || 0,
         };
     }
     async getWoProgress(workOrderId, user) {
@@ -157,8 +208,12 @@ let ProductionEntryService = class ProductionEntryService {
             where: { workOrderId, companyId: user.companyId },
             orderBy: { entryDate: 'asc' },
         });
-        const confirmedGood = entries.filter(e => e.status === 'CONFIRMED').reduce((s, e) => s + e.goodQty, 0);
-        const confirmedScrap = entries.filter(e => e.status === 'CONFIRMED').reduce((s, e) => s + e.scrapQty, 0);
+        const confirmedEntries = entries.filter(e => e.status === 'CONFIRMED');
+        const confirmedGood = confirmedEntries.reduce((s, e) => s + e.goodQty, 0);
+        const confirmedScrap = confirmedEntries.reduce((s, e) => s + e.scrapQty, 0);
+        const confirmedRework = confirmedEntries.reduce((s, e) => s + e.reworkQty, 0);
+        const totalActualLabourCost = confirmedEntries.reduce((s, e) => s + (e.actualLabourCost || 0), 0);
+        const totalActualLabourHours = confirmedEntries.reduce((s, e) => s + (e.actualLabourHours || 0), 0);
         return {
             workOrder: wo,
             entries,
@@ -166,9 +221,12 @@ let ProductionEntryService = class ProductionEntryService {
                 plannedQty: wo.plannedQty,
                 confirmedGoodQty: confirmedGood,
                 confirmedScrapQty: confirmedScrap,
+                confirmedReworkQty: confirmedRework,
                 pendingQty: Math.max(0, wo.plannedQty - confirmedGood),
                 completionPercent: wo.plannedQty > 0 ? Math.round(confirmedGood / wo.plannedQty * 100) : 0,
                 totalEntries: entries.length,
+                totalActualLabourHours,
+                totalActualLabourCost,
             },
         };
     }
@@ -178,6 +236,7 @@ exports.ProductionEntryService = ProductionEntryService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        material_reservation_service_1.MaterialReservationService])
+        material_reservation_service_1.MaterialReservationService,
+        settings_service_1.SettingsService])
 ], ProductionEntryService);
 //# sourceMappingURL=production-entry.service.js.map
