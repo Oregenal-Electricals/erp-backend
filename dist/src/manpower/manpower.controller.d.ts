@@ -568,6 +568,8 @@ export declare class ManpowerController {
             warning: string;
         }[];
         estimatedCost: any;
+        approvalRequestId: any;
+        status: string;
     }>;
     endAssignment(id: string, dto: EndAssignmentDto, req: any): Promise<{
         workOrder: {
@@ -598,6 +600,8 @@ export declare class ManpowerController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        status: string;
+        submittedAt: Date | null;
         remarks: string | null;
         employeeId: string;
         stageName: string | null;
@@ -607,6 +611,10 @@ export declare class ManpowerController {
         startTime: Date;
         plannedEndTime: Date | null;
         endTime: Date | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         assignedByUserId: string;
     }>;
     getCurrentRoster(query: any, req: any): Promise<({
@@ -638,6 +646,8 @@ export declare class ManpowerController {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        status: string;
+        submittedAt: Date | null;
         remarks: string | null;
         employeeId: string;
         stageName: string | null;
@@ -647,6 +657,10 @@ export declare class ManpowerController {
         startTime: Date;
         plannedEndTime: Date | null;
         endTime: Date | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         assignedByUserId: string;
     })[]>;
     getManpowerAvailability(query: any, req: any): Promise<{
@@ -801,6 +815,8 @@ export declare class ManpowerController {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            status: string;
+            submittedAt: Date | null;
             remarks: string | null;
             employeeId: string;
             stageName: string | null;
@@ -810,6 +826,10 @@ export declare class ManpowerController {
             startTime: Date;
             plannedEndTime: Date | null;
             endTime: Date | null;
+            plannedTargetQty: number | null;
+            estimatedLabourCost: number | null;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             assignedByUserId: string;
         })[];
     }>;

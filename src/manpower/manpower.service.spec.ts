@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ManpowerService } from './manpower.service';
 
 describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', () => {
@@ -495,6 +495,300 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
       it('the controller enforces JwtAuthGuard and PermissionsGuard on every route', () => {
         const controllerSource = require('fs').readFileSync(require.resolve('./manpower.controller.ts'), 'utf8');
         expect(controllerSource).toContain('@UseGuards(JwtAuthGuard, PermissionsGuard)');
+      });
+    });
+  });
+
+  describe('PROD-004: Stage Head Allocates Manpower to Work Order', () => {
+    const emp1Attendance = { id: 'att-1', status: 'PRESENT', checkIn: new Date('2026-05-10T08:00:00') };
+    const employeeRecord = (id: string, skill = 'Assembly Operator') => ({ id, isActive: true, skill });
+    const releasedWO = { id: 'wo-1', woNumber: 'WO-TEST-001', status: 'RELEASED', stageName: 'Assembly', productCode: '9W-LED' };
+    const activeStageAssignment = (employeeId: string) => ({
+      id: `stage-${employeeId}`, employeeId, workOrderId: null, activityType: 'PRODUCTION', stageName: 'Assembly',
+      startTime: new Date('2026-05-10T08:00:00'), endTime: null, plannedEndTime: new Date('2026-05-10T16:00:00'),
+    });
+
+    beforeEach(() => {
+      prisma.employee.findFirst = jest.fn();
+      prisma.attendance.findFirst = jest.fn();
+      prisma.manpowerAssignment.findFirst = jest.fn().mockResolvedValue(null);
+      prisma.manpowerAssignment.findMany = jest.fn().mockResolvedValue([]);
+      prisma.manpowerAssignment.create = jest.fn();
+      prisma.manpowerAssignment.count = jest.fn().mockResolvedValue(0);
+      prisma.manpowerAllocation = { findFirst: jest.fn() };
+      prisma.workOrder = { findFirst: jest.fn() };
+      prisma.product = { findFirst: jest.fn() };
+      prisma.productStandardProductivity = { findFirst: jest.fn() };
+      workflows.submit = jest.fn().mockResolvedValue({ request: { id: 'req-1' } });
+    });
+
+    describe('positive: valid WO manpower allocation', () => {
+      it('allocates a single authorized worker to a released WO and submits for approval', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.product.findFirst.mockResolvedValue({ id: 'prod-1', code: '9W-LED' });
+        prisma.productStandardProductivity.findFirst.mockResolvedValue({ piecesPerManHour: 8, effectiveFrom: new Date('2026-01-01'), effectiveTo: null });
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(activeStageAssignment('emp-5'));
+        prisma.manpowerAssignment.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `assign-${data.employeeId}`, ...data }));
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(1);
+        expect(result.status).toBe('PENDING_APPROVAL');
+        expect(workflows.submit).toHaveBeenCalledWith(
+          expect.objectContaining({ documentType: 'WO_MANPOWER_ALLOCATION', documentId: 'wo-1', documentNumber: 'WO-TEST-001' }),
+          user,
+        );
+      });
+
+      it('allocates the exact spec scenario: 5 workers to WO-TEST-001', async () => {
+        prisma.employee.findFirst.mockImplementation(({ where }: any) => Promise.resolve(employeeRecord(where.id)));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.product.findFirst.mockResolvedValue({ id: 'prod-1', code: '9W-LED' });
+        prisma.productStandardProductivity.findFirst.mockResolvedValue({ piecesPerManHour: 8, effectiveFrom: new Date('2026-01-01'), effectiveTo: null });
+        prisma.manpowerAssignment.findFirst.mockImplementation(({ where }: any) => Promise.resolve(activeStageAssignment(where.employeeId)));
+        prisma.manpowerAssignment.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `assign-${data.employeeId}`, ...data }));
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5', 'emp-6', 'emp-7', 'emp-8', 'emp-9'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(5);
+        expect(result.skippedCount).toBe(0);
+      });
+    });
+
+    describe('stage-ownership control (spec sections 4, 31)', () => {
+      it('blocks an employee with no active stage allocation for this stage', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-1'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(null); // no active Assembly stage assignment for emp-1 (they're on SMT)
+
+        const result = await service.assignEmployees({ employeeIds: ['emp-1'], workOrderId: 'wo-1', stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(result.skipped[0].reason).toContain('No active Assembly stage allocation');
+        expect(prisma.manpowerAssignment.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('WO eligibility (spec sections 5, 32, 33)', () => {
+      it('blocks allocation to an unreleased (DRAFT) Work Order', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...releasedWO, status: 'DRAFT' });
+        await expect(
+          service.assignEmployees({ employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+        expect(prisma.manpowerAssignment.create).not.toHaveBeenCalled();
+      });
+
+      it('blocks allocation when the WO belongs to a different stage', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...releasedWO, stageName: 'SMT' });
+        await expect(
+          service.assignEmployees({ employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws NotFoundException for a nonexistent Work Order', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(null);
+        await expect(
+          service.assignEmployees({ employeeIds: ['emp-5'], workOrderId: 'wo-999', stageName: 'Assembly' } as any, user),
+        ).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    describe('time-within-stage-allocation control (spec section 9, manual test 9)', () => {
+      it('blocks a WO allocation whose end time exceeds the stage allocation window', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        // stage window ends at 12:00, WO allocation requests until 13:00
+        prisma.manpowerAssignment.findFirst.mockResolvedValue({ ...activeStageAssignment('emp-5'), plannedEndTime: new Date('2026-05-10T12:00:00') });
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T10:00:00', plannedEndTime: '2026-05-10T13:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(result.skipped[0].reason).toContain('outside the authorized stage allocation window');
+      });
+
+      it('allows a WO allocation fully inside the stage allocation window', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue({ ...activeStageAssignment('emp-5'), plannedEndTime: new Date('2026-05-10T16:00:00') });
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-5', employeeId: 'emp-5' });
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(1);
+      });
+    });
+
+    describe('the stage-level parent assignment is never auto-closed by a WO-level child (key design decision)', () => {
+      it('does not call manpowerAssignment.update to close the parent when creating a WO-level allocation', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(activeStageAssignment('emp-5'));
+        prisma.manpowerAssignment.update = jest.fn();
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-5', employeeId: 'emp-5' });
+
+        await service.assignEmployees({ employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(prisma.manpowerAssignment.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('overlap control between Work Orders (spec sections 10-11, manual tests 10-11)', () => {
+      it('blocks overlapping WO-level allocations for the same employee', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(activeStageAssignment('emp-5'));
+        prisma.manpowerAssignment.findMany.mockResolvedValue([
+          { startTime: new Date('2026-05-10T08:00:00'), endTime: null, plannedEndTime: new Date('2026-05-10T10:00:00'), stageName: 'Assembly', activityType: 'PRODUCTION', workOrderId: 'wo-0' },
+        ]);
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T09:00:00', plannedEndTime: '2026-05-10T11:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(0);
+        expect(result.skipped[0].reason).toContain('Overlaps');
+      });
+
+      it('allows non-overlapping back-to-back WO allocations', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(activeStageAssignment('emp-5'));
+        prisma.manpowerAssignment.findMany.mockResolvedValue([
+          { startTime: new Date('2026-05-10T08:00:00'), endTime: new Date('2026-05-10T10:00:00'), plannedEndTime: null, stageName: 'Assembly', activityType: 'PRODUCTION', workOrderId: 'wo-0' },
+        ]);
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-5', employeeId: 'emp-5' });
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T10:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(1);
+      });
+    });
+
+    describe('partial allocation preserves the remaining stage manpower (manual test 12)', () => {
+      it('allocating 3 of 5 workers leaves the other 2 with their stage-level assignment untouched', async () => {
+        prisma.employee.findFirst.mockImplementation(({ where }: any) => Promise.resolve(employeeRecord(where.id)));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockImplementation(({ where }: any) => Promise.resolve(activeStageAssignment(where.employeeId)));
+        prisma.manpowerAssignment.update = jest.fn();
+        prisma.manpowerAssignment.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `assign-${data.employeeId}`, ...data }));
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5', 'emp-6', 'emp-7'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.createdCount).toBe(3);
+        expect(prisma.manpowerAssignment.update).not.toHaveBeenCalled(); // emp-8, emp-9's stage assignments untouched
+      });
+    });
+
+    describe('target and costing calculation (spec sections 14, 17-19, manual tests 2-4)', () => {
+      it('computes the exact spec example: 5 workers x 4h x 8pcs/man/hr = 160 target; 20 labour-hours; ₹300 cost', async () => {
+        prisma.employee.findFirst.mockImplementation(({ where }: any) => Promise.resolve(employeeRecord(where.id)));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.product.findFirst.mockResolvedValue({ id: 'prod-1', code: '9W-LED' });
+        prisma.productStandardProductivity.findFirst.mockResolvedValue({ piecesPerManHour: 8, effectiveFrom: new Date('2026-01-01'), effectiveTo: null });
+        prisma.manpowerAssignment.findFirst.mockImplementation(({ where }: any) => Promise.resolve(activeStageAssignment(where.employeeId)));
+        prisma.manpowerAssignment.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `assign-${data.employeeId}`, ...data }));
+        settings.getSettingValue = jest.fn((key: string, def: string) => {
+          if (key === 'STANDARD_LABOUR_RATE_PER_SHIFT') return Promise.resolve('120');
+          if (key === 'STANDARD_SHIFT_HOURS') return Promise.resolve('8');
+          return Promise.resolve(def);
+        });
+
+        const result = await service.assignEmployees({
+          employeeIds: ['emp-5', 'emp-6', 'emp-7', 'emp-8', 'emp-9'], workOrderId: 'wo-1', stageName: 'Assembly',
+          startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00',
+        } as any, user);
+
+        expect(result.estimatedCost.workerCount).toBe(5);
+        expect(result.estimatedCost.labourHours).toBe(20);
+        expect(result.estimatedCost.estimatedCost).toBe(300);
+        expect(result.estimatedCost.plannedTargetQty).toBe(160);
+        // per-employee rate snapshot
+        expect(result.created[0].productivityRateSnapshot).toBe(8);
+        expect(result.created[0].labourRateSnapshot).toBe(15);
+        expect(result.created[0].plannedTargetQty).toBe(32); // 4h x 8pcs/man/hr
+        expect(result.created[0].estimatedLabourCost).toBe(60); // 4h x ₹15
+      });
+    });
+
+    describe('actual WO labour cost remains zero (spec section 20, manual test 5) - proven, not just claimed', () => {
+      it('the WO-level branch never writes to WorkOrder or ProductionCostSheet', () => {
+        const serviceSource = require('fs').readFileSync(require.resolve('./manpower.service.ts'), 'utf8');
+        const start = serviceSource.indexOf('async assignEmployees');
+        const end = serviceSource.indexOf('async endAssignment');
+        const section = serviceSource.slice(start, end);
+        expect(section).not.toContain('workOrder.update');
+        expect(section).not.toContain('workOrder.create');
+        expect(section).not.toContain('productionCostSheet');
+      });
+
+      it('never touches WorkOrder at runtime for a WO-level allocation either', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(activeStageAssignment('emp-5'));
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-5', employeeId: 'emp-5' });
+        const woUpdate = jest.fn();
+        prisma.workOrder.update = woUpdate;
+
+        await service.assignEmployees({ employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(woUpdate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('audit', () => {
+      it('logs the WO manpower allocation submission', async () => {
+        prisma.employee.findFirst.mockResolvedValue(employeeRecord('emp-5'));
+        prisma.attendance.findFirst.mockResolvedValue(emp1Attendance);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO);
+        prisma.manpowerAssignment.findFirst.mockResolvedValue(activeStageAssignment('emp-5'));
+        prisma.manpowerAssignment.create.mockResolvedValue({ id: 'assign-5', employeeId: 'emp-5' });
+
+        await service.assignEmployees({ employeeIds: ['emp-5'], workOrderId: 'wo-1', stageName: 'Assembly', startTime: '2026-05-10T08:00:00' } as any, user);
+
+        expect(audit.log).toHaveBeenCalledWith(
+          expect.objectContaining({ tableName: 'manpower_assignments', recordId: 'wo-1', action: 'CREATE', changedBy: user.id }),
+        );
+      });
+    });
+
+    describe('unauthorized allocation - permission enforcement is structural (manual test 14)', () => {
+      it('the assignment route requires MANPOWER_ASSIGN, unchanged from PROD-003', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./manpower.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Post('assignments')");
+        expect(routeIdx).toBeGreaterThan(-1);
+        const nextLines = controllerSource.slice(routeIdx, routeIdx + 150);
+        expect(nextLines).toContain('@RequirePermissions(Permission.MANPOWER_ASSIGN)');
       });
     });
   });

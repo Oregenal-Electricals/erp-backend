@@ -346,6 +346,14 @@ export class ManpowerService {
   // Extended in place (not duplicated) - this is the same method
   // Phase 1 already used for employee-level assignment; the checks
   // below are additive validation, not a new allocation mechanism.
+  // PROD-003/PROD-004: employee-level manpower assignment. When
+  // dto.workOrderId is absent this is a stage-level assignment
+  // (PROD-003 behavior, unchanged). When present, this is a Stage
+  // Head proposing a WO-level allocation (PROD-004) - it must be
+  // drawn from the employee's existing stage-level assignment, stays
+  // within its time window, targets a released WO for the right
+  // stage, and lands PENDING_APPROVAL via the same generic workflow
+  // engine WO_START already uses, rather than going ACTIVE immediately.
   async assignEmployees(dto: AssignEmployeesDto, user: any) {
     if (!dto.employeeIds || dto.employeeIds.length === 0) {
       throw new BadRequestException('Provide at least one employee to assign');
@@ -357,6 +365,7 @@ export class ManpowerService {
     }
     const dayStart = new Date(startTime); dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(startTime); dayEnd.setHours(23, 59, 59, 999);
+    const isWoLevel = !!dto.workOrderId;
 
     // Stage-count authorization (spec section 4): the number assigned
     // against a given allocation can never exceed what was authorized
@@ -373,6 +382,22 @@ export class ManpowerService {
       if (alreadyAssignedCount + dto.employeeIds.length > allocation.count) {
         throw new BadRequestException(`This allocation authorizes ${allocation.count} workers - ${alreadyAssignedCount} already assigned, cannot assign ${dto.employeeIds.length} more.`);
       }
+    }
+
+    // PROD-004: WO eligibility (spec section 5) - only a released WO,
+    // at the stage this allocation is for, can receive manpower.
+    let workOrder: any = null;
+    let product: any = null;
+    if (isWoLevel) {
+      workOrder = await this.prisma.workOrder.findFirst({ where: { id: dto.workOrderId, companyId: user.companyId } });
+      if (!workOrder) throw new NotFoundException('Work Order not found');
+      if (workOrder.status !== 'RELEASED') {
+        throw new BadRequestException(`Work Order ${workOrder.woNumber} is ${workOrder.status} - only a RELEASED Work Order can receive manpower allocation`);
+      }
+      if (dto.stageName && workOrder.stageName && workOrder.stageName !== dto.stageName) {
+        throw new BadRequestException(`Work Order ${workOrder.woNumber} belongs to stage ${workOrder.stageName}, not ${dto.stageName}`);
+      }
+      product = await this.prisma.product.findFirst({ where: { code: workOrder.productCode, companyId: user.companyId } });
     }
 
     const created = [];
@@ -399,15 +424,41 @@ export class ManpowerService {
         continue;
       }
 
+      // PROD-004 stage-ownership control (spec sections 4, 31): a
+      // Stage Head can only put forward workers Plant Head actually
+      // gave their stage - and only within that stage allocation's own
+      // time window (spec section 9). This is the real gate that
+      // stops "EMP-001 from SMT" being pulled into Assembly's WO.
+      let stageAssignment: any = null;
+      if (isWoLevel) {
+        stageAssignment = await this.prisma.manpowerAssignment.findFirst({
+          where: {
+            companyId: user.companyId, employeeId, isActive: true, status: 'ACTIVE',
+            workOrderId: null, activityType: 'PRODUCTION',
+            stageName: workOrder.stageName || dto.stageName,
+            startTime: { lte: startTime },
+          },
+        });
+        if (!stageAssignment) {
+          skipped.push({ employeeId, reason: `No active ${workOrder.stageName || dto.stageName} stage allocation covering this time - not authorized for this stage` });
+          continue;
+        }
+        const stageEnd = stageAssignment.endTime || stageAssignment.plannedEndTime || dayEnd;
+        const woEnd = plannedEndTime || dayEnd;
+        if (woEnd > stageEnd) {
+          skipped.push({ employeeId, reason: `Requested end time is outside the authorized stage allocation window (ends ${stageEnd.toISOString()})` });
+          continue;
+        }
+      }
+
       // Overlap control (spec sections 10-11): reject if this planned
-      // range conflicts with any other assignment for the same
-      // employee today. An assignment with no end yet (still open, or
-      // no plannedEndTime given) is treated as running through the end
-      // of the day for this check. Ranges that merely touch at a
-      // boundary (10:00 end, 10:00 start) do not count as overlapping.
-      const todaysAssignments = await this.prisma.manpowerAssignment.findMany({
-        where: { companyId: user.companyId, employeeId, isActive: true, startTime: { gte: dayStart, lte: dayEnd } },
-      });
+      // range conflicts with another assignment for the same employee
+      // today. For a WO-level allocation, only other WO-level
+      // allocations count as conflicts - the parent stage-level
+      // assignment is the authorizing window, not a competing one.
+      const overlapWhere: any = { companyId: user.companyId, employeeId, isActive: true, startTime: { gte: dayStart, lte: dayEnd } };
+      if (isWoLevel) overlapWhere.workOrderId = { not: null };
+      const todaysAssignments = await this.prisma.manpowerAssignment.findMany({ where: overlapWhere });
       const newEnd = plannedEndTime || dayEnd;
       const conflict = todaysAssignments.find(a => {
         const existingEnd = a.endTime || a.plannedEndTime || dayEnd;
@@ -426,12 +477,41 @@ export class ManpowerService {
       }
 
       // Close any currently-open assignment for this person before
-      // opening the new one.
-      const openAssignment = await this.prisma.manpowerAssignment.findFirst({
-        where: { companyId: user.companyId, employeeId, endTime: null, isActive: true },
-      });
-      if (openAssignment) {
-        await this.prisma.manpowerAssignment.update({ where: { id: openAssignment.id }, data: { endTime: startTime, updatedBy: user.id } });
+      // opening the new one - only for stage-level assignment, not a
+      // WO-level allocation nested inside an existing stage window.
+      if (!isWoLevel) {
+        const openAssignment = await this.prisma.manpowerAssignment.findFirst({
+          where: { companyId: user.companyId, employeeId, endTime: null, isActive: true },
+        });
+        if (openAssignment) {
+          await this.prisma.manpowerAssignment.update({ where: { id: openAssignment.id }, data: { endTime: startTime, updatedBy: user.id } });
+        }
+      }
+
+      // PROD-004 target/cost calculation (spec sections 13-18) - rate
+      // snapshots taken now so a later master change never alters this
+      // planned figure retroactively.
+      let plannedTargetQty: number | null = null;
+      let estimatedLabourCostForEmployee: number | null = null;
+      let productivityRateSnapshot: number | null = null;
+      let labourRateSnapshot: number | null = null;
+      if (isWoLevel && plannedEndTime && product) {
+        const now = new Date();
+        const productivity = await this.prisma.productStandardProductivity.findFirst({
+          where: { companyId: user.companyId, productId: product.id, isActive: true, effectiveFrom: { lte: now }, OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+          orderBy: { effectiveFrom: 'desc' },
+        });
+        const hours = (plannedEndTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+        if (productivity && productivity.piecesPerManHour > 0) {
+          productivityRateSnapshot = productivity.piecesPerManHour;
+          plannedTargetQty = Math.round(hours * productivity.piecesPerManHour * 100) / 100;
+        }
+        const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+        const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+        if (rate > 0) {
+          labourRateSnapshot = rate / shiftHours;
+          estimatedLabourCostForEmployee = Math.round(hours * labourRateSnapshot * 100) / 100;
+        }
       }
 
       const assignment = await this.prisma.manpowerAssignment.create({
@@ -440,10 +520,16 @@ export class ManpowerService {
           employeeId,
           allocationId: dto.allocationId,
           workOrderId: dto.workOrderId,
-          stageName: dto.stageName,
+          stageName: dto.stageName || workOrder?.stageName,
           activityType: dto.activityType || 'PRODUCTION',
           startTime,
           plannedEndTime,
+          status: isWoLevel ? 'PENDING_APPROVAL' : 'ACTIVE',
+          plannedTargetQty,
+          estimatedLabourCost: estimatedLabourCostForEmployee,
+          productivityRateSnapshot,
+          labourRateSnapshot,
+          submittedAt: isWoLevel ? new Date() : null,
           assignedByUserId: user.id,
           remarks: dto.remarks,
           createdBy: user.id, updatedBy: user.id,
@@ -453,8 +539,8 @@ export class ManpowerService {
       created.push(assignment);
     }
 
-    // Estimated stage labour cost - a planning reference only, never
-    // posted anywhere as actual cost (spec sections 19-21).
+    // Estimated stage/WO labour cost - a planning reference only,
+    // never posted anywhere as actual cost (spec sections 19-21).
     let estimatedCost: any = null;
     if (plannedEndTime && created.length > 0) {
       const hours = (plannedEndTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
@@ -462,18 +548,33 @@ export class ManpowerService {
       const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
       if (rate > 0) {
         const hourlyRate = rate / shiftHours;
+        const teamTarget = created.reduce((sum, c: any) => sum + (c.plannedTargetQty || 0), 0);
         estimatedCost = {
           workerCount: created.length,
           hours: Math.round(hours * 100) / 100,
           hourlyRate,
           labourHours: Math.round(created.length * hours * 100) / 100,
           estimatedCost: Math.round(created.length * hours * hourlyRate * 100) / 100,
+          plannedTargetQty: teamTarget > 0 ? Math.round(teamTarget * 100) / 100 : null,
         };
       }
     }
 
+    // PROD-004: submit the whole batch for Plant Head approval - one
+    // pending request per Work Order, matching how WO_START already
+    // works (no WorkflowDefinition needs to be pre-registered; the
+    // engine falls back to a single-level approval when none exists).
+    let approvalRequest: any = null;
+    if (isWoLevel && created.length > 0) {
+      const { request } = await this.workflows.submit({
+        documentType: 'WO_MANPOWER_ALLOCATION', documentId: dto.workOrderId as string, documentNumber: workOrder.woNumber,
+        remarks: `${created.length} worker(s) proposed for ${workOrder.woNumber} by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      }, user);
+      approvalRequest = request;
+    }
+
     await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped, warnings }, changedBy: user.id });
-    return { created, createdCount: created.length, skipped, skippedCount: skipped.length, warnings, estimatedCost };
+    return { created, createdCount: created.length, skipped, skippedCount: skipped.length, warnings, estimatedCost, approvalRequestId: approvalRequest?.id, status: isWoLevel ? 'PENDING_APPROVAL' : 'ACTIVE' };
   }
 
   async endAssignment(id: string, dto: EndAssignmentDto, user: any) {

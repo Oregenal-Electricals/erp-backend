@@ -331,6 +331,7 @@ let ManpowerService = class ManpowerService {
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(startTime);
         dayEnd.setHours(23, 59, 59, 999);
+        const isWoLevel = !!dto.workOrderId;
         let allocation = null;
         if (dto.allocationId) {
             allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: dto.allocationId, companyId: user.companyId } });
@@ -342,6 +343,20 @@ let ManpowerService = class ManpowerService {
             if (alreadyAssignedCount + dto.employeeIds.length > allocation.count) {
                 throw new common_1.BadRequestException(`This allocation authorizes ${allocation.count} workers - ${alreadyAssignedCount} already assigned, cannot assign ${dto.employeeIds.length} more.`);
             }
+        }
+        let workOrder = null;
+        let product = null;
+        if (isWoLevel) {
+            workOrder = await this.prisma.workOrder.findFirst({ where: { id: dto.workOrderId, companyId: user.companyId } });
+            if (!workOrder)
+                throw new common_1.NotFoundException('Work Order not found');
+            if (workOrder.status !== 'RELEASED') {
+                throw new common_1.BadRequestException(`Work Order ${workOrder.woNumber} is ${workOrder.status} - only a RELEASED Work Order can receive manpower allocation`);
+            }
+            if (dto.stageName && workOrder.stageName && workOrder.stageName !== dto.stageName) {
+                throw new common_1.BadRequestException(`Work Order ${workOrder.woNumber} belongs to stage ${workOrder.stageName}, not ${dto.stageName}`);
+            }
+            product = await this.prisma.product.findFirst({ where: { code: workOrder.productCode, companyId: user.companyId } });
         }
         const created = [];
         const skipped = [];
@@ -363,9 +378,31 @@ let ManpowerService = class ManpowerService {
                 skipped.push({ employeeId, reason: `Allocation start is before this employee's actual check-in (${attendance.checkIn.toISOString()})` });
                 continue;
             }
-            const todaysAssignments = await this.prisma.manpowerAssignment.findMany({
-                where: { companyId: user.companyId, employeeId, isActive: true, startTime: { gte: dayStart, lte: dayEnd } },
-            });
+            let stageAssignment = null;
+            if (isWoLevel) {
+                stageAssignment = await this.prisma.manpowerAssignment.findFirst({
+                    where: {
+                        companyId: user.companyId, employeeId, isActive: true, status: 'ACTIVE',
+                        workOrderId: null, activityType: 'PRODUCTION',
+                        stageName: workOrder.stageName || dto.stageName,
+                        startTime: { lte: startTime },
+                    },
+                });
+                if (!stageAssignment) {
+                    skipped.push({ employeeId, reason: `No active ${workOrder.stageName || dto.stageName} stage allocation covering this time - not authorized for this stage` });
+                    continue;
+                }
+                const stageEnd = stageAssignment.endTime || stageAssignment.plannedEndTime || dayEnd;
+                const woEnd = plannedEndTime || dayEnd;
+                if (woEnd > stageEnd) {
+                    skipped.push({ employeeId, reason: `Requested end time is outside the authorized stage allocation window (ends ${stageEnd.toISOString()})` });
+                    continue;
+                }
+            }
+            const overlapWhere = { companyId: user.companyId, employeeId, isActive: true, startTime: { gte: dayStart, lte: dayEnd } };
+            if (isWoLevel)
+                overlapWhere.workOrderId = { not: null };
+            const todaysAssignments = await this.prisma.manpowerAssignment.findMany({ where: overlapWhere });
             const newEnd = plannedEndTime || dayEnd;
             const conflict = todaysAssignments.find(a => {
                 const existingEnd = a.endTime || a.plannedEndTime || dayEnd;
@@ -379,11 +416,35 @@ let ManpowerService = class ManpowerService {
             if (dto.stageName && employee.skill && !employee.skill.toLowerCase().includes(dto.stageName.toLowerCase())) {
                 warnings.push({ employeeId, warning: `${employee.skill} may not match the ${dto.stageName} stage` });
             }
-            const openAssignment = await this.prisma.manpowerAssignment.findFirst({
-                where: { companyId: user.companyId, employeeId, endTime: null, isActive: true },
-            });
-            if (openAssignment) {
-                await this.prisma.manpowerAssignment.update({ where: { id: openAssignment.id }, data: { endTime: startTime, updatedBy: user.id } });
+            if (!isWoLevel) {
+                const openAssignment = await this.prisma.manpowerAssignment.findFirst({
+                    where: { companyId: user.companyId, employeeId, endTime: null, isActive: true },
+                });
+                if (openAssignment) {
+                    await this.prisma.manpowerAssignment.update({ where: { id: openAssignment.id }, data: { endTime: startTime, updatedBy: user.id } });
+                }
+            }
+            let plannedTargetQty = null;
+            let estimatedLabourCostForEmployee = null;
+            let productivityRateSnapshot = null;
+            let labourRateSnapshot = null;
+            if (isWoLevel && plannedEndTime && product) {
+                const now = new Date();
+                const productivity = await this.prisma.productStandardProductivity.findFirst({
+                    where: { companyId: user.companyId, productId: product.id, isActive: true, effectiveFrom: { lte: now }, OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+                    orderBy: { effectiveFrom: 'desc' },
+                });
+                const hours = (plannedEndTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+                if (productivity && productivity.piecesPerManHour > 0) {
+                    productivityRateSnapshot = productivity.piecesPerManHour;
+                    plannedTargetQty = Math.round(hours * productivity.piecesPerManHour * 100) / 100;
+                }
+                const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+                const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+                if (rate > 0) {
+                    labourRateSnapshot = rate / shiftHours;
+                    estimatedLabourCostForEmployee = Math.round(hours * labourRateSnapshot * 100) / 100;
+                }
             }
             const assignment = await this.prisma.manpowerAssignment.create({
                 data: {
@@ -391,10 +452,16 @@ let ManpowerService = class ManpowerService {
                     employeeId,
                     allocationId: dto.allocationId,
                     workOrderId: dto.workOrderId,
-                    stageName: dto.stageName,
+                    stageName: dto.stageName || (workOrder === null || workOrder === void 0 ? void 0 : workOrder.stageName),
                     activityType: dto.activityType || 'PRODUCTION',
                     startTime,
                     plannedEndTime,
+                    status: isWoLevel ? 'PENDING_APPROVAL' : 'ACTIVE',
+                    plannedTargetQty,
+                    estimatedLabourCost: estimatedLabourCostForEmployee,
+                    productivityRateSnapshot,
+                    labourRateSnapshot,
+                    submittedAt: isWoLevel ? new Date() : null,
                     assignedByUserId: user.id,
                     remarks: dto.remarks,
                     createdBy: user.id, updatedBy: user.id,
@@ -410,17 +477,27 @@ let ManpowerService = class ManpowerService {
             const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
             if (rate > 0) {
                 const hourlyRate = rate / shiftHours;
+                const teamTarget = created.reduce((sum, c) => sum + (c.plannedTargetQty || 0), 0);
                 estimatedCost = {
                     workerCount: created.length,
                     hours: Math.round(hours * 100) / 100,
                     hourlyRate,
                     labourHours: Math.round(created.length * hours * 100) / 100,
                     estimatedCost: Math.round(created.length * hours * hourlyRate * 100) / 100,
+                    plannedTargetQty: teamTarget > 0 ? Math.round(teamTarget * 100) / 100 : null,
                 };
             }
         }
+        let approvalRequest = null;
+        if (isWoLevel && created.length > 0) {
+            const { request } = await this.workflows.submit({
+                documentType: 'WO_MANPOWER_ALLOCATION', documentId: dto.workOrderId, documentNumber: workOrder.woNumber,
+                remarks: `${created.length} worker(s) proposed for ${workOrder.woNumber} by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            }, user);
+            approvalRequest = request;
+        }
         await this.audit.log({ tableName: 'manpower_assignments', recordId: dto.allocationId || dto.workOrderId || 'bulk', action: 'CREATE', newValues: { created: created.map(c => c.id), skipped, warnings }, changedBy: user.id });
-        return { created, createdCount: created.length, skipped, skippedCount: skipped.length, warnings, estimatedCost };
+        return { created, createdCount: created.length, skipped, skippedCount: skipped.length, warnings, estimatedCost, approvalRequestId: approvalRequest === null || approvalRequest === void 0 ? void 0 : approvalRequest.id, status: isWoLevel ? 'PENDING_APPROVAL' : 'ACTIVE' };
     }
     async endAssignment(id, dto, user) {
         const assignment = await this.prisma.manpowerAssignment.findFirst({ where: { id, companyId: user.companyId } });

@@ -1103,6 +1103,18 @@ model ManpowerAssignment {
   // the same employee - endTime remains the actual-close signal that
   // getCurrentRoster()/getReconciliation() already rely on.
   plannedEndTime DateTime?
+  // PROD-004: WO-level manpower allocation, proposed by a Stage Head
+  // and pending Plant Head approval (PROD-005). Stage-level rows from
+  // PROD-003 default to ACTIVE and are unaffected by this field.
+  status         String    @default("ACTIVE") // ACTIVE, PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED
+  plannedTargetQty Float?
+  estimatedLabourCost Float?
+  // Snapshots taken at allocation time so a later change to the
+  // productivity/rate master never retroactively alters this planned
+  // figure - mirrors the same pattern already used in WorkOrder.
+  productivityRateSnapshot Float?
+  labourRateSnapshot Float?
+  submittedAt    DateTime?
   assignedByUserId String
   assignedBy       User    @relation("ManpowerAssignmentBy", fields: [assignedByUserId], references: [id])
   remarks        String?

@@ -578,6 +578,8 @@ export declare class ManpowerService {
             warning: string;
         }[];
         estimatedCost: any;
+        approvalRequestId: any;
+        status: string;
     }>;
     endAssignment(id: string, dto: EndAssignmentDto, user: any): Promise<{
         workOrder: {
@@ -608,6 +610,8 @@ export declare class ManpowerService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        status: string;
+        submittedAt: Date | null;
         remarks: string | null;
         employeeId: string;
         stageName: string | null;
@@ -617,6 +621,10 @@ export declare class ManpowerService {
         startTime: Date;
         plannedEndTime: Date | null;
         endTime: Date | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         assignedByUserId: string;
     }>;
     getCurrentRoster(query: any, user: any): Promise<({
@@ -648,6 +656,8 @@ export declare class ManpowerService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
+        status: string;
+        submittedAt: Date | null;
         remarks: string | null;
         employeeId: string;
         stageName: string | null;
@@ -657,6 +667,10 @@ export declare class ManpowerService {
         startTime: Date;
         plannedEndTime: Date | null;
         endTime: Date | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
         assignedByUserId: string;
     })[]>;
     getEmployeeTimeline(employeeId: string, date: string, user: any): Promise<{
@@ -770,6 +784,8 @@ export declare class ManpowerService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            status: string;
+            submittedAt: Date | null;
             remarks: string | null;
             employeeId: string;
             stageName: string | null;
@@ -779,6 +795,10 @@ export declare class ManpowerService {
             startTime: Date;
             plannedEndTime: Date | null;
             endTime: Date | null;
+            plannedTargetQty: number | null;
+            estimatedLabourCost: number | null;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
             assignedByUserId: string;
         })[];
     }>;
