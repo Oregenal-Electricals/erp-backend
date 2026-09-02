@@ -243,16 +243,45 @@ export class WorkOrderService {
     return { plannedManpower, plannedLabourHours, plannedLabourCost, plannedLabourCostPerPc };
   }
 
+  // PROD-006: Production Start with real start conditions. Since each
+  // routing stage is already its own WorkOrder here, there's no single
+  // current-stage bottleneck to remove - starting the MI stage is
+  // already independent of the SMT stage's status. What was actually
+  // missing were the gates themselves.
   async start(id: string, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'RELEASED') throw new BadRequestException('Only RELEASED work orders can be started');
+
+    // Approved manpower gate (spec sections 7, 28, 50): a stage cannot
+    // start production without its own approved WO manpower allocation
+    // - present quantity flowing in from the previous stage is not
+    // enough on its own.
+    const approvedManpower = await this.prisma.manpowerAllocation.findFirst({
+      where: { companyId: user.companyId, workOrderId: id, status: 'APPROVED', isActive: true },
+    });
+    if (!approvedManpower) {
+      throw new BadRequestException('No approved manpower allocation exists for this Work Order yet - it cannot start production without one');
+    }
+
+    // Previous-stage handover gate (spec sections 7-9, 43): a
+    // subsequent stage needs a positive available input quantity, not
+    // a fully-completed previous stage. The first stage in a routing
+    // chain (no parent) instead draws from Store/material reservation,
+    // which release() already validated - never mix the two sources.
+    if (wo.parentWorkOrderId) {
+      const availableInput = wo.cumulativeInputQty - wo.cumulativeProcessedQty;
+      if (availableInput <= 0) {
+        throw new BadRequestException('No previous-stage handover quantity available yet - this stage cannot start until the prior stage hands over output');
+      }
+    }
+
     // Plant Head (and above) starting a Work Order is the approval itself -
     // no need to wait on themselves. Anyone else's start request goes
     // through the same generic multi-level approval engine already used
     // for PO/SO/Voucher approvals, and doesn't take effect until a Plant
     // Head approves it.
     if (STAGE_BYPASS_ROLES.includes(user.role)) {
-      const updated = await this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+      const updated = await this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString(), stageStatus: 'IN_PRODUCTION' } as any, user);
       // Material reservation moves here from release() (PROD-001) - this
       // is the point production is actually about to begin consuming
       // material, not the earlier administrative "approved to exist" step.

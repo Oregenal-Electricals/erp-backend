@@ -223,8 +223,20 @@ let WorkOrderService = class WorkOrderService {
         const wo = await this.findOne(id, user);
         if (wo.status !== 'RELEASED')
             throw new common_1.BadRequestException('Only RELEASED work orders can be started');
+        const approvedManpower = await this.prisma.manpowerAllocation.findFirst({
+            where: { companyId: user.companyId, workOrderId: id, status: 'APPROVED', isActive: true },
+        });
+        if (!approvedManpower) {
+            throw new common_1.BadRequestException('No approved manpower allocation exists for this Work Order yet - it cannot start production without one');
+        }
+        if (wo.parentWorkOrderId) {
+            const availableInput = wo.cumulativeInputQty - wo.cumulativeProcessedQty;
+            if (availableInput <= 0) {
+                throw new common_1.BadRequestException('No previous-stage handover quantity available yet - this stage cannot start until the prior stage hands over output');
+            }
+        }
         if (STAGE_BYPASS_ROLES.includes(user.role)) {
-            const updated = await this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString() }, user);
+            const updated = await this.update(id, { status: 'IN_PROGRESS', actualStartDate: new Date().toISOString(), stageStatus: 'IN_PRODUCTION' }, user);
             const reservations = await this.materialReservation.reserveForWorkOrder(id, user);
             return Object.assign(Object.assign({}, updated), { materialReservations: reservations });
         }

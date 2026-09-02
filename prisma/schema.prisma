@@ -3687,6 +3687,16 @@ model WorkOrder {
   pendingReassignQty Float?   // set while a WO_REASSIGN_QTY approval is in flight; cleared on approve/reject
   completedQty      Float     @default(0)
   rejectedQty       Float     @default(0)
+  // PROD-006: per-stage execution state, since each routing stage is
+  // already its own WorkOrder here - no separate WoStageExecution
+  // table needed. completedQty/rejectedQty above already track this
+  // stage's own good/rejected output; these track material FLOWING
+  // BETWEEN stages, separate from WO-level status so a downstream
+  // stage's readiness never depends on an upstream stage finishing.
+  cumulativeInputQty     Float  @default(0) // total received via StageTransferNote from the previous stage
+  cumulativeProcessedQty Float  @default(0) // how much of that received input this stage has consumed
+  cumulativeHandoverQty  Float  @default(0) // total already given onward to the next stage
+  stageStatus String @default("NOT_READY") // NOT_READY, READY_FOR_START, IN_PRODUCTION, PARTIALLY_COMPLETED, COMPLETED, BLOCKED
   plannedStartDate  DateTime
   plannedEndDate    DateTime
   actualStartDate   DateTime?

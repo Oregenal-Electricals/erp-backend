@@ -28,17 +28,35 @@ let StageTransferService = class StageTransferService {
         };
     }
     async give(dto, user) {
+        var _a;
         const fromWo = await this.prisma.workOrder.findFirst({ where: { id: dto.fromWorkOrderId, companyId: user.companyId } });
         if (!fromWo)
             throw new common_1.NotFoundException('Source Work Order not found');
-        if (fromWo.status !== 'COMPLETED')
-            throw new common_1.BadRequestException('Only a completed Work Order has finished goods to give');
+        if (!['IN_PROGRESS', 'COMPLETED'].includes(fromWo.status)) {
+            throw new common_1.BadRequestException('Only a Work Order that is IN PRODUCTION or COMPLETED has output to give');
+        }
         const toWo = await this.prisma.workOrder.findFirst({ where: { id: dto.toWorkOrderId, companyId: user.companyId } });
         if (!toWo)
             throw new common_1.NotFoundException('Destination Work Order not found');
-        const qty = dto.qty || fromWo.completedQty;
-        if (qty > fromWo.completedQty)
-            throw new common_1.BadRequestException(`Cannot give more than the ${fromWo.completedQty} units this Work Order actually completed`);
+        if (fromWo.routingGroupId && toWo.routingGroupId === fromWo.routingGroupId) {
+            if (toWo.parentWorkOrderId !== fromWo.id) {
+                throw new common_1.BadRequestException(`${toWo.woNumber} is not the immediate next stage after ${fromWo.woNumber} in this routing - handover would skip a stage`);
+            }
+        }
+        const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty;
+        const qty = (_a = dto.qty) !== null && _a !== void 0 ? _a : transferable;
+        if (qty <= 0)
+            throw new common_1.BadRequestException('No transferable quantity available to hand over');
+        if (qty > transferable) {
+            throw new common_1.BadRequestException(`Cannot give ${qty} - only ${transferable} is transferable (${fromWo.completedQty} completed minus ${fromWo.cumulativeHandoverQty} already given)`);
+        }
+        const updated = await this.prisma.$executeRaw `
+      UPDATE work_orders SET "cumulativeHandoverQty" = "cumulativeHandoverQty" + ${qty}, "updatedBy" = ${user.id}
+      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" >= ${qty}
+    `;
+        if (updated === 0) {
+            throw new common_1.BadRequestException('Transferable quantity changed since this was checked - please retry');
+        }
         const note = await this.prisma.stageTransferNote.create({
             data: {
                 companyId: user.companyId,
@@ -49,6 +67,14 @@ let StageTransferService = class StageTransferService {
                 createdBy: user.id, updatedBy: user.id,
             },
             include: this.includes(),
+        });
+        await this.prisma.workOrder.update({
+            where: { id: toWo.id },
+            data: {
+                cumulativeInputQty: { increment: qty },
+                stageStatus: toWo.stageStatus === 'NOT_READY' ? 'READY_FOR_START' : toWo.stageStatus,
+                updatedBy: user.id,
+            },
         });
         await this.audit.log({ tableName: 'stage_transfer_notes', recordId: note.id, action: 'CREATE', newValues: note, changedBy: user.id });
         return note;

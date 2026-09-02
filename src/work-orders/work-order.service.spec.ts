@@ -29,6 +29,7 @@ describe('WorkOrderService — PROD-001: Work Order Released to Production', () 
       bomItem: { findMany: jest.fn().mockResolvedValue([]) },
       stockBalance: { findUnique: jest.fn().mockResolvedValue(null) },
       productStandardProductivity: { findFirst: jest.fn().mockResolvedValue(productivity) },
+      manpowerAllocation: { findFirst: jest.fn().mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' }) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     materialReservation = { reserveForWorkOrder: jest.fn().mockResolvedValue([]) };
@@ -242,6 +243,99 @@ describe('WorkOrderService — PROD-001: Work Order Released to Production', () 
 
       const updateCall = prisma.workOrder.update.mock.calls[0][0];
       expect(updateCall.data.plannedManpower).toBe(1);
+    });
+  });
+
+  describe('PROD-006: Production Start with real start conditions', () => {
+    const releasedFirstStage = { ...draftWo, status: 'RELEASED', parentWorkOrderId: null, cumulativeInputQty: 0, cumulativeProcessedQty: 0 };
+    const releasedSubsequentStage = { ...draftWo, status: 'RELEASED', parentWorkOrderId: 'wo-smt', cumulativeInputQty: 0, cumulativeProcessedQty: 0 };
+
+    describe('approved manpower gate (spec sections 7, 28, 50)', () => {
+      it('blocks start when no approved manpower allocation exists for this Work Order', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(releasedFirstStage);
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(null);
+
+        await expect(service.start('wo-1', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows start once an approved manpower allocation exists', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(releasedFirstStage);
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+        prisma.workOrder.update.mockResolvedValue({ ...releasedFirstStage, status: 'IN_PROGRESS' });
+
+        const result = await service.start('wo-1', user);
+        expect(result.status).toBe('IN_PROGRESS');
+      });
+    });
+
+    describe('first-stage vs subsequent-stage input gate (spec sections 7-9, 37, 43)', () => {
+      it('the first routing stage (no parentWorkOrderId) needs no previous-stage handover to start', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(releasedFirstStage);
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+        prisma.workOrder.update.mockResolvedValue({ ...releasedFirstStage, status: 'IN_PROGRESS' });
+
+        const result = await service.start('wo-1', user);
+        expect(result.status).toBe('IN_PROGRESS');
+      });
+
+      it('blocks a subsequent stage with zero available input (manual test 2, spec section 9)', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(releasedSubsequentStage);
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+
+        await expect(service.start('wo-1', user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows a subsequent stage once positive available input exists (manual tests 3-4)', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...releasedSubsequentStage, cumulativeInputQty: 200 });
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+        prisma.workOrder.update.mockResolvedValue({ ...releasedSubsequentStage, status: 'IN_PROGRESS', cumulativeInputQty: 200 });
+
+        const result = await service.start('wo-1', user);
+        expect(result.status).toBe('IN_PROGRESS');
+      });
+
+      it('available input accounts for what has already been processed (spec sections 10-11)', async () => {
+        // 200 received, 150 already processed -> 50 available, still positive, still allowed
+        prisma.workOrder.findFirst.mockResolvedValue({ ...releasedSubsequentStage, cumulativeInputQty: 200, cumulativeProcessedQty: 150 });
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+        prisma.workOrder.update.mockResolvedValue({ ...releasedSubsequentStage, status: 'IN_PROGRESS' });
+
+        const result = await service.start('wo-1', user);
+        expect(result.status).toBe('IN_PROGRESS');
+      });
+
+      it('blocks when received equals already-processed - no fresh available input remains', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...releasedSubsequentStage, cumulativeInputQty: 200, cumulativeProcessedQty: 200 });
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+
+        await expect(service.start('wo-1', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('multiple stages of the same WO can be simultaneously active (spec sections 4, 18)', () => {
+      it('starting a subsequent stage never touches or depends on another stage row directly - each call is independent', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...releasedSubsequentStage, cumulativeInputQty: 200 });
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+        prisma.workOrder.update.mockResolvedValue({ ...releasedSubsequentStage, status: 'IN_PROGRESS' });
+
+        await service.start('wo-mi', user);
+
+        const updateCall = prisma.workOrder.update.mock.calls[0][0];
+        expect(updateCall.where.id).toBe('wo-mi');
+      });
+    });
+
+    describe('sets stageStatus alongside status (spec section 5)', () => {
+      it('IN_PRODUCTION stageStatus is set when a bypass-role user starts directly', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(releasedFirstStage);
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ id: 'alloc-1', status: 'APPROVED' });
+        prisma.workOrder.update.mockResolvedValue({ ...releasedFirstStage, status: 'IN_PROGRESS', stageStatus: 'IN_PRODUCTION' });
+
+        await service.start('wo-1', user);
+
+        const updateCall = prisma.workOrder.update.mock.calls[0][0];
+        expect(updateCall.data.stageStatus).toBe('IN_PRODUCTION');
+      });
     });
   });
 });

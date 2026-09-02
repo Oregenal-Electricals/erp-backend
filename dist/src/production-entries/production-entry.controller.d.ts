@@ -40,6 +40,10 @@ export declare class ProductionEntryController {
             plannedQty: number;
             pendingReassignQty: number | null;
             completedQty: number;
+            cumulativeInputQty: number;
+            cumulativeProcessedQty: number;
+            cumulativeHandoverQty: number;
+            stageStatus: string;
             plannedStartDate: Date;
             plannedEndDate: Date;
             actualStartDate: Date | null;
