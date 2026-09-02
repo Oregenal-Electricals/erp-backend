@@ -792,4 +792,251 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
       });
     });
   });
+
+  describe('Architecture correction: quantity-based Production manpower allocation', () => {
+    const releasedWO1 = { id: 'wo-1', woNumber: 'WO-1001', status: 'RELEASED', stageName: 'Assembly', productCode: '9W-LED' };
+    const releasedWO2 = { id: 'wo-2', woNumber: 'WO-1002', status: 'RELEASED', stageName: 'Assembly', productCode: '9W-LED' };
+    const parentAllocation = (overrides = {}) => ({
+      id: 'parent-1', companyId: 'company-1', level: 'HR_TO_PLANT', toUserId: user.id, status: 'ACCEPTED', count: 100, date: new Date('2026-05-10'), ...overrides,
+    });
+
+    beforeEach(() => {
+      prisma.manpowerAllocation = {
+        findFirst: jest.fn(), findMany: jest.fn().mockResolvedValue([]), create: jest.fn(), update: jest.fn(),
+      };
+      prisma.workOrder = { findFirst: jest.fn() };
+      prisma.product = { findFirst: jest.fn() };
+      prisma.productStandardProductivity = { findFirst: jest.fn() };
+      prisma.approvalRequest = { findFirst: jest.fn() };
+      workflows.submit = jest.fn().mockResolvedValue({ request: { id: 'req-1' } });
+      workflows.act = jest.fn();
+    });
+
+    describe('PROD-003: quantity-based stage allocation (no employee selection)', () => {
+      it('allocates the exact spec distribution: 100 -> SMT=20, MI=15, Assembly=40, Packaging=20, Other=5', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation());
+        prisma.manpowerAllocation.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `child-${data.category}`, ...data }));
+
+        const result = await service.distribute({
+          parentId: 'parent-1',
+          lines: [
+            { category: 'SMT', count: 20, toUserId: 'user-smt' },
+            { category: 'MI', count: 15, toUserId: 'user-mi' },
+            { category: 'Assembly', count: 40, toUserId: 'user-assembly' },
+            { category: 'Packaging', count: 20, toUserId: 'user-packaging' },
+            { category: 'Other', count: 5, toUserId: 'user-other' },
+          ],
+        } as any, user);
+
+        expect(result.distributedTotal).toBe(100);
+        expect(result.difference).toBe(0);
+        expect(result.children).toHaveLength(5);
+      });
+
+      it('no line requires an employeeId - quantity only', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation());
+        prisma.manpowerAllocation.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'child-1', ...data }));
+
+        await service.distribute({ parentId: 'parent-1', lines: [{ category: 'SMT', count: 20, toUserId: 'user-smt' }] } as any, user);
+
+        const createCall = prisma.manpowerAllocation.create.mock.calls[0][0];
+        expect(createCall.data.employeeId).toBeUndefined();
+      });
+    });
+
+    describe('cannot exceed available production manpower (spec sections 6, 26)', () => {
+      it('hard-blocks when requested total exceeds parent count', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ count: 100 }));
+        prisma.manpowerAllocation.findMany.mockResolvedValue([{ id: 's1', count: 90, startTime: null, plannedEndTime: null }]);
+
+        await expect(
+          service.distribute({ parentId: 'parent-1', lines: [{ category: 'Other', count: 15, toUserId: 'user-x' }] } as any, user),
+        ).rejects.toThrow(BadRequestException);
+        expect(prisma.manpowerAllocation.create).not.toHaveBeenCalled();
+      });
+
+      it('allows exactly the remaining amount', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ count: 100 }));
+        prisma.manpowerAllocation.findMany.mockResolvedValue([{ id: 's1', count: 90, startTime: null, plannedEndTime: null }]);
+        prisma.manpowerAllocation.create.mockResolvedValue({ id: 'child-1', count: 10 });
+
+        const result = await service.distribute({ parentId: 'parent-1', lines: [{ category: 'Other', count: 10, toUserId: 'user-x' }] } as any, user);
+        expect(result.distributedTotal).toBe(10);
+      });
+    });
+
+    describe('PROD-004: quantity-based WO allocation (spec sections 8, 27)', () => {
+      it('Assembly=40 splits into WO-1001=25, WO-1002=10, leaving 5 unassigned', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.workOrder.findFirst.mockImplementation(({ where }: any) => Promise.resolve(where.id === 'wo-1' ? releasedWO1 : releasedWO2));
+        prisma.manpowerAllocation.create.mockImplementation(({ data }: any) => Promise.resolve({ id: `child-${data.workOrderId}`, ...data }));
+
+        const result = await service.distribute({
+          parentId: 'parent-1',
+          lines: [
+            { workOrderId: 'wo-1', count: 25, startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00' },
+            { workOrderId: 'wo-2', count: 10, startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00' },
+          ],
+        } as any, user);
+
+        expect(result.distributedTotal).toBe(35);
+        expect(result.difference).toBe(5);
+        expect(workflows.submit).toHaveBeenCalledTimes(2);
+      });
+
+      it('lands each WO-level child as PENDING_APPROVAL, not immediately active', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO1);
+        prisma.manpowerAllocation.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'child-1', ...data }));
+
+        await service.distribute({ parentId: 'parent-1', lines: [{ workOrderId: 'wo-1', count: 25 }] } as any, user);
+
+        const createCall = prisma.manpowerAllocation.create.mock.calls[0][0];
+        expect(createCall.data.status).toBe('PENDING_APPROVAL');
+      });
+    });
+
+    describe('cannot exceed stage manpower (spec sections 11, 27)', () => {
+      it('blocks WO-1003=8 when only 5 remain of 40', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.manpowerAllocation.findMany.mockResolvedValue([
+          { id: 's1', count: 25, startTime: null, plannedEndTime: null },
+          { id: 's2', count: 10, startTime: null, plannedEndTime: null },
+        ]);
+
+        await expect(
+          service.distribute({ parentId: 'parent-1', lines: [{ workOrderId: 'wo-3', count: 8 }] } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows exactly the remaining 5', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.manpowerAllocation.findMany.mockResolvedValue([
+          { id: 's1', count: 25, startTime: null, plannedEndTime: null },
+          { id: 's2', count: 10, startTime: null, plannedEndTime: null },
+        ]);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO1);
+        prisma.manpowerAllocation.create.mockResolvedValue({ id: 'child-1', count: 5 });
+
+        const result = await service.distribute({ parentId: 'parent-1', lines: [{ workOrderId: 'wo-1', count: 5 }] } as any, user);
+        expect(result.distributedTotal).toBe(5);
+      });
+    });
+
+    describe('concurrent quantity validation by time window (spec sections 12-13, 31)', () => {
+      it('blocks when concurrent overlapping quantity would exceed stage capacity: 25+10+8=43 > 40', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.manpowerAllocation.findMany.mockResolvedValue([
+          { id: 's1', count: 25, startTime: new Date('2026-05-10T08:00:00'), plannedEndTime: new Date('2026-05-10T12:00:00') },
+          { id: 's2', count: 10, startTime: new Date('2026-05-10T08:00:00'), plannedEndTime: new Date('2026-05-10T12:00:00') },
+        ]);
+
+        await expect(
+          service.distribute({
+            parentId: 'parent-1',
+            lines: [{ workOrderId: 'wo-3', count: 8, startTime: '2026-05-10T09:00:00', plannedEndTime: '2026-05-10T11:00:00' }],
+          } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows full-capacity reuse across non-overlapping time windows: 40 then 40 again', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.manpowerAllocation.findMany.mockResolvedValue([
+          { id: 's1', count: 40, startTime: new Date('2026-05-10T08:00:00'), plannedEndTime: new Date('2026-05-10T10:00:00') },
+        ]);
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO2);
+        prisma.manpowerAllocation.create.mockResolvedValue({ id: 'child-2', count: 40 });
+
+        const result = await service.distribute({
+          parentId: 'parent-1',
+          lines: [{ workOrderId: 'wo-2', count: 40, startTime: '2026-05-10T10:00:00', plannedEndTime: '2026-05-10T12:00:00' }],
+        } as any, user);
+
+        expect(result.distributedTotal).toBe(40);
+      });
+    });
+
+    describe('target, labour-hours, and cost calculation (spec sections 14-18, 28)', () => {
+      it('computes the exact spec example: 25 manpower x 4h x 8pcs/man/hr = 800 target; 100 labour-hours; ₹1500 cost; ₹1.875/pc', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(parentAllocation({ level: 'PLANT_TO_STAGE', count: 40 }));
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWO1);
+        prisma.product.findFirst.mockResolvedValue({ id: 'prod-1', code: '9W-LED' });
+        prisma.productStandardProductivity.findFirst.mockResolvedValue({ piecesPerManHour: 8, effectiveFrom: new Date('2026-01-01'), effectiveTo: null });
+        prisma.manpowerAllocation.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'child-1', ...data }));
+        settings.getSettingValue = jest.fn((key: string, def: string) => {
+          if (key === 'STANDARD_LABOUR_RATE_PER_SHIFT') return Promise.resolve('120');
+          if (key === 'STANDARD_SHIFT_HOURS') return Promise.resolve('8');
+          return Promise.resolve(def);
+        });
+
+        const result = await service.distribute({
+          parentId: 'parent-1',
+          lines: [{ workOrderId: 'wo-1', count: 25, startTime: '2026-05-10T08:00:00', plannedEndTime: '2026-05-10T12:00:00' }],
+        } as any, user);
+
+        const child = result.children[0];
+        expect(child.plannedLabourHours).toBe(100);
+        expect(child.plannedTargetQty).toBe(800);
+        expect(child.estimatedLabourCost).toBe(1500);
+        expect(child.productivityRateSnapshot).toBe(8);
+        expect(child.labourRateSnapshot).toBe(15);
+        // ₹1500 / 800 = ₹1.875/pc - computable from the returned figures
+        expect(child.estimatedLabourCost / child.plannedTargetQty).toBeCloseTo(1.875, 5);
+      });
+    });
+
+    describe('PROD-005: quantity-based approval (spec sections 19-21, 29)', () => {
+      const pendingAllocation = { id: 'alloc-1', companyId: 'company-1', status: 'PENDING_APPROVAL', count: 25, workOrderId: 'wo-1' };
+
+      it('approves and marks the allocation APPROVED, recording approver and timestamp', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(pendingAllocation);
+        prisma.approvalRequest.findFirst.mockResolvedValue({ id: 'req-1' });
+        workflows.act.mockResolvedValue({ status: 'APPROVED' });
+        prisma.manpowerAllocation.update.mockResolvedValue({ ...pendingAllocation, status: 'APPROVED' });
+
+        const result = await service.approveWOAllocation('alloc-1', { action: 'APPROVED' }, user);
+
+        expect(result.status).toBe('APPROVED');
+        const updateCall = prisma.manpowerAllocation.update.mock.calls[0][0];
+        expect(updateCall.data.status).toBe('APPROVED');
+        expect(updateCall.data.approvedByUserId).toBe(user.id);
+      });
+
+      it('rejects and marks the allocation REJECTED', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue(pendingAllocation);
+        prisma.approvalRequest.findFirst.mockResolvedValue({ id: 'req-1' });
+        workflows.act.mockResolvedValue({ status: 'REJECTED' });
+        prisma.manpowerAllocation.update.mockResolvedValue({ ...pendingAllocation, status: 'REJECTED' });
+
+        const result = await service.approveWOAllocation('alloc-1', { action: 'REJECTED', comments: 'Not needed' }, user);
+
+        expect(result.status).toBe('REJECTED');
+      });
+
+      it('refuses to approve an allocation that is not PENDING_APPROVAL', async () => {
+        prisma.manpowerAllocation.findFirst.mockResolvedValue({ ...pendingAllocation, status: 'APPROVED' });
+        await expect(service.approveWOAllocation('alloc-1', { action: 'APPROVED' }, user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('approval never starts production - no WorkOrder write of any kind', () => {
+        const serviceSource = require('fs').readFileSync(require.resolve('./manpower.service.ts'), 'utf8');
+        const start = serviceSource.indexOf('async approveWOAllocation');
+        const end = serviceSource.indexOf('async findAll(user: any, query: any)');
+        const section = serviceSource.slice(start, end);
+        expect(section).not.toContain('workOrder.update');
+        expect(section).not.toContain('workOrder.create');
+        expect(section).not.toContain('productionCostSheet');
+      });
+    });
+
+    describe('audit and permission enforcement', () => {
+      it('the approve route requires MANPOWER_ALLOCATE', () => {
+        const controllerSource = require('fs').readFileSync(require.resolve('./manpower.controller.ts'), 'utf8');
+        const routeIdx = controllerSource.indexOf("@Post('allocations/:id/approve')");
+        expect(routeIdx).toBeGreaterThan(-1);
+        const nextLines = controllerSource.slice(routeIdx, routeIdx + 150);
+        expect(nextLines).toContain('@RequirePermissions(Permission.MANPOWER_ALLOCATE)');
+      });
+    });
+  });
 });

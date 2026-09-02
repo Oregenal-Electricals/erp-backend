@@ -1,0 +1,15 @@
+ALTER TABLE "manpower_allocations" ADD COLUMN "shiftId" TEXT;
+ALTER TABLE "manpower_allocations" ADD COLUMN "lineId" TEXT;
+ALTER TABLE "manpower_allocations" ADD COLUMN "skillCategory" TEXT;
+ALTER TABLE "manpower_allocations" ADD COLUMN "startTime" TIMESTAMP(3);
+ALTER TABLE "manpower_allocations" ADD COLUMN "plannedEndTime" TIMESTAMP(3);
+ALTER TABLE "manpower_allocations" ADD COLUMN "productivityRateSnapshot" DOUBLE PRECISION;
+ALTER TABLE "manpower_allocations" ADD COLUMN "labourRateSnapshot" DOUBLE PRECISION;
+ALTER TABLE "manpower_allocations" ADD COLUMN "plannedLabourHours" DOUBLE PRECISION;
+ALTER TABLE "manpower_allocations" ADD COLUMN "plannedTargetQty" DOUBLE PRECISION;
+ALTER TABLE "manpower_allocations" ADD COLUMN "estimatedLabourCost" DOUBLE PRECISION;
+ALTER TABLE "manpower_allocations" ADD COLUMN "submittedAt" TIMESTAMP(3);
+ALTER TABLE "manpower_allocations" ADD COLUMN "approvedByUserId" TEXT;
+ALTER TABLE "manpower_allocations" ADD COLUMN "approvedAt" TIMESTAMP(3);
+ALTER TABLE "manpower_allocations" ADD CONSTRAINT "manpower_allocations_shiftId_fkey" FOREIGN KEY ("shiftId") REFERENCES "shifts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "manpower_allocations" ADD CONSTRAINT "manpower_allocations_approvedByUserId_fkey" FOREIGN KEY ("approvedByUserId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -68,13 +68,26 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     }>;
     accept(id: string, user: any): Promise<{
         workOrder: {
@@ -132,19 +145,112 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     }>;
     distribute(dto: DistributeManpowerDto, user: any): Promise<{
         children: any[];
         distributedTotal: any;
         parentCount: number;
         difference: number;
+    }>;
+    approveWOAllocation(allocationId: string, dto: {
+        action: string;
+        comments?: string;
+    }, user: any): Promise<{
+        workOrder: {
+            id: string;
+            stageName: string;
+            productName: string;
+            woNumber: string;
+        };
+        queries: ({
+            raisedBy: {
+                firstName: string;
+                lastName: string;
+            };
+            raisedTo: {
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            message: string;
+            raisedToUserId: string;
+            response: string | null;
+            raisedByUserId: string;
+            allocationId: string;
+        })[];
+        fromUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        toUser: {
+            role: string;
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        level: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        category: string | null;
+        submittedAt: Date | null;
+        remarks: string | null;
+        date: Date;
+        approvedAt: Date | null;
+        parentId: string | null;
+        count: number;
+        plannedLabourHours: number | null;
+        workOrderId: string | null;
+        toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
+        fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     }>;
     findAll(user: any, query: any): Promise<({
         workOrder: {
@@ -202,13 +308,26 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     })[]>;
     findOne(id: string, user: any): Promise<{
         workOrder: {
@@ -273,13 +392,26 @@ export declare class ManpowerService {
             updatedBy: string | null;
             status: string;
             category: string | null;
+            submittedAt: Date | null;
             remarks: string | null;
             date: Date;
+            approvedAt: Date | null;
             parentId: string | null;
             count: number;
+            plannedLabourHours: number | null;
             workOrderId: string | null;
             toUserId: string | null;
+            startTime: Date | null;
+            plannedEndTime: Date | null;
             fromUserId: string;
+            shiftId: string | null;
+            lineId: string | null;
+            skillCategory: string | null;
+            productivityRateSnapshot: number | null;
+            labourRateSnapshot: number | null;
+            plannedTargetQty: number | null;
+            estimatedLabourCost: number | null;
+            approvedByUserId: string | null;
         })[];
         queries: ({
             raisedBy: {
@@ -330,13 +462,26 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     }>;
     getChain(rootId: string, user: any): Promise<{
         workOrder: {
@@ -394,13 +539,26 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     }>;
     raiseQuery(dto: RaiseManpowerQueryDto, user: any): Promise<{
         id: string;
@@ -446,13 +604,26 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -470,13 +641,26 @@ export declare class ManpowerService {
         updatedBy: string | null;
         status: string;
         category: string | null;
+        submittedAt: Date | null;
         remarks: string | null;
         date: Date;
+        approvedAt: Date | null;
         parentId: string | null;
         count: number;
+        plannedLabourHours: number | null;
         workOrderId: string | null;
         toUserId: string | null;
+        startTime: Date | null;
+        plannedEndTime: Date | null;
         fromUserId: string;
+        shiftId: string | null;
+        lineId: string | null;
+        skillCategory: string | null;
+        productivityRateSnapshot: number | null;
+        labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
+        approvedByUserId: string | null;
     } | {
         pendingApproval: boolean;
         approvalRequestId: string;
@@ -621,10 +805,10 @@ export declare class ManpowerService {
         startTime: Date;
         plannedEndTime: Date | null;
         endTime: Date | null;
-        plannedTargetQty: number | null;
-        estimatedLabourCost: number | null;
         productivityRateSnapshot: number | null;
         labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
         assignedByUserId: string;
     }>;
     getCurrentRoster(query: any, user: any): Promise<({
@@ -667,10 +851,10 @@ export declare class ManpowerService {
         startTime: Date;
         plannedEndTime: Date | null;
         endTime: Date | null;
-        plannedTargetQty: number | null;
-        estimatedLabourCost: number | null;
         productivityRateSnapshot: number | null;
         labourRateSnapshot: number | null;
+        plannedTargetQty: number | null;
+        estimatedLabourCost: number | null;
         assignedByUserId: string;
     })[]>;
     getEmployeeTimeline(employeeId: string, date: string, user: any): Promise<{
@@ -795,10 +979,10 @@ export declare class ManpowerService {
             startTime: Date;
             plannedEndTime: Date | null;
             endTime: Date | null;
-            plannedTargetQty: number | null;
-            estimatedLabourCost: number | null;
             productivityRateSnapshot: number | null;
             labourRateSnapshot: number | null;
+            plannedTargetQty: number | null;
+            estimatedLabourCost: number | null;
             assignedByUserId: string;
         })[];
     }>;

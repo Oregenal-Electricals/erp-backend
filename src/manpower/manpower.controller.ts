@@ -30,6 +30,10 @@ export class ManpowerController {
   @Post('allocations/:id/accept')
   @RequirePermissions(Permission.MANPOWER_ACCEPT)
   accept(@Param('id') id: string, @Request() req: any) { return this.manpowerService.accept(id, req.user); }
+  // PROD-005 (quantity-based correction): Plant Head approves/rejects/returns a Stage Head's WO manpower quantity proposal.
+  @Post('allocations/:id/approve')
+  @RequirePermissions(Permission.MANPOWER_ALLOCATE)
+  approveWOAllocation(@Param('id') id: string, @Body() dto: { action: string; comments?: string }, @Request() req: any) { return this.manpowerService.approveWOAllocation(id, dto, req.user); }
 
   @Post('allocations/distribute')
   @RequirePermissions(Permission.MANPOWER_DISTRIBUTE)

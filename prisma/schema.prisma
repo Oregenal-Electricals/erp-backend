@@ -539,6 +539,7 @@ model User {
   ginReturnGateOut    GateInwardEntry[]  @relation("GINReturnGateOutBy")
   ginPackageCountVerified  GateInwardEntry[]  @relation("GINPackageCountVerifiedBy")
   workOrdersReleased      WorkOrder[]        @relation("WorkOrderReleasedBy")
+  manpowerAllocApproved   ManpowerAllocation[] @relation("ManpowerAllocApprovedBy")
   goeAuthorized    GateOutwardEntry[] @relation("GOEAuthorizedBy")
   goeDispatched    GateOutwardEntry[] @relation("GOEDispatchedBy")
   goeCreated       GateOutwardEntry[] @relation("GOECreatedBy")
@@ -1026,6 +1027,24 @@ model ManpowerAllocation {
   remarks    String?
   workOrderId String?
   workOrder   WorkOrder? @relation(fields: [workOrderId], references: [id])
+  // Quantity-based correction: Production allocates manpower as a
+  // count, not by selecting individual Employee IDs (HR retains its
+  // own employee-wise attendance separately in ManpowerAssignment).
+  shiftId    String?
+  shift      Shift?    @relation(fields: [shiftId], references: [id])
+  lineId     String?
+  skillCategory String?
+  startTime  DateTime?
+  plannedEndTime DateTime?
+  productivityRateSnapshot Float?
+  labourRateSnapshot Float?
+  plannedLabourHours Float?
+  plannedTargetQty Float?
+  estimatedLabourCost Float?
+  submittedAt DateTime?
+  approvedByUserId String?
+  approvedByUser   User?     @relation("ManpowerAllocApprovedBy", fields: [approvedByUserId], references: [id])
+  approvedAt DateTime?
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
   createdAt  DateTime @default(now())
@@ -5594,6 +5613,7 @@ model Shift {
   createdBy           String?
   updatedBy           String?
 
+  manpowerAllocations ManpowerAllocation[]
   attendance          Attendance[]
 
   @@unique([companyId, code])

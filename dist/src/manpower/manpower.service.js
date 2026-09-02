@@ -115,9 +115,68 @@ let ManpowerService = class ManpowerService {
             if (!line.toUserId && !line.workOrderId) {
                 throw new common_1.BadRequestException('Each line needs either a recipient (line incharge) or a Work Order, or both');
             }
+            if (!line.count || line.count <= 0) {
+                throw new common_1.BadRequestException('Each line needs a manpower quantity greater than zero');
+            }
         }
+        const requestedTotal = dto.lines.reduce((sum, l) => sum + l.count, 0);
+        const existingSiblings = await this.prisma.manpowerAllocation.findMany({
+            where: { companyId: user.companyId, parentId: parent.id, isActive: true, status: { not: 'REJECTED' } },
+        });
+        const alreadyDistributedTotal = existingSiblings.reduce((sum, s) => sum + s.count, 0);
+        const rangesOverlap = (s1, e1, s2, e2) => {
+            if (!s1 || !e1 || !s2 || !e2)
+                return true;
+            return s1 < e2 && s2 < e1;
+        };
+        for (const line of dto.lines) {
+            const lineStart = line.startTime ? new Date(line.startTime) : null;
+            const lineEnd = line.plannedEndTime ? new Date(line.plannedEndTime) : null;
+            const concurrentSiblingTotal = existingSiblings
+                .filter(s => rangesOverlap(lineStart, lineEnd, s.startTime, s.plannedEndTime))
+                .reduce((sum, s) => sum + s.count, 0);
+            const concurrentNewLinesTotal = dto.lines
+                .filter(l => l !== line && rangesOverlap(lineStart, lineEnd, l.startTime ? new Date(l.startTime) : null, l.plannedEndTime ? new Date(l.plannedEndTime) : null))
+                .reduce((sum, l) => sum + l.count, 0);
+            const concurrentTotal = concurrentSiblingTotal + concurrentNewLinesTotal + line.count;
+            if (concurrentTotal > parent.count) {
+                throw new common_1.BadRequestException(`Concurrent manpower during this time window would reach ${concurrentTotal}, exceeding the authorized ${parent.count}.`);
+            }
+        }
+        const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+        const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+        const labourRateSnapshot = rate > 0 ? rate / shiftHours : null;
         const created = [];
         for (const line of dto.lines) {
+            const lineStart = line.startTime ? new Date(line.startTime) : null;
+            const lineEnd = line.plannedEndTime ? new Date(line.plannedEndTime) : null;
+            let productivityRateSnapshot = null;
+            let plannedLabourHours = null;
+            let plannedTargetQty = null;
+            let estimatedLabourCost = null;
+            if (line.workOrderId && lineStart && lineEnd) {
+                const workOrder = await this.prisma.workOrder.findFirst({ where: { id: line.workOrderId, companyId: user.companyId } });
+                const hours = (lineEnd.getTime() - lineStart.getTime()) / (1000 * 60 * 60);
+                plannedLabourHours = Math.round(line.count * hours * 100) / 100;
+                if (workOrder) {
+                    const product = await this.prisma.product.findFirst({ where: { code: workOrder.productCode, companyId: user.companyId } });
+                    if (product) {
+                        const now = new Date();
+                        const productivity = await this.prisma.productStandardProductivity.findFirst({
+                            where: { companyId: user.companyId, productId: product.id, isActive: true, effectiveFrom: { lte: now }, OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+                            orderBy: { effectiveFrom: 'desc' },
+                        });
+                        if (productivity && productivity.piecesPerManHour > 0) {
+                            productivityRateSnapshot = productivity.piecesPerManHour;
+                            plannedTargetQty = Math.round(line.count * hours * productivity.piecesPerManHour * 100) / 100;
+                        }
+                    }
+                }
+                if (labourRateSnapshot) {
+                    estimatedLabourCost = Math.round(plannedLabourHours * labourRateSnapshot * 100) / 100;
+                }
+            }
+            const needsApproval = nextLevel === 'STAGE_TO_LINE' && !!line.workOrderId;
             const child = await this.prisma.manpowerAllocation.create({
                 data: {
                     companyId: user.companyId,
@@ -127,7 +186,18 @@ let ManpowerService = class ManpowerService {
                     fromUserId: user.id,
                     toUserId: line.toUserId,
                     workOrderId: line.workOrderId,
-                    status: line.toUserId ? 'PENDING' : 'ACCEPTED',
+                    shiftId: line.shiftId,
+                    lineId: line.lineId,
+                    skillCategory: line.skillCategory,
+                    startTime: lineStart,
+                    plannedEndTime: lineEnd,
+                    productivityRateSnapshot,
+                    labourRateSnapshot: estimatedLabourCost !== null ? labourRateSnapshot : null,
+                    plannedLabourHours,
+                    plannedTargetQty,
+                    estimatedLabourCost,
+                    submittedAt: needsApproval ? new Date() : null,
+                    status: needsApproval ? 'PENDING_APPROVAL' : (line.toUserId ? 'PENDING' : 'ACCEPTED'),
                     parentId: parent.id,
                     count: line.count,
                     remarks: line.remarks,
@@ -135,11 +205,48 @@ let ManpowerService = class ManpowerService {
                 },
                 include: this.includes(),
             });
+            if (needsApproval) {
+                const workOrder = await this.prisma.workOrder.findFirst({ where: { id: line.workOrderId, companyId: user.companyId } });
+                await this.workflows.submit({
+                    documentType: 'WO_MANPOWER_ALLOCATION', documentId: child.id, documentNumber: (workOrder === null || workOrder === void 0 ? void 0 : workOrder.woNumber) || child.id,
+                    remarks: `${line.count} manpower proposed for ${(workOrder === null || workOrder === void 0 ? void 0 : workOrder.woNumber) || 'WO'} by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                }, user);
+            }
             created.push(child);
         }
-        await this.audit.log({ tableName: 'manpower_allocations', recordId: parent.id, action: 'UPDATE', newValues: { distributed: created.map(c => ({ id: c.id, toUserId: c.toUserId, count: c.count })) }, changedBy: user.id });
+        await this.audit.log({ tableName: 'manpower_allocations', recordId: parent.id, action: 'UPDATE', newValues: { distributed: created.map(c => ({ id: c.id, toUserId: c.toUserId, count: c.count, status: c.status })) }, changedBy: user.id });
         const distributedTotal = created.reduce((sum, c) => sum + c.count, 0);
-        return { children: created, distributedTotal, parentCount: parent.count, difference: parent.count - distributedTotal };
+        return { children: created, distributedTotal, parentCount: parent.count, difference: parent.count - (alreadyDistributedTotal + distributedTotal) };
+    }
+    async approveWOAllocation(allocationId, dto, user) {
+        const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: allocationId, companyId: user.companyId } });
+        if (!allocation)
+            throw new common_1.NotFoundException('Allocation not found');
+        if (allocation.status !== 'PENDING_APPROVAL') {
+            throw new common_1.BadRequestException(`Allocation is ${allocation.status}, not pending approval`);
+        }
+        const request = await this.prisma.approvalRequest.findFirst({
+            where: { companyId: user.companyId, documentType: 'WO_MANPOWER_ALLOCATION', documentId: allocationId, status: 'PENDING' },
+        });
+        if (!request)
+            throw new common_1.NotFoundException('No pending approval request found for this allocation');
+        const result = await this.workflows.act(request.id, { action: dto.action, comments: dto.comments }, user);
+        let newStatus = allocation.status;
+        if (result.status === 'APPROVED')
+            newStatus = 'APPROVED';
+        else if (result.status === 'REJECTED')
+            newStatus = 'REJECTED';
+        const updated = await this.prisma.manpowerAllocation.update({
+            where: { id: allocationId },
+            data: Object.assign(Object.assign({ status: newStatus }, (newStatus === 'APPROVED' ? { approvedByUserId: user.id, approvedAt: new Date() } : {})), { updatedBy: user.id }),
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'manpower_allocations', recordId: allocationId, action: 'UPDATE',
+            oldValues: { status: 'PENDING_APPROVAL' }, newValues: { status: newStatus, comments: dto.comments },
+            changedBy: user.id,
+        });
+        return updated;
     }
     async findAll(user, query) {
         const { date, level, mine } = query;

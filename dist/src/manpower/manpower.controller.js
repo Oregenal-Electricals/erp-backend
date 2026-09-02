@@ -29,6 +29,7 @@ let ManpowerController = class ManpowerController {
     getChain(id, req) { return this.manpowerService.getChain(id, req.user); }
     create(dto, req) { return this.manpowerService.create(dto, req.user); }
     accept(id, req) { return this.manpowerService.accept(id, req.user); }
+    approveWOAllocation(id, dto, req) { return this.manpowerService.approveWOAllocation(id, dto, req.user); }
     distribute(dto, req) { return this.manpowerService.distribute(dto, req.user); }
     raiseQuery(dto, req) { return this.manpowerService.raiseQuery(dto, req.user); }
     resolveQuery(id, dto, req) { return this.manpowerService.resolveQuery(id, dto, req.user); }
@@ -89,6 +90,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], ManpowerController.prototype, "accept", null);
+__decorate([
+    (0, common_1.Post)('allocations/:id/approve'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_ALLOCATE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "approveWOAllocation", null);
 __decorate([
     (0, common_1.Post)('allocations/distribute'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_DISTRIBUTE),

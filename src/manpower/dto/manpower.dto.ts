@@ -20,6 +20,11 @@ export class DistributeManpowerDto {
     category?: string;
     count: number;
     remarks?: string;
+    shiftId?: string;
+    lineId?: string;
+    skillCategory?: string;
+    startTime?: string;
+    plannedEndTime?: string;
   }[];
 }
 

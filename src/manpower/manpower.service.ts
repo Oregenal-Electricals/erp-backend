@@ -105,6 +105,15 @@ export class ManpowerService {
   // hard-block the total from over/under-matching the parent's count -
   // returns the difference instead, so the UI can flag it and the Plant
   // Manager can raise a query rather than being blocked outright.
+  // Architecture correction: Production manpower allocation is
+  // quantity-based, not employee-wise. Splits an accepted allocation
+  // into several next-level allocations by count (e.g. Plant Head
+  // splitting 100 available manpower across SMT/MI/Assembly/Packaging,
+  // or a Stage Head splitting their stage count across Work Orders).
+  // HR continues to track employee-wise attendance separately via
+  // ManpowerAssignment/assignEmployees() - that mechanism is untouched
+  // and still available for HR-internal reconciliation, it is simply
+  // no longer the mandatory Production allocation path.
   async distribute(dto: DistributeManpowerDto, user: any) {
     const parent = await this.prisma.manpowerAllocation.findFirst({ where: { id: dto.parentId, companyId: user.companyId } });
     if (!parent) throw new NotFoundException('Parent allocation not found');
@@ -117,10 +126,74 @@ export class ManpowerService {
       if (!line.toUserId && !line.workOrderId) {
         throw new BadRequestException('Each line needs either a recipient (line incharge) or a Work Order, or both');
       }
+      if (!line.count || line.count <= 0) {
+        throw new BadRequestException('Each line needs a manpower quantity greater than zero');
+      }
     }
 
-    const created = [];
+    const requestedTotal = dto.lines.reduce((sum, l) => sum + l.count, 0);
+    const existingSiblings = await this.prisma.manpowerAllocation.findMany({
+      where: { companyId: user.companyId, parentId: parent.id, isActive: true, status: { not: 'REJECTED' } },
+    });
+    const alreadyDistributedTotal = existingSiblings.reduce((sum, s) => sum + s.count, 0);
+
+    const rangesOverlap = (s1: Date | null, e1: Date | null, s2: Date | null, e2: Date | null) => {
+      if (!s1 || !e1 || !s2 || !e2) return true;
+      return s1 < e2 && s2 < e1;
+    };
     for (const line of dto.lines) {
+      const lineStart = line.startTime ? new Date(line.startTime) : null;
+      const lineEnd = line.plannedEndTime ? new Date(line.plannedEndTime) : null;
+      const concurrentSiblingTotal = existingSiblings
+        .filter(s => rangesOverlap(lineStart, lineEnd, s.startTime, s.plannedEndTime))
+        .reduce((sum, s) => sum + s.count, 0);
+      const concurrentNewLinesTotal = dto.lines
+        .filter(l => l !== line && rangesOverlap(lineStart, lineEnd, l.startTime ? new Date(l.startTime) : null, l.plannedEndTime ? new Date(l.plannedEndTime) : null))
+        .reduce((sum, l) => sum + l.count, 0);
+      const concurrentTotal = concurrentSiblingTotal + concurrentNewLinesTotal + line.count;
+      if (concurrentTotal > parent.count) {
+        throw new BadRequestException(`Concurrent manpower during this time window would reach ${concurrentTotal}, exceeding the authorized ${parent.count}.`);
+      }
+    }
+
+    const rate = parseFloat(await this.settings.getSettingValue('STANDARD_LABOUR_RATE_PER_SHIFT', '0'));
+    const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
+    const labourRateSnapshot = rate > 0 ? rate / shiftHours : null;
+
+    const created: any[] = [];
+    for (const line of dto.lines) {
+      const lineStart = line.startTime ? new Date(line.startTime) : null;
+      const lineEnd = line.plannedEndTime ? new Date(line.plannedEndTime) : null;
+
+      let productivityRateSnapshot: number | null = null;
+      let plannedLabourHours: number | null = null;
+      let plannedTargetQty: number | null = null;
+      let estimatedLabourCost: number | null = null;
+      if (line.workOrderId && lineStart && lineEnd) {
+        const workOrder = await this.prisma.workOrder.findFirst({ where: { id: line.workOrderId, companyId: user.companyId } });
+        const hours = (lineEnd.getTime() - lineStart.getTime()) / (1000 * 60 * 60);
+        plannedLabourHours = Math.round(line.count * hours * 100) / 100;
+        if (workOrder) {
+          const product = await this.prisma.product.findFirst({ where: { code: workOrder.productCode, companyId: user.companyId } });
+          if (product) {
+            const now = new Date();
+            const productivity = await this.prisma.productStandardProductivity.findFirst({
+              where: { companyId: user.companyId, productId: product.id, isActive: true, effectiveFrom: { lte: now }, OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+              orderBy: { effectiveFrom: 'desc' },
+            });
+            if (productivity && productivity.piecesPerManHour > 0) {
+              productivityRateSnapshot = productivity.piecesPerManHour;
+              plannedTargetQty = Math.round(line.count * hours * productivity.piecesPerManHour * 100) / 100;
+            }
+          }
+        }
+        if (labourRateSnapshot) {
+          estimatedLabourCost = Math.round(plannedLabourHours * labourRateSnapshot * 100) / 100;
+        }
+      }
+
+      const needsApproval = nextLevel === 'STAGE_TO_LINE' && !!line.workOrderId;
+
       const child = await this.prisma.manpowerAllocation.create({
         data: {
           companyId: user.companyId,
@@ -130,10 +203,18 @@ export class ManpowerService {
           fromUserId: user.id,
           toUserId: line.toUserId,
           workOrderId: line.workOrderId,
-          // A line with no recipient person is just the Stage Head logging
-          // "N manpower on this Work Order today" - there's no one else to
-          // hand it off to, so it doesn't sit PENDING waiting for an accept.
-          status: line.toUserId ? 'PENDING' : 'ACCEPTED',
+          shiftId: line.shiftId,
+          lineId: line.lineId,
+          skillCategory: line.skillCategory,
+          startTime: lineStart,
+          plannedEndTime: lineEnd,
+          productivityRateSnapshot,
+          labourRateSnapshot: estimatedLabourCost !== null ? labourRateSnapshot : null,
+          plannedLabourHours,
+          plannedTargetQty,
+          estimatedLabourCost,
+          submittedAt: needsApproval ? new Date() : null,
+          status: needsApproval ? 'PENDING_APPROVAL' : (line.toUserId ? 'PENDING' : 'ACCEPTED'),
           parentId: parent.id,
           count: line.count,
           remarks: line.remarks,
@@ -141,12 +222,62 @@ export class ManpowerService {
         },
         include: this.includes(),
       });
+
+      if (needsApproval) {
+        const workOrder = await this.prisma.workOrder.findFirst({ where: { id: line.workOrderId, companyId: user.companyId } });
+        await this.workflows.submit({
+          documentType: 'WO_MANPOWER_ALLOCATION', documentId: child.id, documentNumber: workOrder?.woNumber || child.id,
+          remarks: `${line.count} manpower proposed for ${workOrder?.woNumber || 'WO'} by ${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        }, user);
+      }
+
       created.push(child);
     }
-    await this.audit.log({ tableName: 'manpower_allocations', recordId: parent.id, action: 'UPDATE', newValues: { distributed: created.map(c => ({ id: c.id, toUserId: c.toUserId, count: c.count })) }, changedBy: user.id });
-
+    await this.audit.log({ tableName: 'manpower_allocations', recordId: parent.id, action: 'UPDATE', newValues: { distributed: created.map(c => ({ id: c.id, toUserId: c.toUserId, count: c.count, status: c.status })) }, changedBy: user.id });
     const distributedTotal = created.reduce((sum, c) => sum + c.count, 0);
-    return { children: created, distributedTotal, parentCount: parent.count, difference: parent.count - distributedTotal };
+    return { children: created, distributedTotal, parentCount: parent.count, difference: parent.count - (alreadyDistributedTotal + distributedTotal) };
+  }
+
+  // PROD-005 (quantity-based correction): Plant Head reviews and
+  // approves/rejects/returns a Stage Head's proposed WO manpower
+  // quantity. Wraps the generic WorkflowsService the same way
+  // WorkOrderService already does for WO_START - no separate approval
+  // engine, no PROD-006 (production start) triggered here.
+  async approveWOAllocation(allocationId: string, dto: { action: string; comments?: string }, user: any) {
+    const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: allocationId, companyId: user.companyId } });
+    if (!allocation) throw new NotFoundException('Allocation not found');
+    if (allocation.status !== 'PENDING_APPROVAL') {
+      throw new BadRequestException(`Allocation is ${allocation.status}, not pending approval`);
+    }
+
+    const request = await this.prisma.approvalRequest.findFirst({
+      where: { companyId: user.companyId, documentType: 'WO_MANPOWER_ALLOCATION', documentId: allocationId, status: 'PENDING' },
+    });
+    if (!request) throw new NotFoundException('No pending approval request found for this allocation');
+
+    const result = await this.workflows.act(request.id, { action: dto.action, comments: dto.comments } as any, user);
+
+    let newStatus = allocation.status;
+    if (result.status === 'APPROVED') newStatus = 'APPROVED';
+    else if (result.status === 'REJECTED') newStatus = 'REJECTED';
+
+    const updated = await this.prisma.manpowerAllocation.update({
+      where: { id: allocationId },
+      data: {
+        status: newStatus,
+        ...(newStatus === 'APPROVED' ? { approvedByUserId: user.id, approvedAt: new Date() } : {}),
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+
+    await this.audit.log({
+      tableName: 'manpower_allocations', recordId: allocationId, action: 'UPDATE',
+      oldValues: { status: 'PENDING_APPROVAL' }, newValues: { status: newStatus, comments: dto.comments },
+      changedBy: user.id,
+    });
+
+    return updated;
   }
 
   async findAll(user: any, query: any) {
