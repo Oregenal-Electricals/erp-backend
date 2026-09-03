@@ -43,6 +43,7 @@ export class AdjustManpowerDto {
   // PROD-009: reason is mandatory (matches PROD-008's mandatory reason).
   @IsString() reason: string;
   @IsOptional() @IsDateString() effectiveAt?: string;
+  @IsOptional() @IsString() destinationType?: 'WO_TO_STAGE_UNALLOCATED' | 'STAGE_TO_PLANT_UNALLOCATED' | 'TEMPORARILY_UNAVAILABLE';
 }
 
 export class TransferManpowerDto {

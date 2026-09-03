@@ -40,6 +40,9 @@ export class ProductionEntryService {
       throw new BadRequestException('Work order must be IN_PROGRESS to record production');
     }
 
+    if (wo.stageStatus === 'MANPOWER_HOLD') {
+      throw new BadRequestException('This stage has zero active manpower (MANPOWER_HOLD) - restore manpower before recording further production');
+    }
     const periodStart = new Date(dto.periodStart);
     const periodEnd = new Date(dto.periodEnd);
     if (periodEnd <= periodStart) throw new BadRequestException('Period end must be after period start');

@@ -1249,4 +1249,138 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
       });
     });
   });
+
+  describe('PROD-010: Manpower Quantity Reduced/Removed During Active Production', () => {
+    const woAllocation = {
+      id: 'alloc-wo', companyId: 'company-1', count: 25, date: new Date('2026-05-10'),
+      level: 'STAGE_TO_LINE', category: 'Assembly', parentId: 'alloc-stage',
+      workOrderId: 'wo-assembly', workOrder: { woNumber: 'WO-2026-0001-ASSEMBLY', status: 'IN_PROGRESS' },
+    };
+    const stageAllocation = { id: 'alloc-stage', companyId: 'company-1', count: 40, parentId: 'alloc-plant' };
+    const plantAllocation = { id: 'alloc-plant', companyId: 'company-1', count: 100, parentId: null };
+
+    beforeEach(() => {
+      prisma.manpowerAllocation = {
+        findFirst: jest.fn().mockImplementation(({ where }: any) => {
+          if (where.id === 'alloc-wo') return Promise.resolve(woAllocation);
+          if (where.id === 'alloc-stage') return Promise.resolve(stageAllocation);
+          if (where.id === 'alloc-plant') return Promise.resolve(plantAllocation);
+          return Promise.resolve(null);
+        }),
+        findMany: jest.fn().mockResolvedValue([]),
+        update: jest.fn().mockResolvedValue({}),
+        create: jest.fn(),
+      };
+      prisma.workOrder = { update: jest.fn().mockResolvedValue({}) };
+      prisma.$executeRaw = jest.fn().mockResolvedValue(1);
+      workflows.submit = jest.fn().mockResolvedValue({ request: { id: 'req-1' } });
+    });
+
+    describe('destination required for a reduction (spec section 4)', () => {
+      it('blocks a decrease with no destinationType', async () => {
+        await expect(
+          service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Workload reduced' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('WO_TO_STAGE_UNALLOCATED and STAGE_TO_PLANT_UNALLOCATED (manual tests 1-2, spec sections 15-16)', () => {
+      it('reduces the WO-level allocation - the freed count naturally becomes available at the stage parent', async () => {
+        const result: any = await service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Workload reduced', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, user);
+        expect(prisma.$executeRaw).toHaveBeenCalled();
+      });
+
+      it('the stage total itself never changes for a WO-level release - only the child row', async () => {
+        await service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Workload reduced', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, user);
+        const updateCalls = prisma.manpowerAllocation.update.mock.calls.filter((c: any) => c[0].where.id === 'alloc-stage');
+        expect(updateCalls).toHaveLength(0);
+      });
+    });
+
+    describe('TEMPORARILY_UNAVAILABLE (manual test 3, spec sections 17, 21)', () => {
+      it('also reduces the root HR_TO_PLANT allocation, so it never becomes reallocatable unallocated capacity', async () => {
+        // wo(parent=stage) -> stage(parent=plant) -> plant(parent=null): root is plant
+        await service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Temporary unavailability', destinationType: 'TEMPORARILY_UNAVAILABLE' } as any, user);
+
+        const rootUpdateCall = prisma.manpowerAllocation.update.mock.calls.find((c: any) => c[0].where.id === 'alloc-plant');
+        expect(rootUpdateCall).toBeDefined();
+        expect(rootUpdateCall[0].data.count).toEqual({ decrement: 5 });
+      });
+    });
+
+    describe('excess reduction blocked (manual test 6, spec section 8)', () => {
+      it('blocks a reduction greater than the current allocation', async () => {
+        await expect(
+          service.requestAdjust({ allocationId: 'alloc-wo', delta: -30, reason: 'Workload reduced', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('concurrency safety (spec section 39)', () => {
+      it('treats a zero-row atomic update as a real concurrency conflict', async () => {
+        prisma.$executeRaw = jest.fn().mockResolvedValue(0);
+        await expect(
+          service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Workload reduced', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('zero-manpower hold (manual test 7, spec sections 23-26)', () => {
+      it('reducing a WO-level allocation to exactly zero sets stageStatus to MANPOWER_HOLD', async () => {
+        prisma.manpowerAllocation.findFirst = jest.fn().mockImplementation(({ where }: any) => {
+          if (where.id === 'alloc-wo') return Promise.resolve({ ...woAllocation, count: 5 });
+          if (where.id === 'alloc-stage') return Promise.resolve(stageAllocation);
+          return Promise.resolve(null);
+        });
+
+        await service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Line stopped', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, user);
+
+        const woUpdateCall = prisma.workOrder.update.mock.calls[0][0];
+        expect(woUpdateCall.data.stageStatus).toBe('MANPOWER_HOLD');
+      });
+
+      it('does not set MANPOWER_HOLD when manpower remains above zero', async () => {
+        await service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Workload reduced', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, user);
+        expect(prisma.workOrder.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('pool reconciliation (manual test 8, spec sections 19-21, 37)', () => {
+      it('flags over-allocation when STAGE_TO_LINE total exceeds HR_TO_PLANT total', async () => {
+        prisma.manpowerAllocation.findMany = jest.fn().mockResolvedValue([
+          { level: 'HR_TO_PLANT', count: 98 },
+          { level: 'STAGE_TO_LINE', count: 60 },
+          { level: 'STAGE_TO_LINE', count: 40 },
+        ]);
+
+        const result = await service.getManpowerPoolReconciliation(user);
+
+        expect(result.eligible).toBe(98);
+        expect(result.allocated).toBe(100);
+        expect(result.difference).toBe(2);
+        expect(result.overAllocated).toBe(true);
+      });
+
+      it('does not flag over-allocation when allocated is within eligible', async () => {
+        prisma.manpowerAllocation.findMany = jest.fn().mockResolvedValue([
+          { level: 'HR_TO_PLANT', count: 100 },
+          { level: 'STAGE_TO_LINE', count: 95 },
+        ]);
+
+        const result = await service.getManpowerPoolReconciliation(user);
+        expect(result.overAllocated).toBe(false);
+      });
+    });
+
+    describe('authority: Stage Head requests, Plant Head approves (spec section 31)', () => {
+      it('a non-supervisor reduction request goes through approval, not immediate execution', async () => {
+        const nonSupervisorUser = { id: 'user-2', companyId: 'company-1', role: 'STAGE_HEAD' };
+        const result: any = await service.requestAdjust({ allocationId: 'alloc-wo', delta: -5, reason: 'Workload reduced', destinationType: 'WO_TO_STAGE_UNALLOCATED' } as any, nonSupervisorUser);
+
+        expect(workflows.submit).toHaveBeenCalled();
+        expect(result.pendingApproval).toBe(true);
+        expect(prisma.$executeRaw).not.toHaveBeenCalled();
+      });
+    });
+  });
 });

@@ -630,7 +630,15 @@ export declare class ManpowerService {
         message: string;
     }>;
     private getAvailableForIncrease;
+    private findRootAllocation;
     private executeAdjust;
+    getManpowerPoolReconciliation(user: any, date?: string): Promise<{
+        date: Date;
+        eligible: any;
+        allocated: any;
+        difference: number;
+        overAllocated: boolean;
+    }>;
     requestTransfer(dto: TransferManpowerDto, user: any): Promise<{
         level: string;
         id: string;

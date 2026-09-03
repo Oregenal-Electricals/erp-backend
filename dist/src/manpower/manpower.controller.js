@@ -43,6 +43,7 @@ let ManpowerController = class ManpowerController {
     getManpowerAvailability(query, req) { return this.manpowerService.getManpowerAvailability(query, req.user); }
     getEmployeeTimeline(employeeId, date, req) { return this.manpowerService.getEmployeeTimeline(employeeId, date, req.user); }
     getReconciliation(date, req) { return this.manpowerService.getReconciliation(date, req.user); }
+    getPoolReconciliation(date, req) { return this.manpowerService.getManpowerPoolReconciliation(req.user, date); }
 };
 exports.ManpowerController = ManpowerController;
 __decorate([
@@ -221,6 +222,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], ManpowerController.prototype, "getReconciliation", null);
+__decorate([
+    (0, common_1.Get)('pool-reconciliation'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.MANPOWER_VIEW),
+    __param(0, (0, common_1.Query)('date')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], ManpowerController.prototype, "getPoolReconciliation", null);
 exports.ManpowerController = ManpowerController = __decorate([
     (0, common_1.Controller)('manpower'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

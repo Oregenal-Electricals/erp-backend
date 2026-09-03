@@ -1031,4 +1031,11 @@ export declare class ManpowerController {
         unallocatedEmployees: any[];
         graceMinutes: number;
     }>;
+    getPoolReconciliation(date: string, req: any): Promise<{
+        date: Date;
+        eligible: any;
+        allocated: any;
+        difference: number;
+        overAllocated: boolean;
+    }>;
 }

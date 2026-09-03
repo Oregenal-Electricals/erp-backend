@@ -242,4 +242,14 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
       );
     });
   });
+
+  describe('PROD-010: zero-manpower hold blocks new production entries', () => {
+    it('refuses a new entry when the WO stage is in MANPOWER_HOLD, even though status is still IN_PROGRESS', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue({ ...firstStageWo, stageStatus: 'MANPOWER_HOLD' });
+
+      await expect(
+        service.create({ workOrderId: 'wo-smt', manpowerQty: 0, goodQty: 0, periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00' } as any, user),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
 });

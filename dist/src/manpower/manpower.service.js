@@ -342,6 +342,9 @@ let ManpowerService = class ManpowerService {
             throw new common_1.BadRequestException('Delta must be non-zero');
         if (dto.delta < 0 && allocation.count + dto.delta < 0)
             throw new common_1.BadRequestException('This would take the allocation below zero');
+        if (dto.delta < 0 && !dto.destinationType) {
+            throw new common_1.BadRequestException('destinationType is required for a manpower reduction - WO_TO_STAGE_UNALLOCATED, STAGE_TO_PLANT_UNALLOCATED, or TEMPORARILY_UNAVAILABLE');
+        }
         if (dto.delta > 0) {
             const available = await this.getAvailableForIncrease(allocation, user);
             if (dto.delta > available) {
@@ -350,12 +353,12 @@ let ManpowerService = class ManpowerService {
         }
         const effectiveAt = dto.effectiveAt ? new Date(dto.effectiveAt) : new Date();
         if (SUPERVISOR_ROLES.includes(user.role)) {
-            return this.executeAdjust(allocation, dto.delta, effectiveAt, user);
+            return this.executeAdjust(allocation, dto.delta, effectiveAt, dto.destinationType, user);
         }
         const documentType = dto.delta >= 0 ? 'MANPOWER_INCREASE' : 'MANPOWER_DECREASE';
         const { request } = await this.workflows.submit({
             documentType, documentId: allocation.id, documentNumber: allocation.workOrder.woNumber,
-            amount: Math.abs(dto.delta), remarks: JSON.stringify({ reason: dto.reason, effectiveAt: effectiveAt.toISOString() }),
+            amount: Math.abs(dto.delta), remarks: JSON.stringify({ reason: dto.reason, effectiveAt: effectiveAt.toISOString(), destinationType: dto.destinationType }),
         }, user);
         return { pendingApproval: true, approvalRequestId: request === null || request === void 0 ? void 0 : request.id, message: 'Submitted for Plant Head approval - manpower count has not changed yet' };
     }
@@ -371,7 +374,17 @@ let ManpowerService = class ManpowerService {
         const siblingsTotal = siblings.reduce((sum, s) => sum + s.count, 0);
         return Math.max(0, parent.count - siblingsTotal);
     }
-    async executeAdjust(allocation, delta, effectiveAt, user) {
+    async findRootAllocation(allocation, user) {
+        let current = allocation;
+        while (current.parentId) {
+            const parent = await this.prisma.manpowerAllocation.findFirst({ where: { id: current.parentId, companyId: user.companyId } });
+            if (!parent)
+                break;
+            current = parent;
+        }
+        return current;
+    }
+    async executeAdjust(allocation, delta, effectiveAt, destinationType, user) {
         if (delta > 0) {
             return this.prisma.$transaction(async (tx) => {
                 var _a;
@@ -398,8 +411,39 @@ let ManpowerService = class ManpowerService {
                 });
             });
         }
+        const reduced = await this.prisma.$executeRaw `
+      UPDATE manpower_allocations SET count = count + ${delta}, "updatedBy" = ${user.id}
+      WHERE id = ${allocation.id} AND count >= ${-delta}
+    `;
+        if (reduced === 0) {
+            throw new common_1.BadRequestException('Manpower count changed since this was checked - please retry');
+        }
+        if (destinationType === 'TEMPORARILY_UNAVAILABLE') {
+            const root = await this.findRootAllocation(allocation, user);
+            if (root && root.id !== allocation.id) {
+                await this.prisma.manpowerAllocation.update({
+                    where: { id: root.id }, data: { count: { decrement: -delta }, updatedBy: user.id },
+                });
+            }
+        }
         const newCount = allocation.count + delta;
-        return this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: newCount, updatedBy: user.id } });
+        if (newCount === 0 && allocation.workOrderId) {
+            await this.prisma.workOrder.update({ where: { id: allocation.workOrderId }, data: { stageStatus: 'MANPOWER_HOLD', updatedBy: user.id } });
+        }
+        return this.prisma.manpowerAllocation.findFirst({ where: { id: allocation.id } });
+    }
+    async getManpowerPoolReconciliation(user, date) {
+        const targetDate = date ? new Date(date) : new Date();
+        const allocations = await this.prisma.manpowerAllocation.findMany({
+            where: { companyId: user.companyId, isActive: true, status: { not: 'REJECTED' } },
+        });
+        const allocatedTotal = allocations.filter((a) => a.level === 'STAGE_TO_LINE').reduce((sum, a) => sum + a.count, 0);
+        const eligibleTotal = allocations.filter((a) => a.level === 'HR_TO_PLANT').reduce((sum, a) => sum + a.count, 0);
+        const difference = allocatedTotal - eligibleTotal;
+        return {
+            date: targetDate, eligible: eligibleTotal, allocated: allocatedTotal,
+            difference, overAllocated: difference > 0,
+        };
     }
     async requestTransfer(dto, user) {
         const allocation = await this.prisma.manpowerAllocation.findFirst({
@@ -448,10 +492,10 @@ let ManpowerService = class ManpowerService {
         if (actionResult.status === 'APPROVED') {
             if (actionResult.documentType === 'MANPOWER_INCREASE' || actionResult.documentType === 'MANPOWER_DECREASE') {
                 const delta = actionResult.documentType === 'MANPOWER_INCREASE' ? actionResult.amount : -actionResult.amount;
-                const { effectiveAt } = JSON.parse(actionResult.remarks || '{}');
+                const { effectiveAt, destinationType } = JSON.parse(actionResult.remarks || '{}');
                 const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId }, include: { workOrder: true } });
                 if (allocation)
-                    await this.executeAdjust(allocation, delta, effectiveAt ? new Date(effectiveAt) : new Date(), user);
+                    await this.executeAdjust(allocation, delta, effectiveAt ? new Date(effectiveAt) : new Date(), destinationType, user);
             }
             else if (actionResult.documentType === 'MANPOWER_TRANSFER') {
                 const { toWorkOrderId, effectiveAt } = JSON.parse(actionResult.remarks || '{}');

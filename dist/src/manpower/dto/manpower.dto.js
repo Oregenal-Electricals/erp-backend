@@ -93,6 +93,11 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], AdjustManpowerDto.prototype, "effectiveAt", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AdjustManpowerDto.prototype, "destinationType", void 0);
 class TransferManpowerDto {
 }
 exports.TransferManpowerDto = TransferManpowerDto;

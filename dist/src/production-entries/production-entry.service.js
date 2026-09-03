@@ -41,6 +41,9 @@ let ProductionEntryService = class ProductionEntryService {
         if (wo.status !== 'IN_PROGRESS') {
             throw new common_1.BadRequestException('Work order must be IN_PROGRESS to record production');
         }
+        if (wo.stageStatus === 'MANPOWER_HOLD') {
+            throw new common_1.BadRequestException('This stage has zero active manpower (MANPOWER_HOLD) - restore manpower before recording further production');
+        }
         const periodStart = new Date(dto.periodStart);
         const periodEnd = new Date(dto.periodEnd);
         if (periodEnd <= periodStart)

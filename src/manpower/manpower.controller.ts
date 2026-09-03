@@ -85,4 +85,10 @@ export class ManpowerController {
   @Get('reconciliation')
   @RequirePermissions(Permission.MANPOWER_VIEW)
   getReconciliation(@Query('date') date: string, @Request() req: any) { return this.manpowerService.getReconciliation(date, req.user); }
+  // PROD-010: allocated (STAGE_TO_LINE total) vs HR-eligible present
+  // (HR_TO_PLANT total) quantity reconciliation - distinct from the
+  // employee-wise attendance reconciliation above.
+  @Get('pool-reconciliation')
+  @RequirePermissions(Permission.MANPOWER_VIEW)
+  getPoolReconciliation(@Query('date') date: string, @Request() req: any) { return this.manpowerService.getManpowerPoolReconciliation(req.user, date); }
 }

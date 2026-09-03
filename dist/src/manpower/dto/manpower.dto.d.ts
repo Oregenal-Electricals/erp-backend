@@ -34,6 +34,7 @@ export declare class AdjustManpowerDto {
     delta: number;
     reason: string;
     effectiveAt?: string;
+    destinationType?: 'WO_TO_STAGE_UNALLOCATED' | 'STAGE_TO_PLANT_UNALLOCATED' | 'TEMPORARILY_UNAVAILABLE';
 }
 export declare class TransferManpowerDto {
     allocationId: string;
