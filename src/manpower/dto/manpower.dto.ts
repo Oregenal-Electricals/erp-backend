@@ -40,7 +40,9 @@ export class ResolveManpowerQueryDto {
 export class AdjustManpowerDto {
   @IsString() allocationId: string;
   @IsInt() delta: number; // positive = increase, negative = decrease
-  @IsOptional() @IsString() reason?: string;
+  // PROD-009: reason is mandatory (matches PROD-008's mandatory reason).
+  @IsString() reason: string;
+  @IsOptional() @IsDateString() effectiveAt?: string;
 }
 
 export class TransferManpowerDto {

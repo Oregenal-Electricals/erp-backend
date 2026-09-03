@@ -629,6 +629,8 @@ export declare class ManpowerService {
         approvalRequestId: string;
         message: string;
     }>;
+    private getAvailableForIncrease;
+    private executeAdjust;
     requestTransfer(dto: TransferManpowerDto, user: any): Promise<{
         level: string;
         id: string;

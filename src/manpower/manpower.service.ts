@@ -364,6 +364,10 @@ export class ManpowerService {
   // allocation goes through the same Plant Head approval gate as starting
   // or restarting the Work Order itself - a Plant-Head-tier user's change
   // applies immediately, anyone else's waits for approval.
+  // PROD-009: additional manpower must come from a genuinely available
+  // unallocated pool, never created from nothing (spec section 4) - and
+  // must carry a real effective time so PROD-007's costing can split
+  // correctly at the moment it actually joined (spec sections 13-17).
   async requestAdjust(dto: AdjustManpowerDto, user: any) {
     const allocation = await this.prisma.manpowerAllocation.findFirst({
       where: { id: dto.allocationId, companyId: user.companyId }, include: { workOrder: true },
@@ -371,18 +375,85 @@ export class ManpowerService {
     if (!allocation) throw new NotFoundException('Allocation not found');
     if (!allocation.workOrderId) throw new BadRequestException('Only a Work Order-linked allocation can be adjusted this way');
     if (allocation.workOrder?.status !== 'IN_PROGRESS') throw new BadRequestException('This Work Order is not currently active');
-    const newCount = allocation.count + dto.delta;
-    if (newCount < 0) throw new BadRequestException('This would take the allocation below zero');
+    if (dto.delta === 0) throw new BadRequestException('Delta must be non-zero');
+    if (dto.delta < 0 && allocation.count + dto.delta < 0) throw new BadRequestException('This would take the allocation below zero');
+
+    if (dto.delta > 0) {
+      const available = await this.getAvailableForIncrease(allocation, user);
+      if (dto.delta > available) {
+        throw new BadRequestException(`Requested ${dto.delta} exceeds available unallocated manpower (${available})`);
+      }
+    }
+
+    const effectiveAt = dto.effectiveAt ? new Date(dto.effectiveAt) : new Date();
 
     if (SUPERVISOR_ROLES.includes(user.role)) {
-      return this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: newCount, updatedBy: user.id } });
+      return this.executeAdjust(allocation, dto.delta, effectiveAt, user);
     }
     const documentType = dto.delta >= 0 ? 'MANPOWER_INCREASE' : 'MANPOWER_DECREASE';
     const { request } = await this.workflows.submit({
       documentType, documentId: allocation.id, documentNumber: allocation.workOrder.woNumber,
-      amount: Math.abs(dto.delta), remarks: dto.reason,
+      amount: Math.abs(dto.delta), remarks: JSON.stringify({ reason: dto.reason, effectiveAt: effectiveAt.toISOString() }),
     }, user);
     return { pendingApproval: true, approvalRequestId: request?.id, message: 'Submitted for Plant Head approval - manpower count has not changed yet' };
+  }
+
+  // Computes how much additional manpower can legitimately be assigned,
+  // bounded by the stage parent's remaining unallocated balance across
+  // all its children - never lets an increase exceed what the parent
+  // stage allocation actually authorizes (spec sections 4, 18-19). A
+  // missing parent link is a structural gap in older data, not grounds
+  // to silently block every increase, so it's treated as unbounded.
+  private async getAvailableForIncrease(allocation: any, user: any): Promise<number> {
+    if (!allocation.parentId) return Infinity;
+    const parent = await this.prisma.manpowerAllocation.findFirst({ where: { id: allocation.parentId, companyId: user.companyId } });
+    if (!parent) return Infinity;
+    const siblings = await this.prisma.manpowerAllocation.findMany({
+      where: { companyId: user.companyId, parentId: parent.id, isActive: true, status: { not: 'REJECTED' } },
+    });
+    const siblingsTotal = siblings.reduce((sum: number, s: any) => sum + s.count, 0);
+    return Math.max(0, parent.count - siblingsTotal);
+  }
+
+  // For an increase, this creates a new time-stamped allocation row for
+  // the increment rather than overwriting the existing row's count -
+  // preserving the original allocation's own startTime and giving the
+  // increment its own effective-time boundary (spec section 13), the
+  // same pattern PROD-008's transfer already uses. The check+create
+  // runs inside a transaction to narrow (not eliminate) the race window
+  // against a concurrent increase against the same parent (spec
+  // sections 33, 55) - re-verifying the parent's remaining balance at
+  // the moment of creation, not just at requestAdjust()'s earlier read.
+  // A decrease (PROD-010 scope) keeps the existing in-place update,
+  // since reducing a count can never over-allocate.
+  private async executeAdjust(allocation: any, delta: number, effectiveAt: Date, user: any) {
+    if (delta > 0) {
+      return this.prisma.$transaction(async (tx) => {
+        if (allocation.parentId) {
+          const parent = await tx.manpowerAllocation.findFirst({ where: { id: allocation.parentId, companyId: user.companyId } });
+          if (parent) {
+            const siblings = await tx.manpowerAllocation.findMany({
+              where: { companyId: user.companyId, parentId: parent.id, isActive: true, status: { not: 'REJECTED' } },
+            });
+            const siblingsTotal = siblings.reduce((sum: number, s: any) => sum + s.count, 0);
+            if (delta > parent.count - siblingsTotal) {
+              throw new BadRequestException('Available unallocated manpower changed since this was checked - please retry');
+            }
+          }
+        }
+        return tx.manpowerAllocation.create({
+          data: {
+            companyId: user.companyId, date: allocation.date, level: allocation.level, category: allocation.category,
+            fromUserId: user.id, workOrderId: allocation.workOrderId, parentId: allocation.parentId,
+            count: delta, status: 'ACCEPTED', startTime: effectiveAt,
+            remarks: `Additional manpower for ${allocation.workOrder?.woNumber || 'this Work Order'}`,
+            createdBy: user.id, updatedBy: user.id,
+          },
+        });
+      });
+    }
+    const newCount = allocation.count + delta;
+    return this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: newCount, updatedBy: user.id } });
   }
 
   // PROD-008: quantity-based manpower transfer with a real effective
@@ -452,8 +523,9 @@ export class ManpowerService {
     if (actionResult.status === 'APPROVED') {
       if (actionResult.documentType === 'MANPOWER_INCREASE' || actionResult.documentType === 'MANPOWER_DECREASE') {
         const delta = actionResult.documentType === 'MANPOWER_INCREASE' ? actionResult.amount : -actionResult.amount;
-        const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId } });
-        if (allocation) await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count + delta, updatedBy: user.id } });
+        const { effectiveAt } = JSON.parse(actionResult.remarks || '{}');
+        const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId }, include: { workOrder: true } });
+        if (allocation) await this.executeAdjust(allocation, delta, effectiveAt ? new Date(effectiveAt) : new Date(), user);
       } else if (actionResult.documentType === 'MANPOWER_TRANSFER') {
         const { toWorkOrderId, effectiveAt } = JSON.parse(actionResult.remarks || '{}');
         const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId }, include: { workOrder: true } });

@@ -1147,4 +1147,106 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
       });
     });
   });
+
+  describe('PROD-009: Additional Manpower Added During Active Production', () => {
+    const activeAllocation = {
+      id: 'alloc-wo', companyId: 'company-1', count: 20, date: new Date('2026-05-10'),
+      level: 'STAGE_TO_LINE', category: 'Assembly', parentId: 'alloc-stage',
+      workOrderId: 'wo-assembly', workOrder: { woNumber: 'WO-2026-0001-ASSEMBLY', status: 'IN_PROGRESS' },
+    };
+    const stageParent = { id: 'alloc-stage', companyId: 'company-1', count: 40 };
+    const nonSupervisorUser = { id: 'user-2', companyId: 'company-1', role: 'STAGE_HEAD' };
+
+    beforeEach(() => {
+      prisma.manpowerAllocation = {
+        findFirst: jest.fn().mockImplementation(({ where }: any) => {
+          if (where.id === 'alloc-wo') return Promise.resolve(activeAllocation);
+          if (where.id === 'alloc-stage') return Promise.resolve(stageParent);
+          return Promise.resolve(null);
+        }),
+        findMany: jest.fn().mockResolvedValue([{ id: 'alloc-wo', count: 20, isActive: true, status: 'ACCEPTED' }]), // siblings sum = 20, so 20 available (40-20)
+        create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'alloc-new', ...data })),
+        update: jest.fn(),
+      };
+      prisma.$transaction = jest.fn().mockImplementation((cb: any) => cb(prisma));
+      workflows.submit = jest.fn().mockResolvedValue({ request: { id: 'req-1' } });
+    });
+
+    describe('positive: valid request and approval (manual tests 1-2, spec sections 2, 39)', () => {
+      it('a supervisor-tier user executes the increase directly, creating a new time-stamped allocation row', async () => {
+        const result: any = await service.requestAdjust({ allocationId: 'alloc-wo', delta: 5, reason: 'Production backlog', effectiveAt: '2026-05-10T11:30:00' } as any, user);
+
+        expect(result.count).toBe(5);
+        expect(result.startTime).toEqual(new Date('2026-05-10T11:30:00'));
+      });
+
+      it('does not modify the original allocation row - preserves its own startTime/history', async () => {
+        await service.requestAdjust({ allocationId: 'alloc-wo', delta: 5, reason: 'Production backlog' } as any, user);
+
+        expect(prisma.manpowerAllocation.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('never creates manpower - bounded by the stage parent (spec sections 4, 18-19, manual test 5)', () => {
+      it('blocks an increase that exceeds the stage parent\'s remaining unallocated balance', async () => {
+        // parent=40, siblings total=20 (from beforeEach) -> only 20 available
+        await expect(
+          service.requestAdjust({ allocationId: 'alloc-wo', delta: 25, reason: 'Production backlog' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows exactly the remaining available amount', async () => {
+        const result: any = await service.requestAdjust({ allocationId: 'alloc-wo', delta: 20, reason: 'Production backlog' } as any, user);
+        expect(result.count).toBe(20);
+      });
+    });
+
+    describe('active WO required (spec section 22, manual test 9)', () => {
+      it('blocks addition to a WO that is not IN_PROGRESS', async () => {
+        prisma.manpowerAllocation.findFirst = jest.fn().mockResolvedValue({ ...activeAllocation, workOrder: { ...activeAllocation.workOrder, status: 'RELEASED' } });
+        await expect(
+          service.requestAdjust({ allocationId: 'alloc-wo', delta: 5, reason: 'Production backlog' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('effective time (spec sections 13, 27)', () => {
+      it('defaults effective time to now when not provided', async () => {
+        const result: any = await service.requestAdjust({ allocationId: 'alloc-wo', delta: 5, reason: 'Production backlog' } as any, user);
+        expect(result.startTime).toBeInstanceOf(Date);
+      });
+    });
+
+    describe('authority: Stage Head requests, Plant Head approves (spec section 6)', () => {
+      it('a non-supervisor request goes through approval, not immediate execution', async () => {
+        const result: any = await service.requestAdjust({ allocationId: 'alloc-wo', delta: 5, reason: 'Production backlog' } as any, nonSupervisorUser);
+
+        expect(workflows.submit).toHaveBeenCalled();
+        expect(result.pendingApproval).toBe(true);
+        expect(prisma.manpowerAllocation.create).not.toHaveBeenCalled();
+      });
+
+      it('revalidates availability at approval time via the same bounded check inside executeAdjust', async () => {
+        workflows.act = jest.fn().mockResolvedValue({
+          status: 'APPROVED', documentType: 'MANPOWER_INCREASE', documentId: 'alloc-wo', amount: 25,
+          remarks: JSON.stringify({ reason: 'Production backlog', effectiveAt: '2026-05-10T11:30:00.000Z' }),
+        });
+        (service as any).notifyAdmins = jest.fn();
+
+        // amount=25 exceeds the 20 available - the transaction-level recheck must still block it
+        await expect(service.approveManpowerRequest('req-1', user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('mandatory reason (spec section 35 pattern) - verified structurally via the DTO', () => {
+      it('reason is a required (non-optional) field on AdjustManpowerDto', () => {
+        const dtoSource = require('fs').readFileSync(require.resolve('./dto/manpower.dto.ts'), 'utf8');
+        const classStart = dtoSource.indexOf('class AdjustManpowerDto');
+        const classBody = dtoSource.slice(classStart, classStart + 400);
+        const reasonLine = classBody.split('\n').find((l: string) => l.includes('reason:'));
+        expect(reasonLine).toBeDefined();
+        expect(reasonLine).not.toContain('@IsOptional()');
+      });
+    });
+  });
 });

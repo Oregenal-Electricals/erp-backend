@@ -32,7 +32,8 @@ export declare class ResolveManpowerQueryDto {
 export declare class AdjustManpowerDto {
     allocationId: string;
     delta: number;
-    reason?: string;
+    reason: string;
+    effectiveAt?: string;
 }
 export declare class TransferManpowerDto {
     allocationId: string;
