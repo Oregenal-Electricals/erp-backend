@@ -360,6 +360,7 @@ model Company {
   hourlyProductionReports HourlyProductionReport[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
+  downtimes              Downtime[]
 
   @@map("companies")
   @@index([code])
@@ -559,6 +560,8 @@ model User {
   bomQueryRaisedTo BomQuery[] @relation("BomQueryRaisedTo")
   transfersGiven    StageTransferNote[] @relation("TransferGivenBy")
   transfersReceived StageTransferNote[] @relation("TransferReceivedBy")
+  downtimesStarted  Downtime[] @relation("DowntimeStartedBy")
+  downtimesResumed  Downtime[] @relation("DowntimeResumedBy")
 
   @@map("users")
   @@index([email])
@@ -1415,6 +1418,39 @@ model GateEvent {
 
 
 // A stage explicitly hands off its finished output to the next stage (or
+// PROD-011: Production Pause/Downtime and Resume. Separate from
+// ProductionEntry.downtimeMinutes/downtimeReason (PROD-007's flat,
+// per-hourly-entry fields) - this is a real start/end-timestamped
+// event with its own OPEN/CLOSED lifecycle, needed because exact
+// timestamps (not just a typed duration) are required for costing,
+// audit, and correctly reconstructing overlapping production entries.
+model Downtime {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  workOrderId     String
+  workOrder       WorkOrder @relation(fields: [workOrderId], references: [id])
+  reason          String
+  category        String    @default("OTHER") // MACHINE, MATERIAL, QUALITY, POWER, MANPOWER, CHANGEOVER, PLANNED_BREAK, MAINTENANCE, OTHER
+  startTime       DateTime
+  endTime         DateTime?
+  status          String    @default("OPEN") // OPEN, CLOSED
+  startedByUserId String
+  startedBy       User      @relation("DowntimeStartedBy", fields: [startedByUserId], references: [id])
+  resumedByUserId String?
+  resumedBy       User?     @relation("DowntimeResumedBy", fields: [resumedByUserId], references: [id])
+  remarks         String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("downtimes")
+  @@index([companyId, workOrderId])
+}
+
 // any other stage) instead of that handoff happening invisibly through
 // automatic BOM-based material consumption. The giving side creates this
 // as PENDING; the receiving side must explicitly accept it before it's
@@ -3744,6 +3780,7 @@ model WorkOrder {
   hourlyProductionReports HourlyProductionReport[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
+  downtimes           Downtime[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
