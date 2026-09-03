@@ -364,22 +364,30 @@ let ManpowerService = class ManpowerService {
         const toWo = await this.prisma.workOrder.findFirst({ where: { id: dto.toWorkOrderId, companyId: user.companyId } });
         if (!toWo)
             throw new common_1.NotFoundException('Destination Work Order not found');
+        const effectiveAt = dto.effectiveAt ? new Date(dto.effectiveAt) : new Date();
         if (SUPERVISOR_ROLES.includes(user.role)) {
-            return this.executeTransfer(allocation, dto.toWorkOrderId, dto.qty, user);
+            return this.executeTransfer(allocation, dto.toWorkOrderId, dto.qty, effectiveAt, user);
         }
         const { request } = await this.workflows.submit({
             documentType: 'MANPOWER_TRANSFER', documentId: allocation.id, documentNumber: allocation.workOrder.woNumber,
-            amount: dto.qty, remarks: JSON.stringify({ reason: dto.reason, toWorkOrderId: dto.toWorkOrderId }),
+            amount: dto.qty, remarks: JSON.stringify({ reason: dto.reason, toWorkOrderId: dto.toWorkOrderId, effectiveAt: effectiveAt.toISOString() }),
         }, user);
         return { pendingApproval: true, approvalRequestId: request === null || request === void 0 ? void 0 : request.id, message: 'Submitted for Plant Head approval - manpower has not moved yet' };
     }
-    async executeTransfer(allocation, toWorkOrderId, qty, user) {
+    async executeTransfer(allocation, toWorkOrderId, qty, effectiveAt, user) {
         var _a;
-        await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count - qty, updatedBy: user.id } });
+        const updated = await this.prisma.$executeRaw `
+      UPDATE manpower_allocations SET count = count - ${qty}, "updatedBy" = ${user.id}
+      WHERE id = ${allocation.id} AND count >= ${qty}
+    `;
+        if (updated === 0) {
+            throw new common_1.BadRequestException('Source manpower count changed since this was checked - please retry');
+        }
         return this.prisma.manpowerAllocation.create({
             data: {
                 companyId: user.companyId, date: allocation.date, level: allocation.level, category: allocation.category,
                 fromUserId: user.id, workOrderId: toWorkOrderId, count: qty, status: 'ACCEPTED',
+                startTime: effectiveAt,
                 remarks: `Transferred from ${((_a = allocation.workOrder) === null || _a === void 0 ? void 0 : _a.woNumber) || 'another Work Order'}`,
                 createdBy: user.id, updatedBy: user.id,
             },
@@ -395,10 +403,10 @@ let ManpowerService = class ManpowerService {
                     await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count + delta, updatedBy: user.id } });
             }
             else if (actionResult.documentType === 'MANPOWER_TRANSFER') {
-                const { toWorkOrderId } = JSON.parse(actionResult.remarks || '{}');
+                const { toWorkOrderId, effectiveAt } = JSON.parse(actionResult.remarks || '{}');
                 const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId }, include: { workOrder: true } });
                 if (allocation && toWorkOrderId)
-                    await this.executeTransfer(allocation, toWorkOrderId, actionResult.amount, user);
+                    await this.executeTransfer(allocation, toWorkOrderId, actionResult.amount, effectiveAt ? new Date(effectiveAt) : new Date(), user);
             }
             await this.notifyAdmins(user, actionResult, `${actionResult.documentType.replace(/_/g, ' ')} approved`);
         }

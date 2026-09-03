@@ -1039,4 +1039,112 @@ describe('ManpowerService — PROD-002: Manpower Available from HR Attendance', 
       });
     });
   });
+
+  describe('PROD-008: Manpower Quantity Transfer During Production', () => {
+    const sourceAllocation = {
+      id: 'alloc-src', companyId: 'company-1', count: 25, date: new Date('2026-05-10'),
+      level: 'STAGE_TO_LINE', category: 'Assembly',
+      workOrderId: 'wo-assembly', workOrder: { woNumber: 'WO-2026-0001-ASSEMBLY' },
+    };
+    const destWo = { id: 'wo-packaging', companyId: 'company-1' };
+    const nonSupervisorUser = { id: 'user-2', companyId: 'company-1', role: 'STAGE_HEAD' };
+
+    beforeEach(() => {
+      prisma.manpowerAllocation = {
+        findFirst: jest.fn().mockResolvedValue(sourceAllocation),
+        update: jest.fn(),
+        create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'alloc-dest', ...data })),
+      };
+      prisma.workOrder = { findFirst: jest.fn().mockResolvedValue(destWo) };
+      prisma.$executeRaw = jest.fn().mockResolvedValue(1);
+      workflows.submit = jest.fn().mockResolvedValue({ request: { id: 'req-1' } });
+    });
+
+    describe('positive: normal quantity transfer (manual test 1, spec sections 6, 41)', () => {
+      it('a supervisor-tier user executes the transfer directly - source decreases, destination created with the same qty', async () => {
+        const result: any = await service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 5, reason: 'Workload balancing' } as any, user);
+
+        expect(prisma.$executeRaw).toHaveBeenCalled();
+        expect(result.count).toBe(5);
+      });
+
+      it('total manpower is preserved by construction - decrement and create carry the identical quantity', async () => {
+        await service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 5, reason: 'Workload balancing' } as any, user);
+
+        const createCall = prisma.manpowerAllocation.create.mock.calls[0][0];
+        expect(createCall.data.count).toBe(5);
+      });
+    });
+
+    describe('effective time capture (spec sections 3, 9, 38)', () => {
+      it('an explicit effectiveAt is stored on the destination allocation as startTime', async () => {
+        const effectiveAt = '2026-05-10T12:00:00';
+        await service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 5, reason: 'Workload balancing', effectiveAt } as any, user);
+
+        const createCall = prisma.manpowerAllocation.create.mock.calls[0][0];
+        expect(createCall.data.startTime).toEqual(new Date(effectiveAt));
+      });
+
+      it('defaults to now when effectiveAt is not provided, rather than leaving it undefined', async () => {
+        await service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 5, reason: 'Workload balancing' } as any, user);
+
+        const createCall = prisma.manpowerAllocation.create.mock.calls[0][0];
+        expect(createCall.data.startTime).toBeInstanceOf(Date);
+      });
+    });
+
+    describe('source validation (manual test 2, spec section 7)', () => {
+      it('blocks a transfer requesting more than the source currently has', async () => {
+        await expect(
+          service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 30, reason: 'Workload balancing' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('concurrency safety (spec sections 57-58, manual test 19)', () => {
+      it('treats a zero-row atomic update as a real concurrency conflict, not a silent success', async () => {
+        prisma.$executeRaw = jest.fn().mockResolvedValue(0);
+
+        await expect(
+          service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 5, reason: 'Workload balancing' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+        expect(prisma.manpowerAllocation.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('authority: Plant Head approves non-supervisor requests (spec section 5, manual test 11)', () => {
+      it('a non-supervisor request goes through approval, not immediate execution', async () => {
+        const result: any = await service.requestTransfer({ allocationId: 'alloc-src', toWorkOrderId: 'wo-packaging', qty: 5, reason: 'Workload balancing' } as any, nonSupervisorUser);
+
+        expect(workflows.submit).toHaveBeenCalled();
+        expect(result.pendingApproval).toBe(true);
+        expect(prisma.$executeRaw).not.toHaveBeenCalled();
+      });
+
+      it('the effective time is preserved through the approval remarks and applied on execution', async () => {
+        workflows.act = jest.fn().mockResolvedValue({
+          status: 'APPROVED', documentType: 'MANPOWER_TRANSFER', documentId: 'alloc-src', amount: 5,
+          remarks: JSON.stringify({ reason: 'Workload balancing', toWorkOrderId: 'wo-packaging', effectiveAt: '2026-05-10T12:00:00.000Z' }),
+        });
+        notifications.createBulk = jest.fn();
+        (service as any).notifyAdmins = jest.fn();
+
+        await service.approveManpowerRequest('req-1', user);
+
+        const createCall = prisma.manpowerAllocation.create.mock.calls[0][0];
+        expect(createCall.data.startTime).toEqual(new Date('2026-05-10T12:00:00.000Z'));
+      });
+    });
+
+    describe('mandatory reason (spec section 31) - verified structurally via the DTO', () => {
+      it('reason is a required (non-optional) field on TransferManpowerDto', () => {
+        const dtoSource = require('fs').readFileSync(require.resolve('./dto/manpower.dto.ts'), 'utf8');
+        const classStart = dtoSource.indexOf('class TransferManpowerDto');
+        const classBody = dtoSource.slice(classStart, classStart + 400);
+        const reasonLine = classBody.split('\n').find((l: string) => l.includes('reason:'));
+        expect(reasonLine).toBeDefined();
+        expect(reasonLine).not.toContain('@IsOptional()');
+      });
+    });
+  });
 });

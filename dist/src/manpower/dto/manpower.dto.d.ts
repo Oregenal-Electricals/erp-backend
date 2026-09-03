@@ -38,7 +38,8 @@ export declare class TransferManpowerDto {
     allocationId: string;
     toWorkOrderId: string;
     qty: number;
-    reason?: string;
+    reason: string;
+    effectiveAt?: string;
 }
 export declare class AssignEmployeesDto {
     employeeIds: string[];

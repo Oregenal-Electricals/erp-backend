@@ -47,7 +47,14 @@ export class TransferManpowerDto {
   @IsString() allocationId: string;
   @IsString() toWorkOrderId: string;
   @IsInt() @Min(1) qty: number;
-  @IsOptional() @IsString() reason?: string;
+  // PROD-008: reason is mandatory (spec section 31) - "Other" still
+  // requires a real reason string, no separate remarks field needed.
+  @IsString() reason: string;
+  // Optional - when omitted, the transfer takes effect now. When
+  // provided, this becomes the source-of-truth boundary for costing
+  // (spec sections 3, 9): before it, manpower belongs to the source;
+  // from it onward, to the destination.
+  @IsOptional() @IsDateString() effectiveAt?: string;
 }
 
 // ---- Phase 1: employee-level assignment ----

@@ -106,10 +106,14 @@ __decorate([
     __metadata("design:type", Number)
 ], TransferManpowerDto.prototype, "qty", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], TransferManpowerDto.prototype, "reason", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], TransferManpowerDto.prototype, "effectiveAt", void 0);
 const ACTIVITY_TYPES = [
     'PRODUCTION', 'QUALITY_INSPECTION', 'REWORK', 'REPAIR', 'MACHINE_SETUP',
     'LINE_CHANGEOVER', 'MAINTENANCE', 'BREAKDOWN_SUPPORT', 'MATERIAL_HANDLING',

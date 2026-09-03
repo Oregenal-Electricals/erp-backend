@@ -385,6 +385,10 @@ export class ManpowerService {
     return { pendingApproval: true, approvalRequestId: request?.id, message: 'Submitted for Plant Head approval - manpower count has not changed yet' };
   }
 
+  // PROD-008: quantity-based manpower transfer with a real effective
+  // time (spec sections 3, 9, 38) - the boundary PROD-007's costing
+  // needs to split labour-hours/cost/target correctly at the moment
+  // manpower actually moved, not just "sometime during this entry".
   async requestTransfer(dto: TransferManpowerDto, user: any) {
     const allocation = await this.prisma.manpowerAllocation.findFirst({
       where: { id: dto.allocationId, companyId: user.companyId }, include: { workOrder: true },
@@ -395,26 +399,46 @@ export class ManpowerService {
     const toWo = await this.prisma.workOrder.findFirst({ where: { id: dto.toWorkOrderId, companyId: user.companyId } });
     if (!toWo) throw new NotFoundException('Destination Work Order not found');
 
+    const effectiveAt = dto.effectiveAt ? new Date(dto.effectiveAt) : new Date();
+
     if (SUPERVISOR_ROLES.includes(user.role)) {
-      return this.executeTransfer(allocation, dto.toWorkOrderId, dto.qty, user);
+      return this.executeTransfer(allocation, dto.toWorkOrderId, dto.qty, effectiveAt, user);
     }
     // documentId/amount hold the source allocation and quantity; the
-    // destination Work Order doesn't fit the generic engine's fixed
-    // columns, so it rides along as structured remarks instead of adding
-    // a bespoke field to a table shared by every other approval type.
+    // destination Work Order and effective time don't fit the generic
+    // engine's fixed columns, so they ride along as structured remarks
+    // instead of adding bespoke fields to a table shared by every other
+    // approval type.
     const { request } = await this.workflows.submit({
       documentType: 'MANPOWER_TRANSFER', documentId: allocation.id, documentNumber: allocation.workOrder.woNumber,
-      amount: dto.qty, remarks: JSON.stringify({ reason: dto.reason, toWorkOrderId: dto.toWorkOrderId }),
+      amount: dto.qty, remarks: JSON.stringify({ reason: dto.reason, toWorkOrderId: dto.toWorkOrderId, effectiveAt: effectiveAt.toISOString() }),
     }, user);
     return { pendingApproval: true, approvalRequestId: request?.id, message: 'Submitted for Plant Head approval - manpower has not moved yet' };
   }
 
-  private async executeTransfer(allocation: any, toWorkOrderId: string, qty: number, user: any) {
-    await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count - qty, updatedBy: user.id } });
+  private async executeTransfer(allocation: any, toWorkOrderId: string, qty: number, effectiveAt: Date, user: any) {
+    // Concurrency-safe (spec sections 57-58): the actual guard against
+    // two simultaneous transfers together exceeding source availability
+    // is this atomic conditional update, not the read-check in
+    // requestTransfer() above (which is only a friendly pre-check for
+    // the common case) - the WHERE clause re-verifies the count at the
+    // database level in the same statement that applies the decrement.
+    const updated = await this.prisma.$executeRaw`
+      UPDATE manpower_allocations SET count = count - ${qty}, "updatedBy" = ${user.id}
+      WHERE id = ${allocation.id} AND count >= ${qty}
+    `;
+    if (updated === 0) {
+      throw new BadRequestException('Source manpower count changed since this was checked - please retry');
+    }
     return this.prisma.manpowerAllocation.create({
       data: {
         companyId: user.companyId, date: allocation.date, level: allocation.level, category: allocation.category,
         fromUserId: user.id, workOrderId: toWorkOrderId, count: qty, status: 'ACCEPTED',
+        // startTime already exists on this model (from PROD-003) as the
+        // "when does this allocation become active" field - reused here
+        // as the transfer's effective time, so downstream manpower
+        // lookups naturally respect the boundary without a new column.
+        startTime: effectiveAt,
         remarks: `Transferred from ${allocation.workOrder?.woNumber || 'another Work Order'}`,
         createdBy: user.id, updatedBy: user.id,
       },
@@ -431,9 +455,9 @@ export class ManpowerService {
         const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId } });
         if (allocation) await this.prisma.manpowerAllocation.update({ where: { id: allocation.id }, data: { count: allocation.count + delta, updatedBy: user.id } });
       } else if (actionResult.documentType === 'MANPOWER_TRANSFER') {
-        const { toWorkOrderId } = JSON.parse(actionResult.remarks || '{}');
+        const { toWorkOrderId, effectiveAt } = JSON.parse(actionResult.remarks || '{}');
         const allocation = await this.prisma.manpowerAllocation.findFirst({ where: { id: actionResult.documentId }, include: { workOrder: true } });
-        if (allocation && toWorkOrderId) await this.executeTransfer(allocation, toWorkOrderId, actionResult.amount, user);
+        if (allocation && toWorkOrderId) await this.executeTransfer(allocation, toWorkOrderId, actionResult.amount, effectiveAt ? new Date(effectiveAt) : new Date(), user);
       }
       await this.notifyAdmins(user, actionResult, `${actionResult.documentType.replace(/_/g, ' ')} approved`);
     }
