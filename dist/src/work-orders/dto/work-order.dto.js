@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateWorkOrderDto = exports.CreateWorkOrderDto = void 0;
+exports.CompleteStageDto = exports.UpdateWorkOrderDto = exports.CreateWorkOrderDto = void 0;
 const class_validator_1 = require("class-validator");
 const STATUSES = ['DRAFT', 'RELEASED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
@@ -131,4 +131,17 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateWorkOrderDto.prototype, "remarks", void 0);
+class CompleteStageDto {
+}
+exports.CompleteStageDto = CompleteStageDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CompleteStageDto.prototype, "shortClosure", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CompleteStageDto.prototype, "reason", void 0);
 //# sourceMappingURL=work-order.dto.js.map

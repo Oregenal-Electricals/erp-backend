@@ -4,7 +4,7 @@ import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from './material-reservation.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
+import { CreateWorkOrderDto, UpdateWorkOrderDto, CompleteStageDto } from './dto/work-order.dto';
 import { SettingsService } from '../settings/settings.service';
 
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
@@ -455,16 +455,20 @@ export class WorkOrderService {
     }
   }
 
-  async complete(id: string, dto: { completedQty: number; rejectedQty?: number }, user: any) {
+  // PROD-012: real, reconciled stage completion. This method already
+  // existed and already correctly set status to COMPLETED (each
+  // routing stage being its own WorkOrder here means this WO's own
+  // status IS the stage's completion signal - no separate stageStatus
+  // value was needed) and already gated on IPQC failure - but it had
+  // no quantity reconciliation at all, and took completedQty/rejectedQty
+  // as raw user input rather than trusting what PROD-007's confirm()
+  // already accumulated on the WO. Corrected in place rather than
+  // building a parallel completeStage() method, to avoid two competing
+  // "is this stage done" signals on the same model.
+  async complete(id: string, dto: CompleteStageDto & { completedQty?: number; rejectedQty?: number }, user: any) {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'IN_PROGRESS') throw new BadRequestException('Only IN_PROGRESS work orders can be completed');
 
-    // In-process quality is a real gate, not just a log: if the most
-    // recent IPQC inspection for this WO failed, completion is blocked
-    // until a corrective re-inspection (a new IPQC record with a PASS or
-    // CONDITIONAL result) exists. This holds even after a Plant Head
-    // approves resuming a stopped WO - approving the restart isn't the
-    // same as confirming the underlying quality issue was actually fixed.
     const lastQc = await this.prisma.productionQc.findFirst({
       where: { companyId: user.companyId, workOrderId: id, status: 'COMPLETED' },
       orderBy: { inspectionDate: 'desc' },
@@ -473,11 +477,57 @@ export class WorkOrderService {
       throw new BadRequestException(`Cannot complete: the most recent in-process QC inspection (${lastQc.qcNumber}) failed. Record a corrective re-inspection with a PASS or CONDITIONAL result first.`);
     }
 
+    // Active downtime blocks completion (spec section 27).
+    const openDowntime = await this.prisma.downtime.findFirst({
+      where: { companyId: user.companyId, workOrderId: id, status: 'OPEN', isActive: true },
+    });
+    if (openDowntime) {
+      throw new BadRequestException(`Cannot complete - production is currently paused since ${openDowntime.startTime.toISOString()}`);
+    }
+
+    // Quantity reconciliation (spec sections 11-13): nothing may
+    // disappear or be created. Uses the WO's own accumulated
+    // completedQty/rejectedQty (maintained by PROD-007's confirm()) as
+    // the source of truth, not the caller-supplied dto values, which
+    // were previously trusted uncritically. Rework is summed fresh
+    // from ProductionEntry rather than a separately-maintained total.
+    const reworkAgg = await this.prisma.productionEntry.aggregate({
+      where: { companyId: user.companyId, workOrderId: id, status: 'CONFIRMED' },
+      _sum: { reworkQty: true },
+    });
+    const reworkTotal = reworkAgg._sum.reworkQty || 0;
+    const accountedFor = wo.completedQty + wo.rejectedQty + reworkTotal;
+    if (accountedFor < wo.cumulativeProcessedQty) {
+      throw new BadRequestException(`Unreconciled quantity: ${wo.cumulativeProcessedQty - accountedFor} pcs processed but not accounted for in good/reject/rework`);
+    }
+    if (accountedFor > wo.cumulativeProcessedQty) {
+      throw new BadRequestException(`Accounted quantity exceeds valid processed input by ${accountedFor - wo.cumulativeProcessedQty} pcs`);
+    }
+
+    // Remaining unprocessed input (spec sections 14, 48) - only a
+    // non-first stage has an upstream input to check against.
+    if (wo.parentWorkOrderId) {
+      const remainingInput = wo.cumulativeInputQty - wo.cumulativeProcessedQty;
+      if (remainingInput > 0 && !(dto.shortClosure && dto.reason)) {
+        throw new BadRequestException(`${remainingInput} pcs of received input remain unprocessed - complete processing or provide an authorized short-closure reason`);
+      }
+    }
+
     const result = await this.update(id, {
-      status: 'COMPLETED', completedQty: dto.completedQty,
-      rejectedQty: dto.rejectedQty || 0, actualEndDate: new Date().toISOString(),
-    }, user);
+      status: 'COMPLETED', actualEndDate: new Date().toISOString(),
+    } as any, user);
     await this.materialReservation.releaseReservations(id, user, true);
+
+    await this.audit.log({
+      tableName: 'work_orders', recordId: id, action: 'UPDATE',
+      oldValues: { status: 'IN_PROGRESS' },
+      newValues: {
+        status: 'COMPLETED', goodQty: wo.completedQty, rejectQty: wo.rejectedQty, reworkQty: reworkTotal,
+        shortClosure: !!dto.shortClosure, reason: dto.reason,
+      },
+      changedBy: user.id,
+    });
+
     return result;
   }
 
@@ -513,4 +563,5 @@ export class WorkOrderService {
       totalRejected: totals._sum.rejectedQty || 0,
     };
   }
+
 }

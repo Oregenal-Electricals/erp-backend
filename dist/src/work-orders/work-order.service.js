@@ -386,11 +386,43 @@ let WorkOrderService = class WorkOrderService {
         if (lastQc && lastQc.result === 'FAIL') {
             throw new common_1.BadRequestException(`Cannot complete: the most recent in-process QC inspection (${lastQc.qcNumber}) failed. Record a corrective re-inspection with a PASS or CONDITIONAL result first.`);
         }
+        const openDowntime = await this.prisma.downtime.findFirst({
+            where: { companyId: user.companyId, workOrderId: id, status: 'OPEN', isActive: true },
+        });
+        if (openDowntime) {
+            throw new common_1.BadRequestException(`Cannot complete - production is currently paused since ${openDowntime.startTime.toISOString()}`);
+        }
+        const reworkAgg = await this.prisma.productionEntry.aggregate({
+            where: { companyId: user.companyId, workOrderId: id, status: 'CONFIRMED' },
+            _sum: { reworkQty: true },
+        });
+        const reworkTotal = reworkAgg._sum.reworkQty || 0;
+        const accountedFor = wo.completedQty + wo.rejectedQty + reworkTotal;
+        if (accountedFor < wo.cumulativeProcessedQty) {
+            throw new common_1.BadRequestException(`Unreconciled quantity: ${wo.cumulativeProcessedQty - accountedFor} pcs processed but not accounted for in good/reject/rework`);
+        }
+        if (accountedFor > wo.cumulativeProcessedQty) {
+            throw new common_1.BadRequestException(`Accounted quantity exceeds valid processed input by ${accountedFor - wo.cumulativeProcessedQty} pcs`);
+        }
+        if (wo.parentWorkOrderId) {
+            const remainingInput = wo.cumulativeInputQty - wo.cumulativeProcessedQty;
+            if (remainingInput > 0 && !(dto.shortClosure && dto.reason)) {
+                throw new common_1.BadRequestException(`${remainingInput} pcs of received input remain unprocessed - complete processing or provide an authorized short-closure reason`);
+            }
+        }
         const result = await this.update(id, {
-            status: 'COMPLETED', completedQty: dto.completedQty,
-            rejectedQty: dto.rejectedQty || 0, actualEndDate: new Date().toISOString(),
+            status: 'COMPLETED', actualEndDate: new Date().toISOString(),
         }, user);
         await this.materialReservation.releaseReservations(id, user, true);
+        await this.audit.log({
+            tableName: 'work_orders', recordId: id, action: 'UPDATE',
+            oldValues: { status: 'IN_PROGRESS' },
+            newValues: {
+                status: 'COMPLETED', goodQty: wo.completedQty, rejectQty: wo.rejectedQty, reworkQty: reworkTotal,
+                shortClosure: !!dto.shortClosure, reason: dto.reason,
+            },
+            changedBy: user.id,
+        });
         return result;
     }
     async cancel(id, user) {

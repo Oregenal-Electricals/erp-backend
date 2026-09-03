@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString, IsIn, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, IsIn, Min, IsBoolean } from 'class-validator';
 const STATUSES = ['DRAFT','RELEASED','IN_PROGRESS','COMPLETED','CANCELLED'];
 const PRIORITIES = ['LOW','MEDIUM','HIGH','URGENT'];
 export class CreateWorkOrderDto {
@@ -26,4 +26,10 @@ export class UpdateWorkOrderDto {
   @IsOptional() @IsNumber() @Min(1) plannedManpower?: number;
   @IsOptional() @IsString() @IsIn(PRIORITIES) priority?: string;
   @IsOptional() @IsString() remarks?: string;
+}
+
+// PROD-012: stage completion, distinct from an authorized short closure.
+export class CompleteStageDto {
+  @IsOptional() @IsBoolean() shortClosure?: boolean;
+  @IsOptional() @IsString() reason?: string;
 }

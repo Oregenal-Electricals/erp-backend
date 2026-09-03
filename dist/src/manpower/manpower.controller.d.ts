@@ -796,9 +796,9 @@ export declare class ManpowerController {
         labourRateSnapshot: number | null;
         plannedTargetQty: number | null;
         estimatedLabourCost: number | null;
+        endTime: Date | null;
         allocationId: string | null;
         activityType: string;
-        endTime: Date | null;
         assignedByUserId: string;
     }>;
     getCurrentRoster(query: any, req: any): Promise<({
@@ -842,9 +842,9 @@ export declare class ManpowerController {
         labourRateSnapshot: number | null;
         plannedTargetQty: number | null;
         estimatedLabourCost: number | null;
+        endTime: Date | null;
         allocationId: string | null;
         activityType: string;
-        endTime: Date | null;
         assignedByUserId: string;
     })[]>;
     getManpowerAvailability(query: any, req: any): Promise<{
@@ -1011,9 +1011,9 @@ export declare class ManpowerController {
             labourRateSnapshot: number | null;
             plannedTargetQty: number | null;
             estimatedLabourCost: number | null;
+            endTime: Date | null;
             allocationId: string | null;
             activityType: string;
-            endTime: Date | null;
             assignedByUserId: string;
         })[];
     }>;

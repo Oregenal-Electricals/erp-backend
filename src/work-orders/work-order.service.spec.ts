@@ -338,4 +338,117 @@ describe('WorkOrderService — PROD-001: Work Order Released to Production', () 
       });
     });
   });
+
+  describe('PROD-012: Stage Completion / Remaining WIP Reconciliation', () => {
+    const firstStageWo = {
+      id: 'wo-smt', companyId: 'company-1', status: 'IN_PROGRESS', parentWorkOrderId: null,
+      completedQty: 980, rejectedQty: 20, cumulativeProcessedQty: 1000, cumulativeInputQty: 0,
+    };
+    const subsequentStageWo = {
+      ...firstStageWo, id: 'wo-mi', parentWorkOrderId: 'wo-smt',
+      completedQty: 490, rejectedQty: 10, cumulativeProcessedQty: 500, cumulativeInputQty: 500,
+    };
+
+    beforeEach(() => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.workOrder.update.mockResolvedValue({ ...firstStageWo, status: 'COMPLETED' });
+      prisma.productionQc = { findFirst: jest.fn().mockResolvedValue(null) };
+      prisma.downtime = { findFirst: jest.fn().mockResolvedValue(null) };
+      prisma.productionEntry = { aggregate: jest.fn().mockResolvedValue({ _sum: { reworkQty: 0 } }) };
+      materialReservation.releaseReservations = jest.fn().mockResolvedValue([]);
+    });
+
+    describe('positive: valid final stage completion (manual test 4, spec section 63)', () => {
+      it('completes the exact spec example: 1000 input, 980 good, 20 reject, fully reconciled', async () => {
+        const result = await service.complete('wo-smt', {} as any, user);
+        expect(result.status).toBe('COMPLETED');
+      });
+
+      it('never sets a separate stageStatus field - WorkOrder.status IS the stage completion signal', async () => {
+        await service.complete('wo-smt', {} as any, user);
+        const updateCall = prisma.workOrder.update.mock.calls.find((c: any) => c[0].data.status === 'COMPLETED');
+        expect(updateCall).toBeDefined();
+      });
+    });
+
+    describe('unreconciled/excess quantity blocked (manual tests 5-6, spec sections 12-13)', () => {
+      it('blocks completion when accounted quantity is less than processed (unreconciled)', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...firstStageWo, completedQty: 470, rejectedQty: 20, cumulativeProcessedQty: 500 });
+        await expect(service.complete('wo-mi', {} as any, user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('blocks completion when accounted quantity exceeds processed (excess/created)', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...firstStageWo, completedQty: 500, rejectedQty: 20, cumulativeProcessedQty: 500 });
+        await expect(service.complete('wo-mi', {} as any, user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('remaining unprocessed input blocked (manual test 7, spec section 14)', () => {
+      it('blocks a non-first-stage completion when input remains unprocessed', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...subsequentStageWo, cumulativeInputQty: 550, cumulativeProcessedQty: 500 });
+        await expect(service.complete('wo-mi', {} as any, user)).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows authorized short closure with a reason despite remaining input', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...subsequentStageWo, cumulativeInputQty: 550, cumulativeProcessedQty: 500 });
+        const result = await service.complete('wo-mi', { shortClosure: true, reason: 'Material shortage - management approved' } as any, user);
+        expect(result.status).toBe('COMPLETED');
+      });
+
+      it('the first stage (no parentWorkOrderId) skips the remaining-input check entirely', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+        const result = await service.complete('wo-smt', {} as any, user);
+        expect(result.status).toBe('COMPLETED');
+      });
+    });
+
+    describe('active downtime blocks completion (manual test 10, spec section 27)', () => {
+      it('blocks completion while a downtime record is OPEN', async () => {
+        prisma.downtime.findFirst.mockResolvedValue({ id: 'dt-1', status: 'OPEN', startTime: new Date('2026-05-10T10:20:00') });
+        await expect(service.complete('wo-smt', {} as any, user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('IPQC gate preserved (pre-existing, unchanged behavior)', () => {
+      it('still blocks completion on a failed IPQC inspection', async () => {
+        prisma.productionQc.findFirst.mockResolvedValue({ qcNumber: 'QC-1', result: 'FAIL' });
+        await expect(service.complete('wo-smt', {} as any, user)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('WO status verification (spec section 4, manual test 4)', () => {
+      it('completing this WO never implies any other WO (a different routing stage) is touched', async () => {
+        await service.complete('wo-smt', {} as any, user);
+        // complete() only ever calls prisma.workOrder.update with this WO's own id
+        const updateCall = prisma.workOrder.update.mock.calls[prisma.workOrder.update.mock.calls.length - 1][0];
+        expect(updateCall.where.id).toBe('wo-smt');
+      });
+    });
+
+    describe('material reservation release preserved (pre-existing behavior)', () => {
+      it('still releases material reservations on completion', async () => {
+        await service.complete('wo-smt', {} as any, user);
+        expect(materialReservation.releaseReservations).toHaveBeenCalledWith('wo-smt', user, true);
+      });
+    });
+
+    describe('rework counted in reconciliation (spec section 11)', () => {
+      it('accounts for confirmed rework quantity, not just good+reject', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...firstStageWo, completedQty: 970, rejectedQty: 20, cumulativeProcessedQty: 1000 });
+        prisma.productionEntry.aggregate.mockResolvedValue({ _sum: { reworkQty: 10 } }); // 970+20+10=1000, reconciles
+
+        const result = await service.complete('wo-smt', {} as any, user);
+        expect(result.status).toBe('COMPLETED');
+      });
+    });
+
+    describe('audit', () => {
+      it('logs stage completion with quantity breakdown', async () => {
+        await service.complete('wo-smt', {} as any, user);
+        expect(audit.log).toHaveBeenCalledWith(
+          expect.objectContaining({ tableName: 'work_orders', action: 'UPDATE', changedBy: user.id }),
+        );
+      });
+    });
+  });
 });

@@ -3,7 +3,7 @@ import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from './material-reservation.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto/work-order.dto';
+import { CreateWorkOrderDto, UpdateWorkOrderDto, CompleteStageDto } from './dto/work-order.dto';
 import { SettingsService } from '../settings/settings.service';
 export declare class WorkOrderService {
     private prisma;
@@ -979,8 +979,8 @@ export declare class WorkOrderService {
         plannedLabourCostPerPc: number | null;
     }>;
     private notifyAdmins;
-    complete(id: string, dto: {
-        completedQty: number;
+    complete(id: string, dto: CompleteStageDto & {
+        completedQty?: number;
         rejectedQty?: number;
     }, user: any): Promise<{
         warehouse: {

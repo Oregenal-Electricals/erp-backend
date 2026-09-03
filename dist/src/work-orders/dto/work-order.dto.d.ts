@@ -24,3 +24,7 @@ export declare class UpdateWorkOrderDto {
     priority?: string;
     remarks?: string;
 }
+export declare class CompleteStageDto {
+    shortClosure?: boolean;
+    reason?: string;
+}

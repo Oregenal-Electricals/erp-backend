@@ -816,9 +816,9 @@ export declare class ManpowerService {
         labourRateSnapshot: number | null;
         plannedTargetQty: number | null;
         estimatedLabourCost: number | null;
+        endTime: Date | null;
         allocationId: string | null;
         activityType: string;
-        endTime: Date | null;
         assignedByUserId: string;
     }>;
     getCurrentRoster(query: any, user: any): Promise<({
@@ -862,9 +862,9 @@ export declare class ManpowerService {
         labourRateSnapshot: number | null;
         plannedTargetQty: number | null;
         estimatedLabourCost: number | null;
+        endTime: Date | null;
         allocationId: string | null;
         activityType: string;
-        endTime: Date | null;
         assignedByUserId: string;
     })[]>;
     getEmployeeTimeline(employeeId: string, date: string, user: any): Promise<{
@@ -990,9 +990,9 @@ export declare class ManpowerService {
             labourRateSnapshot: number | null;
             plannedTargetQty: number | null;
             estimatedLabourCost: number | null;
+            endTime: Date | null;
             allocationId: string | null;
             activityType: string;
-            endTime: Date | null;
             assignedByUserId: string;
         })[];
     }>;
