@@ -362,6 +362,7 @@ model Company {
   stageTransferNotes     StageTransferNote[]
   downtimes              Downtime[]
   reworks                Rework[]
+  scraps                 Scrap[]
 
   @@map("companies")
   @@index([code])
@@ -1463,7 +1464,40 @@ model Rework {
   createdBy               String?
   updatedBy               String?
 
+  scraps                  Scrap[]
   @@map("reworks")
+  @@index([companyId, workOrderId])
+}
+
+model Scrap {
+  id                      String       @id @default(uuid())
+  companyId               String
+  company                 Company      @relation(fields: [companyId], references: [id])
+  rejectionNumber         String
+  workOrderId             String
+  workOrder               WorkOrder    @relation(fields: [workOrderId], references: [id])
+  sourceQcInspectionId    String
+  sourceQcInspection      ProductionQc @relation(fields: [sourceQcInspectionId], references: [id])
+  sourceReworkId          String?
+  sourceRework            Rework?      @relation(fields: [sourceReworkId], references: [id])
+  defectDescription       String?
+  quantity                Int
+  scrapQty                Int          @default(0)
+  recoveryQty             Int          @default(0)
+  otherDispositionQty     Int          @default(0)
+  status                  String       @default("PENDING_DISPOSITION")
+  estimatedScrapValue     Float        @default(0)
+  recognizedScrapRecovery Float        @default(0)
+  recoveredComponents     String?
+  remarks                 String?
+  isActive                Boolean      @default(true)
+  isTestData              Boolean      @default(false)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+  createdBy               String?
+  updatedBy               String?
+
+  @@map("scraps")
   @@index([companyId, workOrderId])
 }
 
@@ -3832,6 +3866,7 @@ model WorkOrder {
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
   reworks             Rework[]
+  scraps              Scrap[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -4066,6 +4101,7 @@ model ProductionQc {
   @@unique([companyId, qcNumber])
   @@index([companyId, workOrderId])
   reworks             Rework[]
+  scraps              Scrap[]
   @@map("production_qc")
 }
 

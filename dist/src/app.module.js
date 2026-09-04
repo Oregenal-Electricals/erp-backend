@@ -80,6 +80,7 @@ const gate_events_module_1 = require("./gate-events/gate-events.module");
 const stage_transfer_module_1 = require("./stage-transfers/stage-transfer.module");
 const downtime_module_1 = require("./downtime/downtime.module");
 const rework_module_1 = require("./rework/rework.module");
+const scrap_module_1 = require("./scrap/scrap.module");
 const mrp_module_1 = require("./mrp/mrp.module");
 const routing_module_1 = require("./routing/routing.module");
 const customer_module_1 = require("./customers/customer.module");
@@ -237,6 +238,7 @@ exports.AppModule = AppModule = __decorate([
             stage_transfer_module_1.StageTransferModule,
             downtime_module_1.DowntimeModule,
             rework_module_1.ReworkModule,
+            scrap_module_1.ScrapModule,
             mrp_module_1.MrpModule,
             routing_module_1.RoutingModule,
             customer_module_1.CustomerModule,

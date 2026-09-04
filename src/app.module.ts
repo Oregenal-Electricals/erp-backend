@@ -68,6 +68,7 @@ import { GateEventsModule } from './gate-events/gate-events.module';
 import { StageTransferModule } from './stage-transfers/stage-transfer.module';
 import { DowntimeModule } from './downtime/downtime.module';
 import { ReworkModule } from './rework/rework.module';
+import { ScrapModule } from './scrap/scrap.module';
 import { MrpModule } from './mrp/mrp.module';
 import { RoutingModule } from './routing/routing.module';
 import { CustomerModule } from './customers/customer.module';
@@ -219,6 +220,7 @@ import configuration from './config/configuration';
     StageTransferModule,
     DowntimeModule,
     ReworkModule,
+    ScrapModule,
     MrpModule,
     RoutingModule,
     CustomerModule,
