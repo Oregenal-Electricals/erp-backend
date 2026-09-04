@@ -135,6 +135,8 @@ export declare class RoutingService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;

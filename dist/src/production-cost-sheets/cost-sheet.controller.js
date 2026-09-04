@@ -30,6 +30,8 @@ let CostSheetController = class CostSheetController {
     generate(woId, req) { return this.csService.generateFromWo(woId, req.user); }
     update(id, dto, req) { return this.csService.update(id, dto, req.user); }
     finalize(id, req) { return this.csService.finalize(id, req.user); }
+    validateClosure(woId, req) { return this.csService.validateClosure(woId, req.user); }
+    closeWorkOrder(woId, req) { return this.csService.closeWorkOrder(woId, req.user); }
 };
 exports.CostSheetController = CostSheetController;
 __decorate([
@@ -86,6 +88,24 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], CostSheetController.prototype, "finalize", null);
+__decorate([
+    (0, common_1.Get)('closure-check/:woId'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_VIEW),
+    __param(0, (0, common_1.Param)('woId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], CostSheetController.prototype, "validateClosure", null);
+__decorate([
+    (0, common_1.Post)('close/:woId'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),
+    __param(0, (0, common_1.Param)('woId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], CostSheetController.prototype, "closeWorkOrder", null);
 exports.CostSheetController = CostSheetController = __decorate([
     (0, common_1.Controller)('production-cost-sheets'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

@@ -34,4 +34,11 @@ export class CostSheetController {
   @Post(':id/finalize')
   @RequirePermissions(Permission.PRODUCTION_EDIT)
   finalize(@Param('id') id: string, @Request() req: any) { return this.csService.finalize(id, req.user); }
+  // PROD-018: live closure blockers panel and the actual closure gate.
+  @Get('closure-check/:woId')
+  @RequirePermissions(Permission.PRODUCTION_VIEW)
+  validateClosure(@Param('woId') woId: string, @Request() req: any) { return this.csService.validateClosure(woId, req.user); }
+  @Post('close/:woId')
+  @RequirePermissions(Permission.PRODUCTION_EDIT)
+  closeWorkOrder(@Param('woId') woId: string, @Request() req: any) { return this.csService.closeWorkOrder(woId, req.user); }
 }

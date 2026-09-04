@@ -38,6 +38,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -93,6 +95,8 @@ export declare class WorkOrderService {
             priority: string;
             remarks: string | null;
             uom: string;
+            closedAt: Date | null;
+            closedById: string | null;
             warehouseId: string;
             stageName: string | null;
             productCode: string;
@@ -198,6 +202,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -252,6 +258,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -315,6 +323,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -371,6 +381,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -472,6 +484,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -526,6 +540,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -580,6 +596,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -681,6 +699,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -838,6 +858,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -947,6 +969,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -1005,6 +1029,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;
@@ -1059,6 +1085,8 @@ export declare class WorkOrderService {
         priority: string;
         remarks: string | null;
         uom: string;
+        closedAt: Date | null;
+        closedById: string | null;
         warehouseId: string;
         stageName: string | null;
         productCode: string;

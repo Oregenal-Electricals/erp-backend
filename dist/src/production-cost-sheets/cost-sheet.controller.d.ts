@@ -48,6 +48,12 @@ export declare class CostSheetController {
             totalShifts: number;
             plannedMaterialCost: number;
             varianceCost: number;
+            reworkCost: number;
+            scrapRecovery: number;
+            grossActualCost: number;
+            netActualCost: number;
+            finalGoodFgQty: number;
+            closureBlockers: string | null;
         })[];
         total: number;
         page: number;
@@ -106,6 +112,12 @@ export declare class CostSheetController {
         totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
+        reworkCost: number;
+        scrapRecovery: number;
+        grossActualCost: number;
+        netActualCost: number;
+        finalGoodFgQty: number;
+        closureBlockers: string | null;
     }>;
     generate(woId: string, req: any): Promise<{
         id: string;
@@ -134,6 +146,12 @@ export declare class CostSheetController {
         totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
+        reworkCost: number;
+        scrapRecovery: number;
+        grossActualCost: number;
+        netActualCost: number;
+        finalGoodFgQty: number;
+        closureBlockers: string | null;
     }>;
     update(id: string, dto: UpdateCostSheetDto, req: any): Promise<{
         workOrder: {
@@ -168,6 +186,12 @@ export declare class CostSheetController {
         totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
+        reworkCost: number;
+        scrapRecovery: number;
+        grossActualCost: number;
+        netActualCost: number;
+        finalGoodFgQty: number;
+        closureBlockers: string | null;
     }>;
     finalize(id: string, req: any): Promise<{
         workOrder: {
@@ -201,5 +225,101 @@ export declare class CostSheetController {
         totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
+        reworkCost: number;
+        scrapRecovery: number;
+        grossActualCost: number;
+        netActualCost: number;
+        finalGoodFgQty: number;
+        closureBlockers: string | null;
+    }>;
+    validateClosure(woId: string, req: any): Promise<{
+        passed: boolean;
+        blockers: string[];
+    }>;
+    closeWorkOrder(woId: string, req: any): Promise<{
+        workOrder: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            priority: string;
+            remarks: string | null;
+            uom: string;
+            closedAt: Date | null;
+            closedById: string | null;
+            warehouseId: string;
+            stageName: string | null;
+            productCode: string;
+            productName: string;
+            bomId: string | null;
+            requiredDate: Date | null;
+            rejectedQty: number;
+            woNumber: string;
+            salesOrderId: string | null;
+            routingGroupId: string | null;
+            stageSequence: number | null;
+            parentWorkOrderId: string | null;
+            plannedQty: number;
+            pendingReassignQty: number | null;
+            completedQty: number;
+            cumulativeInputQty: number;
+            cumulativeProcessedQty: number;
+            cumulativeHandoverQty: number;
+            stageStatus: string;
+            plannedStartDate: Date;
+            plannedEndDate: Date;
+            actualStartDate: Date | null;
+            actualEndDate: Date | null;
+            releasedById: string | null;
+            releasedAt: Date | null;
+            materialAvailability: string | null;
+            plannedManpower: number | null;
+            plannedLabourHours: number | null;
+            plannedLabourCost: number | null;
+            plannedLabourCostPerPc: number | null;
+        };
+        costSheet: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            remarks: string | null;
+            unitCost: number;
+            totalCost: number;
+            completedQty: number;
+            workOrderId: string;
+            laborHours: number;
+            laborRatePerHour: number;
+            laborCost: number;
+            overheadCost: number;
+            overheadRemarks: string | null;
+            otherCost: number;
+            otherRemarks: string | null;
+            costSheetNumber: string;
+            materialCost: number;
+            totalShifts: number;
+            plannedMaterialCost: number;
+            varianceCost: number;
+            reworkCost: number;
+            scrapRecovery: number;
+            grossActualCost: number;
+            netActualCost: number;
+            finalGoodFgQty: number;
+            closureBlockers: string | null;
+        };
+        validation: {
+            passed: boolean;
+            blockers: string[];
+        };
     }>;
 }

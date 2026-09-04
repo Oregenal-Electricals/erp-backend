@@ -212,6 +212,8 @@ export declare class ProductionEntryService {
             priority: string;
             remarks: string | null;
             uom: string;
+            closedAt: Date | null;
+            closedById: string | null;
             warehouseId: string;
             stageName: string | null;
             productCode: string;

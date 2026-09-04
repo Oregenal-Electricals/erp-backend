@@ -3866,6 +3866,8 @@ model WorkOrder {
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
   reworks             Rework[]
+  closedAt            DateTime?
+  closedById          String?
   scraps              Scrap[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
@@ -4182,6 +4184,20 @@ model ProductionCostSheet {
   // Variance
   plannedMaterialCost Float   @default(0)
   varianceCost      Float     @default(0)
+  // PROD-018: rework and scrap-recovery are pulled from PROD-015/016
+  // records rather than re-entered - reworkCost is a sum of
+  // Rework.totalAdditionalCost, scrapRecovery a sum of
+  // Scrap.recognizedScrapRecovery, for this WO.
+  reworkCost        Float     @default(0)
+  scrapRecovery     Float     @default(0)
+  grossActualCost   Float     @default(0)
+  netActualCost     Float     @default(0)
+  // Final accepted good FG quantity (from PROD-017's FgReceipt rows
+  // linked to this WO's QC acceptances) - NOT wo.completedQty, which
+  // would silently include rejected/rework/scrap pieces in the cost-
+  // per-piece denominator (the exact bug this spec warns against).
+  finalGoodFgQty    Float     @default(0)
+  closureBlockers   String?
   status            String    @default("DRAFT") // DRAFT, FINALIZED
   remarks           String?
   isActive          Boolean   @default(true)
