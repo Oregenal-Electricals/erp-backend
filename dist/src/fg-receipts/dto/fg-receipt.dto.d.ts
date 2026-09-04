@@ -7,3 +7,11 @@ export declare class CreateFgReceiptDto {
     unitCost?: number;
     remarks?: string;
 }
+export declare class CreateFgReceiptFromQcDto {
+    productionQcId: string;
+    warehouseId: string;
+    qty: number;
+    batchNumber?: string;
+    unitCost?: number;
+    remarks?: string;
+}

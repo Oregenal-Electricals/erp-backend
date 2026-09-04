@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { WorkOrderService } from '../work-orders/work-order.service';
-import { CreateFgReceiptDto } from './dto/fg-receipt.dto';
+import { CreateFgReceiptDto, CreateFgReceiptFromQcDto } from './dto/fg-receipt.dto';
 
 @Injectable()
 export class FgReceiptService {
@@ -59,6 +59,60 @@ export class FgReceiptService {
       batchNumber: `FG-${wo.woNumber}-${new Date().getFullYear()}`,
       unitCost: computedUnitCost, remarks: `Auto-created from WO ${wo.woNumber}`,
     }, user);
+  }
+
+  // PROD-017: handover sourced from a ProductionQc acceptance decision
+  // (first-pass PROD-014 or rework re-inspection PROD-015) rather than
+  // WorkOrder.completedQty - the pre-existing createFromWo()/create()
+  // above are left untouched since they're the already-working
+  // completed-WO path. This is a new, additional entry point into the
+  // same FgReceipt/OqcInspection/StockLedgerService machinery: confirm()
+  // and OqcInspection.release() are reused exactly as-is for the actual
+  // Store verification and stock-crediting steps, so no inventory
+  // posting logic is duplicated here.
+  //
+  // Does not require wo.status === 'COMPLETED' - accepted quantity can
+  // move to FG Store while the WO is still IN_PROGRESS and production
+  // continues on the remaining planned quantity (spec sections 11-12).
+  async createFromQcAcceptance(dto: CreateFgReceiptFromQcDto, user: any) {
+    const qc = await this.prisma.productionQc.findFirst({ where: { id: dto.productionQcId, companyId: user.companyId } });
+    if (!qc) throw new NotFoundException('QC inspection not found');
+    if (qc.acceptedQty <= 0) throw new BadRequestException('This QC inspection has no accepted quantity');
+
+    const wo = await this.prisma.workOrder.findFirst({ where: { id: qc.workOrderId, companyId: user.companyId } });
+    if (!wo) throw new NotFoundException('Work order not found');
+
+    const available = qc.acceptedQty - qc.fgHandedOverQty;
+    if (dto.qty > available) {
+      throw new BadRequestException(`Cannot hand over ${dto.qty} to FG Store - only ${available} accepted quantity is available for FG handover from this QC inspection (${qc.acceptedQty} accepted, ${qc.fgHandedOverQty} already handed over)`);
+    }
+
+    const updated = await this.prisma.$executeRaw`
+      UPDATE production_qc SET "fgHandedOverQty" = "fgHandedOverQty" + ${dto.qty}, "updatedBy" = ${user.id}
+      WHERE id = ${qc.id} AND "acceptedQty" - "fgHandedOverQty" >= ${dto.qty}
+    `;
+    if (updated === 0) {
+      throw new BadRequestException('Available quantity changed since this was checked - please retry');
+    }
+
+    const receiptNumber = await this.generateNumber(user.companyId);
+    const totalCost = dto.qty * (dto.unitCost || 0);
+
+    const receipt = await this.prisma.fgReceipt.create({
+      data: {
+        receiptNumber, workOrderId: qc.workOrderId, warehouseId: dto.warehouseId,
+        sourceProductionQcId: dto.productionQcId,
+        itemCode: wo.productCode, itemName: wo.productName, uom: wo.uom,
+        plannedQty: wo.plannedQty, receivedQty: dto.qty, rejectedQty: 0,
+        batchNumber: dto.batchNumber, unitCost: dto.unitCost || 0, totalCost,
+        remarks: dto.remarks, status: 'DRAFT',
+        companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+
+    await this.audit.log({ tableName: 'fg_receipts', recordId: receipt.id, action: 'CREATE', newValues: { ...receipt, sourceProductionQcId: dto.productionQcId }, changedBy: user.id });
+    return receipt;
   }
 
   async create(dto: CreateFgReceiptDto, user: any) {

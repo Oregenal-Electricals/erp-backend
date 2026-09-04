@@ -63,6 +63,43 @@ let FgReceiptService = class FgReceiptService {
             unitCost: computedUnitCost, remarks: `Auto-created from WO ${wo.woNumber}`,
         }, user);
     }
+    async createFromQcAcceptance(dto, user) {
+        const qc = await this.prisma.productionQc.findFirst({ where: { id: dto.productionQcId, companyId: user.companyId } });
+        if (!qc)
+            throw new common_1.NotFoundException('QC inspection not found');
+        if (qc.acceptedQty <= 0)
+            throw new common_1.BadRequestException('This QC inspection has no accepted quantity');
+        const wo = await this.prisma.workOrder.findFirst({ where: { id: qc.workOrderId, companyId: user.companyId } });
+        if (!wo)
+            throw new common_1.NotFoundException('Work order not found');
+        const available = qc.acceptedQty - qc.fgHandedOverQty;
+        if (dto.qty > available) {
+            throw new common_1.BadRequestException(`Cannot hand over ${dto.qty} to FG Store - only ${available} accepted quantity is available for FG handover from this QC inspection (${qc.acceptedQty} accepted, ${qc.fgHandedOverQty} already handed over)`);
+        }
+        const updated = await this.prisma.$executeRaw `
+      UPDATE production_qc SET "fgHandedOverQty" = "fgHandedOverQty" + ${dto.qty}, "updatedBy" = ${user.id}
+      WHERE id = ${qc.id} AND "acceptedQty" - "fgHandedOverQty" >= ${dto.qty}
+    `;
+        if (updated === 0) {
+            throw new common_1.BadRequestException('Available quantity changed since this was checked - please retry');
+        }
+        const receiptNumber = await this.generateNumber(user.companyId);
+        const totalCost = dto.qty * (dto.unitCost || 0);
+        const receipt = await this.prisma.fgReceipt.create({
+            data: {
+                receiptNumber, workOrderId: qc.workOrderId, warehouseId: dto.warehouseId,
+                sourceProductionQcId: dto.productionQcId,
+                itemCode: wo.productCode, itemName: wo.productName, uom: wo.uom,
+                plannedQty: wo.plannedQty, receivedQty: dto.qty, rejectedQty: 0,
+                batchNumber: dto.batchNumber, unitCost: dto.unitCost || 0, totalCost,
+                remarks: dto.remarks, status: 'DRAFT',
+                companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'fg_receipts', recordId: receipt.id, action: 'CREATE', newValues: Object.assign(Object.assign({}, receipt), { sourceProductionQcId: dto.productionQcId }), changedBy: user.id });
+        return receipt;
+    }
     async create(dto, user) {
         const wo = await this.prisma.workOrder.findFirst({
             where: { id: dto.workOrderId, companyId: user.companyId },

@@ -1,0 +1,1 @@
+ALTER TABLE "production_qc" ADD COLUMN "fgHandedOverQty" INTEGER NOT NULL DEFAULT 0;

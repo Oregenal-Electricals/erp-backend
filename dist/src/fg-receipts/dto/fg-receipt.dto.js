@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateFgReceiptDto = void 0;
+exports.CreateFgReceiptFromQcDto = exports.CreateFgReceiptDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateFgReceiptDto {
 }
@@ -49,4 +49,36 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateFgReceiptDto.prototype, "remarks", void 0);
+class CreateFgReceiptFromQcDto {
+}
+exports.CreateFgReceiptFromQcDto = CreateFgReceiptFromQcDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFgReceiptFromQcDto.prototype, "productionQcId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFgReceiptFromQcDto.prototype, "warehouseId", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0.0001),
+    __metadata("design:type", Number)
+], CreateFgReceiptFromQcDto.prototype, "qty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFgReceiptFromQcDto.prototype, "batchNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateFgReceiptFromQcDto.prototype, "unitCost", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateFgReceiptFromQcDto.prototype, "remarks", void 0);
 //# sourceMappingURL=fg-receipt.dto.js.map

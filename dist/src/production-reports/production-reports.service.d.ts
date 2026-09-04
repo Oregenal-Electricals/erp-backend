@@ -153,6 +153,7 @@ export declare class ProductionReportsService {
             failQty: number;
             reworkQty: number;
             holdQty: number;
+            fgHandedOverQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];

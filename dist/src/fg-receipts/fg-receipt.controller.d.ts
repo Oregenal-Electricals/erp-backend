@@ -1,5 +1,5 @@
 import { FgReceiptService } from './fg-receipt.service';
-import { CreateFgReceiptDto } from './dto/fg-receipt.dto';
+import { CreateFgReceiptDto, CreateFgReceiptFromQcDto } from './dto/fg-receipt.dto';
 export declare class FgReceiptController {
     private readonly fgrService;
     constructor(fgrService: FgReceiptService);
@@ -50,6 +50,7 @@ export declare class FgReceiptController {
             workOrderId: string;
             batchNumber: string | null;
             receiptNumber: string;
+            sourceProductionQcId: string | null;
         })[];
         total: number;
         page: number;
@@ -91,6 +92,7 @@ export declare class FgReceiptController {
         workOrderId: string;
         batchNumber: string | null;
         receiptNumber: string;
+        sourceProductionQcId: string | null;
     }>;
     create(dto: CreateFgReceiptDto, req: any): Promise<{
         warehouse: {
@@ -127,6 +129,7 @@ export declare class FgReceiptController {
         workOrderId: string;
         batchNumber: string | null;
         receiptNumber: string;
+        sourceProductionQcId: string | null;
     }>;
     createFromWo(woId: string, req: any): Promise<{
         warehouse: {
@@ -163,6 +166,44 @@ export declare class FgReceiptController {
         workOrderId: string;
         batchNumber: string | null;
         receiptNumber: string;
+        sourceProductionQcId: string | null;
+    }>;
+    createFromQcAcceptance(dto: CreateFgReceiptFromQcDto, req: any): Promise<{
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        workOrder: {
+            productCode: string;
+            productName: string;
+            woNumber: string;
+            plannedQty: number;
+            completedQty: number;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        warehouseId: string;
+        unitCost: number;
+        totalCost: number;
+        receivedQty: number;
+        rejectedQty: number;
+        plannedQty: number;
+        workOrderId: string;
+        batchNumber: string | null;
+        receiptNumber: string;
+        sourceProductionQcId: string | null;
     }>;
     confirm(id: string, req: any): Promise<{
         warehouse: {
@@ -199,5 +240,6 @@ export declare class FgReceiptController {
         workOrderId: string;
         batchNumber: string | null;
         receiptNumber: string;
+        sourceProductionQcId: string | null;
     }>;
 }

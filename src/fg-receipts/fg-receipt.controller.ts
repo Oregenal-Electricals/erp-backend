@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { FgReceiptService } from './fg-receipt.service';
-import { CreateFgReceiptDto } from './dto/fg-receipt.dto';
+import { CreateFgReceiptDto, CreateFgReceiptFromQcDto } from './dto/fg-receipt.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -34,6 +34,10 @@ export class FgReceiptController {
   @Post('from-wo/:woId')
   @RequirePermissions(Permission.PRODUCTION_CREATE)
   createFromWo(@Param('woId') woId: string, @Request() req: any) { return this.fgrService.createFromWo(woId, req.user); }
+  // PROD-017: handover sourced from a ProductionQc acceptance decision.
+  @Post('from-qc-acceptance')
+  @RequirePermissions(Permission.PRODUCTION_CREATE)
+  createFromQcAcceptance(@Body() dto: CreateFgReceiptFromQcDto, @Request() req: any) { return this.fgrService.createFromQcAcceptance(dto, req.user); }
 
   @Post(':id/confirm')
   @RequirePermissions(Permission.PRODUCTION_EDIT)

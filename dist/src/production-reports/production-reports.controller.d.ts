@@ -152,6 +152,7 @@ export declare class ProductionReportsController {
             failQty: number;
             reworkQty: number;
             holdQty: number;
+            fgHandedOverQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];

@@ -30,6 +30,7 @@ let FgReceiptController = class FgReceiptController {
     findOne(id, req) { return this.fgrService.findOne(id, req.user); }
     create(dto, req) { return this.fgrService.create(dto, req.user); }
     createFromWo(woId, req) { return this.fgrService.createFromWo(woId, req.user); }
+    createFromQcAcceptance(dto, req) { return this.fgrService.createFromQcAcceptance(dto, req.user); }
     confirm(id, req) { return this.fgrService.confirm(id, req.user); }
 };
 exports.FgReceiptController = FgReceiptController;
@@ -85,6 +86,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], FgReceiptController.prototype, "createFromWo", null);
+__decorate([
+    (0, common_1.Post)('from-qc-acceptance'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_CREATE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [fg_receipt_dto_1.CreateFgReceiptFromQcDto, Object]),
+    __metadata("design:returntype", void 0)
+], FgReceiptController.prototype, "createFromQcAcceptance", null);
 __decorate([
     (0, common_1.Post)(':id/confirm'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_EDIT),

@@ -4086,6 +4086,11 @@ model ProductionQc {
   acceptedQty         Int             @default(0)
   reworkQty           Int             @default(0)
   holdQty             Int             @default(0)
+  // PROD-017: running total already handed to FG Store from this QC
+  // acceptance - lets available-for-handover be checked with the same
+  // atomic conditional UPDATE pattern used for cumulativeHandoverQty
+  // on WorkOrder (PROD-006/013), instead of a read-then-write race.
+  fgHandedOverQty     Int             @default(0)
   result              String          @default("PENDING") // PASS, FAIL, CONDITIONAL, PENDING
   defectDescription   String?
   correctiveAction    String?
@@ -4102,6 +4107,7 @@ model ProductionQc {
   @@index([companyId, workOrderId])
   reworks             Rework[]
   scraps              Scrap[]
+  fgReceipts          FgReceipt[]
   @@map("production_qc")
 }
 
@@ -4125,6 +4131,12 @@ model FgReceipt {
   batchNumber   String?
   unitCost      Float     @default(0)
   totalCost     Float     @default(0)
+  // PROD-017: traces this receipt back to the specific ProductionQc
+  // decision (first-pass or rework re-inspection) that accepted this
+  // quantity - nullable because createFromWo()'s pre-existing
+  // completedQty-based path has no ProductionQc reference at all.
+  sourceProductionQcId String?
+  sourceProductionQc   ProductionQc? @relation(fields: [sourceProductionQcId], references: [id])
   status        String    @default("DRAFT") // DRAFT, RECEIVED
   remarks       String?
   isActive      Boolean   @default(true)
