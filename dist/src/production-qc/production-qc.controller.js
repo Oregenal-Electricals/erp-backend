@@ -29,6 +29,7 @@ let ProductionQcController = class ProductionQcController {
     findOne(id, req) { return this.pqcService.findOne(id, req.user); }
     create(dto, req) { return this.pqcService.create(dto, req.user); }
     complete(id, dto, req) { return this.pqcService.complete(id, dto, req.user); }
+    decideQuantities(id, dto, req) { return this.pqcService.decideQuantities(id, dto, req.user); }
 };
 exports.ProductionQcController = ProductionQcController;
 __decorate([
@@ -76,6 +77,16 @@ __decorate([
     __metadata("design:paramtypes", [String, production_qc_dto_1.CompleteQcDto, Object]),
     __metadata("design:returntype", void 0)
 ], ProductionQcController.prototype, "complete", null);
+__decorate([
+    (0, common_1.Post)(':id/decide-quantities'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, production_qc_dto_1.DecideQcDto, Object]),
+    __metadata("design:returntype", void 0)
+], ProductionQcController.prototype, "decideQuantities", null);
 exports.ProductionQcController = ProductionQcController = __decorate([
     (0, common_1.Controller)('production-qc'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

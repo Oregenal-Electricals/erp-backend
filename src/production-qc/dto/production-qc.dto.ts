@@ -23,3 +23,15 @@ export class CompleteQcDto {
   @IsOptional() @IsString() correctiveAction?: string;
   @IsOptional() @IsString() remarks?: string;
 }
+
+// PROD-014: quantity-based mixed disposition for a FINAL-stage
+// inspection - accepted + rework + rejected + hold must exactly equal
+// the quantity being inspected in this decision.
+export class DecideQcDto {
+  @IsNumber() @Min(0) acceptedQty: number;
+  @IsNumber() @Min(0) reworkQty: number;
+  @IsNumber() @Min(0) rejectedQty: number;
+  @IsOptional() @IsNumber() @Min(0) holdQty?: number;
+  @IsOptional() @IsString() defectDescription?: string;
+  @IsOptional() @IsString() remarks?: string;
+}

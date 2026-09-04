@@ -17,3 +17,11 @@ export declare class CompleteQcDto {
     correctiveAction?: string;
     remarks?: string;
 }
+export declare class DecideQcDto {
+    acceptedQty: number;
+    reworkQty: number;
+    rejectedQty: number;
+    holdQty?: number;
+    defectDescription?: string;
+    remarks?: string;
+}

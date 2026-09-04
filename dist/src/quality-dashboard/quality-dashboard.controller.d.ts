@@ -54,8 +54,8 @@ export declare class QualityDashboardController {
             createdAt: Date;
             status: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         }[];
     }>;
     getOqcTrend(req: any): Promise<{

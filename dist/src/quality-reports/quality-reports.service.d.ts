@@ -30,13 +30,13 @@ export declare class QualityReportsService {
             workOrderId: string | null;
             disposition: string | null;
             source: string;
+            ncrNumber: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
             severity: string;
             qtyAffected: number;
             detectedBy: string | null;
             detectedDate: Date;
-            ncrNumber: string;
             closedDate: Date | null;
         }[];
         total: number;
@@ -60,8 +60,8 @@ export declare class QualityReportsService {
             daysToComplete: number;
             ncr: {
                 source: string;
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
             id: string;
             companyId: string;

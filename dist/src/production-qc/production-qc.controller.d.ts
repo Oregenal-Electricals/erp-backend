@@ -1,5 +1,5 @@
 import { ProductionQcService } from './production-qc.service';
-import { CreateProductionQcDto, CompleteQcDto } from './dto/production-qc.dto';
+import { CreateProductionQcDto, CompleteQcDto, DecideQcDto } from './dto/production-qc.dto';
 export declare class ProductionQcController {
     private readonly pqcService;
     constructor(pqcService: ProductionQcService);
@@ -37,6 +37,7 @@ export declare class ProductionQcController {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
+            acceptedQty: number;
             sampleSize: number;
             workOrderId: string;
             qcNumber: string;
@@ -46,6 +47,8 @@ export declare class ProductionQcController {
             inspectionDate: Date;
             passQty: number;
             failQty: number;
+            reworkQty: number;
+            holdQty: number;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];
@@ -77,6 +80,7 @@ export declare class ProductionQcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        acceptedQty: number;
         sampleSize: number;
         workOrderId: string;
         qcNumber: string;
@@ -86,6 +90,8 @@ export declare class ProductionQcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
+        reworkQty: number;
+        holdQty: number;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -112,6 +118,7 @@ export declare class ProductionQcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        acceptedQty: number;
         sampleSize: number;
         workOrderId: string;
         qcNumber: string;
@@ -121,6 +128,8 @@ export declare class ProductionQcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
+        reworkQty: number;
+        holdQty: number;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -147,6 +156,7 @@ export declare class ProductionQcController {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
+        acceptedQty: number;
         sampleSize: number;
         workOrderId: string;
         qcNumber: string;
@@ -156,6 +166,46 @@ export declare class ProductionQcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
+        reworkQty: number;
+        holdQty: number;
+        defectDescription: string | null;
+        correctiveAction: string | null;
+    }>;
+    decideQuantities(id: string, dto: DecideQcDto, req: any): Promise<{
+        workOrder: {
+            productCode: string;
+            productName: string;
+            woNumber: string;
+        };
+        productionEntry: {
+            shift: string;
+            goodQty: number;
+            entryNumber: string;
+        };
+    } & {
+        result: string;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        acceptedQty: number;
+        sampleSize: number;
+        workOrderId: string;
+        qcNumber: string;
+        productionEntryId: string | null;
+        inspectionStage: string;
+        inspectorName: string | null;
+        inspectionDate: Date;
+        passQty: number;
+        failQty: number;
+        reworkQty: number;
+        holdQty: number;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;

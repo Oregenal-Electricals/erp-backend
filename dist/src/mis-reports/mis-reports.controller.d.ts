@@ -146,9 +146,9 @@ export declare class MisReportsController {
             itemCode: string;
             itemName: string;
             source: string;
+            ncrNumber: string;
             severity: string;
             detectedDate: Date;
-            ncrNumber: string;
         }[];
     }>;
     getProductionSummary(req: any, query: any): Promise<{

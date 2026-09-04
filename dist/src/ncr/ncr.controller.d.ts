@@ -39,13 +39,13 @@ export declare class NcrController {
             workOrderId: string | null;
             disposition: string | null;
             source: string;
+            ncrNumber: string;
             sourceReferenceId: string | null;
             sourceReferenceNumber: string | null;
             severity: string;
             qtyAffected: number;
             detectedBy: string | null;
             detectedDate: Date;
-            ncrNumber: string;
             closedDate: Date | null;
         })[];
         total: number;
@@ -82,13 +82,13 @@ export declare class NcrController {
         workOrderId: string | null;
         disposition: string | null;
         source: string;
+        ncrNumber: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
         severity: string;
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
     create(dto: CreateNcrDto, req: any): Promise<{
@@ -121,13 +121,13 @@ export declare class NcrController {
         workOrderId: string | null;
         disposition: string | null;
         source: string;
+        ncrNumber: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
         severity: string;
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
     update(id: string, dto: UpdateNcrDto, req: any): Promise<{
@@ -160,13 +160,13 @@ export declare class NcrController {
         workOrderId: string | null;
         disposition: string | null;
         source: string;
+        ncrNumber: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
         severity: string;
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
     close(id: string, req: any): Promise<{
@@ -199,13 +199,13 @@ export declare class NcrController {
         workOrderId: string | null;
         disposition: string | null;
         source: string;
+        ncrNumber: string;
         sourceReferenceId: string | null;
         sourceReferenceNumber: string | null;
         severity: string;
         qtyAffected: number;
         detectedBy: string | null;
         detectedDate: Date;
-        ncrNumber: string;
         closedDate: Date | null;
     }>;
 }

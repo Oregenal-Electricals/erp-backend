@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CompleteQcDto = exports.CreateProductionQcDto = void 0;
+exports.DecideQcDto = exports.CompleteQcDto = exports.CreateProductionQcDto = void 0;
 const class_validator_1 = require("class-validator");
 const STAGES = ['IN_PROCESS', 'FINAL', 'INLINE'];
 const RESULTS = ['PASS', 'FAIL', 'CONDITIONAL'];
@@ -94,4 +94,38 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CompleteQcDto.prototype, "remarks", void 0);
+class DecideQcDto {
+}
+exports.DecideQcDto = DecideQcDto;
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], DecideQcDto.prototype, "acceptedQty", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], DecideQcDto.prototype, "reworkQty", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], DecideQcDto.prototype, "rejectedQty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], DecideQcDto.prototype, "holdQty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DecideQcDto.prototype, "defectDescription", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DecideQcDto.prototype, "remarks", void 0);
 //# sourceMappingURL=production-qc.dto.js.map

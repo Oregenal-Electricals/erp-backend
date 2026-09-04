@@ -17,8 +17,8 @@ export declare class RcaController {
                 description: string;
                 itemCode: string;
                 source: string;
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -60,8 +60,8 @@ export declare class RcaController {
             description: string;
             itemCode: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -99,8 +99,8 @@ export declare class RcaController {
             description: string;
             itemCode: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -138,8 +138,8 @@ export declare class RcaController {
             description: string;
             itemCode: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -177,8 +177,8 @@ export declare class RcaController {
             description: string;
             itemCode: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;

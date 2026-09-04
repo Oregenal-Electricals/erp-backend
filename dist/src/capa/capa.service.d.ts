@@ -11,8 +11,8 @@ export declare class CapaService {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -41,8 +41,8 @@ export declare class CapaService {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -71,8 +71,8 @@ export declare class CapaService {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -102,8 +102,8 @@ export declare class CapaService {
             ncr: {
                 description: string;
                 source: string;
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -136,8 +136,8 @@ export declare class CapaService {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;

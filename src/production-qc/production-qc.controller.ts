@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ProductionQcService } from './production-qc.service';
-import { CreateProductionQcDto, CompleteQcDto } from './dto/production-qc.dto';
+import { CreateProductionQcDto, CompleteQcDto, DecideQcDto } from './dto/production-qc.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -30,4 +30,8 @@ export class ProductionQcController {
   @Post(':id/complete')
   @RequirePermissions(Permission.QUALITY_EDIT)
   complete(@Param('id') id: string, @Body() dto: CompleteQcDto, @Request() req: any) { return this.pqcService.complete(id, dto, req.user); }
+  // PROD-014: quantity-based mixed disposition for a FINAL-stage handover.
+  @Post(':id/decide-quantities')
+  @RequirePermissions(Permission.QUALITY_EDIT)
+  decideQuantities(@Param('id') id: string, @Body() dto: DecideQcDto, @Request() req: any) { return this.pqcService.decideQuantities(id, dto, req.user); }
 }

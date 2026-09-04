@@ -85,6 +85,49 @@ let ProductionQcService = class ProductionQcService {
         }
         return updated;
     }
+    async decideQuantities(id, dto, user) {
+        const qc = await this.prisma.productionQc.findFirst({ where: { id, companyId: user.companyId } });
+        if (!qc)
+            throw new common_1.NotFoundException('QC record not found');
+        if (qc.status === 'COMPLETED')
+            throw new common_1.BadRequestException('This QC inspection has already been decided');
+        const holdQty = dto.holdQty || 0;
+        const total = dto.acceptedQty + dto.reworkQty + dto.rejectedQty + holdQty;
+        if (total < qc.sampleSize) {
+            throw new common_1.BadRequestException(`Unreconciled quantity: ${qc.sampleSize - total} pcs inspected but not accounted for in accepted/rework/reject/hold`);
+        }
+        if (total > qc.sampleSize) {
+            throw new common_1.BadRequestException(`Disposition total (${total}) exceeds inspected quantity (${qc.sampleSize}) by ${total - qc.sampleSize}`);
+        }
+        const result = dto.acceptedQty === qc.sampleSize ? 'PASS' : dto.rejectedQty === qc.sampleSize ? 'FAIL' : 'CONDITIONAL';
+        const updated = await this.prisma.productionQc.update({
+            where: { id },
+            data: {
+                acceptedQty: dto.acceptedQty, reworkQty: dto.reworkQty, failQty: dto.rejectedQty, holdQty,
+                result, status: 'COMPLETED',
+                defectDescription: dto.defectDescription || qc.defectDescription,
+                remarks: dto.remarks || qc.remarks,
+                updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        if (dto.reworkQty > 0 || dto.rejectedQty > 0) {
+            const ncrCount = await this.prisma.ncrRecord.count({ where: { companyId: user.companyId } });
+            const ncrNumber = `NCR-${new Date().getFullYear()}-${String(ncrCount + 1).padStart(4, '0')}`;
+            await this.prisma.ncrRecord.create({
+                data: {
+                    companyId: user.companyId, ncrNumber, source: 'OQC',
+                    sourceReferenceId: qc.id, sourceReferenceNumber: qc.qcNumber,
+                    workOrderId: qc.workOrderId, description: dto.defectDescription || `QC rework/reject from ${qc.qcNumber}`,
+                    qtyAffected: dto.reworkQty + dto.rejectedQty,
+                    disposition: dto.reworkQty > 0 && dto.rejectedQty === 0 ? 'REWORK' : undefined,
+                    createdBy: user.id, updatedBy: user.id,
+                },
+            });
+        }
+        await this.audit.log({ tableName: 'production_qc', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        return updated;
+    }
     async findAll(user, query) {
         const { page = 1, limit = 20, search, result, workOrderId } = query;
         const skip = (Number(page) - 1) * Number(limit);

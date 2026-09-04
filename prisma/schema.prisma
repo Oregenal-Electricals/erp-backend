@@ -4004,6 +4004,9 @@ model ProductionQc {
   sampleSize          Int             @default(0)
   passQty             Int             @default(0)
   failQty             Int             @default(0)
+  acceptedQty         Int             @default(0)
+  reworkQty           Int             @default(0)
+  holdQty             Int             @default(0)
   result              String          @default("PENDING") // PASS, FAIL, CONDITIONAL, PENDING
   defectDescription   String?
   correctiveAction    String?

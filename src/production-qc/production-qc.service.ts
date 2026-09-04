@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateProductionQcDto, CompleteQcDto } from './dto/production-qc.dto';
+import { CreateProductionQcDto, CompleteQcDto, DecideQcDto } from './dto/production-qc.dto';
 import { WorkOrderService } from '../work-orders/work-order.service';
 
 @Injectable()
@@ -85,6 +85,68 @@ export class ProductionQcService {
       }
     }
 
+    return updated;
+  }
+
+  // PROD-014: quantity-based mixed disposition for a FINAL-stage
+  // inspection created by PROD-013's giveToQc(). Deliberately a
+  // separate method from complete() above - that method's FAIL branch
+  // stops the WO outright, which is correct for an in-process (IPQC)
+  // single-verdict inspection but wrong here, since a final QC
+  // decision routinely mixes accepted/rework/reject in one handover
+  // without implying production itself must stop.
+  async decideQuantities(id: string, dto: DecideQcDto, user: any) {
+    const qc = await this.prisma.productionQc.findFirst({ where: { id, companyId: user.companyId } });
+    if (!qc) throw new NotFoundException('QC record not found');
+    if (qc.status === 'COMPLETED') throw new BadRequestException('This QC inspection has already been decided');
+
+    const holdQty = dto.holdQty || 0;
+    const total = dto.acceptedQty + dto.reworkQty + dto.rejectedQty + holdQty;
+    if (total < qc.sampleSize) {
+      throw new BadRequestException(`Unreconciled quantity: ${qc.sampleSize - total} pcs inspected but not accounted for in accepted/rework/reject/hold`);
+    }
+    if (total > qc.sampleSize) {
+      throw new BadRequestException(`Disposition total (${total}) exceeds inspected quantity (${qc.sampleSize}) by ${total - qc.sampleSize}`);
+    }
+
+    // Overall result is derived, not entered directly - kept consistent
+    // with the single-verdict result field the in-process flow already
+    // uses, so existing stats/filters (getStats() below) still work
+    // sensibly across both flows.
+    const result = dto.acceptedQty === qc.sampleSize ? 'PASS' : dto.rejectedQty === qc.sampleSize ? 'FAIL' : 'CONDITIONAL';
+
+    const updated = await this.prisma.productionQc.update({
+      where: { id },
+      data: {
+        acceptedQty: dto.acceptedQty, reworkQty: dto.reworkQty, failQty: dto.rejectedQty, holdQty,
+        result, status: 'COMPLETED',
+        defectDescription: dto.defectDescription || qc.defectDescription,
+        remarks: dto.remarks || qc.remarks,
+        updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+
+    // Rework/reject traceability via the existing NCR mechanism (spec
+    // sections 23-27) - reused rather than building a parallel defect-
+    // tracking system. PROD-015/016 own the actual rework/scrap
+    // execution; this only creates the reference for them to act on.
+    if (dto.reworkQty > 0 || dto.rejectedQty > 0) {
+      const ncrCount = await this.prisma.ncrRecord.count({ where: { companyId: user.companyId } });
+      const ncrNumber = `NCR-${new Date().getFullYear()}-${String(ncrCount + 1).padStart(4, '0')}`;
+      await this.prisma.ncrRecord.create({
+        data: {
+          companyId: user.companyId, ncrNumber, source: 'OQC',
+          sourceReferenceId: qc.id, sourceReferenceNumber: qc.qcNumber,
+          workOrderId: qc.workOrderId, description: dto.defectDescription || `QC rework/reject from ${qc.qcNumber}`,
+          qtyAffected: dto.reworkQty + dto.rejectedQty,
+          disposition: dto.reworkQty > 0 && dto.rejectedQty === 0 ? 'REWORK' : undefined,
+          createdBy: user.id, updatedBy: user.id,
+        },
+      });
+    }
+
+    await this.audit.log({ tableName: 'production_qc', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
   }
 

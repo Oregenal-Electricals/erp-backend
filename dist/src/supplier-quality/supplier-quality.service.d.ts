@@ -68,8 +68,8 @@ export declare class SupplierQualityService {
         }[];
         cars: ({
             ncr: {
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -226,8 +226,8 @@ export declare class SupplierQualityService {
                 code: string;
             };
             ncr: {
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;

@@ -90,9 +90,9 @@ export declare class CapaAutomationService {
         recurringNcrs: number;
         recurringDetails: {
             source: string;
+            ncrNumber: string;
             severity: string;
             detectedDate: Date;
-            ncrNumber: string;
         }[];
         message: string;
         error?: undefined;

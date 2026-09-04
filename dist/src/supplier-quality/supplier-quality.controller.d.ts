@@ -71,8 +71,8 @@ export declare class SupplierQualityController {
         }[];
         cars: ({
             ncr: {
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -110,8 +110,8 @@ export declare class SupplierQualityController {
                 code: string;
             };
             ncr: {
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;

@@ -147,9 +147,9 @@ export declare class MisReportsService {
             itemCode: string;
             itemName: string;
             source: string;
+            ncrNumber: string;
             severity: string;
             detectedDate: Date;
-            ncrNumber: string;
         }[];
     }>;
     getProductionSummary(companyId: string, query: any): Promise<{

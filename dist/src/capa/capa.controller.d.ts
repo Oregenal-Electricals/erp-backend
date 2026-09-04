@@ -16,8 +16,8 @@ export declare class CapaController {
             ncr: {
                 description: string;
                 source: string;
-                severity: string;
                 ncrNumber: string;
+                severity: string;
             };
         } & {
             id: string;
@@ -50,8 +50,8 @@ export declare class CapaController {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -80,8 +80,8 @@ export declare class CapaController {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -110,8 +110,8 @@ export declare class CapaController {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
@@ -140,8 +140,8 @@ export declare class CapaController {
         ncr: {
             description: string;
             source: string;
-            severity: string;
             ncrNumber: string;
+            severity: string;
         };
     } & {
         id: string;
