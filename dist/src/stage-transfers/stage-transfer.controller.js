@@ -26,6 +26,7 @@ let StageTransferController = class StageTransferController {
     }
     findAll(req, query) { return this.stageTransferService.findAll(req.user, query); }
     give(dto, req) { return this.stageTransferService.give(dto, req.user); }
+    giveToQc(dto, req) { return this.stageTransferService.giveToQc(dto, req.user); }
     receive(id, req) { return this.stageTransferService.receive(id, req.user); }
 };
 exports.StageTransferController = StageTransferController;
@@ -47,6 +48,15 @@ __decorate([
     __metadata("design:paramtypes", [stage_transfer_dto_1.GiveTransferDto, Object]),
     __metadata("design:returntype", void 0)
 ], StageTransferController.prototype, "give", null);
+__decorate([
+    (0, common_1.Post)('give-to-qc'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STAGE_TRANSFER_GIVE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [stage_transfer_dto_1.GiveToQcDto, Object]),
+    __metadata("design:returntype", void 0)
+], StageTransferController.prototype, "giveToQc", null);
 __decorate([
     (0, common_1.Post)(':id/receive'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STAGE_TRANSFER_RECEIVE),

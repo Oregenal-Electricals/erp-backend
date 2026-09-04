@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { GiveTransferDto } from './dto/stage-transfer.dto';
+import { GiveTransferDto, GiveToQcDto } from './dto/stage-transfer.dto';
 
 const SUPERVISOR_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
 
@@ -97,6 +97,87 @@ export class StageTransferService {
     });
 
     await this.audit.log({ tableName: 'stage_transfer_notes', recordId: note.id, action: 'CREATE', newValues: note, changedBy: user.id });
+    return note;
+  }
+
+  // PROD-013: final production stage handover to Production QC.
+  // Reuses the exact same transferable-balance/concurrency mechanics as
+  // give() above - the "next destination" for a WO's output is either
+  // another routing stage or QC, never both, so cumulativeHandoverQty
+  // is the correct running total for either case without a parallel
+  // field. QC handover never touches FgReceipt/inventory at all (spec
+  // section 23) - it only creates a StageTransferNote and a PENDING
+  // ProductionQc row for PROD-014 to later decide on.
+  async giveToQc(dto: GiveToQcDto, user: any) {
+    const fromWo = await this.prisma.workOrder.findFirst({ where: { id: dto.fromWorkOrderId, companyId: user.companyId } });
+    if (!fromWo) throw new NotFoundException('Source Work Order not found');
+    if (!['IN_PROGRESS', 'COMPLETED'].includes(fromWo.status)) {
+      throw new BadRequestException('Only a Work Order that is IN PRODUCTION or COMPLETED has output to hand to QC');
+    }
+
+    // Final production stage validation (spec sections 3, 32-34): only
+    // the routing's last operation may hand normal completed quantity
+    // to Production QC. Aging falls out of this same rule naturally -
+    // if Aging exists in the routing it IS the last stage, so a
+    // handover attempt from the stage before it is correctly blocked
+    // without any separate Aging-specific logic.
+    if (fromWo.routingGroupId) {
+      const routingStages = await this.prisma.routingStage.findMany({ where: { routingId: fromWo.routingGroupId, isActive: true } });
+      const thisStage = routingStages.find((s: any) => s.stageName === fromWo.stageName);
+      if (thisStage && routingStages.length > 0) {
+        const maxSequence = Math.max(...routingStages.map((s: any) => s.sequence));
+        if (thisStage.sequence !== maxSequence) {
+          throw new BadRequestException(`${fromWo.stageName} is not the final production stage in this routing - QC handover is only valid from the last operation`);
+        }
+      }
+    }
+
+    const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty;
+    const qty = dto.qty ?? transferable;
+    if (qty <= 0) throw new BadRequestException('No transferable quantity available to hand over to QC');
+    if (qty > transferable) {
+      throw new BadRequestException(`Cannot give ${qty} to QC - only ${transferable} is transferable (${fromWo.completedQty} completed minus ${fromWo.cumulativeHandoverQty} already given)`);
+    }
+
+    const updated = await this.prisma.$executeRaw`
+      UPDATE work_orders SET "cumulativeHandoverQty" = "cumulativeHandoverQty" + ${qty}, "updatedBy" = ${user.id}
+      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" >= ${qty}
+    `;
+    if (updated === 0) {
+      throw new BadRequestException('Transferable quantity changed since this was checked - please retry');
+    }
+
+    const note = await this.prisma.stageTransferNote.create({
+      data: {
+        companyId: user.companyId,
+        fromWorkOrderId: dto.fromWorkOrderId, toWorkOrderId: null, isQcHandover: true,
+        batchLot: dto.batchLot,
+        itemCode: fromWo.productCode, itemName: fromWo.productName,
+        qty, remarks: dto.remarks,
+        givenByUserId: user.id,
+        createdBy: user.id, updatedBy: user.id,
+      },
+      include: this.includes(),
+    });
+
+    // QC-pending record (spec section 18): result/status must NOT
+    // default to a decision - PROD-014 owns Accept/Reject/Rework. The
+    // model's sampleSize field doubles as "quantity handed for
+    // inspection" here, since ProductionQc has no dedicated handover-
+    // quantity field of its own.
+    const qcCount = await this.prisma.productionQc.count({ where: { companyId: user.companyId } });
+    const qcNumber = `QC-${new Date().getFullYear()}-${String(qcCount + 1).padStart(4, '0')}`;
+    await this.prisma.productionQc.create({
+      data: {
+        companyId: user.companyId, qcNumber, workOrderId: dto.fromWorkOrderId,
+        inspectionStage: 'FINAL', result: 'PENDING', status: 'PENDING',
+        sampleSize: qty,
+        remarks: dto.batchLot ? `Batch/Lot: ${dto.batchLot}` : dto.remarks,
+        createdBy: user.id, updatedBy: user.id,
+      },
+    });
+
+    await this.audit.log({ tableName: 'stage_transfer_notes', recordId: note.id, action: 'CREATE', newValues: { ...note, isQcHandover: true }, changedBy: user.id });
     return note;
   }
 

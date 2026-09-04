@@ -1462,8 +1462,15 @@ model StageTransferNote {
   company        Company   @relation(fields: [companyId], references: [id])
   fromWorkOrderId String
   fromWorkOrder   WorkOrder @relation("StageTransferFrom", fields: [fromWorkOrderId], references: [id])
-  toWorkOrderId   String
-  toWorkOrder     WorkOrder @relation("StageTransferTo", fields: [toWorkOrderId], references: [id])
+  // PROD-013: nullable because a QC handover has no destination
+  // WorkOrder - the final production stage hands off to Production QC,
+  // not to another routing stage. isQcHandover distinguishes the two
+  // cases rather than adding a parallel handover model, since the
+  // transferable-balance/concurrency mechanics are identical either way.
+  toWorkOrderId   String?
+  toWorkOrder     WorkOrder? @relation("StageTransferTo", fields: [toWorkOrderId], references: [id])
+  isQcHandover   Boolean   @default(false)
+  batchLot       String?
   itemCode       String
   itemName       String
   qty            Float

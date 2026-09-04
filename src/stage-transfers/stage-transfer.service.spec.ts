@@ -157,4 +157,135 @@ describe('StageTransferService — PROD-006: Partial Stage Handover', () => {
       expect(controllerSource).toContain('@UseGuards');
     });
   });
+
+  describe('PROD-013: Final Production Stage Handover to Production QC', () => {
+    const packagingWo = {
+      id: 'wo-packaging', companyId: 'company-1', woNumber: 'WO-2026-0001-PACKAGING', status: 'IN_PROGRESS',
+      productCode: '9W-LED', productName: '9W Emergency LED Bulb',
+      completedQty: 500, cumulativeHandoverQty: 200,
+      routingGroupId: 'routing-1', stageName: 'Packaging',
+    };
+    const assemblyWo = { ...packagingWo, id: 'wo-assembly', stageName: 'Assembly', completedQty: 300, cumulativeHandoverQty: 0 };
+    const routingStagesNoAging = [
+      { stageName: 'SMT', sequence: 1 }, { stageName: 'MI', sequence: 2 },
+      { stageName: 'Assembly', sequence: 3 }, { stageName: 'Packaging', sequence: 4 },
+    ];
+    const routingStagesWithAging = [...routingStagesNoAging, { stageName: 'Aging', sequence: 5 }];
+
+    beforeEach(() => {
+      prisma.workOrder = { findFirst: jest.fn().mockResolvedValue(packagingWo) };
+      prisma.routingStage = { findMany: jest.fn().mockResolvedValue(routingStagesNoAging) };
+      prisma.stageTransferNote = { create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'note-1', ...data })) };
+      prisma.productionQc = { count: jest.fn().mockResolvedValue(0), create: jest.fn().mockResolvedValue({ id: 'qc-1' }) };
+      prisma.$executeRaw = jest.fn().mockResolvedValue(1);
+    });
+
+    describe('positive: valid partial QC handover (manual test 1, spec sections 6, 41)', () => {
+      it('hands over a partial transferable quantity to QC from the final production stage', async () => {
+        const result = await service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100, batchLot: 'BATCH-001' } as any, user);
+        expect(result.qty).toBe(100);
+        expect(result.isQcHandover).toBe(true);
+        expect(result.toWorkOrderId).toBeNull();
+      });
+
+      it('creates a PENDING ProductionQc record - PROD-013 never makes the Accept/Reject decision (spec section 18)', async () => {
+        await service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100 } as any, user);
+        const qcCreateCall = prisma.productionQc.create.mock.calls[0][0];
+        expect(qcCreateCall.data.result).toBe('PENDING');
+        expect(qcCreateCall.data.status).toBe('PENDING');
+      });
+    });
+
+    describe('multiple QC handovers accumulate correctly (manual test 3, spec sections 7, 9)', () => {
+      it('accounts for quantity already handed to QC when checking a second handover', async () => {
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 350 } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows exactly the remaining transferable balance', async () => {
+        const result = await service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 300 } as any, user);
+        expect(result.qty).toBe(300);
+      });
+    });
+
+    describe('excess/zero handover blocked (manual test 4, spec sections 10-11)', () => {
+      it('blocks a handover exceeding the transferable balance', async () => {
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 301 } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('blocks a zero transferable balance handover with no explicit qty', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue({ ...packagingWo, completedQty: 200, cumulativeHandoverQty: 200 });
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-packaging' } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('routing validation: only the final production stage may hand to QC (manual test 7, spec sections 3, 32)', () => {
+      it('blocks a non-final stage (Assembly, when Packaging is next) from handing to QC directly', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(assemblyWo);
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-assembly', qty: 100 } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('Aging routing (manual tests 8-9, spec sections 4, 33-34)', () => {
+      it('blocks Packaging from handing to QC when Aging is the actual final stage in this routing', async () => {
+        prisma.routingStage.findMany.mockResolvedValue(routingStagesWithAging);
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100 } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('allows Packaging to hand to QC directly when no Aging stage exists in the routing', async () => {
+        const result = await service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100 } as any, user);
+        expect(result.qty).toBe(100);
+      });
+    });
+
+    describe('concurrency safety (spec section 36)', () => {
+      it('treats a zero-row atomic update as a real concurrency conflict', async () => {
+        prisma.$executeRaw = jest.fn().mockResolvedValue(0);
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100 } as any, user),
+        ).rejects.toThrow(BadRequestException);
+        expect(prisma.stageTransferNote.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('no FG inventory creation (manual test 13, spec section 23) - proven at the source level', () => {
+      it('giveToQc never references FgReceipt or any inventory model', () => {
+        const serviceSource = require('fs').readFileSync(require.resolve('./stage-transfer.service.ts'), 'utf8');
+        const start = serviceSource.indexOf('async giveToQc');
+        const end = serviceSource.indexOf('async receive(id: string, user: any)');
+        const section = serviceSource.slice(start, end);
+        expect(section).not.toContain('fgReceipt');
+        expect(section).not.toContain('stockBalance');
+      });
+    });
+
+    describe('cost preservation (spec sections 25-26)', () => {
+      it('never touches WorkOrder cost fields or ProductionCostSheet', () => {
+        const serviceSource = require('fs').readFileSync(require.resolve('./stage-transfer.service.ts'), 'utf8');
+        const start = serviceSource.indexOf('async giveToQc');
+        const end = serviceSource.indexOf('async receive(id: string, user: any)');
+        const section = serviceSource.slice(start, end);
+        expect(section).not.toContain('productionCostSheet');
+        expect(section).not.toContain('actualLabourCost');
+      });
+    });
+
+    describe('audit', () => {
+      it('logs the QC handover', async () => {
+        await service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100 } as any, user);
+        expect(audit.log).toHaveBeenCalledWith(
+          expect.objectContaining({ tableName: 'stage_transfer_notes', action: 'CREATE', changedBy: user.id }),
+        );
+      });
+    });
+  });
 });

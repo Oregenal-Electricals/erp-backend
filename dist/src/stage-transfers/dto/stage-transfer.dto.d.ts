@@ -4,3 +4,9 @@ export declare class GiveTransferDto {
     qty?: number;
     remarks?: string;
 }
+export declare class GiveToQcDto {
+    fromWorkOrderId: string;
+    qty?: number;
+    batchLot?: string;
+    remarks?: string;
+}

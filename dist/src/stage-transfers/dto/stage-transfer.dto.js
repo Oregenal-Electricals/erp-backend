@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GiveTransferDto = void 0;
+exports.GiveToQcDto = exports.GiveTransferDto = void 0;
 const class_validator_1 = require("class-validator");
 class GiveTransferDto {
 }
@@ -33,4 +33,27 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], GiveTransferDto.prototype, "remarks", void 0);
+class GiveToQcDto {
+}
+exports.GiveToQcDto = GiveToQcDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GiveToQcDto.prototype, "fromWorkOrderId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0.0001),
+    __metadata("design:type", Number)
+], GiveToQcDto.prototype, "qty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GiveToQcDto.prototype, "batchLot", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GiveToQcDto.prototype, "remarks", void 0);
 //# sourceMappingURL=stage-transfer.dto.js.map
