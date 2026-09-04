@@ -361,6 +361,7 @@ model Company {
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
   downtimes              Downtime[]
+  reworks                Rework[]
 
   @@map("companies")
   @@index([code])
@@ -1424,6 +1425,48 @@ model GateEvent {
 // event with its own OPEN/CLOSED lifecycle, needed because exact
 // timestamps (not just a typed duration) are required for costing,
 // audit, and correctly reconstructing overlapping production entries.
+// PROD-015: Rework Production Flow. A rework quantity has already
+// passed through production and already carries accumulated cost -
+// this is a controlled correction pass linked back to the original
+// WO/QC inspection, not a fresh production run. cycleNumber lets a
+// piece that fails QC re-inspection go through rework again without
+// ever overwriting an earlier cycle's history.
+model Rework {
+  id                      String       @id @default(uuid())
+  companyId               String
+  company                 Company      @relation(fields: [companyId], references: [id])
+  reworkNumber            String
+  workOrderId             String
+  workOrder               WorkOrder    @relation(fields: [workOrderId], references: [id])
+  originalQcInspectionId  String
+  originalQcInspection    ProductionQc @relation(fields: [originalQcInspectionId], references: [id])
+  defectDescription       String?
+  quantity                Int
+  remainingQuantity       Int
+  reworkStage             String?
+  cycleNumber             Int          @default(1)
+  status                  String       @default("REWORK_PENDING") // REWORK_PENDING, IN_REWORK, REWORK_COMPLETED, PENDING_QC_REINSPECTION, CLOSED
+  successfullyReworkedQty Int?
+  stillDefectiveQty       Int?
+  manpowerQty             Int?
+  actualStartAt           DateTime?
+  actualEndAt             DateTime?
+  additionalMaterialCost  Float        @default(0)
+  additionalLabourCost    Float        @default(0)
+  additionalOtherCost     Float        @default(0)
+  totalAdditionalCost     Float        @default(0)
+  remarks                 String?
+  isActive                Boolean      @default(true)
+  isTestData              Boolean      @default(false)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+  createdBy               String?
+  updatedBy               String?
+
+  @@map("reworks")
+  @@index([companyId, workOrderId])
+}
+
 model Downtime {
   id              String    @id @default(uuid())
   companyId       String
@@ -3788,6 +3831,7 @@ model WorkOrder {
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
+  reworks             Rework[]
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
@@ -4021,6 +4065,7 @@ model ProductionQc {
 
   @@unique([companyId, qcNumber])
   @@index([companyId, workOrderId])
+  reworks             Rework[]
   @@map("production_qc")
 }
 
