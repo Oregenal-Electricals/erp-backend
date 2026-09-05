@@ -15,6 +15,7 @@ import { DummyDataModule } from './dummy-data/dummy-data.module';
 import { VisitorManagementModule } from './visitor-management/visitor-management.module';
 import { VehicleManagementModule } from './vehicle-management/vehicle-management.module';
 import { GateInwardModule } from './gate-inward/gate-inward.module';
+import { StoreReceivingModule } from './store-receiving/store-receiving.module';
 import { GateOutwardModule } from './gate-outward/gate-outward.module';
 import { GatePassModule } from './gate-pass/gate-pass.module';
 import { GateDashboardModule } from './gate-dashboard/gate-dashboard.module';
@@ -153,6 +154,7 @@ import configuration from './config/configuration';
     VisitorManagementModule,
     VehicleManagementModule,
     GateInwardModule,
+    StoreReceivingModule,
     GateOutwardModule,
     GatePassModule,
     GateDashboardModule,

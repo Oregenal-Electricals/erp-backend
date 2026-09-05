@@ -367,6 +367,7 @@ model Company {
   @@map("companies")
   @@index([code])
   @@index([isActive])
+  storeReceivings StoreReceiving[]
 }
 
 model Plant {
@@ -569,6 +570,7 @@ model User {
   @@index([email])
   @@index([companyId])
   @@index([role])
+  storeReceivingsReceived StoreReceiving[] @relation("StoreReceivingReceivedBy")
 }
 
 model SystemSetting {
@@ -926,6 +928,7 @@ model GateInwardEntry {
   isActive   Boolean  @default(true)
   isTestData Boolean  @default(false)
   grnHeaders GrnHeader[]
+  storeReceiving StoreReceiving?
   items      GateInwardItem[]
 
   @@map("gate_inward_entries")
@@ -1500,6 +1503,67 @@ model Scrap {
 
   @@map("scraps")
   @@index([companyId, workOrderId])
+}
+
+// STORE-001: Store's own acknowledgment that material physically
+// reached the Store Receiving Area - deliberately distinct from
+// GateInwardEntry.status=SENT_TO_STORES (Gate's side of the handoff)
+// and from GrnHeader (final quantity-verified/QC-accepted receipt).
+// gateInwardEntryId is unique - one Gate-In can only ever produce one
+// StoreReceiving, the concurrency/duplicate-receipt guard.
+model StoreReceiving {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  receivingNumber     String
+  gateInwardEntryId   String    @unique
+  gateInwardEntry     GateInwardEntry @relation(fields: [gateInwardEntryId], references: [id])
+  supplierName        String
+  poId                String?
+  poNumber            String?
+  invoiceNumber       String?
+  receivingWarehouseId String?
+  receivedById        String
+  receivedBy          User      @relation("StoreReceivingReceivedBy", fields: [receivedById], references: [id])
+  receivedAt          DateTime  @default(now())
+  status              String    @default("PHYSICAL_VERIFICATION_PENDING")
+  remarks             String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+  items               StoreReceivingItem[]
+
+  @@map("store_receivings")
+  @@index([companyId])
+}
+
+// Expected quantity is copied from GateInwardItem at receiving time;
+// actualVerifiedQty is deliberately left null here - STORE-002 owns
+// filling that in, never this module.
+model StoreReceivingItem {
+  id                String   @id @default(uuid())
+  companyId         String
+  storeReceivingId  String
+  storeReceiving    StoreReceiving @relation(fields: [storeReceivingId], references: [id], onDelete: Cascade)
+  gateInwardItemId  String?
+  itemCode          String
+  itemName          String
+  uom               String   @default("NOS")
+  expectedQty       Float
+  actualVerifiedQty Float?
+  remarks           String?
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@map("store_receiving_items")
+  @@index([companyId, storeReceivingId])
 }
 
 model Downtime {

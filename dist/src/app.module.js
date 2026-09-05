@@ -27,6 +27,7 @@ const dummy_data_module_1 = require("./dummy-data/dummy-data.module");
 const visitor_management_module_1 = require("./visitor-management/visitor-management.module");
 const vehicle_management_module_1 = require("./vehicle-management/vehicle-management.module");
 const gate_inward_module_1 = require("./gate-inward/gate-inward.module");
+const store_receiving_module_1 = require("./store-receiving/store-receiving.module");
 const gate_outward_module_1 = require("./gate-outward/gate-outward.module");
 const gate_pass_module_1 = require("./gate-pass/gate-pass.module");
 const gate_dashboard_module_1 = require("./gate-dashboard/gate-dashboard.module");
@@ -171,6 +172,7 @@ exports.AppModule = AppModule = __decorate([
             visitor_management_module_1.VisitorManagementModule,
             vehicle_management_module_1.VehicleManagementModule,
             gate_inward_module_1.GateInwardModule,
+            store_receiving_module_1.StoreReceivingModule,
             gate_outward_module_1.GateOutwardModule,
             gate_pass_module_1.GatePassModule,
             gate_dashboard_module_1.GateDashboardModule,
