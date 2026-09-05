@@ -45,6 +45,7 @@ export declare class ProductionQcService {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -84,6 +85,7 @@ export declare class ProductionQcService {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -123,6 +125,7 @@ export declare class ProductionQcService {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -163,6 +166,7 @@ export declare class ProductionQcService {
             reworkQty: number;
             holdQty: number;
             fgHandedOverQty: number;
+            sourceReworkId: string | null;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];
@@ -207,6 +211,7 @@ export declare class ProductionQcService {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;

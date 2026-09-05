@@ -143,6 +143,12 @@ export class ReworkService {
           companyId: user.companyId, qcNumber, workOrderId: rework.workOrderId,
           inspectionStage: 'FINAL', result: 'PENDING', status: 'PENDING',
           sampleSize: dto.successfullyReworkedQty,
+          // Real link (not just the text remark below) so
+          // ProductionQcService.decideQuantities() can close this
+          // Rework once its re-inspection completes - found missing
+          // via manual UAT, which left closure permanently blocked on
+          // "not yet resolved" even after QC accepted the rework output.
+          sourceReworkId: rework.id,
           remarks: `Rework re-inspection - ${rework.reworkNumber}, cycle ${rework.cycleNumber}`,
           createdBy: user.id, updatedBy: user.id,
         },

@@ -1465,6 +1465,7 @@ model Rework {
   updatedBy               String?
 
   scraps                  Scrap[]
+  sourceQcRecords          ProductionQc[]  @relation("QcSourceRework")
   @@map("reworks")
   @@index([companyId, workOrderId])
 }
@@ -4093,6 +4094,8 @@ model ProductionQc {
   // atomic conditional UPDATE pattern used for cumulativeHandoverQty
   // on WorkOrder (PROD-006/013), instead of a read-then-write race.
   fgHandedOverQty     Int             @default(0)
+  sourceReworkId      String?
+  sourceRework        Rework?         @relation("QcSourceRework", fields: [sourceReworkId], references: [id])
   result              String          @default("PENDING") // PASS, FAIL, CONDITIONAL, PENDING
   defectDescription   String?
   correctiveAction    String?

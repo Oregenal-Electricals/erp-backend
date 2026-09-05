@@ -9,12 +9,12 @@ export declare class ScrapController {
             productName: string;
             woNumber: string;
         };
-        sourceQcInspection: {
-            qcNumber: string;
-        };
         sourceRework: {
             reworkNumber: string;
             cycleNumber: number;
+        };
+        sourceQcInspection: {
+            qcNumber: string;
         };
     } & {
         id: string;
@@ -29,11 +29,11 @@ export declare class ScrapController {
         remarks: string | null;
         quantity: number;
         workOrderId: string;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         scrapQty: number;
         rejectionNumber: string;
         sourceQcInspectionId: string;
-        sourceReworkId: string | null;
         recoveryQty: number;
         otherDispositionQty: number;
         estimatedScrapValue: number;
@@ -46,12 +46,12 @@ export declare class ScrapController {
             productName: string;
             woNumber: string;
         };
-        sourceQcInspection: {
-            qcNumber: string;
-        };
         sourceRework: {
             reworkNumber: string;
             cycleNumber: number;
+        };
+        sourceQcInspection: {
+            qcNumber: string;
         };
     } & {
         id: string;
@@ -66,11 +66,11 @@ export declare class ScrapController {
         remarks: string | null;
         quantity: number;
         workOrderId: string;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         scrapQty: number;
         rejectionNumber: string;
         sourceQcInspectionId: string;
-        sourceReworkId: string | null;
         recoveryQty: number;
         otherDispositionQty: number;
         estimatedScrapValue: number;
@@ -83,12 +83,12 @@ export declare class ScrapController {
             productName: string;
             woNumber: string;
         };
-        sourceQcInspection: {
-            qcNumber: string;
-        };
         sourceRework: {
             reworkNumber: string;
             cycleNumber: number;
+        };
+        sourceQcInspection: {
+            qcNumber: string;
         };
     } & {
         id: string;
@@ -103,11 +103,11 @@ export declare class ScrapController {
         remarks: string | null;
         quantity: number;
         workOrderId: string;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         scrapQty: number;
         rejectionNumber: string;
         sourceQcInspectionId: string;
-        sourceReworkId: string | null;
         recoveryQty: number;
         otherDispositionQty: number;
         estimatedScrapValue: number;
@@ -120,12 +120,12 @@ export declare class ScrapController {
             productName: string;
             woNumber: string;
         };
-        sourceQcInspection: {
-            qcNumber: string;
-        };
         sourceRework: {
             reworkNumber: string;
             cycleNumber: number;
+        };
+        sourceQcInspection: {
+            qcNumber: string;
         };
     } & {
         id: string;
@@ -140,11 +140,11 @@ export declare class ScrapController {
         remarks: string | null;
         quantity: number;
         workOrderId: string;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         scrapQty: number;
         rejectionNumber: string;
         sourceQcInspectionId: string;
-        sourceReworkId: string | null;
         recoveryQty: number;
         otherDispositionQty: number;
         estimatedScrapValue: number;

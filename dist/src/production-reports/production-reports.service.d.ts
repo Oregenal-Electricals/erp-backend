@@ -154,6 +154,7 @@ export declare class ProductionReportsService {
             reworkQty: number;
             holdQty: number;
             fgHandedOverQty: number;
+            sourceReworkId: string | null;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];

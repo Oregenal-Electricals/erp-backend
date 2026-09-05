@@ -120,6 +120,7 @@ let ReworkService = class ReworkService {
                     companyId: user.companyId, qcNumber, workOrderId: rework.workOrderId,
                     inspectionStage: 'FINAL', result: 'PENDING', status: 'PENDING',
                     sampleSize: dto.successfullyReworkedQty,
+                    sourceReworkId: rework.id,
                     remarks: `Rework re-inspection - ${rework.reworkNumber}, cycle ${rework.cycleNumber}`,
                     createdBy: user.id, updatedBy: user.id,
                 },

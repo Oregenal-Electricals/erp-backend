@@ -136,6 +136,7 @@ export declare class ProductionDashboardService {
             reworkQty: number;
             holdQty: number;
             fgHandedOverQty: number;
+            sourceReworkId: string | null;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];
@@ -177,6 +178,7 @@ export declare class ProductionDashboardService {
             reworkQty: number;
             holdQty: number;
             fgHandedOverQty: number;
+            sourceReworkId: string | null;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];

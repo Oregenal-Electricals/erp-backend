@@ -125,6 +125,12 @@ let ProductionQcService = class ProductionQcService {
                 },
             });
         }
+        if (qc.sourceReworkId) {
+            await this.prisma.rework.update({
+                where: { id: qc.sourceReworkId },
+                data: { status: 'CLOSED', updatedBy: user.id },
+            });
+        }
         await this.audit.log({ tableName: 'production_qc', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }

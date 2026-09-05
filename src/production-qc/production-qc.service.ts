@@ -146,6 +146,20 @@ export class ProductionQcService {
       });
     }
 
+    // Bug found via manual UAT: completing a rework's re-inspection
+    // never closed the originating Rework record, permanently blocking
+    // WO closure on "rework not yet resolved" even after QC decided.
+    // The Rework's own lifecycle ends here regardless of outcome - a
+    // Rework Again disposition creates a brand new cycle-2 Rework
+    // record rather than reopening this one, so closing it now never
+    // loses history.
+    if (qc.sourceReworkId) {
+      await this.prisma.rework.update({
+        where: { id: qc.sourceReworkId },
+        data: { status: 'CLOSED', updatedBy: user.id },
+      });
+    }
+
     await this.audit.log({ tableName: 'production_qc', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
   }

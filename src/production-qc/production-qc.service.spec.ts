@@ -136,6 +136,23 @@ describe('ProductionQcService PROD014', () => {
     });
   });
 
+  describe('closes the originating Rework once its re-inspection completes (bug found via UAT)', () => {
+    it('sets Rework.status to CLOSED when the QC record has a sourceReworkId', async () => {
+      prisma.productionQc.findFirst.mockResolvedValue({ ...pendingQc, sourceReworkId: 'rw-1' });
+      prisma.rework = { update: jest.fn().mockResolvedValue({ id: 'rw-1', status: 'CLOSED' }) };
+      await service.decideQuantities('qc-1', { acceptedQty: 200, reworkQty: 0, rejectedQty: 0 } as any, user);
+      expect(prisma.rework.update).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'rw-1' }, data: expect.objectContaining({ status: 'CLOSED' }) }),
+      );
+    });
+
+    it('does not touch Rework when the QC record has no sourceReworkId (first-pass inspection)', async () => {
+      prisma.rework = { update: jest.fn() };
+      await service.decideQuantities('qc-1', { acceptedQty: 200, reworkQty: 0, rejectedQty: 0 } as any, user);
+      expect(prisma.rework.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('audit', () => {
     it('logs the QC decision', async () => {
       await service.decideQuantities('qc-1', { acceptedQty: 185, reworkQty: 10, rejectedQty: 5 } as any, user);

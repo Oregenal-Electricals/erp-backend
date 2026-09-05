@@ -50,6 +50,7 @@ export declare class ProductionQcController {
             reworkQty: number;
             holdQty: number;
             fgHandedOverQty: number;
+            sourceReworkId: string | null;
             defectDescription: string | null;
             correctiveAction: string | null;
         })[];
@@ -94,6 +95,7 @@ export declare class ProductionQcController {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -133,6 +135,7 @@ export declare class ProductionQcController {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -172,6 +175,7 @@ export declare class ProductionQcController {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
@@ -211,6 +215,7 @@ export declare class ProductionQcController {
         reworkQty: number;
         holdQty: number;
         fgHandedOverQty: number;
+        sourceReworkId: string | null;
         defectDescription: string | null;
         correctiveAction: string | null;
     }>;
