@@ -231,8 +231,8 @@ export declare class IqcController {
                 warehouse: {
                     name: string;
                 };
-                grnType: string;
                 grnNumber: string;
+                grnType: string;
             };
         } & {
             id: string;
@@ -283,9 +283,9 @@ export declare class IqcController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -331,9 +331,9 @@ export declare class IqcController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -359,8 +359,8 @@ export declare class IqcController {
                         name: string;
                     };
                 };
-                warehouseId: string;
                 grnNumber: string;
+                warehouseId: string;
             };
             inspectionDate: Date;
             iqcNumber: string;
@@ -502,9 +502,9 @@ export declare class IqcController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -550,9 +550,9 @@ export declare class IqcController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -598,9 +598,9 @@ export declare class IqcController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -626,8 +626,8 @@ export declare class IqcController {
                         name: string;
                     };
                 };
-                warehouseId: string;
                 grnNumber: string;
+                warehouseId: string;
             };
             inspectionDate: Date;
             iqcNumber: string;
@@ -749,8 +749,8 @@ export declare class IqcController {
                         name: string;
                     };
                 };
-                warehouseId: string;
                 grnNumber: string;
+                warehouseId: string;
             };
             inspectionDate: Date;
             iqcNumber: string;

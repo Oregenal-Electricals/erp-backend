@@ -41,6 +41,7 @@ export declare class FgReceiptController {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
             warehouseId: string;
             unitCost: number;
             totalCost: number;
@@ -48,7 +49,6 @@ export declare class FgReceiptController {
             rejectedQty: number;
             plannedQty: number;
             workOrderId: string;
-            batchNumber: string | null;
             receiptNumber: string;
             sourceProductionQcId: string | null;
         })[];
@@ -83,6 +83,7 @@ export declare class FgReceiptController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
         warehouseId: string;
         unitCost: number;
         totalCost: number;
@@ -90,7 +91,6 @@ export declare class FgReceiptController {
         rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
-        batchNumber: string | null;
         receiptNumber: string;
         sourceProductionQcId: string | null;
     }>;
@@ -120,6 +120,7 @@ export declare class FgReceiptController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
         warehouseId: string;
         unitCost: number;
         totalCost: number;
@@ -127,7 +128,6 @@ export declare class FgReceiptController {
         rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
-        batchNumber: string | null;
         receiptNumber: string;
         sourceProductionQcId: string | null;
     }>;
@@ -157,6 +157,7 @@ export declare class FgReceiptController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
         warehouseId: string;
         unitCost: number;
         totalCost: number;
@@ -164,7 +165,6 @@ export declare class FgReceiptController {
         rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
-        batchNumber: string | null;
         receiptNumber: string;
         sourceProductionQcId: string | null;
     }>;
@@ -194,6 +194,7 @@ export declare class FgReceiptController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
         warehouseId: string;
         unitCost: number;
         totalCost: number;
@@ -201,7 +202,6 @@ export declare class FgReceiptController {
         rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
-        batchNumber: string | null;
         receiptNumber: string;
         sourceProductionQcId: string | null;
     }>;
@@ -231,6 +231,7 @@ export declare class FgReceiptController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
         warehouseId: string;
         unitCost: number;
         totalCost: number;
@@ -238,7 +239,6 @@ export declare class FgReceiptController {
         rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
-        batchNumber: string | null;
         receiptNumber: string;
         sourceProductionQcId: string | null;
     }>;

@@ -58,9 +58,9 @@ export declare class CostSheetService {
             priority: string;
             remarks: string | null;
             uom: string;
+            warehouseId: string;
             closedAt: Date | null;
             closedById: string | null;
-            warehouseId: string;
             stageName: string | null;
             productCode: string;
             productName: string;

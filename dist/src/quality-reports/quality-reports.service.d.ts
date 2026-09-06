@@ -115,6 +115,8 @@ export declare class QualityReportsService {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
+            lotNumber: string | null;
             sampleSize: number;
             releasedBy: string | null;
             workOrderId: string | null;
@@ -122,8 +124,6 @@ export declare class QualityReportsService {
             inspectionDate: Date;
             passQty: number;
             failQty: number;
-            batchNumber: string | null;
-            lotNumber: string | null;
             oqcNumber: string;
             fgReceiptId: string | null;
             visualCheck: string | null;
@@ -231,11 +231,11 @@ export declare class QualityReportsService {
             itemCode: string;
             itemName: string;
             invoiceNumber: string | null;
-            closedBy: string | null;
+            batchNumber: string | null;
             receivedDate: Date;
+            closedBy: string | null;
             customerId: string | null;
             correctiveAction: string | null;
-            batchNumber: string | null;
             assignedTo: string | null;
             severity: string;
             qtyAffected: number;

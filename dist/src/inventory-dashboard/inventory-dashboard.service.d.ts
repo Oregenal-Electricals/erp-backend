@@ -29,9 +29,9 @@ export declare class InventoryDashboardService {
         expiringBatches: {
             itemCode: string;
             itemName: string;
+            batchNumber: string;
             expiryDate: Date;
             availableQty: number;
-            batchNumber: string;
         }[];
         expiredBatches: number;
         pendingGrns: {

@@ -79,6 +79,7 @@ export declare class ImportOrderController {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -92,7 +93,6 @@ export declare class ImportOrderController {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -151,6 +151,7 @@ export declare class ImportOrderController {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -164,7 +165,6 @@ export declare class ImportOrderController {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -223,6 +223,7 @@ export declare class ImportOrderController {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -236,7 +237,6 @@ export declare class ImportOrderController {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -295,6 +295,7 @@ export declare class ImportOrderController {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -308,7 +309,6 @@ export declare class ImportOrderController {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -367,6 +367,7 @@ export declare class ImportOrderController {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -380,7 +381,6 @@ export declare class ImportOrderController {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -439,6 +439,7 @@ export declare class ImportOrderController {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -452,7 +453,6 @@ export declare class ImportOrderController {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -510,6 +510,7 @@ export declare class ImportOrderController {
         itemName: string;
         uom: string;
         hsnCode: string | null;
+        ipoId: string;
         igstRate: number;
         sequence: number;
         discount: number | null;
@@ -523,6 +524,5 @@ export declare class ImportOrderController {
         unitPriceInr: number;
         totalForeign: number;
         totalInr: number;
-        ipoId: string;
     }>;
 }

@@ -46,8 +46,8 @@ export declare class StockPutawayController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
             grnNumber: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -93,8 +93,8 @@ export declare class StockPutawayController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -143,8 +143,8 @@ export declare class StockPutawayController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -193,8 +193,8 @@ export declare class StockPutawayController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -243,8 +243,8 @@ export declare class StockPutawayController {
             code: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;

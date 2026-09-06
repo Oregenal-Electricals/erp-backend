@@ -172,9 +172,11 @@ export declare class ItemMasterController {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -183,15 +185,13 @@ export declare class ItemMasterController {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     findAllItems(user: any, itemType?: string, categoryId?: string, status?: string, search?: string): Promise<({
         category: {
@@ -235,9 +235,11 @@ export declare class ItemMasterController {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -246,15 +248,13 @@ export declare class ItemMasterController {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     })[]>;
     getStats(user: any): Promise<{
         total: number;
@@ -307,9 +307,11 @@ export declare class ItemMasterController {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -318,15 +320,13 @@ export declare class ItemMasterController {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     updateItem(id: string, dto: UpdateItemDto, user: any): Promise<{
         category: {
@@ -370,9 +370,11 @@ export declare class ItemMasterController {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -381,15 +383,13 @@ export declare class ItemMasterController {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     toggleItem(id: string, user: any): Promise<{
         id: string;
@@ -412,9 +412,11 @@ export declare class ItemMasterController {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -423,14 +425,12 @@ export declare class ItemMasterController {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
 }

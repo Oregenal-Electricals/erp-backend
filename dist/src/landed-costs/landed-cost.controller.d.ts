@@ -66,6 +66,7 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            landedCostId: string;
             qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
@@ -74,7 +75,6 @@ export declare class LandedCostController {
             landedCostPerUnit: number;
             valueForeign: number;
             valueInr: number;
-            landedCostId: string;
         }[];
         ipo: {
             status: string;
@@ -123,6 +123,7 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            landedCostId: string;
             qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
@@ -131,7 +132,6 @@ export declare class LandedCostController {
             landedCostPerUnit: number;
             valueForeign: number;
             valueInr: number;
-            landedCostId: string;
         }[];
         ipo: {
             status: string;
@@ -180,6 +180,7 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            landedCostId: string;
             qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
@@ -188,7 +189,6 @@ export declare class LandedCostController {
             landedCostPerUnit: number;
             valueForeign: number;
             valueInr: number;
-            landedCostId: string;
         }[];
         ipo: {
             status: string;
@@ -237,6 +237,7 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            landedCostId: string;
             qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
@@ -245,7 +246,6 @@ export declare class LandedCostController {
             landedCostPerUnit: number;
             valueForeign: number;
             valueInr: number;
-            landedCostId: string;
         }[];
         ipo: {
             status: string;
@@ -294,6 +294,7 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            landedCostId: string;
             qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
@@ -302,7 +303,6 @@ export declare class LandedCostController {
             landedCostPerUnit: number;
             valueForeign: number;
             valueInr: number;
-            landedCostId: string;
         }[];
         ipo: {
             status: string;
@@ -351,6 +351,7 @@ export declare class LandedCostController {
             itemCode: string;
             itemName: string;
             uom: string;
+            landedCostId: string;
             qty: number;
             unitPriceForeign: number;
             ipoItemId: string | null;
@@ -359,7 +360,6 @@ export declare class LandedCostController {
             landedCostPerUnit: number;
             valueForeign: number;
             valueInr: number;
-            landedCostId: string;
         }[];
         ipo: {
             status: string;

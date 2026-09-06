@@ -53,8 +53,8 @@ export declare class StockLedgerService {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
             grnNumber: string;
+            warehouseId: string;
         };
     } & {
         id: string;

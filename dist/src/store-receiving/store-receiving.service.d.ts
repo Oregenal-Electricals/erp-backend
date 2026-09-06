@@ -97,6 +97,7 @@ export declare class StoreReceivingService {
     findAll(user: any, query: any): Promise<{
         data: ({
             items: {
+                result: string | null;
                 id: string;
                 companyId: string;
                 isActive: boolean;
@@ -109,9 +110,17 @@ export declare class StoreReceivingService {
                 itemCode: string;
                 itemName: string;
                 uom: string;
+                verifiedById: string | null;
+                verifiedAt: Date | null;
                 gateInwardItemId: string | null;
                 expectedQty: number;
                 actualVerifiedQty: number | null;
+                actualUom: string | null;
+                differenceQty: number | null;
+                shortQty: number | null;
+                excessQty: number | null;
+                damagedQty: number | null;
+                materialMismatch: boolean;
                 storeReceivingId: string;
             }[];
             gateInwardEntry: {
@@ -155,6 +164,7 @@ export declare class StoreReceivingService {
     }>;
     findOne(id: string, user: any): Promise<{
         items: {
+            result: string | null;
             id: string;
             companyId: string;
             isActive: boolean;
@@ -167,9 +177,17 @@ export declare class StoreReceivingService {
             itemCode: string;
             itemName: string;
             uom: string;
+            verifiedById: string | null;
+            verifiedAt: Date | null;
             gateInwardItemId: string | null;
             expectedQty: number;
             actualVerifiedQty: number | null;
+            actualUom: string | null;
+            differenceQty: number | null;
+            shortQty: number | null;
+            excessQty: number | null;
+            damagedQty: number | null;
+            materialMismatch: boolean;
             storeReceivingId: string;
         }[];
         gateInwardEntry: {

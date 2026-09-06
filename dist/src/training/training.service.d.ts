@@ -194,8 +194,8 @@ export declare class TrainingService {
             updatedBy: string | null;
             status: string;
             remarks: string | null;
-            employeeId: string;
             expiryDate: Date | null;
+            employeeId: string;
             passed: boolean | null;
             score: number | null;
             sessionId: string;
@@ -242,8 +242,8 @@ export declare class TrainingService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        employeeId: string;
         expiryDate: Date | null;
+        employeeId: string;
         passed: boolean | null;
         score: number | null;
         sessionId: string;
@@ -317,8 +317,8 @@ export declare class TrainingService {
         updatedBy: string | null;
         status: string;
         remarks: string | null;
-        employeeId: string;
         expiryDate: Date | null;
+        employeeId: string;
         passed: boolean | null;
         score: number | null;
         sessionId: string;

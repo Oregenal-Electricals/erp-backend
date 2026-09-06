@@ -58,9 +58,9 @@ export declare class StockIssueController {
     findOne(id: string, req: any): Promise<{
         items: ({
             batch: {
-                receivedDate: Date;
                 batchNumber: string;
                 lotNumber: string;
+                receivedDate: Date;
             };
         } & {
             id: string;

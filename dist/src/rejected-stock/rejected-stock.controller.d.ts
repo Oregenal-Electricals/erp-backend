@@ -89,8 +89,8 @@ export declare class RejectedStockController {
             receiptNumber: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -150,8 +150,8 @@ export declare class RejectedStockController {
             receiptNumber: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -211,8 +211,8 @@ export declare class RejectedStockController {
             receiptNumber: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -272,8 +272,8 @@ export declare class RejectedStockController {
             receiptNumber: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;
@@ -333,8 +333,8 @@ export declare class RejectedStockController {
             receiptNumber: string;
         };
         grn: {
-            grnType: string;
             grnNumber: string;
+            grnType: string;
         };
         iqc: {
             iqcNumber: string;

@@ -174,9 +174,11 @@ export declare class ItemMasterService {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -185,15 +187,13 @@ export declare class ItemMasterService {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     findAllItems(user: any, filters: {
         itemType?: string;
@@ -242,9 +242,11 @@ export declare class ItemMasterService {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -253,15 +255,13 @@ export declare class ItemMasterService {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     })[]>;
     findOneItem(id: string): Promise<{
         category: {
@@ -305,9 +305,11 @@ export declare class ItemMasterService {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -316,15 +318,13 @@ export declare class ItemMasterService {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     updateItem(id: string, dto: UpdateItemDto, user: any): Promise<{
         category: {
@@ -368,9 +368,11 @@ export declare class ItemMasterService {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -379,15 +381,13 @@ export declare class ItemMasterService {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     toggleItemStatus(id: string, user: any): Promise<{
         id: string;
@@ -410,9 +410,11 @@ export declare class ItemMasterService {
         salesUomId: string | null;
         hsnCode: string | null;
         gstRate: number;
+        sacCode: string | null;
         purchaseRate: number | null;
         salesRate: number | null;
         standardCost: number | null;
+        lastPurchaseRate: number | null;
         reorderLevel: number | null;
         reorderQty: number | null;
         minOrderQty: number | null;
@@ -421,15 +423,13 @@ export declare class ItemMasterService {
         shelfLifeDays: number | null;
         isBatchTracked: boolean;
         isSerialTracked: boolean;
+        isMaintenance: boolean;
         drawingNo: string | null;
+        specifications: import("@prisma/client/runtime/library").JsonValue | null;
+        imageUrl: string | null;
         barcode: string | null;
         abcClass: string | null;
         criticalityLevel: string | null;
-        sacCode: string | null;
-        lastPurchaseRate: number | null;
-        isMaintenance: boolean;
-        specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        imageUrl: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

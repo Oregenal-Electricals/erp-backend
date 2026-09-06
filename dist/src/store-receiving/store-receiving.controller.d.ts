@@ -1,8 +1,11 @@
 import { StoreReceivingService } from './store-receiving.service';
 import { ReceiveAtStoreDto } from './dto/store-receiving.dto';
+import { PhysicalVerificationService } from './physical-verification.service';
+import { VerifyLineDto, CorrectLineDto } from './dto/physical-verification.dto';
 export declare class StoreReceivingController {
     private service;
-    constructor(service: StoreReceivingService);
+    private verifyService;
+    constructor(service: StoreReceivingService, verifyService: PhysicalVerificationService);
     findPendingFromGate(req: any): Promise<({
         items: {
             id: string;
@@ -90,6 +93,7 @@ export declare class StoreReceivingController {
     findAll(req: any, query: any): Promise<{
         data: ({
             items: {
+                result: string | null;
                 id: string;
                 companyId: string;
                 isActive: boolean;
@@ -102,9 +106,17 @@ export declare class StoreReceivingController {
                 itemCode: string;
                 itemName: string;
                 uom: string;
+                verifiedById: string | null;
+                verifiedAt: Date | null;
                 gateInwardItemId: string | null;
                 expectedQty: number;
                 actualVerifiedQty: number | null;
+                actualUom: string | null;
+                differenceQty: number | null;
+                shortQty: number | null;
+                excessQty: number | null;
+                damagedQty: number | null;
+                materialMismatch: boolean;
                 storeReceivingId: string;
             }[];
             gateInwardEntry: {
@@ -148,6 +160,7 @@ export declare class StoreReceivingController {
     }>;
     findOne(id: string, req: any): Promise<{
         items: {
+            result: string | null;
             id: string;
             companyId: string;
             isActive: boolean;
@@ -160,9 +173,17 @@ export declare class StoreReceivingController {
             itemCode: string;
             itemName: string;
             uom: string;
+            verifiedById: string | null;
+            verifiedAt: Date | null;
             gateInwardItemId: string | null;
             expectedQty: number;
             actualVerifiedQty: number | null;
+            actualUom: string | null;
+            differenceQty: number | null;
+            shortQty: number | null;
+            excessQty: number | null;
+            damagedQty: number | null;
+            materialMismatch: boolean;
             storeReceivingId: string;
         }[];
         gateInwardEntry: {
@@ -200,4 +221,141 @@ export declare class StoreReceivingController {
         receivedAt: Date;
     }>;
     receiveAtStore(dto: ReceiveAtStoreDto, req: any): Promise<any>;
+    verifyLine(itemId: string, dto: VerifyLineDto, req: any): Promise<{
+        batches: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            quantity: number;
+            batchNumber: string;
+            lotNumber: string | null;
+            mfgDate: Date | null;
+            expiryDate: Date | null;
+            storeReceivingItemId: string;
+        }[];
+    } & {
+        result: string | null;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        remarks: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        verifiedById: string | null;
+        verifiedAt: Date | null;
+        gateInwardItemId: string | null;
+        expectedQty: number;
+        actualVerifiedQty: number | null;
+        actualUom: string | null;
+        differenceQty: number | null;
+        shortQty: number | null;
+        excessQty: number | null;
+        damagedQty: number | null;
+        materialMismatch: boolean;
+        storeReceivingId: string;
+    }>;
+    completeVerification(id: string, req: any): Promise<{
+        items: {
+            result: string | null;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            verifiedById: string | null;
+            verifiedAt: Date | null;
+            gateInwardItemId: string | null;
+            expectedQty: number;
+            actualVerifiedQty: number | null;
+            actualUom: string | null;
+            differenceQty: number | null;
+            shortQty: number | null;
+            excessQty: number | null;
+            damagedQty: number | null;
+            materialMismatch: boolean;
+            storeReceivingId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        supplierName: string;
+        poNumber: string | null;
+        poId: string | null;
+        invoiceNumber: string | null;
+        receivedById: string;
+        gateInwardEntryId: string;
+        receivingWarehouseId: string | null;
+        receivingNumber: string;
+        receivedAt: Date;
+    }>;
+    correctLine(itemId: string, dto: CorrectLineDto, req: any): Promise<{
+        batches: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            quantity: number;
+            batchNumber: string;
+            lotNumber: string | null;
+            mfgDate: Date | null;
+            expiryDate: Date | null;
+            storeReceivingItemId: string;
+        }[];
+    } & {
+        result: string | null;
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        remarks: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        verifiedById: string | null;
+        verifiedAt: Date | null;
+        gateInwardItemId: string | null;
+        expectedQty: number;
+        actualVerifiedQty: number | null;
+        actualUom: string | null;
+        differenceQty: number | null;
+        shortQty: number | null;
+        excessQty: number | null;
+        damagedQty: number | null;
+        materialMismatch: boolean;
+        storeReceivingId: string;
+    }>;
 }

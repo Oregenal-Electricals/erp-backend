@@ -220,8 +220,8 @@ export declare class IqcEscalationService {
                         name: string;
                     };
                 };
-                warehouseId: string;
                 grnNumber: string;
+                warehouseId: string;
             };
             inspectionDate: Date;
             iqcNumber: string;
@@ -343,8 +343,8 @@ export declare class IqcEscalationService {
                         name: string;
                     };
                 };
-                warehouseId: string;
                 grnNumber: string;
+                warehouseId: string;
             };
             inspectionDate: Date;
             iqcNumber: string;
@@ -466,8 +466,8 @@ export declare class IqcEscalationService {
                         name: string;
                     };
                 };
-                warehouseId: string;
                 grnNumber: string;
+                warehouseId: string;
             };
             inspectionDate: Date;
             iqcNumber: string;

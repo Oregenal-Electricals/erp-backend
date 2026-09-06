@@ -571,6 +571,7 @@ model User {
   @@index([companyId])
   @@index([role])
   storeReceivingsReceived StoreReceiving[] @relation("StoreReceivingReceivedBy")
+  storeReceivingItemsVerified StoreReceivingItem[] @relation("StoreReceivingItemVerifiedBy")
 }
 
 model SystemSetting {
@@ -1554,6 +1555,21 @@ model StoreReceivingItem {
   uom               String   @default("NOS")
   expectedQty       Float
   actualVerifiedQty Float?
+  // STORE-002: physical quantity verification. actualUom is the UOM
+  // Store actually entered against - compared by exact match to uom
+  // above (no conversion architecture exists yet, so BOX<->PCS etc.
+  // is deliberately not attempted here - flagged as UOM_MISMATCH
+  // instead of silently converted).
+  actualUom         String?
+  result            String?  // QUANTITY_VERIFIED, SHORT_QUANTITY, EXCESS_QUANTITY, MATERIAL_MISMATCH, UOM_MISMATCH, FULL_SHORT, PENDING
+  differenceQty     Float?   // actualVerifiedQty - expectedQty
+  shortQty          Float?   // MAX(expected - actual, 0)
+  excessQty         Float?   // MAX(actual - expected, 0)
+  damagedQty        Float?
+  materialMismatch  Boolean  @default(false)
+  verifiedById      String?
+  verifiedBy        User?    @relation("StoreReceivingItemVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt        DateTime?
   remarks           String?
   isActive          Boolean  @default(true)
   isTestData        Boolean  @default(false)
@@ -1561,9 +1577,35 @@ model StoreReceivingItem {
   updatedAt         DateTime @updatedAt
   createdBy         String?
   updatedBy         String?
+  batches           StoreReceivingItemBatch[]
 
   @@map("store_receiving_items")
   @@index([companyId, storeReceivingId])
+}
+
+// STORE-002: pre-GRN batch/lot split capture, deliberately separate
+// from StockBatch (which is GRN-linked, post-GRN inventory-backing).
+// Multiple rows per line support "PO line 1000 pcs, batch A 600 +
+// batch B 400" without merging them into one fake batch.
+model StoreReceivingItemBatch {
+  id                   String   @id @default(uuid())
+  companyId            String
+  storeReceivingItemId String
+  storeReceivingItem   StoreReceivingItem @relation(fields: [storeReceivingItemId], references: [id], onDelete: Cascade)
+  batchNumber          String
+  lotNumber            String?
+  mfgDate              DateTime?
+  expiryDate           DateTime?
+  quantity             Float
+  isActive             Boolean  @default(true)
+  isTestData           Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  createdBy            String?
+  updatedBy            String?
+
+  @@map("store_receiving_item_batches")
+  @@index([companyId, storeReceivingItemId])
 }
 
 model Downtime {

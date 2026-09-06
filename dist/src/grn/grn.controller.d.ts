@@ -51,13 +51,13 @@ export declare class GrnController {
             invoiceNumber: string | null;
             invoiceDate: Date | null;
             gateInwardEntryId: string | null;
-            warehouseId: string;
+            grnNumber: string;
+            grnType: string;
             ipoId: string | null;
             landedCostId: string | null;
-            grnType: string;
+            warehouseId: string;
             receivedDate: Date;
             dcNumber: string | null;
-            grnNumber: string;
         })[];
         total: number;
         page: number;
@@ -123,13 +123,13 @@ export declare class GrnController {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         gateInwardEntryId: string | null;
-        warehouseId: string;
+        grnNumber: string;
+        grnType: string;
         ipoId: string | null;
         landedCostId: string | null;
-        grnType: string;
+        warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
     create(dto: CreateGrnDto, req: any): Promise<{
         items: {
@@ -190,13 +190,13 @@ export declare class GrnController {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         gateInwardEntryId: string | null;
-        warehouseId: string;
+        grnNumber: string;
+        grnType: string;
         ipoId: string | null;
         landedCostId: string | null;
-        grnType: string;
+        warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
     update(id: string, dto: UpdateGrnDto, req: any): Promise<{
         items: {
@@ -257,13 +257,13 @@ export declare class GrnController {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         gateInwardEntryId: string | null;
-        warehouseId: string;
+        grnNumber: string;
+        grnType: string;
         ipoId: string | null;
         landedCostId: string | null;
-        grnType: string;
+        warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
     submit(id: string, req: any): Promise<{
         items: {
@@ -324,12 +324,12 @@ export declare class GrnController {
         invoiceNumber: string | null;
         invoiceDate: Date | null;
         gateInwardEntryId: string | null;
-        warehouseId: string;
+        grnNumber: string;
+        grnType: string;
         ipoId: string | null;
         landedCostId: string | null;
-        grnType: string;
+        warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
-        grnNumber: string;
     }>;
 }

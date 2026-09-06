@@ -20,9 +20,12 @@ const permissions_decorator_1 = require("../common/decorators/permissions.decora
 const permissions_enum_1 = require("../common/permissions/permissions.enum");
 const store_receiving_service_1 = require("./store-receiving.service");
 const store_receiving_dto_1 = require("./dto/store-receiving.dto");
+const physical_verification_service_1 = require("./physical-verification.service");
+const physical_verification_dto_1 = require("./dto/physical-verification.dto");
 let StoreReceivingController = class StoreReceivingController {
-    constructor(service) {
+    constructor(service, verifyService) {
         this.service = service;
+        this.verifyService = verifyService;
     }
     findPendingFromGate(req) {
         return this.service.findPendingFromGate(req.user);
@@ -35,6 +38,15 @@ let StoreReceivingController = class StoreReceivingController {
     }
     receiveAtStore(dto, req) {
         return this.service.receiveAtStore(dto, req.user);
+    }
+    verifyLine(itemId, dto, req) {
+        return this.verifyService.verifyLine(itemId, dto, req.user);
+    }
+    completeVerification(id, req) {
+        return this.verifyService.completeVerification(id, req.user);
+    }
+    correctLine(itemId, dto, req) {
+        return this.verifyService.correctLine(itemId, dto, req.user);
     }
 };
 exports.StoreReceivingController = StoreReceivingController;
@@ -73,9 +85,38 @@ __decorate([
     __metadata("design:paramtypes", [store_receiving_dto_1.ReceiveAtStoreDto, Object]),
     __metadata("design:returntype", void 0)
 ], StoreReceivingController.prototype, "receiveAtStore", null);
+__decorate([
+    (0, common_1.Post)('items/:itemId/verify'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_PHYSICAL_VERIFY),
+    __param(0, (0, common_1.Param)('itemId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, physical_verification_dto_1.VerifyLineDto, Object]),
+    __metadata("design:returntype", void 0)
+], StoreReceivingController.prototype, "verifyLine", null);
+__decorate([
+    (0, common_1.Post)(':id/complete-verification'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_PHYSICAL_VERIFY),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], StoreReceivingController.prototype, "completeVerification", null);
+__decorate([
+    (0, common_1.Post)('items/:itemId/correct'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_PHYSICAL_VERIFY_CORRECT),
+    __param(0, (0, common_1.Param)('itemId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, physical_verification_dto_1.CorrectLineDto, Object]),
+    __metadata("design:returntype", void 0)
+], StoreReceivingController.prototype, "correctLine", null);
 exports.StoreReceivingController = StoreReceivingController = __decorate([
     (0, common_1.Controller)('store-receiving'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    __metadata("design:paramtypes", [store_receiving_service_1.StoreReceivingService])
+    __metadata("design:paramtypes", [store_receiving_service_1.StoreReceivingService, physical_verification_service_1.PhysicalVerificationService])
 ], StoreReceivingController);
 //# sourceMappingURL=store-receiving.controller.js.map

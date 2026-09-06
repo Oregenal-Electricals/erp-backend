@@ -41,9 +41,9 @@ export declare class ShippingDocumentController {
             status: string;
             documentType: string;
             notes: string | null;
+            ipoId: string;
             portOfLoading: string | null;
             portOfDischarge: string | null;
-            ipoId: string;
             issueDate: Date | null;
             shipmentId: string;
             documentNumber: string;
@@ -89,9 +89,9 @@ export declare class ShippingDocumentController {
         status: string;
         documentType: string;
         notes: string | null;
+        ipoId: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
-        ipoId: string;
         issueDate: Date | null;
         shipmentId: string;
         documentNumber: string;
@@ -132,9 +132,9 @@ export declare class ShippingDocumentController {
         status: string;
         documentType: string;
         notes: string | null;
+        ipoId: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
-        ipoId: string;
         issueDate: Date | null;
         shipmentId: string;
         documentNumber: string;
@@ -175,9 +175,9 @@ export declare class ShippingDocumentController {
         status: string;
         documentType: string;
         notes: string | null;
+        ipoId: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
-        ipoId: string;
         issueDate: Date | null;
         shipmentId: string;
         documentNumber: string;
@@ -218,9 +218,9 @@ export declare class ShippingDocumentController {
         status: string;
         documentType: string;
         notes: string | null;
+        ipoId: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
-        ipoId: string;
         issueDate: Date | null;
         shipmentId: string;
         documentNumber: string;
@@ -261,9 +261,9 @@ export declare class ShippingDocumentController {
         status: string;
         documentType: string;
         notes: string | null;
+        ipoId: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
-        ipoId: string;
         issueDate: Date | null;
         shipmentId: string;
         documentNumber: string;
@@ -304,9 +304,9 @@ export declare class ShippingDocumentController {
         status: string;
         documentType: string;
         notes: string | null;
+        ipoId: string;
         portOfLoading: string | null;
         portOfDischarge: string | null;
-        ipoId: string;
         issueDate: Date | null;
         shipmentId: string;
         documentNumber: string;

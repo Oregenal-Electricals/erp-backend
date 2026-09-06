@@ -34,9 +34,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -78,9 +78,9 @@ export declare class CustomsEntryService {
             updatedBy: string | null;
             status: string;
             notes: string | null;
+            ipoId: string;
             igstRate: number;
             bcdRate: number;
-            ipoId: string;
             shipmentId: string;
             customsBoeNumber: string | null;
             chaName: string | null;
@@ -126,9 +126,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -169,9 +169,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -212,9 +212,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -255,9 +255,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -298,9 +298,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -341,9 +341,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;
@@ -384,9 +384,9 @@ export declare class CustomsEntryService {
         updatedBy: string | null;
         status: string;
         notes: string | null;
+        ipoId: string;
         igstRate: number;
         bcdRate: number;
-        ipoId: string;
         shipmentId: string;
         customsBoeNumber: string | null;
         chaName: string | null;

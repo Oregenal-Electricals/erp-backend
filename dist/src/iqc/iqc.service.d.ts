@@ -37,9 +37,9 @@ export declare class IqcService {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -66,8 +66,8 @@ export declare class IqcService {
                 warehouse: {
                     name: string;
                 };
-                grnType: string;
                 grnNumber: string;
+                grnType: string;
             };
         } & {
             id: string;
@@ -118,9 +118,9 @@ export declare class IqcService {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -166,9 +166,9 @@ export declare class IqcService {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -214,9 +214,9 @@ export declare class IqcService {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;
@@ -262,9 +262,9 @@ export declare class IqcService {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
-            grnType: string;
             grnNumber: string;
+            grnType: string;
+            warehouseId: string;
         };
     } & {
         id: string;

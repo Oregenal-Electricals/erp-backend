@@ -44,6 +44,8 @@ export declare class OqcController {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
+            lotNumber: string | null;
             sampleSize: number;
             releasedBy: string | null;
             workOrderId: string | null;
@@ -51,8 +53,6 @@ export declare class OqcController {
             inspectionDate: Date;
             passQty: number;
             failQty: number;
-            batchNumber: string | null;
-            lotNumber: string | null;
             oqcNumber: string;
             fgReceiptId: string | null;
             visualCheck: string | null;
@@ -93,6 +93,8 @@ export declare class OqcController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
+        lotNumber: string | null;
         sampleSize: number;
         releasedBy: string | null;
         workOrderId: string | null;
@@ -100,8 +102,6 @@ export declare class OqcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
-        batchNumber: string | null;
-        lotNumber: string | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -138,6 +138,8 @@ export declare class OqcController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
+        lotNumber: string | null;
         sampleSize: number;
         releasedBy: string | null;
         workOrderId: string | null;
@@ -145,8 +147,6 @@ export declare class OqcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
-        batchNumber: string | null;
-        lotNumber: string | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -183,6 +183,8 @@ export declare class OqcController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
+        lotNumber: string | null;
         sampleSize: number;
         releasedBy: string | null;
         workOrderId: string | null;
@@ -190,8 +192,6 @@ export declare class OqcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
-        batchNumber: string | null;
-        lotNumber: string | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -228,6 +228,8 @@ export declare class OqcController {
         itemCode: string;
         itemName: string;
         uom: string;
+        batchNumber: string | null;
+        lotNumber: string | null;
         sampleSize: number;
         releasedBy: string | null;
         workOrderId: string | null;
@@ -235,8 +237,6 @@ export declare class OqcController {
         inspectionDate: Date;
         passQty: number;
         failQty: number;
-        batchNumber: string | null;
-        lotNumber: string | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;

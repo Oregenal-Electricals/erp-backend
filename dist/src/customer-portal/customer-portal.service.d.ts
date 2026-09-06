@@ -116,11 +116,11 @@ export declare class CustomerPortalService {
         itemCode: string;
         itemName: string;
         invoiceNumber: string | null;
-        closedBy: string | null;
+        batchNumber: string | null;
         receivedDate: Date;
+        closedBy: string | null;
         customerId: string | null;
         correctiveAction: string | null;
-        batchNumber: string | null;
         assignedTo: string | null;
         severity: string;
         qtyAffected: number;

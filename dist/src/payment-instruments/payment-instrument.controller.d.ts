@@ -41,8 +41,9 @@ export declare class PaymentInstrumentController {
             currency: string;
             notes: string | null;
             bankName: string;
-            amount: number;
+            expiryDate: Date | null;
             ipoId: string;
+            amount: number;
             piId: string | null;
             instrumentType: string;
             bankReference: string | null;
@@ -50,7 +51,6 @@ export declare class PaymentInstrumentController {
             vendorSwiftCode: string | null;
             amountInr: number;
             issueDate: Date;
-            expiryDate: Date | null;
             latestShipmentDate: Date | null;
             presentationDays: number | null;
             instrumentNumber: string;
@@ -87,8 +87,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -96,7 +97,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;
@@ -128,8 +128,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -137,7 +138,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;
@@ -169,8 +169,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -178,7 +179,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;
@@ -210,8 +210,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -219,7 +220,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;
@@ -251,8 +251,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -260,7 +261,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;
@@ -292,8 +292,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -301,7 +302,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;
@@ -333,8 +333,9 @@ export declare class PaymentInstrumentController {
         currency: string;
         notes: string | null;
         bankName: string;
-        amount: number;
+        expiryDate: Date | null;
         ipoId: string;
+        amount: number;
         piId: string | null;
         instrumentType: string;
         bankReference: string | null;
@@ -342,7 +343,6 @@ export declare class PaymentInstrumentController {
         vendorSwiftCode: string | null;
         amountInr: number;
         issueDate: Date;
-        expiryDate: Date | null;
         latestShipmentDate: Date | null;
         presentationDays: number | null;
         instrumentNumber: string;

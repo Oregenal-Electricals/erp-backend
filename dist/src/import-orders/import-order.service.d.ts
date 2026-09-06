@@ -23,6 +23,7 @@ export declare class ImportOrderService {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -36,7 +37,6 @@ export declare class ImportOrderService {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -140,6 +140,7 @@ export declare class ImportOrderService {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -153,7 +154,6 @@ export declare class ImportOrderService {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -212,6 +212,7 @@ export declare class ImportOrderService {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -225,7 +226,6 @@ export declare class ImportOrderService {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -284,6 +284,7 @@ export declare class ImportOrderService {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -297,7 +298,6 @@ export declare class ImportOrderService {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -356,6 +356,7 @@ export declare class ImportOrderService {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -369,7 +370,6 @@ export declare class ImportOrderService {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -428,6 +428,7 @@ export declare class ImportOrderService {
             itemName: string;
             uom: string;
             hsnCode: string | null;
+            ipoId: string;
             igstRate: number;
             sequence: number;
             discount: number | null;
@@ -441,7 +442,6 @@ export declare class ImportOrderService {
             unitPriceInr: number;
             totalForeign: number;
             totalInr: number;
-            ipoId: string;
         }[];
         vendor: {
             name: string;
@@ -499,6 +499,7 @@ export declare class ImportOrderService {
         itemName: string;
         uom: string;
         hsnCode: string | null;
+        ipoId: string;
         igstRate: number;
         sequence: number;
         discount: number | null;
@@ -512,7 +513,6 @@ export declare class ImportOrderService {
         unitPriceInr: number;
         totalForeign: number;
         totalInr: number;
-        ipoId: string;
     }>;
     private recalcTotals;
     getStats(user: any): Promise<{

@@ -148,9 +148,9 @@ export declare class StockIssueService {
     findOne(id: string, user: any): Promise<{
         items: ({
             batch: {
-                receivedDate: Date;
                 batchNumber: string;
                 lotNumber: string;
+                receivedDate: Date;
             };
         } & {
             id: string;

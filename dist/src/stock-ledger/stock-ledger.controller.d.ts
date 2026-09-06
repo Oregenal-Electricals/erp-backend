@@ -59,8 +59,8 @@ export declare class StockLedgerController {
             warehouse: {
                 name: string;
             };
-            warehouseId: string;
             grnNumber: string;
+            warehouseId: string;
         };
     } & {
         id: string;
