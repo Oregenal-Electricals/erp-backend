@@ -178,4 +178,63 @@ export class ProductionReportsService {
       overallPassRate: totalSampled > 0 ? Math.round(totalPassed/totalSampled*100) : 0,
     };
   }
+
+  // Extends the existing production-reports module (not a new module -
+  // reused per project convention) with time-bucketed, product-wise
+  // output the prior 5 reports never provided: WO Completion is a flat
+  // per-WO list, Shift Production groups only by shift/operator, and
+  // neither buckets by calendar day or groups by product. This fills
+  // that gap using the same source (ProductionEntry, CONFIRMED only)
+  // and the same date-range filtering pattern as the other reports.
+  //
+  // Grouping is done in application code rather than a SQL date_trunc
+  // groupBy, matching getShiftProductionReport()'s existing approach -
+  // entries are fetched once, then bucketed by day and by product in
+  // memory, so the response supports both a daily trend view and a
+  // product-wise breakdown from a single query.
+  async getDailyOutputByProduct(user: any, query: any) {
+    const { fromDate, toDate, productCode } = query;
+    const where: any = { companyId: user.companyId, status: 'CONFIRMED' };
+    const dateWhere = this.dateWhere(fromDate, toDate);
+    if (dateWhere) where.entryDate = dateWhere;
+    if (productCode) where.workOrder = { productCode };
+
+    const entries = await this.prisma.productionEntry.findMany({
+      where, orderBy: { entryDate: 'asc' },
+      include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, stageName: true } } },
+    });
+
+    const byDate: Record<string, any> = {};
+    const byProduct: Record<string, any> = {};
+
+    for (const e of entries) {
+      // Truncate to calendar day (UTC) - entryDate carries a full
+      // timestamp, but "daily output" buckets by day, not by second.
+      const dayKey = e.entryDate.toISOString().slice(0, 10);
+      const prodCode = e.workOrder?.productCode || 'UNKNOWN';
+      const prodName = e.workOrder?.productName || 'Unknown';
+
+      if (!byDate[dayKey]) byDate[dayKey] = { date: dayKey, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
+      byDate[dayKey].goodQty += e.goodQty;
+      byDate[dayKey].scrapQty += e.scrapQty;
+      byDate[dayKey].reworkQty += e.reworkQty;
+      byDate[dayKey].entries++;
+
+      const prodKey = prodCode;
+      if (!byProduct[prodKey]) byProduct[prodKey] = { productCode: prodCode, productName: prodName, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
+      byProduct[prodKey].goodQty += e.goodQty;
+      byProduct[prodKey].scrapQty += e.scrapQty;
+      byProduct[prodKey].reworkQty += e.reworkQty;
+      byProduct[prodKey].entries++;
+    }
+
+    return {
+      byDate: Object.values(byDate).sort((a: any, b: any) => a.date.localeCompare(b.date)),
+      byProduct: Object.values(byProduct).sort((a: any, b: any) => b.goodQty - a.goodQty),
+      totalGoodQty: entries.reduce((s, e) => s + e.goodQty, 0),
+      totalScrapQty: entries.reduce((s, e) => s + e.scrapQty, 0),
+      totalReworkQty: entries.reduce((s, e) => s + e.reworkQty, 0),
+      totalEntries: entries.length,
+    };
+  }
 }

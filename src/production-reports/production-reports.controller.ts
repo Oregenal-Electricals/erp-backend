@@ -29,4 +29,7 @@ export class ProductionReportsController {
   @Get('quality-summary')
   @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
   getQualitySummary(@Request() req: any, @Query() query: any) { return this.prService.getQualitySummary(req.user, query); }
+  @Get('daily-output')
+  @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
+  getDailyOutput(@Request() req: any, @Query() query: any) { return this.prService.getDailyOutputByProduct(req.user, query); }
 }

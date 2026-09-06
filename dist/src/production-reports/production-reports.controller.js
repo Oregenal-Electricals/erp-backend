@@ -28,6 +28,7 @@ let ProductionReportsController = class ProductionReportsController {
     getMaterialConsumption(req, query) { return this.prService.getMaterialConsumptionReport(req.user, query); }
     getScrapAnalysis(req, query) { return this.prService.getScrapAnalysis(req.user, query); }
     getQualitySummary(req, query) { return this.prService.getQualitySummary(req.user, query); }
+    getDailyOutput(req, query) { return this.prService.getDailyOutputByProduct(req.user, query); }
 };
 exports.ProductionReportsController = ProductionReportsController;
 __decorate([
@@ -75,6 +76,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], ProductionReportsController.prototype, "getQualitySummary", null);
+__decorate([
+    (0, common_1.Get)('daily-output'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PRODUCTION_REPORT_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], ProductionReportsController.prototype, "getDailyOutput", null);
 exports.ProductionReportsController = ProductionReportsController = __decorate([
     (0, common_1.Controller)('production-reports'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

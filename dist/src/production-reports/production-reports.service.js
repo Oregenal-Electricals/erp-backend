@@ -181,6 +181,48 @@ let ProductionReportsService = class ProductionReportsService {
             overallPassRate: totalSampled > 0 ? Math.round(totalPassed / totalSampled * 100) : 0,
         };
     }
+    async getDailyOutputByProduct(user, query) {
+        var _a, _b;
+        const { fromDate, toDate, productCode } = query;
+        const where = { companyId: user.companyId, status: 'CONFIRMED' };
+        const dateWhere = this.dateWhere(fromDate, toDate);
+        if (dateWhere)
+            where.entryDate = dateWhere;
+        if (productCode)
+            where.workOrder = { productCode };
+        const entries = await this.prisma.productionEntry.findMany({
+            where, orderBy: { entryDate: 'asc' },
+            include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, stageName: true } } },
+        });
+        const byDate = {};
+        const byProduct = {};
+        for (const e of entries) {
+            const dayKey = e.entryDate.toISOString().slice(0, 10);
+            const prodCode = ((_a = e.workOrder) === null || _a === void 0 ? void 0 : _a.productCode) || 'UNKNOWN';
+            const prodName = ((_b = e.workOrder) === null || _b === void 0 ? void 0 : _b.productName) || 'Unknown';
+            if (!byDate[dayKey])
+                byDate[dayKey] = { date: dayKey, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
+            byDate[dayKey].goodQty += e.goodQty;
+            byDate[dayKey].scrapQty += e.scrapQty;
+            byDate[dayKey].reworkQty += e.reworkQty;
+            byDate[dayKey].entries++;
+            const prodKey = prodCode;
+            if (!byProduct[prodKey])
+                byProduct[prodKey] = { productCode: prodCode, productName: prodName, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
+            byProduct[prodKey].goodQty += e.goodQty;
+            byProduct[prodKey].scrapQty += e.scrapQty;
+            byProduct[prodKey].reworkQty += e.reworkQty;
+            byProduct[prodKey].entries++;
+        }
+        return {
+            byDate: Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date)),
+            byProduct: Object.values(byProduct).sort((a, b) => b.goodQty - a.goodQty),
+            totalGoodQty: entries.reduce((s, e) => s + e.goodQty, 0),
+            totalScrapQty: entries.reduce((s, e) => s + e.scrapQty, 0),
+            totalReworkQty: entries.reduce((s, e) => s + e.reworkQty, 0),
+            totalEntries: entries.length,
+        };
+    }
 };
 exports.ProductionReportsService = ProductionReportsService;
 exports.ProductionReportsService = ProductionReportsService = __decorate([

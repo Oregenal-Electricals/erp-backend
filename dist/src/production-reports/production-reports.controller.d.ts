@@ -161,4 +161,12 @@ export declare class ProductionReportsController {
         totalInspections: number;
         overallPassRate: number;
     }>;
+    getDailyOutput(req: any, query: any): Promise<{
+        byDate: any[];
+        byProduct: any[];
+        totalGoodQty: number;
+        totalScrapQty: number;
+        totalReworkQty: number;
+        totalEntries: number;
+    }>;
 }
