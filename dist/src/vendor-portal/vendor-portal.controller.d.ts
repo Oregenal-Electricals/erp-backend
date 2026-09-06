@@ -37,21 +37,21 @@ export declare class VendorPortalController {
                 itemName: string;
                 uom: string;
                 poId: string;
-                hsnCode: string | null;
-                igstRate: number;
-                cgstRate: number;
-                sgstRate: number;
-                sequence: number;
                 prItemId: string | null;
+                quotationItemId: string | null;
+                sequence: number;
+                hsnCode: string | null;
+                orderedQty: number;
+                receivedQty: number;
+                pendingQty: number;
                 unitPrice: number;
                 discount: number | null;
                 taxRate: number;
-                totalPrice: number;
-                quotationItemId: string | null;
-                orderedQty: number;
-                pendingQty: number;
+                igstRate: number;
+                cgstRate: number;
+                sgstRate: number;
                 taxAmount: number;
-                receivedQty: number;
+                totalPrice: number;
             }[];
         } & {
             id: string;
@@ -100,8 +100,8 @@ export declare class VendorPortalController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
     } & {
         id: string;
@@ -137,14 +137,14 @@ export declare class VendorPortalController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         rfq: {

@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { VerifyLineDto, CorrectLineDto } from './dto/physical-verification.dto';
+import { StoreShortageService } from './store-shortage.service';
 export declare class PhysicalVerificationService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private shortageService;
+    constructor(prisma: PrismaService, audit: AuditService, shortageService: StoreShortageService);
     private computeResult;
     verifyLine(itemId: string, dto: VerifyLineDto, user: any): Promise<{
         batches: {

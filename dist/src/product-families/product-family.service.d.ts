@@ -132,9 +132,9 @@ export declare class ProductFamilyService {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
+        hsnCode: string | null;
         categoryId: string | null;
         uomId: string | null;
-        hsnCode: string | null;
         gstRate: number | null;
         minOrderQty: number | null;
         leadTimeDays: number | null;

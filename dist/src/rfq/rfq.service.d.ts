@@ -22,8 +22,8 @@ export declare class RfqService {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -120,8 +120,8 @@ export declare class RfqService {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -183,8 +183,8 @@ export declare class RfqService {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -246,8 +246,8 @@ export declare class RfqService {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -309,8 +309,8 @@ export declare class RfqService {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -372,8 +372,8 @@ export declare class RfqService {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {

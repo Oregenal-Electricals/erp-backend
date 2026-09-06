@@ -64,8 +64,8 @@ export declare class DispatchController {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
@@ -121,8 +121,8 @@ export declare class DispatchController {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
@@ -178,8 +178,8 @@ export declare class DispatchController {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;

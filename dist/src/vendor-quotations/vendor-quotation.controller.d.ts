@@ -62,14 +62,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -110,14 +110,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -165,14 +165,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -220,14 +220,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -275,14 +275,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -330,14 +330,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -385,14 +385,14 @@ export declare class VendorQuotationController {
             itemName: string;
             uom: string;
             notes: string | null;
-            requiredQty: number;
-            rfqItemId: string | null;
-            deliveryDays: number | null;
-            quotedQty: number;
             unitPrice: number;
             discount: number | null;
             taxRate: number | null;
             totalPrice: number;
+            requiredQty: number;
+            rfqItemId: string | null;
+            deliveryDays: number | null;
+            quotedQty: number;
             quotationId: string;
         }[];
         vendor: {
@@ -439,14 +439,14 @@ export declare class VendorQuotationController {
         itemName: string;
         uom: string;
         notes: string | null;
-        requiredQty: number;
-        rfqItemId: string | null;
-        deliveryDays: number | null;
-        quotedQty: number;
         unitPrice: number;
         discount: number | null;
         taxRate: number | null;
         totalPrice: number;
+        requiredQty: number;
+        rfqItemId: string | null;
+        deliveryDays: number | null;
+        quotedQty: number;
         quotationId: string;
     }>;
 }

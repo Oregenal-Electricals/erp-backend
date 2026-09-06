@@ -21,9 +21,9 @@ export declare class GrnService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitPrice: number;
             orderedQty: number;
             receivedQty: number;
+            unitPrice: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
             previouslyReceived: number;
@@ -138,9 +138,9 @@ export declare class GrnService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitPrice: number;
             orderedQty: number;
             receivedQty: number;
+            unitPrice: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
             previouslyReceived: number;
@@ -205,9 +205,9 @@ export declare class GrnService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitPrice: number;
             orderedQty: number;
             receivedQty: number;
+            unitPrice: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
             previouslyReceived: number;
@@ -272,9 +272,9 @@ export declare class GrnService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitPrice: number;
             orderedQty: number;
             receivedQty: number;
+            unitPrice: number;
             ipoItemId: string | null;
             landedCostPerUnit: number | null;
             previouslyReceived: number;

@@ -259,11 +259,11 @@ export declare class DispatchPlanningService {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             qty: number;
+            pendingQty: number;
             unitPrice: number;
             discount: number;
-            pendingQty: number;
+            gstRate: number;
             cpoItemId: string | null;
             taxableAmt: number;
             gstAmount: number;

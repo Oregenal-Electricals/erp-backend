@@ -17,8 +17,8 @@ export declare class RoutingService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            warehouseId: string | null;
             sequence: number;
+            warehouseId: string | null;
             stageName: string;
             bomId: string;
             routingId: string;
@@ -53,8 +53,8 @@ export declare class RoutingService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            warehouseId: string | null;
             sequence: number;
+            warehouseId: string | null;
             stageName: string;
             bomId: string;
             routingId: string;
@@ -89,8 +89,8 @@ export declare class RoutingService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            warehouseId: string | null;
             sequence: number;
+            warehouseId: string | null;
             stageName: string;
             bomId: string;
             routingId: string;

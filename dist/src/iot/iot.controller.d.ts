@@ -122,13 +122,13 @@ export declare class IotController {
             status: string;
             value: number | null;
             message: string;
+            resolvedAt: Date | null;
+            resolvedBy: string | null;
             parameter: string | null;
             severity: string;
             machineId: string;
             alertType: string;
             threshold: number | null;
-            resolvedAt: Date | null;
-            resolvedBy: string | null;
         }[];
         id: string;
         companyId: string;
@@ -267,13 +267,13 @@ export declare class IotController {
         status: string;
         value: number | null;
         message: string;
+        resolvedAt: Date | null;
+        resolvedBy: string | null;
         parameter: string | null;
         severity: string;
         machineId: string;
         alertType: string;
         threshold: number | null;
-        resolvedAt: Date | null;
-        resolvedBy: string | null;
     })[]>;
     updateAlert(id: string, dto: UpdateAlertDto, req: any): Promise<{
         id: string;
@@ -287,12 +287,12 @@ export declare class IotController {
         status: string;
         value: number | null;
         message: string;
+        resolvedAt: Date | null;
+        resolvedBy: string | null;
         parameter: string | null;
         severity: string;
         machineId: string;
         alertType: string;
         threshold: number | null;
-        resolvedAt: Date | null;
-        resolvedBy: string | null;
     }>;
 }

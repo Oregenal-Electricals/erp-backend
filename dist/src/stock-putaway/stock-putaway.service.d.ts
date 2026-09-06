@@ -51,8 +51,8 @@ export declare class StockPutawayService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             binId: string;
             putawayId: string;
         })[];
@@ -133,8 +133,8 @@ export declare class StockPutawayService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             binId: string;
             putawayId: string;
         })[];
@@ -183,8 +183,8 @@ export declare class StockPutawayService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             binId: string;
             putawayId: string;
         })[];
@@ -233,8 +233,8 @@ export declare class StockPutawayService {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             binId: string;
             putawayId: string;
         })[];

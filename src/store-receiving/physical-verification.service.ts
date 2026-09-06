@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { VerifyLineDto, CorrectLineDto } from './dto/physical-verification.dto';
+import { StoreShortageService } from './store-shortage.service';
 
 // Whole-number-only UOMs, used as a heuristic since neither Item nor
 // UnitOfMeasure carries an explicit decimal-precision flag yet
@@ -11,7 +12,7 @@ const WHOLE_NUMBER_UOMS = ['PCS', 'NOS', 'BOX', 'UNIT', 'UNITS'];
 
 @Injectable()
 export class PhysicalVerificationService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private shortageService: StoreShortageService) {}
 
   private computeResult(actualQty: number, expectedQty: number, uomMismatch: boolean, materialMismatch: boolean) {
     if (uomMismatch) {
@@ -121,6 +122,8 @@ export class PhysicalVerificationService {
       oldValues, newValues: { actualVerifiedQty: dto.actualQty, result }, changedBy: user.id,
     });
 
+    await this.shortageService.upsertFromLine(withBatches, user);
+
     return withBatches;
   }
 
@@ -202,6 +205,8 @@ export class PhysicalVerificationService {
       oldValues, newValues: { actualVerifiedQty: dto.actualQty, result, reason: dto.reason },
       changedBy: user.id,
     });
+
+    await this.shortageService.upsertFromLine({ ...updated, storeReceiving: line.storeReceiving }, user);
 
     return updated;
   }

@@ -368,6 +368,7 @@ model Company {
   @@index([code])
   @@index([isActive])
   storeReceivings StoreReceiving[]
+  storeShortages StoreShortage[]
 }
 
 model Plant {
@@ -572,6 +573,8 @@ model User {
   @@index([role])
   storeReceivingsReceived StoreReceiving[] @relation("StoreReceivingReceivedBy")
   storeReceivingItemsVerified StoreReceivingItem[] @relation("StoreReceivingItemVerifiedBy")
+  storeShortagesRaised StoreShortage[] @relation("StoreShortageRaisedBy")
+  storeShortagesResolved StoreShortage[] @relation("StoreShortageResolvedBy")
 }
 
 model SystemSetting {
@@ -1578,6 +1581,7 @@ model StoreReceivingItem {
   createdBy         String?
   updatedBy         String?
   batches           StoreReceivingItemBatch[]
+  shortage          StoreShortage?
 
   @@map("store_receiving_items")
   @@index([companyId, storeReceivingId])
@@ -1606,6 +1610,49 @@ model StoreReceivingItemBatch {
 
   @@map("store_receiving_item_batches")
   @@index([companyId, storeReceivingItemId])
+}
+
+model StoreShortage {
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id])
+  discrepancyNumber     String
+  storeReceivingItemId  String   @unique
+  storeReceivingItem    StoreReceivingItem @relation(fields: [storeReceivingItemId], references: [id])
+  gateInwardEntryId     String
+  poId                  String?
+  poItemId              String?
+  supplierName          String
+  itemCode              String
+  itemName              String
+  uom                   String
+  expectedQty           Float
+  actualQty             Float
+  shortQty              Float
+  shortageType          String   @default("UNKNOWN")
+  reason                String?
+  status                String   @default("SHORT_DETECTED")
+  purchaseNotifiedAt    DateTime?
+  purchaseReviewStatus  String?
+  laterReceivedQty      Float    @default(0)
+  approvedShortClosureQty Float  @default(0)
+  raisedById            String
+  raisedBy              User     @relation("StoreShortageRaisedBy", fields: [raisedById], references: [id])
+  raisedAt              DateTime @default(now())
+  resolvedById          String?
+  resolvedBy            User?    @relation("StoreShortageResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAt            DateTime?
+  remarks               String?
+  isActive              Boolean  @default(true)
+  isTestData            Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  @@map("store_shortages")
+  @@index([companyId])
+  @@index([companyId, status])
 }
 
 model Downtime {

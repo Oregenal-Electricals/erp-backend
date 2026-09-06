@@ -13,11 +13,13 @@ exports.PhysicalVerificationService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const store_shortage_service_1 = require("./store-shortage.service");
 const WHOLE_NUMBER_UOMS = ['PCS', 'NOS', 'BOX', 'UNIT', 'UNITS'];
 let PhysicalVerificationService = class PhysicalVerificationService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, shortageService) {
         this.prisma = prisma;
         this.audit = audit;
+        this.shortageService = shortageService;
     }
     computeResult(actualQty, expectedQty, uomMismatch, materialMismatch) {
         if (uomMismatch) {
@@ -99,6 +101,7 @@ let PhysicalVerificationService = class PhysicalVerificationService {
             tableName: 'store_receiving_items', recordId: itemId, action: 'UPDATE',
             oldValues, newValues: { actualVerifiedQty: dto.actualQty, result }, changedBy: user.id,
         });
+        await this.shortageService.upsertFromLine(withBatches, user);
         return withBatches;
     }
     async completeVerification(receivingId, user) {
@@ -160,12 +163,13 @@ let PhysicalVerificationService = class PhysicalVerificationService {
             oldValues, newValues: { actualVerifiedQty: dto.actualQty, result, reason: dto.reason },
             changedBy: user.id,
         });
+        await this.shortageService.upsertFromLine(Object.assign(Object.assign({}, updated), { storeReceiving: line.storeReceiving }), user);
         return updated;
     }
 };
 exports.PhysicalVerificationService = PhysicalVerificationService;
 exports.PhysicalVerificationService = PhysicalVerificationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, store_shortage_service_1.StoreShortageService])
 ], PhysicalVerificationService);
 //# sourceMappingURL=physical-verification.service.js.map

@@ -39,8 +39,8 @@ export declare class CustomsEntryController {
             updatedBy: string | null;
             status: string;
             notes: string | null;
-            ipoId: string;
             igstRate: number;
+            ipoId: string;
             bcdRate: number;
             shipmentId: string;
             customsBoeNumber: string | null;
@@ -87,8 +87,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -130,8 +130,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -173,8 +173,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -216,8 +216,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -259,8 +259,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -302,8 +302,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -345,8 +345,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;
@@ -388,8 +388,8 @@ export declare class CustomsEntryController {
         updatedBy: string | null;
         status: string;
         notes: string | null;
-        ipoId: string;
         igstRate: number;
+        ipoId: string;
         bcdRate: number;
         shipmentId: string;
         customsBoeNumber: string | null;

@@ -25,8 +25,8 @@ export declare class BomService {
             uom: string;
             quantity: number;
             notes: string | null;
-            itemType: string;
             sequence: number;
+            itemType: string;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
@@ -151,8 +151,8 @@ export declare class BomService {
             uom: string;
             quantity: number;
             notes: string | null;
-            itemType: string;
             sequence: number;
+            itemType: string;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
@@ -271,8 +271,8 @@ export declare class BomService {
             uom: string;
             quantity: number;
             notes: string | null;
-            itemType: string;
             sequence: number;
+            itemType: string;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
@@ -329,8 +329,8 @@ export declare class BomService {
             uom: string;
             quantity: number;
             notes: string | null;
-            itemType: string;
             sequence: number;
+            itemType: string;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
@@ -422,8 +422,8 @@ export declare class BomService {
             uom: string;
             quantity: number;
             notes: string | null;
-            itemType: string;
             sequence: number;
+            itemType: string;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
@@ -507,8 +507,8 @@ export declare class BomService {
             uom: string;
             quantity: number;
             notes: string | null;
-            itemType: string;
             sequence: number;
+            itemType: string;
             section: string | null;
             rawMaterialId: string | null;
             wastagePercent: number | null;
@@ -603,8 +603,8 @@ export declare class BomService {
         uom: string;
         quantity: number;
         notes: string | null;
-        itemType: string;
         sequence: number;
+        itemType: string;
         section: string | null;
         rawMaterialId: string | null;
         wastagePercent: number | null;

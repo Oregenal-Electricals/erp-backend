@@ -60,8 +60,8 @@ export declare class RfqController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -123,8 +123,8 @@ export declare class RfqController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -186,8 +186,8 @@ export declare class RfqController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -249,8 +249,8 @@ export declare class RfqController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -312,8 +312,8 @@ export declare class RfqController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {
@@ -375,8 +375,8 @@ export declare class RfqController {
             uom: string;
             rfqId: string;
             notes: string | null;
-            requiredQty: number;
             prItemId: string | null;
+            requiredQty: number;
         }[];
         vendors: ({
             vendor: {

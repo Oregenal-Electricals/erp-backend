@@ -22,8 +22,8 @@ export declare class DispatchService {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
@@ -120,8 +120,8 @@ export declare class DispatchService {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
@@ -177,8 +177,8 @@ export declare class DispatchService {
             itemName: string;
             uom: string;
             totalAmount: number;
-            gstRate: number;
             unitPrice: number;
+            gstRate: number;
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;

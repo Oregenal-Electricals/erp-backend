@@ -41,7 +41,8 @@ describe('PhysicalVerificationService STORE-002', () => {
       $transaction: jest.fn().mockImplementation((ops: any[]) => Promise.all(ops)),
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new PhysicalVerificationService(prisma, audit);
+    const shortageService = { upsertFromLine: jest.fn().mockResolvedValue(undefined) };
+    service = new PhysicalVerificationService(prisma, audit, shortageService as any);
   });
 
   describe('MANUAL TEST 1 - exact match', () => {

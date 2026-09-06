@@ -11,6 +11,8 @@ const common_1 = require("@nestjs/common");
 const store_receiving_controller_1 = require("./store-receiving.controller");
 const store_receiving_service_1 = require("./store-receiving.service");
 const physical_verification_service_1 = require("./physical-verification.service");
+const store_shortage_service_1 = require("./store-shortage.service");
+const notifications_module_1 = require("../notifications/notifications.module");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const gate_inward_module_1 = require("../gate-inward/gate-inward.module");
@@ -19,10 +21,10 @@ let StoreReceivingModule = class StoreReceivingModule {
 exports.StoreReceivingModule = StoreReceivingModule;
 exports.StoreReceivingModule = StoreReceivingModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, gate_inward_module_1.GateInwardModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, gate_inward_module_1.GateInwardModule, notifications_module_1.NotificationsModule],
         controllers: [store_receiving_controller_1.StoreReceivingController],
-        providers: [store_receiving_service_1.StoreReceivingService, physical_verification_service_1.PhysicalVerificationService],
-        exports: [store_receiving_service_1.StoreReceivingService, physical_verification_service_1.PhysicalVerificationService],
+        providers: [store_receiving_service_1.StoreReceivingService, physical_verification_service_1.PhysicalVerificationService, store_shortage_service_1.StoreShortageService],
+        exports: [store_receiving_service_1.StoreReceivingService, physical_verification_service_1.PhysicalVerificationService, store_shortage_service_1.StoreShortageService],
     })
 ], StoreReceivingModule);
 //# sourceMappingURL=store-receiving.module.js.map

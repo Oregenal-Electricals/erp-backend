@@ -7,11 +7,13 @@ import { StoreReceivingService } from './store-receiving.service';
 import { ReceiveAtStoreDto } from './dto/store-receiving.dto';
 import { PhysicalVerificationService } from './physical-verification.service';
 import { VerifyLineDto, CorrectLineDto } from './dto/physical-verification.dto';
+import { StoreShortageService } from './store-shortage.service';
+import { LinkBalanceDeliveryDto, ApproveShortClosureDto } from './dto/shortage.dto';
 
 @Controller('store-receiving')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class StoreReceivingController {
-  constructor(private service: StoreReceivingService, private verifyService: PhysicalVerificationService) {}
+  constructor(private service: StoreReceivingService, private verifyService: PhysicalVerificationService, private shortageService: StoreShortageService) {}
 
   @Get('pending-from-gate')
   @RequirePermissions(Permission.STORE_RECEIVING_VIEW)
@@ -53,5 +55,30 @@ export class StoreReceivingController {
   @RequirePermissions(Permission.STORE_PHYSICAL_VERIFY_CORRECT)
   correctLine(@Param('itemId') itemId: string, @Body() dto: CorrectLineDto, @Request() req: any) {
     return this.verifyService.correctLine(itemId, dto, req.user);
+  }
+
+  // STORE-003: shortage / Purchase notification & resolution
+  @Get('shortages')
+  @RequirePermissions(Permission.STORE_SHORTAGE_VIEW)
+  findAllShortages(@Request() req: any, @Query() query: any) {
+    return this.shortageService.findAll(req.user, query);
+  }
+
+  @Get('shortages/:id')
+  @RequirePermissions(Permission.STORE_SHORTAGE_VIEW)
+  findOneShortage(@Param('id') id: string, @Request() req: any) {
+    return this.shortageService.findOne(id, req.user);
+  }
+
+  @Post('shortages/:id/link-balance-delivery')
+  @RequirePermissions(Permission.PURCHASE_SHORTAGE_RESOLVE)
+  linkBalanceDelivery(@Param('id') id: string, @Body() dto: LinkBalanceDeliveryDto, @Request() req: any) {
+    return this.shortageService.linkBalanceDelivery(id, dto, req.user);
+  }
+
+  @Post('shortages/:id/approve-short-closure')
+  @RequirePermissions(Permission.PURCHASE_SHORT_CLOSE_APPROVE)
+  approveShortClosure(@Param('id') id: string, @Body() dto: ApproveShortClosureDto, @Request() req: any) {
+    return this.shortageService.approveShortClosure(id, dto, req.user);
   }
 }

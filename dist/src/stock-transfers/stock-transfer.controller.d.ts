@@ -64,8 +64,8 @@ export declare class StockTransferController {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             batchId: string | null;
             transferId: string;
         })[];
@@ -113,8 +113,8 @@ export declare class StockTransferController {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             batchId: string | null;
             transferId: string;
         })[];
@@ -162,8 +162,8 @@ export declare class StockTransferController {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             batchId: string | null;
             transferId: string;
         })[];
@@ -211,8 +211,8 @@ export declare class StockTransferController {
             itemCode: string;
             itemName: string;
             uom: string;
-            unitCost: number;
             qty: number;
+            unitCost: number;
             batchId: string | null;
             transferId: string;
         })[];
