@@ -27,6 +27,18 @@ export class StoreReceivingController {
     return this.service.findAll(req.user, query);
   }
 
+  @Get('shortages')
+  @RequirePermissions(Permission.STORE_SHORTAGE_VIEW)
+  findAllShortages(@Request() req: any, @Query() query: any) {
+    return this.shortageService.findAll(req.user, query);
+  }
+
+  @Get('shortages/:id')
+  @RequirePermissions(Permission.STORE_SHORTAGE_VIEW)
+  findOneShortage(@Param('id') id: string, @Request() req: any) {
+    return this.shortageService.findOne(id, req.user);
+  }
+
   @Get(':id')
   @RequirePermissions(Permission.STORE_RECEIVING_DETAIL_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) {
@@ -58,18 +70,6 @@ export class StoreReceivingController {
   }
 
   // STORE-003: shortage / Purchase notification & resolution
-  @Get('shortages')
-  @RequirePermissions(Permission.STORE_SHORTAGE_VIEW)
-  findAllShortages(@Request() req: any, @Query() query: any) {
-    return this.shortageService.findAll(req.user, query);
-  }
-
-  @Get('shortages/:id')
-  @RequirePermissions(Permission.STORE_SHORTAGE_VIEW)
-  findOneShortage(@Param('id') id: string, @Request() req: any) {
-    return this.shortageService.findOne(id, req.user);
-  }
-
   @Post('shortages/:id/link-balance-delivery')
   @RequirePermissions(Permission.PURCHASE_SHORTAGE_RESOLVE)
   linkBalanceDelivery(@Param('id') id: string, @Body() dto: LinkBalanceDeliveryDto, @Request() req: any) {

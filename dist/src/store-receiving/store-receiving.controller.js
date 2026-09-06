@@ -36,6 +36,12 @@ let StoreReceivingController = class StoreReceivingController {
     findAll(req, query) {
         return this.service.findAll(req.user, query);
     }
+    findAllShortages(req, query) {
+        return this.shortageService.findAll(req.user, query);
+    }
+    findOneShortage(id, req) {
+        return this.shortageService.findOne(id, req.user);
+    }
     findOne(id, req) {
         return this.service.findOne(id, req.user);
     }
@@ -50,12 +56,6 @@ let StoreReceivingController = class StoreReceivingController {
     }
     correctLine(itemId, dto, req) {
         return this.verifyService.correctLine(itemId, dto, req.user);
-    }
-    findAllShortages(req, query) {
-        return this.shortageService.findAll(req.user, query);
-    }
-    findOneShortage(id, req) {
-        return this.shortageService.findOne(id, req.user);
     }
     linkBalanceDelivery(id, dto, req) {
         return this.shortageService.linkBalanceDelivery(id, dto, req.user);
@@ -82,6 +82,24 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], StoreReceivingController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('shortages'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_SHORTAGE_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], StoreReceivingController.prototype, "findAllShortages", null);
+__decorate([
+    (0, common_1.Get)('shortages/:id'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_SHORTAGE_VIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], StoreReceivingController.prototype, "findOneShortage", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_RECEIVING_DETAIL_VIEW),
@@ -129,24 +147,6 @@ __decorate([
     __metadata("design:paramtypes", [String, physical_verification_dto_1.CorrectLineDto, Object]),
     __metadata("design:returntype", void 0)
 ], StoreReceivingController.prototype, "correctLine", null);
-__decorate([
-    (0, common_1.Get)('shortages'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_SHORTAGE_VIEW),
-    __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", void 0)
-], StoreReceivingController.prototype, "findAllShortages", null);
-__decorate([
-    (0, common_1.Get)('shortages/:id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_SHORTAGE_VIEW),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], StoreReceivingController.prototype, "findOneShortage", null);
 __decorate([
     (0, common_1.Post)('shortages/:id/link-balance-delivery'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_SHORTAGE_RESOLVE),
