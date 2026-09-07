@@ -297,6 +297,68 @@ let ProductionReportsService = class ProductionReportsService {
             totalEntries: entries.length,
         };
     }
+    async getCostTrend(user, query) {
+        var _a;
+        const { fromDate, toDate, productCode, granularity = 'DAY' } = query;
+        const gran = ['HOUR', 'DAY', 'MONTH'].includes(granularity) ? granularity : 'DAY';
+        const workOrderWhere = {};
+        const dateWhere = this.dateWhere(fromDate, toDate);
+        if (dateWhere)
+            workOrderWhere.closedAt = dateWhere;
+        if (productCode)
+            workOrderWhere.productCode = productCode;
+        const sheets = await this.prisma.productionCostSheet.findMany({
+            where: { companyId: user.companyId, status: 'FINALIZED', workOrder: workOrderWhere },
+            include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, closedAt: true } } },
+        });
+        const ratio = (num, den) => (den > 0 ? num / den : null);
+        const byBucket = {};
+        const byProduct = {};
+        let grandMaterial = 0, grandLabor = 0, grandOverhead = 0, grandOther = 0, grandNetActual = 0, grandFgQty = 0;
+        for (const s of sheets) {
+            if (!((_a = s.workOrder) === null || _a === void 0 ? void 0 : _a.closedAt))
+                continue;
+            const bucketKey = this.truncateToKey(new Date(s.workOrder.closedAt).toISOString(), gran);
+            if (!byBucket[bucketKey])
+                byBucket[bucketKey] = { date: bucketKey, materialCost: 0, laborCost: 0, overheadCost: 0, otherCost: 0, netActualCost: 0, finalGoodFgQty: 0, woCount: 0 };
+            byBucket[bucketKey].materialCost += s.materialCost;
+            byBucket[bucketKey].laborCost += s.laborCost;
+            byBucket[bucketKey].overheadCost += s.overheadCost;
+            byBucket[bucketKey].otherCost += s.otherCost;
+            byBucket[bucketKey].netActualCost += s.netActualCost;
+            byBucket[bucketKey].finalGoodFgQty += s.finalGoodFgQty;
+            byBucket[bucketKey].woCount++;
+            const prodCode = s.workOrder.productCode || 'UNKNOWN';
+            const prodName = s.workOrder.productName || 'Unknown';
+            if (!byProduct[prodCode])
+                byProduct[prodCode] = { productCode: prodCode, productName: prodName, materialCost: 0, laborCost: 0, overheadCost: 0, otherCost: 0, netActualCost: 0, finalGoodFgQty: 0, woCount: 0 };
+            byProduct[prodCode].materialCost += s.materialCost;
+            byProduct[prodCode].laborCost += s.laborCost;
+            byProduct[prodCode].overheadCost += s.overheadCost;
+            byProduct[prodCode].otherCost += s.otherCost;
+            byProduct[prodCode].netActualCost += s.netActualCost;
+            byProduct[prodCode].finalGoodFgQty += s.finalGoodFgQty;
+            byProduct[prodCode].woCount++;
+            grandMaterial += s.materialCost;
+            grandLabor += s.laborCost;
+            grandOverhead += s.overheadCost;
+            grandOther += s.otherCost;
+            grandNetActual += s.netActualCost;
+            grandFgQty += s.finalGoodFgQty;
+        }
+        const finalize = (b) => (Object.assign(Object.assign({}, b), { avgUnitCost: ratio(b.netActualCost, b.finalGoodFgQty) }));
+        return {
+            granularity: gran,
+            byDate: Object.values(byBucket).map(finalize).sort((a, b) => a.date.localeCompare(b.date)),
+            byProduct: Object.values(byProduct).map(finalize).sort((a, b) => b.netActualCost - a.netActualCost),
+            totals: {
+                materialCost: grandMaterial, laborCost: grandLabor, overheadCost: grandOverhead, otherCost: grandOther,
+                netActualCost: grandNetActual, finalGoodFgQty: grandFgQty,
+                avgUnitCost: ratio(grandNetActual, grandFgQty),
+            },
+            totalWos: sheets.length,
+        };
+    }
 };
 exports.ProductionReportsService = ProductionReportsService;
 exports.ProductionReportsService = ProductionReportsService = __decorate([

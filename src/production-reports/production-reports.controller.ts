@@ -35,4 +35,7 @@ export class ProductionReportsController {
   @Get('oee')
   @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
   getOee(@Request() req: any, @Query() query: any) { return this.prService.getOeeReport(req.user, query); }
+  @Get('cost-trend')
+  @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
+  getCostTrend(@Request() req: any, @Query() query: any) { return this.prService.getCostTrend(req.user, query); }
 }

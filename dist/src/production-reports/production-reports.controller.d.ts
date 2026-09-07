@@ -182,4 +182,19 @@ export declare class ProductionReportsController {
         };
         totalEntries: number;
     }>;
+    getCostTrend(req: any, query: any): Promise<{
+        granularity: any;
+        byDate: any[];
+        byProduct: any[];
+        totals: {
+            materialCost: number;
+            laborCost: number;
+            overheadCost: number;
+            otherCost: number;
+            netActualCost: number;
+            finalGoodFgQty: number;
+            avgUnitCost: number;
+        };
+        totalWos: number;
+    }>;
 }

@@ -338,4 +338,87 @@ export class ProductionReportsService {
       totalEntries: entries.length,
     };
   }
+
+  // Phase 4: cost trend, bucketed the same way as Phase 1-3 but
+  // sourced from ProductionCostSheet rather than ProductionEntry -
+  // only FINALIZED cost sheets are included (mirrors the CONFIRMED-
+  // only rule for entries: a still-open WO's cost sheet can still
+  // change, so including it would make the trend retroactively shift
+  // under the user).
+  //
+  // ProductionCostSheet has no date field of its own - it's bucketed
+  // by WorkOrder.closedAt, the moment the cost was actually finalized
+  // (PROD-018), not by when the cost sheet row happened to be created/
+  // updated in the database.
+  //
+  // avgUnitCost is netActualCost/finalGoodFgQty computed on the
+  // aggregated sums per bucket, not an average of each WO's individual
+  // unitCost - same aggregate-then-ratio principle as OEE, since
+  // averaging per-WO unit costs directly would misweight a 10-unit WO
+  // the same as a 10,000-unit one.
+  async getCostTrend(user: any, query: any) {
+    const { fromDate, toDate, productCode, granularity = 'DAY' } = query;
+    const gran = ['HOUR', 'DAY', 'MONTH'].includes(granularity) ? granularity : 'DAY';
+    const workOrderWhere: any = {};
+    const dateWhere = this.dateWhere(fromDate, toDate);
+    if (dateWhere) workOrderWhere.closedAt = dateWhere;
+    if (productCode) workOrderWhere.productCode = productCode;
+
+    const sheets = await this.prisma.productionCostSheet.findMany({
+      where: { companyId: user.companyId, status: 'FINALIZED', workOrder: workOrderWhere },
+      include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, closedAt: true } } },
+    });
+
+    const ratio = (num: number, den: number) => (den > 0 ? num / den : null);
+
+    const byBucket: Record<string, any> = {};
+    const byProduct: Record<string, any> = {};
+    let grandMaterial = 0, grandLabor = 0, grandOverhead = 0, grandOther = 0, grandNetActual = 0, grandFgQty = 0;
+
+    for (const s of sheets) {
+      // Cost sheets can only be FINALIZED after WorkOrder.closeWorkOrder()
+      // sets closedAt, so this is never null for a sheet that reaches
+      // this filter - but skip defensively rather than crash on a
+      // future data inconsistency.
+      if (!s.workOrder?.closedAt) continue;
+
+      const bucketKey = this.truncateToKey(new Date(s.workOrder.closedAt).toISOString(), gran);
+      if (!byBucket[bucketKey]) byBucket[bucketKey] = { date: bucketKey, materialCost: 0, laborCost: 0, overheadCost: 0, otherCost: 0, netActualCost: 0, finalGoodFgQty: 0, woCount: 0 };
+      byBucket[bucketKey].materialCost += s.materialCost;
+      byBucket[bucketKey].laborCost += s.laborCost;
+      byBucket[bucketKey].overheadCost += s.overheadCost;
+      byBucket[bucketKey].otherCost += s.otherCost;
+      byBucket[bucketKey].netActualCost += s.netActualCost;
+      byBucket[bucketKey].finalGoodFgQty += s.finalGoodFgQty;
+      byBucket[bucketKey].woCount++;
+
+      const prodCode = s.workOrder.productCode || 'UNKNOWN';
+      const prodName = s.workOrder.productName || 'Unknown';
+      if (!byProduct[prodCode]) byProduct[prodCode] = { productCode: prodCode, productName: prodName, materialCost: 0, laborCost: 0, overheadCost: 0, otherCost: 0, netActualCost: 0, finalGoodFgQty: 0, woCount: 0 };
+      byProduct[prodCode].materialCost += s.materialCost;
+      byProduct[prodCode].laborCost += s.laborCost;
+      byProduct[prodCode].overheadCost += s.overheadCost;
+      byProduct[prodCode].otherCost += s.otherCost;
+      byProduct[prodCode].netActualCost += s.netActualCost;
+      byProduct[prodCode].finalGoodFgQty += s.finalGoodFgQty;
+      byProduct[prodCode].woCount++;
+
+      grandMaterial += s.materialCost; grandLabor += s.laborCost; grandOverhead += s.overheadCost; grandOther += s.otherCost;
+      grandNetActual += s.netActualCost; grandFgQty += s.finalGoodFgQty;
+    }
+
+    const finalize = (b: any) => ({ ...b, avgUnitCost: ratio(b.netActualCost, b.finalGoodFgQty) });
+
+    return {
+      granularity: gran,
+      byDate: Object.values(byBucket).map(finalize).sort((a: any, b: any) => a.date.localeCompare(b.date)),
+      byProduct: Object.values(byProduct).map(finalize).sort((a: any, b: any) => b.netActualCost - a.netActualCost),
+      totals: {
+        materialCost: grandMaterial, laborCost: grandLabor, overheadCost: grandOverhead, otherCost: grandOther,
+        netActualCost: grandNetActual, finalGoodFgQty: grandFgQty,
+        avgUnitCost: ratio(grandNetActual, grandFgQty),
+      },
+      totalWos: sheets.length,
+    };
+  }
 }

@@ -201,4 +201,106 @@ describe('ProductionReportsService.getDailyOutputByProduct', () => {
       expect(r.totalEntries).toBe(0);
     });
   });
+
+  describe('Phase 4 - Cost Trend', () => {
+    const costSheets = [
+      {
+        id: 'pcs-a', status: 'FINALIZED',
+        materialCost: 500, laborCost: 200, overheadCost: 50, otherCost: 10,
+        netActualCost: 760, finalGoodFgQty: 100,
+        workOrder: { woNumber: 'WO-1', productCode: 'DRIVER-01', productName: 'LED Driver', closedAt: new Date('2026-09-01T10:00:00.000Z') },
+      },
+      {
+        id: 'pcs-b', status: 'FINALIZED',
+        materialCost: 300, laborCost: 100, overheadCost: 20, otherCost: 5,
+        netActualCost: 425, finalGoodFgQty: 50,
+        workOrder: { woNumber: 'WO-2', productCode: 'DRIVER-01', productName: 'LED Driver', closedAt: new Date('2026-09-02T10:00:00.000Z') },
+      },
+    ];
+
+    beforeEach(() => {
+      prisma.productionCostSheet = {
+        findMany: jest.fn().mockResolvedValue(costSheets),
+      };
+    });
+
+    it('only queries FINALIZED cost sheets for this company', async () => {
+      await service.getCostTrend(user, {});
+      expect(prisma.productionCostSheet.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ companyId: 'company-1', status: 'FINALIZED' }) }),
+      );
+    });
+
+    it('buckets by WorkOrder.closedAt, not by cost sheet createdAt/updatedAt', async () => {
+      const r = await service.getCostTrend(user, {});
+      expect(r.byDate.map((d: any) => d.date)).toEqual(['2026-09-01', '2026-09-02']);
+    });
+
+    it('groups by product, summing cost components across multiple WOs for the same product', async () => {
+      const r = await service.getCostTrend(user, {});
+      const driver = r.byProduct.find((p: any) => p.productCode === 'DRIVER-01');
+      expect(driver.materialCost).toBe(800); // 500 + 300
+      expect(driver.laborCost).toBe(300);    // 200 + 100
+      expect(driver.netActualCost).toBe(1185); // 760 + 425
+      expect(driver.finalGoodFgQty).toBe(150); // 100 + 50
+      expect(driver.woCount).toBe(2);
+    });
+
+    it('computes avgUnitCost from summed netActualCost/finalGoodFgQty, not an average of individual unit costs', async () => {
+      const r = await service.getCostTrend(user, {});
+      const driver = r.byProduct.find((p: any) => p.productCode === 'DRIVER-01');
+      // pcs-a alone would be 760/100=7.6, pcs-b alone 425/50=8.5 - a naive
+      // average would be 8.05, but the aggregate ratio is 1185/150=7.9
+      expect(driver.avgUnitCost).toBeCloseTo(1185 / 150, 5);
+      expect(driver.avgUnitCost).not.toBeCloseTo((7.6 + 8.5) / 2, 2);
+    });
+
+    it('returns null avgUnitCost rather than dividing by zero when finalGoodFgQty is 0', async () => {
+      prisma.productionCostSheet.findMany.mockResolvedValue([
+        { id: 'pcs-c', status: 'FINALIZED', materialCost: 100, laborCost: 0, overheadCost: 0, otherCost: 0, netActualCost: 100, finalGoodFgQty: 0, workOrder: { woNumber: 'WO-3', productCode: 'X', productName: 'X', closedAt: new Date('2026-09-05T00:00:00.000Z') } },
+      ]);
+      const r = await service.getCostTrend(user, {});
+      expect(r.byProduct[0].avgUnitCost).toBeNull();
+    });
+
+    it('applies the productCode filter to the WorkOrder relation', async () => {
+      await service.getCostTrend(user, { productCode: 'DRIVER-01' });
+      expect(prisma.productionCostSheet.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ workOrder: expect.objectContaining({ productCode: 'DRIVER-01' }) }) }),
+      );
+    });
+
+    it('applies fromDate/toDate as a WorkOrder.closedAt range filter', async () => {
+      await service.getCostTrend(user, { fromDate: '2026-09-01', toDate: '2026-09-02' });
+      const call = prisma.productionCostSheet.findMany.mock.calls[0][0];
+      expect(call.where.workOrder.closedAt.gte).toEqual(new Date('2026-09-01'));
+      expect(call.where.workOrder.closedAt.lte).toEqual(new Date('2026-09-02T23:59:59.999Z'));
+    });
+
+    it('returns correct grand totals across all products/dates', async () => {
+      const r = await service.getCostTrend(user, {});
+      expect(r.totals.materialCost).toBe(800);
+      expect(r.totals.netActualCost).toBe(1185);
+      expect(r.totals.avgUnitCost).toBeCloseTo(1185 / 150, 5);
+      expect(r.totalWos).toBe(2);
+    });
+
+    it('handles an empty result set without throwing', async () => {
+      prisma.productionCostSheet.findMany.mockResolvedValue([]);
+      const r = await service.getCostTrend(user, {});
+      expect(r.byDate).toEqual([]);
+      expect(r.byProduct).toEqual([]);
+      expect(r.totals.avgUnitCost).toBeNull();
+      expect(r.totalWos).toBe(0);
+    });
+
+    it('skips a sheet defensively if its WorkOrder has no closedAt rather than throwing', async () => {
+      prisma.productionCostSheet.findMany.mockResolvedValue([
+        { id: 'pcs-d', status: 'FINALIZED', materialCost: 10, laborCost: 0, overheadCost: 0, otherCost: 0, netActualCost: 10, finalGoodFgQty: 5, workOrder: { woNumber: 'WO-4', productCode: 'Y', productName: 'Y', closedAt: null } },
+      ]);
+      const r = await service.getCostTrend(user, {});
+      expect(r.byDate).toEqual([]);
+      expect(r.totalWos).toBe(1); // still counted in the raw fetch, just not bucketed
+    });
+  });
 });
