@@ -232,6 +232,71 @@ let ProductionReportsService = class ProductionReportsService {
             totalEntries: entries.length,
         };
     }
+    async getOeeReport(user, query) {
+        var _a, _b;
+        const { fromDate, toDate, productCode, granularity = 'DAY' } = query;
+        const gran = ['HOUR', 'DAY', 'MONTH'].includes(granularity) ? granularity : 'DAY';
+        const where = { companyId: user.companyId, status: 'CONFIRMED' };
+        const dateWhere = this.dateWhere(fromDate, toDate);
+        if (dateWhere)
+            where.entryDate = dateWhere;
+        if (productCode)
+            where.workOrder = { productCode };
+        const entries = await this.prisma.productionEntry.findMany({
+            where, orderBy: { entryDate: 'asc' },
+            include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, stageName: true } } },
+        });
+        const ratio = (num, den) => (den > 0 ? num / den : null);
+        const computeOee = (durationMin, downtimeMin, totalQty, targetQty, goodQty) => {
+            const availability = ratio(Math.max(durationMin - downtimeMin, 0), durationMin);
+            const performance = targetQty > 0 ? ratio(totalQty, targetQty) : null;
+            const quality = ratio(goodQty, totalQty);
+            const oee = availability != null && performance != null && quality != null ? availability * performance * quality : null;
+            return { availability, performance, quality, oee };
+        };
+        const byBucket = {};
+        const byProduct = {};
+        let grandDuration = 0, grandDowntime = 0, grandTotalQty = 0, grandTargetQty = 0, grandGoodQty = 0;
+        for (const e of entries) {
+            const durationMin = e.periodStart && e.periodEnd
+                ? (new Date(e.periodEnd).getTime() - new Date(e.periodStart).getTime()) / 60000
+                : 0;
+            const downtimeMin = e.downtimeMinutes || 0;
+            const targetQty = e.targetQty || 0;
+            const bucketKey = this.truncateToKey(e.entryDate.toISOString(), gran);
+            if (!byBucket[bucketKey])
+                byBucket[bucketKey] = { date: bucketKey, durationMin: 0, downtimeMin: 0, totalQty: 0, targetQty: 0, goodQty: 0, entries: 0 };
+            byBucket[bucketKey].durationMin += durationMin;
+            byBucket[bucketKey].downtimeMin += downtimeMin;
+            byBucket[bucketKey].totalQty += e.totalQty;
+            byBucket[bucketKey].targetQty += targetQty;
+            byBucket[bucketKey].goodQty += e.goodQty;
+            byBucket[bucketKey].entries++;
+            const prodCode = ((_a = e.workOrder) === null || _a === void 0 ? void 0 : _a.productCode) || 'UNKNOWN';
+            const prodName = ((_b = e.workOrder) === null || _b === void 0 ? void 0 : _b.productName) || 'Unknown';
+            if (!byProduct[prodCode])
+                byProduct[prodCode] = { productCode: prodCode, productName: prodName, durationMin: 0, downtimeMin: 0, totalQty: 0, targetQty: 0, goodQty: 0, entries: 0 };
+            byProduct[prodCode].durationMin += durationMin;
+            byProduct[prodCode].downtimeMin += downtimeMin;
+            byProduct[prodCode].totalQty += e.totalQty;
+            byProduct[prodCode].targetQty += targetQty;
+            byProduct[prodCode].goodQty += e.goodQty;
+            byProduct[prodCode].entries++;
+            grandDuration += durationMin;
+            grandDowntime += downtimeMin;
+            grandTotalQty += e.totalQty;
+            grandTargetQty += targetQty;
+            grandGoodQty += e.goodQty;
+        }
+        const finalizeBucket = (b) => (Object.assign(Object.assign({}, b), computeOee(b.durationMin, b.downtimeMin, b.totalQty, b.targetQty, b.goodQty)));
+        return {
+            granularity: gran,
+            byDate: Object.values(byBucket).map(finalizeBucket).sort((a, b) => a.date.localeCompare(b.date)),
+            byProduct: Object.values(byProduct).map(finalizeBucket).sort((a, b) => (b.oee || 0) - (a.oee || 0)),
+            overall: computeOee(grandDuration, grandDowntime, grandTotalQty, grandTargetQty, grandGoodQty),
+            totalEntries: entries.length,
+        };
+    }
 };
 exports.ProductionReportsService = ProductionReportsService;
 exports.ProductionReportsService = ProductionReportsService = __decorate([

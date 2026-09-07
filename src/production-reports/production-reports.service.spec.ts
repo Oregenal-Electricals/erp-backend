@@ -126,4 +126,79 @@ describe('ProductionReportsService.getDailyOutputByProduct', () => {
       expect(daily.totalGoodQty).toBe(monthly.totalGoodQty);
     });
   });
+
+  describe('Phase 3 - OEE', () => {
+    const oeeEntries = [
+      {
+        id: 'pe-a', entryDate: new Date('2026-09-01T08:00:00.000Z'),
+        periodStart: new Date('2026-09-01T08:00:00.000Z'), periodEnd: new Date('2026-09-01T09:00:00.000Z'),
+        downtimeMinutes: 10, targetQty: 120, totalQty: 100, goodQty: 90,
+        workOrder: { productCode: 'DRIVER-01', productName: 'LED Driver' },
+      },
+      {
+        id: 'pe-b', entryDate: new Date('2026-09-01T09:00:00.000Z'),
+        periodStart: new Date('2026-09-01T09:00:00.000Z'), periodEnd: new Date('2026-09-01T10:00:00.000Z'),
+        downtimeMinutes: 0, targetQty: null, totalQty: 50, goodQty: 45,
+        workOrder: { productCode: 'DRIVER-01', productName: 'LED Driver' },
+      },
+    ];
+
+    beforeEach(() => {
+      prisma.productionEntry.findMany.mockResolvedValue(oeeEntries);
+    });
+
+    it('computes availability as (duration - downtime) / duration, summed across entries', async () => {
+      const r = await service.getOeeReport(user, {});
+      expect(r.overall.availability).toBeCloseTo((120 - 10) / 120, 5);
+    });
+
+    it('computes performance as totalQty/targetQty, summing before dividing', async () => {
+      const r = await service.getOeeReport(user, {});
+      expect(r.overall.performance).toBeCloseTo(150 / 120, 5);
+    });
+
+    it('computes quality as goodQty/totalQty across all entries', async () => {
+      const r = await service.getOeeReport(user, {});
+      expect(r.overall.quality).toBeCloseTo((90 + 45) / (100 + 50), 5);
+    });
+
+    it('an entry with no targetQty still contributes duration/downtime/quality, only performance/oee are withheld', async () => {
+      prisma.productionEntry.findMany.mockResolvedValue([oeeEntries[1]]);
+      const r = await service.getOeeReport(user, {});
+      expect(r.overall.performance).toBeNull();
+      expect(r.overall.availability).toBeCloseTo(1, 5);
+      expect(r.overall.quality).toBeCloseTo(45 / 50, 5);
+      expect(r.overall.oee).toBeNull();
+    });
+
+    it('OEE is the product of all three legs when all are available', async () => {
+      const r = await service.getOeeReport(user, {});
+      const expected = r.overall.availability * r.overall.performance * r.overall.quality;
+      expect(r.overall.oee).toBeCloseTo(expected, 10);
+    });
+
+    it('groups by product with the same aggregate-then-ratio approach', async () => {
+      const r = await service.getOeeReport(user, {});
+      const driver = r.byProduct.find((p: any) => p.productCode === 'DRIVER-01');
+      expect(driver.totalQty).toBe(150);
+      expect(driver.oee).toBeCloseTo(r.overall.oee, 10);
+    });
+
+    it('treats a missing period as zero duration without throwing', async () => {
+      prisma.productionEntry.findMany.mockResolvedValue([
+        { id: 'pe-c', entryDate: new Date('2026-09-03T08:00:00.000Z'), periodStart: null, periodEnd: null, downtimeMinutes: 0, targetQty: 10, totalQty: 10, goodQty: 10, workOrder: { productCode: 'X', productName: 'X' } },
+      ]);
+      const r = await service.getOeeReport(user, {});
+      expect(r.overall.availability).toBeNull();
+    });
+
+    it('handles an empty result set without throwing', async () => {
+      prisma.productionEntry.findMany.mockResolvedValue([]);
+      const r = await service.getOeeReport(user, {});
+      expect(r.byDate).toEqual([]);
+      expect(r.byProduct).toEqual([]);
+      expect(r.overall.availability).toBeNull();
+      expect(r.totalEntries).toBe(0);
+    });
+  });
 });

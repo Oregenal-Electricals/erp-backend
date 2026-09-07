@@ -253,4 +253,89 @@ export class ProductionReportsService {
       totalEntries: entries.length,
     };
   }
+
+  // Phase 3: OEE = Availability x Performance x Quality, computed
+  // entirely from ProductionEntry (periodStart/periodEnd/downtimeMinutes
+  // for Availability, targetQty/totalQty for Performance, goodQty/
+  // totalQty for Quality) - periodStart/periodEnd are mandatory,
+  // validated fields on every entry (see ProductionEntryService), so
+  // no separate Downtime/ManpowerAllocation join was needed.
+  //
+  // Per-bucket ratios are computed from summed underlying quantities
+  // (total duration, total downtime, total output, total target)
+  // rather than averaging each entry's individual ratio - averaging
+  // ratios directly would misweight short entries the same as long
+  // ones and produce a misleading bucket-level number.
+  //
+  // Entries missing targetQty get performance/oee left null for that
+  // entry, but their duration/downtime/quality inputs still count
+  // toward the bucket sums - only the targetQty-dependent piece is
+  // withheld, not the whole entry.
+  async getOeeReport(user: any, query: any) {
+    const { fromDate, toDate, productCode, granularity = 'DAY' } = query;
+    const gran = ['HOUR', 'DAY', 'MONTH'].includes(granularity) ? granularity : 'DAY';
+    const where: any = { companyId: user.companyId, status: 'CONFIRMED' };
+    const dateWhere = this.dateWhere(fromDate, toDate);
+    if (dateWhere) where.entryDate = dateWhere;
+    if (productCode) where.workOrder = { productCode };
+
+    const entries = await this.prisma.productionEntry.findMany({
+      where, orderBy: { entryDate: 'asc' },
+      include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, stageName: true } } },
+    });
+
+    const ratio = (num: number, den: number) => (den > 0 ? num / den : null);
+    const computeOee = (durationMin: number, downtimeMin: number, totalQty: number, targetQty: number, goodQty: number) => {
+      const availability = ratio(Math.max(durationMin - downtimeMin, 0), durationMin);
+      const performance = targetQty > 0 ? ratio(totalQty, targetQty) : null;
+      const quality = ratio(goodQty, totalQty);
+      const oee = availability != null && performance != null && quality != null ? availability * performance * quality : null;
+      return { availability, performance, quality, oee };
+    };
+
+    const byBucket: Record<string, any> = {};
+    const byProduct: Record<string, any> = {};
+
+    let grandDuration = 0, grandDowntime = 0, grandTotalQty = 0, grandTargetQty = 0, grandGoodQty = 0;
+
+    for (const e of entries) {
+      const durationMin = e.periodStart && e.periodEnd
+        ? (new Date(e.periodEnd).getTime() - new Date(e.periodStart).getTime()) / 60000
+        : 0;
+      const downtimeMin = e.downtimeMinutes || 0;
+      const targetQty = e.targetQty || 0;
+
+      const bucketKey = this.truncateToKey(e.entryDate.toISOString(), gran);
+      if (!byBucket[bucketKey]) byBucket[bucketKey] = { date: bucketKey, durationMin: 0, downtimeMin: 0, totalQty: 0, targetQty: 0, goodQty: 0, entries: 0 };
+      byBucket[bucketKey].durationMin += durationMin;
+      byBucket[bucketKey].downtimeMin += downtimeMin;
+      byBucket[bucketKey].totalQty += e.totalQty;
+      byBucket[bucketKey].targetQty += targetQty;
+      byBucket[bucketKey].goodQty += e.goodQty;
+      byBucket[bucketKey].entries++;
+
+      const prodCode = e.workOrder?.productCode || 'UNKNOWN';
+      const prodName = e.workOrder?.productName || 'Unknown';
+      if (!byProduct[prodCode]) byProduct[prodCode] = { productCode: prodCode, productName: prodName, durationMin: 0, downtimeMin: 0, totalQty: 0, targetQty: 0, goodQty: 0, entries: 0 };
+      byProduct[prodCode].durationMin += durationMin;
+      byProduct[prodCode].downtimeMin += downtimeMin;
+      byProduct[prodCode].totalQty += e.totalQty;
+      byProduct[prodCode].targetQty += targetQty;
+      byProduct[prodCode].goodQty += e.goodQty;
+      byProduct[prodCode].entries++;
+
+      grandDuration += durationMin; grandDowntime += downtimeMin;
+      grandTotalQty += e.totalQty; grandTargetQty += targetQty; grandGoodQty += e.goodQty;
+    }
+
+    const finalizeBucket = (b: any) => ({ ...b, ...computeOee(b.durationMin, b.downtimeMin, b.totalQty, b.targetQty, b.goodQty) });
+
+    return {
+      granularity: gran,
+      byDate: Object.values(byBucket).map(finalizeBucket).sort((a: any, b: any) => a.date.localeCompare(b.date)),
+      byProduct: Object.values(byProduct).map(finalizeBucket).sort((a: any, b: any) => (b.oee || 0) - (a.oee || 0)),
+      overall: computeOee(grandDuration, grandDowntime, grandTotalQty, grandTargetQty, grandGoodQty),
+      totalEntries: entries.length,
+    };
+  }
 }

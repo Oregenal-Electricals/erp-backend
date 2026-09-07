@@ -172,4 +172,16 @@ export declare class ProductionReportsService {
         totalReworkQty: number;
         totalEntries: number;
     }>;
+    getOeeReport(user: any, query: any): Promise<{
+        granularity: any;
+        byDate: any[];
+        byProduct: any[];
+        overall: {
+            availability: number;
+            performance: number;
+            quality: number;
+            oee: number;
+        };
+        totalEntries: number;
+    }>;
 }

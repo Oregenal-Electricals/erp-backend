@@ -32,4 +32,7 @@ export class ProductionReportsController {
   @Get('daily-output')
   @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
   getDailyOutput(@Request() req: any, @Query() query: any) { return this.prService.getDailyOutputByProduct(req.user, query); }
+  @Get('oee')
+  @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
+  getOee(@Request() req: any, @Query() query: any) { return this.prService.getOeeReport(req.user, query); }
 }
