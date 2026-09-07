@@ -89,4 +89,41 @@ describe('ProductionReportsService.getDailyOutputByProduct', () => {
     expect(r.byProduct).toEqual([]);
     expect(r.totalGoodQty).toBe(0);
   });
+
+  describe('Phase 2 - HOUR/MONTH granularity (same query, different truncation)', () => {
+    it('defaults to DAY granularity when none is given, and echoes it back in the response', async () => {
+      const r = await service.getDailyOutputByProduct(user, {});
+      expect(r.granularity).toBe('DAY');
+      expect(r.byDate[0].date).toBe('2026-09-01');
+    });
+
+    it('buckets by hour when granularity=HOUR - two same-day entries at different hours stay separate', async () => {
+      const r = await service.getDailyOutputByProduct(user, { granularity: 'HOUR' });
+      expect(r.granularity).toBe('HOUR');
+      expect(r.byDate).toHaveLength(3); // 08:00 and 16:00 on Sept 1 are different hour buckets, plus Sept 2 08:00
+      expect(r.byDate.map((d: any) => d.date)).toEqual(['2026-09-01T08', '2026-09-01T16', '2026-09-02T08']);
+      const hour8 = r.byDate.find((d: any) => d.date === '2026-09-01T08');
+      expect(hour8.goodQty).toBe(100); // only pe-1, not merged with pe-2's 16:00 entry
+    });
+
+    it('buckets by month when granularity=MONTH - both Sept 1 and Sept 2 entries merge into one bucket', async () => {
+      const r = await service.getDailyOutputByProduct(user, { granularity: 'MONTH' });
+      expect(r.granularity).toBe('MONTH');
+      expect(r.byDate).toHaveLength(1);
+      expect(r.byDate[0].date).toBe('2026-09');
+      expect(r.byDate[0].goodQty).toBe(230); // 100 + 80 + 50, all three entries in one month bucket
+    });
+
+    it('falls back to DAY for an invalid/unrecognized granularity value rather than erroring', async () => {
+      const r = await service.getDailyOutputByProduct(user, { granularity: 'FORTNIGHT' });
+      expect(r.granularity).toBe('DAY');
+    });
+
+    it('byProduct totals are identical across granularities - only byDate bucketing changes', async () => {
+      const daily = await service.getDailyOutputByProduct(user, { granularity: 'DAY' });
+      const monthly = await service.getDailyOutputByProduct(user, { granularity: 'MONTH' });
+      expect(daily.byProduct).toEqual(monthly.byProduct);
+      expect(daily.totalGoodQty).toBe(monthly.totalGoodQty);
+    });
+  });
 });

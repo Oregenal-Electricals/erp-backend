@@ -162,7 +162,9 @@ export declare class ProductionReportsService {
         totalInspections: number;
         overallPassRate: number;
     }>;
+    private truncateToKey;
     getDailyOutputByProduct(user: any, query: any): Promise<{
+        granularity: any;
         byDate: any[];
         byProduct: any[];
         totalGoodQty: number;

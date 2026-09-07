@@ -192,8 +192,25 @@ export class ProductionReportsService {
   // entries are fetched once, then bucketed by day and by product in
   // memory, so the response supports both a daily trend view and a
   // product-wise breakdown from a single query.
+  // Truncates an ISO timestamp to the requested bucket width. HOUR and
+  // MONTH are Phase 2 additions - same slice-based approach as the
+  // original DAY bucketing, just a different ISO prefix length, so no
+  // new query/grouping logic was needed to add them.
+  private truncateToKey(iso: string, granularity: string): string {
+    if (granularity === 'HOUR') return iso.slice(0, 13);   // YYYY-MM-DDTHH
+    if (granularity === 'MONTH') return iso.slice(0, 7);   // YYYY-MM
+    return iso.slice(0, 10);                                // YYYY-MM-DD (DAY, default)
+  }
+
+  // Phase 1 built this as day-only; Phase 2 generalizes it to also
+  // support HOUR and MONTH granularity via the same query and the same
+  // in-memory bucketing approach - only the truncation width changes.
+  // The daily-output endpoint/frontend tab keep working unchanged
+  // (granularity defaults to DAY), so this is additive, not a breaking
+  // change to the existing report.
   async getDailyOutputByProduct(user: any, query: any) {
-    const { fromDate, toDate, productCode } = query;
+    const { fromDate, toDate, productCode, granularity = 'DAY' } = query;
+    const gran = ['HOUR', 'DAY', 'MONTH'].includes(granularity) ? granularity : 'DAY';
     const where: any = { companyId: user.companyId, status: 'CONFIRMED' };
     const dateWhere = this.dateWhere(fromDate, toDate);
     if (dateWhere) where.entryDate = dateWhere;
@@ -208,17 +225,15 @@ export class ProductionReportsService {
     const byProduct: Record<string, any> = {};
 
     for (const e of entries) {
-      // Truncate to calendar day (UTC) - entryDate carries a full
-      // timestamp, but "daily output" buckets by day, not by second.
-      const dayKey = e.entryDate.toISOString().slice(0, 10);
+      const dateKey = this.truncateToKey(e.entryDate.toISOString(), gran);
       const prodCode = e.workOrder?.productCode || 'UNKNOWN';
       const prodName = e.workOrder?.productName || 'Unknown';
 
-      if (!byDate[dayKey]) byDate[dayKey] = { date: dayKey, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
-      byDate[dayKey].goodQty += e.goodQty;
-      byDate[dayKey].scrapQty += e.scrapQty;
-      byDate[dayKey].reworkQty += e.reworkQty;
-      byDate[dayKey].entries++;
+      if (!byDate[dateKey]) byDate[dateKey] = { date: dateKey, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
+      byDate[dateKey].goodQty += e.goodQty;
+      byDate[dateKey].scrapQty += e.scrapQty;
+      byDate[dateKey].reworkQty += e.reworkQty;
+      byDate[dateKey].entries++;
 
       const prodKey = prodCode;
       if (!byProduct[prodKey]) byProduct[prodKey] = { productCode: prodCode, productName: prodName, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
@@ -229,6 +244,7 @@ export class ProductionReportsService {
     }
 
     return {
+      granularity: gran,
       byDate: Object.values(byDate).sort((a: any, b: any) => a.date.localeCompare(b.date)),
       byProduct: Object.values(byProduct).sort((a: any, b: any) => b.goodQty - a.goodQty),
       totalGoodQty: entries.reduce((s, e) => s + e.goodQty, 0),

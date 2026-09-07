@@ -162,6 +162,7 @@ export declare class ProductionReportsController {
         overallPassRate: number;
     }>;
     getDailyOutput(req: any, query: any): Promise<{
+        granularity: any;
         byDate: any[];
         byProduct: any[];
         totalGoodQty: number;

@@ -181,9 +181,17 @@ let ProductionReportsService = class ProductionReportsService {
             overallPassRate: totalSampled > 0 ? Math.round(totalPassed / totalSampled * 100) : 0,
         };
     }
+    truncateToKey(iso, granularity) {
+        if (granularity === 'HOUR')
+            return iso.slice(0, 13);
+        if (granularity === 'MONTH')
+            return iso.slice(0, 7);
+        return iso.slice(0, 10);
+    }
     async getDailyOutputByProduct(user, query) {
         var _a, _b;
-        const { fromDate, toDate, productCode } = query;
+        const { fromDate, toDate, productCode, granularity = 'DAY' } = query;
+        const gran = ['HOUR', 'DAY', 'MONTH'].includes(granularity) ? granularity : 'DAY';
         const where = { companyId: user.companyId, status: 'CONFIRMED' };
         const dateWhere = this.dateWhere(fromDate, toDate);
         if (dateWhere)
@@ -197,15 +205,15 @@ let ProductionReportsService = class ProductionReportsService {
         const byDate = {};
         const byProduct = {};
         for (const e of entries) {
-            const dayKey = e.entryDate.toISOString().slice(0, 10);
+            const dateKey = this.truncateToKey(e.entryDate.toISOString(), gran);
             const prodCode = ((_a = e.workOrder) === null || _a === void 0 ? void 0 : _a.productCode) || 'UNKNOWN';
             const prodName = ((_b = e.workOrder) === null || _b === void 0 ? void 0 : _b.productName) || 'Unknown';
-            if (!byDate[dayKey])
-                byDate[dayKey] = { date: dayKey, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
-            byDate[dayKey].goodQty += e.goodQty;
-            byDate[dayKey].scrapQty += e.scrapQty;
-            byDate[dayKey].reworkQty += e.reworkQty;
-            byDate[dayKey].entries++;
+            if (!byDate[dateKey])
+                byDate[dateKey] = { date: dateKey, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
+            byDate[dateKey].goodQty += e.goodQty;
+            byDate[dateKey].scrapQty += e.scrapQty;
+            byDate[dateKey].reworkQty += e.reworkQty;
+            byDate[dateKey].entries++;
             const prodKey = prodCode;
             if (!byProduct[prodKey])
                 byProduct[prodKey] = { productCode: prodCode, productName: prodName, goodQty: 0, scrapQty: 0, reworkQty: 0, entries: 0 };
@@ -215,6 +223,7 @@ let ProductionReportsService = class ProductionReportsService {
             byProduct[prodKey].entries++;
         }
         return {
+            granularity: gran,
             byDate: Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date)),
             byProduct: Object.values(byProduct).sort((a, b) => b.goodQty - a.goodQty),
             totalGoodQty: entries.reduce((s, e) => s + e.goodQty, 0),
