@@ -80,6 +80,7 @@ import { FgReceiptModule } from './fg-receipts/fg-receipt.module';
 import { CostSheetModule } from './production-cost-sheets/cost-sheet.module';
 import { ProductionDashboardModule } from './production-dashboard/production-dashboard.module';
 import { ProductionReportsModule } from './production-reports/production-reports.module';
+import { ProductTargetModule } from './product-standard-productivity/product-target.module';
 import { NcrModule } from './ncr/ncr.module';
 import { CapaModule } from './capa/capa.module';
 import { RcaModule } from './rca/rca.module';
@@ -233,6 +234,7 @@ import configuration from './config/configuration';
     CostSheetModule,
     ProductionDashboardModule,
     ProductionReportsModule,
+    ProductTargetModule,
     NcrModule,
     CapaModule,
     RcaModule,

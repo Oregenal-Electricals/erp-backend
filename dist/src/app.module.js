@@ -92,6 +92,7 @@ const fg_receipt_module_1 = require("./fg-receipts/fg-receipt.module");
 const cost_sheet_module_1 = require("./production-cost-sheets/cost-sheet.module");
 const production_dashboard_module_1 = require("./production-dashboard/production-dashboard.module");
 const production_reports_module_1 = require("./production-reports/production-reports.module");
+const product_target_module_1 = require("./product-standard-productivity/product-target.module");
 const ncr_module_1 = require("./ncr/ncr.module");
 const capa_module_1 = require("./capa/capa.module");
 const rca_module_1 = require("./rca/rca.module");
@@ -251,6 +252,7 @@ exports.AppModule = AppModule = __decorate([
             cost_sheet_module_1.CostSheetModule,
             production_dashboard_module_1.ProductionDashboardModule,
             production_reports_module_1.ProductionReportsModule,
+            product_target_module_1.ProductTargetModule,
             ncr_module_1.NcrModule,
             capa_module_1.CapaModule,
             rca_module_1.RcaModule,
