@@ -8,6 +8,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GrnService = void 0;
 const common_1 = require("@nestjs/common");
@@ -144,9 +155,26 @@ let GrnService = class GrnService {
         const grn = await this.findOne(id, user);
         if (grn.status !== 'DRAFT')
             throw new common_1.BadRequestException('Only DRAFT GRNs can be edited');
+        if (dto.items && dto.items.length > 0) {
+            const itemMap = new Map((dto.items || []).map(i => [i.id, i.receivedQty]));
+            for (const existingItem of grn.items) {
+                if (!itemMap.has(existingItem.id))
+                    continue;
+                const newReceivedQty = itemMap.get(existingItem.id);
+                const maxAllowed = existingItem.orderedQty * 1.05;
+                const totalReceived = existingItem.previouslyReceived + newReceivedQty;
+                if (totalReceived > maxAllowed) {
+                    throw new common_1.BadRequestException(`Item ${existingItem.itemCode}: verified qty (${totalReceived}) exceeds ordered qty (${existingItem.orderedQty}) by more than 5%`);
+                }
+            }
+            await this.prisma.$transaction((dto.items || [])
+                .filter(i => itemMap.has(i.id))
+                .map(i => this.prisma.grnItem.update({ where: { id: i.id }, data: { receivedQty: i.receivedQty, updatedBy: user.id } })));
+        }
+        const { items: _items } = dto, headerDto = __rest(dto, ["items"]);
         const updated = await this.prisma.grnHeader.update({
             where: { id },
-            data: Object.assign(Object.assign({}, dto), { invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined, updatedBy: user.id }),
+            data: Object.assign(Object.assign({}, headerDto), { invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined, updatedBy: user.id }),
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'grn_headers', recordId: id, action: 'UPDATE', oldValues: grn, newValues: updated, changedBy: user.id });

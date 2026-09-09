@@ -140,10 +140,36 @@ export class GrnService {
   async update(id: string, dto: UpdateGrnDto, user: any) {
     const grn = await this.findOne(id, user);
     if (grn.status !== 'DRAFT') throw new BadRequestException('Only DRAFT GRNs can be edited');
+
+    // Physical Verification: corrects each item's receivedQty to what
+    // Store actually counted, separate from the initial Receive step.
+    // Still gated to DRAFT only (same guard as the header update above),
+    // so a GRN already sent to IQC can never have its quantities quietly
+    // rewritten. Same 105%-of-ordered tolerance as create() - verification
+    // corrects a miscount, it doesn't relax the ordered-qty ceiling.
+    if (dto.items && dto.items.length > 0) {
+      const itemMap = new Map((dto.items || []).map(i => [i.id, i.receivedQty]));
+      for (const existingItem of grn.items as any[]) {
+        if (!itemMap.has(existingItem.id)) continue;
+        const newReceivedQty = itemMap.get(existingItem.id)!;
+        const maxAllowed = existingItem.orderedQty * 1.05;
+        const totalReceived = existingItem.previouslyReceived + newReceivedQty;
+        if (totalReceived > maxAllowed) {
+          throw new BadRequestException(`Item ${existingItem.itemCode}: verified qty (${totalReceived}) exceeds ordered qty (${existingItem.orderedQty}) by more than 5%`);
+        }
+      }
+      await this.prisma.$transaction(
+        (dto.items || [])
+          .filter(i => itemMap.has(i.id))
+          .map(i => this.prisma.grnItem.update({ where: { id: i.id }, data: { receivedQty: i.receivedQty, updatedBy: user.id } })),
+      );
+    }
+
+    const { items: _items, ...headerDto } = dto;
     const updated = await this.prisma.grnHeader.update({
       where: { id },
       data: {
-        ...dto,
+        ...headerDto,
         invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
         updatedBy: user.id,
       },

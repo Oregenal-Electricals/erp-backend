@@ -25,10 +25,15 @@ export declare class CreateGrnDto {
     remarks?: string;
     items: GrnItemDto[];
 }
+export declare class GrnItemVerifyDto {
+    id: string;
+    receivedQty: number;
+}
 export declare class UpdateGrnDto {
     vehicleNumber?: string;
     dcNumber?: string;
     invoiceNumber?: string;
     invoiceDate?: string;
     remarks?: string;
+    items?: GrnItemVerifyDto[];
 }
