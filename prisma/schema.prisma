@@ -371,6 +371,7 @@ model Company {
   storeShortages StoreShortage[]
   productionMaterialReturns ProductionMaterialReturn[]
   materialIssueOverrides MaterialIssueOverride[]
+  productSellingPrices ProductSellingPrice[]
 }
 
 model Plant {
@@ -2186,6 +2187,7 @@ model Product {
 
   @@unique([companyId, code])
   @@map("products")
+  sellingPrices ProductSellingPrice[]
 }
 
 // Product Family - links Products that are physically identical through
@@ -4191,6 +4193,25 @@ model ProductStandardProductivity {
   createdBy       String?
   updatedBy       String?
   @@map("product_standard_productivity")
+  @@index([companyId, productId])
+}
+
+model ProductSellingPrice {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  sellingPrice    Float
+  effectiveFrom   DateTime  @default(now())
+  effectiveTo     DateTime?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+  @@map("product_selling_prices")
   @@index([companyId, productId])
 }
 
