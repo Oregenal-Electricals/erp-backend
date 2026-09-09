@@ -4,6 +4,7 @@ import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { MrpService } from '../mrp/mrp.service';
 import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
+import { MaterialIssueOverrideService } from '../material-issue-override/material-issue-override.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class ProductionIssueService {
     private stockLedger: StockLedgerService,
     private mrpService: MrpService,
     private materialReturnService: ProductionMaterialReturnService,
+    private overrideService: MaterialIssueOverrideService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -66,10 +68,19 @@ export class ProductionIssueService {
     // this is the actual block, override is a separate, explicit path
     // built on top of this rather than a way around it.
     const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
+    let usedOverride: { id: string } | null = null;
     if (status.overallStatus === 'PENDING') {
-      const pendingItems = status.items.filter(i => i.status === 'PENDING');
-      const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
-      throw new BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material.`);
+      // An approved, still-valid (within its 5-hour window), not-yet-used
+      // override is a one-time exception to this exact block - it does not
+      // clear the outstanding balance itself, and is consumed the moment
+      // it's used so it can't cover a second issue.
+      const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, user);
+      if (!override) {
+        const pendingItems = status.items.filter(i => i.status === 'PENDING');
+        const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
+        throw new BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material, or request a management override.`);
+      }
+      usedOverride = override;
     }
 
     const issueNumber = await this.generateNumber(user.companyId);
@@ -95,6 +106,11 @@ export class ProductionIssueService {
     }
 
     await this.audit.log({ tableName: 'production_issues', recordId: issue.id, action: 'CREATE', newValues: issue, changedBy: user.id });
+
+    if (usedOverride) {
+      await this.overrideService.consume(usedOverride.id, issue.id, user);
+    }
+
     return issue;
   }
 

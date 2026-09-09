@@ -94,6 +94,7 @@ const production_dashboard_module_1 = require("./production-dashboard/production
 const production_reports_module_1 = require("./production-reports/production-reports.module");
 const product_target_module_1 = require("./product-standard-productivity/product-target.module");
 const production_material_return_module_1 = require("./production-material-return/production-material-return.module");
+const material_issue_override_module_1 = require("./material-issue-override/material-issue-override.module");
 const ncr_module_1 = require("./ncr/ncr.module");
 const capa_module_1 = require("./capa/capa.module");
 const rca_module_1 = require("./rca/rca.module");
@@ -255,6 +256,7 @@ exports.AppModule = AppModule = __decorate([
             production_reports_module_1.ProductionReportsModule,
             product_target_module_1.ProductTargetModule,
             production_material_return_module_1.ProductionMaterialReturnModule,
+            material_issue_override_module_1.MaterialIssueOverrideModule,
             ncr_module_1.NcrModule,
             capa_module_1.CapaModule,
             rca_module_1.RcaModule,

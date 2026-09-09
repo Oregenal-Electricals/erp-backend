@@ -1,0 +1,166 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../common/services/audit.service';
+import { WorkflowsService } from '../workflows/workflows.service';
+import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
+import { RequestOverrideDto, DecideOverrideDto } from './dto/material-issue-override.dto';
+export declare class MaterialIssueOverrideService {
+    private prisma;
+    private audit;
+    private workflows;
+    private materialReturnService;
+    constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService, materialReturnService: ProductionMaterialReturnService);
+    request(dto: RequestOverrideDto, user: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        requestedById: string;
+        approvedAt: Date | null;
+        workOrderId: string;
+        approvalRequestId: string;
+        itemsSnapshot: import("@prisma/client/runtime/library").JsonValue;
+        requestedAt: Date;
+        deadlineAt: Date;
+        approvedById: string | null;
+        approverComments: string | null;
+        consumedByIssueId: string | null;
+    }>;
+    decide(overrideId: string, dto: DecideOverrideDto, user: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        requestedById: string;
+        approvedAt: Date | null;
+        workOrderId: string;
+        approvalRequestId: string;
+        itemsSnapshot: import("@prisma/client/runtime/library").JsonValue;
+        requestedAt: Date;
+        deadlineAt: Date;
+        approvedById: string | null;
+        approverComments: string | null;
+        consumedByIssueId: string | null;
+    }>;
+    findActiveApprovedOverride(workOrderId: string, user: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        requestedById: string;
+        approvedAt: Date | null;
+        workOrderId: string;
+        approvalRequestId: string;
+        itemsSnapshot: import("@prisma/client/runtime/library").JsonValue;
+        requestedAt: Date;
+        deadlineAt: Date;
+        approvedById: string | null;
+        approverComments: string | null;
+        consumedByIssueId: string | null;
+    }>;
+    consume(overrideId: string, issueId: string, user: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        requestedById: string;
+        approvedAt: Date | null;
+        workOrderId: string;
+        approvalRequestId: string;
+        itemsSnapshot: import("@prisma/client/runtime/library").JsonValue;
+        requestedAt: Date;
+        deadlineAt: Date;
+        approvedById: string | null;
+        approverComments: string | null;
+        consumedByIssueId: string | null;
+    }>;
+    findPending(user: any): Promise<({
+        workOrder: {
+            productName: string;
+            woNumber: string;
+        };
+        requestedBy: {
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        requestedById: string;
+        approvedAt: Date | null;
+        workOrderId: string;
+        approvalRequestId: string;
+        itemsSnapshot: import("@prisma/client/runtime/library").JsonValue;
+        requestedAt: Date;
+        deadlineAt: Date;
+        approvedById: string | null;
+        approverComments: string | null;
+        consumedByIssueId: string | null;
+    })[]>;
+    findOne(id: string, user: any): Promise<{
+        workOrder: {
+            productName: string;
+            woNumber: string;
+        };
+        requestedBy: {
+            firstName: string;
+            lastName: string;
+        };
+        approvedBy: {
+            firstName: string;
+            lastName: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        requestedById: string;
+        approvedAt: Date | null;
+        workOrderId: string;
+        approvalRequestId: string;
+        itemsSnapshot: import("@prisma/client/runtime/library").JsonValue;
+        requestedAt: Date;
+        deadlineAt: Date;
+        approvedById: string | null;
+        approverComments: string | null;
+        consumedByIssueId: string | null;
+    }>;
+}

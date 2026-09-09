@@ -82,6 +82,7 @@ import { ProductionDashboardModule } from './production-dashboard/production-das
 import { ProductionReportsModule } from './production-reports/production-reports.module';
 import { ProductTargetModule } from './product-standard-productivity/product-target.module';
 import { ProductionMaterialReturnModule } from './production-material-return/production-material-return.module';
+import { MaterialIssueOverrideModule } from './material-issue-override/material-issue-override.module';
 import { NcrModule } from './ncr/ncr.module';
 import { CapaModule } from './capa/capa.module';
 import { RcaModule } from './rca/rca.module';
@@ -237,6 +238,7 @@ import configuration from './config/configuration';
     ProductionReportsModule,
     ProductTargetModule,
     ProductionMaterialReturnModule,
+    MaterialIssueOverrideModule,
     NcrModule,
     CapaModule,
     RcaModule,

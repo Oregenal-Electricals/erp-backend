@@ -120,6 +120,9 @@ export enum Permission {
   // Production Target (versioned ProductStandardProductivity CRUD)
   PRODUCTION_TARGET_VIEW = 'PRODUCTION_TARGET_VIEW',
   PRODUCTION_TARGET_MANAGE = 'PRODUCTION_TARGET_MANAGE',
+
+  // Material Issue Override (Phase C - WO Material Issue reconciliation exception)
+  MATERIAL_ISSUE_OVERRIDE_APPROVE = 'MATERIAL_ISSUE_OVERRIDE_APPROVE',
   GATE_OUTWARD_VIEW = 'GATE_OUTWARD_VIEW',
   GATE_PASS_VIEW = 'GATE_PASS_VIEW',
   VISITOR_VIEW = 'VISITOR_VIEW',

@@ -16,13 +16,15 @@ const audit_service_1 = require("../common/services/audit.service");
 const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
 const mrp_service_1 = require("../mrp/mrp.service");
 const production_material_return_service_1 = require("../production-material-return/production-material-return.service");
+const material_issue_override_service_1 = require("../material-issue-override/material-issue-override.service");
 let ProductionIssueService = class ProductionIssueService {
-    constructor(prisma, audit, stockLedger, mrpService, materialReturnService) {
+    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
         this.mrpService = mrpService;
         this.materialReturnService = materialReturnService;
+        this.overrideService = overrideService;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionIssue.count({ where: { companyId } });
@@ -67,10 +69,15 @@ let ProductionIssueService = class ProductionIssueService {
             throw new common_1.BadRequestException('Work order must be RELEASED or IN_PROGRESS');
         }
         const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
+        let usedOverride = null;
         if (status.overallStatus === 'PENDING') {
-            const pendingItems = status.items.filter(i => i.status === 'PENDING');
-            const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
-            throw new common_1.BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material.`);
+            const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, user);
+            if (!override) {
+                const pendingItems = status.items.filter(i => i.status === 'PENDING');
+                const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
+                throw new common_1.BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material, or request a management override.`);
+            }
+            usedOverride = override;
         }
         const issueNumber = await this.generateNumber(user.companyId);
         const issue = await this.prisma.productionIssue.create({
@@ -92,6 +99,9 @@ let ProductionIssueService = class ProductionIssueService {
             });
         }
         await this.audit.log({ tableName: 'production_issues', recordId: issue.id, action: 'CREATE', newValues: issue, changedBy: user.id });
+        if (usedOverride) {
+            await this.overrideService.consume(usedOverride.id, issue.id, user);
+        }
         return issue;
     }
     async confirm(id, user) {
@@ -190,6 +200,7 @@ exports.ProductionIssueService = ProductionIssueService = __decorate([
         audit_service_1.AuditService,
         stock_ledger_service_1.StockLedgerService,
         mrp_service_1.MrpService,
-        production_material_return_service_1.ProductionMaterialReturnService])
+        production_material_return_service_1.ProductionMaterialReturnService,
+        material_issue_override_service_1.MaterialIssueOverrideService])
 ], ProductionIssueService);
 //# sourceMappingURL=production-issue.service.js.map

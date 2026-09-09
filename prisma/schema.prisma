@@ -370,6 +370,7 @@ model Company {
   storeReceivings StoreReceiving[]
   storeShortages StoreShortage[]
   productionMaterialReturns ProductionMaterialReturn[]
+  materialIssueOverrides MaterialIssueOverride[]
 }
 
 model Plant {
@@ -577,6 +578,8 @@ model User {
   storeShortagesRaised StoreShortage[] @relation("StoreShortageRaisedBy")
   storeShortagesResolved StoreShortage[] @relation("StoreShortageResolvedBy")
   materialReturnsReturned ProductionMaterialReturn[] @relation("ProductionMaterialReturnedBy")
+  materialIssueOverridesRequested MaterialIssueOverride[] @relation("MaterialIssueOverrideRequestedBy")
+  materialIssueOverridesApproved MaterialIssueOverride[] @relation("MaterialIssueOverrideApprovedBy")
 }
 
 model SystemSetting {
@@ -1685,6 +1688,43 @@ model ProductionMaterialReturn {
   @@map("production_material_returns")
   @@index([companyId, workOrderId])
   @@index([companyId, itemCode])
+}
+
+model MaterialIssueOverride {
+  id                    String    @id @default(uuid())
+  companyId             String
+  company               Company   @relation(fields: [companyId], references: [id])
+  workOrderId           String
+  workOrder             WorkOrder @relation(fields: [workOrderId], references: [id])
+  approvalRequestId     String    // loosely linked, no FK - matches the generic engine's own documentId convention
+  // Snapshot of the pending items and their outstanding quantities at the
+  // moment the override was requested. Never modified after creation -
+  // this is what "never falsifies the original unreconciled amount" means:
+  // the approval grants a one-time exception to issue despite this exact
+  // snapshot, it does not retroactively change or clear the outstanding
+  // balance itself.
+  itemsSnapshot         Json
+  reason                String
+  requestedById         String
+  requestedBy           User      @relation("MaterialIssueOverrideRequestedBy", fields: [requestedById], references: [id])
+  requestedAt           DateTime  @default(now())
+  deadlineAt            DateTime
+  status                String    @default("PENDING") // PENDING, APPROVED, REJECTED, EXPIRED, CONSUMED
+  approvedById          String?
+  approvedBy            User?     @relation("MaterialIssueOverrideApprovedBy", fields: [approvedById], references: [id])
+  approvedAt            DateTime?
+  approverComments      String?
+  consumedByIssueId     String?
+  isActive              Boolean   @default(true)
+  isTestData            Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  @@map("material_issue_overrides")
+  @@index([companyId, workOrderId])
+  @@index([companyId, status])
 }
 
 model Downtime {
@@ -4060,6 +4100,7 @@ model WorkOrder {
   @@index([companyId, status])
   @@map("work_orders")
   materialReturns ProductionMaterialReturn[]
+  materialIssueOverrides MaterialIssueOverride[]
 }
 
 model MaterialReservation {

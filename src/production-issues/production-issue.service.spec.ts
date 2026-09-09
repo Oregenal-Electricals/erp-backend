@@ -8,6 +8,7 @@ describe('ProductionIssueService.create - previous material status gate', () => 
   let stockLedger: any;
   let mrpService: any;
   let materialReturnService: any;
+  let overrideService: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const wo = { id: 'wo-1', companyId: 'company-1', status: 'RELEASED' };
@@ -25,7 +26,8 @@ describe('ProductionIssueService.create - previous material status gate', () => 
     stockLedger = { postTransaction: jest.fn().mockResolvedValue({}) };
     mrpService = { calculateMrp: jest.fn() };
     materialReturnService = { getPreviousMaterialStatus: jest.fn().mockResolvedValue({ overallStatus: 'CLEAR', items: [] }) };
-    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService);
+    overrideService = { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn().mockResolvedValue({}) };
+    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService);
   });
 
   it('allows the new issue when previous material status is CLEAR', async () => {
@@ -59,6 +61,29 @@ describe('ProductionIssueService.create - previous material status gate', () => 
     prisma.workOrder.findFirst.mockResolvedValue({ ...wo, status: 'DRAFT' });
     await expect(service.create(dto as any, user)).rejects.toThrow(/RELEASED or IN_PROGRESS/);
     expect(materialReturnService.getPreviousMaterialStatus).not.toHaveBeenCalled();
+  });
+
+  it('allows the issue through a valid APPROVED override even while PENDING, and consumes it afterward', async () => {
+    materialReturnService.getPreviousMaterialStatus.mockResolvedValue({
+      overallStatus: 'PENDING',
+      items: [{ itemCode: 'DRIVER-01', outstandingQty: 50, uom: 'PCS', status: 'PENDING' }],
+    });
+    overrideService.findActiveApprovedOverride.mockResolvedValue({ id: 'override-1' });
+    const r = await service.create(dto as any, user);
+    expect(r.id).toBe('pi-1');
+    expect(overrideService.consume).toHaveBeenCalledWith('override-1', 'pi-1', user);
+  });
+
+  it('checks for an override for the correct work order before blocking', async () => {
+    materialReturnService.getPreviousMaterialStatus.mockResolvedValue({ overallStatus: 'PENDING', items: [{ itemCode: 'DRIVER-01', outstandingQty: 50, uom: 'PCS', status: 'PENDING' }] });
+    overrideService.findActiveApprovedOverride.mockResolvedValue(null);
+    await expect(service.create(dto as any, user)).rejects.toThrow(BadRequestException);
+    expect(overrideService.findActiveApprovedOverride).toHaveBeenCalledWith('wo-1', user);
+  });
+
+  it('does not consume an override on the CLEAR path (nothing to consume)', async () => {
+    await service.create(dto as any, user);
+    expect(overrideService.consume).not.toHaveBeenCalled();
   });
 
   it('only mentions the specific PENDING items in the block message, not every issued item', async () => {

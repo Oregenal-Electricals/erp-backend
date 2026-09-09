@@ -15,12 +15,13 @@ const common_module_1 = require("../common/common.module");
 const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
 const mrp_module_1 = require("../mrp/mrp.module");
 const production_material_return_module_1 = require("../production-material-return/production-material-return.module");
+const material_issue_override_module_1 = require("../material-issue-override/material-issue-override.module");
 let ProductionIssueModule = class ProductionIssueModule {
 };
 exports.ProductionIssueModule = ProductionIssueModule;
 exports.ProductionIssueModule = ProductionIssueModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, mrp_module_1.MrpModule, production_material_return_module_1.ProductionMaterialReturnModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, mrp_module_1.MrpModule, production_material_return_module_1.ProductionMaterialReturnModule, material_issue_override_module_1.MaterialIssueOverrideModule],
         controllers: [production_issue_controller_1.ProductionIssueController],
         providers: [production_issue_service_1.ProductionIssueService],
         exports: [production_issue_service_1.ProductionIssueService],
