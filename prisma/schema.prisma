@@ -369,6 +369,7 @@ model Company {
   @@index([isActive])
   storeReceivings StoreReceiving[]
   storeShortages StoreShortage[]
+  productionMaterialReturns ProductionMaterialReturn[]
 }
 
 model Plant {
@@ -575,6 +576,7 @@ model User {
   storeReceivingItemsVerified StoreReceivingItem[] @relation("StoreReceivingItemVerifiedBy")
   storeShortagesRaised StoreShortage[] @relation("StoreShortageRaisedBy")
   storeShortagesResolved StoreShortage[] @relation("StoreShortageResolvedBy")
+  materialReturnsReturned ProductionMaterialReturn[] @relation("ProductionMaterialReturnedBy")
 }
 
 model SystemSetting {
@@ -1655,6 +1657,36 @@ model StoreShortage {
   @@index([companyId, status])
 }
 
+model ProductionMaterialReturn {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  returnNumber    String
+  workOrderId     String
+  workOrder       WorkOrder @relation(fields: [workOrderId], references: [id])
+  warehouseId     String
+  warehouse       Warehouse @relation(fields: [warehouseId], references: [id])
+  itemCode        String
+  itemName        String
+  uom             String
+  qty             Float
+  reason          String    @default("EXCESS_UNUSED") // EXCESS_UNUSED, REJECTED_MATERIAL, OTHER
+  remarks         String?
+  returnedById    String
+  returnedBy      User      @relation("ProductionMaterialReturnedBy", fields: [returnedById], references: [id])
+  returnedAt      DateTime  @default(now())
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("production_material_returns")
+  @@index([companyId, workOrderId])
+  @@index([companyId, itemCode])
+}
+
 model Downtime {
   id              String    @id @default(uuid())
   companyId       String
@@ -1948,6 +1980,7 @@ model Warehouse {
   @@unique([companyId, code])
   @@index([companyId])
   @@index([plantId])
+  materialReturns ProductionMaterialReturn[]
 }
 
 model Zone {
@@ -4026,6 +4059,7 @@ model WorkOrder {
   @@unique([companyId, woNumber])
   @@index([companyId, status])
   @@map("work_orders")
+  materialReturns ProductionMaterialReturn[]
 }
 
 model MaterialReservation {

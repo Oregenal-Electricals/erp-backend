@@ -81,6 +81,7 @@ import { CostSheetModule } from './production-cost-sheets/cost-sheet.module';
 import { ProductionDashboardModule } from './production-dashboard/production-dashboard.module';
 import { ProductionReportsModule } from './production-reports/production-reports.module';
 import { ProductTargetModule } from './product-standard-productivity/product-target.module';
+import { ProductionMaterialReturnModule } from './production-material-return/production-material-return.module';
 import { NcrModule } from './ncr/ncr.module';
 import { CapaModule } from './capa/capa.module';
 import { RcaModule } from './rca/rca.module';
@@ -235,6 +236,7 @@ import configuration from './config/configuration';
     ProductionDashboardModule,
     ProductionReportsModule,
     ProductTargetModule,
+    ProductionMaterialReturnModule,
     NcrModule,
     CapaModule,
     RcaModule,
