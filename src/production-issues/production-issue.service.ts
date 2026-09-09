@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { MrpService } from '../mrp/mrp.service';
+import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class ProductionIssueService {
     private audit: AuditService,
     private stockLedger: StockLedgerService,
     private mrpService: MrpService,
+    private materialReturnService: ProductionMaterialReturnService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -56,6 +58,18 @@ export class ProductionIssueService {
     if (!wo) throw new NotFoundException('Work order not found');
     if (!['RELEASED','IN_PROGRESS'].includes(wo.status)) {
       throw new BadRequestException('Work order must be RELEASED or IN_PROGRESS');
+    }
+
+    // Previous material status gate: new material cannot normally be
+    // issued for this WO while an earlier issue on the same WO is still
+    // unreconciled. Backend-enforced (not just a frontend indicator) -
+    // this is the actual block, override is a separate, explicit path
+    // built on top of this rather than a way around it.
+    const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
+    if (status.overallStatus === 'PENDING') {
+      const pendingItems = status.items.filter(i => i.status === 'PENDING');
+      const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
+      throw new BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material.`);
     }
 
     const issueNumber = await this.generateNumber(user.companyId);

@@ -2,13 +2,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { MrpService } from '../mrp/mrp.service';
+import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 export declare class ProductionIssueService {
     private prisma;
     private audit;
     private stockLedger;
     private mrpService;
-    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, mrpService: MrpService);
+    private materialReturnService;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, mrpService: MrpService, materialReturnService: ProductionMaterialReturnService);
     private generateNumber;
     private includes;
     createFromMrp(workOrderId: string, user: any): Promise<{

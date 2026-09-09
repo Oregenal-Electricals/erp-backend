@@ -77,13 +77,13 @@ export declare class ProductionDashboardController {
             actualLabourCost: number | null;
             downtimeMinutes: number;
             totalQty: number;
+            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             periodStart: Date | null;
             periodEnd: Date | null;
             downtimeReason: string | null;
-            entryNumber: string;
         })[];
         byShift: {
             shift: string;

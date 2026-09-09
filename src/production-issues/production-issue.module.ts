@@ -5,9 +5,10 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
 import { StockLedgerModule } from '../stock-ledger/stock-ledger.module';
 import { MrpModule } from '../mrp/mrp.module';
+import { ProductionMaterialReturnModule } from '../production-material-return/production-material-return.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule, StockLedgerModule, MrpModule],
+  imports: [PrismaModule, CommonModule, StockLedgerModule, MrpModule, ProductionMaterialReturnModule],
   controllers: [ProductionIssueController],
   providers: [ProductionIssueService],
   exports: [ProductionIssueService],

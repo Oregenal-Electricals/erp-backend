@@ -84,13 +84,13 @@ export declare class ProductionEntryController {
             actualLabourCost: number | null;
             downtimeMinutes: number;
             totalQty: number;
+            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             periodStart: Date | null;
             periodEnd: Date | null;
             downtimeReason: string | null;
-            entryNumber: string;
         }[];
         summary: {
             plannedQty: number;
@@ -140,13 +140,13 @@ export declare class ProductionEntryController {
             actualLabourCost: number | null;
             downtimeMinutes: number;
             totalQty: number;
+            entryNumber: string;
             entryDate: Date;
             operatorName: string | null;
             machineName: string | null;
             periodStart: Date | null;
             periodEnd: Date | null;
             downtimeReason: string | null;
-            entryNumber: string;
         })[];
         total: number;
         page: number;
@@ -188,13 +188,13 @@ export declare class ProductionEntryController {
         actualLabourCost: number | null;
         downtimeMinutes: number;
         totalQty: number;
+        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         periodStart: Date | null;
         periodEnd: Date | null;
         downtimeReason: string | null;
-        entryNumber: string;
     }>;
     create(dto: CreateProductionEntryDto, req: any): Promise<{
         workOrder: {
@@ -231,13 +231,13 @@ export declare class ProductionEntryController {
         actualLabourCost: number | null;
         downtimeMinutes: number;
         totalQty: number;
+        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         periodStart: Date | null;
         periodEnd: Date | null;
         downtimeReason: string | null;
-        entryNumber: string;
     }>;
     confirm(id: string, req: any): Promise<{
         workOrder: {
@@ -274,12 +274,12 @@ export declare class ProductionEntryController {
         actualLabourCost: number | null;
         downtimeMinutes: number;
         totalQty: number;
+        entryNumber: string;
         entryDate: Date;
         operatorName: string | null;
         machineName: string | null;
         periodStart: Date | null;
         periodEnd: Date | null;
         downtimeReason: string | null;
-        entryNumber: string;
     }>;
 }
