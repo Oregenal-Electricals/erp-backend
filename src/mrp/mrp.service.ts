@@ -309,8 +309,14 @@ export class MrpService {
       const wasteQty = (item.wastagePercent || 0) / 100 * grossQty;
       const netRequired = grossQty + wasteQty;
 
+      // Pre-existing bug fixed: this lookup had no warehouseId filter,
+      // so findFirst() (no orderBy) could return ANY warehouse's balance
+      // row for this itemCode - in a multi-warehouse company, that could
+      // silently pick a warehouse with zero stock while the WO's own
+      // warehouse actually had plenty, producing a false shortage/zero
+      // issuable quantity with no error raised anywhere.
       const balance = await this.prisma.stockBalance.findFirst({
-        where: { companyId, itemCode: item.itemCode },
+        where: { companyId, itemCode: item.itemCode, warehouseId: wo.warehouseId },
       });
       const availableQty = balance?.availableQty || 0;
 

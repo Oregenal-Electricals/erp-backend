@@ -229,7 +229,7 @@ let MrpService = class MrpService {
             const wasteQty = (item.wastagePercent || 0) / 100 * grossQty;
             const netRequired = grossQty + wasteQty;
             const balance = await this.prisma.stockBalance.findFirst({
-                where: { companyId, itemCode: item.itemCode },
+                where: { companyId, itemCode: item.itemCode, warehouseId: wo.warehouseId },
             });
             const availableQty = (balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0;
             const batches = await this.prisma.stockBatch.findMany({
