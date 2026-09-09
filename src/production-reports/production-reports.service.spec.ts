@@ -303,4 +303,81 @@ describe('ProductionReportsService.getDailyOutputByProduct', () => {
       expect(r.totalWos).toBe(1); // still counted in the raw fetch, just not bucketed
     });
   });
+
+  describe('getPnl', () => {
+    const costSheets = [
+      { id: 'pcs-a', status: 'FINALIZED', netActualCost: 760, finalGoodFgQty: 100, workOrder: { woNumber: 'WO-1', productCode: 'PANEL-01', productName: 'LED Panel', closedAt: new Date('2026-09-05T00:00:00.000Z') } },
+      { id: 'pcs-b', status: 'FINALIZED', netActualCost: 425, finalGoodFgQty: 50, workOrder: { woNumber: 'WO-2', productCode: 'PANEL-01', productName: 'LED Panel', closedAt: new Date('2026-10-05T00:00:00.000Z') } },
+      { id: 'pcs-c', status: 'FINALIZED', netActualCost: 200, finalGoodFgQty: 20, workOrder: { woNumber: 'WO-3', productCode: 'BULB-01', productName: 'LED Bulb', closedAt: new Date('2026-09-05T00:00:00.000Z') } },
+    ];
+    const priceHistory = [
+      // newest-first, matching the service's own ordering
+      { productId: 'prod-panel', sellingPrice: 12, effectiveFrom: new Date('2026-10-01T00:00:00.000Z'), effectiveTo: null },
+      { productId: 'prod-panel', sellingPrice: 10, effectiveFrom: new Date('2026-01-01T00:00:00.000Z'), effectiveTo: new Date('2026-10-01T00:00:00.000Z') },
+    ];
+
+    beforeEach(() => {
+      prisma.productionCostSheet = { findMany: jest.fn().mockResolvedValue(costSheets) };
+      prisma.product = { findMany: jest.fn().mockResolvedValue([{ id: 'prod-panel', code: 'PANEL-01' }]) };
+      prisma.productSellingPrice = { findMany: jest.fn().mockResolvedValue(priceHistory) };
+    });
+
+    it('uses the price that was effective on each WO\'s own closedAt date, not the current/latest price', async () => {
+      const r = await service.getPnl(user, {});
+      const panel = r.byProduct.find((p: any) => p.productCode === 'PANEL-01');
+      // WO-1 closed Sep 5 -> old price (10) x 100 = 1000
+      // WO-2 closed Oct 5 -> revised price (12) x 50 = 600
+      expect(panel.revenue).toBe(1600);
+    });
+
+    it('computes profit as revenue minus cost, per product and in the grand total', async () => {
+      const r = await service.getPnl(user, {});
+      const panel = r.byProduct.find((p: any) => p.productCode === 'PANEL-01');
+      expect(panel.cost).toBe(1185); // 760 + 425
+      expect(panel.profit).toBe(1600 - 1185);
+      expect(r.totals.profit).toBe(r.totals.revenue - r.totals.cost);
+    });
+
+    it('flags a product with no price version at all as a price gap, counting its cost but not fabricating revenue', async () => {
+      const r = await service.getPnl(user, {});
+      const bulb = r.byProduct.find((p: any) => p.productCode === 'BULB-01');
+      expect(bulb.hasPriceGap).toBe(true);
+      expect(bulb.revenue).toBe(0);
+      expect(bulb.cost).toBe(200);
+      expect(r.noPriceProducts).toContain('BULB-01');
+      expect(r.noPriceProducts).not.toContain('PANEL-01');
+    });
+
+    it('only queries FINALIZED cost sheets for this company', async () => {
+      await service.getPnl(user, {});
+      expect(prisma.productionCostSheet.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ companyId: 'company-1', status: 'FINALIZED' }) }),
+      );
+    });
+
+    it('applies fromDate/toDate as a WorkOrder.closedAt range filter, same as Cost Trend', async () => {
+      await service.getPnl(user, { fromDate: '2026-09-01', toDate: '2026-09-30' });
+      const call = prisma.productionCostSheet.findMany.mock.calls[0][0];
+      expect(call.where.workOrder.closedAt.gte).toEqual(new Date('2026-09-01'));
+      expect(call.where.workOrder.closedAt.lte).toEqual(new Date('2026-09-30T23:59:59.999Z'));
+    });
+
+    it('handles an empty result set without throwing', async () => {
+      prisma.productionCostSheet.findMany.mockResolvedValue([]);
+      const r = await service.getPnl(user, {});
+      expect(r.byProduct).toEqual([]);
+      expect(r.totals.revenue).toBe(0);
+      expect(r.totals.profit).toBe(0);
+      expect(r.noPriceProducts).toEqual([]);
+      expect(r.totalWos).toBe(0);
+    });
+
+    it('skips a sheet defensively if its WorkOrder has no closedAt, same as Cost Trend', async () => {
+      prisma.productionCostSheet.findMany.mockResolvedValue([
+        { id: 'pcs-e', status: 'FINALIZED', netActualCost: 50, finalGoodFgQty: 5, workOrder: { woNumber: 'WO-5', productCode: 'Z', productName: 'Z', closedAt: null } },
+      ]);
+      const r = await service.getPnl(user, {});
+      expect(r.byProduct).toEqual([]);
+    });
+  });
 });

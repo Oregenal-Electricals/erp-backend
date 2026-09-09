@@ -38,4 +38,7 @@ export class ProductionReportsController {
   @Get('cost-trend')
   @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
   getCostTrend(@Request() req: any, @Query() query: any) { return this.prService.getCostTrend(req.user, query); }
+  @Get('pnl')
+  @RequirePermissions(Permission.PRODUCTION_REPORT_VIEW)
+  getPnl(@Request() req: any, @Query() query: any) { return this.prService.getPnl(req.user, query); }
 }

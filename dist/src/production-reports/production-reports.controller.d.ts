@@ -197,4 +197,15 @@ export declare class ProductionReportsController {
         };
         totalWos: number;
     }>;
+    getPnl(req: any, query: any): Promise<{
+        byProduct: any[];
+        totals: {
+            revenue: number;
+            cost: number;
+            profit: number;
+            finalGoodFgQty: number;
+        };
+        noPriceProducts: string[];
+        totalWos: number;
+    }>;
 }

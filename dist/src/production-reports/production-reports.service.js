@@ -359,6 +359,79 @@ let ProductionReportsService = class ProductionReportsService {
             totalWos: sheets.length,
         };
     }
+    async getPnl(user, query) {
+        var _a;
+        const { fromDate, toDate, productCode } = query;
+        const workOrderWhere = {};
+        const dateWhere = this.dateWhere(fromDate, toDate);
+        if (dateWhere)
+            workOrderWhere.closedAt = dateWhere;
+        if (productCode)
+            workOrderWhere.productCode = productCode;
+        const sheets = await this.prisma.productionCostSheet.findMany({
+            where: { companyId: user.companyId, status: 'FINALIZED', workOrder: workOrderWhere },
+            include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, closedAt: true } } },
+        });
+        const productCodes = Array.from(new Set(sheets.map(s => { var _a; return (_a = s.workOrder) === null || _a === void 0 ? void 0 : _a.productCode; }).filter(Boolean)));
+        const products = await this.prisma.product.findMany({
+            where: { companyId: user.companyId, code: { in: productCodes } },
+            select: { id: true, code: true },
+        });
+        const productIdByCode = new Map(products.map(p => [p.code, p.id]));
+        const priceCache = new Map();
+        const getPriceHistory = async (productId) => {
+            if (!priceCache.has(productId)) {
+                priceCache.set(productId, await this.prisma.productSellingPrice.findMany({
+                    where: { companyId: user.companyId, productId, isActive: true },
+                    orderBy: { effectiveFrom: 'desc' },
+                }));
+            }
+            return priceCache.get(productId);
+        };
+        const priceAt = (history, at) => { var _a, _b; return (_b = (_a = history.find(v => v.effectiveFrom <= at && (!v.effectiveTo || v.effectiveTo >= at))) === null || _a === void 0 ? void 0 : _a.sellingPrice) !== null && _b !== void 0 ? _b : null; };
+        const byProduct = {};
+        const noPriceProducts = new Set();
+        let grandRevenue = 0, grandCost = 0, grandFgQty = 0;
+        for (const s of sheets) {
+            if (!((_a = s.workOrder) === null || _a === void 0 ? void 0 : _a.closedAt))
+                continue;
+            const prodCode = s.workOrder.productCode || 'UNKNOWN';
+            const prodName = s.workOrder.productName || 'Unknown';
+            const productId = productIdByCode.get(prodCode);
+            let unitPrice = null;
+            if (productId) {
+                const history = await getPriceHistory(productId);
+                unitPrice = priceAt(history, new Date(s.workOrder.closedAt));
+            }
+            if (!byProduct[prodCode]) {
+                byProduct[prodCode] = { productCode: prodCode, productName: prodName, revenue: 0, cost: 0, profit: 0, finalGoodFgQty: 0, woCount: 0, hasPriceGap: false };
+            }
+            const row = byProduct[prodCode];
+            row.cost += s.netActualCost;
+            row.finalGoodFgQty += s.finalGoodFgQty;
+            row.woCount++;
+            grandCost += s.netActualCost;
+            grandFgQty += s.finalGoodFgQty;
+            if (unitPrice === null) {
+                row.hasPriceGap = true;
+                noPriceProducts.add(prodCode);
+            }
+            else {
+                const revenue = unitPrice * s.finalGoodFgQty;
+                row.revenue += revenue;
+                grandRevenue += revenue;
+            }
+            row.profit = row.revenue - row.cost;
+        }
+        return {
+            byProduct: Object.values(byProduct).map((r) => (Object.assign(Object.assign({}, r), { profit: r.revenue - r.cost }))).sort((a, b) => b.profit - a.profit),
+            totals: {
+                revenue: grandRevenue, cost: grandCost, profit: grandRevenue - grandCost, finalGoodFgQty: grandFgQty,
+            },
+            noPriceProducts: Array.from(noPriceProducts),
+            totalWos: sheets.length,
+        };
+    }
 };
 exports.ProductionReportsService = ProductionReportsService;
 exports.ProductionReportsService = ProductionReportsService = __decorate([

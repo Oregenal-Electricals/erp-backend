@@ -421,4 +421,91 @@ export class ProductionReportsService {
       totalWos: sheets.length,
     };
   }
+
+  // Revenue side of P&L: for each finalized cost sheet, look up the
+  // selling price that was actually effective on the WO's own closedAt
+  // date (never "today's" price) - the same historical-window selection
+  // ProductSellingPriceService.findCurrent() uses for "now", just
+  // parameterized by a specific past date instead. A product with no
+  // price version covering that date is reported separately rather than
+  // silently treated as zero revenue, so a missing price is visible
+  // rather than masquerading as a real loss.
+  async getPnl(user: any, query: any) {
+    const { fromDate, toDate, productCode } = query;
+    const workOrderWhere: any = {};
+    const dateWhere = this.dateWhere(fromDate, toDate);
+    if (dateWhere) workOrderWhere.closedAt = dateWhere;
+    if (productCode) workOrderWhere.productCode = productCode;
+
+    const sheets = await this.prisma.productionCostSheet.findMany({
+      where: { companyId: user.companyId, status: 'FINALIZED', workOrder: workOrderWhere },
+      include: { workOrder: { select: { woNumber: true, productCode: true, productName: true, closedAt: true } } },
+    });
+
+    const productCodes = Array.from(new Set(sheets.map(s => s.workOrder?.productCode).filter(Boolean)));
+    const products = await this.prisma.product.findMany({
+      where: { companyId: user.companyId, code: { in: productCodes } },
+      select: { id: true, code: true },
+    });
+    const productIdByCode = new Map(products.map(p => [p.code, p.id]));
+
+    const priceCache = new Map<string, any[]>();
+    const getPriceHistory = async (productId: string) => {
+      if (!priceCache.has(productId)) {
+        priceCache.set(productId, await this.prisma.productSellingPrice.findMany({
+          where: { companyId: user.companyId, productId, isActive: true },
+          orderBy: { effectiveFrom: 'desc' },
+        }));
+      }
+      return priceCache.get(productId)!;
+    };
+    const priceAt = (history: any[], at: Date) =>
+      history.find(v => v.effectiveFrom <= at && (!v.effectiveTo || v.effectiveTo >= at))?.sellingPrice ?? null;
+
+    const byProduct: Record<string, any> = {};
+    const noPriceProducts = new Set<string>();
+    let grandRevenue = 0, grandCost = 0, grandFgQty = 0;
+
+    for (const s of sheets) {
+      if (!s.workOrder?.closedAt) continue;
+      const prodCode = s.workOrder.productCode || 'UNKNOWN';
+      const prodName = s.workOrder.productName || 'Unknown';
+      const productId = productIdByCode.get(prodCode);
+
+      let unitPrice: number | null = null;
+      if (productId) {
+        const history = await getPriceHistory(productId);
+        unitPrice = priceAt(history, new Date(s.workOrder.closedAt));
+      }
+
+      if (!byProduct[prodCode]) {
+        byProduct[prodCode] = { productCode: prodCode, productName: prodName, revenue: 0, cost: 0, profit: 0, finalGoodFgQty: 0, woCount: 0, hasPriceGap: false };
+      }
+      const row = byProduct[prodCode];
+      row.cost += s.netActualCost;
+      row.finalGoodFgQty += s.finalGoodFgQty;
+      row.woCount++;
+      grandCost += s.netActualCost;
+      grandFgQty += s.finalGoodFgQty;
+
+      if (unitPrice === null) {
+        row.hasPriceGap = true;
+        noPriceProducts.add(prodCode);
+      } else {
+        const revenue = unitPrice * s.finalGoodFgQty;
+        row.revenue += revenue;
+        grandRevenue += revenue;
+      }
+      row.profit = row.revenue - row.cost;
+    }
+
+    return {
+      byProduct: Object.values(byProduct).map((r: any) => ({ ...r, profit: r.revenue - r.cost })).sort((a: any, b: any) => b.profit - a.profit),
+      totals: {
+        revenue: grandRevenue, cost: grandCost, profit: grandRevenue - grandCost, finalGoodFgQty: grandFgQty,
+      },
+      noPriceProducts: Array.from(noPriceProducts),
+      totalWos: sheets.length,
+    };
+  }
 }
