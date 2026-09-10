@@ -36,6 +36,21 @@ let GrnDiscrepancyController = class GrnDiscrepancyController {
     correct(id, dto, req) {
         return this.service.correct(id, dto, req.user);
     }
+    purchaseReview(id, dto, req) {
+        return this.service.purchaseReview(id, dto, req.user);
+    }
+    qcReview(id, dto, req) {
+        return this.service.qcReview(id, dto, req.user);
+    }
+    requestResolution(id, dto, req) {
+        return this.service.requestResolution(id, dto, req.user);
+    }
+    decideResolution(id, dto, req) {
+        return this.service.decideResolution(id, dto, req.user);
+    }
+    resolveDirect(id, dto, req) {
+        return this.service.resolveDirect(id, dto, req.user);
+    }
 };
 exports.GrnDiscrepancyController = GrnDiscrepancyController;
 __decorate([
@@ -76,6 +91,56 @@ __decorate([
     __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.CorrectDiscrepancyDto, Object]),
     __metadata("design:returntype", void 0)
 ], GrnDiscrepancyController.prototype, "correct", null);
+__decorate([
+    (0, common_1.Post)(':id/purchase-review'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_DISCREPANCY_PURCHASE_REVIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.PurchaseReviewDto, Object]),
+    __metadata("design:returntype", void 0)
+], GrnDiscrepancyController.prototype, "purchaseReview", null);
+__decorate([
+    (0, common_1.Post)(':id/qc-review'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_DISCREPANCY_QC_REVIEW),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.QcReviewDto, Object]),
+    __metadata("design:returntype", void 0)
+], GrnDiscrepancyController.prototype, "qcReview", null);
+__decorate([
+    (0, common_1.Post)(':id/request-resolution'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_DISCREPANCY_RESOLVE_REQUEST),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.RequestResolutionDto, Object]),
+    __metadata("design:returntype", void 0)
+], GrnDiscrepancyController.prototype, "requestResolution", null);
+__decorate([
+    (0, common_1.Post)(':id/decide-resolution'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_DISCREPANCY_RESOLVE_APPROVE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.DecideResolutionDto, Object]),
+    __metadata("design:returntype", void 0)
+], GrnDiscrepancyController.prototype, "decideResolution", null);
+__decorate([
+    (0, common_1.Post)(':id/resolve-direct'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_DISCREPANCY_RESOLVE_REQUEST),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.DirectResolveDto, Object]),
+    __metadata("design:returntype", void 0)
+], GrnDiscrepancyController.prototype, "resolveDirect", null);
 exports.GrnDiscrepancyController = GrnDiscrepancyController = __decorate([
     (0, common_1.Controller)('grn-discrepancies'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

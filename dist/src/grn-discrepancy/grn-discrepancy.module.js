@@ -13,12 +13,14 @@ const grn_discrepancy_service_1 = require("./grn-discrepancy.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const notifications_module_1 = require("../notifications/notifications.module");
+const workflows_module_1 = require("../workflows/workflows.module");
+const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
 let GrnDiscrepancyModule = class GrnDiscrepancyModule {
 };
 exports.GrnDiscrepancyModule = GrnDiscrepancyModule;
 exports.GrnDiscrepancyModule = GrnDiscrepancyModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, notifications_module_1.NotificationsModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, notifications_module_1.NotificationsModule, workflows_module_1.WorkflowsModule, stock_ledger_module_1.StockLedgerModule],
         controllers: [grn_discrepancy_controller_1.GrnDiscrepancyController],
         providers: [grn_discrepancy_service_1.GrnDiscrepancyService],
         exports: [grn_discrepancy_service_1.GrnDiscrepancyService],

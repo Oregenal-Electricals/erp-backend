@@ -14,6 +14,8 @@ describe('GrnDiscrepancyService (STORE-005)', () => {
 
   let lastDiscrepancy: any = null;
   let lastGrnItem: any = { ...grnItem };
+  let workflows: any;
+  let stockLedger: any;
 
   beforeEach(() => {
     lastDiscrepancy = null;
@@ -44,11 +46,17 @@ describe('GrnDiscrepancyService (STORE-005)', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
       user: { findMany: jest.fn().mockResolvedValue([{ id: 'pm-1' }]) },
+      grnHeader: { findFirst: jest.fn().mockResolvedValue({ id: 'grn-1', warehouseId: 'wh-1' }) },
       $transaction: jest.fn().mockImplementation((ops: any) => Promise.all(ops)),
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
-    service = new GrnDiscrepancyService(prisma, audit, notifications);
+    workflows = {
+      submit: jest.fn().mockResolvedValue({ request: { id: 'approval-1' } }),
+      act: jest.fn().mockResolvedValue(undefined),
+    };
+    stockLedger = { postTransaction: jest.fn().mockResolvedValue(undefined) };
+    service = new GrnDiscrepancyService(prisma, audit, notifications, workflows, stockLedger);
   });
 
   describe('raise', () => {
@@ -178,6 +186,171 @@ describe('GrnDiscrepancyService (STORE-005)', () => {
     it('findOne throws NotFoundException for a missing record', async () => {
       lastDiscrepancy = null;
       await expect(service.findOne('missing', user)).rejects.toThrow(NotFoundException);
+    });
+  });
+});
+
+describe('GrnDiscrepancyService Phase B - review and resolution', () => {
+  let service: GrnDiscrepancyService;
+  let prisma: any;
+  let audit: any;
+  let notifications: any;
+  let workflows: any;
+  let stockLedger: any;
+
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  let lastRecord: any;
+  let lastGrnItem: any;
+
+  beforeEach(() => {
+    lastRecord = {
+      id: 'dis-1', companyId: 'company-1', grnItemId: 'gi-1', grnId: 'grn-1',
+      itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', affectedQty: 20,
+      purchaseStatus: 'NOTIFIED', qcStatus: 'PENDING', status: 'OPEN',
+      resolution: null, resolutionApprovalRequestId: null,
+    };
+    lastGrnItem = { id: 'gi-1', heldQty: 20 };
+
+    prisma = {
+      grnItemDiscrepancy: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(lastRecord)),
+        update: jest.fn().mockImplementation(({ data }: any) => {
+          lastRecord = { ...lastRecord, ...data };
+          return Promise.resolve(lastRecord);
+        }),
+      },
+      grnItem: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(lastGrnItem)),
+        update: jest.fn().mockImplementation(({ data }: any) => {
+          if (data.heldQty?.decrement !== undefined) {
+            lastGrnItem = { ...lastGrnItem, heldQty: lastGrnItem.heldQty - data.heldQty.decrement };
+          }
+          return Promise.resolve(lastGrnItem);
+        }),
+      },
+      grnHeader: { findFirst: jest.fn().mockResolvedValue({ id: 'grn-1', warehouseId: 'wh-1' }) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
+    workflows = {
+      submit: jest.fn().mockResolvedValue({ request: { id: 'approval-1' } }),
+      act: jest.fn().mockResolvedValue(undefined),
+    };
+    stockLedger = { postTransaction: jest.fn().mockResolvedValue(undefined) };
+    service = new GrnDiscrepancyService(prisma, audit, notifications, workflows, stockLedger);
+  });
+
+  describe('purchaseReview', () => {
+    it('records purchaseStatus independently of qcStatus', async () => {
+      const r = await service.purchaseReview('dis-1', { purchaseStatus: 'COMMERCIALLY_ACCEPTED' } as any, user);
+      expect(r.purchaseStatus).toBe('COMMERCIALLY_ACCEPTED');
+      expect(r.qcStatus).toBe('PENDING');
+    });
+
+    it('blocks review on an already-resolved discrepancy', async () => {
+      lastRecord = { ...lastRecord, status: 'RESOLVED' };
+      await expect(service.purchaseReview('dis-1', { purchaseStatus: 'COMMERCIALLY_ACCEPTED' } as any, user)).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('qcReview', () => {
+    it('records the QC decision when qcStatus is PENDING', async () => {
+      const r = await service.qcReview('dis-1', { qcStatus: 'REJECTED' } as any, user);
+      expect(r.qcStatus).toBe('REJECTED');
+    });
+
+    it('blocks QC review when the discrepancy never required QC (qcStatus NOT_REQUIRED)', async () => {
+      lastRecord = { ...lastRecord, qcStatus: 'NOT_REQUIRED' };
+      await expect(service.qcReview('dis-1', { qcStatus: 'ACCEPTED' } as any, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('blocks QC review when already decided (idempotent, no re-decision)', async () => {
+      lastRecord = { ...lastRecord, qcStatus: 'ACCEPTED' };
+      await expect(service.qcReview('dis-1', { qcStatus: 'REJECTED' } as any, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('QC decision and Purchase decision are independent - QC rejecting does not touch purchaseStatus', async () => {
+      lastRecord = { ...lastRecord, purchaseStatus: 'COMMERCIALLY_ACCEPTED' };
+      const r = await service.qcReview('dis-1', { qcStatus: 'REJECTED' } as any, user);
+      expect(r.purchaseStatus).toBe('COMMERCIALLY_ACCEPTED');
+      expect(r.qcStatus).toBe('REJECTED');
+    });
+  });
+
+  describe('requestResolution', () => {
+    it('submits an approval request and stores its id, status moves to PURCHASE_REVIEW', async () => {
+      const r = await service.requestResolution('dis-1', { resolution: 'ACCEPT_AUTHORIZED', reason: 'Alternate approved packaging' }, user);
+      expect(workflows.submit).toHaveBeenCalledWith(expect.objectContaining({ documentType: 'GRN_DISCREPANCY_RESOLUTION', documentId: 'dis-1' }), user);
+      expect(r.resolutionApprovalRequestId).toBe('approval-1');
+      expect(r.status).toBe('PURCHASE_REVIEW');
+    });
+
+    it('blocks a second resolution request while one is already pending', async () => {
+      lastRecord = { ...lastRecord, resolutionApprovalRequestId: 'approval-existing' };
+      await expect(service.requestResolution('dis-1', { resolution: 'ACCEPT_AUTHORIZED', reason: 'x' }, user)).rejects.toThrow(/already pending/);
+    });
+
+    it('blocks requesting resolution on an already-resolved discrepancy', async () => {
+      lastRecord = { ...lastRecord, status: 'RESOLVED' };
+      await expect(service.requestResolution('dis-1', { resolution: 'RECLASSIFY', reason: 'x' }, user)).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('decideResolution', () => {
+    beforeEach(() => {
+      lastRecord = { ...lastRecord, resolution: 'ACCEPT_AUTHORIZED', resolutionApprovalRequestId: 'approval-1', status: 'PURCHASE_REVIEW' };
+    });
+
+    it('on APPROVED + ACCEPT_AUTHORIZED: decrements heldQty and posts a DISCREPANCY_RELEASE stock transaction', async () => {
+      const r = await service.decideResolution('dis-1', { action: 'APPROVED' }, user);
+      expect(lastGrnItem.heldQty).toBe(0);
+      expect(stockLedger.postTransaction).toHaveBeenCalledWith(expect.objectContaining({
+        transactionType: 'DISCREPANCY_RELEASE', inQty: 20, warehouseId: 'wh-1',
+      }));
+      expect(r.status).toBe('RESOLVED');
+    });
+
+    it('on APPROVED + RECLASSIFY: resolves without touching stock or heldQty', async () => {
+      lastRecord = { ...lastRecord, resolution: 'RECLASSIFY' };
+      const r = await service.decideResolution('dis-1', { action: 'APPROVED' }, user);
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+      expect(lastGrnItem.heldQty).toBe(20);
+      expect(r.status).toBe('RESOLVED');
+    });
+
+    it('on REJECTED: reopens the discrepancy and clears the requested resolution, no stock impact', async () => {
+      const r = await service.decideResolution('dis-1', { action: 'REJECTED', comments: 'Not approved' }, user);
+      expect(r.status).toBe('OPEN');
+      expect(r.resolution).toBeNull();
+      expect(r.resolutionApprovalRequestId).toBeNull();
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('blocks deciding when no resolution request is pending', async () => {
+      lastRecord = { ...lastRecord, resolutionApprovalRequestId: null };
+      await expect(service.decideResolution('dis-1', { action: 'APPROVED' }, user)).rejects.toThrow(/No resolution request/);
+    });
+  });
+
+  describe('resolveDirect', () => {
+    it('resolves RETURN_TO_VENDOR without releasing heldQty - material stays physically controlled', async () => {
+      const r = await service.resolveDirect('dis-1', { resolution: 'RETURN_TO_VENDOR', reason: 'Wrong material, vendor to collect' }, user);
+      expect(r.resolution).toBe('RETURN_TO_VENDOR');
+      expect(r.status).toBe('RESOLVED');
+      expect(prisma.grnItem.update).not.toHaveBeenCalled();
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('resolves HOLD_INVESTIGATION the same way - no stock movement', async () => {
+      const r = await service.resolveDirect('dis-1', { resolution: 'HOLD_INVESTIGATION', reason: 'Pending supplier response' }, user);
+      expect(r.status).toBe('RESOLVED');
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('blocks resolving an already-resolved discrepancy again', async () => {
+      lastRecord = { ...lastRecord, status: 'RESOLVED' };
+      await expect(service.resolveDirect('dis-1', { resolution: 'REPLACE', reason: 'x' }, user)).rejects.toThrow(BadRequestException);
     });
   });
 });

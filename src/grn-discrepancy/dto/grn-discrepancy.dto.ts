@@ -19,3 +19,35 @@ export class CorrectDiscrepancyDto {
   @IsNumber() @Min(0) affectedQty: number;
   @IsString() reason: string;
 }
+
+const PURCHASE_STATUSES = ['COMMERCIALLY_ACCEPTED', 'RETURN_REQUIRED', 'REPLACEMENT_REQUIRED'];
+const QC_DECISIONS = ['ACCEPTED', 'REJECTED'];
+const AUTHORIZATION_RESOLUTIONS = ['ACCEPT_AUTHORIZED', 'RECLASSIFY'];
+const DIRECT_RESOLUTIONS = ['RETURN_TO_VENDOR', 'REPLACE', 'HOLD_INVESTIGATION', 'OTHER'];
+
+export class PurchaseReviewDto {
+  @IsIn(PURCHASE_STATUSES) purchaseStatus: string;
+  @IsOptional() @IsString() remarks?: string;
+}
+
+export class QcReviewDto {
+  @IsIn(QC_DECISIONS) qcStatus: string;
+  @IsOptional() @IsString() remarks?: string;
+}
+
+export class RequestResolutionDto {
+  @IsIn(AUTHORIZATION_RESOLUTIONS) resolution: string;
+  @IsString() reason: string;
+}
+
+export class DecideResolutionDto {
+  @IsIn(['APPROVED', 'REJECTED']) action: string;
+  @IsOptional() @IsString() comments?: string;
+}
+
+export class DirectResolveDto {
+  @IsIn(DIRECT_RESOLUTIONS) resolution: string;
+  @IsString() reason: string;
+}
+
+export { AUTHORIZATION_RESOLUTIONS, DIRECT_RESOLUTIONS };

@@ -14,12 +14,16 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const notifications_service_1 = require("../notifications/notifications.service");
+const workflows_service_1 = require("../workflows/workflows.service");
+const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
 const QC_REQUIRED_PROBLEM_TYPES = ['VISIBLE_DAMAGE', 'SPECIFICATION_MISMATCH'];
 let GrnDiscrepancyService = class GrnDiscrepancyService {
-    constructor(prisma, audit, notifications) {
+    constructor(prisma, audit, notifications, workflows, stockLedger) {
         this.prisma = prisma;
         this.audit = audit;
         this.notifications = notifications;
+        this.workflows = workflows;
+        this.stockLedger = stockLedger;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.grnItemDiscrepancy.count({ where: { companyId } });
@@ -148,12 +152,147 @@ let GrnDiscrepancyService = class GrnDiscrepancyService {
         });
         return updated;
     }
+    async purchaseReview(id, dto, user) {
+        const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+        if (!record)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (record.status === 'RESOLVED' || record.status === 'CANCELLED') {
+            throw new common_1.BadRequestException(`Cannot review a discrepancy that is already ${record.status}`);
+        }
+        const oldValues = { purchaseStatus: record.purchaseStatus };
+        const updated = await this.prisma.grnItemDiscrepancy.update({
+            where: { id },
+            data: { purchaseStatus: dto.purchaseStatus, remarks: dto.remarks, updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+            oldValues, newValues: { purchaseStatus: dto.purchaseStatus }, changedBy: user.id,
+        });
+        return updated;
+    }
+    async qcReview(id, dto, user) {
+        const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+        if (!record)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (record.qcStatus !== 'PENDING') {
+            throw new common_1.BadRequestException(`This discrepancy is not awaiting QC review (qcStatus is ${record.qcStatus})`);
+        }
+        const oldValues = { qcStatus: record.qcStatus };
+        const updated = await this.prisma.grnItemDiscrepancy.update({
+            where: { id },
+            data: { qcStatus: dto.qcStatus, remarks: dto.remarks, updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+            oldValues, newValues: { qcStatus: dto.qcStatus }, changedBy: user.id,
+        });
+        return updated;
+    }
+    async requestResolution(id, dto, user) {
+        const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+        if (!record)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (record.status === 'RESOLVED' || record.status === 'CANCELLED') {
+            throw new common_1.BadRequestException(`Cannot request resolution for a discrepancy that is already ${record.status}`);
+        }
+        if (record.resolutionApprovalRequestId) {
+            throw new common_1.BadRequestException('A resolution request is already pending for this discrepancy');
+        }
+        const { request: approvalRequest } = await this.workflows.submit({
+            documentType: 'GRN_DISCREPANCY_RESOLUTION',
+            documentId: record.id,
+            documentNumber: record.discrepancyNumber,
+            remarks: dto.reason,
+        }, user);
+        const updated = await this.prisma.grnItemDiscrepancy.update({
+            where: { id },
+            data: {
+                resolution: dto.resolution, resolutionApprovalRequestId: approvalRequest.id,
+                status: 'PURCHASE_REVIEW', remarks: dto.reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+            newValues: { resolution: dto.resolution, resolutionApprovalRequestId: approvalRequest.id }, changedBy: user.id,
+        });
+        return updated;
+    }
+    async decideResolution(id, dto, user) {
+        const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+        if (!record)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (!record.resolutionApprovalRequestId)
+            throw new common_1.BadRequestException('No resolution request is pending for this discrepancy');
+        await this.workflows.act(record.resolutionApprovalRequestId, { action: dto.action, comments: dto.comments }, user);
+        if (dto.action === 'REJECTED') {
+            const updated = await this.prisma.grnItemDiscrepancy.update({
+                where: { id },
+                data: { resolution: null, resolutionApprovalRequestId: null, status: 'OPEN', remarks: dto.comments, updatedBy: user.id },
+                include: this.includes(),
+            });
+            await this.audit.log({
+                tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+                newValues: { resolutionDecision: 'REJECTED' }, changedBy: user.id,
+            });
+            return updated;
+        }
+        if (record.resolution === 'ACCEPT_AUTHORIZED') {
+            const grnItem = await this.prisma.grnItem.findFirst({ where: { id: record.grnItemId } });
+            const grn = await this.prisma.grnHeader.findFirst({ where: { id: record.grnId } });
+            if (grnItem && grn) {
+                await this.prisma.grnItem.update({ where: { id: grnItem.id }, data: { heldQty: { decrement: record.affectedQty }, updatedBy: user.id } });
+                await this.stockLedger.postTransaction({
+                    companyId: user.companyId, itemCode: record.itemCode, itemName: record.itemName,
+                    warehouseId: grn.warehouseId, transactionType: 'DISCREPANCY_RELEASE',
+                    referenceType: 'GRN_ITEM_DISCREPANCY', referenceId: record.id, referenceNumber: record.discrepancyNumber,
+                    inQty: record.affectedQty, remarks: 'Released to available stock after authorized acceptance of discrepancy ' + record.discrepancyNumber,
+                    userId: user.id,
+                });
+            }
+        }
+        const updated = await this.prisma.grnItemDiscrepancy.update({
+            where: { id },
+            data: { status: 'RESOLVED', resolvedById: user.id, resolvedAt: new Date(), remarks: dto.comments, updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+            newValues: { resolutionDecision: 'APPROVED', resolution: record.resolution }, changedBy: user.id,
+        });
+        return updated;
+    }
+    async resolveDirect(id, dto, user) {
+        const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+        if (!record)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (record.status === 'RESOLVED' || record.status === 'CANCELLED') {
+            throw new common_1.BadRequestException(`Cannot resolve a discrepancy that is already ${record.status}`);
+        }
+        const updated = await this.prisma.grnItemDiscrepancy.update({
+            where: { id },
+            data: {
+                resolution: dto.resolution, status: 'RESOLVED',
+                resolvedById: user.id, resolvedAt: new Date(), remarks: dto.reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+            newValues: { resolution: dto.resolution, status: 'RESOLVED' }, changedBy: user.id,
+        });
+        return updated;
+    }
 };
 exports.GrnDiscrepancyService = GrnDiscrepancyService;
 exports.GrnDiscrepancyService = GrnDiscrepancyService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        notifications_service_1.NotificationsService])
+        notifications_service_1.NotificationsService,
+        workflows_service_1.WorkflowsService,
+        stock_ledger_service_1.StockLedgerService])
 ], GrnDiscrepancyService);
 //# sourceMappingURL=grn-discrepancy.service.js.map

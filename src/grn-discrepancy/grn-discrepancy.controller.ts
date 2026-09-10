@@ -4,7 +4,10 @@ import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { Permission } from '../common/permissions/permissions.enum';
 import { GrnDiscrepancyService } from './grn-discrepancy.service';
-import { RaiseDiscrepancyDto, CorrectDiscrepancyDto } from './dto/grn-discrepancy.dto';
+import {
+  RaiseDiscrepancyDto, CorrectDiscrepancyDto, PurchaseReviewDto, QcReviewDto,
+  RequestResolutionDto, DecideResolutionDto, DirectResolveDto,
+} from './dto/grn-discrepancy.dto';
 
 @Controller('grn-discrepancies')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -33,5 +36,35 @@ export class GrnDiscrepancyController {
   @RequirePermissions(Permission.GRN_DISCREPANCY_CORRECT)
   correct(@Param('id') id: string, @Body() dto: CorrectDiscrepancyDto, @Request() req: any) {
     return this.service.correct(id, dto, req.user);
+  }
+
+  @Post(':id/purchase-review')
+  @RequirePermissions(Permission.GRN_DISCREPANCY_PURCHASE_REVIEW)
+  purchaseReview(@Param('id') id: string, @Body() dto: PurchaseReviewDto, @Request() req: any) {
+    return this.service.purchaseReview(id, dto, req.user);
+  }
+
+  @Post(':id/qc-review')
+  @RequirePermissions(Permission.GRN_DISCREPANCY_QC_REVIEW)
+  qcReview(@Param('id') id: string, @Body() dto: QcReviewDto, @Request() req: any) {
+    return this.service.qcReview(id, dto, req.user);
+  }
+
+  @Post(':id/request-resolution')
+  @RequirePermissions(Permission.GRN_DISCREPANCY_RESOLVE_REQUEST)
+  requestResolution(@Param('id') id: string, @Body() dto: RequestResolutionDto, @Request() req: any) {
+    return this.service.requestResolution(id, dto, req.user);
+  }
+
+  @Post(':id/decide-resolution')
+  @RequirePermissions(Permission.GRN_DISCREPANCY_RESOLVE_APPROVE)
+  decideResolution(@Param('id') id: string, @Body() dto: DecideResolutionDto, @Request() req: any) {
+    return this.service.decideResolution(id, dto, req.user);
+  }
+
+  @Post(':id/resolve-direct')
+  @RequirePermissions(Permission.GRN_DISCREPANCY_RESOLVE_REQUEST)
+  resolveDirect(@Param('id') id: string, @Body() dto: DirectResolveDto, @Request() req: any) {
+    return this.service.resolveDirect(id, dto, req.user);
   }
 }

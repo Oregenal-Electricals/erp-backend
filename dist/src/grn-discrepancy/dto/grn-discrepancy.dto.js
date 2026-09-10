@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CorrectDiscrepancyDto = exports.RaiseDiscrepancyDto = void 0;
+exports.DIRECT_RESOLUTIONS = exports.AUTHORIZATION_RESOLUTIONS = exports.DirectResolveDto = exports.DecideResolutionDto = exports.RequestResolutionDto = exports.QcReviewDto = exports.PurchaseReviewDto = exports.CorrectDiscrepancyDto = exports.RaiseDiscrepancyDto = void 0;
 const class_validator_1 = require("class-validator");
 const PROBLEM_TYPES = ['WRONG_MATERIAL', 'SPECIFICATION_MISMATCH', 'BATCH_MISMATCH', 'UOM_MISMATCH', 'VISIBLE_DAMAGE', 'LABEL_MISMATCH', 'MIXED_MATERIAL', 'DOCUMENT_MISMATCH', 'UNKNOWN'];
 const DAMAGE_TYPES = ['PACKAGING_DAMAGED', 'MATERIAL_DAMAGED'];
@@ -72,4 +72,68 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CorrectDiscrepancyDto.prototype, "reason", void 0);
+const PURCHASE_STATUSES = ['COMMERCIALLY_ACCEPTED', 'RETURN_REQUIRED', 'REPLACEMENT_REQUIRED'];
+const QC_DECISIONS = ['ACCEPTED', 'REJECTED'];
+const AUTHORIZATION_RESOLUTIONS = ['ACCEPT_AUTHORIZED', 'RECLASSIFY'];
+exports.AUTHORIZATION_RESOLUTIONS = AUTHORIZATION_RESOLUTIONS;
+const DIRECT_RESOLUTIONS = ['RETURN_TO_VENDOR', 'REPLACE', 'HOLD_INVESTIGATION', 'OTHER'];
+exports.DIRECT_RESOLUTIONS = DIRECT_RESOLUTIONS;
+class PurchaseReviewDto {
+}
+exports.PurchaseReviewDto = PurchaseReviewDto;
+__decorate([
+    (0, class_validator_1.IsIn)(PURCHASE_STATUSES),
+    __metadata("design:type", String)
+], PurchaseReviewDto.prototype, "purchaseStatus", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], PurchaseReviewDto.prototype, "remarks", void 0);
+class QcReviewDto {
+}
+exports.QcReviewDto = QcReviewDto;
+__decorate([
+    (0, class_validator_1.IsIn)(QC_DECISIONS),
+    __metadata("design:type", String)
+], QcReviewDto.prototype, "qcStatus", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], QcReviewDto.prototype, "remarks", void 0);
+class RequestResolutionDto {
+}
+exports.RequestResolutionDto = RequestResolutionDto;
+__decorate([
+    (0, class_validator_1.IsIn)(AUTHORIZATION_RESOLUTIONS),
+    __metadata("design:type", String)
+], RequestResolutionDto.prototype, "resolution", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RequestResolutionDto.prototype, "reason", void 0);
+class DecideResolutionDto {
+}
+exports.DecideResolutionDto = DecideResolutionDto;
+__decorate([
+    (0, class_validator_1.IsIn)(['APPROVED', 'REJECTED']),
+    __metadata("design:type", String)
+], DecideResolutionDto.prototype, "action", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DecideResolutionDto.prototype, "comments", void 0);
+class DirectResolveDto {
+}
+exports.DirectResolveDto = DirectResolveDto;
+__decorate([
+    (0, class_validator_1.IsIn)(DIRECT_RESOLUTIONS),
+    __metadata("design:type", String)
+], DirectResolveDto.prototype, "resolution", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DirectResolveDto.prototype, "reason", void 0);
 //# sourceMappingURL=grn-discrepancy.dto.js.map
