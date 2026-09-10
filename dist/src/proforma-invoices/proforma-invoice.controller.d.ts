@@ -70,10 +70,10 @@ export declare class ProformaInvoiceController {
             qty: number;
             sequence: number;
             hsnCode: string | null;
+            ipoItemId: string | null;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
-            ipoItemId: string | null;
             piId: string;
         }[];
         ipo: {
@@ -127,10 +127,10 @@ export declare class ProformaInvoiceController {
             qty: number;
             sequence: number;
             hsnCode: string | null;
+            ipoItemId: string | null;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
-            ipoItemId: string | null;
             piId: string;
         }[];
         ipo: {
@@ -184,10 +184,10 @@ export declare class ProformaInvoiceController {
             qty: number;
             sequence: number;
             hsnCode: string | null;
+            ipoItemId: string | null;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
-            ipoItemId: string | null;
             piId: string;
         }[];
         ipo: {
@@ -241,10 +241,10 @@ export declare class ProformaInvoiceController {
             qty: number;
             sequence: number;
             hsnCode: string | null;
+            ipoItemId: string | null;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
-            ipoItemId: string | null;
             piId: string;
         }[];
         ipo: {
@@ -298,10 +298,10 @@ export declare class ProformaInvoiceController {
             qty: number;
             sequence: number;
             hsnCode: string | null;
+            ipoItemId: string | null;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
-            ipoItemId: string | null;
             piId: string;
         }[];
         ipo: {
@@ -355,10 +355,10 @@ export declare class ProformaInvoiceController {
             qty: number;
             sequence: number;
             hsnCode: string | null;
+            ipoItemId: string | null;
             unitPriceForeign: number;
             totalForeign: number;
             totalInr: number;
-            ipoItemId: string | null;
             piId: string;
         }[];
         ipo: {

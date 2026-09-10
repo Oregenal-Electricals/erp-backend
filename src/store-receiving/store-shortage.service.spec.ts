@@ -214,3 +214,159 @@ describe('StoreShortageService STORE-003', () => {
     });
   });
 });
+
+describe('StoreShortageService.upsertFromGrnLine - STORE-003/004 on the live GRN pipeline', () => {
+  let service: StoreShortageService;
+  let prisma: any;
+  let audit: any;
+  let notifications: any;
+
+  const user = { id: 'purchase-1', companyId: 'company-1' };
+
+  const grn = {
+    id: 'grn-1', poId: 'po-1', gateInwardEntryId: 'gin-1',
+    po: { vendor: { name: 'Vendor A' } }, gateInwardEntry: null,
+  };
+
+  let lastState: any = null;
+
+  beforeEach(() => {
+    lastState = null;
+    prisma = {
+      storeShortage: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockImplementation(({ data }: any) => {
+          lastState = { id: 'sht-grn-1', ...data, laterReceivedQty: 0, approvedShortClosureQty: 0, approvedExcessQty: 0 };
+          return Promise.resolve(lastState);
+        }),
+        update: jest.fn().mockImplementation(({ data }: any) => {
+          lastState = { ...(lastState || {}), ...data };
+          return Promise.resolve(lastState);
+        }),
+        count: jest.fn().mockResolvedValue(0),
+      },
+      purchaseOrderItem: { findFirst: jest.fn().mockResolvedValue({ id: 'poi-1' }) },
+      user: { findMany: jest.fn().mockResolvedValue([{ id: 'pm-1' }]) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
+    service = new StoreShortageService(prisma, audit, notifications);
+  });
+
+  it('detects SHORT when receivedQty is below orderedQty', async () => {
+    const grnItem = { id: 'gi-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', orderedQty: 1000, receivedQty: 980 };
+    const r = await service.upsertFromGrnLine(grnItem, grn, user);
+    expect(r.discrepancyType).toBe('SHORT');
+    expect(r.shortQty).toBe(20);
+    expect(r.excessQty).toBe(0);
+  });
+
+  it('detects EXCESS when receivedQty is above orderedQty', async () => {
+    const grnItem = { id: 'gi-2', itemCode: 'PCB-01', itemName: 'PCB', uom: 'PCS', orderedQty: 500, receivedQty: 560 };
+    const r = await service.upsertFromGrnLine(grnItem, grn, user);
+    expect(r.discrepancyType).toBe('EXCESS');
+    expect(r.excessQty).toBe(60);
+    expect(r.shortQty).toBe(0);
+  });
+
+  it('creates no discrepancy and returns null when receivedQty exactly matches orderedQty', async () => {
+    const grnItem = { id: 'gi-3', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', orderedQty: 1000, receivedQty: 1000 };
+    const r = await service.upsertFromGrnLine(grnItem, grn, user);
+    expect(r).toBeNull();
+    expect(prisma.storeShortage.create).not.toHaveBeenCalled();
+  });
+
+  it('closes (deactivates) an existing discrepancy record if a later correction brings the qty back to matching', async () => {
+    prisma.storeShortage.findFirst.mockResolvedValue({ id: 'sht-existing', isActive: true });
+    const grnItem = { id: 'gi-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', orderedQty: 1000, receivedQty: 1000 };
+    await service.upsertFromGrnLine(grnItem, grn, user);
+    expect(prisma.storeShortage.update).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'sht-existing' }, data: expect.objectContaining({ isActive: false }),
+    }));
+  });
+
+  it('notifies Purchase with an EXCESS-specific message requiring approval, distinct from the SHORT message', async () => {
+    const grnItem = { id: 'gi-2', itemCode: 'PCB-01', itemName: 'PCB', uom: 'PCS', orderedQty: 500, receivedQty: 560 };
+    await service.upsertFromGrnLine(grnItem, grn, user);
+    const call = notifications.createBulk.mock.calls[0][0][0];
+    expect(call.type).toBe('STORE_EXCESS_DETECTED');
+    expect(call.message).toContain('excess 60');
+    expect(call.message).toContain('requires Purchase approval');
+  });
+
+  it('links to grnItemId, not storeReceivingItemId, for GRN-sourced records', async () => {
+    const grnItem = { id: 'gi-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', orderedQty: 1000, receivedQty: 980 };
+    await service.upsertFromGrnLine(grnItem, grn, user);
+    expect(prisma.storeShortage.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ grnItemId: 'gi-1' }),
+    }));
+    const createCall = prisma.storeShortage.create.mock.calls[0][0];
+    expect(createCall.data.storeReceivingItemId).toBeUndefined();
+  });
+
+  it('resolves supplier name from the PO vendor when no Gate Inward entry is linked', async () => {
+    const grnItem = { id: 'gi-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', orderedQty: 1000, receivedQty: 980 };
+    const r = await service.upsertFromGrnLine(grnItem, grn, user);
+    expect(r.supplierName).toBe('Vendor A');
+  });
+});
+
+describe('StoreShortageService.approveExcess', () => {
+  let service: StoreShortageService;
+  let prisma: any;
+  let audit: any;
+  let notifications: any;
+
+  const user = { id: 'purchase-1', companyId: 'company-1' };
+  const excessRecord = {
+    id: 'sht-excess-1', companyId: 'company-1', discrepancyType: 'EXCESS',
+    excessQty: 60, approvedExcessQty: 0, status: 'PURCHASE_NOTIFIED',
+  };
+
+  beforeEach(() => {
+    prisma = {
+      storeShortage: {
+        findFirst: jest.fn().mockResolvedValue(excessRecord),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ ...excessRecord, ...data })),
+      },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
+    service = new StoreShortageService(prisma, audit, notifications);
+  });
+
+  it('approves partial excess and leaves the record PARTIALLY_RESOLVED with the remainder still outstanding', async () => {
+    const r = await service.approveExcess('sht-excess-1', { qty: 40, reason: 'Vendor bulk-shipped early' }, user);
+    expect(r.approvedExcessQty).toBe(40);
+    expect(r.status).toBe('PARTIALLY_RESOLVED');
+    expect(r.outstandingExcessQty).toBe(20);
+  });
+
+  it('fully approving the outstanding excess marks the record APPROVED_EXCESS', async () => {
+    const r = await service.approveExcess('sht-excess-1', { qty: 60, reason: 'Approved as buffer stock' }, user);
+    expect(r.status).toBe('APPROVED_EXCESS');
+    expect(r.outstandingExcessQty).toBe(0);
+  });
+
+  it('rejects approving more than the outstanding excess quantity', async () => {
+    await expect(service.approveExcess('sht-excess-1', { qty: 100 } as any, user)).rejects.toThrow(BadRequestException);
+  });
+
+  it('rejects approveExcess on a SHORT-type record - it is not the mirror action for shortage', async () => {
+    prisma.storeShortage.findFirst.mockResolvedValue({ ...excessRecord, discrepancyType: 'SHORT' });
+    await expect(service.approveExcess('sht-excess-1', { qty: 10 } as any, user)).rejects.toThrow(/not an EXCESS/);
+  });
+
+  it('throws NotFoundException for a record that does not exist', async () => {
+    prisma.storeShortage.findFirst.mockResolvedValue(null);
+    await expect(service.approveExcess('missing', { qty: 10 } as any, user)).rejects.toThrow(NotFoundException);
+  });
+
+  it('logs the audit trail with old and new approvedExcessQty', async () => {
+    await service.approveExcess('sht-excess-1', { qty: 40, reason: 'test' }, user);
+    expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({
+      oldValues: expect.objectContaining({ approvedExcessQty: 0 }),
+      newValues: expect.objectContaining({ approvedExcessQty: 40 }),
+    }));
+  });
+});

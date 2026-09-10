@@ -81,4 +81,13 @@ export class StoreReceivingController {
   approveShortClosure(@Param('id') id: string, @Body() dto: ApproveShortClosureDto, @Request() req: any) {
     return this.shortageService.approveShortClosure(id, dto, req.user);
   }
+
+  // STORE-004: same shape (qty, reason) as ApproveShortClosureDto - Purchase
+  // approving/accepting some or all of an EXCESS discrepancy, reusing the
+  // DTO rather than duplicating an identical class for the opposite case.
+  @Post('shortages/:id/approve-excess')
+  @RequirePermissions(Permission.PURCHASE_SHORT_CLOSE_APPROVE)
+  approveExcess(@Param('id') id: string, @Body() dto: ApproveShortClosureDto, @Request() req: any) {
+    return this.shortageService.approveExcess(id, dto, req.user);
+  }
 }

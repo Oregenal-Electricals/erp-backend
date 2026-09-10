@@ -29,9 +29,13 @@ let StoreShortageService = class StoreShortageService {
     outstanding(s) {
         return Math.max(s.shortQty - s.laterReceivedQty - s.approvedShortClosureQty, 0);
     }
+    outstandingExcess(s) {
+        return Math.max((s.excessQty || 0) - s.approvedExcessQty, 0);
+    }
     includes() {
         return {
             storeReceivingItem: { include: { storeReceiving: { select: { receivingNumber: true } } } },
+            grnItem: { include: { grn: { select: { grnNumber: true } } } },
             raisedBy: { select: { firstName: true, lastName: true } },
             resolvedBy: { select: { firstName: true, lastName: true } },
         };
@@ -108,6 +112,114 @@ let StoreShortageService = class StoreShortageService {
         });
         return shortage;
     }
+    async upsertFromGrnLine(grnItem, grn, user) {
+        var _a, _b, _c, _d;
+        const diff = grnItem.receivedQty - grnItem.orderedQty;
+        const existing = await this.prisma.storeShortage.findFirst({ where: { grnItemId: grnItem.id } });
+        if (diff === 0) {
+            if (existing) {
+                await this.prisma.storeShortage.update({ where: { id: existing.id }, data: { isActive: false, updatedBy: user.id } });
+                await this.audit.log({ tableName: 'store_shortages', recordId: existing.id, action: 'UPDATE', oldValues: { isActive: true }, newValues: { isActive: false }, changedBy: user.id });
+            }
+            return null;
+        }
+        const discrepancyType = diff < 0 ? 'SHORT' : 'EXCESS';
+        const shortQty = diff < 0 ? -diff : 0;
+        const excessQty = diff > 0 ? diff : 0;
+        let poItemId = null;
+        if (grn.poId) {
+            const poItem = await this.prisma.purchaseOrderItem.findFirst({ where: { poId: grn.poId, itemCode: grnItem.itemCode } });
+            poItemId = (_a = poItem === null || poItem === void 0 ? void 0 : poItem.id) !== null && _a !== void 0 ? _a : null;
+        }
+        const supplierName = ((_c = (_b = grn.po) === null || _b === void 0 ? void 0 : _b.vendor) === null || _c === void 0 ? void 0 : _c.name) || ((_d = grn.gateInwardEntry) === null || _d === void 0 ? void 0 : _d.supplierName) || '';
+        let record;
+        if (existing) {
+            record = await this.prisma.storeShortage.update({
+                where: { id: existing.id },
+                data: {
+                    expectedQty: grnItem.orderedQty, actualQty: grnItem.receivedQty,
+                    shortQty, excessQty, discrepancyType,
+                    isActive: true, updatedBy: user.id,
+                },
+                include: this.includes(),
+            });
+        }
+        else {
+            const discrepancyNumber = await this.generateNumber(user.companyId);
+            record = await this.prisma.storeShortage.create({
+                data: {
+                    companyId: user.companyId, discrepancyNumber,
+                    grnItemId: grnItem.id, gateInwardEntryId: grn.gateInwardEntryId,
+                    poId: grn.poId, poItemId,
+                    supplierName, itemCode: grnItem.itemCode, itemName: grnItem.itemName, uom: grnItem.uom,
+                    expectedQty: grnItem.orderedQty, actualQty: grnItem.receivedQty,
+                    shortQty, excessQty, discrepancyType,
+                    shortageType: 'UNKNOWN', status: discrepancyType === 'SHORT' ? 'SHORT_DETECTED' : 'EXCESS_DETECTED',
+                    raisedById: user.id, createdBy: user.id, updatedBy: user.id,
+                },
+                include: this.includes(),
+            });
+        }
+        if (!record.purchaseNotifiedAt) {
+            const purchaseUsers = await this.prisma.user.findMany({
+                where: { companyId: user.companyId, isActive: true, role: { in: ['PURCHASE_MANAGER', 'SUPER_ADMIN'] } },
+                select: { id: true },
+            });
+            if (purchaseUsers.length > 0) {
+                const message = discrepancyType === 'SHORT'
+                    ? record.discrepancyNumber + ' - ' + record.supplierName + ' - ' + record.itemName + ': expected ' + record.expectedQty + ', received ' + record.actualQty + ', short ' + record.shortQty + ' ' + record.uom + '.'
+                    : record.discrepancyNumber + ' - ' + record.supplierName + ' - ' + record.itemName + ': expected ' + record.expectedQty + ', received ' + record.actualQty + ', excess ' + record.excessQty + ' ' + record.uom + ' - requires Purchase approval.';
+                await this.notifications.createBulk(purchaseUsers.map(u => ({
+                    userId: u.id,
+                    type: discrepancyType === 'SHORT' ? 'STORE_SHORTAGE_DETECTED' : 'STORE_EXCESS_DETECTED',
+                    title: discrepancyType === 'SHORT' ? 'Material shortage detected at Store' : 'Excess material received at Store',
+                    message,
+                    referenceType: 'STORE_SHORTAGE', referenceId: record.id, referenceNumber: record.discrepancyNumber,
+                    priority: 'HIGH',
+                })), user.companyId, user.id);
+            }
+            record = await this.prisma.storeShortage.update({
+                where: { id: record.id },
+                data: { purchaseNotifiedAt: new Date(), status: discrepancyType === 'SHORT' ? 'PURCHASE_NOTIFIED' : 'PURCHASE_NOTIFIED' },
+                include: this.includes(),
+            });
+        }
+        await this.audit.log({
+            tableName: 'store_shortages', recordId: record.id, action: existing ? 'UPDATE' : 'CREATE',
+            newValues: { expectedQty: record.expectedQty, actualQty: record.actualQty, shortQty: record.shortQty, excessQty: record.excessQty, discrepancyType },
+            changedBy: user.id,
+        });
+        return record;
+    }
+    async approveExcess(shortageId, dto, user) {
+        const shortage = await this.prisma.storeShortage.findFirst({ where: { id: shortageId, companyId: user.companyId } });
+        if (!shortage)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (shortage.discrepancyType !== 'EXCESS')
+            throw new common_1.BadRequestException('This record is not an EXCESS discrepancy');
+        const outstandingExcess = Math.max((shortage.excessQty || 0) - shortage.approvedExcessQty, 0);
+        if (dto.qty > outstandingExcess) {
+            throw new common_1.BadRequestException('Cannot approve ' + dto.qty + ' - only ' + outstandingExcess + ' excess is outstanding on this record');
+        }
+        const newApprovedExcess = shortage.approvedExcessQty + dto.qty;
+        const newOutstanding = Math.max((shortage.excessQty || 0) - newApprovedExcess, 0);
+        const newStatus = newOutstanding === 0 ? 'APPROVED_EXCESS' : 'PARTIALLY_RESOLVED';
+        const oldValues = { approvedExcessQty: shortage.approvedExcessQty, status: shortage.status };
+        const updated = await this.prisma.storeShortage.update({
+            where: { id: shortageId },
+            data: {
+                approvedExcessQty: newApprovedExcess, status: newStatus,
+                resolvedById: user.id, resolvedAt: new Date(), remarks: dto.reason, updatedBy: user.id,
+            },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'store_shortages', recordId: shortageId, action: 'UPDATE',
+            oldValues, newValues: { approvedExcessQty: newApprovedExcess, status: newStatus, reason: dto.reason },
+            changedBy: user.id,
+        });
+        return Object.assign(Object.assign({}, updated), { outstandingExcessQty: newOutstanding });
+    }
     async findAll(user, query) {
         const page = parseInt(query === null || query === void 0 ? void 0 : query.page) || 1;
         const limit = parseInt(query === null || query === void 0 ? void 0 : query.limit) || 20;
@@ -119,7 +231,7 @@ let StoreShortageService = class StoreShortageService {
             this.prisma.storeShortage.count({ where }),
         ]);
         return {
-            data: data.map(s => (Object.assign(Object.assign({}, s), { outstandingQty: this.outstanding(s) }))),
+            data: data.map(s => (Object.assign(Object.assign({}, s), { outstandingQty: this.outstanding(s), outstandingExcessQty: this.outstandingExcess(s) }))),
             total, page, limit, totalPages: Math.ceil(total / limit),
         };
     }
@@ -127,7 +239,7 @@ let StoreShortageService = class StoreShortageService {
         const s = await this.prisma.storeShortage.findFirst({ where: { id, companyId: user.companyId }, include: this.includes() });
         if (!s)
             throw new common_1.NotFoundException('Shortage record not found');
-        return Object.assign(Object.assign({}, s), { outstandingQty: this.outstanding(s) });
+        return Object.assign(Object.assign({}, s), { outstandingQty: this.outstanding(s), outstandingExcessQty: this.outstandingExcess(s) });
     }
     async linkBalanceDelivery(shortageId, dto, user) {
         const shortage = await this.prisma.storeShortage.findFirst({ where: { id: shortageId, companyId: user.companyId } });

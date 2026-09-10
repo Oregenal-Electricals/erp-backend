@@ -9,90 +9,15 @@ export declare class StoreShortageService {
     constructor(prisma: PrismaService, audit: AuditService, notifications: NotificationsService);
     private generateNumber;
     private outstanding;
+    private outstandingExcess;
     private includes;
     upsertFromLine(line: any, user: any): Promise<any>;
-    findAll(user: any, query: any): Promise<{
-        data: {
-            outstandingQty: number;
-            storeReceivingItem: {
-                storeReceiving: {
-                    receivingNumber: string;
-                };
-            } & {
-                result: string | null;
-                id: string;
-                companyId: string;
-                isActive: boolean;
-                isTestData: boolean;
-                createdAt: Date;
-                updatedAt: Date;
-                createdBy: string | null;
-                updatedBy: string | null;
-                remarks: string | null;
-                itemCode: string;
-                itemName: string;
-                uom: string;
-                verifiedById: string | null;
-                verifiedAt: Date | null;
-                gateInwardItemId: string | null;
-                expectedQty: number;
-                actualVerifiedQty: number | null;
-                actualUom: string | null;
-                differenceQty: number | null;
-                shortQty: number | null;
-                excessQty: number | null;
-                damagedQty: number | null;
-                materialMismatch: boolean;
-                storeReceivingId: string;
-            };
-            raisedBy: {
-                firstName: string;
-                lastName: string;
-            };
-            resolvedBy: {
-                firstName: string;
-                lastName: string;
-            };
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            reason: string | null;
-            remarks: string | null;
-            supplierName: string;
-            poItemId: string | null;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            poId: string | null;
-            gateInwardEntryId: string;
-            expectedQty: number;
-            shortQty: number;
-            actualQty: number;
-            discrepancyNumber: string;
-            storeReceivingItemId: string;
-            shortageType: string;
-            purchaseNotifiedAt: Date | null;
-            purchaseReviewStatus: string | null;
-            laterReceivedQty: number;
-            approvedShortClosureQty: number;
-            raisedById: string;
-            raisedAt: Date;
-            resolvedById: string | null;
-            resolvedAt: Date | null;
-        }[];
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-    }>;
-    findOne(id: string, user: any): Promise<{
-        outstandingQty: number;
+    upsertFromGrnLine(grnItem: any, grn: any, user: any): Promise<any>;
+    approveExcess(shortageId: string, dto: {
+        qty: number;
+        reason?: string;
+    }, user: any): Promise<{
+        outstandingExcessQty: number;
         storeReceivingItem: {
             storeReceiving: {
                 receivingNumber: string;
@@ -124,6 +49,34 @@ export declare class StoreShortageService {
             materialMismatch: boolean;
             storeReceivingId: string;
         };
+        grnItem: {
+            grn: {
+                grnNumber: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            orderedQty: number;
+            receivedQty: number;
+            unitPrice: number;
+            grnId: string;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            landedCostPerUnit: number | null;
+            totalValue: number;
+        };
         raisedBy: {
             firstName: string;
             lastName: string;
@@ -149,17 +102,241 @@ export declare class StoreShortageService {
         itemName: string;
         uom: string;
         poId: string | null;
-        gateInwardEntryId: string;
+        gateInwardEntryId: string | null;
         expectedQty: number;
         shortQty: number;
+        excessQty: number | null;
         actualQty: number;
         discrepancyNumber: string;
-        storeReceivingItemId: string;
+        storeReceivingItemId: string | null;
+        grnItemId: string | null;
+        discrepancyType: string;
         shortageType: string;
         purchaseNotifiedAt: Date | null;
         purchaseReviewStatus: string | null;
         laterReceivedQty: number;
         approvedShortClosureQty: number;
+        approvedExcessQty: number;
+        raisedById: string;
+        raisedAt: Date;
+        resolvedById: string | null;
+        resolvedAt: Date | null;
+    }>;
+    findAll(user: any, query: any): Promise<{
+        data: {
+            outstandingQty: number;
+            outstandingExcessQty: number;
+            storeReceivingItem: {
+                storeReceiving: {
+                    receivingNumber: string;
+                };
+            } & {
+                result: string | null;
+                id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                remarks: string | null;
+                itemCode: string;
+                itemName: string;
+                uom: string;
+                verifiedById: string | null;
+                verifiedAt: Date | null;
+                gateInwardItemId: string | null;
+                expectedQty: number;
+                actualVerifiedQty: number | null;
+                actualUom: string | null;
+                differenceQty: number | null;
+                shortQty: number | null;
+                excessQty: number | null;
+                damagedQty: number | null;
+                materialMismatch: boolean;
+                storeReceivingId: string;
+            };
+            grnItem: {
+                grn: {
+                    grnNumber: string;
+                };
+            } & {
+                id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                poItemId: string | null;
+                itemCode: string;
+                itemName: string;
+                uom: string;
+                orderedQty: number;
+                receivedQty: number;
+                unitPrice: number;
+                grnId: string;
+                ipoItemId: string | null;
+                previouslyReceived: number;
+                acceptedQty: number;
+                rejectedQty: number;
+                landedCostPerUnit: number | null;
+                totalValue: number;
+            };
+            raisedBy: {
+                firstName: string;
+                lastName: string;
+            };
+            resolvedBy: {
+                firstName: string;
+                lastName: string;
+            };
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            reason: string | null;
+            remarks: string | null;
+            supplierName: string;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            poId: string | null;
+            gateInwardEntryId: string | null;
+            expectedQty: number;
+            shortQty: number;
+            excessQty: number | null;
+            actualQty: number;
+            discrepancyNumber: string;
+            storeReceivingItemId: string | null;
+            grnItemId: string | null;
+            discrepancyType: string;
+            shortageType: string;
+            purchaseNotifiedAt: Date | null;
+            purchaseReviewStatus: string | null;
+            laterReceivedQty: number;
+            approvedShortClosureQty: number;
+            approvedExcessQty: number;
+            raisedById: string;
+            raisedAt: Date;
+            resolvedById: string | null;
+            resolvedAt: Date | null;
+        }[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findOne(id: string, user: any): Promise<{
+        outstandingQty: number;
+        outstandingExcessQty: number;
+        storeReceivingItem: {
+            storeReceiving: {
+                receivingNumber: string;
+            };
+        } & {
+            result: string | null;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            remarks: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            verifiedById: string | null;
+            verifiedAt: Date | null;
+            gateInwardItemId: string | null;
+            expectedQty: number;
+            actualVerifiedQty: number | null;
+            actualUom: string | null;
+            differenceQty: number | null;
+            shortQty: number | null;
+            excessQty: number | null;
+            damagedQty: number | null;
+            materialMismatch: boolean;
+            storeReceivingId: string;
+        };
+        grnItem: {
+            grn: {
+                grnNumber: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            orderedQty: number;
+            receivedQty: number;
+            unitPrice: number;
+            grnId: string;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            landedCostPerUnit: number | null;
+            totalValue: number;
+        };
+        raisedBy: {
+            firstName: string;
+            lastName: string;
+        };
+        resolvedBy: {
+            firstName: string;
+            lastName: string;
+        };
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string | null;
+        remarks: string | null;
+        supplierName: string;
+        poItemId: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        poId: string | null;
+        gateInwardEntryId: string | null;
+        expectedQty: number;
+        shortQty: number;
+        excessQty: number | null;
+        actualQty: number;
+        discrepancyNumber: string;
+        storeReceivingItemId: string | null;
+        grnItemId: string | null;
+        discrepancyType: string;
+        shortageType: string;
+        purchaseNotifiedAt: Date | null;
+        purchaseReviewStatus: string | null;
+        laterReceivedQty: number;
+        approvedShortClosureQty: number;
+        approvedExcessQty: number;
         raisedById: string;
         raisedAt: Date;
         resolvedById: string | null;
@@ -198,6 +375,34 @@ export declare class StoreShortageService {
             materialMismatch: boolean;
             storeReceivingId: string;
         };
+        grnItem: {
+            grn: {
+                grnNumber: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            orderedQty: number;
+            receivedQty: number;
+            unitPrice: number;
+            grnId: string;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            landedCostPerUnit: number | null;
+            totalValue: number;
+        };
         raisedBy: {
             firstName: string;
             lastName: string;
@@ -223,17 +428,21 @@ export declare class StoreShortageService {
         itemName: string;
         uom: string;
         poId: string | null;
-        gateInwardEntryId: string;
+        gateInwardEntryId: string | null;
         expectedQty: number;
         shortQty: number;
+        excessQty: number | null;
         actualQty: number;
         discrepancyNumber: string;
-        storeReceivingItemId: string;
+        storeReceivingItemId: string | null;
+        grnItemId: string | null;
+        discrepancyType: string;
         shortageType: string;
         purchaseNotifiedAt: Date | null;
         purchaseReviewStatus: string | null;
         laterReceivedQty: number;
         approvedShortClosureQty: number;
+        approvedExcessQty: number;
         raisedById: string;
         raisedAt: Date;
         resolvedById: string | null;
@@ -272,6 +481,34 @@ export declare class StoreShortageService {
             materialMismatch: boolean;
             storeReceivingId: string;
         };
+        grnItem: {
+            grn: {
+                grnNumber: string;
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            orderedQty: number;
+            receivedQty: number;
+            unitPrice: number;
+            grnId: string;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            landedCostPerUnit: number | null;
+            totalValue: number;
+        };
         raisedBy: {
             firstName: string;
             lastName: string;
@@ -297,17 +534,21 @@ export declare class StoreShortageService {
         itemName: string;
         uom: string;
         poId: string | null;
-        gateInwardEntryId: string;
+        gateInwardEntryId: string | null;
         expectedQty: number;
         shortQty: number;
+        excessQty: number | null;
         actualQty: number;
         discrepancyNumber: string;
-        storeReceivingItemId: string;
+        storeReceivingItemId: string | null;
+        grnItemId: string | null;
+        discrepancyType: string;
         shortageType: string;
         purchaseNotifiedAt: Date | null;
         purchaseReviewStatus: string | null;
         laterReceivedQty: number;
         approvedShortClosureQty: number;
+        approvedExcessQty: number;
         raisedById: string;
         raisedAt: Date;
         resolvedById: string | null;

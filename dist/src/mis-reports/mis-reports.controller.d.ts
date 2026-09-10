@@ -167,9 +167,9 @@ export declare class MisReportsController {
         };
         items: {
             status: string;
+            rejectedQty: number;
             productCode: string;
             productName: string;
-            rejectedQty: number;
             woNumber: string;
             plannedQty: number;
             completedQty: number;

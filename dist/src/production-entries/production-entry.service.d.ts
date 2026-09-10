@@ -213,6 +213,7 @@ export declare class ProductionEntryService {
             remarks: string | null;
             uom: string;
             warehouseId: string;
+            rejectedQty: number;
             closedAt: Date | null;
             closedById: string | null;
             stageName: string | null;
@@ -220,7 +221,6 @@ export declare class ProductionEntryService {
             productName: string;
             bomId: string | null;
             requiredDate: Date | null;
-            rejectedQty: number;
             woNumber: string;
             salesOrderId: string | null;
             routingGroupId: string | null;

@@ -24,10 +24,12 @@ exports.GrnService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const store_shortage_service_1 = require("../store-receiving/store-shortage.service");
 let GrnService = class GrnService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, shortageService) {
         this.prisma = prisma;
         this.audit = audit;
+        this.shortageService = shortageService;
     }
     async generateGrnNumber(companyId) {
         const count = await this.prisma.grnHeader.count({ where: { companyId } });
@@ -45,13 +47,6 @@ let GrnService = class GrnService {
     async create(dto, user) {
         if (!dto.items || dto.items.length === 0)
             throw new common_1.BadRequestException('GRN must have at least one item');
-        for (const item of dto.items) {
-            const maxAllowed = item.orderedQty * 1.05;
-            const totalReceived = item.previouslyReceived + item.receivedQty;
-            if (totalReceived > maxAllowed) {
-                throw new common_1.BadRequestException(`Item ${item.itemCode}: received qty (${totalReceived}) exceeds ordered qty (${item.orderedQty}) by more than 5%`);
-            }
-        }
         let resolvedPoId = dto.poId;
         let resolvedInvoiceNumber = dto.invoiceNumber;
         let resolvedInvoiceDate = dto.invoiceDate;
@@ -110,6 +105,9 @@ let GrnService = class GrnService {
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'CREATE', newValues: grn, changedBy: user.id });
+        for (const item of grn.items) {
+            await this.shortageService.upsertFromGrnLine(item, grn, user);
+        }
         return grn;
     }
     async findAll(user, query) {
@@ -157,19 +155,13 @@ let GrnService = class GrnService {
             throw new common_1.BadRequestException('Only DRAFT GRNs can be edited');
         if (dto.items && dto.items.length > 0) {
             const itemMap = new Map((dto.items || []).map(i => [i.id, i.receivedQty]));
-            for (const existingItem of grn.items) {
-                if (!itemMap.has(existingItem.id))
-                    continue;
-                const newReceivedQty = itemMap.get(existingItem.id);
-                const maxAllowed = existingItem.orderedQty * 1.05;
-                const totalReceived = existingItem.previouslyReceived + newReceivedQty;
-                if (totalReceived > maxAllowed) {
-                    throw new common_1.BadRequestException(`Item ${existingItem.itemCode}: verified qty (${totalReceived}) exceeds ordered qty (${existingItem.orderedQty}) by more than 5%`);
-                }
-            }
             await this.prisma.$transaction((dto.items || [])
                 .filter(i => itemMap.has(i.id))
                 .map(i => this.prisma.grnItem.update({ where: { id: i.id }, data: { receivedQty: i.receivedQty, updatedBy: user.id } })));
+            const updatedItems = await this.prisma.grnItem.findMany({ where: { id: { in: Array.from(itemMap.keys()) } } });
+            for (const item of updatedItems) {
+                await this.shortageService.upsertFromGrnLine(item, grn, user);
+            }
         }
         const { items: _items } = dto, headerDto = __rest(dto, ["items"]);
         const updated = await this.prisma.grnHeader.update({
@@ -214,6 +206,8 @@ let GrnService = class GrnService {
 exports.GrnService = GrnService;
 exports.GrnService = GrnService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService,
+        store_shortage_service_1.StoreShortageService])
 ], GrnService);
 //# sourceMappingURL=grn.service.js.map

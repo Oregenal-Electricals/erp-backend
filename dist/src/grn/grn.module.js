@@ -12,12 +12,13 @@ const grn_controller_1 = require("./grn.controller");
 const grn_service_1 = require("./grn.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const store_receiving_module_1 = require("../store-receiving/store-receiving.module");
 let GrnModule = class GrnModule {
 };
 exports.GrnModule = GrnModule;
 exports.GrnModule = GrnModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, store_receiving_module_1.StoreReceivingModule],
         controllers: [grn_controller_1.GrnController],
         providers: [grn_service_1.GrnService],
         exports: [grn_service_1.GrnService],

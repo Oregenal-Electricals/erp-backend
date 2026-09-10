@@ -90,8 +90,8 @@ export declare class InventoryDashboardController {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalValue: number;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
             inQcQty: number;

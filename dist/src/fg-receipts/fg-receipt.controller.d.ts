@@ -44,9 +44,9 @@ export declare class FgReceiptController {
             batchNumber: string | null;
             receivedQty: number;
             warehouseId: string;
+            rejectedQty: number;
             unitCost: number;
             totalCost: number;
-            rejectedQty: number;
             plannedQty: number;
             workOrderId: string;
             receiptNumber: string;
@@ -86,9 +86,9 @@ export declare class FgReceiptController {
         batchNumber: string | null;
         receivedQty: number;
         warehouseId: string;
+        rejectedQty: number;
         unitCost: number;
         totalCost: number;
-        rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
         receiptNumber: string;
@@ -123,9 +123,9 @@ export declare class FgReceiptController {
         batchNumber: string | null;
         receivedQty: number;
         warehouseId: string;
+        rejectedQty: number;
         unitCost: number;
         totalCost: number;
-        rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
         receiptNumber: string;
@@ -160,9 +160,9 @@ export declare class FgReceiptController {
         batchNumber: string | null;
         receivedQty: number;
         warehouseId: string;
+        rejectedQty: number;
         unitCost: number;
         totalCost: number;
-        rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
         receiptNumber: string;
@@ -197,9 +197,9 @@ export declare class FgReceiptController {
         batchNumber: string | null;
         receivedQty: number;
         warehouseId: string;
+        rejectedQty: number;
         unitCost: number;
         totalCost: number;
-        rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
         receiptNumber: string;
@@ -234,9 +234,9 @@ export declare class FgReceiptController {
         batchNumber: string | null;
         receivedQty: number;
         warehouseId: string;
+        rejectedQty: number;
         unitCost: number;
         totalCost: number;
-        rejectedQty: number;
         plannedQty: number;
         workOrderId: string;
         receiptNumber: string;

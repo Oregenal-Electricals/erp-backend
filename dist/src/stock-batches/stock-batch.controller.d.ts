@@ -36,13 +36,13 @@ export declare class StockBatchController {
             lotNumber: string | null;
             mfgDate: Date | null;
             expiryDate: Date | null;
+            grnItemId: string | null;
             warehouseId: string;
             receivedDate: Date;
-            unitCost: number;
             grnId: string | null;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
-            grnItemId: string | null;
             originalQty: number;
         })[];
         total: number;
@@ -72,13 +72,13 @@ export declare class StockBatchController {
         lotNumber: string | null;
         mfgDate: Date | null;
         expiryDate: Date | null;
+        grnItemId: string | null;
         warehouseId: string;
         receivedDate: Date;
-        unitCost: number;
         grnId: string | null;
+        unitCost: number;
         availableQty: number;
         reservedQty: number;
-        grnItemId: string | null;
         originalQty: number;
     })[]>;
     findOne(id: string, req: any): Promise<{
@@ -103,13 +103,13 @@ export declare class StockBatchController {
         lotNumber: string | null;
         mfgDate: Date | null;
         expiryDate: Date | null;
+        grnItemId: string | null;
         warehouseId: string;
         receivedDate: Date;
-        unitCost: number;
         grnId: string | null;
+        unitCost: number;
         availableQty: number;
         reservedQty: number;
-        grnItemId: string | null;
         originalQty: number;
     }>;
     create(dto: CreateBatchDto, req: any): Promise<{
@@ -135,13 +135,13 @@ export declare class StockBatchController {
         lotNumber: string | null;
         mfgDate: Date | null;
         expiryDate: Date | null;
+        grnItemId: string | null;
         warehouseId: string;
         receivedDate: Date;
-        unitCost: number;
         grnId: string | null;
+        unitCost: number;
         availableQty: number;
         reservedQty: number;
-        grnItemId: string | null;
         originalQty: number;
     }>;
     createFromGrn(grnId: string, req: any): Promise<{
@@ -170,13 +170,13 @@ export declare class StockBatchController {
         lotNumber: string | null;
         mfgDate: Date | null;
         expiryDate: Date | null;
+        grnItemId: string | null;
         warehouseId: string;
         receivedDate: Date;
-        unitCost: number;
         grnId: string | null;
+        unitCost: number;
         availableQty: number;
         reservedQty: number;
-        grnItemId: string | null;
         originalQty: number;
     }>;
     quarantine(id: string, req: any): Promise<{
@@ -197,13 +197,13 @@ export declare class StockBatchController {
         lotNumber: string | null;
         mfgDate: Date | null;
         expiryDate: Date | null;
+        grnItemId: string | null;
         warehouseId: string;
         receivedDate: Date;
-        unitCost: number;
         grnId: string | null;
+        unitCost: number;
         availableQty: number;
         reservedQty: number;
-        grnItemId: string | null;
         originalQty: number;
     }>;
 }

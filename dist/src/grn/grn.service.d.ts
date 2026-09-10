@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { StoreShortageService } from '../store-receiving/store-shortage.service';
 import { CreateGrnDto, UpdateGrnDto } from './dto/grn.dto';
 export declare class GrnService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private shortageService;
+    constructor(prisma: PrismaService, audit: AuditService, shortageService: StoreShortageService);
     private generateGrnNumber;
     private includes;
     create(dto: CreateGrnDto, user: any): Promise<{
@@ -24,13 +26,13 @@ export declare class GrnService {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;
@@ -141,13 +143,13 @@ export declare class GrnService {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;
@@ -208,13 +210,13 @@ export declare class GrnService {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;
@@ -275,13 +277,13 @@ export declare class GrnService {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;

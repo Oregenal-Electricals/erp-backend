@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { StoreShortageService } from '../store-receiving/store-shortage.service';
 import { CreateGrnDto, UpdateGrnDto } from './dto/grn.dto';
 
 @Injectable()
 export class GrnService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private shortageService: StoreShortageService,
+  ) {}
 
   private async generateGrnNumber(companyId: string): Promise<string> {
     const count = await this.prisma.grnHeader.count({ where: { companyId } });
@@ -24,15 +29,6 @@ export class GrnService {
 
   async create(dto: CreateGrnDto, user: any) {
     if (!dto.items || dto.items.length === 0) throw new BadRequestException('GRN must have at least one item');
-
-    // Validate received qty vs ordered qty (max 105% tolerance)
-    for (const item of dto.items) {
-      const maxAllowed = item.orderedQty * 1.05;
-      const totalReceived = item.previouslyReceived + item.receivedQty;
-      if (totalReceived > maxAllowed) {
-        throw new BadRequestException(`Item ${item.itemCode}: received qty (${totalReceived}) exceeds ordered qty (${item.orderedQty}) by more than 5%`);
-      }
-    }
 
     let resolvedPoId = dto.poId;
     let resolvedInvoiceNumber = dto.invoiceNumber;
@@ -98,6 +94,16 @@ export class GrnService {
     });
 
     await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'CREATE', newValues: grn, changedBy: user.id });
+
+    // STORE-003/004: detect short or excess per line against orderedQty
+    // and raise/close a discrepancy record as needed. Runs after the GRN
+    // itself is committed, one line at a time - a failure here (e.g. a
+    // notification hiccup) must never roll back a GRN that was otherwise
+    // valid, it's a follow-on side effect, not a precondition.
+    for (const item of grn.items as any[]) {
+      await this.shortageService.upsertFromGrnLine(item, grn, user);
+    }
+
     return grn;
   }
 
@@ -147,22 +153,22 @@ export class GrnService {
     // so a GRN already sent to IQC can never have its quantities quietly
     // rewritten. Same 105%-of-ordered tolerance as create() - verification
     // corrects a miscount, it doesn't relax the ordered-qty ceiling.
+    // STORE-004: no more hard 105% ceiling here either - a verified qty
+    // above/below ordered is allowed through and tracked as a discrepancy
+    // (below), same as create(). Physical verification is exactly the
+    // moment Store is most likely to discover a real short or excess, so
+    // blocking it here would defeat the point of tracking it at all.
     if (dto.items && dto.items.length > 0) {
       const itemMap = new Map((dto.items || []).map(i => [i.id, i.receivedQty]));
-      for (const existingItem of grn.items as any[]) {
-        if (!itemMap.has(existingItem.id)) continue;
-        const newReceivedQty = itemMap.get(existingItem.id)!;
-        const maxAllowed = existingItem.orderedQty * 1.05;
-        const totalReceived = existingItem.previouslyReceived + newReceivedQty;
-        if (totalReceived > maxAllowed) {
-          throw new BadRequestException(`Item ${existingItem.itemCode}: verified qty (${totalReceived}) exceeds ordered qty (${existingItem.orderedQty}) by more than 5%`);
-        }
-      }
       await this.prisma.$transaction(
         (dto.items || [])
           .filter(i => itemMap.has(i.id))
           .map(i => this.prisma.grnItem.update({ where: { id: i.id }, data: { receivedQty: i.receivedQty, updatedBy: user.id } })),
       );
+      const updatedItems = await this.prisma.grnItem.findMany({ where: { id: { in: Array.from(itemMap.keys()) } } });
+      for (const item of updatedItems) {
+        await this.shortageService.upsertFromGrnLine(item, grn, user);
+      }
     }
 
     const { items: _items, ...headerDto } = dto;

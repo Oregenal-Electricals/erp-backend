@@ -63,6 +63,9 @@ let StoreReceivingController = class StoreReceivingController {
     approveShortClosure(id, dto, req) {
         return this.shortageService.approveShortClosure(id, dto, req.user);
     }
+    approveExcess(id, dto, req) {
+        return this.shortageService.approveExcess(id, dto, req.user);
+    }
 };
 exports.StoreReceivingController = StoreReceivingController;
 __decorate([
@@ -167,6 +170,16 @@ __decorate([
     __metadata("design:paramtypes", [String, shortage_dto_1.ApproveShortClosureDto, Object]),
     __metadata("design:returntype", void 0)
 ], StoreReceivingController.prototype, "approveShortClosure", null);
+__decorate([
+    (0, common_1.Post)('shortages/:id/approve-excess'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.PURCHASE_SHORT_CLOSE_APPROVE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, shortage_dto_1.ApproveShortClosureDto, Object]),
+    __metadata("design:returntype", void 0)
+], StoreReceivingController.prototype, "approveExcess", null);
 exports.StoreReceivingController = StoreReceivingController = __decorate([
     (0, common_1.Controller)('store-receiving'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

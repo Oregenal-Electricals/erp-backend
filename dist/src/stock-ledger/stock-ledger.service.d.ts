@@ -161,8 +161,8 @@ export declare class StockLedgerService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalValue: number;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
             inQcQty: number;

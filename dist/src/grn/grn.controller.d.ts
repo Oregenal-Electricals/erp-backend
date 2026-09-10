@@ -81,13 +81,13 @@ export declare class GrnController {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;
@@ -148,13 +148,13 @@ export declare class GrnController {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;
@@ -215,13 +215,13 @@ export declare class GrnController {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;
@@ -282,13 +282,13 @@ export declare class GrnController {
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
+            grnId: string;
             ipoItemId: string | null;
-            landedCostPerUnit: number | null;
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            landedCostPerUnit: number | null;
             totalValue: number;
-            grnId: string;
         }[];
         warehouse: {
             name: string;

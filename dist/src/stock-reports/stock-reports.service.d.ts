@@ -55,8 +55,8 @@ export declare class StockReportsService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalValue: number;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
@@ -84,8 +84,8 @@ export declare class StockReportsService {
             itemCode: string;
             itemName: string;
             warehouseId: string;
-            unitCost: number;
             totalValue: number;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
@@ -141,13 +141,13 @@ export declare class StockReportsService {
             lotNumber: string | null;
             mfgDate: Date | null;
             expiryDate: Date | null;
+            grnItemId: string | null;
             warehouseId: string;
             receivedDate: Date;
-            unitCost: number;
             grnId: string | null;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
-            grnItemId: string | null;
             originalQty: number;
         })[];
         summary: {
@@ -180,13 +180,13 @@ export declare class StockReportsService {
             lotNumber: string | null;
             mfgDate: Date | null;
             expiryDate: Date | null;
+            grnItemId: string | null;
             warehouseId: string;
             receivedDate: Date;
-            unitCost: number;
             grnId: string | null;
+            unitCost: number;
             availableQty: number;
             reservedQty: number;
-            grnItemId: string | null;
             originalQty: number;
         })[];
         total: number;
