@@ -54,17 +54,20 @@ let IqcService = class IqcService {
                 companyId: user.companyId,
                 createdBy: user.id, updatedBy: user.id,
                 items: {
-                    create: grn.items.map(item => ({
-                        grnItemId: item.id,
-                        itemCode: item.itemCode,
-                        itemName: item.itemName,
-                        uom: item.uom,
-                        receivedQty: item.receivedQty,
-                        acceptedQty: item.receivedQty,
-                        rejectedQty: 0,
-                        companyId: user.companyId,
-                        createdBy: user.id, updatedBy: user.id,
-                    })),
+                    create: grn.items.map(item => {
+                        const availableForIqc = item.receivedQty - (item.heldQty || 0);
+                        return {
+                            grnItemId: item.id,
+                            itemCode: item.itemCode,
+                            itemName: item.itemName,
+                            uom: item.uom,
+                            receivedQty: availableForIqc,
+                            acceptedQty: availableForIqc,
+                            rejectedQty: 0,
+                            companyId: user.companyId,
+                            createdBy: user.id, updatedBy: user.id,
+                        };
+                    }),
                 },
             },
             include: this.includes(),

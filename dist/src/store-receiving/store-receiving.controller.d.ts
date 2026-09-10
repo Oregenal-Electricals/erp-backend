@@ -221,6 +221,7 @@ export declare class StoreReceivingController {
                 previouslyReceived: number;
                 acceptedQty: number;
                 rejectedQty: number;
+                heldQty: number;
                 landedCostPerUnit: number | null;
                 totalValue: number;
             };
@@ -333,6 +334,7 @@ export declare class StoreReceivingController {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };
@@ -639,6 +641,7 @@ export declare class StoreReceivingController {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };
@@ -745,6 +748,7 @@ export declare class StoreReceivingController {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };
@@ -851,6 +855,7 @@ export declare class StoreReceivingController {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };

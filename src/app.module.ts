@@ -84,6 +84,7 @@ import { ProductTargetModule } from './product-standard-productivity/product-tar
 import { ProductionMaterialReturnModule } from './production-material-return/production-material-return.module';
 import { MaterialIssueOverrideModule } from './material-issue-override/material-issue-override.module';
 import { ProductSellingPriceModule } from './product-selling-price/product-selling-price.module';
+import { GrnDiscrepancyModule } from './grn-discrepancy/grn-discrepancy.module';
 import { NcrModule } from './ncr/ncr.module';
 import { CapaModule } from './capa/capa.module';
 import { RcaModule } from './rca/rca.module';
@@ -241,6 +242,7 @@ import configuration from './config/configuration';
     ProductionMaterialReturnModule,
     MaterialIssueOverrideModule,
     ProductSellingPriceModule,
+    GrnDiscrepancyModule,
     NcrModule,
     CapaModule,
     RcaModule,

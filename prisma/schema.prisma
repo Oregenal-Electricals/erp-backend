@@ -372,6 +372,7 @@ model Company {
   productionMaterialReturns ProductionMaterialReturn[]
   materialIssueOverrides MaterialIssueOverride[]
   productSellingPrices ProductSellingPrice[]
+  grnItemDiscrepancies GrnItemDiscrepancy[]
 }
 
 model Plant {
@@ -581,6 +582,8 @@ model User {
   materialReturnsReturned ProductionMaterialReturn[] @relation("ProductionMaterialReturnedBy")
   materialIssueOverridesRequested MaterialIssueOverride[] @relation("MaterialIssueOverrideRequestedBy")
   materialIssueOverridesApproved MaterialIssueOverride[] @relation("MaterialIssueOverrideApprovedBy")
+  grnDiscrepanciesRaised GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyRaisedBy")
+  grnDiscrepanciesResolved GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyResolvedBy")
 }
 
 model SystemSetting {
@@ -3375,6 +3378,7 @@ model GrnHeader {
   stockPutaways   StockPutaway[]
   @@unique([companyId, grnNumber])
   @@map("grn_headers")
+  discrepancies   GrnItemDiscrepancy[]
 }
 
 model GrnItem {
@@ -3392,6 +3396,7 @@ model GrnItem {
   receivedQty         Float      @default(0)
   acceptedQty         Float      @default(0)
   rejectedQty         Float      @default(0)
+  heldQty             Float      @default(0)
   unitPrice           Float      @default(0)
   landedCostPerUnit   Float?     @default(0)
   totalValue          Float      @default(0)
@@ -3404,6 +3409,7 @@ model GrnItem {
 
   @@map("grn_items")
   storeShortage       StoreShortage?
+  discrepancies       GrnItemDiscrepancy[]
 }
 
 // MODULE 39 — IQC INSPECTION
@@ -3781,6 +3787,7 @@ model WarehouseBin {
   putawayItems StockPutawayItem[]
   @@unique([companyId, warehouseId, code])
   @@map("warehouse_bins")
+  discrepancies GrnItemDiscrepancy[]
 }
 
 // MODULE 44 — STOCK PUTAWAY
@@ -4226,6 +4233,80 @@ model ProductSellingPrice {
   updatedBy       String?
   @@map("product_selling_prices")
   @@index([companyId, productId])
+}
+
+// STORE-005: Wrong/Mismatched/Damaged Material Handling + Segregation/Hold.
+// A different dimension from StoreShortage (STORE-003/004, which is purely
+// about actual-vs-ordered quantity) - this is about material identity and
+// condition problems, independent of whether the quantity itself matched.
+// The affectedQty on a discrepancy is subtracted into GrnItem.heldQty,
+// which iqc.service.ts's create() then excludes from what IQC even sees -
+// held material is structurally never in IqcItem.acceptedQty and therefore
+// never reaches StockBalance.availableQty, rather than being merely
+// flagged as unavailable after the fact.
+model GrnItemDiscrepancy {
+  id                       String    @id @default(uuid())
+  companyId                String
+  company                  Company   @relation(fields: [companyId], references: [id])
+  discrepancyNumber        String
+  grnItemId                String
+  grnItem                  GrnItem   @relation(fields: [grnItemId], references: [id])
+  grnId                    String
+  grn                      GrnHeader @relation(fields: [grnId], references: [id])
+  gateInwardEntryId        String?
+  poId                     String?
+  poItemId                 String?
+  supplierName             String
+  // Expected side - the GrnItem's own identity, denormalized for a
+  // stable historical record even if the GrnItem is later touched.
+  itemCode                 String
+  itemName                 String
+  uom                      String
+  expectedSpecification    String?
+  expectedBatch            String?
+  // Physical side - what Store actually found. Nullable because not
+  // every problem type changes material identity (e.g. VISIBLE_DAMAGE
+  // doesn't necessarily mean a different item arrived).
+  physicalItemCode         String?
+  physicalItemName         String?
+  physicalSpecification    String?
+  physicalBatch            String?
+  affectedQty              Float
+  problemType              String    @default("UNKNOWN") // WRONG_MATERIAL, SPECIFICATION_MISMATCH, BATCH_MISMATCH, UOM_MISMATCH, VISIBLE_DAMAGE, LABEL_MISMATCH, MIXED_MATERIAL, DOCUMENT_MISMATCH, UNKNOWN
+  damageType               String?   // PACKAGING_DAMAGED, MATERIAL_DAMAGED - only set when problemType is damage-related
+  reason                   String?
+  evidence                 Json?     // array of evidence descriptions/URLs
+  holdBinId                String?
+  holdBin                  WarehouseBin? @relation(fields: [holdBinId], references: [id])
+  segregatedById           String?
+  segregatedAt             DateTime?
+  // Two-dimension control (STORE-005 section 26) - Purchase's commercial
+  // decision and QC's technical decision are never the same field, since
+  // one can approve while the other rejects and both matter independently.
+  purchaseStatus           String    @default("NOT_REVIEWED") // NOT_REVIEWED, NOTIFIED, COMMERCIALLY_ACCEPTED, RETURN_REQUIRED, REPLACEMENT_REQUIRED
+  purchaseNotifiedAt       DateTime?
+  qcStatus                 String    @default("NOT_REQUIRED") // NOT_REQUIRED, PENDING, ACCEPTED, REJECTED
+  qcInspectionId           String?
+  resolution               String?   // SEND_TO_QC, ACCEPT_AUTHORIZED, RETURN_TO_VENDOR, REPLACE, RECLASSIFY, HOLD_INVESTIGATION, OTHER
+  resolutionApprovalRequestId String? // loosely linked to the generic ApprovalRequest engine, same convention as MaterialIssueOverride
+  status                   String    @default("OPEN") // OPEN, SEGREGATED, PURCHASE_REVIEW, QC_REVIEW, RESOLVED, CANCELLED
+  raisedById               String
+  raisedBy                 User      @relation("GrnItemDiscrepancyRaisedBy", fields: [raisedById], references: [id])
+  raisedAt                 DateTime  @default(now())
+  resolvedById             String?
+  resolvedBy               User?     @relation("GrnItemDiscrepancyResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAt                DateTime?
+  remarks                  String?
+  isActive                 Boolean   @default(true)
+  isTestData                Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  createdBy                String?
+  updatedBy                String?
+
+  @@map("grn_item_discrepancies")
+  @@index([companyId, grnItemId])
+  @@index([companyId, status])
 }
 
 // MODULE 56 — PRODUCTION MATERIAL ISSUE

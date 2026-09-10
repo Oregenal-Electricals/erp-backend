@@ -45,17 +45,26 @@ export class IqcService {
         companyId: user.companyId,
         createdBy: user.id, updatedBy: user.id,
         items: {
-          create: grn.items.map(item => ({
-            grnItemId: item.id,
-            itemCode: item.itemCode,
-            itemName: item.itemName,
-            uom: item.uom,
-            receivedQty: item.receivedQty,
-            acceptedQty: item.receivedQty, // default all accepted
-            rejectedQty: 0,
-            companyId: user.companyId,
-            createdBy: user.id, updatedBy: user.id,
-          })),
+          // STORE-005: heldQty (material flagged as a discrepancy before
+          // IQC - wrong material, damage, mismatch) is subtracted here,
+          // never handed to IQC in the first place. This is what makes
+          // held material structurally unable to reach acceptedQty/
+          // availableQty, rather than being merely marked unavailable
+          // after the fact - IQC only ever sees the unaffected portion.
+          create: grn.items.map(item => {
+            const availableForIqc = item.receivedQty - (item.heldQty || 0);
+            return {
+              grnItemId: item.id,
+              itemCode: item.itemCode,
+              itemName: item.itemName,
+              uom: item.uom,
+              receivedQty: availableForIqc,
+              acceptedQty: availableForIqc, // default all accepted
+              rejectedQty: 0,
+              companyId: user.companyId,
+              createdBy: user.id, updatedBy: user.id,
+            };
+          }),
         },
       },
       include: this.includes(),

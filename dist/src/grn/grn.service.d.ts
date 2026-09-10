@@ -31,6 +31,7 @@ export declare class GrnService {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -148,6 +149,7 @@ export declare class GrnService {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -215,6 +217,7 @@ export declare class GrnService {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -282,6 +285,7 @@ export declare class GrnService {
             previouslyReceived: number;
             acceptedQty: number;
             rejectedQty: number;
+            heldQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
