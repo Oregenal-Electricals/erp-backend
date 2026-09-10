@@ -264,6 +264,44 @@ let GrnDiscrepancyService = class GrnDiscrepancyService {
         });
         return updated;
     }
+    async segregate(id, dto, user) {
+        const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+        if (!record)
+            throw new common_1.NotFoundException('Discrepancy record not found');
+        if (record.holdBinId)
+            throw new common_1.BadRequestException('This discrepancy is already segregated to a bin');
+        if (record.status === 'RESOLVED' || record.status === 'CANCELLED') {
+            throw new common_1.BadRequestException(`Cannot segregate a discrepancy that is already ${record.status}`);
+        }
+        const grn = await this.prisma.grnHeader.findFirst({ where: { id: record.grnId } });
+        const bin = await this.prisma.warehouseBin.findFirst({ where: { id: dto.binId, companyId: user.companyId } });
+        if (!bin)
+            throw new common_1.NotFoundException('Bin not found');
+        if (grn && bin.warehouseId !== grn.warehouseId) {
+            throw new common_1.BadRequestException('Selected bin does not belong to the same warehouse as this GRN');
+        }
+        if (bin.status !== 'EMPTY' && !(bin.status === 'BLOCKED' && bin.itemCode === record.itemCode)) {
+            throw new common_1.BadRequestException('Selected bin is not available for hold - it must be empty or already a hold bin for the same item, not normal unrestricted stock');
+        }
+        const newQty = bin.currentQty + record.affectedQty;
+        if (bin.maxQty && newQty > bin.maxQty) {
+            throw new common_1.BadRequestException(`Bin ${bin.code} can only hold ${bin.maxQty} but this would bring it to ${newQty}`);
+        }
+        await this.prisma.warehouseBin.update({
+            where: { id: bin.id },
+            data: { currentQty: newQty, itemCode: record.itemCode, status: 'BLOCKED', updatedBy: user.id },
+        });
+        const updated = await this.prisma.grnItemDiscrepancy.update({
+            where: { id },
+            data: { holdBinId: bin.id, segregatedById: user.id, segregatedAt: new Date(), status: 'SEGREGATED', updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+            newValues: { holdBinId: bin.id, binCode: bin.code, affectedQty: record.affectedQty }, changedBy: user.id,
+        });
+        return updated;
+    }
     async resolveDirect(id, dto, user) {
         const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
         if (!record)

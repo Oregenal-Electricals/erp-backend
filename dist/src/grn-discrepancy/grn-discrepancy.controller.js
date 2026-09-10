@@ -51,6 +51,9 @@ let GrnDiscrepancyController = class GrnDiscrepancyController {
     resolveDirect(id, dto, req) {
         return this.service.resolveDirect(id, dto, req.user);
     }
+    segregate(id, dto, req) {
+        return this.service.segregate(id, dto, req.user);
+    }
 };
 exports.GrnDiscrepancyController = GrnDiscrepancyController;
 __decorate([
@@ -141,6 +144,16 @@ __decorate([
     __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.DirectResolveDto, Object]),
     __metadata("design:returntype", void 0)
 ], GrnDiscrepancyController.prototype, "resolveDirect", null);
+__decorate([
+    (0, common_1.Post)(':id/segregate'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_DISCREPANCY_SEGREGATE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, grn_discrepancy_dto_1.SegregateDiscrepancyDto, Object]),
+    __metadata("design:returntype", void 0)
+], GrnDiscrepancyController.prototype, "segregate", null);
 exports.GrnDiscrepancyController = GrnDiscrepancyController = __decorate([
     (0, common_1.Controller)('grn-discrepancies'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

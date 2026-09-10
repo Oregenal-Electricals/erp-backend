@@ -6,7 +6,7 @@ import { WorkflowsService } from '../workflows/workflows.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import {
   RaiseDiscrepancyDto, CorrectDiscrepancyDto, PurchaseReviewDto, QcReviewDto,
-  RequestResolutionDto, DecideResolutionDto, DirectResolveDto,
+  RequestResolutionDto, DecideResolutionDto, DirectResolveDto, SegregateDiscrepancyDto,
 } from './dto/grn-discrepancy.dto';
 
 // STORE-005: problem types the spec names as needing technical QC
@@ -340,6 +340,56 @@ export class GrnDiscrepancyService {
   // use. heldQty deliberately stays untouched: physical custody remains
   // in the plant until an actual RTV/Gate-Out happens (section 67), which
   // this Phase does not yet build.
+  // Section 18-20: segregation moves the held material to a dedicated
+  // controlled bin, physically separate from normal unrestricted RM -
+  // reuses WarehouseBin.status BLOCKED (already existed) rather than
+  // inventing new location architecture. Deliberately NOT the normal
+  // StockPutaway flow, which assumes material has already passed IQC and
+  // become available stock - the opposite of what's true here. The bin
+  // must be empty or already BLOCKED holding the same item, never a
+  // normal bin already carrying ordinary available stock, so held
+  // material can never silently mix into unrestricted RM (section 19).
+  async segregate(id: string, dto: SegregateDiscrepancyDto, user: any) {
+    const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
+    if (!record) throw new NotFoundException('Discrepancy record not found');
+    if (record.holdBinId) throw new BadRequestException('This discrepancy is already segregated to a bin');
+    if (record.status === 'RESOLVED' || record.status === 'CANCELLED') {
+      throw new BadRequestException(`Cannot segregate a discrepancy that is already ${record.status}`);
+    }
+
+    const grn = await this.prisma.grnHeader.findFirst({ where: { id: record.grnId } });
+    const bin = await this.prisma.warehouseBin.findFirst({ where: { id: dto.binId, companyId: user.companyId } });
+    if (!bin) throw new NotFoundException('Bin not found');
+    if (grn && bin.warehouseId !== grn.warehouseId) {
+      throw new BadRequestException('Selected bin does not belong to the same warehouse as this GRN');
+    }
+    if (bin.status !== 'EMPTY' && !(bin.status === 'BLOCKED' && bin.itemCode === record.itemCode)) {
+      throw new BadRequestException('Selected bin is not available for hold - it must be empty or already a hold bin for the same item, not normal unrestricted stock');
+    }
+    const newQty = bin.currentQty + record.affectedQty;
+    if (bin.maxQty && newQty > bin.maxQty) {
+      throw new BadRequestException(`Bin ${bin.code} can only hold ${bin.maxQty} but this would bring it to ${newQty}`);
+    }
+
+    await this.prisma.warehouseBin.update({
+      where: { id: bin.id },
+      data: { currentQty: newQty, itemCode: record.itemCode, status: 'BLOCKED', updatedBy: user.id },
+    });
+
+    const updated = await this.prisma.grnItemDiscrepancy.update({
+      where: { id },
+      data: { holdBinId: bin.id, segregatedById: user.id, segregatedAt: new Date(), status: 'SEGREGATED', updatedBy: user.id },
+      include: this.includes(),
+    });
+
+    await this.audit.log({
+      tableName: 'grn_item_discrepancies', recordId: id, action: 'UPDATE',
+      newValues: { holdBinId: bin.id, binCode: bin.code, affectedQty: record.affectedQty }, changedBy: user.id,
+    });
+
+    return updated;
+  }
+
   async resolveDirect(id: string, dto: DirectResolveDto, user: any) {
     const record = await this.prisma.grnItemDiscrepancy.findFirst({ where: { id, companyId: user.companyId } });
     if (!record) throw new NotFoundException('Discrepancy record not found');

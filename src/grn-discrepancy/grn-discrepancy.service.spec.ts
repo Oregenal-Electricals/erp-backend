@@ -354,3 +354,99 @@ describe('GrnDiscrepancyService Phase B - review and resolution', () => {
     });
   });
 });
+
+describe('GrnDiscrepancyService.segregate - physical hold bin assignment', () => {
+  let service: GrnDiscrepancyService;
+  let prisma: any;
+  let audit: any;
+
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  let lastRecord: any;
+  let lastBin: any;
+
+  beforeEach(() => {
+    lastRecord = {
+      id: 'dis-1', companyId: 'company-1', grnId: 'grn-1', itemCode: 'DRIVER-01',
+      affectedQty: 20, holdBinId: null, status: 'OPEN',
+    };
+    lastBin = { id: 'bin-1', companyId: 'company-1', warehouseId: 'wh-1', code: 'HOLD-01', status: 'EMPTY', currentQty: 0, maxQty: 100, itemCode: null };
+
+    prisma = {
+      grnItemDiscrepancy: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(lastRecord)),
+        update: jest.fn().mockImplementation(({ data }: any) => {
+          lastRecord = { ...lastRecord, ...data };
+          return Promise.resolve(lastRecord);
+        }),
+      },
+      grnHeader: { findFirst: jest.fn().mockResolvedValue({ id: 'grn-1', warehouseId: 'wh-1' }) },
+      warehouseBin: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(lastBin)),
+        update: jest.fn().mockImplementation(({ data }: any) => {
+          lastBin = { ...lastBin, ...data };
+          return Promise.resolve(lastBin);
+        }),
+      },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    service = new GrnDiscrepancyService(prisma, audit, {} as any, {} as any, {} as any);
+  });
+
+  it('assigns the bin, sets it BLOCKED, and increments its currentQty by affectedQty', async () => {
+    const r = await service.segregate('dis-1', { binId: 'bin-1' }, user);
+    expect(r.holdBinId).toBe('bin-1');
+    expect(r.status).toBe('SEGREGATED');
+    expect(lastBin.status).toBe('BLOCKED');
+    expect(lastBin.currentQty).toBe(20);
+    expect(lastBin.itemCode).toBe('DRIVER-01');
+  });
+
+  it('records segregatedById and segregatedAt', async () => {
+    const r = await service.segregate('dis-1', { binId: 'bin-1' }, user);
+    expect(r.segregatedById).toBe(user.id);
+    expect(r.segregatedAt).toBeInstanceOf(Date);
+  });
+
+  it('allows segregating into a bin already BLOCKED for the same item (mixed status batch)', async () => {
+    lastBin = { ...lastBin, status: 'BLOCKED', itemCode: 'DRIVER-01', currentQty: 10 };
+    const r = await service.segregate('dis-1', { binId: 'bin-1' }, user);
+    expect(r.holdBinId).toBe('bin-1');
+    expect(lastBin.currentQty).toBe(30);
+  });
+
+  it('rejects a bin that already holds normal unrestricted stock (status PARTIAL) - never mix held material into normal RM', async () => {
+    lastBin = { ...lastBin, status: 'PARTIAL', itemCode: 'OTHER-ITEM', currentQty: 50 };
+    await expect(service.segregate('dis-1', { binId: 'bin-1' }, user)).rejects.toThrow(/not available for hold/);
+  });
+
+  it('rejects a BLOCKED bin already holding a different held item', async () => {
+    lastBin = { ...lastBin, status: 'BLOCKED', itemCode: 'DIFFERENT-ITEM', currentQty: 5 };
+    await expect(service.segregate('dis-1', { binId: 'bin-1' }, user)).rejects.toThrow(/not available for hold/);
+  });
+
+  it('rejects a bin from a different warehouse than the GRN', async () => {
+    lastBin = { ...lastBin, warehouseId: 'wh-other' };
+    await expect(service.segregate('dis-1', { binId: 'bin-1' }, user)).rejects.toThrow(/same warehouse/);
+  });
+
+  it('rejects exceeding the bin capacity', async () => {
+    lastBin = { ...lastBin, maxQty: 10 };
+    await expect(service.segregate('dis-1', { binId: 'bin-1' }, user)).rejects.toThrow(/can only hold/);
+  });
+
+  it('blocks segregating the same discrepancy twice', async () => {
+    lastRecord = { ...lastRecord, holdBinId: 'bin-already' };
+    await expect(service.segregate('dis-1', { binId: 'bin-1' }, user)).rejects.toThrow(/already segregated/);
+  });
+
+  it('blocks segregating an already-resolved discrepancy', async () => {
+    lastRecord = { ...lastRecord, status: 'RESOLVED' };
+    await expect(service.segregate('dis-1', { binId: 'bin-1' }, user)).rejects.toThrow(BadRequestException);
+  });
+
+  it('throws NotFoundException for a bin that does not exist', async () => {
+    prisma.warehouseBin.findFirst.mockResolvedValue(null);
+    await expect(service.segregate('dis-1', { binId: 'missing' }, user)).rejects.toThrow(NotFoundException);
+  });
+});

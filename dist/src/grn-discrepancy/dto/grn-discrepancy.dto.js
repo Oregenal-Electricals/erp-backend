@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DIRECT_RESOLUTIONS = exports.AUTHORIZATION_RESOLUTIONS = exports.DirectResolveDto = exports.DecideResolutionDto = exports.RequestResolutionDto = exports.QcReviewDto = exports.PurchaseReviewDto = exports.CorrectDiscrepancyDto = exports.RaiseDiscrepancyDto = void 0;
+exports.SegregateDiscrepancyDto = exports.DIRECT_RESOLUTIONS = exports.AUTHORIZATION_RESOLUTIONS = exports.DirectResolveDto = exports.DecideResolutionDto = exports.RequestResolutionDto = exports.QcReviewDto = exports.PurchaseReviewDto = exports.CorrectDiscrepancyDto = exports.RaiseDiscrepancyDto = void 0;
 const class_validator_1 = require("class-validator");
 const PROBLEM_TYPES = ['WRONG_MATERIAL', 'SPECIFICATION_MISMATCH', 'BATCH_MISMATCH', 'UOM_MISMATCH', 'VISIBLE_DAMAGE', 'LABEL_MISMATCH', 'MIXED_MATERIAL', 'DOCUMENT_MISMATCH', 'UNKNOWN'];
 const DAMAGE_TYPES = ['PACKAGING_DAMAGED', 'MATERIAL_DAMAGED'];
@@ -136,4 +136,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DirectResolveDto.prototype, "reason", void 0);
+class SegregateDiscrepancyDto {
+}
+exports.SegregateDiscrepancyDto = SegregateDiscrepancyDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SegregateDiscrepancyDto.prototype, "binId", void 0);
 //# sourceMappingURL=grn-discrepancy.dto.js.map

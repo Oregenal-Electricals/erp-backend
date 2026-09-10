@@ -51,3 +51,7 @@ export class DirectResolveDto {
 }
 
 export { AUTHORIZATION_RESOLUTIONS, DIRECT_RESOLUTIONS };
+
+export class SegregateDiscrepancyDto {
+  @IsString() binId: string;
+}

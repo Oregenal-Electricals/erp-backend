@@ -36,3 +36,6 @@ export declare class DirectResolveDto {
     reason: string;
 }
 export { AUTHORIZATION_RESOLUTIONS, DIRECT_RESOLUTIONS };
+export declare class SegregateDiscrepancyDto {
+    binId: string;
+}

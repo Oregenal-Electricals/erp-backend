@@ -6,7 +6,7 @@ import { Permission } from '../common/permissions/permissions.enum';
 import { GrnDiscrepancyService } from './grn-discrepancy.service';
 import {
   RaiseDiscrepancyDto, CorrectDiscrepancyDto, PurchaseReviewDto, QcReviewDto,
-  RequestResolutionDto, DecideResolutionDto, DirectResolveDto,
+  RequestResolutionDto, DecideResolutionDto, DirectResolveDto, SegregateDiscrepancyDto,
 } from './dto/grn-discrepancy.dto';
 
 @Controller('grn-discrepancies')
@@ -66,5 +66,11 @@ export class GrnDiscrepancyController {
   @RequirePermissions(Permission.GRN_DISCREPANCY_RESOLVE_REQUEST)
   resolveDirect(@Param('id') id: string, @Body() dto: DirectResolveDto, @Request() req: any) {
     return this.service.resolveDirect(id, dto, req.user);
+  }
+
+  @Post(':id/segregate')
+  @RequirePermissions(Permission.GRN_DISCREPANCY_SEGREGATE)
+  segregate(@Param('id') id: string, @Body() dto: SegregateDiscrepancyDto, @Request() req: any) {
+    return this.service.segregate(id, dto, req.user);
   }
 }
