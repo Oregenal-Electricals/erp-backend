@@ -333,6 +333,8 @@ export declare class IqcEscalationService {
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
+        holdQty: number;
+        holdReason: string | null;
         currentStage: string;
         finalOutcome: string;
     }>;
@@ -457,6 +459,8 @@ export declare class IqcEscalationService {
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
+        holdQty: number;
+        holdReason: string | null;
         currentStage: string;
         finalOutcome: string;
     }>;
@@ -581,6 +585,8 @@ export declare class IqcEscalationService {
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
+        holdQty: number;
+        holdReason: string | null;
         currentStage: string;
         finalOutcome: string;
     }>;

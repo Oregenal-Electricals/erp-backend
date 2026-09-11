@@ -2,11 +2,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto } from './dto/iqc.dto';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { RejectedStockService } from '../rejected-stock/rejected-stock.service';
+import { HoldStockService } from '../hold-stock/hold-stock.service';
 export declare class IqcService {
     private prisma;
     private audit;
     private stockLedger;
-    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
+    private rejectedStock;
+    private holdStock;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, rejectedStock: RejectedStockService, holdStock: HoldStockService);
     private generateIqcNumber;
     private includes;
     create(dto: CreateIqcDto, user: any): Promise<({
@@ -31,6 +35,8 @@ export declare class IqcService {
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
+            holdQty: number;
+            holdReason: string | null;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -143,6 +149,8 @@ export declare class IqcService {
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
+            holdQty: number;
+            holdReason: string | null;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -192,6 +200,8 @@ export declare class IqcService {
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
+            holdQty: number;
+            holdReason: string | null;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -241,6 +251,8 @@ export declare class IqcService {
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
+            holdQty: number;
+            holdReason: string | null;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -291,6 +303,8 @@ export declare class IqcService {
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
+            holdQty: number;
+            holdReason: string | null;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -339,6 +353,8 @@ export declare class IqcService {
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
+            holdQty: number;
+            holdReason: string | null;
             currentStage: string;
             finalOutcome: string;
         }[];

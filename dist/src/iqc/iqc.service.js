@@ -14,11 +14,15 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
+const rejected_stock_service_1 = require("../rejected-stock/rejected-stock.service");
+const hold_stock_service_1 = require("../hold-stock/hold-stock.service");
 let IqcService = class IqcService {
-    constructor(prisma, audit, stockLedger) {
+    constructor(prisma, audit, stockLedger, rejectedStock, holdStock) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
+        this.rejectedStock = rejectedStock;
+        this.holdStock = holdStock;
     }
     async generateIqcNumber(companyId) {
         const count = await this.prisma.iqcInspection.count({ where: { companyId } });
@@ -252,7 +256,7 @@ let IqcService = class IqcService {
         if (iqc.status !== 'IN_PROGRESS')
             throw new common_1.BadRequestException('IQC must be IN_PROGRESS before approval');
         for (const item of iqc.items) {
-            if (item.acceptedQty + item.rejectedQty > item.receivedQty) {
+            if (item.acceptedQty + item.rejectedQty + (item.holdQty || 0) > item.receivedQty) {
                 throw new common_1.BadRequestException(`Item ${item.itemCode}: quantities don't balance`);
             }
         }
@@ -260,6 +264,14 @@ let IqcService = class IqcService {
             where: { id }, data: { status: 'APPROVED', updatedBy: user.id },
         });
         await this.stockLedger.receiveFromIqc(id, user);
+        const totalRejectedForTracking = iqc.items.reduce((s, i) => s + i.rejectedQty, 0);
+        const totalHoldForTracking = iqc.items.reduce((s, i) => s + (i.holdQty || 0), 0);
+        if (totalRejectedForTracking > 0) {
+            await this.rejectedStock.createFromIqc(id, user);
+        }
+        if (totalHoldForTracking > 0) {
+            await this.holdStock.createFromIqc(id, user);
+        }
         for (const item of iqc.items) {
             await this.prisma.grnItem.update({
                 where: { id: item.grnItemId },
@@ -297,6 +309,10 @@ let IqcService = class IqcService {
 exports.IqcService = IqcService;
 exports.IqcService = IqcService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, stock_ledger_service_1.StockLedgerService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService,
+        stock_ledger_service_1.StockLedgerService,
+        rejected_stock_service_1.RejectedStockService,
+        hold_stock_service_1.HoldStockService])
 ], IqcService);
 //# sourceMappingURL=iqc.service.js.map

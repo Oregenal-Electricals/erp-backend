@@ -275,6 +275,7 @@ model Company {
   stockLedgers       StockLedger[]
   stockBalances      StockBalance[]
   rejectedStocks     RejectedStock[]
+  holdStocks         HoldStock[]
   stockPutaways      StockPutaway[]
   stockBatches       StockBatch[]
   stockIssues        StockIssue[]
@@ -2019,6 +2020,7 @@ model Warehouse {
   grnHeaders  GrnHeader[]
   stockLedgers StockLedger[]
   rejectedStocks  RejectedStock[]
+  holdStocks      HoldStock[]
   stockPutaways  StockPutaway[]
   stockBatches   StockBatch[]
   stockIssues    StockIssue[]
@@ -3386,6 +3388,7 @@ model GrnHeader {
 
   iqcInspections IqcInspection[]
   rejectedStocks  RejectedStock[]
+  holdStocks      HoldStock[]
   stockPutaways   StockPutaway[]
   @@unique([companyId, grnNumber])
   @@map("grn_headers")
@@ -3451,6 +3454,7 @@ model IqcInspection {
   items           IqcItem[]
 
   rejectedStocks RejectedStock[]
+  holdStocks     HoldStock[]
   stockPutaways StockPutaway[]
   @@unique([companyId, iqcNumber])
   @@map("iqc_inspections")
@@ -3479,6 +3483,11 @@ model IqcItem {
   acceptedQty      Float          @default(0)
   rejectedQty      Float          @default(0)
   rejectionReason  String?
+  // STORE-008 section 19-24: third QC disposition alongside accept/
+  // reject - decision pending/investigation, never auto-converted to
+  // reject. accepted + rejected + hold must reconcile to received.
+  holdQty          Float          @default(0)
+  holdReason       String?
   templateId       String?
   template         IqcCheckTemplate? @relation(fields: [templateId], references: [id])
   sampleSize       Int?
@@ -3733,6 +3742,68 @@ model RejectedStockItem {
   updatedBy         String?
 
   @@map("rejected_stock_items")
+}
+
+// STORE-008 sections 19-24: Hold/Quarantine tracking, deliberately
+// mirroring RejectedStock/RejectedStockItem's shape rather than
+// inventing a new pattern - held material needs the exact same kind of
+// physical traceability (location, reason, who, since when) that
+// rejected material already gets, just with a different eventual
+// outcome (reinspection into pass/fail, not RTV/scrap/rework).
+model HoldStock {
+  id             String          @id @default(uuid())
+  companyId      String
+  company        Company         @relation(fields: [companyId], references: [id])
+  holdNumber     String
+  iqcId          String?
+  iqc            IqcInspection?  @relation(fields: [iqcId], references: [id])
+  grnId          String?
+  grn            GrnHeader?      @relation(fields: [grnId], references: [id])
+  warehouseId    String
+  warehouse      Warehouse       @relation(fields: [warehouseId], references: [id])
+  status         String          @default("HELD") // HELD, PARTIALLY_RELEASED, CLOSED
+  totalHoldQty   Float           @default(0)
+  remarks        String?
+  isActive       Boolean         @default(true)
+  isTestData     Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  items          HoldStockItem[]
+
+  @@unique([companyId, holdNumber])
+  @@map("hold_stock")
+}
+
+model HoldStockItem {
+  id                  String     @id @default(uuid())
+  companyId           String
+  holdStockId         String
+  holdStock           HoldStock  @relation(fields: [holdStockId], references: [id])
+  iqcItemId           String?
+  itemCode            String
+  itemName            String
+  uom                 String
+  holdQty             Float      @default(0)
+  holdReason          String?
+  // Reinspection outcome - never overwrites the original hold record,
+  // just tracks what happened to it, preserving QC history per section 23.
+  reinspectionStatus  String     @default("PENDING") // PENDING, PASS, FAIL, PARTIAL
+  reinspectedPassQty  Float      @default(0)
+  reinspectedFailQty  Float      @default(0)
+  reinspectedAt       DateTime?
+  reinspectedBy       String?
+  reinspectionNotes   String?
+  isActive            Boolean    @default(true)
+  isTestData          Boolean    @default(false)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@map("hold_stock_items")
 }
 
 // MODULE 43 — RACK & BIN MANAGEMENT

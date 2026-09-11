@@ -17,12 +17,13 @@ const common_module_1 = require("../common/common.module");
 const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
 const notifications_module_1 = require("../notifications/notifications.module");
 const rejected_stock_module_1 = require("../rejected-stock/rejected-stock.module");
+const hold_stock_module_1 = require("../hold-stock/hold-stock.module");
 let IqcModule = class IqcModule {
 };
 exports.IqcModule = IqcModule;
 exports.IqcModule = IqcModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, notifications_module_1.NotificationsModule, rejected_stock_module_1.RejectedStockModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, notifications_module_1.NotificationsModule, rejected_stock_module_1.RejectedStockModule, hold_stock_module_1.HoldStockModule],
         controllers: [iqc_controller_1.IqcController],
         providers: [iqc_service_1.IqcService, iqc_escalation_service_1.IqcEscalationService, iqc_template_import_service_1.IqcTemplateImportService],
         exports: [iqc_service_1.IqcService, iqc_escalation_service_1.IqcEscalationService, iqc_template_import_service_1.IqcTemplateImportService],

@@ -8,9 +8,10 @@ import { CommonModule } from '../common/common.module';
 import { StockLedgerModule } from '../stock-ledger/stock-ledger.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { RejectedStockModule } from '../rejected-stock/rejected-stock.module';
+import { HoldStockModule } from '../hold-stock/hold-stock.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule, StockLedgerModule, NotificationsModule, RejectedStockModule],
+  imports: [PrismaModule, CommonModule, StockLedgerModule, NotificationsModule, RejectedStockModule, HoldStockModule],
   controllers: [IqcController],
   providers: [IqcService, IqcEscalationService, IqcTemplateImportService],
   exports: [IqcService, IqcEscalationService, IqcTemplateImportService],

@@ -3,10 +3,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto } from './dto/iqc.dto';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { RejectedStockService } from '../rejected-stock/rejected-stock.service';
+import { HoldStockService } from '../hold-stock/hold-stock.service';
 
 @Injectable()
 export class IqcService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private stockLedger: StockLedgerService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private stockLedger: StockLedgerService,
+    private rejectedStock: RejectedStockService,
+    private holdStock: HoldStockService,
+  ) {}
 
   private async generateIqcNumber(companyId: string): Promise<string> {
     const count = await this.prisma.iqcInspection.count({ where: { companyId } });
@@ -288,9 +296,12 @@ export class IqcService {
     if (iqc.status === 'AWAITING_QC_RECEIPT') throw new BadRequestException('QC must confirm physical receipt before this inspection can be approved');
     if (iqc.status !== 'IN_PROGRESS') throw new BadRequestException('IQC must be IN_PROGRESS before approval');
 
-    // Validate: accepted + rejected = received for all items
+    // STORE-008 section 8: three-way reconciliation - accepted + rejected
+    // + hold must never exceed received. A prior version of this check
+    // only validated accepted+rejected, silently allowing hold quantity
+    // to slip through unvalidated.
     for (const item of iqc.items as any[]) {
-      if (item.acceptedQty + item.rejectedQty > item.receivedQty) {
+      if (item.acceptedQty + item.rejectedQty + (item.holdQty || 0) > item.receivedQty) {
         throw new BadRequestException(`Item ${item.itemCode}: quantities don't balance`);
       }
     }
@@ -304,6 +315,22 @@ export class IqcService {
     // without this, materials could pass IQC and still be invisible to
     // the rest of the system (shortage checks, dashboards, production).
     await this.stockLedger.receiveFromIqc(id, user);
+
+    // STORE-008 sections 17, 19: rejected and held material must remain
+    // physically traceable, not just excluded from availableQty. This
+    // was previously only wired into the separate template-escalation
+    // approval path (iqc-escalation.service.ts) - the simple, direct
+    // quantity-entry approve() path used everywhere else in this session
+    // never created these tracking records at all, a real pre-existing
+    // gap this closes.
+    const totalRejectedForTracking = (iqc.items as any[]).reduce((s, i) => s + i.rejectedQty, 0);
+    const totalHoldForTracking = (iqc.items as any[]).reduce((s, i) => s + (i.holdQty || 0), 0);
+    if (totalRejectedForTracking > 0) {
+      await this.rejectedStock.createFromIqc(id, user);
+    }
+    if (totalHoldForTracking > 0) {
+      await this.holdStock.createFromIqc(id, user);
+    }
 
     // Update GRN items with accepted/rejected quantities
     for (const item of iqc.items as any[]) {

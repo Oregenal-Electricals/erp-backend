@@ -5,6 +5,8 @@ describe('IqcService.create - STORE-005 heldQty exclusion', () => {
   let prisma: any;
   let audit: any;
   let stockLedger: any;
+  let rejectedStockSvc: any;
+  let holdStockSvc: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
 
@@ -22,7 +24,9 @@ describe('IqcService.create - STORE-005 heldQty exclusion', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = { postTransaction: jest.fn().mockResolvedValue(undefined) };
-    service = new IqcService(prisma, audit, stockLedger);
+    rejectedStockSvc = rejectedStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    holdStockSvc = holdStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger, rejectedStockSvc, holdStockSvc);
   });
 
   it('subtracts heldQty from receivedQty when building the IqcItem - held material never reaches IQC at all', async () => {
@@ -79,6 +83,8 @@ describe('IqcService.create - STORE-007 IQC-required per-line skip', () => {
   let prisma: any;
   let audit: any;
   let stockLedger: any;
+  let rejectedStockSvc: any;
+  let holdStockSvc: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const grn = { id: 'grn-1', warehouseId: 'wh-1', grnNumber: 'GRN-2026-0001', status: 'IQC_PENDING' };
@@ -97,7 +103,9 @@ describe('IqcService.create - STORE-007 IQC-required per-line skip', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = { postTransaction: jest.fn().mockResolvedValue(undefined) };
-    service = new IqcService(prisma, audit, stockLedger);
+    rejectedStockSvc = rejectedStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    holdStockSvc = holdStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger, rejectedStockSvc, holdStockSvc);
   });
 
   it('a line whose material is configured IQC-not-required never becomes an IqcItem - directly accepted instead', async () => {
@@ -189,6 +197,8 @@ describe('IqcService.create - STORE-007 partial/cumulative handover', () => {
   let prisma: any;
   let audit: any;
   let stockLedger: any;
+  let rejectedStockSvc: any;
+  let holdStockSvc: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const grn = { id: 'grn-1', warehouseId: 'wh-1', grnNumber: 'GRN-2026-0001', status: 'IQC_PENDING' };
@@ -217,7 +227,9 @@ describe('IqcService.create - STORE-007 partial/cumulative handover', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = { postTransaction: jest.fn().mockResolvedValue(undefined) };
-    service = new IqcService(prisma, audit, stockLedger);
+    rejectedStockSvc = rejectedStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    holdStockSvc = holdStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger, rejectedStockSvc, holdStockSvc);
   });
 
   it('a partial send only covers the requested qty - IqcItem gets that qty, not the full line', async () => {
@@ -283,6 +295,8 @@ describe('IqcService.confirmReceipt - STORE-007 QC-confirms-receipt', () => {
   let prisma: any;
   let audit: any;
   let stockLedger: any;
+  let rejectedStockSvc: any;
+  let holdStockSvc: any;
 
   const user = { id: 'qc-1', companyId: 'company-1' };
   const iqcItem = { id: 'iqc-item-1', itemCode: 'DRIVER-01', receivedQty: 1000, acceptedQty: 1000, rejectedQty: 0 };
@@ -297,7 +311,9 @@ describe('IqcService.confirmReceipt - STORE-007 QC-confirms-receipt', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = {};
-    service = new IqcService(prisma, audit, stockLedger);
+    rejectedStockSvc = rejectedStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    holdStockSvc = holdStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger, rejectedStockSvc, holdStockSvc);
   });
 
   it('an exact-match confirmation moves status to IN_PROGRESS with no mismatch flagged', async () => {
@@ -355,6 +371,8 @@ describe('IqcService.approve - STORE-007 blocked until QC receipt is confirmed',
   let prisma: any;
   let audit: any;
   let stockLedger: any;
+  let rejectedStockSvc: any;
+  let holdStockSvc: any;
 
   const user = { id: 'qc-1', companyId: 'company-1' };
 
@@ -369,7 +387,9 @@ describe('IqcService.approve - STORE-007 blocked until QC receipt is confirmed',
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = { receiveFromIqc: jest.fn().mockResolvedValue(undefined) };
-    service = new IqcService(prisma, audit, stockLedger);
+    rejectedStockSvc = rejectedStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    holdStockSvc = holdStockSvc || { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger, rejectedStockSvc, holdStockSvc);
   });
 
   it('blocks approve() while status is AWAITING_QC_RECEIPT', async () => {
@@ -382,6 +402,91 @@ describe('IqcService.approve - STORE-007 blocked until QC receipt is confirmed',
       id: 'iqc-1', companyId: 'company-1', status: 'IN_PROGRESS', grnId: 'grn-1',
       items: [{ grnItemId: 'gi-1', acceptedQty: 980, rejectedQty: 0, receivedQty: 980 }],
     });
+    await expect(service.approve('iqc-1', user)).resolves.toBeDefined();
+  });
+});
+
+describe('IqcService.approve - STORE-008 three-way reconciliation and Rejected/Hold tracking', () => {
+  let service: IqcService;
+  let prisma: any;
+  let audit: any;
+  let stockLedger: any;
+  let rejectedStockSvc: any;
+  let holdStockSvc: any;
+
+  const user = { id: 'qc-1', companyId: 'company-1' };
+
+  function makeIqc(items: any[]) {
+    return { id: 'iqc-1', companyId: 'company-1', status: 'IN_PROGRESS', grnId: 'grn-1', items };
+  }
+
+  beforeEach(() => {
+    prisma = {
+      iqcInspection: { findFirst: jest.fn(), update: jest.fn().mockResolvedValue({}) },
+      grnItem: { update: jest.fn().mockResolvedValue({}) },
+      grnHeader: { update: jest.fn().mockResolvedValue({}) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    stockLedger = { receiveFromIqc: jest.fn().mockResolvedValue(undefined) };
+    rejectedStockSvc = { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    holdStockSvc = { createFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger, rejectedStockSvc, holdStockSvc);
+  });
+
+  it('blocks approval when accepted + rejected + hold exceeds received', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 800, rejectedQty: 150, holdQty: 100, receivedQty: 1000 },
+    ]));
+    await expect(service.approve('iqc-1', user)).rejects.toThrow(/quantities don't balance/);
+  });
+
+  it('allows approval when accepted + rejected + hold reconciles exactly to received (three-way split)', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 800, rejectedQty: 150, holdQty: 50, receivedQty: 1000 },
+    ]));
+    await expect(service.approve('iqc-1', user)).resolves.toBeDefined();
+  });
+
+  it('calls RejectedStockService.createFromIqc when rejectedQty > 0', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 980, rejectedQty: 20, holdQty: 0, receivedQty: 1000 },
+    ]));
+    await service.approve('iqc-1', user);
+    expect(rejectedStockSvc.createFromIqc).toHaveBeenCalledWith('iqc-1', user);
+    expect(holdStockSvc.createFromIqc).not.toHaveBeenCalled();
+  });
+
+  it('calls HoldStockService.createFromIqc when holdQty > 0', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 900, rejectedQty: 0, holdQty: 100, receivedQty: 1000 },
+    ]));
+    await service.approve('iqc-1', user);
+    expect(holdStockSvc.createFromIqc).toHaveBeenCalledWith('iqc-1', user);
+    expect(rejectedStockSvc.createFromIqc).not.toHaveBeenCalled();
+  });
+
+  it('calls both RejectedStockService and HoldStockService for a full three-way Pass/Fail/Hold split', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 800, rejectedQty: 150, holdQty: 50, receivedQty: 1000 },
+    ]));
+    await service.approve('iqc-1', user);
+    expect(rejectedStockSvc.createFromIqc).toHaveBeenCalledWith('iqc-1', user);
+    expect(holdStockSvc.createFromIqc).toHaveBeenCalledWith('iqc-1', user);
+  });
+
+  it('calls neither tracking service on a full, clean pass with no rejection or hold', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 1000, rejectedQty: 0, holdQty: 0, receivedQty: 1000 },
+    ]));
+    await service.approve('iqc-1', user);
+    expect(rejectedStockSvc.createFromIqc).not.toHaveBeenCalled();
+    expect(holdStockSvc.createFromIqc).not.toHaveBeenCalled();
+  });
+
+  it('handles a GrnItem/IqcItem with holdQty undefined (rows predating this migration) as zero, not NaN', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue(makeIqc([
+      { grnItemId: 'gi-1', itemCode: 'X', acceptedQty: 980, rejectedQty: 20, receivedQty: 1000 },
+    ]));
     await expect(service.approve('iqc-1', user)).resolves.toBeDefined();
   });
 });
