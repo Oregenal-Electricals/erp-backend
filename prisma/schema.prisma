@@ -584,6 +584,7 @@ model User {
   materialIssueOverridesApproved MaterialIssueOverride[] @relation("MaterialIssueOverrideApprovedBy")
   grnDiscrepanciesRaised GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyRaisedBy")
   grnDiscrepanciesResolved GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyResolvedBy")
+  grnReversals GrnHeader[] @relation("GrnHeaderReversedBy")
 }
 
 model SystemSetting {
@@ -3362,7 +3363,12 @@ model GrnHeader {
   dcNumber        String?
   invoiceNumber   String?
   invoiceDate     DateTime?
-  status          String   @default("DRAFT") // DRAFT, SUBMITTED, IQC_PENDING, PARTIALLY_ACCEPTED, ACCEPTED, CLOSED
+  status          String   @default("DRAFT") // DRAFT, SUBMITTED, IQC_PENDING, PARTIALLY_ACCEPTED, ACCEPTED, CLOSED, REVERSED
+  physicallyVerifiedAt DateTime?
+  reversedById    String?
+  reversedBy      User?    @relation("GrnHeaderReversedBy", fields: [reversedById], references: [id])
+  reversedAt      DateTime?
+  reversalReason  String?
   remarks         String?
   isActive        Boolean  @default(true)
   isTestData      Boolean  @default(false)

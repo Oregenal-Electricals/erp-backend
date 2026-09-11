@@ -223,8 +223,8 @@ export declare class IqcEscalationService {
                 grnNumber: string;
                 warehouseId: string;
             };
-            inspectionDate: Date;
             iqcNumber: string;
+            inspectionDate: Date;
         };
         template: {
             parameters: {
@@ -346,8 +346,8 @@ export declare class IqcEscalationService {
                 grnNumber: string;
                 warehouseId: string;
             };
-            inspectionDate: Date;
             iqcNumber: string;
+            inspectionDate: Date;
         };
         template: {
             parameters: {
@@ -469,8 +469,8 @@ export declare class IqcEscalationService {
                 grnNumber: string;
                 warehouseId: string;
             };
-            inspectionDate: Date;
             iqcNumber: string;
+            inspectionDate: Date;
         };
         template: {
             parameters: {

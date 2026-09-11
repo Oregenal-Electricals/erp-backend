@@ -76,6 +76,10 @@ export declare class GrnService {
         warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
+        physicallyVerifiedAt: Date | null;
+        reversedById: string | null;
+        reversedAt: Date | null;
+        reversalReason: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -121,6 +125,10 @@ export declare class GrnService {
             warehouseId: string;
             receivedDate: Date;
             dcNumber: string | null;
+            physicallyVerifiedAt: Date | null;
+            reversedById: string | null;
+            reversedAt: Date | null;
+            reversalReason: string | null;
         })[];
         total: number;
         page: number;
@@ -194,6 +202,10 @@ export declare class GrnService {
         warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
+        physicallyVerifiedAt: Date | null;
+        reversedById: string | null;
+        reversedAt: Date | null;
+        reversalReason: string | null;
     }>;
     update(id: string, dto: UpdateGrnDto, user: any): Promise<{
         items: {
@@ -262,6 +274,10 @@ export declare class GrnService {
         warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
+        physicallyVerifiedAt: Date | null;
+        reversedById: string | null;
+        reversedAt: Date | null;
+        reversalReason: string | null;
     }>;
     submit(id: string, user: any): Promise<{
         items: {
@@ -330,6 +346,84 @@ export declare class GrnService {
         warehouseId: string;
         receivedDate: Date;
         dcNumber: string | null;
+        physicallyVerifiedAt: Date | null;
+        reversedById: string | null;
+        reversedAt: Date | null;
+        reversalReason: string | null;
+    }>;
+    reverse(id: string, dto: {
+        reason: string;
+    }, user: any): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            poItemId: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            orderedQty: number;
+            receivedQty: number;
+            unitPrice: number;
+            grnId: string;
+            ipoItemId: string | null;
+            previouslyReceived: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            heldQty: number;
+            landedCostPerUnit: number | null;
+            totalValue: number;
+        }[];
+        warehouse: {
+            name: string;
+            code: string;
+        };
+        po: {
+            vendor: {
+                name: string;
+                code: string;
+            };
+            poNumber: string;
+        };
+        ipo: {
+            vendor: {
+                name: string;
+                code: string;
+            };
+            ipoNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        vehicleNumber: string | null;
+        remarks: string | null;
+        poId: string | null;
+        invoiceNumber: string | null;
+        invoiceDate: Date | null;
+        gateInwardEntryId: string | null;
+        grnNumber: string;
+        grnType: string;
+        ipoId: string | null;
+        landedCostId: string | null;
+        warehouseId: string;
+        receivedDate: Date;
+        dcNumber: string | null;
+        physicallyVerifiedAt: Date | null;
+        reversedById: string | null;
+        reversedAt: Date | null;
+        reversalReason: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

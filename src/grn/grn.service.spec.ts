@@ -144,3 +144,148 @@ describe('GrnService.create - STORE-004 discrepancy detection', () => {
     );
   });
 });
+
+describe('GrnService.update - STORE-006 physicallyVerifiedAt stamping', () => {
+  let service: GrnService;
+  let prisma: any;
+  let audit: any;
+  let shortageService: any;
+
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  const grnBase = {
+    id: 'grn-1', companyId: 'company-1', status: 'DRAFT', physicallyVerifiedAt: null,
+    items: [{ id: 'item-1', itemCode: 'DRIVER-01', orderedQty: 1000, previouslyReceived: 0, receivedQty: 1000, heldQty: 0 }],
+  };
+
+  beforeEach(() => {
+    prisma = {
+      grnHeader: {
+        findFirst: jest.fn().mockResolvedValue(grnBase),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ ...grnBase, ...data })),
+      },
+      grnItem: {
+        update: jest.fn().mockResolvedValue({}),
+        findMany: jest.fn().mockResolvedValue([{ id: 'item-1', itemCode: 'DRIVER-01', orderedQty: 1000, receivedQty: 980 }]),
+      },
+      iqcInspection: { findFirst: jest.fn().mockResolvedValue(null) },
+      $transaction: jest.fn().mockImplementation((ops: any) => Promise.all(ops)),
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    shortageService = { upsertFromGrnLine: jest.fn().mockResolvedValue(null) };
+    service = new GrnService(prisma, audit, shortageService);
+  });
+
+  it('stamps physicallyVerifiedAt the first time an items correction is applied', async () => {
+    const r = await service.update('grn-1', { items: [{ id: 'item-1', receivedQty: 980 }] } as any, user);
+    expect(r.physicallyVerifiedAt).toBeInstanceOf(Date);
+  });
+
+  it('does not restamp physicallyVerifiedAt on a later correction', async () => {
+    const already = new Date('2026-01-01T00:00:00Z');
+    const verifiedGrn = { ...grnBase, physicallyVerifiedAt: already };
+    prisma.grnHeader.findFirst.mockResolvedValue(verifiedGrn);
+    prisma.grnHeader.update.mockImplementation(({ data }: any) => Promise.resolve({ ...verifiedGrn, ...data }));
+    const r = await service.update('grn-1', { items: [{ id: 'item-1', receivedQty: 970 }] } as any, user);
+    expect(r.physicallyVerifiedAt).toEqual(already);
+  });
+
+  it('does not stamp physicallyVerifiedAt on a header-only update (no items)', async () => {
+    const r = await service.update('grn-1', { remarks: 'vehicle corrected' } as any, user);
+    expect(r.physicallyVerifiedAt).toBeNull();
+  });
+});
+
+describe('GrnService.submit - STORE-006 verification gate', () => {
+  let service: GrnService;
+  let prisma: any;
+  let audit: any;
+  let shortageService: any;
+
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      grnHeader: {
+        findFirst: jest.fn(),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'grn-1', ...data })),
+      },
+      iqcInspection: { findFirst: jest.fn().mockResolvedValue(null) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    shortageService = {};
+    service = new GrnService(prisma, audit, shortageService);
+  });
+
+  it('blocks submit when physical verification never happened', async () => {
+    prisma.grnHeader.findFirst.mockResolvedValue({
+      id: 'grn-1', status: 'DRAFT', physicallyVerifiedAt: null, items: [{ id: 'item-1' }],
+    });
+    await expect(service.submit('grn-1', user)).rejects.toThrow(/[Pp]hysical verification is required/);
+  });
+
+  it('allows submit once physical verification has been recorded', async () => {
+    prisma.grnHeader.findFirst.mockResolvedValue({
+      id: 'grn-1', status: 'DRAFT', physicallyVerifiedAt: new Date(), items: [{ id: 'item-1' }],
+    });
+    const r = await service.submit('grn-1', user);
+    expect(r.status).toBe('IQC_PENDING');
+  });
+
+  it('still blocks submit with no items regardless of verification', async () => {
+    prisma.grnHeader.findFirst.mockResolvedValue({
+      id: 'grn-1', status: 'DRAFT', physicallyVerifiedAt: new Date(), items: [],
+    });
+    await expect(service.submit('grn-1', user)).rejects.toThrow(BadRequestException);
+  });
+});
+
+describe('GrnService.reverse - STORE-006', () => {
+  let service: GrnService;
+  let prisma: any;
+  let audit: any;
+  let shortageService: any;
+
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      grnHeader: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'grn-1', status: 'IQC_PENDING' }),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'grn-1', ...data })),
+      },
+      iqcInspection: { findFirst: jest.fn().mockResolvedValue(null) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    shortageService = {};
+    service = new GrnService(prisma, audit, shortageService);
+  });
+
+  it('reverses a submitted GRN with no IQC inspection yet, recording reason and reversedBy', async () => {
+    const r = await service.reverse('grn-1', { reason: 'Wrong PO linked' }, user);
+    expect(r.status).toBe('REVERSED');
+    expect(r.reversalReason).toBe('Wrong PO linked');
+    expect(r.reversedById).toBe(user.id);
+    expect(r.reversedAt).toBeInstanceOf(Date);
+  });
+
+  it('blocks reversal once an IQC inspection already exists for this GRN', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue({ id: 'iqc-1' });
+    await expect(service.reverse('grn-1', { reason: 'x' }, user)).rejects.toThrow(/already exists/);
+  });
+
+  it('blocks reversal on a still-DRAFT GRN - it should be edited directly, not reversed', async () => {
+    prisma.grnHeader.findFirst.mockResolvedValue({ id: 'grn-1', status: 'DRAFT' });
+    await expect(service.reverse('grn-1', { reason: 'x' }, user)).rejects.toThrow(/does not need reversal/);
+  });
+
+  it('blocks reversing an already-reversed GRN', async () => {
+    prisma.grnHeader.findFirst.mockResolvedValue({ id: 'grn-1', status: 'REVERSED' });
+    await expect(service.reverse('grn-1', { reason: 'x' }, user)).rejects.toThrow(/already reversed/);
+  });
+
+  it('logs the audit trail for the reversal', async () => {
+    await service.reverse('grn-1', { reason: 'Wrong PO linked' }, user);
+    expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ tableName: 'grn_headers', action: 'UPDATE' }));
+  });
+});

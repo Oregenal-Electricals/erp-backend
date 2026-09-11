@@ -61,9 +61,9 @@ export declare class StockPutawayController {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: ({

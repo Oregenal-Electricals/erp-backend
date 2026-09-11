@@ -29,9 +29,9 @@ export declare class StockPutawayService {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     })[]>;
     create(dto: CreatePutawayDto, user: any): Promise<{
         items: ({

@@ -177,6 +177,12 @@ export class GrnService {
       data: {
         ...headerDto,
         invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined,
+        // STORE-006: this is the exact moment Store's physical
+        // verification is considered to have happened - stamped once and
+        // never overwritten by a later correction, since it only needs
+        // to record that verification occurred at all, not when it was
+        // last touched.
+        ...(dto.items && dto.items.length > 0 && !grn.physicallyVerifiedAt ? { physicallyVerifiedAt: new Date() } : {}),
         updatedBy: user.id,
       },
       include: this.includes(),
@@ -185,12 +191,46 @@ export class GrnService {
     return updated;
   }
 
+  // STORE-006 section 6: GRN cannot reach IQC without Store's own
+  // physical verification having actually run at least once - closes
+  // the gap where a GRN could previously be submitted straight from its
+  // initial (unverified) receivedQty.
   async submit(id: string, user: any) {
     const grn = await this.findOne(id, user);
     if (grn.status !== 'DRAFT') throw new BadRequestException('Only DRAFT GRNs can be submitted');
     if (!grn.items || grn.items.length === 0) throw new BadRequestException('GRN must have items');
+    if (!grn.physicallyVerifiedAt) {
+      throw new BadRequestException('Physical verification is required before this GRN can be submitted to IQC - correct at least one item\'s receivedQty first');
+    }
     const updated = await this.prisma.grnHeader.update({
       where: { id }, data: { status: 'IQC_PENDING', updatedBy: user.id }, include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'grn_headers', recordId: id, action: 'UPDATE', oldValues: grn, newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
+  // STORE-006 sections 39/40/42/70: a GRN that has left DRAFT is not
+  // directly re-editable - a mistake found after submit() must go through
+  // this controlled reversal (reason required, audited) rather than a
+  // silent field edit. Blocked once an IqcInspection exists for this GRN,
+  // since IQC is then a separate process already underway that GRN-level
+  // reversal alone cannot safely unwind.
+  async reverse(id: string, dto: { reason: string }, user: any) {
+    const grn = await this.findOne(id, user);
+    if (grn.status === 'DRAFT') throw new BadRequestException('A DRAFT GRN does not need reversal - it can still be edited directly');
+    if (grn.status === 'REVERSED') throw new BadRequestException('This GRN is already reversed');
+    const existingIqc = await this.prisma.iqcInspection.findFirst({ where: { grnId: id } });
+    if (existingIqc) {
+      throw new BadRequestException('Cannot reverse this GRN - an Incoming QC inspection already exists for it and is a separate process already underway');
+    }
+
+    const updated = await this.prisma.grnHeader.update({
+      where: { id },
+      data: {
+        status: 'REVERSED', reversedById: user.id, reversedAt: new Date(),
+        reversalReason: dto.reason, updatedBy: user.id,
+      },
+      include: this.includes(),
     });
     await this.audit.log({ tableName: 'grn_headers', recordId: id, action: 'UPDATE', oldValues: grn, newValues: updated, changedBy: user.id });
     return updated;

@@ -34,4 +34,8 @@ export class GrnController {
   @Post(':id/submit')
   @RequirePermissions(Permission.INVENTORY_EDIT)
   submit(@Param('id') id: string, @Request() req: any) { return this.grnService.submit(id, req.user); }
+
+  @Post(':id/reverse')
+  @RequirePermissions(Permission.GRN_REVERSE)
+  reverse(@Param('id') id: string, @Body() dto: { reason: string }, @Request() req: any) { return this.grnService.reverse(id, dto, req.user); }
 }

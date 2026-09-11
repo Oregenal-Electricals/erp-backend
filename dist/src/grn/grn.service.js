@@ -166,7 +166,7 @@ let GrnService = class GrnService {
         const { items: _items } = dto, headerDto = __rest(dto, ["items"]);
         const updated = await this.prisma.grnHeader.update({
             where: { id },
-            data: Object.assign(Object.assign({}, headerDto), { invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined, updatedBy: user.id }),
+            data: Object.assign(Object.assign(Object.assign(Object.assign({}, headerDto), { invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : undefined }), (dto.items && dto.items.length > 0 && !grn.physicallyVerifiedAt ? { physicallyVerifiedAt: new Date() } : {})), { updatedBy: user.id }),
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'grn_headers', recordId: id, action: 'UPDATE', oldValues: grn, newValues: updated, changedBy: user.id });
@@ -178,8 +178,32 @@ let GrnService = class GrnService {
             throw new common_1.BadRequestException('Only DRAFT GRNs can be submitted');
         if (!grn.items || grn.items.length === 0)
             throw new common_1.BadRequestException('GRN must have items');
+        if (!grn.physicallyVerifiedAt) {
+            throw new common_1.BadRequestException('Physical verification is required before this GRN can be submitted to IQC - correct at least one item\'s receivedQty first');
+        }
         const updated = await this.prisma.grnHeader.update({
             where: { id }, data: { status: 'IQC_PENDING', updatedBy: user.id }, include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'grn_headers', recordId: id, action: 'UPDATE', oldValues: grn, newValues: updated, changedBy: user.id });
+        return updated;
+    }
+    async reverse(id, dto, user) {
+        const grn = await this.findOne(id, user);
+        if (grn.status === 'DRAFT')
+            throw new common_1.BadRequestException('A DRAFT GRN does not need reversal - it can still be edited directly');
+        if (grn.status === 'REVERSED')
+            throw new common_1.BadRequestException('This GRN is already reversed');
+        const existingIqc = await this.prisma.iqcInspection.findFirst({ where: { grnId: id } });
+        if (existingIqc) {
+            throw new common_1.BadRequestException('Cannot reverse this GRN - an Incoming QC inspection already exists for it and is a separate process already underway');
+        }
+        const updated = await this.prisma.grnHeader.update({
+            where: { id },
+            data: {
+                status: 'REVERSED', reversedById: user.id, reversedAt: new Date(),
+                reversalReason: dto.reason, updatedBy: user.id,
+            },
+            include: this.includes(),
         });
         await this.audit.log({ tableName: 'grn_headers', recordId: id, action: 'UPDATE', oldValues: grn, newValues: updated, changedBy: user.id });
         return updated;

@@ -246,9 +246,9 @@ export declare class IqcController {
             status: string;
             remarks: string | null;
             grnId: string;
+            iqcNumber: string;
             inspectedBy: string | null;
             inspectionDate: Date;
-            iqcNumber: string;
         })[];
         total: number;
         page: number;
@@ -299,9 +299,9 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         items: {
@@ -347,9 +347,9 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     }>;
     getItemEscalationDetail(itemId: string, req: any): Promise<{
         iqc: {
@@ -362,8 +362,8 @@ export declare class IqcController {
                 grnNumber: string;
                 warehouseId: string;
             };
-            inspectionDate: Date;
             iqcNumber: string;
+            inspectionDate: Date;
         };
         template: {
             parameters: {
@@ -518,9 +518,9 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     }>;
     updateItems(id: string, dto: UpdateIqcItemsDto, req: any): Promise<{
         items: {
@@ -566,9 +566,9 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     }>;
     approve(id: string, req: any): Promise<{
         items: {
@@ -614,9 +614,9 @@ export declare class IqcController {
         status: string;
         remarks: string | null;
         grnId: string;
+        iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
-        iqcNumber: string;
     }>;
     attachTemplate(itemId: string, dto: AttachTemplateDto, req: any): Promise<{
         iqc: {
@@ -629,8 +629,8 @@ export declare class IqcController {
                 grnNumber: string;
                 warehouseId: string;
             };
-            inspectionDate: Date;
             iqcNumber: string;
+            inspectionDate: Date;
         };
         template: {
             parameters: {
@@ -752,8 +752,8 @@ export declare class IqcController {
                 grnNumber: string;
                 warehouseId: string;
             };
-            inspectionDate: Date;
             iqcNumber: string;
+            inspectionDate: Date;
         };
         template: {
             parameters: {

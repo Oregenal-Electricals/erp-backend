@@ -30,6 +30,7 @@ let GrnController = class GrnController {
     create(dto, req) { return this.grnService.create(dto, req.user); }
     update(id, dto, req) { return this.grnService.update(id, dto, req.user); }
     submit(id, req) { return this.grnService.submit(id, req.user); }
+    reverse(id, dto, req) { return this.grnService.reverse(id, dto, req.user); }
 };
 exports.GrnController = GrnController;
 __decorate([
@@ -86,6 +87,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], GrnController.prototype, "submit", null);
+__decorate([
+    (0, common_1.Post)(':id/reverse'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.GRN_REVERSE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", void 0)
+], GrnController.prototype, "reverse", null);
 exports.GrnController = GrnController = __decorate([
     (0, common_1.Controller)('grn'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
