@@ -81,7 +81,7 @@ export class IqcController {
   getItemEscalationDetail(@Param('itemId') itemId: string, @Request() req: any) { return this.escalation.getItemEscalationDetail(itemId, req.user); }
 
   @Post()
-  @RequirePermissions(Permission.QUALITY_CREATE)
+  @RequirePermissions(Permission.STORE_IQC_HANDOVER)
   create(@Body() dto: CreateIqcDto, @Request() req: any) { return this.iqcService.create(dto, req.user); }
 
   @Put(':id/items')

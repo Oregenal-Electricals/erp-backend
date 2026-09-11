@@ -175,7 +175,7 @@ __decorate([
 ], IqcController.prototype, "getItemEscalationDetail", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_CREATE),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_IQC_HANDOVER),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
