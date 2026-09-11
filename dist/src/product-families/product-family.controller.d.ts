@@ -142,5 +142,6 @@ export declare class ProductFamilyController {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
 }

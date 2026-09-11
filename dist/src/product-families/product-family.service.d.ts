@@ -145,5 +145,6 @@ export declare class ProductFamilyService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
 }

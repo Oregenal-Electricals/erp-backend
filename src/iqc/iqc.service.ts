@@ -21,6 +21,14 @@ export class IqcService {
     };
   }
 
+  // STORE-007 sections 5-6: per line, IQC-required material goes
+  // through the normal manual inspection below; material configured as
+  // NOT requiring IQC never becomes an IqcItem at all - it's accepted
+  // directly (its own StockLedger posting, same pattern as STORE-005's
+  // DISCREPANCY_RELEASE) and routed straight toward Put-Away, closing
+  // the gap where every material was inspected unconditionally. This is
+  // deliberately per-line, not per-GRN: a single mixed receipt can have
+  // some lines go straight through while others still need a human.
   async create(dto: CreateIqcDto, user: any) {
     const grn = await this.prisma.grnHeader.findFirst({
       where: { id: dto.grnId, companyId: user.companyId },
@@ -32,6 +40,55 @@ export class IqcService {
     // Check if IQC already exists for this GRN
     const existing = await this.prisma.iqcInspection.findFirst({ where: { grnId: dto.grnId, companyId: user.companyId } });
     if (existing) throw new BadRequestException('IQC inspection already exists for this GRN');
+
+    const itemCodes = grn.items.map(i => i.itemCode);
+    const [rawMaterials, products] = await Promise.all([
+      this.prisma.rawMaterial.findMany({ where: { companyId: user.companyId, code: { in: itemCodes } }, select: { code: true, iqcRequired: true } }),
+      this.prisma.product.findMany({ where: { companyId: user.companyId, code: { in: itemCodes } }, select: { code: true, iqcRequired: true } }),
+    ]);
+    const iqcRequiredByCode = new Map<string, boolean>();
+    for (const rm of rawMaterials) iqcRequiredByCode.set(rm.code, rm.iqcRequired);
+    for (const p of products) if (!iqcRequiredByCode.has(p.code)) iqcRequiredByCode.set(p.code, p.iqcRequired);
+    // Unknown material (neither master has a matching code) defaults to
+    // IQC-required - the safe default is inspection, not a silent skip.
+    const requiresIqc = (itemCode: string) => iqcRequiredByCode.get(itemCode) ?? true;
+
+    const iqcLines = grn.items.filter(item => requiresIqc(item.itemCode));
+    const skippedLines = grn.items.filter(item => !requiresIqc(item.itemCode));
+
+    // Directly accept the skipped lines - no IqcItem, no human inspection
+    // step, but still fully audited (both on the GrnItem itself and the
+    // ledger entry's remarks) so it's clear why no IQC record exists.
+    for (const item of skippedLines) {
+      const availableQty = item.receivedQty - (item.heldQty || 0);
+      if (availableQty <= 0) continue;
+      await this.prisma.grnItem.update({
+        where: { id: item.id },
+        data: { acceptedQty: availableQty, rejectedQty: 0, updatedBy: user.id },
+      });
+      await this.stockLedger.postTransaction({
+        companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+        warehouseId: grn.warehouseId, transactionType: 'GRN_DIRECT_ACCEPT',
+        referenceType: 'GRN', referenceId: grn.id, referenceNumber: grn.grnNumber,
+        inQty: availableQty, remarks: 'IQC not required for this material - accepted directly per material master configuration',
+        userId: user.id,
+      });
+      await this.audit.log({
+        tableName: 'grn_items', recordId: item.id, action: 'UPDATE',
+        newValues: { acceptedQty: availableQty, reason: 'IQC_NOT_REQUIRED' }, changedBy: user.id,
+      });
+    }
+
+    // If every line skipped IQC, there's nothing left needing an
+    // inspection record at all - close the GRN directly rather than
+    // creating an empty, meaningless IqcInspection.
+    if (iqcLines.length === 0) {
+      const updatedGrn = await this.prisma.grnHeader.update({
+        where: { id: grn.id }, data: { status: 'ACCEPTED', updatedBy: user.id },
+      });
+      await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'UPDATE', newValues: { status: 'ACCEPTED', reason: 'ALL_LINES_IQC_NOT_REQUIRED' }, changedBy: user.id });
+      return { skippedIqc: true, grn: updatedGrn };
+    }
 
     const iqcNumber = await this.generateIqcNumber(user.companyId);
 
@@ -51,7 +108,7 @@ export class IqcService {
           // held material structurally unable to reach acceptedQty/
           // availableQty, rather than being merely marked unavailable
           // after the fact - IQC only ever sees the unaffected portion.
-          create: grn.items.map(item => {
+          create: iqcLines.map(item => {
             const availableForIqc = item.receivedQty - (item.heldQty || 0);
             return {
               grnItemId: item.id,

@@ -2188,6 +2188,7 @@ model Product {
   specifications  Json?
   minOrderQty     Float?
   leadTimeDays    Int?
+  iqcRequired     Boolean       @default(true)
   isActive        Boolean       @default(true)
   isTestData      Boolean       @default(false)
   createdAt       DateTime      @default(now())
@@ -2252,6 +2253,10 @@ model RawMaterial {
   brand           String?
   partNumber      String?
   specifications  Json?
+  // STORE-007 section 5-6: if false, GRN lines for this material skip
+  // IQC entirely and go straight to Put-Away - defaults true so nothing
+  // that isn't explicitly configured otherwise changes behavior.
+  iqcRequired     Boolean       @default(true)
   minStockLevel   Float?
   maxStockLevel   Float?
   reorderQty      Float?

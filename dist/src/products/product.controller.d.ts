@@ -79,6 +79,7 @@ export declare class ProductController {
             model: string | null;
             revision: string | null;
             drawingNumber: string | null;
+            iqcRequired: boolean;
         })[];
         total: number;
         page: number;
@@ -152,6 +153,7 @@ export declare class ProductController {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
     create(dto: CreateProductDto, req: any): Promise<{
         category: {
@@ -220,6 +222,7 @@ export declare class ProductController {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
     update(id: string, dto: UpdateProductDto, req: any): Promise<{
         category: {
@@ -288,6 +291,7 @@ export declare class ProductController {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

@@ -62,6 +62,7 @@ export declare class RawMaterialController {
             leadTimeDays: number | null;
             specifications: import("@prisma/client/runtime/library").JsonValue | null;
             brand: string | null;
+            iqcRequired: boolean;
             materialType: string;
             partNumber: string | null;
             minStockLevel: number | null;
@@ -122,6 +123,7 @@ export declare class RawMaterialController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         brand: string | null;
+        iqcRequired: boolean;
         materialType: string;
         partNumber: string | null;
         minStockLevel: number | null;
@@ -177,6 +179,7 @@ export declare class RawMaterialController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         brand: string | null;
+        iqcRequired: boolean;
         materialType: string;
         partNumber: string | null;
         minStockLevel: number | null;
@@ -232,6 +235,7 @@ export declare class RawMaterialController {
         leadTimeDays: number | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
         brand: string | null;
+        iqcRequired: boolean;
         materialType: string;
         partNumber: string | null;
         minStockLevel: number | null;

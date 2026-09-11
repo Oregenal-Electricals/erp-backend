@@ -9,7 +9,7 @@ export declare class IqcService {
     constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
     private generateIqcNumber;
     private includes;
-    create(dto: CreateIqcDto, user: any): Promise<{
+    create(dto: CreateIqcDto, user: any): Promise<({
         items: {
             id: string;
             companyId: string;
@@ -56,6 +56,36 @@ export declare class IqcService {
         iqcNumber: string;
         inspectedBy: string | null;
         inspectionDate: Date;
+    }) | {
+        skippedIqc: boolean;
+        grn: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            vehicleNumber: string | null;
+            remarks: string | null;
+            poId: string | null;
+            invoiceNumber: string | null;
+            invoiceDate: Date | null;
+            gateInwardEntryId: string | null;
+            grnNumber: string;
+            grnType: string;
+            ipoId: string | null;
+            landedCostId: string | null;
+            warehouseId: string;
+            receivedDate: Date;
+            dcNumber: string | null;
+            physicallyVerifiedAt: Date | null;
+            reversedById: string | null;
+            reversedAt: Date | null;
+            reversalReason: string | null;
+        };
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({

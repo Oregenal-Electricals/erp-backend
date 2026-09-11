@@ -1,0 +1,2 @@
+ALTER TABLE "raw_materials" ADD COLUMN "iqcRequired" BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE "products" ADD COLUMN "iqcRequired" BOOLEAN NOT NULL DEFAULT true;

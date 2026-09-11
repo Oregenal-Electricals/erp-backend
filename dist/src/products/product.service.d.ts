@@ -73,6 +73,7 @@ export declare class ProductService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -142,6 +143,7 @@ export declare class ProductService {
             model: string | null;
             revision: string | null;
             drawingNumber: string | null;
+            iqcRequired: boolean;
         })[];
         total: number;
         page: number;
@@ -215,6 +217,7 @@ export declare class ProductService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
     update(id: string, dto: UpdateProductDto, user: any): Promise<{
         category: {
@@ -283,6 +286,7 @@ export declare class ProductService {
         model: string | null;
         revision: string | null;
         drawingNumber: string | null;
+        iqcRequired: boolean;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;
