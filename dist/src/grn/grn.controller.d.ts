@@ -91,6 +91,7 @@ export declare class GrnController {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -163,6 +164,7 @@ export declare class GrnController {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -235,6 +237,7 @@ export declare class GrnController {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -307,6 +310,7 @@ export declare class GrnController {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];
@@ -381,6 +385,7 @@ export declare class GrnController {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         }[];

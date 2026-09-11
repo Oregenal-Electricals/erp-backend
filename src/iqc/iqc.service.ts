@@ -29,6 +29,16 @@ export class IqcService {
   // the gap where every material was inspected unconditionally. This is
   // deliberately per-line, not per-GRN: a single mixed receipt can have
   // some lines go straight through while others still need a human.
+  // STORE-007 sections 26-30: partial/cumulative handover. A GRN can now
+  // have multiple IqcInspection records, one per handover batch, rather
+  // than exactly one. dto.items selects which lines/quantities this
+  // batch covers; omitting it sends everything still remaining (keeps
+  // the original one-shot call working unchanged). GrnItem.sentToIqcQty
+  // tracks the running total per line so cumulative sent can never
+  // exceed what's actually eligible (receivedQty - heldQty), whether
+  // sent in one call or several - claimed via a conditional update
+  // rather than a read-then-write, so two concurrent handovers can
+  // never both succeed against the same remaining balance.
   async create(dto: CreateIqcDto, user: any) {
     const grn = await this.prisma.grnHeader.findFirst({
       where: { id: dto.grnId, companyId: user.companyId },
@@ -37,11 +47,44 @@ export class IqcService {
     if (!grn) throw new NotFoundException('GRN not found');
     if (grn.status !== 'IQC_PENDING') throw new BadRequestException('GRN must be in IQC_PENDING status');
 
-    // Check if IQC already exists for this GRN
-    const existing = await this.prisma.iqcInspection.findFirst({ where: { grnId: dto.grnId, companyId: user.companyId } });
-    if (existing) throw new BadRequestException('IQC inspection already exists for this GRN');
+    const requestedByGrnItemId = new Map<string, number>();
+    if (dto.items && dto.items.length > 0) {
+      for (const line of dto.items) requestedByGrnItemId.set(line.grnItemId, line.qty);
+    }
 
-    const itemCodes = grn.items.map(i => i.itemCode);
+    const linesToSend: { item: any; qty: number }[] = [];
+    for (const item of grn.items) {
+      const eligibleQty = item.receivedQty - (item.heldQty || 0);
+      const remaining = eligibleQty - (item.sentToIqcQty || 0);
+      let qty: number;
+      if (requestedByGrnItemId.size > 0) {
+        if (!requestedByGrnItemId.has(item.id)) continue;
+        qty = requestedByGrnItemId.get(item.id)!;
+        if (qty > remaining) {
+          throw new BadRequestException(`Item ${item.itemCode}: requested ${qty} exceeds remaining eligible qty ${remaining} (already sent ${item.sentToIqcQty || 0} of ${eligibleQty})`);
+        }
+      } else {
+        qty = remaining;
+      }
+      if (qty > 0) linesToSend.push({ item, qty });
+    }
+
+    if (linesToSend.length === 0) {
+      throw new BadRequestException('Nothing eligible to send to IQC - every requested line is either already fully sent or has zero eligible quantity');
+    }
+
+    for (const { item, qty } of linesToSend) {
+      const eligibleQty = item.receivedQty - (item.heldQty || 0);
+      const claim = await this.prisma.grnItem.updateMany({
+        where: { id: item.id, sentToIqcQty: { lte: eligibleQty - qty } },
+        data: { sentToIqcQty: { increment: qty }, updatedBy: user.id },
+      });
+      if (claim.count === 0) {
+        throw new BadRequestException(`Item ${item.itemCode}: could not claim ${qty} to send - the remaining eligible qty changed, likely a concurrent handover - please retry`);
+      }
+    }
+
+    const itemCodes = linesToSend.map(l => l.item.itemCode);
     const [rawMaterials, products] = await Promise.all([
       this.prisma.rawMaterial.findMany({ where: { companyId: user.companyId, code: { in: itemCodes } }, select: { code: true, iqcRequired: true } }),
       this.prisma.product.findMany({ where: { companyId: user.companyId, code: { in: itemCodes } }, select: { code: true, iqcRequired: true } }),
@@ -53,41 +96,48 @@ export class IqcService {
     // IQC-required - the safe default is inspection, not a silent skip.
     const requiresIqc = (itemCode: string) => iqcRequiredByCode.get(itemCode) ?? true;
 
-    const iqcLines = grn.items.filter(item => requiresIqc(item.itemCode));
-    const skippedLines = grn.items.filter(item => !requiresIqc(item.itemCode));
+    const iqcLines = linesToSend.filter(l => requiresIqc(l.item.itemCode));
+    const skippedLines = linesToSend.filter(l => !requiresIqc(l.item.itemCode));
 
     // Directly accept the skipped lines - no IqcItem, no human inspection
-    // step, but still fully audited (both on the GrnItem itself and the
-    // ledger entry's remarks) so it's clear why no IQC record exists.
-    for (const item of skippedLines) {
-      const availableQty = item.receivedQty - (item.heldQty || 0);
-      if (availableQty <= 0) continue;
+    // step, but still fully audited so it's clear why no IQC record
+    // exists. acceptedQty is incremented rather than set, since a line
+    // could in principle be sent (and thus accepted) across more than
+    // one batch over time.
+    for (const { item, qty } of skippedLines) {
       await this.prisma.grnItem.update({
         where: { id: item.id },
-        data: { acceptedQty: availableQty, rejectedQty: 0, updatedBy: user.id },
+        data: { acceptedQty: { increment: qty }, updatedBy: user.id },
       });
       await this.stockLedger.postTransaction({
         companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
         warehouseId: grn.warehouseId, transactionType: 'GRN_DIRECT_ACCEPT',
         referenceType: 'GRN', referenceId: grn.id, referenceNumber: grn.grnNumber,
-        inQty: availableQty, remarks: 'IQC not required for this material - accepted directly per material master configuration',
+        inQty: qty, remarks: 'IQC not required for this material - accepted directly per material master configuration',
         userId: user.id,
       });
       await this.audit.log({
         tableName: 'grn_items', recordId: item.id, action: 'UPDATE',
-        newValues: { acceptedQty: availableQty, reason: 'IQC_NOT_REQUIRED' }, changedBy: user.id,
+        newValues: { acceptedQtyIncrement: qty, reason: 'IQC_NOT_REQUIRED' }, changedBy: user.id,
       });
     }
 
-    // If every line skipped IQC, there's nothing left needing an
-    // inspection record at all - close the GRN directly rather than
-    // creating an empty, meaningless IqcInspection.
+    // If this batch contained no IQC-required lines, there's no
+    // inspection to create for it. Only close the GRN outright if
+    // nothing at all remains unsent and unaccepted across every line -
+    // with partial handover, a batch that skips IQC is not necessarily
+    // the GRN's last batch.
     if (iqcLines.length === 0) {
-      const updatedGrn = await this.prisma.grnHeader.update({
-        where: { id: grn.id }, data: { status: 'ACCEPTED', updatedBy: user.id },
-      });
-      await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'UPDATE', newValues: { status: 'ACCEPTED', reason: 'ALL_LINES_IQC_NOT_REQUIRED' }, changedBy: user.id });
-      return { skippedIqc: true, grn: updatedGrn };
+      const refreshedItems = await this.prisma.grnItem.findMany({ where: { grnId: grn.id, isActive: true } });
+      const allDone = refreshedItems.every(i => (i.receivedQty - (i.heldQty || 0)) - (i.sentToIqcQty || 0) <= 0);
+      if (allDone) {
+        const updatedGrn = await this.prisma.grnHeader.update({
+          where: { id: grn.id }, data: { status: 'ACCEPTED', updatedBy: user.id },
+        });
+        await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'UPDATE', newValues: { status: 'ACCEPTED', reason: 'ALL_LINES_IQC_NOT_REQUIRED' }, changedBy: user.id });
+        return { skippedIqc: true, grn: updatedGrn };
+      }
+      return { skippedIqc: true, grn };
     }
 
     const iqcNumber = await this.generateIqcNumber(user.companyId);
@@ -102,26 +152,20 @@ export class IqcService {
         companyId: user.companyId,
         createdBy: user.id, updatedBy: user.id,
         items: {
-          // STORE-005: heldQty (material flagged as a discrepancy before
-          // IQC - wrong material, damage, mismatch) is subtracted here,
-          // never handed to IQC in the first place. This is what makes
-          // held material structurally unable to reach acceptedQty/
-          // availableQty, rather than being merely marked unavailable
-          // after the fact - IQC only ever sees the unaffected portion.
-          create: iqcLines.map(item => {
-            const availableForIqc = item.receivedQty - (item.heldQty || 0);
-            return {
-              grnItemId: item.id,
-              itemCode: item.itemCode,
-              itemName: item.itemName,
-              uom: item.uom,
-              receivedQty: availableForIqc,
-              acceptedQty: availableForIqc, // default all accepted
-              rejectedQty: 0,
-              companyId: user.companyId,
-              createdBy: user.id, updatedBy: user.id,
-            };
-          }),
+          // STORE-005: heldQty was already subtracted when computing
+          // eligibleQty above, so held material never enters linesToSend
+          // and therefore never reaches an IqcItem here either.
+          create: iqcLines.map(({ item, qty }) => ({
+            grnItemId: item.id,
+            itemCode: item.itemCode,
+            itemName: item.itemName,
+            uom: item.uom,
+            receivedQty: qty,
+            acceptedQty: qty, // default all accepted
+            rejectedQty: 0,
+            companyId: user.companyId,
+            createdBy: user.id, updatedBy: user.id,
+          })),
         },
       },
       include: this.includes(),

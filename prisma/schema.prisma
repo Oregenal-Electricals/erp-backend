@@ -3408,6 +3408,11 @@ model GrnItem {
   acceptedQty         Float      @default(0)
   rejectedQty         Float      @default(0)
   heldQty             Float      @default(0)
+  // STORE-007 section 26-28: cumulative qty already sent to IQC across
+  // all handover batches for this line (partial handover support) -
+  // separate from acceptedQty, which is only set once IQC actually
+  // decides, not merely once material is sent to them.
+  sentToIqcQty        Float      @default(0)
   unitPrice           Float      @default(0)
   landedCostPerUnit   Float?     @default(0)
   totalValue          Float      @default(0)

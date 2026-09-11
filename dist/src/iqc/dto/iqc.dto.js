@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConfirmTemplateImportDto = exports.ImportedTemplateDto = exports.ImportedTemplateParameterDto = exports.SubmitIqcStageResultDto = exports.IqcParameterResultDto = exports.UpdateIqcCheckTemplateDto = exports.CreateIqcCheckTemplateDto = exports.IqcCheckParameterDto = exports.AttachTemplateDto = exports.UpdateIqcItemsDto = exports.CreateIqcDto = exports.IqcItemUpdateDto = void 0;
+exports.ConfirmTemplateImportDto = exports.ImportedTemplateDto = exports.ImportedTemplateParameterDto = exports.SubmitIqcStageResultDto = exports.IqcParameterResultDto = exports.UpdateIqcCheckTemplateDto = exports.CreateIqcCheckTemplateDto = exports.IqcCheckParameterDto = exports.AttachTemplateDto = exports.UpdateIqcItemsDto = exports.CreateIqcDto = exports.HandoverLineDto = exports.IqcItemUpdateDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class IqcItemUpdateDto {
@@ -34,6 +34,18 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], IqcItemUpdateDto.prototype, "rejectionReason", void 0);
+class HandoverLineDto {
+}
+exports.HandoverLineDto = HandoverLineDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], HandoverLineDto.prototype, "grnItemId", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0.0001),
+    __metadata("design:type", Number)
+], HandoverLineDto.prototype, "qty", void 0);
 class CreateIqcDto {
 }
 exports.CreateIqcDto = CreateIqcDto;
@@ -51,6 +63,13 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateIqcDto.prototype, "remarks", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => HandoverLineDto),
+    __metadata("design:type", Array)
+], CreateIqcDto.prototype, "items", void 0);
 class UpdateIqcItemsDto {
 }
 exports.UpdateIqcItemsDto = UpdateIqcItemsDto;

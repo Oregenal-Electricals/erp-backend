@@ -4,10 +4,15 @@ export declare class IqcItemUpdateDto {
     rejectedQty: number;
     rejectionReason?: string;
 }
+export declare class HandoverLineDto {
+    grnItemId: string;
+    qty: number;
+}
 export declare class CreateIqcDto {
     grnId: string;
     inspectedBy?: string;
     remarks?: string;
+    items?: HandoverLineDto[];
 }
 export declare class UpdateIqcItemsDto {
     items: IqcItemUpdateDto[];

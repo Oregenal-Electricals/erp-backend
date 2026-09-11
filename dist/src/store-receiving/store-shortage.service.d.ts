@@ -75,6 +75,7 @@ export declare class StoreShortageService {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };
@@ -184,6 +185,7 @@ export declare class StoreShortageService {
                 acceptedQty: number;
                 rejectedQty: number;
                 heldQty: number;
+                sentToIqcQty: number;
                 landedCostPerUnit: number | null;
                 totalValue: number;
             };
@@ -297,6 +299,7 @@ export declare class StoreShortageService {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };
@@ -404,6 +407,7 @@ export declare class StoreShortageService {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };
@@ -511,6 +515,7 @@ export declare class StoreShortageService {
             acceptedQty: number;
             rejectedQty: number;
             heldQty: number;
+            sentToIqcQty: number;
             landedCostPerUnit: number | null;
             totalValue: number;
         };

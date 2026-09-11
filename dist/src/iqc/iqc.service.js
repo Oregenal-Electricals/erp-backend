@@ -40,10 +40,44 @@ let IqcService = class IqcService {
             throw new common_1.NotFoundException('GRN not found');
         if (grn.status !== 'IQC_PENDING')
             throw new common_1.BadRequestException('GRN must be in IQC_PENDING status');
-        const existing = await this.prisma.iqcInspection.findFirst({ where: { grnId: dto.grnId, companyId: user.companyId } });
-        if (existing)
-            throw new common_1.BadRequestException('IQC inspection already exists for this GRN');
-        const itemCodes = grn.items.map(i => i.itemCode);
+        const requestedByGrnItemId = new Map();
+        if (dto.items && dto.items.length > 0) {
+            for (const line of dto.items)
+                requestedByGrnItemId.set(line.grnItemId, line.qty);
+        }
+        const linesToSend = [];
+        for (const item of grn.items) {
+            const eligibleQty = item.receivedQty - (item.heldQty || 0);
+            const remaining = eligibleQty - (item.sentToIqcQty || 0);
+            let qty;
+            if (requestedByGrnItemId.size > 0) {
+                if (!requestedByGrnItemId.has(item.id))
+                    continue;
+                qty = requestedByGrnItemId.get(item.id);
+                if (qty > remaining) {
+                    throw new common_1.BadRequestException(`Item ${item.itemCode}: requested ${qty} exceeds remaining eligible qty ${remaining} (already sent ${item.sentToIqcQty || 0} of ${eligibleQty})`);
+                }
+            }
+            else {
+                qty = remaining;
+            }
+            if (qty > 0)
+                linesToSend.push({ item, qty });
+        }
+        if (linesToSend.length === 0) {
+            throw new common_1.BadRequestException('Nothing eligible to send to IQC - every requested line is either already fully sent or has zero eligible quantity');
+        }
+        for (const { item, qty } of linesToSend) {
+            const eligibleQty = item.receivedQty - (item.heldQty || 0);
+            const claim = await this.prisma.grnItem.updateMany({
+                where: { id: item.id, sentToIqcQty: { lte: eligibleQty - qty } },
+                data: { sentToIqcQty: { increment: qty }, updatedBy: user.id },
+            });
+            if (claim.count === 0) {
+                throw new common_1.BadRequestException(`Item ${item.itemCode}: could not claim ${qty} to send - the remaining eligible qty changed, likely a concurrent handover - please retry`);
+            }
+        }
+        const itemCodes = linesToSend.map(l => l.item.itemCode);
         const [rawMaterials, products] = await Promise.all([
             this.prisma.rawMaterial.findMany({ where: { companyId: user.companyId, code: { in: itemCodes } }, select: { code: true, iqcRequired: true } }),
             this.prisma.product.findMany({ where: { companyId: user.companyId, code: { in: itemCodes } }, select: { code: true, iqcRequired: true } }),
@@ -55,34 +89,36 @@ let IqcService = class IqcService {
             if (!iqcRequiredByCode.has(p.code))
                 iqcRequiredByCode.set(p.code, p.iqcRequired);
         const requiresIqc = (itemCode) => { var _a; return (_a = iqcRequiredByCode.get(itemCode)) !== null && _a !== void 0 ? _a : true; };
-        const iqcLines = grn.items.filter(item => requiresIqc(item.itemCode));
-        const skippedLines = grn.items.filter(item => !requiresIqc(item.itemCode));
-        for (const item of skippedLines) {
-            const availableQty = item.receivedQty - (item.heldQty || 0);
-            if (availableQty <= 0)
-                continue;
+        const iqcLines = linesToSend.filter(l => requiresIqc(l.item.itemCode));
+        const skippedLines = linesToSend.filter(l => !requiresIqc(l.item.itemCode));
+        for (const { item, qty } of skippedLines) {
             await this.prisma.grnItem.update({
                 where: { id: item.id },
-                data: { acceptedQty: availableQty, rejectedQty: 0, updatedBy: user.id },
+                data: { acceptedQty: { increment: qty }, updatedBy: user.id },
             });
             await this.stockLedger.postTransaction({
                 companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
                 warehouseId: grn.warehouseId, transactionType: 'GRN_DIRECT_ACCEPT',
                 referenceType: 'GRN', referenceId: grn.id, referenceNumber: grn.grnNumber,
-                inQty: availableQty, remarks: 'IQC not required for this material - accepted directly per material master configuration',
+                inQty: qty, remarks: 'IQC not required for this material - accepted directly per material master configuration',
                 userId: user.id,
             });
             await this.audit.log({
                 tableName: 'grn_items', recordId: item.id, action: 'UPDATE',
-                newValues: { acceptedQty: availableQty, reason: 'IQC_NOT_REQUIRED' }, changedBy: user.id,
+                newValues: { acceptedQtyIncrement: qty, reason: 'IQC_NOT_REQUIRED' }, changedBy: user.id,
             });
         }
         if (iqcLines.length === 0) {
-            const updatedGrn = await this.prisma.grnHeader.update({
-                where: { id: grn.id }, data: { status: 'ACCEPTED', updatedBy: user.id },
-            });
-            await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'UPDATE', newValues: { status: 'ACCEPTED', reason: 'ALL_LINES_IQC_NOT_REQUIRED' }, changedBy: user.id });
-            return { skippedIqc: true, grn: updatedGrn };
+            const refreshedItems = await this.prisma.grnItem.findMany({ where: { grnId: grn.id, isActive: true } });
+            const allDone = refreshedItems.every(i => (i.receivedQty - (i.heldQty || 0)) - (i.sentToIqcQty || 0) <= 0);
+            if (allDone) {
+                const updatedGrn = await this.prisma.grnHeader.update({
+                    where: { id: grn.id }, data: { status: 'ACCEPTED', updatedBy: user.id },
+                });
+                await this.audit.log({ tableName: 'grn_headers', recordId: grn.id, action: 'UPDATE', newValues: { status: 'ACCEPTED', reason: 'ALL_LINES_IQC_NOT_REQUIRED' }, changedBy: user.id });
+                return { skippedIqc: true, grn: updatedGrn };
+            }
+            return { skippedIqc: true, grn };
         }
         const iqcNumber = await this.generateIqcNumber(user.companyId);
         const iqc = await this.prisma.iqcInspection.create({
@@ -95,20 +131,17 @@ let IqcService = class IqcService {
                 companyId: user.companyId,
                 createdBy: user.id, updatedBy: user.id,
                 items: {
-                    create: iqcLines.map(item => {
-                        const availableForIqc = item.receivedQty - (item.heldQty || 0);
-                        return {
-                            grnItemId: item.id,
-                            itemCode: item.itemCode,
-                            itemName: item.itemName,
-                            uom: item.uom,
-                            receivedQty: availableForIqc,
-                            acceptedQty: availableForIqc,
-                            rejectedQty: 0,
-                            companyId: user.companyId,
-                            createdBy: user.id, updatedBy: user.id,
-                        };
-                    }),
+                    create: iqcLines.map(({ item, qty }) => ({
+                        grnItemId: item.id,
+                        itemCode: item.itemCode,
+                        itemName: item.itemName,
+                        uom: item.uom,
+                        receivedQty: qty,
+                        acceptedQty: qty,
+                        rejectedQty: 0,
+                        companyId: user.companyId,
+                        createdBy: user.id, updatedBy: user.id,
+                    })),
                 },
             },
             include: this.includes(),

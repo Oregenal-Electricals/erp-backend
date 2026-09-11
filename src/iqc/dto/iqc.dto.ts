@@ -8,10 +8,21 @@ export class IqcItemUpdateDto {
   @IsOptional() @IsString() rejectionReason?: string;
 }
 
+export class HandoverLineDto {
+  @IsString() grnItemId: string;
+  @IsNumber() @Min(0.0001) qty: number;
+}
+
 export class CreateIqcDto {
   @IsString() grnId: string;
   @IsOptional() @IsString() inspectedBy?: string;
   @IsOptional() @IsString() remarks?: string;
+  // STORE-007 section 26-27: partial handover - if omitted, defaults to
+  // sending the full remaining eligible qty on every line (preserves the
+  // original one-shot behavior). If provided, only these lines/quantities
+  // are sent this batch; the rest stays eligible for a later handover.
+  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => HandoverLineDto)
+  items?: HandoverLineDto[];
 }
 
 export class UpdateIqcItemsDto {
