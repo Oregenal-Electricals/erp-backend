@@ -6,6 +6,8 @@ export class IqcItemUpdateDto {
   @IsNumber() @Min(0) acceptedQty: number;
   @IsNumber() @Min(0) rejectedQty: number;
   @IsOptional() @IsString() rejectionReason?: string;
+  @IsOptional() @IsNumber() @Min(0) holdQty?: number;
+  @IsOptional() @IsString() holdReason?: string;
 }
 
 export class HandoverLineDto {

@@ -125,6 +125,7 @@ export declare class ProductionDashboardController {
             remarks: string | null;
             acceptedQty: number;
             inspectionDate: Date;
+            holdQty: number;
             sampleSize: number;
             workOrderId: string;
             qcNumber: string;
@@ -134,7 +135,6 @@ export declare class ProductionDashboardController {
             passQty: number;
             failQty: number;
             reworkQty: number;
-            holdQty: number;
             fgHandedOverQty: number;
             sourceReworkId: string | null;
             defectDescription: string | null;
@@ -167,6 +167,7 @@ export declare class ProductionDashboardController {
             remarks: string | null;
             acceptedQty: number;
             inspectionDate: Date;
+            holdQty: number;
             sampleSize: number;
             workOrderId: string;
             qcNumber: string;
@@ -176,7 +177,6 @@ export declare class ProductionDashboardController {
             passQty: number;
             failQty: number;
             reworkQty: number;
-            holdQty: number;
             fgHandedOverQty: number;
             sourceReworkId: string | null;
             defectDescription: string | null;

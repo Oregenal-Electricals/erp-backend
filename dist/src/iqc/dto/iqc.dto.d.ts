@@ -3,6 +3,8 @@ export declare class IqcItemUpdateDto {
     acceptedQty: number;
     rejectedQty: number;
     rejectionReason?: string;
+    holdQty?: number;
+    holdReason?: string;
 }
 export declare class HandoverLineDto {
     grnItemId: string;

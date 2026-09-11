@@ -198,8 +198,9 @@ let IqcService = class IqcService {
             const iqcItem = iqc.items.find((i) => i.id === itemUpdate.id);
             if (!iqcItem)
                 throw new common_1.BadRequestException(`IQC item ${itemUpdate.id} not found`);
-            if (itemUpdate.acceptedQty + itemUpdate.rejectedQty > iqcItem.receivedQty) {
-                throw new common_1.BadRequestException(`Item ${iqcItem.itemCode}: accepted + rejected cannot exceed received qty`);
+            const holdQty = itemUpdate.holdQty || 0;
+            if (itemUpdate.acceptedQty + itemUpdate.rejectedQty + holdQty > iqcItem.receivedQty) {
+                throw new common_1.BadRequestException(`Item ${iqcItem.itemCode}: accepted + rejected + hold cannot exceed received qty`);
             }
             await this.prisma.iqcItem.update({
                 where: { id: itemUpdate.id },
@@ -207,6 +208,8 @@ let IqcService = class IqcService {
                     acceptedQty: itemUpdate.acceptedQty,
                     rejectedQty: itemUpdate.rejectedQty,
                     rejectionReason: itemUpdate.rejectionReason,
+                    holdQty,
+                    holdReason: itemUpdate.holdReason,
                     updatedBy: user.id,
                 },
             });

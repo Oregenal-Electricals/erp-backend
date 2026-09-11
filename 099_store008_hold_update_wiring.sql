@@ -1,0 +1,3 @@
+-- No schema change; this migration number reserved for consistency but
+-- unused - the fix was wiring IqcItemUpdateDto/updateItems() to actually
+-- accept holdQty/holdReason, which the schema already supported.

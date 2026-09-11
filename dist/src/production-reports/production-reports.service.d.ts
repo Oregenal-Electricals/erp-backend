@@ -143,6 +143,7 @@ export declare class ProductionReportsService {
             remarks: string | null;
             acceptedQty: number;
             inspectionDate: Date;
+            holdQty: number;
             sampleSize: number;
             workOrderId: string;
             qcNumber: string;
@@ -152,7 +153,6 @@ export declare class ProductionReportsService {
             passQty: number;
             failQty: number;
             reworkQty: number;
-            holdQty: number;
             fgHandedOverQty: number;
             sourceReworkId: string | null;
             defectDescription: string | null;

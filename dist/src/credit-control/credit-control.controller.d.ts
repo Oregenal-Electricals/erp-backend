@@ -33,8 +33,8 @@ export declare class CreditControlController {
                 referenceType: string;
                 referenceId: string;
                 referenceNumber: string;
-                releasedBy: string | null;
                 holdReason: string;
+                releasedBy: string | null;
                 releasedDate: Date | null;
                 releaseReason: string | null;
                 creditLimitId: string | null;
@@ -77,8 +77,8 @@ export declare class CreditControlController {
                 referenceType: string;
                 referenceId: string;
                 referenceNumber: string;
-                releasedBy: string | null;
                 holdReason: string;
+                releasedBy: string | null;
                 releasedDate: Date | null;
                 releaseReason: string | null;
                 creditLimitId: string | null;
@@ -121,8 +121,8 @@ export declare class CreditControlController {
                 referenceType: string;
                 referenceId: string;
                 referenceNumber: string;
-                releasedBy: string | null;
                 holdReason: string;
+                releasedBy: string | null;
                 releasedDate: Date | null;
                 releaseReason: string | null;
                 creditLimitId: string | null;
@@ -165,8 +165,8 @@ export declare class CreditControlController {
                 referenceType: string;
                 referenceId: string;
                 referenceNumber: string;
-                releasedBy: string | null;
                 holdReason: string;
+                releasedBy: string | null;
                 releasedDate: Date | null;
                 releaseReason: string | null;
                 creditLimitId: string | null;
@@ -213,8 +213,8 @@ export declare class CreditControlController {
             referenceType: string;
             referenceId: string;
             referenceNumber: string;
-            releasedBy: string | null;
             holdReason: string;
+            releasedBy: string | null;
             releasedDate: Date | null;
             releaseReason: string | null;
             creditLimitId: string | null;
@@ -248,8 +248,8 @@ export declare class CreditControlController {
             referenceType: string;
             referenceId: string;
             referenceNumber: string;
-            releasedBy: string | null;
             holdReason: string;
+            releasedBy: string | null;
             releasedDate: Date | null;
             releaseReason: string | null;
             creditLimitId: string | null;
@@ -283,8 +283,8 @@ export declare class CreditControlController {
         referenceType: string;
         referenceId: string;
         referenceNumber: string;
-        releasedBy: string | null;
         holdReason: string;
+        releasedBy: string | null;
         releasedDate: Date | null;
         releaseReason: string | null;
         creditLimitId: string | null;
@@ -318,8 +318,8 @@ export declare class CreditControlController {
                 referenceType: string;
                 referenceId: string;
                 referenceNumber: string;
-                releasedBy: string | null;
                 holdReason: string;
+                releasedBy: string | null;
                 releasedDate: Date | null;
                 releaseReason: string | null;
                 creditLimitId: string | null;
@@ -358,8 +358,8 @@ export declare class CreditControlController {
                 referenceType: string;
                 referenceId: string;
                 referenceNumber: string;
-                releasedBy: string | null;
                 holdReason: string;
+                releasedBy: string | null;
                 releasedDate: Date | null;
                 releaseReason: string | null;
                 creditLimitId: string | null;
@@ -415,8 +415,8 @@ export declare class CreditControlController {
         referenceType: string;
         referenceId: string;
         referenceNumber: string;
-        releasedBy: string | null;
         holdReason: string;
+        releasedBy: string | null;
         releasedDate: Date | null;
         releaseReason: string | null;
         creditLimitId: string | null;
