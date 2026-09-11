@@ -3,6 +3,11 @@ import { Type } from 'class-transformer';
 
 export class PutawayItemDto {
   @IsString() binId: string;
+  // STORE-008 section 33-34: which IqcItem this qty is coming from -
+  // optional since non-IQC put-away sources exist too, but required in
+  // practice for over-put-away validation to have anything to check
+  // against.
+  @IsOptional() @IsString() iqcItemId?: string;
   @IsString() itemCode: string;
   @IsString() itemName: string;
   @IsString() uom: string;

@@ -9,30 +9,7 @@ export declare class StockPutawayService {
     constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
     private generateNumber;
     private includes;
-    getPendingIqcs(user: any): Promise<({
-        grn: {
-            warehouse: {
-                name: string;
-            };
-            grnNumber: string;
-            warehouseId: string;
-        };
-    } & {
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        remarks: string | null;
-        grnId: string;
-        iqcNumber: string;
-        inspectedBy: string | null;
-        inspectionDate: Date;
-    })[]>;
+    getPendingIqcs(user: any): Promise<any[]>;
     create(dto: CreatePutawayDto, user: any): Promise<{
         items: ({
             bin: {
@@ -53,6 +30,7 @@ export declare class StockPutawayService {
             uom: string;
             qty: number;
             unitCost: number;
+            iqcItemId: string | null;
             binId: string;
             putawayId: string;
         })[];
@@ -135,6 +113,7 @@ export declare class StockPutawayService {
             uom: string;
             qty: number;
             unitCost: number;
+            iqcItemId: string | null;
             binId: string;
             putawayId: string;
         })[];
@@ -185,6 +164,7 @@ export declare class StockPutawayService {
             uom: string;
             qty: number;
             unitCost: number;
+            iqcItemId: string | null;
             binId: string;
             putawayId: string;
         })[];
@@ -235,6 +215,7 @@ export declare class StockPutawayService {
             uom: string;
             qty: number;
             unitCost: number;
+            iqcItemId: string | null;
             binId: string;
             putawayId: string;
         })[];

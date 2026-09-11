@@ -31,20 +31,32 @@ export class StockPutawayService {
   // credited into the warehouse) but don't yet have a StockPutaway record -
   // this is what should show as "pending" on the Putaway screen, mirroring
   // the same pending-queue pattern used for GRN/IQC elsewhere.
+  // STORE-008 section 34: shows only what's genuinely still eligible
+  // for put-away (acceptedQty - putAwayQty already claimed at complete()
+  // time), not an all-or-nothing "does this IQC have any StockPutaway at
+  // all" filter. The old filter hid the remainder of a partially-put-
+  // away IQC entirely once even a small first batch existed - there was
+  // no way for the rest to ever show up again as pending.
   async getPendingIqcs(user: any) {
     const where: any = { status: 'APPROVED', isActive: true };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     const approvedIqcs = await this.prisma.iqcInspection.findMany({
       where,
-      include: { grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } } },
+      include: {
+        grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } },
+        items: { where: { isActive: true } },
+      },
       orderBy: { createdAt: 'asc' },
     });
-    const alreadyPutAway = await this.prisma.stockPutaway.findMany({
-      where: { companyId: user.companyId, iqcId: { not: null }, isActive: true },
-      select: { iqcId: true },
-    });
-    const putAwayIqcIds = new Set(alreadyPutAway.map(p => p.iqcId));
-    return approvedIqcs.filter(iqc => !putAwayIqcIds.has(iqc.id));
+    return approvedIqcs
+      .map((iqc: any) => ({
+        ...iqc,
+        items: iqc.items.map((item: any) => ({
+          ...item,
+          remainingPutAwayQty: Math.max(item.acceptedQty - (item.putAwayQty || 0), 0),
+        })),
+      }))
+      .filter((iqc: any) => iqc.items.some((item: any) => item.remainingPutAwayQty > 0));
   }
 
   async create(dto: CreatePutawayDto, user: any) {
@@ -119,6 +131,29 @@ export class StockPutawayService {
     const putaway = await this.findOne(id, user);
     if (putaway.status === 'COMPLETED') throw new BadRequestException('Already completed');
     if (!putaway.items || putaway.items.length === 0) throw new BadRequestException('No items to putaway');
+
+    const qtyByIqcItemId = new Map<string, number>();
+    for (const item of putaway.items as any[]) {
+      if (!item.iqcItemId) continue;
+      qtyByIqcItemId.set(item.iqcItemId, (qtyByIqcItemId.get(item.iqcItemId) || 0) + item.qty);
+    }
+    for (const [iqcItemId, qty] of qtyByIqcItemId) {
+      const iqcItem = await this.prisma.iqcItem.findUnique({ where: { id: iqcItemId } });
+      if (!iqcItem) continue;
+      const remaining = iqcItem.acceptedQty - (iqcItem.putAwayQty || 0);
+      if (qty > remaining) {
+        throw new BadRequestException(
+          `Item ${iqcItem.itemCode}: putting away ${qty} would exceed the remaining accepted qty (${remaining} left of ${iqcItem.acceptedQty} accepted, ${iqcItem.putAwayQty || 0} already put away).`,
+        );
+      }
+      const claim = await this.prisma.iqcItem.updateMany({
+        where: { id: iqcItemId, putAwayQty: { lte: iqcItem.acceptedQty - qty } },
+        data: { putAwayQty: { increment: qty }, updatedBy: user.id },
+      });
+      if (claim.count === 0) {
+        throw new BadRequestException(`Item ${iqcItem.itemCode}: could not claim ${qty} for put-away - the remaining accepted qty changed concurrently, please retry.`);
+      }
+    }
 
     // Validate every item fits its bin's physical capacity BEFORE writing
     // anything - a bin's maxQty was previously only used to choose the

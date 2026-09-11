@@ -20,6 +20,11 @@ __decorate([
     __metadata("design:type", String)
 ], PutawayItemDto.prototype, "binId", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], PutawayItemDto.prototype, "iqcItemId", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], PutawayItemDto.prototype, "itemCode", void 0);

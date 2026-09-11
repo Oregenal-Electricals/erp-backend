@@ -279,6 +279,7 @@ export declare class IqcController {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -330,6 +331,7 @@ export declare class IqcController {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -480,6 +482,7 @@ export declare class IqcController {
         iqcId: string;
         holdQty: number;
         holdReason: string | null;
+        putAwayQty: number;
         currentStage: string;
         finalOutcome: string;
     }>;
@@ -507,6 +510,7 @@ export declare class IqcController {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -589,6 +593,7 @@ export declare class IqcController {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -639,6 +644,7 @@ export declare class IqcController {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -690,6 +696,7 @@ export declare class IqcController {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -840,6 +847,7 @@ export declare class IqcController {
         iqcId: string;
         holdQty: number;
         holdReason: string | null;
+        putAwayQty: number;
         currentStage: string;
         finalOutcome: string;
     }>;
@@ -966,6 +974,7 @@ export declare class IqcController {
         iqcId: string;
         holdQty: number;
         holdReason: string | null;
+        putAwayQty: number;
         currentStage: string;
         finalOutcome: string;
     }>;

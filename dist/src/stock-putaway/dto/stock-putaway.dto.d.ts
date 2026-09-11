@@ -1,5 +1,6 @@
 export declare class PutawayItemDto {
     binId: string;
+    iqcItemId?: string;
     itemCode: string;
     itemName: string;
     uom: string;

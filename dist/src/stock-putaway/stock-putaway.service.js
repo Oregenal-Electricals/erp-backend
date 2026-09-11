@@ -39,15 +39,15 @@ let StockPutawayService = class StockPutawayService {
             where.companyId = user.companyId;
         const approvedIqcs = await this.prisma.iqcInspection.findMany({
             where,
-            include: { grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } } },
+            include: {
+                grn: { select: { grnNumber: true, warehouseId: true, warehouse: { select: { name: true } } } },
+                items: { where: { isActive: true } },
+            },
             orderBy: { createdAt: 'asc' },
         });
-        const alreadyPutAway = await this.prisma.stockPutaway.findMany({
-            where: { companyId: user.companyId, iqcId: { not: null }, isActive: true },
-            select: { iqcId: true },
-        });
-        const putAwayIqcIds = new Set(alreadyPutAway.map(p => p.iqcId));
-        return approvedIqcs.filter(iqc => !putAwayIqcIds.has(iqc.id));
+        return approvedIqcs
+            .map((iqc) => (Object.assign(Object.assign({}, iqc), { items: iqc.items.map((item) => (Object.assign(Object.assign({}, item), { remainingPutAwayQty: Math.max(item.acceptedQty - (item.putAwayQty || 0), 0) }))) })))
+            .filter((iqc) => iqc.items.some((item) => item.remainingPutAwayQty > 0));
     }
     async create(dto, user) {
         const grn = await this.prisma.grnHeader.findFirst({ where: { id: dto.grnId, companyId: user.companyId } });
@@ -122,6 +122,28 @@ let StockPutawayService = class StockPutawayService {
             throw new common_1.BadRequestException('Already completed');
         if (!putaway.items || putaway.items.length === 0)
             throw new common_1.BadRequestException('No items to putaway');
+        const qtyByIqcItemId = new Map();
+        for (const item of putaway.items) {
+            if (!item.iqcItemId)
+                continue;
+            qtyByIqcItemId.set(item.iqcItemId, (qtyByIqcItemId.get(item.iqcItemId) || 0) + item.qty);
+        }
+        for (const [iqcItemId, qty] of qtyByIqcItemId) {
+            const iqcItem = await this.prisma.iqcItem.findUnique({ where: { id: iqcItemId } });
+            if (!iqcItem)
+                continue;
+            const remaining = iqcItem.acceptedQty - (iqcItem.putAwayQty || 0);
+            if (qty > remaining) {
+                throw new common_1.BadRequestException(`Item ${iqcItem.itemCode}: putting away ${qty} would exceed the remaining accepted qty (${remaining} left of ${iqcItem.acceptedQty} accepted, ${iqcItem.putAwayQty || 0} already put away).`);
+            }
+            const claim = await this.prisma.iqcItem.updateMany({
+                where: { id: iqcItemId, putAwayQty: { lte: iqcItem.acceptedQty - qty } },
+                data: { putAwayQty: { increment: qty }, updatedBy: user.id },
+            });
+            if (claim.count === 0) {
+                throw new common_1.BadRequestException(`Item ${iqcItem.itemCode}: could not claim ${qty} for put-away - the remaining accepted qty changed concurrently, please retry.`);
+            }
+        }
         const bins = new Map();
         for (const item of putaway.items) {
             const bin = await this.prisma.warehouseBin.findUnique({ where: { id: item.binId } });

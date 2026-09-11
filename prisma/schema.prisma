@@ -3488,6 +3488,12 @@ model IqcItem {
   // reject. accepted + rejected + hold must reconcile to received.
   holdQty          Float          @default(0)
   holdReason       String?
+  // STORE-008 section 33-35: cumulative qty already put away across
+  // however many StockPutaway batches for this line, mirroring
+  // GrnItem.sentToIqcQty's pattern from STORE-007 - lets the pending
+  // queue show only what's genuinely left, and lets over-put-away be
+  // validated cumulatively rather than per-batch.
+  putAwayQty       Float          @default(0)
   templateId       String?
   template         IqcCheckTemplate? @relation(fields: [templateId], references: [id])
   sampleSize       Int?
@@ -3501,6 +3507,7 @@ model IqcItem {
   updatedBy        String?
 
   stageResults     IqcStageResult[]
+  putawayItems     StockPutawayItem[]
 
   @@map("iqc_items")
 }
@@ -3918,6 +3925,12 @@ model StockPutawayItem {
   putaway     StockPutaway @relation(fields: [putawayId], references: [id])
   binId       String
   bin         WarehouseBin @relation(fields: [binId], references: [id])
+  // STORE-008 section 33-34: which IqcItem this line's qty is being put
+  // away against - without this, over-put-away and partial-put-away
+  // tracking have nothing to validate or accumulate against, since a
+  // GRN can have the same itemCode on more than one line/inspection.
+  iqcItemId   String?
+  iqcItem     IqcItem?     @relation(fields: [iqcItemId], references: [id])
   itemCode    String
   itemName    String
   uom         String

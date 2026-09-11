@@ -335,6 +335,7 @@ export declare class IqcEscalationService {
         iqcId: string;
         holdQty: number;
         holdReason: string | null;
+        putAwayQty: number;
         currentStage: string;
         finalOutcome: string;
     }>;
@@ -461,6 +462,7 @@ export declare class IqcEscalationService {
         iqcId: string;
         holdQty: number;
         holdReason: string | null;
+        putAwayQty: number;
         currentStage: string;
         finalOutcome: string;
     }>;
@@ -587,6 +589,7 @@ export declare class IqcEscalationService {
         iqcId: string;
         holdQty: number;
         holdReason: string | null;
+        putAwayQty: number;
         currentStage: string;
         finalOutcome: string;
     }>;

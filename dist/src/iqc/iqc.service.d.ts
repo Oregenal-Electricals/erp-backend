@@ -37,6 +37,7 @@ export declare class IqcService {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -151,6 +152,7 @@ export declare class IqcService {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -202,6 +204,7 @@ export declare class IqcService {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -253,6 +256,7 @@ export declare class IqcService {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -305,6 +309,7 @@ export declare class IqcService {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];
@@ -355,6 +360,7 @@ export declare class IqcService {
             iqcId: string;
             holdQty: number;
             holdReason: string | null;
+            putAwayQty: number;
             currentStage: string;
             finalOutcome: string;
         }[];

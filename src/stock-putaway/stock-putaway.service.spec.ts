@@ -1,0 +1,152 @@
+import { StockPutawayService } from './stock-putaway.service';
+
+describe('StockPutawayService.getPendingIqcs - STORE-008 remaining-qty visibility', () => {
+  let service: StockPutawayService;
+  let prisma: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      iqcInspection: { findMany: jest.fn() },
+    };
+    service = new StockPutawayService(prisma, {} as any, {} as any);
+  });
+
+  it('shows an IQC with zero put-away yet as fully remaining', async () => {
+    prisma.iqcInspection.findMany.mockResolvedValue([
+      { id: 'iqc-1', items: [{ id: 'ii-1', itemCode: 'X', acceptedQty: 980, putAwayQty: 0 }] },
+    ]);
+    const r = await service.getPendingIqcs(user);
+    expect(r).toHaveLength(1);
+    expect(r[0].items[0].remainingPutAwayQty).toBe(980);
+  });
+
+  it('still shows an IQC with a partial put-away already done, with the correct remainder', async () => {
+    prisma.iqcInspection.findMany.mockResolvedValue([
+      { id: 'iqc-1', items: [{ id: 'ii-1', itemCode: 'X', acceptedQty: 980, putAwayQty: 600 }] },
+    ]);
+    const r = await service.getPendingIqcs(user);
+    expect(r).toHaveLength(1);
+    expect(r[0].items[0].remainingPutAwayQty).toBe(380);
+  });
+
+  it('excludes an IQC once every line has been fully put away - not left visible forever', async () => {
+    prisma.iqcInspection.findMany.mockResolvedValue([
+      { id: 'iqc-1', items: [{ id: 'ii-1', itemCode: 'X', acceptedQty: 980, putAwayQty: 980 }] },
+    ]);
+    const r = await service.getPendingIqcs(user);
+    expect(r).toHaveLength(0);
+  });
+
+  it('keeps a mixed-line IQC visible if any one line still has remaining qty', async () => {
+    prisma.iqcInspection.findMany.mockResolvedValue([
+      { id: 'iqc-1', items: [
+        { id: 'ii-1', itemCode: 'X', acceptedQty: 500, putAwayQty: 500 },
+        { id: 'ii-2', itemCode: 'Y', acceptedQty: 300, putAwayQty: 100 },
+      ] },
+    ]);
+    const r = await service.getPendingIqcs(user);
+    expect(r).toHaveLength(1);
+  });
+});
+
+describe('StockPutawayService.complete - STORE-008 over-put-away and partial put-away', () => {
+  let service: StockPutawayService;
+  let prisma: any;
+  let audit: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  let iqcItemState: any;
+
+  function makePutaway(items: any[]) {
+    return { id: 'put-1', companyId: 'company-1', status: 'IN_PROGRESS', items };
+  }
+
+  beforeEach(() => {
+    iqcItemState = { id: 'ii-1', itemCode: 'DRIVER-01', acceptedQty: 800, putAwayQty: 0 };
+    prisma = {
+      stockPutaway: {
+        findFirst: jest.fn(),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'put-1', ...data })),
+      },
+      iqcItem: {
+        findUnique: jest.fn().mockImplementation(() => Promise.resolve(iqcItemState)),
+        updateMany: jest.fn().mockImplementation(({ where, data }: any) => {
+          const threshold = where.putAwayQty.lte;
+          if (iqcItemState.putAwayQty > threshold) return Promise.resolve({ count: 0 });
+          iqcItemState = { ...iqcItemState, putAwayQty: iqcItemState.putAwayQty + data.putAwayQty.increment };
+          return Promise.resolve({ count: 1 });
+        }),
+      },
+      warehouseBin: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'bin-1', code: 'R02-B04', currentQty: 0, maxQty: null }),
+        update: jest.fn().mockResolvedValue({}),
+      },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    service = new StockPutawayService(prisma, audit, {} as any);
+  });
+
+  it('a first partial put-away of 500 (of 800 accepted) claims exactly 500 and completes normally', async () => {
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 500 },
+    ]));
+    await service.complete('put-1', user);
+    expect(iqcItemState.putAwayQty).toBe(500);
+  });
+
+  it('a second put-away of the remaining 300 completes and reaches the full 800 cumulative', async () => {
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 500 },
+    ]));
+    await service.complete('put-1', user);
+
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 300 },
+    ]));
+    await service.complete('put-2', user);
+
+    expect(iqcItemState.putAwayQty).toBe(800);
+  });
+
+  it('blocks putting away more than the remaining accepted qty', async () => {
+    iqcItemState = { ...iqcItemState, putAwayQty: 600 };
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 300 },
+    ]));
+    await expect(service.complete('put-1', user)).rejects.toThrow(/would exceed the remaining accepted qty/);
+  });
+
+  it('a duplicate/retry complete on an already-fully-put-away line is blocked, not double-counted', async () => {
+    iqcItemState = { ...iqcItemState, putAwayQty: 800 };
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 800 },
+    ]));
+    await expect(service.complete('put-1', user)).rejects.toThrow(/would exceed the remaining accepted qty/);
+    expect(iqcItemState.putAwayQty).toBe(800);
+  });
+
+  it('rejects the claim if the remaining qty changed concurrently between validation and claim', async () => {
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 500 },
+    ]));
+    prisma.iqcItem.updateMany.mockResolvedValueOnce({ count: 0 });
+    await expect(service.complete('put-1', user)).rejects.toThrow(/could not claim/);
+  });
+
+  it('items without an iqcItemId (non-IQC put-away sources) skip the accepted-qty check entirely', async () => {
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', itemCode: 'MISC-01', qty: 50 },
+    ]));
+    await expect(service.complete('put-1', user)).resolves.toBeDefined();
+    expect(prisma.iqcItem.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('still enforces bin capacity after the accepted-qty check passes', async () => {
+    prisma.warehouseBin.findUnique.mockResolvedValue({ id: 'bin-1', code: 'R02-B04', currentQty: 700, maxQty: 800 });
+    prisma.stockPutaway.findFirst.mockResolvedValue(makePutaway([
+      { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 500 },
+    ]));
+    await expect(service.complete('put-1', user)).rejects.toThrow(/can only hold/);
+  });
+});
