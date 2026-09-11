@@ -1,7 +1,7 @@
 import { IqcService } from './iqc.service';
 import { IqcEscalationService } from './iqc-escalation.service';
 import { IqcTemplateImportService } from './iqc-template-import.service';
-import { CreateIqcDto, UpdateIqcItemsDto, CreateIqcCheckTemplateDto, UpdateIqcCheckTemplateDto, AttachTemplateDto, SubmitIqcStageResultDto, ConfirmTemplateImportDto } from './dto/iqc.dto';
+import { CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto, CreateIqcCheckTemplateDto, UpdateIqcCheckTemplateDto, AttachTemplateDto, SubmitIqcStageResultDto, ConfirmTemplateImportDto } from './dto/iqc.dto';
 export declare class IqcController {
     private readonly iqcService;
     private readonly escalation;
@@ -273,6 +273,7 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -321,6 +322,7 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -468,6 +470,7 @@ export declare class IqcController {
         receivedQty: number;
         acceptedQty: number;
         rejectedQty: number;
+        confirmedQty: number | null;
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
@@ -492,6 +495,7 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -552,6 +556,55 @@ export declare class IqcController {
             reversalReason: string | null;
         };
     }>;
+    confirmReceipt(id: string, dto: ConfirmReceiptDto, req: any): Promise<{
+        handoverMismatches: any[];
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            rejectionReason: string | null;
+            grnItemId: string;
+            receivedQty: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            confirmedQty: number | null;
+            templateId: string | null;
+            sampleSize: number | null;
+            iqcId: string;
+            currentStage: string;
+            finalOutcome: string;
+        }[];
+        grn: {
+            warehouse: {
+                name: string;
+            };
+            grnNumber: string;
+            grnType: string;
+            warehouseId: string;
+        };
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        grnId: string;
+        iqcNumber: string;
+        inspectedBy: string | null;
+        inspectionDate: Date;
+    }>;
     updateItems(id: string, dto: UpdateIqcItemsDto, req: any): Promise<{
         items: {
             id: string;
@@ -570,6 +623,7 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -618,6 +672,7 @@ export declare class IqcController {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -765,6 +820,7 @@ export declare class IqcController {
         receivedQty: number;
         acceptedQty: number;
         rejectedQty: number;
+        confirmedQty: number | null;
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
@@ -888,6 +944,7 @@ export declare class IqcController {
         receivedQty: number;
         acceptedQty: number;
         rejectedQty: number;
+        confirmedQty: number | null;
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;

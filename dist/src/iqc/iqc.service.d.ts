@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateIqcDto, UpdateIqcItemsDto } from './dto/iqc.dto';
+import { CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto } from './dto/iqc.dto';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 export declare class IqcService {
     private prisma;
@@ -27,6 +27,7 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -138,6 +139,7 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -186,6 +188,7 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -234,6 +237,7 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;
@@ -249,6 +253,55 @@ export declare class IqcService {
             warehouseId: string;
         };
     } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        grnId: string;
+        iqcNumber: string;
+        inspectedBy: string | null;
+        inspectionDate: Date;
+    }>;
+    confirmReceipt(id: string, dto: ConfirmReceiptDto, user: any): Promise<{
+        handoverMismatches: any[];
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            rejectionReason: string | null;
+            grnItemId: string;
+            receivedQty: number;
+            acceptedQty: number;
+            rejectedQty: number;
+            confirmedQty: number | null;
+            templateId: string | null;
+            sampleSize: number | null;
+            iqcId: string;
+            currentStage: string;
+            finalOutcome: string;
+        }[];
+        grn: {
+            warehouse: {
+                name: string;
+            };
+            grnNumber: string;
+            grnType: string;
+            warehouseId: string;
+        };
         id: string;
         companyId: string;
         isActive: boolean;
@@ -282,6 +335,7 @@ export declare class IqcService {
             receivedQty: number;
             acceptedQty: number;
             rejectedQty: number;
+            confirmedQty: number | null;
             templateId: string | null;
             sampleSize: number | null;
             iqcId: string;

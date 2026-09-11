@@ -329,6 +329,7 @@ export declare class IqcEscalationService {
         receivedQty: number;
         acceptedQty: number;
         rejectedQty: number;
+        confirmedQty: number | null;
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
@@ -452,6 +453,7 @@ export declare class IqcEscalationService {
         receivedQty: number;
         acceptedQty: number;
         rejectedQty: number;
+        confirmedQty: number | null;
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;
@@ -575,6 +577,7 @@ export declare class IqcEscalationService {
         receivedQty: number;
         acceptedQty: number;
         rejectedQty: number;
+        confirmedQty: number | null;
         templateId: string | null;
         sampleSize: number | null;
         iqcId: string;

@@ -3470,6 +3470,12 @@ model IqcItem {
   itemName         String
   uom              String
   receivedQty      Float          @default(0)
+  // STORE-007 section 24-25: what Store claims to have sent, set at
+  // handover time. confirmedQty is set separately once QC physically
+  // receives it - kept apart deliberately so a handover-quantity
+  // mismatch is visible rather than one field silently standing in for
+  // both "what was sent" and "what actually arrived".
+  confirmedQty     Float?
   acceptedQty      Float          @default(0)
   rejectedQty      Float          @default(0)
   rejectionReason  String?

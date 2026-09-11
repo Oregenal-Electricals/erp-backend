@@ -4,7 +4,7 @@ import { IqcService } from './iqc.service';
 import { IqcEscalationService } from './iqc-escalation.service';
 import { IqcTemplateImportService } from './iqc-template-import.service';
 import {
-  CreateIqcDto, UpdateIqcItemsDto,
+  CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto,
   CreateIqcCheckTemplateDto, UpdateIqcCheckTemplateDto,
   AttachTemplateDto, SubmitIqcStageResultDto, ConfirmTemplateImportDto,
 } from './dto/iqc.dto';
@@ -83,6 +83,10 @@ export class IqcController {
   @Post()
   @RequirePermissions(Permission.STORE_IQC_HANDOVER)
   create(@Body() dto: CreateIqcDto, @Request() req: any) { return this.iqcService.create(dto, req.user); }
+
+  @Post(':id/confirm-receipt')
+  @RequirePermissions(Permission.QC_IQC_RECEIVE)
+  confirmReceipt(@Param('id') id: string, @Body() dto: ConfirmReceiptDto, @Request() req: any) { return this.iqcService.confirmReceipt(id, dto, req.user); }
 
   @Put(':id/items')
   @RequirePermissions(Permission.QUALITY_EDIT)

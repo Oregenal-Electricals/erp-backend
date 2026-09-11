@@ -1,0 +1,1 @@
+ALTER TABLE "iqc_items" ADD COLUMN "confirmedQty" DOUBLE PRECISION;

@@ -277,3 +277,111 @@ describe('IqcService.create - STORE-007 partial/cumulative handover', () => {
     ).rejects.toThrow(/exceeds remaining eligible qty/);
   });
 });
+
+describe('IqcService.confirmReceipt - STORE-007 QC-confirms-receipt', () => {
+  let service: IqcService;
+  let prisma: any;
+  let audit: any;
+  let stockLedger: any;
+
+  const user = { id: 'qc-1', companyId: 'company-1' };
+  const iqcItem = { id: 'iqc-item-1', itemCode: 'DRIVER-01', receivedQty: 1000, acceptedQty: 1000, rejectedQty: 0 };
+
+  beforeEach(() => {
+    prisma = {
+      iqcInspection: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'iqc-1', companyId: 'company-1', status: 'AWAITING_QC_RECEIPT', items: [iqcItem] }),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'iqc-1', status: 'AWAITING_QC_RECEIPT', ...data })),
+      },
+      iqcItem: { update: jest.fn().mockResolvedValue({}) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    stockLedger = {};
+    service = new IqcService(prisma, audit, stockLedger);
+  });
+
+  it('an exact-match confirmation moves status to IN_PROGRESS with no mismatch flagged', async () => {
+    const r = await service.confirmReceipt('iqc-1', { items: [{ itemId: 'iqc-item-1', confirmedQty: 1000 }] }, user);
+    expect(r.status).toBe('IN_PROGRESS');
+    expect(r.handoverMismatches).toEqual([]);
+  });
+
+  it('a short confirmation caps acceptedQty at what was actually confirmed and flags a mismatch', async () => {
+    const r = await service.confirmReceipt('iqc-1', { items: [{ itemId: 'iqc-item-1', confirmedQty: 980 }] }, user);
+    expect(prisma.iqcItem.update).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'iqc-item-1' }, data: expect.objectContaining({ confirmedQty: 980, acceptedQty: 980 }),
+    }));
+    expect(r.handoverMismatches).toEqual([
+      expect.objectContaining({ itemCode: 'DRIVER-01', sentQty: 1000, confirmedQty: 980, shortfall: 20 }),
+    ]);
+  });
+
+  it('never silently treats a short confirmation as a full handover - status advances but mismatch is recorded', async () => {
+    const r = await service.confirmReceipt('iqc-1', { items: [{ itemId: 'iqc-item-1', confirmedQty: 980 }] }, user);
+    expect(r.status).toBe('IN_PROGRESS');
+    expect(r.handoverMismatches.length).toBe(1);
+  });
+
+  it('blocks confirming more than what Store actually sent', async () => {
+    await expect(
+      service.confirmReceipt('iqc-1', { items: [{ itemId: 'iqc-item-1', confirmedQty: 1100 }] }, user),
+    ).rejects.toThrow(/cannot exceed what Store sent/);
+  });
+
+  it('blocks confirmReceipt when the inspection is not awaiting QC receipt', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue({ id: 'iqc-1', companyId: 'company-1', status: 'IN_PROGRESS', items: [iqcItem] });
+    await expect(
+      service.confirmReceipt('iqc-1', { items: [{ itemId: 'iqc-item-1', confirmedQty: 1000 }] }, user),
+    ).rejects.toThrow(/not awaiting QC receipt confirmation/);
+  });
+
+  it('throws NotFoundException for an item id not on this inspection', async () => {
+    await expect(
+      service.confirmReceipt('iqc-1', { items: [{ itemId: 'missing-item', confirmedQty: 100 }] }, user),
+    ).rejects.toThrow(/not found on this inspection/);
+  });
+
+  it('logs the audit trail including any mismatches', async () => {
+    await service.confirmReceipt('iqc-1', { items: [{ itemId: 'iqc-item-1', confirmedQty: 980 }] }, user);
+    expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({
+      tableName: 'iqc_inspections',
+      newValues: expect.objectContaining({ receiptConfirmed: true, mismatches: expect.arrayContaining([expect.objectContaining({ shortfall: 20 })]) }),
+    }));
+  });
+});
+
+describe('IqcService.approve - STORE-007 blocked until QC receipt is confirmed', () => {
+  let service: IqcService;
+  let prisma: any;
+  let audit: any;
+  let stockLedger: any;
+
+  const user = { id: 'qc-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      iqcInspection: {
+        findFirst: jest.fn(),
+        update: jest.fn().mockResolvedValue({}),
+      },
+      grnItem: { update: jest.fn().mockResolvedValue({}) },
+      grnHeader: { update: jest.fn().mockResolvedValue({}) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    stockLedger = { receiveFromIqc: jest.fn().mockResolvedValue(undefined) };
+    service = new IqcService(prisma, audit, stockLedger);
+  });
+
+  it('blocks approve() while status is AWAITING_QC_RECEIPT', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue({ id: 'iqc-1', companyId: 'company-1', status: 'AWAITING_QC_RECEIPT', items: [] });
+    await expect(service.approve('iqc-1', user)).rejects.toThrow(/QC must confirm physical receipt/);
+  });
+
+  it('allows approve() once status is IN_PROGRESS', async () => {
+    prisma.iqcInspection.findFirst.mockResolvedValue({
+      id: 'iqc-1', companyId: 'company-1', status: 'IN_PROGRESS', grnId: 'grn-1',
+      items: [{ grnItemId: 'gi-1', acceptedQty: 980, rejectedQty: 0, receivedQty: 980 }],
+    });
+    await expect(service.approve('iqc-1', user)).resolves.toBeDefined();
+  });
+});

@@ -30,6 +30,16 @@ export class UpdateIqcItemsDto {
   items: IqcItemUpdateDto[];
 }
 
+export class ConfirmReceiptItemDto {
+  @IsString() itemId: string;
+  @IsNumber() @Min(0) confirmedQty: number;
+}
+
+export class ConfirmReceiptDto {
+  @IsArray() @ValidateNested({ each: true }) @Type(() => ConfirmReceiptItemDto)
+  items: ConfirmReceiptItemDto[];
+}
+
 export class AttachTemplateDto {
   @IsString() templateId: string;
   @IsOptional() @IsNumber() @Min(0) sampleSize?: number;

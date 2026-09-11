@@ -17,6 +17,13 @@ export declare class CreateIqcDto {
 export declare class UpdateIqcItemsDto {
     items: IqcItemUpdateDto[];
 }
+export declare class ConfirmReceiptItemDto {
+    itemId: string;
+    confirmedQty: number;
+}
+export declare class ConfirmReceiptDto {
+    items: ConfirmReceiptItemDto[];
+}
 export declare class AttachTemplateDto {
     templateId: string;
     sampleSize?: number;

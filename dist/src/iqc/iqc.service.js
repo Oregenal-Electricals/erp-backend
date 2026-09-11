@@ -127,7 +127,7 @@ let IqcService = class IqcService {
                 grnId: dto.grnId,
                 inspectedBy: dto.inspectedBy,
                 remarks: dto.remarks,
-                status: 'IN_PROGRESS',
+                status: 'AWAITING_QC_RECEIPT',
                 companyId: user.companyId,
                 createdBy: user.id, updatedBy: user.id,
                 items: {
@@ -211,11 +211,45 @@ let IqcService = class IqcService {
         await this.audit.log({ tableName: 'iqc_inspections', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }
+    async confirmReceipt(id, dto, user) {
+        const iqc = await this.findOne(id, user);
+        if (iqc.status !== 'AWAITING_QC_RECEIPT') {
+            throw new common_1.BadRequestException(`This inspection is not awaiting QC receipt confirmation (status is ${iqc.status})`);
+        }
+        const mismatches = [];
+        for (const line of dto.items) {
+            const item = iqc.items.find(i => i.id === line.itemId);
+            if (!item)
+                throw new common_1.NotFoundException(`IQC item ${line.itemId} not found on this inspection`);
+            if (line.confirmedQty > item.receivedQty) {
+                throw new common_1.BadRequestException(`Item ${item.itemCode}: confirmed qty (${line.confirmedQty}) cannot exceed what Store sent (${item.receivedQty})`);
+            }
+            const shortfall = item.receivedQty - line.confirmedQty;
+            const newAcceptedQty = Math.min(item.acceptedQty, line.confirmedQty);
+            await this.prisma.iqcItem.update({
+                where: { id: item.id },
+                data: { confirmedQty: line.confirmedQty, acceptedQty: newAcceptedQty, updatedBy: user.id },
+            });
+            if (shortfall > 0) {
+                mismatches.push({ itemCode: item.itemCode, sentQty: item.receivedQty, confirmedQty: line.confirmedQty, shortfall });
+            }
+        }
+        const updated = await this.prisma.iqcInspection.update({
+            where: { id }, data: { status: 'IN_PROGRESS', updatedBy: user.id }, include: this.includes(),
+        });
+        await this.audit.log({
+            tableName: 'iqc_inspections', recordId: id, action: 'UPDATE',
+            newValues: { status: 'IN_PROGRESS', receiptConfirmed: true, mismatches }, changedBy: user.id,
+        });
+        return Object.assign(Object.assign({}, updated), { handoverMismatches: mismatches });
+    }
     async approve(id, user) {
         const iqc = await this.findOne(id, user);
         if (iqc.status === 'APPROVED')
             throw new common_1.BadRequestException('Already approved');
-        if (iqc.status === 'PENDING')
+        if (iqc.status === 'AWAITING_QC_RECEIPT')
+            throw new common_1.BadRequestException('QC must confirm physical receipt before this inspection can be approved');
+        if (iqc.status !== 'IN_PROGRESS')
             throw new common_1.BadRequestException('IQC must be IN_PROGRESS before approval');
         for (const item of iqc.items) {
             if (item.acceptedQty + item.rejectedQty > item.receivedQty) {

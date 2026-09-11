@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateIqcDto, UpdateIqcItemsDto } from './dto/iqc.dto';
+import { CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto } from './dto/iqc.dto';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 
 @Injectable()
@@ -148,7 +148,10 @@ export class IqcService {
         grnId: dto.grnId,
         inspectedBy: dto.inspectedBy,
         remarks: dto.remarks,
-        status: 'IN_PROGRESS',
+        // STORE-007 section 24-25: starts as AWAITING_QC_RECEIPT, not
+        // straight into IN_PROGRESS - handover and physical QC receipt
+        // are two separate events now, not one atomic action.
+        status: 'AWAITING_QC_RECEIPT',
         companyId: user.companyId,
         createdBy: user.id, updatedBy: user.id,
         items: {
@@ -236,10 +239,54 @@ export class IqcService {
     return updated;
   }
 
+  // STORE-007 section 24-25: the QC-side counterpart to handover - Store
+  // claimed to send receivedQty, this records what QC actually,
+  // physically got. A short confirmation caps acceptedQty at what's
+  // really there (can't accept more than physically present) and is
+  // flagged as a handover mismatch rather than silently treated as a
+  // full, uneventful handover - inspection then proceeds against the
+  // confirmed reality, not Store's original claim.
+  async confirmReceipt(id: string, dto: ConfirmReceiptDto, user: any) {
+    const iqc = await this.findOne(id, user);
+    if (iqc.status !== 'AWAITING_QC_RECEIPT') {
+      throw new BadRequestException(`This inspection is not awaiting QC receipt confirmation (status is ${iqc.status})`);
+    }
+
+    const mismatches: any[] = [];
+    for (const line of dto.items) {
+      const item = (iqc.items as any[]).find(i => i.id === line.itemId);
+      if (!item) throw new NotFoundException(`IQC item ${line.itemId} not found on this inspection`);
+      if (line.confirmedQty > item.receivedQty) {
+        throw new BadRequestException(`Item ${item.itemCode}: confirmed qty (${line.confirmedQty}) cannot exceed what Store sent (${item.receivedQty})`);
+      }
+      const shortfall = item.receivedQty - line.confirmedQty;
+      const newAcceptedQty = Math.min(item.acceptedQty, line.confirmedQty);
+      await this.prisma.iqcItem.update({
+        where: { id: item.id },
+        data: { confirmedQty: line.confirmedQty, acceptedQty: newAcceptedQty, updatedBy: user.id },
+      });
+      if (shortfall > 0) {
+        mismatches.push({ itemCode: item.itemCode, sentQty: item.receivedQty, confirmedQty: line.confirmedQty, shortfall });
+      }
+    }
+
+    const updated = await this.prisma.iqcInspection.update({
+      where: { id }, data: { status: 'IN_PROGRESS', updatedBy: user.id }, include: this.includes(),
+    });
+
+    await this.audit.log({
+      tableName: 'iqc_inspections', recordId: id, action: 'UPDATE',
+      newValues: { status: 'IN_PROGRESS', receiptConfirmed: true, mismatches }, changedBy: user.id,
+    });
+
+    return { ...updated, handoverMismatches: mismatches };
+  }
+
   async approve(id: string, user: any) {
     const iqc = await this.findOne(id, user);
     if (iqc.status === 'APPROVED') throw new BadRequestException('Already approved');
-    if (iqc.status === 'PENDING') throw new BadRequestException('IQC must be IN_PROGRESS before approval');
+    if (iqc.status === 'AWAITING_QC_RECEIPT') throw new BadRequestException('QC must confirm physical receipt before this inspection can be approved');
+    if (iqc.status !== 'IN_PROGRESS') throw new BadRequestException('IQC must be IN_PROGRESS before approval');
 
     // Validate: accepted + rejected = received for all items
     for (const item of iqc.items as any[]) {

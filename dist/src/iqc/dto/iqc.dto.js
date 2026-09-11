@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConfirmTemplateImportDto = exports.ImportedTemplateDto = exports.ImportedTemplateParameterDto = exports.SubmitIqcStageResultDto = exports.IqcParameterResultDto = exports.UpdateIqcCheckTemplateDto = exports.CreateIqcCheckTemplateDto = exports.IqcCheckParameterDto = exports.AttachTemplateDto = exports.UpdateIqcItemsDto = exports.CreateIqcDto = exports.HandoverLineDto = exports.IqcItemUpdateDto = void 0;
+exports.ConfirmTemplateImportDto = exports.ImportedTemplateDto = exports.ImportedTemplateParameterDto = exports.SubmitIqcStageResultDto = exports.IqcParameterResultDto = exports.UpdateIqcCheckTemplateDto = exports.CreateIqcCheckTemplateDto = exports.IqcCheckParameterDto = exports.AttachTemplateDto = exports.ConfirmReceiptDto = exports.ConfirmReceiptItemDto = exports.UpdateIqcItemsDto = exports.CreateIqcDto = exports.HandoverLineDto = exports.IqcItemUpdateDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class IqcItemUpdateDto {
@@ -79,6 +79,27 @@ __decorate([
     (0, class_transformer_1.Type)(() => IqcItemUpdateDto),
     __metadata("design:type", Array)
 ], UpdateIqcItemsDto.prototype, "items", void 0);
+class ConfirmReceiptItemDto {
+}
+exports.ConfirmReceiptItemDto = ConfirmReceiptItemDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ConfirmReceiptItemDto.prototype, "itemId", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ConfirmReceiptItemDto.prototype, "confirmedQty", void 0);
+class ConfirmReceiptDto {
+}
+exports.ConfirmReceiptDto = ConfirmReceiptDto;
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ConfirmReceiptItemDto),
+    __metadata("design:type", Array)
+], ConfirmReceiptDto.prototype, "items", void 0);
 class AttachTemplateDto {
 }
 exports.AttachTemplateDto = AttachTemplateDto;

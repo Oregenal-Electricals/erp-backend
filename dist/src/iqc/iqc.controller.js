@@ -49,6 +49,7 @@ let IqcController = class IqcController {
     findOne(id, req) { return this.iqcService.findOne(id, req.user); }
     getItemEscalationDetail(itemId, req) { return this.escalation.getItemEscalationDetail(itemId, req.user); }
     create(dto, req) { return this.iqcService.create(dto, req.user); }
+    confirmReceipt(id, dto, req) { return this.iqcService.confirmReceipt(id, dto, req.user); }
     updateItems(id, dto, req) { return this.iqcService.updateItems(id, dto, req.user); }
     approve(id, req) { return this.iqcService.approve(id, req.user); }
     attachTemplate(itemId, dto, req) { return this.escalation.attachTemplate(itemId, dto, req.user); }
@@ -182,6 +183,16 @@ __decorate([
     __metadata("design:paramtypes", [iqc_dto_1.CreateIqcDto, Object]),
     __metadata("design:returntype", void 0)
 ], IqcController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)(':id/confirm-receipt'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QC_IQC_RECEIVE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, iqc_dto_1.ConfirmReceiptDto, Object]),
+    __metadata("design:returntype", void 0)
+], IqcController.prototype, "confirmReceipt", null);
 __decorate([
     (0, common_1.Put)(':id/items'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.QUALITY_EDIT),
