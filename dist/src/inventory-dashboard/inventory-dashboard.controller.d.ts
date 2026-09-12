@@ -95,6 +95,7 @@ export declare class InventoryDashboardController {
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            putAwayPendingQty: number;
             lastUpdated: Date;
         }[];
         totalValue: number;

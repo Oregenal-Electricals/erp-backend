@@ -44,6 +44,7 @@ export declare class StockLedgerController {
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            putAwayPendingQty: number;
             lastUpdated: Date;
         }[];
         total: number;

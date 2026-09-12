@@ -3701,6 +3701,12 @@ model StockBalance {
   availableQty  Float     @default(0)
   reservedQty   Float     @default(0)
   inQcQty       Float     @default(0)
+  // STORE-010: material that has passed IQC (or skipped it) but has not
+  // yet been physically put away into a bin. Separate from availableQty
+  // deliberately - "Available" should mean actually located, issueable
+  // stock, not merely accepted-but-unbinned. Moves into availableQty
+  // only when StockPutaway.complete() actually runs.
+  putAwayPendingQty Float @default(0)
   unitCost      Float     @default(0)
   totalValue    Float     @default(0)
   lastUpdated   DateTime  @default(now())

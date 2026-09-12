@@ -15,10 +15,18 @@ export class StockLedgerService {
     referenceType?: string; referenceId?: string; referenceNumber?: string;
     inQty?: number; outQty?: number; unitCost?: number; remarks?: string;
     userId: string;
+    // STORE-010: which balance bucket this transaction actually moves.
+    // Defaults to 'available' - every existing caller before this field
+    // existed meant availableQty, and none of them need to change.
+    // 'putAwayPending' is for material that has passed IQC (or skipped
+    // it) but has not yet been physically binned - it should not count
+    // as Available/issueable until StockPutaway.complete() moves it.
+    targetField?: 'available' | 'putAwayPending';
   }) {
     const { companyId, itemCode, itemName, warehouseId, transactionType,
       referenceType, referenceId, referenceNumber, inQty = 0, outQty = 0,
-      unitCost = 0, remarks, userId } = data;
+      unitCost = 0, remarks, userId, targetField = 'available' } = data;
+    const balanceField = targetField === 'putAwayPending' ? 'putAwayPendingQty' : 'availableQty';
 
     // STORE-010 section 53, 73: the previous version here read the
     // balance, checked it, then wrote it back in a separate statement -
@@ -58,15 +66,19 @@ export class StockLedgerService {
         }
       }
 
-      // Check negative stock rule
-      if (outQty > 0 && balance.availableQty < outQty) {
-        throw new BadRequestException(`Insufficient stock for ${itemCode}. Available: ${balance.availableQty}, Required: ${outQty}`);
+      // Check negative stock rule (against whichever bucket this
+      // transaction actually targets)
+      const currentQty = balance[balanceField];
+      if (outQty > 0 && currentQty < outQty) {
+        throw new BadRequestException(`Insufficient stock for ${itemCode}. Available: ${currentQty}, Required: ${outQty}`);
       }
 
-      newBalance = balance.availableQty + inQty - outQty;
+      newBalance = currentQty + inQty - outQty;
       totalCost = inQty * unitCost || outQty * balance.unitCost;
 
-      // Weighted average cost for incoming stock
+      // Weighted average cost for incoming stock - cost is a property of
+      // the item overall, not of which bucket it's sitting in, so this
+      // still bases itself on availableQty regardless of targetField.
       newUnitCost = balance.unitCost;
       if (inQty > 0 && unitCost > 0) {
         const existingValue = balance.availableQty * balance.unitCost;
@@ -74,16 +86,16 @@ export class StockLedgerService {
         newUnitCost = (existingValue + newValue) / (balance.availableQty + inQty);
       }
 
-      // Optimistic-concurrency claim: only commits if availableQty is
+      // Optimistic-concurrency claim: only commits if this bucket is
       // still exactly what we just read. If a concurrent transaction
       // changed it in between, this affects 0 rows and the loop retries
       // from a fresh read instead of overwriting that change.
       const claim = await this.prisma.stockBalance.updateMany({
-        where: { id: balance.id, availableQty: balance.availableQty },
+        where: { id: balance.id, [balanceField]: currentQty },
         data: {
-          availableQty: newBalance,
+          [balanceField]: newBalance,
           unitCost: newUnitCost,
-          totalValue: newBalance * newUnitCost,
+          totalValue: (balanceField === 'availableQty' ? newBalance : balance.availableQty) * newUnitCost,
           lastUpdated: new Date(),
           updatedBy: userId,
         },
@@ -187,6 +199,10 @@ export class StockLedgerService {
           unitCost,
           remarks: `Stock received from IQC ${iqc.iqcNumber}`,
           userId: user.id,
+          // STORE-010: passed IQC does not mean physically binned yet -
+          // credits putAwayPendingQty, not availableQty. Only actually
+          // becomes Available once StockPutaway.complete() runs.
+          targetField: 'putAwayPending',
         });
         entries.push(entry);
 

@@ -60,6 +60,7 @@ export declare class StockReportsController {
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            putAwayPendingQty: number;
             lastUpdated: Date;
         })[];
         totalItems: number;
@@ -89,6 +90,7 @@ export declare class StockReportsController {
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            putAwayPendingQty: number;
             lastUpdated: Date;
         })[];
         movements: {

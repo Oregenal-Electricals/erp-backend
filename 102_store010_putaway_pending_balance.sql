@@ -1,0 +1,1 @@
+ALTER TABLE "stock_balance" ADD COLUMN "putAwayPendingQty" DOUBLE PRECISION NOT NULL DEFAULT 0;

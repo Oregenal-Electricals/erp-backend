@@ -21,7 +21,8 @@ let StockLedgerService = class StockLedgerService {
         this.customerPoService = customerPoService;
     }
     async postTransaction(data) {
-        const { companyId, itemCode, itemName, warehouseId, transactionType, referenceType, referenceId, referenceNumber, inQty = 0, outQty = 0, unitCost = 0, remarks, userId } = data;
+        const { companyId, itemCode, itemName, warehouseId, transactionType, referenceType, referenceId, referenceNumber, inQty = 0, outQty = 0, unitCost = 0, remarks, userId, targetField = 'available' } = data;
+        const balanceField = targetField === 'putAwayPending' ? 'putAwayPendingQty' : 'availableQty';
         let balance;
         let newBalance = 0;
         let newUnitCost = 0;
@@ -48,10 +49,11 @@ let StockLedgerService = class StockLedgerService {
                         throw e;
                 }
             }
-            if (outQty > 0 && balance.availableQty < outQty) {
-                throw new common_1.BadRequestException(`Insufficient stock for ${itemCode}. Available: ${balance.availableQty}, Required: ${outQty}`);
+            const currentQty = balance[balanceField];
+            if (outQty > 0 && currentQty < outQty) {
+                throw new common_1.BadRequestException(`Insufficient stock for ${itemCode}. Available: ${currentQty}, Required: ${outQty}`);
             }
-            newBalance = balance.availableQty + inQty - outQty;
+            newBalance = currentQty + inQty - outQty;
             totalCost = inQty * unitCost || outQty * balance.unitCost;
             newUnitCost = balance.unitCost;
             if (inQty > 0 && unitCost > 0) {
@@ -60,11 +62,11 @@ let StockLedgerService = class StockLedgerService {
                 newUnitCost = (existingValue + newValue) / (balance.availableQty + inQty);
             }
             const claim = await this.prisma.stockBalance.updateMany({
-                where: { id: balance.id, availableQty: balance.availableQty },
+                where: { id: balance.id, [balanceField]: currentQty },
                 data: {
-                    availableQty: newBalance,
+                    [balanceField]: newBalance,
                     unitCost: newUnitCost,
-                    totalValue: newBalance * newUnitCost,
+                    totalValue: (balanceField === 'availableQty' ? newBalance : balance.availableQty) * newUnitCost,
                     lastUpdated: new Date(),
                     updatedBy: userId,
                 },
@@ -151,6 +153,7 @@ let StockLedgerService = class StockLedgerService {
                     unitCost,
                     remarks: `Stock received from IQC ${iqc.iqcNumber}`,
                     userId: user.id,
+                    targetField: 'putAwayPending',
                 });
                 entries.push(entry);
                 if (item.batchNumber) {

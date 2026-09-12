@@ -85,7 +85,7 @@ describe('StockPutawayService.complete - STORE-008 over-put-away and partial put
       },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new StockPutawayService(prisma, audit, {} as any);
+    service = new StockPutawayService(prisma, audit, { postTransaction: jest.fn().mockResolvedValue({}) } as any);
   });
 
   it('a first partial put-away of 500 (of 800 accepted) claims exactly 500 and completes normally', async () => {
@@ -266,5 +266,50 @@ describe('StockPutawayService.findByItem - STORE-009 Material View', () => {
     await service.findByItem('DRIVER-01', user);
     const call = prisma.stockPutawayItem.findMany.mock.calls[0][0];
     expect(call.where.putaway.status).toBe('COMPLETED');
+  });
+});
+
+describe('StockPutawayService.complete - STORE-010 moves qty from putAwayPending to available', () => {
+  let service: StockPutawayService;
+  let prisma: any;
+  let stockLedger: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      stockPutaway: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'put-1', companyId: 'company-1', status: 'IN_PROGRESS', warehouseId: 'wh-1', putawayNumber: 'PUT-2026-0001',
+          items: [{ binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', qty: 500 }],
+        }),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'put-1', ...data })),
+      },
+      iqcItem: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'ii-1', itemCode: 'DRIVER-01', acceptedQty: 500, putAwayQty: 0 }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      warehouseBin: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'bin-1', code: 'R02-B04', currentQty: 0, maxQty: null }),
+        update: jest.fn().mockResolvedValue({}),
+      },
+    };
+    stockLedger = { postTransaction: jest.fn().mockResolvedValue({}) };
+    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, stockLedger);
+  });
+
+  it('debits putAwayPending and credits available for the same qty, in that order', async () => {
+    await service.complete('put-1', user);
+    expect(stockLedger.postTransaction).toHaveBeenCalledTimes(2);
+    expect(stockLedger.postTransaction).toHaveBeenNthCalledWith(1, expect.objectContaining({ itemCode: 'DRIVER-01', outQty: 500, targetField: 'putAwayPending' }));
+    expect(stockLedger.postTransaction).toHaveBeenNthCalledWith(2, expect.objectContaining({ itemCode: 'DRIVER-01', inQty: 500, targetField: 'available' }));
+  });
+
+  it('skips the balance transfer entirely for items with no iqcItemId', async () => {
+    prisma.stockPutaway.findFirst.mockResolvedValue({
+      id: 'put-1', companyId: 'company-1', status: 'IN_PROGRESS', warehouseId: 'wh-1', putawayNumber: 'PUT-2026-0002',
+      items: [{ binId: 'bin-1', itemCode: 'MISC-01', itemName: 'Misc', qty: 10 }],
+    });
+    await service.complete('put-1', user);
+    expect(stockLedger.postTransaction).not.toHaveBeenCalled();
   });
 });

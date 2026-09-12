@@ -252,6 +252,31 @@ export class StockPutawayService {
       });
     }
 
+    // STORE-010: this is the actual moment material becomes genuinely
+    // Available - not IQC approval. Moves each item's qty out of
+    // putAwayPendingQty and into availableQty as two ledger-backed legs
+    // (a debit and a credit), so total physical never changes but the
+    // status split does. Items with no iqcItemId came from a source
+    // that already went straight to availableQty (e.g. IQC-not-required
+    // direct-accept), so there's nothing to transfer for those.
+    for (const item of putaway.items as any[]) {
+      if (!item.iqcItemId || item.qty <= 0) continue;
+      await this.stockLedger.postTransaction({
+        companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+        warehouseId: putaway.warehouseId, transactionType: 'PUTAWAY',
+        referenceType: 'STOCK_PUTAWAY', referenceId: putaway.id, referenceNumber: putaway.putawayNumber,
+        outQty: item.qty, remarks: `Put away to bin - leaving Put-Away Pending`,
+        userId: user.id, targetField: 'putAwayPending',
+      });
+      await this.stockLedger.postTransaction({
+        companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+        warehouseId: putaway.warehouseId, transactionType: 'PUTAWAY',
+        referenceType: 'STOCK_PUTAWAY', referenceId: putaway.id, referenceNumber: putaway.putawayNumber,
+        inQty: item.qty, remarks: `Put away to bin - now Available`,
+        userId: user.id, targetField: 'available',
+      });
+    }
+
     const updated = await this.prisma.stockPutaway.update({
       where: { id }, data: { status: 'COMPLETED', updatedBy: user.id }, include: this.includes(),
     });

@@ -21,6 +21,7 @@ export declare class StockLedgerService {
         unitCost?: number;
         remarks?: string;
         userId: string;
+        targetField?: 'available' | 'putAwayPending';
     }): Promise<{
         id: string;
         companyId: string;
@@ -166,6 +167,7 @@ export declare class StockLedgerService {
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            putAwayPendingQty: number;
             lastUpdated: Date;
         }[];
         total: number;

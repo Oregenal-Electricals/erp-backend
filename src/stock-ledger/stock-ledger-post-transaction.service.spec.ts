@@ -97,3 +97,66 @@ describe('StockLedgerService.postTransaction - STORE-010 concurrency-safe balanc
     expect(r.balanceQty).toBe(50);
   });
 });
+
+describe('StockLedgerService.postTransaction - STORE-010 targetField (Available vs Put-Away Pending)', () => {
+  let service: StockLedgerService;
+  let prisma: any;
+  let balanceState: any;
+
+  beforeEach(() => {
+    balanceState = { id: 'bal-1', companyId: 'company-1', itemCode: 'DRIVER-01', warehouseId: 'wh-1', availableQty: 100, putAwayPendingQty: 0, unitCost: 10 };
+    prisma = {
+      stockBalance: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve({ ...balanceState })),
+        create: jest.fn(),
+        updateMany: jest.fn().mockImplementation(({ where, data }: any) => {
+          const field = 'availableQty' in where ? 'availableQty' : 'putAwayPendingQty';
+          if (where[field] !== balanceState[field]) return Promise.resolve({ count: 0 });
+          balanceState = { ...balanceState, ...data };
+          return Promise.resolve({ count: 1 });
+        }),
+      },
+      stockLedger: { create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'ledger-1', ...data })) },
+    };
+    service = new StockLedgerService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, { recheckAllOpenPos: jest.fn().mockResolvedValue(undefined) } as any);
+  });
+
+  it('defaults to crediting availableQty when targetField is omitted (backward-compatible)', async () => {
+    await service.postTransaction({
+      companyId: 'company-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', warehouseId: 'wh-1',
+      transactionType: 'RECEIPT', inQty: 50, userId: 'user-1',
+    });
+    expect(balanceState.availableQty).toBe(150);
+    expect(balanceState.putAwayPendingQty).toBe(0);
+  });
+
+  it('credits putAwayPendingQty, not availableQty, when targetField is putAwayPending', async () => {
+    await service.postTransaction({
+      companyId: 'company-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', warehouseId: 'wh-1',
+      transactionType: 'IQC_ACCEPT', inQty: 50, userId: 'user-1', targetField: 'putAwayPending',
+    });
+    expect(balanceState.availableQty).toBe(100);
+    expect(balanceState.putAwayPendingQty).toBe(50);
+  });
+
+  it('validates negative-stock against putAwayPendingQty specifically when debiting that bucket', async () => {
+    await expect(service.postTransaction({
+      companyId: 'company-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', warehouseId: 'wh-1',
+      transactionType: 'PUTAWAY', outQty: 10, userId: 'user-1', targetField: 'putAwayPending',
+    })).rejects.toThrow(/Insufficient stock/);
+  });
+
+  it('moving qty from putAwayPending to available via two calls nets to the same physical total', async () => {
+    balanceState = { ...balanceState, putAwayPendingQty: 200 };
+    await service.postTransaction({
+      companyId: 'company-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', warehouseId: 'wh-1',
+      transactionType: 'PUTAWAY', outQty: 200, userId: 'user-1', targetField: 'putAwayPending',
+    });
+    await service.postTransaction({
+      companyId: 'company-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', warehouseId: 'wh-1',
+      transactionType: 'PUTAWAY', inQty: 200, userId: 'user-1', targetField: 'available',
+    });
+    expect(balanceState.putAwayPendingQty).toBe(0);
+    expect(balanceState.availableQty).toBe(300);
+  });
+});

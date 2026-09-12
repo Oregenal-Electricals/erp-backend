@@ -95,6 +95,7 @@ export declare class InventoryDashboardService {
             availableQty: number;
             reservedQty: number;
             inQcQty: number;
+            putAwayPendingQty: number;
             lastUpdated: Date;
         }[];
         totalValue: number;

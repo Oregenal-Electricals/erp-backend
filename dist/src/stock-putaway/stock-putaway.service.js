@@ -215,6 +215,24 @@ let StockPutawayService = class StockPutawayService {
                 data: { currentQty: newQty, itemCode: item.itemCode, status: newStatus, updatedBy: user.id },
             });
         }
+        for (const item of putaway.items) {
+            if (!item.iqcItemId || item.qty <= 0)
+                continue;
+            await this.stockLedger.postTransaction({
+                companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+                warehouseId: putaway.warehouseId, transactionType: 'PUTAWAY',
+                referenceType: 'STOCK_PUTAWAY', referenceId: putaway.id, referenceNumber: putaway.putawayNumber,
+                outQty: item.qty, remarks: `Put away to bin - leaving Put-Away Pending`,
+                userId: user.id, targetField: 'putAwayPending',
+            });
+            await this.stockLedger.postTransaction({
+                companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+                warehouseId: putaway.warehouseId, transactionType: 'PUTAWAY',
+                referenceType: 'STOCK_PUTAWAY', referenceId: putaway.id, referenceNumber: putaway.putawayNumber,
+                inQty: item.qty, remarks: `Put away to bin - now Available`,
+                userId: user.id, targetField: 'available',
+            });
+        }
         const updated = await this.prisma.stockPutaway.update({
             where: { id }, data: { status: 'COMPLETED', updatedBy: user.id }, include: this.includes(),
         });
