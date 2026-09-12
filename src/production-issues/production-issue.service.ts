@@ -65,24 +65,48 @@ export class ProductionIssueService {
     }
 
     // Previous material status gate: new material cannot normally be
-    // issued for this WO while an earlier issue on the same WO is still
-    // unreconciled. Backend-enforced (not just a frontend indicator) -
-    // this is the actual block, override is a separate, explicit path
-    // built on top of this rather than a way around it.
+    // issued while an earlier issue of THAT SPECIFIC MATERIAL on this WO
+    // is still unreconciled - scoped per item (STORE-012 section 10), so
+    // an unrelated pending material never blocks this one. Backend-
+    // enforced (not just a frontend indicator) - this is the actual
+    // block, override is a separate, explicit path built on top of it.
     const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
-    let usedOverride: { id: string } | null = null;
-    if (status.overallStatus === 'PENDING') {
-      // An approved, still-valid (within its 5-hour window), not-yet-used
-      // override is a one-time exception to this exact block - it does not
-      // clear the outstanding balance itself, and is consumed the moment
-      // it's used so it can't cover a second issue.
-      const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, user);
-      if (!override) {
-        const pendingItems = status.items.filter(i => i.status === 'PENDING');
-        const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
-        throw new BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material, or request a management override.`);
+    const overridesToConsume: { id: string; qty: number }[] = [];
+
+    for (const item of dto.items) {
+      const itemStatus = status.items.find(i => i.itemCode === item.itemCode);
+      if (itemStatus && itemStatus.status === 'PENDING') {
+        // An approved, still-valid (within its 5-hour window) override
+        // with remaining capacity is a one-time exception to this exact
+        // block, scoped to this item - it does not clear the outstanding
+        // balance itself, and only the qty actually used here is drawn
+        // from its remaining approved capacity (it may cover more than
+        // one issue as long as capacity remains).
+        const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, item.itemCode, user);
+        const remaining = override ? (override.approvedQty || 0) - override.usedQty : 0;
+        if (!override || remaining < item.issuedQty - 0.0001) {
+          throw new BadRequestException(`Previous material status pending for ${item.itemCode} - ${itemStatus.outstandingQty} ${itemStatus.uom} unreconciled. Return, consume, or account for the outstanding quantity before issuing new material, or request a management override${override ? ` (only ${remaining} remaining of the current approval, less than the ${item.issuedQty} requested)` : ''}.`);
+        }
+        overridesToConsume.push({ id: override.id, qty: item.issuedQty });
       }
-      usedOverride = override;
+
+      // STORE-012 sections 27-30, 56: issue must not exceed this WO's
+      // remaining reservation for the item, where one exists - never
+      // silently bypass STORE-011's reservation controls. Materials
+      // with no reservation at all (e.g. not on this WO's BOM) are left
+      // to whatever additional-issue process a later module defines.
+      const reservationAgg = await this.prisma.materialReservation.aggregate({
+        where: { workOrderId: dto.workOrderId, itemCode: item.itemCode, status: 'ACTIVE' },
+        _sum: { reservedQty: true, issuedQty: true },
+      });
+      const totalReserved = reservationAgg._sum.reservedQty || 0;
+      const totalIssuedAgainstReservation = reservationAgg._sum.issuedQty || 0;
+      if (totalReserved > 0) {
+        const remainingReserved = totalReserved - totalIssuedAgainstReservation;
+        if (item.issuedQty > remainingReserved + 0.0001) {
+          throw new BadRequestException(`Issue qty for ${item.itemCode} (${item.issuedQty}) exceeds the remaining reserved qty (${remainingReserved}) for this Work Order.`);
+        }
+      }
     }
 
     const issueNumber = await this.generateNumber(user.companyId);
@@ -109,8 +133,14 @@ export class ProductionIssueService {
 
     await this.audit.log({ tableName: 'production_issues', recordId: issue.id, action: 'CREATE', newValues: issue, changedBy: user.id });
 
-    if (usedOverride) {
-      await this.overrideService.consume(usedOverride.id, issue.id, user);
+    for (const use of overridesToConsume) {
+      const claimed = await this.overrideService.consume(use.id, issue.id, use.qty, user);
+      if (claimed < use.qty - 0.0001) {
+        // Extremely unlikely given the pre-check above, but a concurrent
+        // issue could have drawn the same capacity in between - fail loud
+        // rather than silently under-covering an exception.
+        throw new BadRequestException('Override approval capacity changed concurrently - please retry this issue.');
+      }
     }
 
     return issue;

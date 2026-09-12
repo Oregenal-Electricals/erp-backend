@@ -21,6 +21,19 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], RequestOverrideDto.prototype, "itemCode", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RequestOverrideDto.prototype, "itemName", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0.0001),
+    __metadata("design:type", Number)
+], RequestOverrideDto.prototype, "requestedQty", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], RequestOverrideDto.prototype, "reason", void 0);
 class DecideOverrideDto {
 }
@@ -30,6 +43,12 @@ __decorate([
     (0, class_validator_1.IsIn)(['APPROVED', 'REJECTED']),
     __metadata("design:type", String)
 ], DecideOverrideDto.prototype, "action", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], DecideOverrideDto.prototype, "approvedQty", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

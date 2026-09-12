@@ -21,12 +21,15 @@ describe('ProductionIssueService.create - previous material status gate', () => 
         count: jest.fn().mockResolvedValue(0),
         create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'pi-1', ...data, items: data.items?.create || [] })),
       },
+      materialReservation: {
+        aggregate: jest.fn().mockResolvedValue({ _sum: { reservedQty: 0, issuedQty: 0 } }),
+      },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = { postTransaction: jest.fn().mockResolvedValue({}) };
     mrpService = { calculateMrp: jest.fn() };
     materialReturnService = { getPreviousMaterialStatus: jest.fn().mockResolvedValue({ overallStatus: 'CLEAR', items: [] }) };
-    overrideService = { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn().mockResolvedValue({}) };
+    overrideService = { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn().mockResolvedValue(500) };
     const materialReservation = { recordIssueAgainstReservations: jest.fn().mockResolvedValue(0) };
     service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation as any);
   });
@@ -43,7 +46,7 @@ describe('ProductionIssueService.create - previous material status gate', () => 
       items: [{ itemCode: 'DRIVER-01', outstandingQty: 50, uom: 'PCS', status: 'PENDING' }],
     });
     await expect(service.create(dto as any, user)).rejects.toThrow(BadRequestException);
-    await expect(service.create(dto as any, user)).rejects.toThrow(/DRIVER-01: 50 PCS unreconciled/);
+    await expect(service.create(dto as any, user)).rejects.toThrow(/DRIVER-01 - 50 PCS unreconciled/);
     expect(prisma.productionIssue.create).not.toHaveBeenCalled();
   });
 
@@ -69,17 +72,17 @@ describe('ProductionIssueService.create - previous material status gate', () => 
       overallStatus: 'PENDING',
       items: [{ itemCode: 'DRIVER-01', outstandingQty: 50, uom: 'PCS', status: 'PENDING' }],
     });
-    overrideService.findActiveApprovedOverride.mockResolvedValue({ id: 'override-1' });
+    overrideService.findActiveApprovedOverride.mockResolvedValue({ id: 'override-1', approvedQty: 500, usedQty: 0 });
     const r = await service.create(dto as any, user);
     expect(r.id).toBe('pi-1');
-    expect(overrideService.consume).toHaveBeenCalledWith('override-1', 'pi-1', user);
+    expect(overrideService.consume).toHaveBeenCalledWith('override-1', 'pi-1', 500, user);
   });
 
-  it('checks for an override for the correct work order before blocking', async () => {
+  it('checks for an override for the correct work order and item before blocking', async () => {
     materialReturnService.getPreviousMaterialStatus.mockResolvedValue({ overallStatus: 'PENDING', items: [{ itemCode: 'DRIVER-01', outstandingQty: 50, uom: 'PCS', status: 'PENDING' }] });
     overrideService.findActiveApprovedOverride.mockResolvedValue(null);
     await expect(service.create(dto as any, user)).rejects.toThrow(BadRequestException);
-    expect(overrideService.findActiveApprovedOverride).toHaveBeenCalledWith('wo-1', user);
+    expect(overrideService.findActiveApprovedOverride).toHaveBeenCalledWith('wo-1', 'DRIVER-01', user);
   });
 
   it('does not consume an override on the CLEAR path (nothing to consume)', async () => {
@@ -87,7 +90,14 @@ describe('ProductionIssueService.create - previous material status gate', () => 
     expect(overrideService.consume).not.toHaveBeenCalled();
   });
 
-  it('only mentions the specific PENDING items in the block message, not every issued item', async () => {
+  it('only mentions the specific PENDING items in the block message, not an unrelated clear item', async () => {
+    const twoItemDto = {
+      ...dto,
+      items: [
+        { itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', requiredQty: 500, issuedQty: 500, unitCost: 0 },
+        { itemCode: 'PCB-01', itemName: 'PCB', uom: 'PCS', requiredQty: 30, issuedQty: 30, unitCost: 0 },
+      ],
+    };
     materialReturnService.getPreviousMaterialStatus.mockResolvedValue({
       overallStatus: 'PENDING',
       items: [
@@ -96,12 +106,43 @@ describe('ProductionIssueService.create - previous material status gate', () => 
       ],
     });
     try {
-      await service.create(dto as any, user);
+      await service.create(twoItemDto as any, user);
       fail('expected to throw');
     } catch (e: any) {
       expect(e.message).toContain('PCB-01');
       expect(e.message).not.toContain('DRIVER-01: 0');
     }
+  });
+
+  it('does not block an unrelated material when only a different material is PENDING', async () => {
+    materialReturnService.getPreviousMaterialStatus.mockResolvedValue({
+      overallStatus: 'PENDING',
+      items: [{ itemCode: 'PCB-01', outstandingQty: 30, uom: 'PCS', status: 'PENDING' }],
+    });
+    const r = await service.create(dto as any, user);
+    expect(r.id).toBe('pi-1');
+  });
+
+  it('blocks the issue if the reserved qty for this WO/item is less than the requested issue qty', async () => {
+    prisma.materialReservation.aggregate.mockResolvedValue({ _sum: { reservedQty: 400, issuedQty: 0 } });
+    await expect(service.create(dto as any, user)).rejects.toThrow(/exceeds the remaining reserved qty/);
+  });
+
+  it('allows the issue when it is within the remaining reserved qty', async () => {
+    prisma.materialReservation.aggregate.mockResolvedValue({ _sum: { reservedQty: 500, issuedQty: 0 } });
+    const r = await service.create(dto as any, user);
+    expect(r.id).toBe('pi-1');
+  });
+
+  it('accounts for already-issued qty against the reservation when checking remaining capacity', async () => {
+    prisma.materialReservation.aggregate.mockResolvedValue({ _sum: { reservedQty: 500, issuedQty: 200 } });
+    await expect(service.create(dto as any, user)).rejects.toThrow(/exceeds the remaining reserved qty/);
+  });
+
+  it('does not require a reservation at all for a material with none (e.g. not on the BOM)', async () => {
+    prisma.materialReservation.aggregate.mockResolvedValue({ _sum: { reservedQty: null, issuedQty: null } });
+    const r = await service.create(dto as any, user);
+    expect(r.id).toBe('pi-1');
   });
 });
 

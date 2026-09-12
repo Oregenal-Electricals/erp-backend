@@ -1721,7 +1721,12 @@ model MaterialIssueOverride {
   // the approval grants a one-time exception to issue despite this exact
   // snapshot, it does not retroactively change or clear the outstanding
   // balance itself.
+  itemCode              String
+  itemName              String
   itemsSnapshot         Json
+  requestedQty          Float
+  approvedQty           Float?
+  usedQty               Float     @default(0)
   reason                String
   requestedById         String
   requestedBy           User      @relation("MaterialIssueOverrideRequestedBy", fields: [requestedById], references: [id])

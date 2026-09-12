@@ -71,15 +71,29 @@ let ProductionIssueService = class ProductionIssueService {
             throw new common_1.BadRequestException('Work order must be RELEASED or IN_PROGRESS');
         }
         const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
-        let usedOverride = null;
-        if (status.overallStatus === 'PENDING') {
-            const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, user);
-            if (!override) {
-                const pendingItems = status.items.filter(i => i.status === 'PENDING');
-                const summary = pendingItems.map(i => `${i.itemCode}: ${i.outstandingQty} ${i.uom} unreconciled`).join('; ');
-                throw new common_1.BadRequestException(`Previous material status pending for this Work Order - ${summary}. Return, consume, or account for the outstanding quantity before issuing new material, or request a management override.`);
+        const overridesToConsume = [];
+        for (const item of dto.items) {
+            const itemStatus = status.items.find(i => i.itemCode === item.itemCode);
+            if (itemStatus && itemStatus.status === 'PENDING') {
+                const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, item.itemCode, user);
+                const remaining = override ? (override.approvedQty || 0) - override.usedQty : 0;
+                if (!override || remaining < item.issuedQty - 0.0001) {
+                    throw new common_1.BadRequestException(`Previous material status pending for ${item.itemCode} - ${itemStatus.outstandingQty} ${itemStatus.uom} unreconciled. Return, consume, or account for the outstanding quantity before issuing new material, or request a management override${override ? ` (only ${remaining} remaining of the current approval, less than the ${item.issuedQty} requested)` : ''}.`);
+                }
+                overridesToConsume.push({ id: override.id, qty: item.issuedQty });
             }
-            usedOverride = override;
+            const reservationAgg = await this.prisma.materialReservation.aggregate({
+                where: { workOrderId: dto.workOrderId, itemCode: item.itemCode, status: 'ACTIVE' },
+                _sum: { reservedQty: true, issuedQty: true },
+            });
+            const totalReserved = reservationAgg._sum.reservedQty || 0;
+            const totalIssuedAgainstReservation = reservationAgg._sum.issuedQty || 0;
+            if (totalReserved > 0) {
+                const remainingReserved = totalReserved - totalIssuedAgainstReservation;
+                if (item.issuedQty > remainingReserved + 0.0001) {
+                    throw new common_1.BadRequestException(`Issue qty for ${item.itemCode} (${item.issuedQty}) exceeds the remaining reserved qty (${remainingReserved}) for this Work Order.`);
+                }
+            }
         }
         const issueNumber = await this.generateNumber(user.companyId);
         const issue = await this.prisma.productionIssue.create({
@@ -101,8 +115,11 @@ let ProductionIssueService = class ProductionIssueService {
             });
         }
         await this.audit.log({ tableName: 'production_issues', recordId: issue.id, action: 'CREATE', newValues: issue, changedBy: user.id });
-        if (usedOverride) {
-            await this.overrideService.consume(usedOverride.id, issue.id, user);
+        for (const use of overridesToConsume) {
+            const claimed = await this.overrideService.consume(use.id, issue.id, use.qty, user);
+            if (claimed < use.qty - 0.0001) {
+                throw new common_1.BadRequestException('Override approval capacity changed concurrently - please retry this issue.');
+            }
         }
         return issue;
     }

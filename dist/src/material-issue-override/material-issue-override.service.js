@@ -28,21 +28,22 @@ let MaterialIssueOverrideService = class MaterialIssueOverrideService {
         if (!wo)
             throw new common_1.NotFoundException('Work order not found');
         const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
-        if (status.overallStatus !== 'PENDING') {
-            throw new common_1.BadRequestException('Previous material status is already CLEAR for this work order - no override needed');
+        const item = status.items.find(i => i.itemCode === dto.itemCode);
+        if (!item || item.status !== 'PENDING') {
+            throw new common_1.BadRequestException(`Previous material status for ${dto.itemCode} is already CLEAR on this work order - no override needed`);
         }
-        const pendingItems = status.items.filter(i => i.status === 'PENDING');
         const existing = await this.prisma.materialIssueOverride.findFirst({
-            where: { companyId: user.companyId, workOrderId: dto.workOrderId, status: 'PENDING', isActive: true },
+            where: { companyId: user.companyId, workOrderId: dto.workOrderId, itemCode: dto.itemCode, status: 'PENDING', isActive: true },
         });
         if (existing)
-            throw new common_1.BadRequestException('An override request is already pending for this work order');
+            throw new common_1.BadRequestException(`An override request is already pending for ${dto.itemCode} on this work order`);
         const deadlineAt = new Date(Date.now() + DEADLINE_HOURS * 60 * 60 * 1000);
         const override = await this.prisma.materialIssueOverride.create({
             data: {
                 companyId: user.companyId, workOrderId: dto.workOrderId,
+                itemCode: dto.itemCode, itemName: dto.itemName, requestedQty: dto.requestedQty,
                 approvalRequestId: 'pending',
-                itemsSnapshot: pendingItems,
+                itemsSnapshot: [item],
                 reason: dto.reason, requestedById: user.id, deadlineAt,
                 createdBy: user.id, updatedBy: user.id,
             },
@@ -61,6 +62,7 @@ let MaterialIssueOverrideService = class MaterialIssueOverrideService {
         return updated;
     }
     async decide(overrideId, dto, user) {
+        var _a;
         const override = await this.prisma.materialIssueOverride.findFirst({ where: { id: overrideId, companyId: user.companyId } });
         if (!override)
             throw new common_1.NotFoundException('Override request not found');
@@ -70,31 +72,62 @@ let MaterialIssueOverrideService = class MaterialIssueOverrideService {
             await this.prisma.materialIssueOverride.update({ where: { id: overrideId }, data: { status: 'EXPIRED', updatedBy: user.id } });
             throw new common_1.BadRequestException('This override request has expired (past its 5-hour decision window) - a new request is needed');
         }
+        let approvedQty = null;
+        if (dto.action === 'APPROVED') {
+            approvedQty = (_a = dto.approvedQty) !== null && _a !== void 0 ? _a : override.requestedQty;
+            if (approvedQty <= 0)
+                throw new common_1.BadRequestException('Approved quantity must be greater than 0');
+            if (approvedQty > override.requestedQty) {
+                throw new common_1.BadRequestException(`Approved quantity (${approvedQty}) cannot exceed the requested quantity (${override.requestedQty})`);
+            }
+        }
         await this.workflows.act(override.approvalRequestId, { action: dto.action, comments: dto.comments }, user);
         const updated = await this.prisma.materialIssueOverride.update({
             where: { id: overrideId },
             data: {
                 status: dto.action, approvedById: user.id, approvedAt: new Date(),
+                approvedQty: approvedQty !== null && approvedQty !== void 0 ? approvedQty : undefined,
                 approverComments: dto.comments, updatedBy: user.id,
             },
         });
         await this.audit.log({ tableName: 'material_issue_overrides', recordId: overrideId, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }
-    async findActiveApprovedOverride(workOrderId, user) {
-        return this.prisma.materialIssueOverride.findFirst({
+    async findActiveApprovedOverride(workOrderId, itemCode, user) {
+        const candidates = await this.prisma.materialIssueOverride.findMany({
             where: {
-                companyId: user.companyId, workOrderId, status: 'APPROVED',
+                companyId: user.companyId, workOrderId, itemCode, status: 'APPROVED',
                 isActive: true, deadlineAt: { gt: new Date() },
             },
-            orderBy: { approvedAt: 'desc' },
+            orderBy: { approvedAt: 'asc' },
         });
+        return candidates.find(o => (o.approvedQty || 0) - o.usedQty > 0.0001) || null;
     }
-    async consume(overrideId, issueId, user) {
-        return this.prisma.materialIssueOverride.update({
-            where: { id: overrideId },
-            data: { status: 'CONSUMED', consumedByIssueId: issueId, updatedBy: user.id },
-        });
+    async consume(overrideId, issueId, wantQty, user) {
+        const MAX_RETRIES = 5;
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+            const override = await this.prisma.materialIssueOverride.findFirst({ where: { id: overrideId } });
+            if (!override || override.status !== 'APPROVED')
+                return 0;
+            const remaining = Math.max(0, (override.approvedQty || 0) - override.usedQty);
+            const claimQty = Math.min(remaining, wantQty);
+            if (claimQty <= 0.0001)
+                return 0;
+            const newUsedQty = override.usedQty + claimQty;
+            const nowConsumed = newUsedQty >= (override.approvedQty || 0) - 0.0001;
+            const claim = await this.prisma.materialIssueOverride.updateMany({
+                where: { id: overrideId, usedQty: override.usedQty },
+                data: {
+                    usedQty: newUsedQty,
+                    status: nowConsumed ? 'CONSUMED' : 'APPROVED',
+                    consumedByIssueId: nowConsumed ? issueId : override.consumedByIssueId,
+                    updatedBy: user.id,
+                },
+            });
+            if (claim.count === 1)
+                return claimQty;
+        }
+        throw new common_1.BadRequestException('Could not consume override capacity - too many concurrent updates, please retry.');
     }
     async findPending(user) {
         return this.prisma.materialIssueOverride.findMany({
