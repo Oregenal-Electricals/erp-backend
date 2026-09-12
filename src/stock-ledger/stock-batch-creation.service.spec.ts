@@ -17,8 +17,9 @@ describe('StockLedgerService.receiveFromIqc - STORE-009 raw material StockBatch 
       },
       stockBalance: {
         findFirst: jest.fn().mockResolvedValue(null),
-        create: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockResolvedValue({ id: 'bal-1', availableQty: 0, unitCost: 0 }),
         update: jest.fn().mockResolvedValue({}),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       grnItem: { findFirst: jest.fn().mockResolvedValue({ landedCostPerUnit: 10, unitPrice: 10 }) },
       stockBatch: { create: jest.fn().mockResolvedValue({}) },

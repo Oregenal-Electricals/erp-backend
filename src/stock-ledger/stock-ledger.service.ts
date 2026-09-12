@@ -20,38 +20,84 @@ export class StockLedgerService {
       referenceType, referenceId, referenceNumber, inQty = 0, outQty = 0,
       unitCost = 0, remarks, userId } = data;
 
-    // Get or create stock balance
-    let balance = await this.prisma.stockBalance.findFirst({
-      where: { companyId, itemCode, warehouseId },
-    });
+    // STORE-010 section 53, 73: the previous version here read the
+    // balance, checked it, then wrote it back in a separate statement -
+    // classic read-then-write race. Two concurrent debits could both
+    // pass the negative-stock check against the same starting balance
+    // and both commit, or a concurrent credit could get silently lost
+    // (overwritten) by a debit that read stale data. This retries with
+    // a fresh read whenever the optimistic-concurrency claim below finds
+    // the balance moved out from under it, rather than ever blindly
+    // overwriting someone else's change.
+    let balance: any;
+    let newBalance = 0;
+    let newUnitCost = 0;
+    let totalCost = 0;
+    const MAX_RETRIES = 5;
+    let committed = false;
 
-    if (!balance) {
-      balance = await this.prisma.stockBalance.create({
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      balance = await this.prisma.stockBalance.findFirst({
+        where: { companyId, itemCode, warehouseId },
+      });
+
+      if (!balance) {
+        try {
+          balance = await this.prisma.stockBalance.create({
+            data: {
+              companyId, itemCode, itemName, warehouseId,
+              availableQty: 0, unitCost: 0, totalValue: 0,
+              createdBy: userId, updatedBy: userId,
+            },
+          });
+        } catch (e) {
+          // Another concurrent call created the row first for this exact
+          // item/warehouse - re-read and continue this attempt against it.
+          balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode, warehouseId } });
+          if (!balance) throw e;
+        }
+      }
+
+      // Check negative stock rule
+      if (outQty > 0 && balance.availableQty < outQty) {
+        throw new BadRequestException(`Insufficient stock for ${itemCode}. Available: ${balance.availableQty}, Required: ${outQty}`);
+      }
+
+      newBalance = balance.availableQty + inQty - outQty;
+      totalCost = inQty * unitCost || outQty * balance.unitCost;
+
+      // Weighted average cost for incoming stock
+      newUnitCost = balance.unitCost;
+      if (inQty > 0 && unitCost > 0) {
+        const existingValue = balance.availableQty * balance.unitCost;
+        const newValue = inQty * unitCost;
+        newUnitCost = (existingValue + newValue) / (balance.availableQty + inQty);
+      }
+
+      // Optimistic-concurrency claim: only commits if availableQty is
+      // still exactly what we just read. If a concurrent transaction
+      // changed it in between, this affects 0 rows and the loop retries
+      // from a fresh read instead of overwriting that change.
+      const claim = await this.prisma.stockBalance.updateMany({
+        where: { id: balance.id, availableQty: balance.availableQty },
         data: {
-          companyId, itemCode, itemName, warehouseId,
-          availableQty: 0, unitCost: 0, totalValue: 0,
-          createdBy: userId, updatedBy: userId,
+          availableQty: newBalance,
+          unitCost: newUnitCost,
+          totalValue: newBalance * newUnitCost,
+          lastUpdated: new Date(),
+          updatedBy: userId,
         },
       });
+
+      if (claim.count === 1) { committed = true; break; }
     }
 
-    // Check negative stock rule
-    if (outQty > 0 && balance.availableQty < outQty) {
-      throw new BadRequestException(`Insufficient stock for ${itemCode}. Available: ${balance.availableQty}, Required: ${outQty}`);
+    if (!committed) {
+      throw new BadRequestException(`Could not update stock for ${itemCode} - too many concurrent updates, please retry.`);
     }
 
-    const newBalance = balance.availableQty + inQty - outQty;
-    const totalCost = inQty * unitCost || outQty * balance.unitCost;
-
-    // Weighted average cost for incoming stock
-    let newUnitCost = balance.unitCost;
-    if (inQty > 0 && unitCost > 0) {
-      const existingValue = balance.availableQty * balance.unitCost;
-      const newValue = inQty * unitCost;
-      newUnitCost = (existingValue + newValue) / (balance.availableQty + inQty);
-    }
-
-    // Create ledger entry
+    // Create ledger entry only after the balance update has actually
+    // committed, so a retried attempt never produces two ledger rows.
     const ledgerEntry = await this.prisma.stockLedger.create({
       data: {
         companyId, itemCode, itemName, warehouseId,
@@ -60,18 +106,6 @@ export class StockLedgerService {
         unitCost: inQty > 0 ? unitCost : balance.unitCost,
         totalCost, remarks,
         createdBy: userId, updatedBy: userId,
-      },
-    });
-
-    // Update stock balance
-    await this.prisma.stockBalance.update({
-      where: { id: balance.id },
-      data: {
-        availableQty: newBalance,
-        unitCost: newUnitCost,
-        totalValue: newBalance * newUnitCost,
-        lastUpdated: new Date(),
-        updatedBy: userId,
       },
     });
 

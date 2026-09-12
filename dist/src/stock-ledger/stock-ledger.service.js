@@ -22,28 +22,60 @@ let StockLedgerService = class StockLedgerService {
     }
     async postTransaction(data) {
         const { companyId, itemCode, itemName, warehouseId, transactionType, referenceType, referenceId, referenceNumber, inQty = 0, outQty = 0, unitCost = 0, remarks, userId } = data;
-        let balance = await this.prisma.stockBalance.findFirst({
-            where: { companyId, itemCode, warehouseId },
-        });
-        if (!balance) {
-            balance = await this.prisma.stockBalance.create({
+        let balance;
+        let newBalance = 0;
+        let newUnitCost = 0;
+        let totalCost = 0;
+        const MAX_RETRIES = 5;
+        let committed = false;
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+            balance = await this.prisma.stockBalance.findFirst({
+                where: { companyId, itemCode, warehouseId },
+            });
+            if (!balance) {
+                try {
+                    balance = await this.prisma.stockBalance.create({
+                        data: {
+                            companyId, itemCode, itemName, warehouseId,
+                            availableQty: 0, unitCost: 0, totalValue: 0,
+                            createdBy: userId, updatedBy: userId,
+                        },
+                    });
+                }
+                catch (e) {
+                    balance = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode, warehouseId } });
+                    if (!balance)
+                        throw e;
+                }
+            }
+            if (outQty > 0 && balance.availableQty < outQty) {
+                throw new common_1.BadRequestException(`Insufficient stock for ${itemCode}. Available: ${balance.availableQty}, Required: ${outQty}`);
+            }
+            newBalance = balance.availableQty + inQty - outQty;
+            totalCost = inQty * unitCost || outQty * balance.unitCost;
+            newUnitCost = balance.unitCost;
+            if (inQty > 0 && unitCost > 0) {
+                const existingValue = balance.availableQty * balance.unitCost;
+                const newValue = inQty * unitCost;
+                newUnitCost = (existingValue + newValue) / (balance.availableQty + inQty);
+            }
+            const claim = await this.prisma.stockBalance.updateMany({
+                where: { id: balance.id, availableQty: balance.availableQty },
                 data: {
-                    companyId, itemCode, itemName, warehouseId,
-                    availableQty: 0, unitCost: 0, totalValue: 0,
-                    createdBy: userId, updatedBy: userId,
+                    availableQty: newBalance,
+                    unitCost: newUnitCost,
+                    totalValue: newBalance * newUnitCost,
+                    lastUpdated: new Date(),
+                    updatedBy: userId,
                 },
             });
+            if (claim.count === 1) {
+                committed = true;
+                break;
+            }
         }
-        if (outQty > 0 && balance.availableQty < outQty) {
-            throw new common_1.BadRequestException(`Insufficient stock for ${itemCode}. Available: ${balance.availableQty}, Required: ${outQty}`);
-        }
-        const newBalance = balance.availableQty + inQty - outQty;
-        const totalCost = inQty * unitCost || outQty * balance.unitCost;
-        let newUnitCost = balance.unitCost;
-        if (inQty > 0 && unitCost > 0) {
-            const existingValue = balance.availableQty * balance.unitCost;
-            const newValue = inQty * unitCost;
-            newUnitCost = (existingValue + newValue) / (balance.availableQty + inQty);
+        if (!committed) {
+            throw new common_1.BadRequestException(`Could not update stock for ${itemCode} - too many concurrent updates, please retry.`);
         }
         const ledgerEntry = await this.prisma.stockLedger.create({
             data: {
@@ -53,16 +85,6 @@ let StockLedgerService = class StockLedgerService {
                 unitCost: inQty > 0 ? unitCost : balance.unitCost,
                 totalCost, remarks,
                 createdBy: userId, updatedBy: userId,
-            },
-        });
-        await this.prisma.stockBalance.update({
-            where: { id: balance.id },
-            data: {
-                availableQty: newBalance,
-                unitCost: newUnitCost,
-                totalValue: newBalance * newUnitCost,
-                lastUpdated: new Date(),
-                updatedBy: userId,
             },
         });
         if (inQty > 0) {
