@@ -2024,6 +2024,7 @@ model Warehouse {
   stockPutaways  StockPutaway[]
   stockBatches   StockBatch[]
   preferredByMaterials RawMaterial[] @relation("PreferredWarehouseForMaterial")
+  restrictedByMaterials RawMaterial[] @relation("RestrictedWarehouseForMaterial")
   stockIssues    StockIssue[]
   stockAdjustments StockAdjustment[]
   workOrders     WorkOrder[]
@@ -2271,6 +2272,14 @@ model RawMaterial {
   preferredRack        WarehouseRack? @relation(fields: [preferredRackId], references: [id])
   preferredBinId       String?
   preferredBin         WarehouseBin?  @relation(fields: [preferredBinId], references: [id])
+  // STORE-009 section 21-22: if set, normal Put-Away is restricted to
+  // this warehouse - a different destination requires an override
+  // reason rather than being silently accepted. Kept deliberately
+  // simple (one warehouse-level restriction, not a category/hazmat
+  // rules engine) per the spec's own explicit guidance not to build
+  // unnecessary complexity here.
+  restrictedWarehouseId String?
+  restrictedWarehouse   Warehouse?   @relation("RestrictedWarehouseForMaterial", fields: [restrictedWarehouseId], references: [id])
   minStockLevel   Float?
   maxStockLevel   Float?
   reorderQty      Float?

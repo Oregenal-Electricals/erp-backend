@@ -87,6 +87,26 @@ export class StockPutawayService {
     const grn = await this.prisma.grnHeader.findFirst({ where: { id: dto.grnId, companyId: user.companyId } });
     if (!grn) throw new NotFoundException('GRN not found');
 
+    // STORE-009 section 21-22: if any item's material is restricted to a
+    // specific warehouse, putting it away anywhere else needs an
+    // explicit override reason - not silently accepted, but not a hard
+    // block either, since a genuinely authorized exception should still
+    // be possible.
+    if (dto.items && dto.items.length > 0) {
+      const codes = [...new Set(dto.items.map(i => i.itemCode))];
+      const restricted = await this.prisma.rawMaterial.findMany({
+        where: { companyId: user.companyId, code: { in: codes }, restrictedWarehouseId: { not: null } },
+        select: { code: true, restrictedWarehouseId: true, restrictedWarehouse: { select: { name: true } } },
+      });
+      for (const material of restricted) {
+        if (material.restrictedWarehouseId !== dto.warehouseId && !dto.overrideReason) {
+          throw new BadRequestException(
+            `Item ${material.code} is restricted to ${material.restrictedWarehouse?.name || 'a specific warehouse'} - provide an overrideReason to put it away elsewhere.`,
+          );
+        }
+      }
+    }
+
     const putawayNumber = await this.generateNumber(user.companyId);
 
     // STORE-009 section 12-13, 30-31: auto-link each line to the batch it

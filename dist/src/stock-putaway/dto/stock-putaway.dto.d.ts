@@ -12,6 +12,7 @@ export declare class CreatePutawayDto {
     iqcId?: string;
     warehouseId: string;
     remarks?: string;
+    overrideReason?: string;
     items?: PutawayItemDto[];
 }
 export declare class UpdatePutawayItemsDto {

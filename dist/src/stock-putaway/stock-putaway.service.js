@@ -69,9 +69,22 @@ let StockPutawayService = class StockPutawayService {
             .filter((iqc) => iqc.items.some((item) => item.remainingPutAwayQty > 0));
     }
     async create(dto, user) {
+        var _a;
         const grn = await this.prisma.grnHeader.findFirst({ where: { id: dto.grnId, companyId: user.companyId } });
         if (!grn)
             throw new common_1.NotFoundException('GRN not found');
+        if (dto.items && dto.items.length > 0) {
+            const codes = [...new Set(dto.items.map(i => i.itemCode))];
+            const restricted = await this.prisma.rawMaterial.findMany({
+                where: { companyId: user.companyId, code: { in: codes }, restrictedWarehouseId: { not: null } },
+                select: { code: true, restrictedWarehouseId: true, restrictedWarehouse: { select: { name: true } } },
+            });
+            for (const material of restricted) {
+                if (material.restrictedWarehouseId !== dto.warehouseId && !dto.overrideReason) {
+                    throw new common_1.BadRequestException(`Item ${material.code} is restricted to ${((_a = material.restrictedWarehouse) === null || _a === void 0 ? void 0 : _a.name) || 'a specific warehouse'} - provide an overrideReason to put it away elsewhere.`);
+                }
+            }
+        }
         const putawayNumber = await this.generateNumber(user.companyId);
         let itemsData;
         if (dto.items) {

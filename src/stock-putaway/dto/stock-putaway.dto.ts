@@ -20,6 +20,10 @@ export class CreatePutawayDto {
   @IsOptional() @IsString() iqcId?: string;
   @IsString() warehouseId: string;
   @IsOptional() @IsString() remarks?: string;
+  // STORE-009 section 21-22: required when putting a restricted
+  // material into a warehouse other than the one its material master
+  // restricts it to - authorized exception, not a silent override.
+  @IsOptional() @IsString() overrideReason?: string;
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => PutawayItemDto) items?: PutawayItemDto[];
 }
 

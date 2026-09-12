@@ -63,6 +63,7 @@ export declare class RawMaterialService {
         preferredWarehouseId: string | null;
         preferredRackId: string | null;
         preferredBinId: string | null;
+        restrictedWarehouseId: string | null;
         referenceRate: number | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -123,6 +124,7 @@ export declare class RawMaterialService {
             preferredWarehouseId: string | null;
             preferredRackId: string | null;
             preferredBinId: string | null;
+            restrictedWarehouseId: string | null;
             referenceRate: number | null;
         })[];
         total: number;
@@ -187,6 +189,7 @@ export declare class RawMaterialService {
         preferredWarehouseId: string | null;
         preferredRackId: string | null;
         preferredBinId: string | null;
+        restrictedWarehouseId: string | null;
         referenceRate: number | null;
     }>;
     update(id: string, dto: UpdateRawMaterialDto, user: any): Promise<{
@@ -246,6 +249,7 @@ export declare class RawMaterialService {
         preferredWarehouseId: string | null;
         preferredRackId: string | null;
         preferredBinId: string | null;
+        restrictedWarehouseId: string | null;
         referenceRate: number | null;
     }>;
     remove(id: string, user: any): Promise<{

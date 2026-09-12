@@ -165,6 +165,7 @@ describe('StockPutawayService.create - STORE-009 auto-links the correct StockBat
         create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'put-1', ...data })),
       },
       iqcItem: { findUnique: jest.fn() },
+      rawMaterial: { findMany: jest.fn().mockResolvedValue([]) },
       stockBatch: { findFirst: jest.fn() },
     };
     service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any);
@@ -189,5 +190,53 @@ describe('StockPutawayService.create - STORE-009 auto-links the correct StockBat
   it('leaves stockBatchId undefined for items with no iqcItemId (non-IQC put-away sources)', async () => {
     await service.create({ grnId: 'grn-1', warehouseId: 'wh-1', items: [{ binId: 'bin-1', itemCode: 'MISC-01', itemName: 'Misc', uom: 'PCS', qty: 10, unitCost: 0 }] } as any, user);
     expect(prisma.iqcItem.findUnique).not.toHaveBeenCalled();
+  });
+});
+
+describe('StockPutawayService.create - STORE-009 material-location restriction', () => {
+  let service: StockPutawayService;
+  let prisma: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      grnHeader: { findFirst: jest.fn().mockResolvedValue({ id: 'grn-1' }) },
+      stockPutaway: {
+        count: jest.fn().mockResolvedValue(0),
+        create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'put-1', ...data })),
+      },
+      iqcItem: { findUnique: jest.fn().mockResolvedValue(null) },
+      stockBatch: { findFirst: jest.fn() },
+      rawMaterial: { findMany: jest.fn() },
+    };
+    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any);
+  });
+
+  it('blocks put-away to a different warehouse than the material is restricted to, without an override reason', async () => {
+    prisma.rawMaterial.findMany.mockResolvedValue([{ code: 'HAZ-01', restrictedWarehouseId: 'wh-secure', restrictedWarehouse: { name: 'Secure Store' } }]);
+    await expect(
+      service.create({ grnId: 'grn-1', warehouseId: 'wh-1', items: [{ binId: 'bin-1', itemCode: 'HAZ-01', itemName: 'Hazmat', uom: 'PCS', qty: 10, unitCost: 0 }] } as any, user),
+    ).rejects.toThrow(/is restricted to Secure Store/);
+  });
+
+  it('allows put-away to a different warehouse when an override reason is provided', async () => {
+    prisma.rawMaterial.findMany.mockResolvedValue([{ code: 'HAZ-01', restrictedWarehouseId: 'wh-secure', restrictedWarehouse: { name: 'Secure Store' } }]);
+    await expect(
+      service.create({ grnId: 'grn-1', warehouseId: 'wh-1', overrideReason: 'Secure store full, plant head approved', items: [{ binId: 'bin-1', itemCode: 'HAZ-01', itemName: 'Hazmat', uom: 'PCS', qty: 10, unitCost: 0 }] } as any, user),
+    ).resolves.toBeDefined();
+  });
+
+  it('allows put-away to the material\'s own restricted warehouse with no override needed', async () => {
+    prisma.rawMaterial.findMany.mockResolvedValue([{ code: 'HAZ-01', restrictedWarehouseId: 'wh-secure', restrictedWarehouse: { name: 'Secure Store' } }]);
+    await expect(
+      service.create({ grnId: 'grn-1', warehouseId: 'wh-secure', items: [{ binId: 'bin-1', itemCode: 'HAZ-01', itemName: 'Hazmat', uom: 'PCS', qty: 10, unitCost: 0 }] } as any, user),
+    ).resolves.toBeDefined();
+  });
+
+  it('does not restrict materials with no restrictedWarehouseId configured', async () => {
+    prisma.rawMaterial.findMany.mockResolvedValue([]);
+    await expect(
+      service.create({ grnId: 'grn-1', warehouseId: 'wh-1', items: [{ binId: 'bin-1', itemCode: 'SCREW-01', itemName: 'Screw', uom: 'PCS', qty: 10, unitCost: 0 }] } as any, user),
+    ).resolves.toBeDefined();
   });
 });
