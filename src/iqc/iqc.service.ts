@@ -171,6 +171,7 @@ export class IqcService {
             itemCode: item.itemCode,
             itemName: item.itemName,
             uom: item.uom,
+            batchNumber: item.batchNumber,
             receivedQty: qty,
             acceptedQty: qty, // default all accepted
             rejectedQty: 0,

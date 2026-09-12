@@ -140,6 +140,7 @@ let IqcService = class IqcService {
                         itemCode: item.itemCode,
                         itemName: item.itemName,
                         uom: item.uom,
+                        batchNumber: item.batchNumber,
                         receivedQty: qty,
                         acceptedQty: qty,
                         rejectedQty: 0,

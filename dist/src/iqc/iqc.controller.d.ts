@@ -269,6 +269,7 @@ export declare class IqcController {
             itemName: string;
             uom: string;
             rejectionReason: string | null;
+            batchNumber: string | null;
             grnItemId: string;
             receivedQty: number;
             acceptedQty: number;
@@ -321,6 +322,7 @@ export declare class IqcController {
             itemName: string;
             uom: string;
             rejectionReason: string | null;
+            batchNumber: string | null;
             grnItemId: string;
             receivedQty: number;
             acceptedQty: number;
@@ -472,6 +474,7 @@ export declare class IqcController {
         itemName: string;
         uom: string;
         rejectionReason: string | null;
+        batchNumber: string | null;
         grnItemId: string;
         receivedQty: number;
         acceptedQty: number;
@@ -500,6 +503,7 @@ export declare class IqcController {
             itemName: string;
             uom: string;
             rejectionReason: string | null;
+            batchNumber: string | null;
             grnItemId: string;
             receivedQty: number;
             acceptedQty: number;
@@ -583,6 +587,7 @@ export declare class IqcController {
             itemName: string;
             uom: string;
             rejectionReason: string | null;
+            batchNumber: string | null;
             grnItemId: string;
             receivedQty: number;
             acceptedQty: number;
@@ -634,6 +639,7 @@ export declare class IqcController {
             itemName: string;
             uom: string;
             rejectionReason: string | null;
+            batchNumber: string | null;
             grnItemId: string;
             receivedQty: number;
             acceptedQty: number;
@@ -686,6 +692,7 @@ export declare class IqcController {
             itemName: string;
             uom: string;
             rejectionReason: string | null;
+            batchNumber: string | null;
             grnItemId: string;
             receivedQty: number;
             acceptedQty: number;
@@ -837,6 +844,7 @@ export declare class IqcController {
         itemName: string;
         uom: string;
         rejectionReason: string | null;
+        batchNumber: string | null;
         grnItemId: string;
         receivedQty: number;
         acceptedQty: number;
@@ -964,6 +972,7 @@ export declare class IqcController {
         itemName: string;
         uom: string;
         rejectionReason: string | null;
+        batchNumber: string | null;
         grnItemId: string;
         receivedQty: number;
         acceptedQty: number;

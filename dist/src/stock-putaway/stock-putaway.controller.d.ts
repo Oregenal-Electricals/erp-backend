@@ -64,6 +64,7 @@ export declare class StockPutawayController {
             unitCost: number;
             iqcItemId: string | null;
             binId: string;
+            stockBatchId: string | null;
             putawayId: string;
         })[];
         warehouse: {
@@ -115,6 +116,7 @@ export declare class StockPutawayController {
             unitCost: number;
             iqcItemId: string | null;
             binId: string;
+            stockBatchId: string | null;
             putawayId: string;
         })[];
         warehouse: {
@@ -166,6 +168,7 @@ export declare class StockPutawayController {
             unitCost: number;
             iqcItemId: string | null;
             binId: string;
+            stockBatchId: string | null;
             putawayId: string;
         })[];
         warehouse: {
@@ -217,6 +220,7 @@ export declare class StockPutawayController {
             unitCost: number;
             iqcItemId: string | null;
             binId: string;
+            stockBatchId: string | null;
             putawayId: string;
         })[];
         warehouse: {

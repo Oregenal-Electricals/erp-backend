@@ -45,8 +45,27 @@ let StockPutawayService = class StockPutawayService {
             },
             orderBy: { createdAt: 'asc' },
         });
+        const itemCodes = [...new Set(approvedIqcs.flatMap((iqc) => iqc.items.map((i) => i.itemCode)))];
+        const materials = itemCodes.length > 0 ? await this.prisma.rawMaterial.findMany({
+            where: { companyId: user.companyId, code: { in: itemCodes } },
+            select: {
+                code: true,
+                preferredWarehouseId: true, preferredWarehouse: { select: { name: true } },
+                preferredRackId: true, preferredRack: { select: { code: true } },
+                preferredBinId: true, preferredBin: { select: { code: true } },
+            },
+        }) : [];
+        const suggestionByCode = new Map(materials.map(m => [m.code, m]));
         return approvedIqcs
-            .map((iqc) => (Object.assign(Object.assign({}, iqc), { items: iqc.items.map((item) => (Object.assign(Object.assign({}, item), { remainingPutAwayQty: Math.max(item.acceptedQty - (item.putAwayQty || 0), 0) }))) })))
+            .map((iqc) => (Object.assign(Object.assign({}, iqc), { items: iqc.items.map((item) => {
+                var _a, _b, _c;
+                const suggestion = suggestionByCode.get(item.itemCode);
+                return Object.assign(Object.assign({}, item), { remainingPutAwayQty: Math.max(item.acceptedQty - (item.putAwayQty || 0), 0), suggestedLocation: (suggestion === null || suggestion === void 0 ? void 0 : suggestion.preferredBinId) ? {
+                        warehouseId: suggestion.preferredWarehouseId, warehouseName: (_a = suggestion.preferredWarehouse) === null || _a === void 0 ? void 0 : _a.name,
+                        rackId: suggestion.preferredRackId, rackCode: (_b = suggestion.preferredRack) === null || _b === void 0 ? void 0 : _b.code,
+                        binId: suggestion.preferredBinId, binCode: (_c = suggestion.preferredBin) === null || _c === void 0 ? void 0 : _c.code,
+                    } : null });
+            }) })))
             .filter((iqc) => iqc.items.some((item) => item.remainingPutAwayQty > 0));
     }
     async create(dto, user) {
@@ -54,15 +73,29 @@ let StockPutawayService = class StockPutawayService {
         if (!grn)
             throw new common_1.NotFoundException('GRN not found');
         const putawayNumber = await this.generateNumber(user.companyId);
+        let itemsData;
+        if (dto.items) {
+            itemsData = [];
+            for (const item of dto.items) {
+                let stockBatchId;
+                if (item.iqcItemId) {
+                    const iqcItem = await this.prisma.iqcItem.findUnique({ where: { id: item.iqcItemId } });
+                    if (iqcItem === null || iqcItem === void 0 ? void 0 : iqcItem.batchNumber) {
+                        const batch = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, batchNumber: iqcItem.batchNumber } });
+                        if (batch)
+                            stockBatchId = batch.id;
+                    }
+                }
+                itemsData.push(Object.assign(Object.assign({}, item), { stockBatchId, companyId: user.companyId, createdBy: user.id, updatedBy: user.id }));
+            }
+        }
         const putaway = await this.prisma.stockPutaway.create({
             data: {
                 putawayNumber, grnId: dto.grnId, iqcId: dto.iqcId,
                 warehouseId: dto.warehouseId, remarks: dto.remarks,
                 status: 'IN_PROGRESS',
                 companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
-                items: dto.items ? {
-                    create: dto.items.map(item => (Object.assign(Object.assign({}, item), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id })))
-                } : undefined,
+                items: itemsData ? { create: itemsData } : undefined,
             },
             include: this.includes(),
         });

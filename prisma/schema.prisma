@@ -2023,6 +2023,7 @@ model Warehouse {
   holdStocks      HoldStock[]
   stockPutaways  StockPutaway[]
   stockBatches   StockBatch[]
+  preferredByMaterials RawMaterial[] @relation("PreferredWarehouseForMaterial")
   stockIssues    StockIssue[]
   stockAdjustments StockAdjustment[]
   workOrders     WorkOrder[]
@@ -2259,6 +2260,17 @@ model RawMaterial {
   // IQC entirely and go straight to Put-Away - defaults true so nothing
   // that isn't explicitly configured otherwise changes behavior.
   iqcRequired     Boolean       @default(true)
+  // STORE-009 section 5-6, 23: suggested Put-Away location for this
+  // material - a suggestion only, never enforced. Store can always
+  // place material elsewhere; this just saves them from searching the
+  // whole warehouse every time. All optional since not every material
+  // needs a fixed preferred spot.
+  preferredWarehouseId String?
+  preferredWarehouse   Warehouse?    @relation("PreferredWarehouseForMaterial", fields: [preferredWarehouseId], references: [id])
+  preferredRackId      String?
+  preferredRack        WarehouseRack? @relation(fields: [preferredRackId], references: [id])
+  preferredBinId       String?
+  preferredBin         WarehouseBin?  @relation(fields: [preferredBinId], references: [id])
   minStockLevel   Float?
   maxStockLevel   Float?
   reorderQty      Float?
@@ -3405,6 +3417,12 @@ model GrnItem {
   itemCode            String
   itemName            String
   uom                 String
+  // STORE-009 section 30-31, 40-41: supplier/internal batch or lot
+  // identity for this receipt line - optional since not every material
+  // is batch-tracked, but this is what lets StockBatch (and eventually
+  // location-level batch separation) exist at all for raw material,
+  // which previously had no batch record created anywhere.
+  batchNumber         String?
   orderedQty          Float      @default(0)
   previouslyReceived  Float      @default(0)
   receivedQty         Float      @default(0)
@@ -3473,6 +3491,7 @@ model IqcItem {
   itemCode         String
   itemName         String
   uom              String
+  batchNumber      String?
   receivedQty      Float          @default(0)
   // STORE-007 section 24-25: what Store claims to have sent, set at
   // handover time. confirmedQty is set separately once QC physically
@@ -3857,6 +3876,7 @@ model WarehouseRack {
   updatedBy   String?
 
   bins        WarehouseBin[]
+  preferredByMaterials RawMaterial[]
 
   @@unique([companyId, warehouseId, code])
   @@map("warehouse_racks")
@@ -3885,6 +3905,7 @@ model WarehouseBin {
   updatedBy   String?
 
   putawayItems StockPutawayItem[]
+  preferredByMaterials RawMaterial[]
   @@unique([companyId, warehouseId, code])
   @@map("warehouse_bins")
   discrepancies GrnItemDiscrepancy[]
@@ -3931,6 +3952,11 @@ model StockPutawayItem {
   // GRN can have the same itemCode on more than one line/inspection.
   iqcItemId   String?
   iqcItem     IqcItem?     @relation(fields: [iqcItemId], references: [id])
+  // STORE-009 section 12-13, 30-31: which physical batch this qty in
+  // this bin belongs to - without this there is no way to answer "which
+  // batch is in which bin" even though StockBatch exists.
+  stockBatchId String?
+  stockBatch   StockBatch? @relation(fields: [stockBatchId], references: [id])
   itemCode    String
   itemName    String
   uom         String
@@ -3980,6 +4006,7 @@ model StockBatch {
   issueItems StockIssueItem[]
   transferItems StockTransferItem[]
   productionIssueItems ProductionIssueItem[] @relation("ProductionIssueBatch")
+  putawayItems StockPutawayItem[]
   @@unique([companyId, batchNumber])
   @@index([companyId, itemCode])
   @@map("stock_batches")

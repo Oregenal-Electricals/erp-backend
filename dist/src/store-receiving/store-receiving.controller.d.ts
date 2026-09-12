@@ -213,6 +213,7 @@ export declare class StoreReceivingController {
                 itemCode: string;
                 itemName: string;
                 uom: string;
+                batchNumber: string | null;
                 orderedQty: number;
                 receivedQty: number;
                 unitPrice: number;
@@ -327,6 +328,7 @@ export declare class StoreReceivingController {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
@@ -635,6 +637,7 @@ export declare class StoreReceivingController {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
@@ -743,6 +746,7 @@ export declare class StoreReceivingController {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;
@@ -851,6 +855,7 @@ export declare class StoreReceivingController {
             itemCode: string;
             itemName: string;
             uom: string;
+            batchNumber: string | null;
             orderedQty: number;
             receivedQty: number;
             unitPrice: number;

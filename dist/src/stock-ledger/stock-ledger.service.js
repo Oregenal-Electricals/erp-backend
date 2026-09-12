@@ -131,6 +131,18 @@ let StockLedgerService = class StockLedgerService {
                     userId: user.id,
                 });
                 entries.push(entry);
+                if (item.batchNumber) {
+                    await this.prisma.stockBatch.create({
+                        data: {
+                            batchNumber: item.batchNumber, itemCode: item.itemCode,
+                            itemName: item.itemName, warehouseId: grn.warehouseId,
+                            grnId: grn.id, grnItemId: item.grnItemId,
+                            originalQty: item.acceptedQty, availableQty: item.acceptedQty,
+                            unitCost, status: 'ACTIVE',
+                            companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+                        },
+                    }).catch(() => { });
+                }
             }
         }
         await this.audit.log({ tableName: 'stock_ledger', recordId: iqcId, action: 'CREATE', newValues: { entries: entries.length }, changedBy: user.id });

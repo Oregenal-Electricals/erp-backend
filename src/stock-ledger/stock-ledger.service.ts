@@ -155,6 +155,24 @@ export class StockLedgerService {
           userId: user.id,
         });
         entries.push(entry);
+
+        // STORE-009 section 30-31, 40-41: raw material previously never
+        // got a StockBatch record at all - only the FG/OQC release path
+        // did (see receiveFromOqc() below). Without this, batch-level
+        // traceability for the exact material this whole ERP build has
+        // been about was structurally impossible, not just untested.
+        if ((item as any).batchNumber) {
+          await this.prisma.stockBatch.create({
+            data: {
+              batchNumber: (item as any).batchNumber, itemCode: item.itemCode,
+              itemName: item.itemName, warehouseId: grn.warehouseId,
+              grnId: grn.id, grnItemId: item.grnItemId,
+              originalQty: item.acceptedQty, availableQty: item.acceptedQty,
+              unitCost, status: 'ACTIVE',
+              companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+            },
+          }).catch(() => {});
+        }
       }
     }
 

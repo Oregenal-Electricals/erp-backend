@@ -67,6 +67,9 @@ export declare class RawMaterialController {
             partNumber: string | null;
             minStockLevel: number | null;
             maxStockLevel: number | null;
+            preferredWarehouseId: string | null;
+            preferredRackId: string | null;
+            preferredBinId: string | null;
             referenceRate: number | null;
         })[];
         total: number;
@@ -128,6 +131,9 @@ export declare class RawMaterialController {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        preferredWarehouseId: string | null;
+        preferredRackId: string | null;
+        preferredBinId: string | null;
         referenceRate: number | null;
     }>;
     create(dto: CreateRawMaterialDto, req: any): Promise<{
@@ -184,6 +190,9 @@ export declare class RawMaterialController {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        preferredWarehouseId: string | null;
+        preferredRackId: string | null;
+        preferredBinId: string | null;
         referenceRate: number | null;
     }>;
     update(id: string, dto: UpdateRawMaterialDto, req: any): Promise<{
@@ -240,6 +249,9 @@ export declare class RawMaterialController {
         partNumber: string | null;
         minStockLevel: number | null;
         maxStockLevel: number | null;
+        preferredWarehouseId: string | null;
+        preferredRackId: string | null;
+        preferredBinId: string | null;
         referenceRate: number | null;
     }>;
     remove(id: string, req: any): Promise<{

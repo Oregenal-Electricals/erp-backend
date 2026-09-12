@@ -48,13 +48,37 @@ export class StockPutawayService {
       },
       orderBy: { createdAt: 'asc' },
     });
+    // STORE-009 section 5-6, 54: suggest each material's preferred
+    // location (if the material master has one configured) so Store
+    // doesn't have to search the whole warehouse - a suggestion only,
+    // never enforced, and never rewriting what Store actually picks.
+    const itemCodes = [...new Set(approvedIqcs.flatMap((iqc: any) => iqc.items.map((i: any) => i.itemCode)))];
+    const materials = itemCodes.length > 0 ? await this.prisma.rawMaterial.findMany({
+      where: { companyId: user.companyId, code: { in: itemCodes as string[] } },
+      select: {
+        code: true,
+        preferredWarehouseId: true, preferredWarehouse: { select: { name: true } },
+        preferredRackId: true, preferredRack: { select: { code: true } },
+        preferredBinId: true, preferredBin: { select: { code: true } },
+      },
+    }) : [];
+    const suggestionByCode = new Map(materials.map(m => [m.code, m]));
+
     return approvedIqcs
       .map((iqc: any) => ({
         ...iqc,
-        items: iqc.items.map((item: any) => ({
-          ...item,
-          remainingPutAwayQty: Math.max(item.acceptedQty - (item.putAwayQty || 0), 0),
-        })),
+        items: iqc.items.map((item: any) => {
+          const suggestion = suggestionByCode.get(item.itemCode);
+          return {
+            ...item,
+            remainingPutAwayQty: Math.max(item.acceptedQty - (item.putAwayQty || 0), 0),
+            suggestedLocation: suggestion?.preferredBinId ? {
+              warehouseId: suggestion.preferredWarehouseId, warehouseName: suggestion.preferredWarehouse?.name,
+              rackId: suggestion.preferredRackId, rackCode: suggestion.preferredRack?.code,
+              binId: suggestion.preferredBinId, binCode: suggestion.preferredBin?.code,
+            } : null,
+          };
+        }),
       }))
       .filter((iqc: any) => iqc.items.some((item: any) => item.remainingPutAwayQty > 0));
   }
@@ -64,15 +88,35 @@ export class StockPutawayService {
     if (!grn) throw new NotFoundException('GRN not found');
 
     const putawayNumber = await this.generateNumber(user.companyId);
+
+    // STORE-009 section 12-13, 30-31: auto-link each line to the batch it
+    // actually came from, so "which batch is in which bin" has an answer.
+    // The IqcItem already carries the batchNumber (propagated from the
+    // GRN line at handover time); StockBatch is looked up by that number
+    // rather than requiring the frontend to know or pass a batch id.
+    let itemsData: any[] | undefined;
+    if (dto.items) {
+      itemsData = [];
+      for (const item of dto.items) {
+        let stockBatchId: string | undefined;
+        if (item.iqcItemId) {
+          const iqcItem = await this.prisma.iqcItem.findUnique({ where: { id: item.iqcItemId } });
+          if (iqcItem?.batchNumber) {
+            const batch = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, batchNumber: iqcItem.batchNumber } });
+            if (batch) stockBatchId = batch.id;
+          }
+        }
+        itemsData.push({ ...item, stockBatchId, companyId: user.companyId, createdBy: user.id, updatedBy: user.id });
+      }
+    }
+
     const putaway = await this.prisma.stockPutaway.create({
       data: {
         putawayNumber, grnId: dto.grnId, iqcId: dto.iqcId,
         warehouseId: dto.warehouseId, remarks: dto.remarks,
         status: 'IN_PROGRESS',
         companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
-        items: dto.items ? {
-          create: dto.items.map(item => ({ ...item, companyId: user.companyId, createdBy: user.id, updatedBy: user.id }))
-        } : undefined,
+        items: itemsData ? { create: itemsData } : undefined,
       },
       include: this.includes(),
     });

@@ -8,6 +8,7 @@ describe('StockPutawayService.getPendingIqcs - STORE-008 remaining-qty visibilit
   beforeEach(() => {
     prisma = {
       iqcInspection: { findMany: jest.fn() },
+      rawMaterial: { findMany: jest.fn().mockResolvedValue([]) },
     };
     service = new StockPutawayService(prisma, {} as any, {} as any);
   });
@@ -148,5 +149,45 @@ describe('StockPutawayService.complete - STORE-008 over-put-away and partial put
       { binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', qty: 500 },
     ]));
     await expect(service.complete('put-1', user)).rejects.toThrow(/can only hold/);
+  });
+});
+
+describe('StockPutawayService.create - STORE-009 auto-links the correct StockBatch', () => {
+  let service: StockPutawayService;
+  let prisma: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      grnHeader: { findFirst: jest.fn().mockResolvedValue({ id: 'grn-1' }) },
+      stockPutaway: {
+        count: jest.fn().mockResolvedValue(0),
+        create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'put-1', ...data })),
+      },
+      iqcItem: { findUnique: jest.fn() },
+      stockBatch: { findFirst: jest.fn() },
+    };
+    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any);
+  });
+
+  it('links stockBatchId when the IqcItem has a batchNumber that matches an existing StockBatch', async () => {
+    prisma.iqcItem.findUnique.mockResolvedValue({ id: 'ii-1', batchNumber: 'DRV-B001' });
+    prisma.stockBatch.findFirst.mockResolvedValue({ id: 'batch-1' });
+    await service.create({ grnId: 'grn-1', warehouseId: 'wh-1', items: [{ binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 500, unitCost: 0 }] } as any, user);
+    const call = prisma.stockPutaway.create.mock.calls[0][0];
+    expect(call.data.items.create[0].stockBatchId).toBe('batch-1');
+  });
+
+  it('leaves stockBatchId undefined when the IqcItem has no batchNumber', async () => {
+    prisma.iqcItem.findUnique.mockResolvedValue({ id: 'ii-1', batchNumber: null });
+    await service.create({ grnId: 'grn-1', warehouseId: 'wh-1', items: [{ binId: 'bin-1', iqcItemId: 'ii-1', itemCode: 'SCREW-01', itemName: 'Screw', uom: 'PCS', qty: 100, unitCost: 0 }] } as any, user);
+    expect(prisma.stockBatch.findFirst).not.toHaveBeenCalled();
+    const call = prisma.stockPutaway.create.mock.calls[0][0];
+    expect(call.data.items.create[0].stockBatchId).toBeUndefined();
+  });
+
+  it('leaves stockBatchId undefined for items with no iqcItemId (non-IQC put-away sources)', async () => {
+    await service.create({ grnId: 'grn-1', warehouseId: 'wh-1', items: [{ binId: 'bin-1', itemCode: 'MISC-01', itemName: 'Misc', uom: 'PCS', qty: 10, unitCost: 0 }] } as any, user);
+    expect(prisma.iqcItem.findUnique).not.toHaveBeenCalled();
   });
 });
