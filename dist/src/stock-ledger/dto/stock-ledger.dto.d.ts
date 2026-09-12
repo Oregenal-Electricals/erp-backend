@@ -7,5 +7,5 @@ export declare class AdjustStockDto {
     qty: number;
     adjustmentType: string;
     unitCost: number;
-    remarks?: string;
+    remarks: string;
 }

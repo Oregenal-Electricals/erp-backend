@@ -10,5 +10,9 @@ export class AdjustStockDto {
   @IsNumber() @Min(0) qty: number;
   @IsString() adjustmentType: string; // ADD, REMOVE
   @IsNumber() @Min(0) unitCost: number;
-  @IsOptional() @IsString() remarks?: string;
+  // STORE-010 section 51-52: a direct stock adjustment must always
+  // carry a reason - this was previously optional, meaning a user
+  // could silently add or remove stock with nothing recorded to
+  // explain why. Required, not just recommended.
+  @IsString() remarks: string;
 }
