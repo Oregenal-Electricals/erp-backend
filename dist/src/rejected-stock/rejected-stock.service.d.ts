@@ -22,15 +22,15 @@ export declare class RejectedStockService {
             uom: string;
             rejectionReason: string | null;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            rejectedStockId: string;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             vendorPickupDeadline: Date | null;
             vendorNotifiedAt: Date | null;
             disposalEligible: boolean;
-            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
@@ -83,15 +83,15 @@ export declare class RejectedStockService {
             uom: string;
             rejectionReason: string | null;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            rejectedStockId: string;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             vendorPickupDeadline: Date | null;
             vendorNotifiedAt: Date | null;
             disposalEligible: boolean;
-            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
@@ -181,15 +181,15 @@ export declare class RejectedStockService {
             uom: string;
             rejectionReason: string | null;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            rejectedStockId: string;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             vendorPickupDeadline: Date | null;
             vendorNotifiedAt: Date | null;
             disposalEligible: boolean;
-            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
@@ -242,15 +242,15 @@ export declare class RejectedStockService {
             uom: string;
             rejectionReason: string | null;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            rejectedStockId: string;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             vendorPickupDeadline: Date | null;
             vendorNotifiedAt: Date | null;
             disposalEligible: boolean;
-            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;
@@ -303,15 +303,15 @@ export declare class RejectedStockService {
             uom: string;
             rejectionReason: string | null;
             rejectedQty: number;
-            disposition: string;
-            dispositionNotes: string | null;
-            dispositionBy: string | null;
             iqcItemId: string | null;
+            rejectedStockId: string;
+            disposition: string;
             dispositionDate: Date | null;
+            dispositionBy: string | null;
+            dispositionNotes: string | null;
             vendorPickupDeadline: Date | null;
             vendorNotifiedAt: Date | null;
             disposalEligible: boolean;
-            rejectedStockId: string;
         }[];
         warehouse: {
             name: string;

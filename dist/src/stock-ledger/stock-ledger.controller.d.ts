@@ -107,6 +107,18 @@ export declare class StockLedgerController {
         balanceQty: number;
         transactionDate: Date;
     })[]>;
+    getMaterialSummary(itemCode: string, req: any): Promise<{
+        itemCode: string;
+        itemName: string;
+        physicalTotal: number;
+        available: number;
+        reserved: number;
+        freeAvailable: number;
+        putAwayPending: number;
+        qcPending: number;
+        hold: number;
+        rejected: number;
+    }>;
     findLedger(req: any, query: any): Promise<{
         data: ({
             warehouse: {

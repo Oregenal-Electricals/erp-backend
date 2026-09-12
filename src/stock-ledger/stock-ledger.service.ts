@@ -414,4 +414,57 @@ export class StockLedgerService {
 
     return { totalItems, totalMovements, totalValue: totalValue._sum.totalValue || 0, byType, lowStockCount };
   }
+
+  // STORE-010 sections 5-6, 9, 24: the Stock screen's core ask - "what
+  // do we have, how much is Available/Reserved/Free/QC Pending/Hold/
+  // Rejected" for one material, in a single call. Deliberately reads
+  // straight from the existing sources of truth (StockBalance, the
+  // IqcInspection/IqcItem status the inspection is actually in, HoldStock
+  // and RejectedStock) rather than maintaining a separate summary
+  // balance that could drift - the same "single stock truth" principle
+  // section 3 asks for.
+  async getMaterialSummary(itemCode: string, user: any) {
+    const companyFilter = user.role !== 'SUPER_ADMIN' ? { companyId: user.companyId } : {};
+
+    const balances = await this.prisma.stockBalance.findMany({ where: { itemCode, ...companyFilter } });
+    const available = balances.reduce((s, b) => s + b.availableQty, 0);
+    const reserved = balances.reduce((s, b) => s + b.reservedQty, 0);
+    const putAwayPending = balances.reduce((s, b) => s + (b.putAwayPendingQty || 0), 0);
+    const itemName = balances[0]?.itemName;
+
+    // QC Pending: material sent to IQC but not yet approved - the
+    // inspection's own status is the source of truth, not a separately
+    // maintained counter (StockBalance.inQcQty is dead precisely because
+    // it tried to be that and nothing ever kept it in sync).
+    const pendingIqcItems = await this.prisma.iqcItem.findMany({
+      where: { itemCode, isActive: true, iqc: { status: { not: 'APPROVED' }, ...companyFilter } },
+      select: { receivedQty: true },
+    });
+    const qcPending = pendingIqcItems.reduce((s, i) => s + i.receivedQty, 0);
+
+    const holdItems = await this.prisma.holdStockItem.findMany({
+      where: { itemCode, isActive: true, reinspectionStatus: 'PENDING', holdStock: { ...companyFilter } },
+      select: { holdQty: true },
+    });
+    const hold = holdItems.reduce((s, i) => s + i.holdQty, 0);
+
+    const rejectedItems = await this.prisma.rejectedStockItem.findMany({
+      where: { itemCode, isActive: true, rejectedStock: { ...companyFilter } },
+      select: { rejectedQty: true },
+    });
+    const rejected = rejectedItems.reduce((s, i) => s + i.rejectedQty, 0);
+
+    return {
+      itemCode,
+      itemName,
+      physicalTotal: available + putAwayPending + qcPending + hold + rejected,
+      available,
+      reserved,
+      freeAvailable: Math.max(available - reserved, 0),
+      putAwayPending,
+      qcPending,
+      hold,
+      rejected,
+    };
+  }
 }

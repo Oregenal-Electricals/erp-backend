@@ -60,6 +60,7 @@ export declare class HoldStockController {
             uom: string;
             holdQty: number;
             holdReason: string | null;
+            holdStockId: string;
             iqcItemId: string | null;
             reinspectionStatus: string;
             reinspectedPassQty: number;
@@ -67,7 +68,6 @@ export declare class HoldStockController {
             reinspectedAt: Date | null;
             reinspectedBy: string | null;
             reinspectionNotes: string | null;
-            holdStockId: string;
         }[];
         warehouse: {
             name: string;
@@ -112,6 +112,7 @@ export declare class HoldStockController {
             uom: string;
             holdQty: number;
             holdReason: string | null;
+            holdStockId: string;
             iqcItemId: string | null;
             reinspectionStatus: string;
             reinspectedPassQty: number;
@@ -119,7 +120,6 @@ export declare class HoldStockController {
             reinspectedAt: Date | null;
             reinspectedBy: string | null;
             reinspectionNotes: string | null;
-            holdStockId: string;
         }[];
         warehouse: {
             name: string;
@@ -164,6 +164,7 @@ export declare class HoldStockController {
             uom: string;
             holdQty: number;
             holdReason: string | null;
+            holdStockId: string;
             iqcItemId: string | null;
             reinspectionStatus: string;
             reinspectedPassQty: number;
@@ -171,7 +172,6 @@ export declare class HoldStockController {
             reinspectedAt: Date | null;
             reinspectedBy: string | null;
             reinspectionNotes: string | null;
-            holdStockId: string;
         }[];
         warehouse: {
             name: string;

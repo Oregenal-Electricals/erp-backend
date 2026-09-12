@@ -329,6 +329,42 @@ let StockLedgerService = class StockLedgerService {
         }).length;
         return { totalItems, totalMovements, totalValue: totalValue._sum.totalValue || 0, byType, lowStockCount };
     }
+    async getMaterialSummary(itemCode, user) {
+        var _a;
+        const companyFilter = user.role !== 'SUPER_ADMIN' ? { companyId: user.companyId } : {};
+        const balances = await this.prisma.stockBalance.findMany({ where: Object.assign({ itemCode }, companyFilter) });
+        const available = balances.reduce((s, b) => s + b.availableQty, 0);
+        const reserved = balances.reduce((s, b) => s + b.reservedQty, 0);
+        const putAwayPending = balances.reduce((s, b) => s + (b.putAwayPendingQty || 0), 0);
+        const itemName = (_a = balances[0]) === null || _a === void 0 ? void 0 : _a.itemName;
+        const pendingIqcItems = await this.prisma.iqcItem.findMany({
+            where: { itemCode, isActive: true, iqc: Object.assign({ status: { not: 'APPROVED' } }, companyFilter) },
+            select: { receivedQty: true },
+        });
+        const qcPending = pendingIqcItems.reduce((s, i) => s + i.receivedQty, 0);
+        const holdItems = await this.prisma.holdStockItem.findMany({
+            where: { itemCode, isActive: true, reinspectionStatus: 'PENDING', holdStock: Object.assign({}, companyFilter) },
+            select: { holdQty: true },
+        });
+        const hold = holdItems.reduce((s, i) => s + i.holdQty, 0);
+        const rejectedItems = await this.prisma.rejectedStockItem.findMany({
+            where: { itemCode, isActive: true, rejectedStock: Object.assign({}, companyFilter) },
+            select: { rejectedQty: true },
+        });
+        const rejected = rejectedItems.reduce((s, i) => s + i.rejectedQty, 0);
+        return {
+            itemCode,
+            itemName,
+            physicalTotal: available + putAwayPending + qcPending + hold + rejected,
+            available,
+            reserved,
+            freeAvailable: Math.max(available - reserved, 0),
+            putAwayPending,
+            qcPending,
+            hold,
+            rejected,
+        };
+    }
 };
 exports.StockLedgerService = StockLedgerService;
 exports.StockLedgerService = StockLedgerService = __decorate([

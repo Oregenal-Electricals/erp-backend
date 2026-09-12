@@ -240,4 +240,16 @@ export declare class StockLedgerService {
         })[];
         lowStockCount: number;
     }>;
+    getMaterialSummary(itemCode: string, user: any): Promise<{
+        itemCode: string;
+        itemName: string;
+        physicalTotal: number;
+        available: number;
+        reserved: number;
+        freeAvailable: number;
+        putAwayPending: number;
+        qcPending: number;
+        hold: number;
+        rejected: number;
+    }>;
 }
