@@ -27,7 +27,8 @@ describe('ProductionIssueService.create - previous material status gate', () => 
     mrpService = { calculateMrp: jest.fn() };
     materialReturnService = { getPreviousMaterialStatus: jest.fn().mockResolvedValue({ overallStatus: 'CLEAR', items: [] }) };
     overrideService = { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn().mockResolvedValue({}) };
-    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService);
+    const materialReservation = { recordIssueAgainstReservations: jest.fn().mockResolvedValue(0) };
+    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation as any);
   });
 
   it('allows the new issue when previous material status is CLEAR', async () => {
@@ -101,5 +102,62 @@ describe('ProductionIssueService.create - previous material status gate', () => 
       expect(e.message).toContain('PCB-01');
       expect(e.message).not.toContain('DRIVER-01: 0');
     }
+  });
+});
+
+describe('ProductionIssueService.confirm - STORE-011 reserved-and-available move together on actual physical issue', () => {
+  let service: ProductionIssueService;
+  let prisma: any;
+  let stockLedger: any;
+  let materialReservation: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = {
+      productionIssue: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'pi-1', companyId: 'company-1', status: 'DRAFT', warehouseId: 'wh-1', issueNumber: 'PI-2026-0001', workOrderId: 'wo-1',
+          items: [{ itemCode: 'DRIVER-01', itemName: 'LED Driver', issuedQty: 300, unitCost: 0, batchId: null }],
+        }),
+        update: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'pi-1', ...data })),
+      },
+      stockBalance: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'bal-1', availableQty: 1300, reservedQty: 1200 }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    stockLedger = { postTransaction: jest.fn().mockResolvedValue({}) };
+    materialReservation = { recordIssueAgainstReservations: jest.fn().mockResolvedValue(0) };
+    service = new ProductionIssueService(
+      prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, stockLedger,
+      {} as any, {} as any, {} as any, materialReservation,
+    );
+  });
+
+  it('decrements StockBalance.reservedQty by the issued qty, capped at what is actually reserved', async () => {
+    await service.confirm('pi-1', user);
+    expect(prisma.stockBalance.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { reservedQty: { decrement: 300 } } }),
+    );
+  });
+
+  it('caps the reservedQty decrement so an over-issue never drives it negative', async () => {
+    prisma.stockBalance.findFirst.mockResolvedValue({ id: 'bal-1', availableQty: 1300, reservedQty: 100 });
+    await service.confirm('pi-1', user);
+    expect(prisma.stockBalance.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { reservedQty: { decrement: 100 } } }),
+    );
+  });
+
+  it('allocates the issued qty against this Work Order own active reservations', async () => {
+    await service.confirm('pi-1', user);
+    expect(materialReservation.recordIssueAgainstReservations).toHaveBeenCalledWith('wo-1', 'DRIVER-01', 300, user);
+  });
+
+  it('still posts the ISSUE ledger entry that decrements availableQty (existing behavior preserved)', async () => {
+    await service.confirm('pi-1', user);
+    expect(stockLedger.postTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ transactionType: 'ISSUE', outQty: 300 }),
+    );
   });
 });

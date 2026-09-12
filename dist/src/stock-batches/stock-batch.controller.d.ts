@@ -41,8 +41,8 @@ export declare class StockBatchController {
             receivedDate: Date;
             grnId: string | null;
             unitCost: number;
-            availableQty: number;
             reservedQty: number;
+            availableQty: number;
             originalQty: number;
         })[];
         total: number;
@@ -77,8 +77,8 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     })[]>;
     findOne(id: string, req: any): Promise<{
@@ -108,8 +108,8 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     create(dto: CreateBatchDto, req: any): Promise<{
@@ -140,8 +140,8 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     createFromGrn(grnId: string, req: any): Promise<{
@@ -175,8 +175,8 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     quarantine(id: string, req: any): Promise<{
@@ -202,8 +202,8 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
 }

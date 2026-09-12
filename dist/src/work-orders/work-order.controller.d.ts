@@ -36,6 +36,7 @@ export declare class WorkOrderController {
         itemName: string;
         warehouseId: string;
         reservedQty: number;
+        issuedQty: number;
         releasedReason: string | null;
         workOrderId: string;
     })[]>;
@@ -279,6 +280,7 @@ export declare class WorkOrderController {
         itemName: string;
         warehouseId: string;
         reservedQty: number;
+        issuedQty: number;
         releasedReason: string | null;
         workOrderId: string;
     }[]>;

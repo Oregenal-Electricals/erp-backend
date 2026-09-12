@@ -17,14 +17,16 @@ const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
 const mrp_service_1 = require("../mrp/mrp.service");
 const production_material_return_service_1 = require("../production-material-return/production-material-return.service");
 const material_issue_override_service_1 = require("../material-issue-override/material-issue-override.service");
+const material_reservation_service_1 = require("../work-orders/material-reservation.service");
 let ProductionIssueService = class ProductionIssueService {
-    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService) {
+    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
         this.mrpService = mrpService;
         this.materialReturnService = materialReturnService;
         this.overrideService = overrideService;
+        this.materialReservation = materialReservation;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionIssue.count({ where: { companyId } });
@@ -137,6 +139,16 @@ let ProductionIssueService = class ProductionIssueService {
                     data: { availableQty: { decrement: item.issuedQty }, updatedBy: user.id },
                 });
             }
+            const decrementReserved = Math.min(item.issuedQty, balance.reservedQty);
+            if (decrementReserved > 0.0001) {
+                await this.prisma.stockBalance.updateMany({
+                    where: { id: balance.id },
+                    data: { reservedQty: { decrement: decrementReserved } },
+                });
+            }
+            if (issue.workOrderId) {
+                await this.materialReservation.recordIssueAgainstReservations(issue.workOrderId, item.itemCode, item.issuedQty, user);
+            }
         }
         const updated = await this.prisma.productionIssue.update({
             where: { id }, data: { status: 'ISSUED', updatedBy: user.id }, include: this.includes(),
@@ -201,6 +213,7 @@ exports.ProductionIssueService = ProductionIssueService = __decorate([
         stock_ledger_service_1.StockLedgerService,
         mrp_service_1.MrpService,
         production_material_return_service_1.ProductionMaterialReturnService,
-        material_issue_override_service_1.MaterialIssueOverrideService])
+        material_issue_override_service_1.MaterialIssueOverrideService,
+        material_reservation_service_1.MaterialReservationService])
 ], ProductionIssueService);
 //# sourceMappingURL=production-issue.service.js.map

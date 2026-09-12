@@ -4,6 +4,7 @@ import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { MrpService } from '../mrp/mrp.service';
 import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
 import { MaterialIssueOverrideService } from '../material-issue-override/material-issue-override.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 export declare class ProductionIssueService {
     private prisma;
@@ -12,7 +13,8 @@ export declare class ProductionIssueService {
     private mrpService;
     private materialReturnService;
     private overrideService;
-    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, mrpService: MrpService, materialReturnService: ProductionMaterialReturnService, overrideService: MaterialIssueOverrideService);
+    private materialReservation;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, mrpService: MrpService, materialReturnService: ProductionMaterialReturnService, overrideService: MaterialIssueOverrideService, materialReservation: MaterialReservationService);
     private generateNumber;
     private includes;
     createFromMrp(workOrderId: string, user: any): Promise<{

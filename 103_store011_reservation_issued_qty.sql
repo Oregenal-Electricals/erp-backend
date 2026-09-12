@@ -1,0 +1,1 @@
+ALTER TABLE "material_reservations" ADD COLUMN "issuedQty" DOUBLE PRECISION NOT NULL DEFAULT 0;

@@ -1,21 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-
-const PRIORITY_RANK: Record<string, number> = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 };
 
 @Injectable()
 export class MaterialReservationService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
-  // Called when a Work Order is released. Reserves real stock for every
-  // BOM item it needs. If there isn't enough free stock, pulls from
-  // lower-priority Work Orders' existing reservations first - never
-  // touching material that's already been physically issued to the
-  // floor (tracked separately via ProductionIssueItem), and never
-  // touching a Work Order that's already COMPLETED or CANCELLED.
-  // Every reallocation is written to the audit log; there is no
-  // approval step by design.
+  // STORE-011: reserves real stock for every BOM item a Work Order
+  // needs. Reservation is purely a commitment - it moves qty from Free
+  // Available into Reserved within the SAME StockBalance.availableQty
+  // total (availableQty is never touched here); physical stock never
+  // actually leaves the warehouse at this step. That happens later, at
+  // ProductionIssueService.confirm() time. If Free Available can't
+  // cover the full requirement, this reserves whatever is free and
+  // reports the shortfall as a partial reservation - it never
+  // automatically steals from another Work Order's existing
+  // reservation. A genuine reallocation is a separate, explicit,
+  // authorized action (release, then re-reserve, with audit) - not
+  // something this method does silently on its own.
   async reserveForWorkOrder(workOrderId: string, user: any) {
     const wo = await this.prisma.workOrder.findUnique({
       where: { id: workOrderId },
@@ -27,165 +29,124 @@ export class MaterialReservationService {
 
     for (const bomItem of wo.bom.items) {
       const requiredQty = (bomItem.effectiveQty || bomItem.quantity) * wo.plannedQty;
-      let stillNeeded = requiredQty;
 
-      const stock = await this.prisma.stockBalance.findUnique({
-        where: {
-          companyId_itemCode_warehouseId: {
-            companyId: wo.companyId,
-            itemCode: bomItem.itemCode,
-            warehouseId: wo.warehouseId,
-          },
-        },
+      // Already reserved for THIS WO/item (e.g. a prior partial
+      // reservation attempt) - never reserve past what this WO's own
+      // requirement still needs.
+      const existingForThisWo = await this.prisma.materialReservation.aggregate({
+        where: { workOrderId, itemCode: bomItem.itemCode, status: 'ACTIVE' },
+        _sum: { reservedQty: true },
       });
+      const alreadyReservedForWo = existingForThisWo._sum.reservedQty || 0;
+      const stillNeeded = Math.max(0, requiredQty - alreadyReservedForWo);
 
-      const freeQty = Math.min(stock?.availableQty || 0, stillNeeded);
-      if (freeQty > 0 && stock) {
-        await this.prisma.stockBalance.update({
-          where: { id: stock.id },
-          data: { availableQty: { decrement: freeQty }, reservedQty: { increment: freeQty } },
-        });
-        await this.prisma.materialReservation.create({
-          data: {
-            companyId: wo.companyId, workOrderId, itemCode: bomItem.itemCode,
-            itemName: bomItem.itemName, warehouseId: wo.warehouseId,
-            reservedQty: freeQty, status: 'ACTIVE',
-            createdBy: user.id, updatedBy: user.id,
-          },
-        });
-        stillNeeded -= freeQty;
-      }
-
+      let reservedNow = 0;
       if (stillNeeded > 0.0001) {
-        const candidates = await this.prisma.materialReservation.findMany({
-          where: {
-            itemCode: bomItem.itemCode, warehouseId: wo.warehouseId,
-            status: 'ACTIVE', companyId: wo.companyId,
-            workOrderId: { not: workOrderId },
-          },
-          include: { workOrder: true },
-        });
-
-        const eligible = candidates
-          .filter(r =>
-            !['COMPLETED', 'CANCELLED'].includes(r.workOrder.status) &&
-            (PRIORITY_RANK[r.workOrder.priority] || 2) < (PRIORITY_RANK[wo.priority] || 2)
-          )
-          .sort((a, b) =>
-            (PRIORITY_RANK[a.workOrder.priority] || 2) - (PRIORITY_RANK[b.workOrder.priority] || 2)
-            || a.createdAt.getTime() - b.createdAt.getTime()
-          );
-
-        for (const cand of eligible) {
-          if (stillNeeded <= 0.0001) break;
-
-          const issuedAgg = await this.prisma.productionIssueItem.aggregate({
-            where: {
-              itemCode: bomItem.itemCode,
-              productionIssue: { workOrderId: cand.workOrderId, status: 'ISSUED' },
-            },
-            _sum: { issuedQty: true },
-          });
-          const alreadyIssued = issuedAgg._sum.issuedQty || 0;
-          const reallocatable = Math.max(0, cand.reservedQty - alreadyIssued);
-          if (reallocatable <= 0.0001) continue;
-
-          const takeQty = Math.min(reallocatable, stillNeeded);
-
-          if (takeQty >= cand.reservedQty - 0.0001) {
-            await this.prisma.materialReservation.update({
-              where: { id: cand.id },
-              data: { status: 'RELEASED', releasedReason: `Reallocated to higher-priority WO ${wo.woNumber}`, updatedBy: user.id },
-            });
-          } else {
-            await this.prisma.materialReservation.update({
-              where: { id: cand.id },
-              data: { reservedQty: { decrement: takeQty } },
-            });
-          }
-
+        reservedNow = await this.reserveQtyAtomically(wo.companyId, bomItem.itemCode, wo.warehouseId, stillNeeded, user.id);
+        if (reservedNow > 0) {
           await this.prisma.materialReservation.create({
             data: {
               companyId: wo.companyId, workOrderId, itemCode: bomItem.itemCode,
               itemName: bomItem.itemName, warehouseId: wo.warehouseId,
-              reservedQty: takeQty, status: 'ACTIVE',
-              releasedReason: `Reallocated from WO ${cand.workOrder.woNumber} (priority ${wo.priority} > ${cand.workOrder.priority})`,
+              reservedQty: reservedNow, status: 'ACTIVE',
               createdBy: user.id, updatedBy: user.id,
             },
           });
-
           await this.audit.log({
-            tableName: 'material_reservations', recordId: cand.id, action: 'UPDATE',
-            oldValues: { workOrder: cand.workOrder.woNumber, itemCode: bomItem.itemCode, qty: takeQty },
-            newValues: { reallocatedTo: wo.woNumber, reason: 'higher priority' },
+            tableName: 'material_reservations', recordId: workOrderId, action: 'CREATE',
+            newValues: { workOrder: wo.woNumber, itemCode: bomItem.itemCode, reservedQty: reservedNow, requiredQty },
             changedBy: user.id,
           });
-
-          stillNeeded -= takeQty;
         }
       }
 
       results.push({
         itemCode: bomItem.itemCode, itemName: bomItem.itemName,
-        requiredQty, reservedQty: requiredQty - stillNeeded, shortfallQty: Math.max(0, stillNeeded),
+        requiredQty, reservedQty: alreadyReservedForWo + reservedNow,
+        shortfallQty: Math.max(0, requiredQty - alreadyReservedForWo - reservedNow),
       });
     }
 
     return results;
   }
 
-  // Reservations were being created on release but never released or
-  // consumed on completion/cancellation - meaning reservedQty grew forever
-  // and material never actually left stock even after being used in
-  // production. This closes that gap:
-  // - consumed=true (WO completed): the material genuinely left the
-  //   warehouse into the finished product, so it comes out of reservedQty
-  //   permanently, with a ledger entry for traceability.
-  // - consumed=false (WO cancelled): nothing was actually used, so it goes
-  //   back into availableQty for other work orders to use.
+  // Atomically claims up to wantQty from Free Available (available -
+  // reserved) for one item/warehouse. Retries with a fresh read if a
+  // concurrent reservation changed reservedQty in between the read and
+  // the write here, rather than ever letting two simultaneous callers
+  // both succeed against the same stale starting balance. Returns
+  // however much it actually managed to claim (0 if nothing was free).
+  private async reserveQtyAtomically(companyId: string, itemCode: string, warehouseId: string, wantQty: number, userId: string): Promise<number> {
+    const MAX_RETRIES = 5;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const stock = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode, warehouseId } });
+      if (!stock) return 0;
+      const freeAvailable = Math.max(stock.availableQty - stock.reservedQty, 0);
+      const claimQty = Math.min(freeAvailable, wantQty);
+      if (claimQty <= 0.0001) return 0;
+
+      const claim = await this.prisma.stockBalance.updateMany({
+        where: { id: stock.id, reservedQty: stock.reservedQty },
+        data: { reservedQty: { increment: claimQty }, updatedBy: userId },
+      });
+      if (claim.count === 1) return claimQty;
+      // Someone else changed reservedQty in between - loop retries with a fresh read.
+    }
+    throw new BadRequestException(`Could not reserve stock for ${itemCode} - too many concurrent updates, please retry.`);
+  }
+
+  // STORE-011 sections 28-31: releases whatever portion of each active
+  // reservation was never actually issued. The issued portion already
+  // physically left the warehouse - ProductionIssueService.confirm()
+  // already decremented both availableQty and reservedQty for it - and
+  // is never touched again here. A release never restores physical
+  // stock; it only removes the unissued reservedQty commitment.
   async releaseReservations(workOrderId: string, user: any, consumed: boolean) {
+    const reason = consumed ? 'Unused reservation released on Work Order completion' : 'Work Order cancelled';
     const reservations = await this.prisma.materialReservation.findMany({
       where: { workOrderId, status: 'ACTIVE' },
     });
     for (const r of reservations) {
-      const balance = await this.prisma.stockBalance.findFirst({
-        where: { companyId: r.companyId, itemCode: r.itemCode, warehouseId: r.warehouseId },
-      });
-      if (balance) {
-        if (consumed) {
-          const consumedValue = r.reservedQty * balance.unitCost;
-          await this.prisma.stockBalance.update({
-            where: { id: balance.id },
-            data: { reservedQty: { decrement: r.reservedQty }, totalValue: { decrement: consumedValue } },
-          });
-          await this.prisma.stockLedger.create({
-            data: {
-              companyId: r.companyId, itemCode: r.itemCode, itemName: r.itemName, warehouseId: r.warehouseId,
-              transactionType: 'PRODUCTION_CONSUMPTION', referenceType: 'WORK_ORDER', referenceId: workOrderId,
-              inQty: 0, outQty: r.reservedQty,
-              balanceQty: balance.availableQty + balance.reservedQty - r.reservedQty,
-              unitCost: balance.unitCost, totalCost: consumedValue,
-              remarks: 'Consumed on Work Order completion',
-              createdBy: user.id, updatedBy: user.id,
-            },
-          });
-        } else {
-          await this.prisma.stockBalance.update({
-            where: { id: balance.id },
-            data: { reservedQty: { decrement: r.reservedQty }, availableQty: { increment: r.reservedQty } },
-          });
-        }
+      const unissued = Math.max(0, r.reservedQty - r.issuedQty);
+      if (unissued > 0.0001) {
+        await this.prisma.stockBalance.updateMany({
+          where: { companyId: r.companyId, itemCode: r.itemCode, warehouseId: r.warehouseId },
+          data: { reservedQty: { decrement: unissued } },
+        });
       }
       await this.prisma.materialReservation.update({
         where: { id: r.id },
-        data: {
-          status: 'RELEASED',
-          releasedReason: consumed ? 'Consumed on WO completion' : 'WO cancelled',
-          updatedBy: user.id,
-        },
+        data: { status: 'RELEASED', releasedReason: reason, updatedBy: user.id },
       });
     }
     return { released: reservations.length };
+  }
+
+  // Called by ProductionIssueService.confirm() at the moment material
+  // actually, physically leaves the warehouse for this Work Order/item.
+  // Allocates the issued qty across this WO's active reservations for
+  // that item (oldest first), keeping each reservation's own issuedQty
+  // accurate for later release calculations. Returns whatever couldn't
+  // be matched to an existing reservation (e.g. an issue with no prior
+  // reservation at all).
+  async recordIssueAgainstReservations(workOrderId: string, itemCode: string, issuedQty: number, user: any): Promise<number> {
+    let remaining = issuedQty;
+    const reservations = await this.prisma.materialReservation.findMany({
+      where: { workOrderId, itemCode, status: 'ACTIVE' },
+      orderBy: { createdAt: 'asc' },
+    });
+    for (const r of reservations) {
+      if (remaining <= 0.0001) break;
+      const unissued = Math.max(0, r.reservedQty - r.issuedQty);
+      if (unissued <= 0.0001) continue;
+      const take = Math.min(unissued, remaining);
+      await this.prisma.materialReservation.update({
+        where: { id: r.id },
+        data: { issuedQty: { increment: take }, updatedBy: user.id },
+      });
+      remaining -= take;
+    }
+    return remaining;
   }
 
   async findForWorkOrder(workOrderId: string) {

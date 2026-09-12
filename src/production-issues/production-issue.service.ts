@@ -5,6 +5,7 @@ import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { MrpService } from '../mrp/mrp.service';
 import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
 import { MaterialIssueOverrideService } from '../material-issue-override/material-issue-override.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class ProductionIssueService {
     private mrpService: MrpService,
     private materialReturnService: ProductionMaterialReturnService,
     private overrideService: MaterialIssueOverrideService,
+    private materialReservation: MaterialReservationService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -150,6 +152,24 @@ export class ProductionIssueService {
           where: { id: item.batchId },
           data: { availableQty: { decrement: item.issuedQty }, updatedBy: user.id },
         });
+      }
+
+      // STORE-011: this is the actual physical departure - the material
+      // was reserved (StockBalance.reservedQty went up, availableQty
+      // never moved) and now it's genuinely leaving, so both
+      // availableQty (already decremented above via postTransaction)
+      // AND reservedQty come down together. Capped at whatever is
+      // actually reserved, so an override/unreserved issue never drives
+      // reservedQty negative.
+      const decrementReserved = Math.min(item.issuedQty, balance.reservedQty);
+      if (decrementReserved > 0.0001) {
+        await this.prisma.stockBalance.updateMany({
+          where: { id: balance.id },
+          data: { reservedQty: { decrement: decrementReserved } },
+        });
+      }
+      if (issue.workOrderId) {
+        await this.materialReservation.recordIssueAgainstReservations(issue.workOrderId, item.itemCode, item.issuedQty, user);
       }
     }
 

@@ -34,8 +34,8 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     createFromGrn(grnId: string, user: any): Promise<{
@@ -71,8 +71,8 @@ export declare class StockBatchService {
             receivedDate: Date;
             grnId: string | null;
             unitCost: number;
-            availableQty: number;
             reservedQty: number;
+            availableQty: number;
             originalQty: number;
         })[];
         total: number;
@@ -107,8 +107,8 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     findByItem(itemCode: string, user: any): Promise<({
@@ -138,8 +138,8 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     })[]>;
     update(id: string, dto: UpdateBatchDto, user: any): Promise<{
@@ -169,8 +169,8 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     quarantine(id: string, user: any): Promise<{
@@ -196,8 +196,8 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        availableQty: number;
         reservedQty: number;
+        availableQty: number;
         originalQty: number;
     }>;
     getStats(user: any): Promise<{

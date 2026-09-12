@@ -4284,6 +4284,12 @@ model MaterialReservation {
   warehouseId    String
   warehouse      Warehouse @relation(fields: [warehouseId], references: [id])
   reservedQty    Float
+  // STORE-011: how much of this reservation's reservedQty has actually
+  // been physically issued so far (ProductionIssueService.confirm()
+  // increments this). reservedQty - issuedQty is what's still a pure
+  // commitment, not yet physically gone - that's the only part a WO
+  // cancellation or completion should ever release back.
+  issuedQty      Float     @default(0)
   status         String    @default("ACTIVE")
   releasedReason String?
   isActive       Boolean   @default(true)

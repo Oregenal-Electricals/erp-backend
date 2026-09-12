@@ -92,8 +92,8 @@ export declare class InventoryDashboardService {
             warehouseId: string;
             totalValue: number;
             unitCost: number;
-            availableQty: number;
             reservedQty: number;
+            availableQty: number;
             inQcQty: number;
             putAwayPendingQty: number;
             lastUpdated: Date;

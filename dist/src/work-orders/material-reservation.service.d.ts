@@ -5,9 +5,11 @@ export declare class MaterialReservationService {
     private audit;
     constructor(prisma: PrismaService, audit: AuditService);
     reserveForWorkOrder(workOrderId: string, user: any): Promise<any[]>;
+    private reserveQtyAtomically;
     releaseReservations(workOrderId: string, user: any, consumed: boolean): Promise<{
         released: number;
     }>;
+    recordIssueAgainstReservations(workOrderId: string, itemCode: string, issuedQty: number, user: any): Promise<number>;
     findForWorkOrder(workOrderId: string): Promise<{
         id: string;
         companyId: string;
@@ -22,6 +24,7 @@ export declare class MaterialReservationService {
         itemName: string;
         warehouseId: string;
         reservedQty: number;
+        issuedQty: number;
         releasedReason: string | null;
         workOrderId: string;
     }[]>;
@@ -45,6 +48,7 @@ export declare class MaterialReservationService {
         itemName: string;
         warehouseId: string;
         reservedQty: number;
+        issuedQty: number;
         releasedReason: string | null;
         workOrderId: string;
     })[]>;
