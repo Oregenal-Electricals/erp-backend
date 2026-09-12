@@ -143,6 +143,11 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], GrnItemVerifyDto.prototype, "receivedQty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GrnItemVerifyDto.prototype, "batchNumber", void 0);
 class UpdateGrnDto {
 }
 exports.UpdateGrnDto = UpdateGrnDto;

@@ -28,6 +28,7 @@ export declare class CreateGrnDto {
 export declare class GrnItemVerifyDto {
     id: string;
     receivedQty: number;
+    batchNumber?: string;
 }
 export declare class UpdateGrnDto {
     vehicleNumber?: string;

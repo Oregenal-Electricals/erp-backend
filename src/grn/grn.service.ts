@@ -163,7 +163,10 @@ export class GrnService {
       await this.prisma.$transaction(
         (dto.items || [])
           .filter(i => itemMap.has(i.id))
-          .map(i => this.prisma.grnItem.update({ where: { id: i.id }, data: { receivedQty: i.receivedQty, updatedBy: user.id } })),
+          .map(i => this.prisma.grnItem.update({
+            where: { id: i.id },
+            data: { receivedQty: i.receivedQty, ...(i.batchNumber !== undefined ? { batchNumber: i.batchNumber } : {}), updatedBy: user.id },
+          })),
       );
       const updatedItems = await this.prisma.grnItem.findMany({ where: { id: { in: Array.from(itemMap.keys()) } } });
       for (const item of updatedItems) {

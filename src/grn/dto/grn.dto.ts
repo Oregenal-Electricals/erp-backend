@@ -38,6 +38,10 @@ export class CreateGrnDto {
 export class GrnItemVerifyDto {
   @IsString() id: string;
   @IsNumber() @Min(0) receivedQty: number;
+  // STORE-009 section 30-31, 40-41: supplier/internal batch or lot
+  // number for this line - optional, propagates through to IqcItem and
+  // eventually StockBatch if provided.
+  @IsOptional() @IsString() batchNumber?: string;
 }
 
 export class UpdateGrnDto {

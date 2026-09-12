@@ -157,7 +157,10 @@ let GrnService = class GrnService {
             const itemMap = new Map((dto.items || []).map(i => [i.id, i.receivedQty]));
             await this.prisma.$transaction((dto.items || [])
                 .filter(i => itemMap.has(i.id))
-                .map(i => this.prisma.grnItem.update({ where: { id: i.id }, data: { receivedQty: i.receivedQty, updatedBy: user.id } })));
+                .map(i => this.prisma.grnItem.update({
+                where: { id: i.id },
+                data: Object.assign(Object.assign({ receivedQty: i.receivedQty }, (i.batchNumber !== undefined ? { batchNumber: i.batchNumber } : {})), { updatedBy: user.id }),
+            })));
             const updatedItems = await this.prisma.grnItem.findMany({ where: { id: { in: Array.from(itemMap.keys()) } } });
             for (const item of updatedItems) {
                 await this.shortageService.upsertFromGrnLine(item, grn, user);
