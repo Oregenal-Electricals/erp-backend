@@ -235,6 +235,22 @@ let StockPutawayService = class StockPutawayService {
         });
         return { total, inProgress, completed, totalQtyPutaway: totalQty._sum.qty || 0 };
     }
+    async findByItem(itemCode, user) {
+        const where = { itemCode, putaway: { status: 'COMPLETED' } };
+        if (user.role !== 'SUPER_ADMIN')
+            where.companyId = user.companyId;
+        const items = await this.prisma.stockPutawayItem.findMany({
+            where,
+            include: {
+                bin: { select: { code: true, rack: { select: { code: true } } } },
+                stockBatch: { select: { batchNumber: true, expiryDate: true } },
+                putaway: { select: { warehouse: { select: { name: true } } } },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        const totalQty = items.reduce((s, i) => s + i.qty, 0);
+        return { itemCode, totalQty, locations: items };
+    }
 };
 exports.StockPutawayService = StockPutawayService;
 exports.StockPutawayService = StockPutawayService = __decorate([

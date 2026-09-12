@@ -272,4 +272,25 @@ export class StockPutawayService {
     });
     return { total, inProgress, completed, totalQtyPutaway: totalQty._sum.qty || 0 };
   }
+
+  // STORE-009 section 39: "search LED Driver, see total available and
+  // exactly which bins it's in" - a few clicks, not a hunt through
+  // multiple screens. StockPutawayItem is the actual record of "which
+  // bin has which qty" (StockBatch only tracks warehouse-level), so this
+  // groups completed put-away lines by bin for that material.
+  async findByItem(itemCode: string, user: any) {
+    const where: any = { itemCode, putaway: { status: 'COMPLETED' } };
+    if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
+    const items = await this.prisma.stockPutawayItem.findMany({
+      where,
+      include: {
+        bin: { select: { code: true, rack: { select: { code: true } } } },
+        stockBatch: { select: { batchNumber: true, expiryDate: true } },
+        putaway: { select: { warehouse: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    const totalQty = items.reduce((s, i) => s + i.qty, 0);
+    return { itemCode, totalQty, locations: items };
+  }
 }

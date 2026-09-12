@@ -42,6 +42,45 @@ export declare class StockPutawayController {
         totalPages: number;
     }>;
     getPendingIqcs(req: any): Promise<any[]>;
+    findByItem(itemCode: string, req: any): Promise<{
+        itemCode: string;
+        totalQty: number;
+        locations: ({
+            bin: {
+                code: string;
+                rack: {
+                    code: string;
+                };
+            };
+            stockBatch: {
+                batchNumber: string;
+                expiryDate: Date;
+            };
+            putaway: {
+                warehouse: {
+                    name: string;
+                };
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            qty: number;
+            unitCost: number;
+            iqcItemId: string | null;
+            binId: string;
+            stockBatchId: string | null;
+            putawayId: string;
+        })[];
+    }>;
     findOne(id: string, req: any): Promise<{
         items: ({
             bin: {

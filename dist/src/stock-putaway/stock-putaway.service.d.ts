@@ -256,4 +256,43 @@ export declare class StockPutawayService {
         completed: number;
         totalQtyPutaway: number;
     }>;
+    findByItem(itemCode: string, user: any): Promise<{
+        itemCode: string;
+        totalQty: number;
+        locations: ({
+            bin: {
+                code: string;
+                rack: {
+                    code: string;
+                };
+            };
+            stockBatch: {
+                batchNumber: string;
+                expiryDate: Date;
+            };
+            putaway: {
+                warehouse: {
+                    name: string;
+                };
+            };
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            qty: number;
+            unitCost: number;
+            iqcItemId: string | null;
+            binId: string;
+            stockBatchId: string | null;
+            putawayId: string;
+        })[];
+    }>;
 }

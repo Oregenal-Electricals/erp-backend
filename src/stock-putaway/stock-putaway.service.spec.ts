@@ -240,3 +240,31 @@ describe('StockPutawayService.create - STORE-009 material-location restriction',
     ).resolves.toBeDefined();
   });
 });
+
+describe('StockPutawayService.findByItem - STORE-009 Material View', () => {
+  let service: StockPutawayService;
+  let prisma: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+
+  beforeEach(() => {
+    prisma = { stockPutawayItem: { findMany: jest.fn() } };
+    service = new StockPutawayService(prisma, {} as any, {} as any);
+  });
+
+  it('sums qty across all bin locations for the item', async () => {
+    prisma.stockPutawayItem.findMany.mockResolvedValue([
+      { itemCode: 'DRIVER-01', qty: 600, bin: { code: 'B01' }, stockBatch: { batchNumber: 'B1' } },
+      { itemCode: 'DRIVER-01', qty: 400, bin: { code: 'B02' }, stockBatch: { batchNumber: 'B1' } },
+    ]);
+    const r = await service.findByItem('DRIVER-01', user);
+    expect(r.totalQty).toBe(1000);
+    expect(r.locations).toHaveLength(2);
+  });
+
+  it('only counts completed put-away batches', async () => {
+    prisma.stockPutawayItem.findMany.mockResolvedValue([]);
+    await service.findByItem('DRIVER-01', user);
+    const call = prisma.stockPutawayItem.findMany.mock.calls[0][0];
+    expect(call.where.putaway.status).toBe('COMPLETED');
+  });
+});

@@ -27,6 +27,7 @@ let StockPutawayController = class StockPutawayController {
     getStats(req) { return this.spService.getStats(req.user); }
     findAll(req, query) { return this.spService.findAll(req.user, query); }
     getPendingIqcs(req) { return this.spService.getPendingIqcs(req.user); }
+    findByItem(itemCode, req) { return this.spService.findByItem(itemCode, req.user); }
     findOne(id, req) { return this.spService.findOne(id, req.user); }
     create(dto, req) { return this.spService.create(dto, req.user); }
     updateItems(id, dto, req) { return this.spService.updateItems(id, dto, req.user); }
@@ -58,6 +59,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], StockPutawayController.prototype, "getPendingIqcs", null);
+__decorate([
+    (0, common_1.Get)('by-item/:itemCode'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    __param(0, (0, common_1.Param)('itemCode')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], StockPutawayController.prototype, "findByItem", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
