@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
+const stock_location_balance_service_1 = require("../stock-location-balance/stock-location-balance.service");
 let ProductionMaterialReturnService = class ProductionMaterialReturnService {
-    constructor(prisma, audit, stockLedger) {
+    constructor(prisma, audit, stockLedger, locationBalance) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
+        this.locationBalance = locationBalance;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionMaterialReturn.count({ where: { companyId } });
@@ -69,6 +71,13 @@ let ProductionMaterialReturnService = class ProductionMaterialReturnService {
                 inQty: dto.qty, remarks: `Returned from WO ${wo.woNumber}: ${dto.reason || 'EXCESS_UNUSED'}`,
                 userId: user.id,
             });
+            if (dto.destinationBinId) {
+                await this.locationBalance.adjustQty({
+                    companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
+                    warehouseId: dto.warehouseId, binId: dto.destinationBinId, batchId,
+                    status: 'AVAILABLE', deltaQty: dto.qty, userId: user.id,
+                });
+            }
         }
         else {
             const holdNumber = `HOLD-RET-${new Date().getFullYear()}-${String(record.id).slice(0, 6)}`;
@@ -86,6 +95,13 @@ let ProductionMaterialReturnService = class ProductionMaterialReturnService {
                     },
                 },
             });
+            if (dto.destinationBinId) {
+                await this.locationBalance.adjustQty({
+                    companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
+                    warehouseId: dto.warehouseId, binId: dto.destinationBinId, batchId,
+                    status: 'HOLD', deltaQty: dto.qty, userId: user.id,
+                });
+            }
         }
         await this.audit.log({
             tableName: 'production_material_returns', recordId: record.id, action: 'CREATE',
@@ -146,6 +162,7 @@ exports.ProductionMaterialReturnService = ProductionMaterialReturnService = __de
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        stock_ledger_service_1.StockLedgerService])
+        stock_ledger_service_1.StockLedgerService,
+        stock_location_balance_service_1.StockLocationBalanceService])
 ], ProductionMaterialReturnService);
 //# sourceMappingURL=production-material-return.service.js.map

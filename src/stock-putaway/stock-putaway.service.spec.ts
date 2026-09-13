@@ -1,5 +1,8 @@
 import { StockPutawayService } from './stock-putaway.service';
 
+const locationBalanceMock = { adjustQty: jest.fn().mockResolvedValue(0) };
+
+
 describe('StockPutawayService.getPendingIqcs - STORE-008 remaining-qty visibility', () => {
   let service: StockPutawayService;
   let prisma: any;
@@ -10,7 +13,7 @@ describe('StockPutawayService.getPendingIqcs - STORE-008 remaining-qty visibilit
       iqcInspection: { findMany: jest.fn() },
       rawMaterial: { findMany: jest.fn().mockResolvedValue([]) },
     };
-    service = new StockPutawayService(prisma, {} as any, {} as any);
+    service = new StockPutawayService(prisma, {} as any, {} as any, locationBalanceMock as any);
   });
 
   it('shows an IQC with zero put-away yet as fully remaining', async () => {
@@ -85,7 +88,7 @@ describe('StockPutawayService.complete - STORE-008 over-put-away and partial put
       },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new StockPutawayService(prisma, audit, { postTransaction: jest.fn().mockResolvedValue({}) } as any);
+    service = new StockPutawayService(prisma, audit, { postTransaction: jest.fn().mockResolvedValue({}) } as any, locationBalanceMock as any);
   });
 
   it('a first partial put-away of 500 (of 800 accepted) claims exactly 500 and completes normally', async () => {
@@ -168,7 +171,7 @@ describe('StockPutawayService.create - STORE-009 auto-links the correct StockBat
       rawMaterial: { findMany: jest.fn().mockResolvedValue([]) },
       stockBatch: { findFirst: jest.fn() },
     };
-    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any);
+    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any, locationBalanceMock as any);
   });
 
   it('links stockBatchId when the IqcItem has a batchNumber that matches an existing StockBatch', async () => {
@@ -209,7 +212,7 @@ describe('StockPutawayService.create - STORE-009 material-location restriction',
       stockBatch: { findFirst: jest.fn() },
       rawMaterial: { findMany: jest.fn() },
     };
-    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any);
+    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, {} as any, locationBalanceMock as any);
   });
 
   it('blocks put-away to a different warehouse than the material is restricted to, without an override reason', async () => {
@@ -248,7 +251,7 @@ describe('StockPutawayService.findByItem - STORE-009 Material View', () => {
 
   beforeEach(() => {
     prisma = { stockPutawayItem: { findMany: jest.fn() } };
-    service = new StockPutawayService(prisma, {} as any, {} as any);
+    service = new StockPutawayService(prisma, {} as any, {} as any, locationBalanceMock as any);
   });
 
   it('sums qty across all bin locations for the item', async () => {
@@ -294,7 +297,7 @@ describe('StockPutawayService.complete - STORE-010 moves qty from putAwayPending
       },
     };
     stockLedger = { postTransaction: jest.fn().mockResolvedValue({}) };
-    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, stockLedger);
+    service = new StockPutawayService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, stockLedger, locationBalanceMock as any);
   });
 
   it('debits putAwayPending and credits available for the same qty, in that order', async () => {

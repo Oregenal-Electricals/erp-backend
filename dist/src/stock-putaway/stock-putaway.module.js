@@ -13,12 +13,13 @@ const stock_putaway_service_1 = require("./stock-putaway.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
+const stock_location_balance_module_1 = require("../stock-location-balance/stock-location-balance.module");
 let StockPutawayModule = class StockPutawayModule {
 };
 exports.StockPutawayModule = StockPutawayModule;
 exports.StockPutawayModule = StockPutawayModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, stock_location_balance_module_1.StockLocationBalanceModule],
         controllers: [stock_putaway_controller_1.StockPutawayController],
         providers: [stock_putaway_service_1.StockPutawayService],
         exports: [stock_putaway_service_1.StockPutawayService],

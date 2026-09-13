@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { StockLocationBalanceService } from '../stock-location-balance/stock-location-balance.service';
 import { CreatePutawayDto, UpdatePutawayItemsDto } from './dto/stock-putaway.dto';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class StockPutawayService {
     private prisma: PrismaService,
     private audit: AuditService,
     private stockLedger: StockLedgerService,
+    private locationBalance: StockLocationBalanceService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -249,6 +251,15 @@ export class StockPutawayService {
       await this.prisma.warehouseBin.update({
         where: { id: item.binId },
         data: { currentQty: newQty, itemCode: item.itemCode, status: newStatus, updatedBy: user.id },
+      });
+
+      // STORE-015: this is the bin-level running balance a transfer will
+      // later debit from - the only place any code actually knows "how
+      // much of this batch is physically in this bin right now".
+      await this.locationBalance.adjustQty({
+        companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+        warehouseId: putaway.warehouseId, binId: item.binId, batchId: item.stockBatchId,
+        status: 'AVAILABLE', deltaQty: item.qty, userId: user.id,
       });
     }
 

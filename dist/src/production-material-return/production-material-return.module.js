@@ -13,12 +13,13 @@ const production_material_return_service_1 = require("./production-material-retu
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const stock_ledger_module_1 = require("../stock-ledger/stock-ledger.module");
+const stock_location_balance_module_1 = require("../stock-location-balance/stock-location-balance.module");
 let ProductionMaterialReturnModule = class ProductionMaterialReturnModule {
 };
 exports.ProductionMaterialReturnModule = ProductionMaterialReturnModule;
 exports.ProductionMaterialReturnModule = ProductionMaterialReturnModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, stock_ledger_module_1.StockLedgerModule, stock_location_balance_module_1.StockLocationBalanceModule],
         controllers: [production_material_return_controller_1.ProductionMaterialReturnController],
         providers: [production_material_return_service_1.ProductionMaterialReturnService],
         exports: [production_material_return_service_1.ProductionMaterialReturnService],

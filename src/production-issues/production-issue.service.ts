@@ -7,6 +7,7 @@ import { ProductionMaterialReturnService } from '../production-material-return/p
 import { MaterialIssueOverrideService } from '../material-issue-override/material-issue-override.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { AdditionalMaterialRequestService } from '../additional-material-request/additional-material-request.service';
+import { StockLocationBalanceService } from '../stock-location-balance/stock-location-balance.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class ProductionIssueService {
     private overrideService: MaterialIssueOverrideService,
     private materialReservation: MaterialReservationService,
     private additionalMaterialRequest: AdditionalMaterialRequestService,
+    private locationBalance: StockLocationBalanceService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -208,6 +210,12 @@ export class ProductionIssueService {
           data: { availableQty: { decrement: item.issuedQty }, updatedBy: user.id },
         });
       }
+
+      // STORE-015: keep the bin-level location view current too -
+      // best-effort, never blocks the issue itself if the location
+      // view can't fully cover this qty (StockBalance/StockBatch above
+      // remain the authoritative gate on whether this issue was valid).
+      await this.locationBalance.consumeAcrossBins(user.companyId, item.itemCode, item.batchId, item.issuedQty, user.id);
 
       // STORE-011: this is the actual physical departure - the material
       // was reserved (StockBalance.reservedQty went up, availableQty

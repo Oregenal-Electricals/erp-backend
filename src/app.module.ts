@@ -84,6 +84,7 @@ import { ProductTargetModule } from './product-standard-productivity/product-tar
 import { ProductionMaterialReturnModule } from './production-material-return/production-material-return.module';
 import { MaterialIssueOverrideModule } from './material-issue-override/material-issue-override.module';
 import { AdditionalMaterialRequestModule } from './additional-material-request/additional-material-request.module';
+import { StockLocationBalanceModule } from './stock-location-balance/stock-location-balance.module';
 import { ProductSellingPriceModule } from './product-selling-price/product-selling-price.module';
 import { GrnDiscrepancyModule } from './grn-discrepancy/grn-discrepancy.module';
 import { NcrModule } from './ncr/ncr.module';
@@ -243,6 +244,7 @@ import configuration from './config/configuration';
     ProductionMaterialReturnModule,
     MaterialIssueOverrideModule,
     AdditionalMaterialRequestModule,
+    StockLocationBalanceModule,
     ProductSellingPriceModule,
     GrnDiscrepancyModule,
     NcrModule,

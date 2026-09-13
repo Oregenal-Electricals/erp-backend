@@ -65,5 +65,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], CreateMaterialReturnDto.prototype, "destinationBinId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateMaterialReturnDto.prototype, "remarks", void 0);
 //# sourceMappingURL=material-return.dto.js.map

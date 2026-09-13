@@ -8,5 +8,6 @@ export declare class CreateMaterialReturnDto {
     reason?: string;
     condition?: string;
     originalIssueItemId?: string;
+    destinationBinId?: string;
     remarks?: string;
 }

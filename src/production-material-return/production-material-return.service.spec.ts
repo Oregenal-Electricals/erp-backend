@@ -6,6 +6,7 @@ describe('ProductionMaterialReturnService', () => {
   let prisma: any;
   let audit: any;
   let stockLedger: any;
+  let locationBalance: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const wo = { id: 'wo-1', companyId: 'company-1', woNumber: 'WO-001', warehouseId: 'wh-1' };
@@ -24,7 +25,8 @@ describe('ProductionMaterialReturnService', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     stockLedger = { postTransaction: jest.fn().mockResolvedValue({}) };
-    service = new ProductionMaterialReturnService(prisma, audit, stockLedger);
+    locationBalance = { adjustQty: jest.fn().mockResolvedValue(0) };
+    service = new ProductionMaterialReturnService(prisma, audit, stockLedger, locationBalance);
   });
 
   describe('create - returning material to Store', () => {
@@ -90,6 +92,22 @@ describe('ProductionMaterialReturnService', () => {
       prisma.productionIssueItem.findFirst = jest.fn().mockResolvedValue({ id: 'pii-1', itemCode: 'PCB-01', batchId: 'batch-1' });
       await expect(service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, originalIssueItemId: 'pii-1' } as any, user))
         .rejects.toThrow(/not DRIVER-01/);
+    });
+
+    it('updates the bin-level location balance when a destination bin is confirmed (GOOD)', async () => {
+      await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, destinationBinId: 'bin-1' } as any, user);
+      expect(locationBalance.adjustQty).toHaveBeenCalledWith(expect.objectContaining({ binId: 'bin-1', status: 'AVAILABLE', deltaQty: 20 }));
+    });
+
+    it('updates the bin-level location balance as HOLD, not AVAILABLE, for a DAMAGED return', async () => {
+      prisma.holdStock = { create: jest.fn().mockResolvedValue({ id: 'hold-1' }) };
+      await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, condition: 'DAMAGED', destinationBinId: 'bin-1' } as any, user);
+      expect(locationBalance.adjustQty).toHaveBeenCalledWith(expect.objectContaining({ binId: 'bin-1', status: 'HOLD', deltaQty: 20 }));
+    });
+
+    it('does not touch the bin-level location balance when no destination bin is given', async () => {
+      await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20 } as any, user);
+      expect(locationBalance.adjustQty).not.toHaveBeenCalled();
     });
   });
 

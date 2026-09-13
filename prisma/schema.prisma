@@ -373,6 +373,7 @@ model Company {
   productionMaterialReturns ProductionMaterialReturn[]
   materialIssueOverrides MaterialIssueOverride[]
   additionalMaterialRequests AdditionalMaterialRequest[]
+  stockLocationBalances StockLocationBalance[]
   productSellingPrices ProductSellingPrice[]
   grnItemDiscrepancies GrnItemDiscrepancy[]
 }
@@ -2106,6 +2107,7 @@ model Warehouse {
   @@index([companyId])
   @@index([plantId])
   materialReturns ProductionMaterialReturn[]
+  stockLocationBalances StockLocationBalance[]
 }
 
 model Zone {
@@ -3985,6 +3987,7 @@ model WarehouseBin {
 
   putawayItems StockPutawayItem[]
   preferredByMaterials RawMaterial[]
+  stockLocationBalances StockLocationBalance[]
   @@unique([companyId, warehouseId, code])
   @@map("warehouse_bins")
   discrepancies GrnItemDiscrepancy[]
@@ -4084,6 +4087,7 @@ model StockBatch {
 
   issueItems StockIssueItem[]
   transferItems StockTransferItem[]
+  stockLocationBalances StockLocationBalance[] @relation("StockLocationBalanceBatch")
   productionIssueItems ProductionIssueItem[] @relation("ProductionIssueBatch")
   productionMaterialReturns ProductionMaterialReturn[] @relation("ProductionMaterialReturnBatch")
   putawayItems StockPutawayItem[]
@@ -4192,6 +4196,40 @@ model StockTransferItem {
   updatedBy    String?
 
   @@map("stock_transfer_items")
+}
+
+// STORE-015: the bin-level running balance the rest of the system has
+// never had. StockBalance is item+warehouse only; StockPutawayItem
+// records a one-time put-away event, not a maintained balance. This
+// table is the new source of truth for "how much of this item/batch,
+// in what status, sits in this exact bin right now" - built once here,
+// then kept current by STORE-009 put-away, STORE-012 issue, and
+// STORE-014 return, so a transfer always debits/credits real numbers
+// rather than a second, parallel, eventually-inconsistent ledger.
+model StockLocationBalance {
+  id          String        @id @default(uuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id])
+  itemCode    String
+  itemName    String
+  warehouseId String
+  warehouse   Warehouse     @relation(fields: [warehouseId], references: [id])
+  binId       String
+  bin         WarehouseBin  @relation(fields: [binId], references: [id])
+  batchId     String?
+  batch       StockBatch?   @relation("StockLocationBalanceBatch", fields: [batchId], references: [id])
+  status      String        @default("AVAILABLE") // AVAILABLE, HOLD, REJECTED, QC_PENDING
+  qty         Float         @default(0)
+  isActive    Boolean       @default(true)
+  isTestData  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([companyId, itemCode, binId, batchId, status])
+  @@index([companyId, warehouseId, itemCode])
+  @@map("stock_location_balances")
 }
 
 // MODULE 48 — STOCK ADJUSTMENT

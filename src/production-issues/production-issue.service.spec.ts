@@ -1,6 +1,9 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductionIssueService } from './production-issue.service';
 
+const locationBalanceMock = { consumeAcrossBins: jest.fn().mockResolvedValue(0) };
+
+
 describe('ProductionIssueService.create - previous material status gate', () => {
   let service: ProductionIssueService;
   let prisma: any;
@@ -39,7 +42,7 @@ describe('ProductionIssueService.create - previous material status gate', () => 
       findActiveApprovedRequest: jest.fn().mockResolvedValue(null),
       consume: jest.fn().mockResolvedValue(0),
     };
-    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation as any, additionalMaterialRequest as any);
+    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation as any, additionalMaterialRequest as any, locationBalanceMock as any);
   });
 
   it('allows the new issue when previous material status is CLEAR', async () => {
@@ -179,7 +182,7 @@ describe('ProductionIssueService.confirm - STORE-011 reserved-and-available move
     materialReservation = { recordIssueAgainstReservations: jest.fn().mockResolvedValue(0) };
     service = new ProductionIssueService(
       prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, stockLedger,
-      {} as any, {} as any, {} as any, materialReservation, {} as any,
+      {} as any, {} as any, {} as any, materialReservation, {} as any, locationBalanceMock as any,
     );
   });
 
@@ -241,7 +244,7 @@ describe('ProductionIssueService.create - STORE-013 original vs additional deman
     service = new ProductionIssueService(
       prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, { postTransaction: jest.fn() } as any,
       {} as any, materialReturnService, { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn() } as any,
-      { recordIssueAgainstReservations: jest.fn() } as any, additionalMaterialRequest,
+      { recordIssueAgainstReservations: jest.fn() } as any, additionalMaterialRequest, locationBalanceMock as any,
     );
   });
 

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { StockLocationBalanceService } from '../stock-location-balance/stock-location-balance.service';
 import { CreateMaterialReturnDto } from './dto/material-return.dto';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class ProductionMaterialReturnService {
     private prisma: PrismaService,
     private audit: AuditService,
     private stockLedger: StockLedgerService,
+    private locationBalance: StockLocationBalanceService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -77,6 +79,13 @@ export class ProductionMaterialReturnService {
         inQty: dto.qty, remarks: `Returned from WO ${wo.woNumber}: ${dto.reason || 'EXCESS_UNUSED'}`,
         userId: user.id,
       });
+      if (dto.destinationBinId) {
+        await this.locationBalance.adjustQty({
+          companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
+          warehouseId: dto.warehouseId, binId: dto.destinationBinId, batchId,
+          status: 'AVAILABLE', deltaQty: dto.qty, userId: user.id,
+        });
+      }
     } else {
       // STORE-014 sections 11, 28, 38-39: uncertain/damaged condition
       // never silently becomes Available - routes to Hold (same
@@ -97,6 +106,13 @@ export class ProductionMaterialReturnService {
           },
         },
       });
+      if (dto.destinationBinId) {
+        await this.locationBalance.adjustQty({
+          companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
+          warehouseId: dto.warehouseId, binId: dto.destinationBinId, batchId,
+          status: 'HOLD', deltaQty: dto.qty, userId: user.id,
+        });
+      }
     }
 
     await this.audit.log({

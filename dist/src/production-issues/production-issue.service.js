@@ -19,8 +19,9 @@ const production_material_return_service_1 = require("../production-material-ret
 const material_issue_override_service_1 = require("../material-issue-override/material-issue-override.service");
 const material_reservation_service_1 = require("../work-orders/material-reservation.service");
 const additional_material_request_service_1 = require("../additional-material-request/additional-material-request.service");
+const stock_location_balance_service_1 = require("../stock-location-balance/stock-location-balance.service");
 let ProductionIssueService = class ProductionIssueService {
-    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation, additionalMaterialRequest) {
+    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation, additionalMaterialRequest, locationBalance) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
@@ -29,6 +30,7 @@ let ProductionIssueService = class ProductionIssueService {
         this.overrideService = overrideService;
         this.materialReservation = materialReservation;
         this.additionalMaterialRequest = additionalMaterialRequest;
+        this.locationBalance = locationBalance;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionIssue.count({ where: { companyId } });
@@ -175,6 +177,7 @@ let ProductionIssueService = class ProductionIssueService {
                     data: { availableQty: { decrement: item.issuedQty }, updatedBy: user.id },
                 });
             }
+            await this.locationBalance.consumeAcrossBins(user.companyId, item.itemCode, item.batchId, item.issuedQty, user.id);
             const decrementReserved = Math.min(item.issuedQty, balance.reservedQty);
             if (decrementReserved > 0.0001) {
                 await this.prisma.stockBalance.updateMany({
@@ -251,6 +254,7 @@ exports.ProductionIssueService = ProductionIssueService = __decorate([
         production_material_return_service_1.ProductionMaterialReturnService,
         material_issue_override_service_1.MaterialIssueOverrideService,
         material_reservation_service_1.MaterialReservationService,
-        additional_material_request_service_1.AdditionalMaterialRequestService])
+        additional_material_request_service_1.AdditionalMaterialRequestService,
+        stock_location_balance_service_1.StockLocationBalanceService])
 ], ProductionIssueService);
 //# sourceMappingURL=production-issue.service.js.map

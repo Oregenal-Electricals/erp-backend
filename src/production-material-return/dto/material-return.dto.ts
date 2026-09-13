@@ -27,5 +27,10 @@ export class CreateMaterialReturnDto {
   // preferred - an untraceable return still validates qty against the
   // item's total outstanding custody across all its issues.
   @IsOptional() @IsString() originalIssueItemId?: string;
+  // STORE-015: which bin the good material is actually placed into on
+  // receipt. Optional - if omitted, the bin-level location view simply
+  // isn't updated for this return (StockBalance/HoldStock, the
+  // authoritative records, are updated regardless).
+  @IsOptional() @IsString() destinationBinId?: string;
   @IsOptional() @IsString() remarks?: string;
 }

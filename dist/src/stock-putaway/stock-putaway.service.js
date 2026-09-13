@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const stock_ledger_service_1 = require("../stock-ledger/stock-ledger.service");
+const stock_location_balance_service_1 = require("../stock-location-balance/stock-location-balance.service");
 let StockPutawayService = class StockPutawayService {
-    constructor(prisma, audit, stockLedger) {
+    constructor(prisma, audit, stockLedger, locationBalance) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
+        this.locationBalance = locationBalance;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.stockPutaway.count({ where: { companyId } });
@@ -214,6 +216,11 @@ let StockPutawayService = class StockPutawayService {
                 where: { id: item.binId },
                 data: { currentQty: newQty, itemCode: item.itemCode, status: newStatus, updatedBy: user.id },
             });
+            await this.locationBalance.adjustQty({
+                companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName,
+                warehouseId: putaway.warehouseId, binId: item.binId, batchId: item.stockBatchId,
+                status: 'AVAILABLE', deltaQty: item.qty, userId: user.id,
+            });
         }
         for (const item of putaway.items) {
             if (!item.iqcItemId || item.qty <= 0)
@@ -275,6 +282,7 @@ exports.StockPutawayService = StockPutawayService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        stock_ledger_service_1.StockLedgerService])
+        stock_ledger_service_1.StockLedgerService,
+        stock_location_balance_service_1.StockLocationBalanceService])
 ], StockPutawayService);
 //# sourceMappingURL=stock-putaway.service.js.map

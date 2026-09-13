@@ -1,12 +1,14 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { StockLocationBalanceService } from '../stock-location-balance/stock-location-balance.service';
 import { CreateMaterialReturnDto } from './dto/material-return.dto';
 export declare class ProductionMaterialReturnService {
     private prisma;
     private audit;
     private stockLedger;
-    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
+    private locationBalance;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, locationBalance: StockLocationBalanceService);
     private generateNumber;
     create(dto: CreateMaterialReturnDto, user: any): Promise<{
         id: string;
