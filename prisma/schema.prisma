@@ -372,6 +372,7 @@ model Company {
   storeShortages StoreShortage[]
   productionMaterialReturns ProductionMaterialReturn[]
   materialIssueOverrides MaterialIssueOverride[]
+  additionalMaterialRequests AdditionalMaterialRequest[]
   productSellingPrices ProductSellingPrice[]
   grnItemDiscrepancies GrnItemDiscrepancy[]
 }
@@ -583,6 +584,8 @@ model User {
   materialReturnsReturned ProductionMaterialReturn[] @relation("ProductionMaterialReturnedBy")
   materialIssueOverridesRequested MaterialIssueOverride[] @relation("MaterialIssueOverrideRequestedBy")
   materialIssueOverridesApproved MaterialIssueOverride[] @relation("MaterialIssueOverrideApprovedBy")
+  additionalMaterialRequestsRequested AdditionalMaterialRequest[] @relation("AdditionalMaterialRequestedBy")
+  additionalMaterialRequestsApproved AdditionalMaterialRequest[] @relation("AdditionalMaterialApprovedBy")
   grnDiscrepanciesRaised GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyRaisedBy")
   grnDiscrepanciesResolved GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyResolvedBy")
   grnReversals GrnHeader[] @relation("GrnHeaderReversedBy")
@@ -1746,6 +1749,48 @@ model MaterialIssueOverride {
   updatedBy             String?
 
   @@map("material_issue_overrides")
+  @@index([companyId, workOrderId])
+  @@index([companyId, status])
+}
+
+// STORE-013: separate from MaterialIssueOverride by design (spec
+// section 15) - that model answers "previous material is unresolved,
+// allow this issue anyway"; this one answers "increase the approved
+// material demand for this WO/material beyond the original BOM
+// requirement." Mirrors MaterialIssueOverride's shape (requested/
+// approved/used qty, same partial-approval and cumulative-use
+// tracking) since the same qty-tracking pattern applies, but is never
+// combined with it - both may be required on the same issue.
+model AdditionalMaterialRequest {
+  id                    String    @id @default(uuid())
+  companyId             String
+  company               Company   @relation(fields: [companyId], references: [id])
+  workOrderId           String
+  workOrder             WorkOrder @relation(fields: [workOrderId], references: [id])
+  approvalRequestId     String    // loosely linked, no FK - matches the generic engine's own documentId convention
+  itemCode              String
+  itemName              String
+  requestedQty          Float
+  approvedQty           Float?
+  usedQty               Float     @default(0)
+  reasonCategory        String    // PROCESS_REJECTION, MATERIAL_DAMAGE, PRODUCTION_LOSS, REWORK, BOM_CHANGE, SHORT_ISSUE_CORRECTION, TRIAL_TESTING, APPROVED_QTY_INCREASE, OTHER
+  reason                String
+  requestedById         String
+  requestedBy           User      @relation("AdditionalMaterialRequestedBy", fields: [requestedById], references: [id])
+  requestedAt           DateTime  @default(now())
+  status                String    @default("PENDING") // PENDING, APPROVED, REJECTED, REVOKED
+  approvedById          String?
+  approvedBy            User?     @relation("AdditionalMaterialApprovedBy", fields: [approvedById], references: [id])
+  approvedAt            DateTime?
+  approverComments      String?
+  isActive              Boolean   @default(true)
+  isTestData            Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  @@map("additional_material_requests")
   @@index([companyId, workOrderId])
   @@index([companyId, status])
 }
@@ -4276,6 +4321,7 @@ model WorkOrder {
   @@map("work_orders")
   materialReturns ProductionMaterialReturn[]
   materialIssueOverrides MaterialIssueOverride[]
+  additionalMaterialRequests AdditionalMaterialRequest[]
 }
 
 model MaterialReservation {

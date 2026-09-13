@@ -31,7 +31,15 @@ describe('ProductionIssueService.create - previous material status gate', () => 
     materialReturnService = { getPreviousMaterialStatus: jest.fn().mockResolvedValue({ overallStatus: 'CLEAR', items: [] }) };
     overrideService = { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn().mockResolvedValue(500) };
     const materialReservation = { recordIssueAgainstReservations: jest.fn().mockResolvedValue(0) };
-    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation as any);
+    // Default: original remaining is effectively unlimited, so the
+    // STORE-013 additional-material gate never triggers unless a test
+    // explicitly overrides getOriginalRemaining to a smaller value.
+    const additionalMaterialRequest = {
+      getOriginalRemaining: jest.fn().mockResolvedValue({ originalRequirement: 100000, totalIssued: 0, originalRemaining: 100000 }),
+      findActiveApprovedRequest: jest.fn().mockResolvedValue(null),
+      consume: jest.fn().mockResolvedValue(0),
+    };
+    service = new ProductionIssueService(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation as any, additionalMaterialRequest as any);
   });
 
   it('allows the new issue when previous material status is CLEAR', async () => {
@@ -171,7 +179,7 @@ describe('ProductionIssueService.confirm - STORE-011 reserved-and-available move
     materialReservation = { recordIssueAgainstReservations: jest.fn().mockResolvedValue(0) };
     service = new ProductionIssueService(
       prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, stockLedger,
-      {} as any, {} as any, {} as any, materialReservation,
+      {} as any, {} as any, {} as any, materialReservation, {} as any,
     );
   });
 
@@ -200,5 +208,85 @@ describe('ProductionIssueService.confirm - STORE-011 reserved-and-available move
     expect(stockLedger.postTransaction).toHaveBeenCalledWith(
       expect.objectContaining({ transactionType: 'ISSUE', outQty: 300 }),
     );
+  });
+});
+
+describe('ProductionIssueService.create - STORE-013 original vs additional demand', () => {
+  let service: ProductionIssueService;
+  let prisma: any;
+  let materialReturnService: any;
+  let additionalMaterialRequest: any;
+  const user = { id: 'user-1', companyId: 'company-1' };
+  const wo = { id: 'wo-1', companyId: 'company-1', status: 'RELEASED' };
+
+  function makeDto(issuedQty: number) {
+    return { workOrderId: 'wo-1', warehouseId: 'wh-1', items: [{ itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', requiredQty: issuedQty, issuedQty, unitCost: 0 }], issueMethod: 'FIFO' };
+  }
+
+  beforeEach(() => {
+    prisma = {
+      workOrder: { findFirst: jest.fn().mockResolvedValue(wo), update: jest.fn().mockResolvedValue(wo) },
+      productionIssue: {
+        count: jest.fn().mockResolvedValue(0),
+        create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'pi-1', ...data, items: data.items?.create || [] })),
+      },
+      materialReservation: { aggregate: jest.fn().mockResolvedValue({ _sum: { reservedQty: 0, issuedQty: 0 } }) },
+    };
+    materialReturnService = { getPreviousMaterialStatus: jest.fn().mockResolvedValue({ overallStatus: 'CLEAR', items: [] }) };
+    additionalMaterialRequest = {
+      getOriginalRemaining: jest.fn().mockResolvedValue({ originalRequirement: 1000, totalIssued: 600, originalRemaining: 400 }),
+      findActiveApprovedRequest: jest.fn().mockResolvedValue(null),
+      consume: jest.fn().mockResolvedValue(0),
+    };
+    service = new ProductionIssueService(
+      prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, { postTransaction: jest.fn() } as any,
+      {} as any, materialReturnService, { findActiveApprovedOverride: jest.fn().mockResolvedValue(null), consume: jest.fn() } as any,
+      { recordIssueAgainstReservations: jest.fn() } as any, additionalMaterialRequest,
+    );
+  });
+
+  it('allows a normal partial issue fully within the original remaining requirement, no additional approval needed', async () => {
+    const r = await service.create(makeDto(300) as any, user);
+    expect(r.id).toBe('pi-1');
+    expect(additionalMaterialRequest.findActiveApprovedRequest).not.toHaveBeenCalled();
+  });
+
+  it('allows the exact remaining original qty (400) with no additional approval', async () => {
+    const r = await service.create(makeDto(400) as any, user);
+    expect(r.id).toBe('pi-1');
+  });
+
+  it('blocks any qty over the original remaining requirement without an approved additional request', async () => {
+    await expect(service.create(makeDto(500) as any, user)).rejects.toThrow(/Additional material approval required for 100/);
+  });
+
+  it('allows the over-requirement portion when a sufficient approved additional request exists', async () => {
+    additionalMaterialRequest.findActiveApprovedRequest.mockResolvedValue({ id: 'amr-1', approvedQty: 150, usedQty: 0 });
+    additionalMaterialRequest.consume.mockResolvedValue(100);
+    const r = await service.create(makeDto(500) as any, user);
+    expect(r.id).toBe('pi-1');
+    expect(additionalMaterialRequest.consume).toHaveBeenCalledWith('amr-1', 'pi-1', 100, user);
+  });
+
+  it('blocks when the approved additional request does not have enough remaining capacity for the extra portion', async () => {
+    additionalMaterialRequest.findActiveApprovedRequest.mockResolvedValue({ id: 'amr-1', approvedQty: 150, usedQty: 100 });
+    // Remaining approved capacity is 50, but extra portion needed is 100.
+    await expect(service.create(makeDto(500) as any, user)).rejects.toThrow(/Additional material approval required/);
+  });
+
+  it('correctly computes the extra portion in a mixed issue (partial original + partial additional)', async () => {
+    additionalMaterialRequest.getOriginalRemaining.mockResolvedValue({ originalRequirement: 1000, totalIssued: 950, originalRemaining: 50 });
+    additionalMaterialRequest.findActiveApprovedRequest.mockResolvedValue({ id: 'amr-1', approvedQty: 100, usedQty: 0 });
+    additionalMaterialRequest.consume.mockResolvedValue(70);
+    const r = await service.create(makeDto(120) as any, user);
+    expect(r.id).toBe('pi-1');
+    // 120 requested, 50 within original -> 70 is the extra portion consumed from the additional approval.
+    expect(additionalMaterialRequest.consume).toHaveBeenCalledWith('amr-1', 'pi-1', 70, user);
+  });
+
+  it('fails loud if the additional approval capacity changed concurrently and could not fully cover the extra portion', async () => {
+    additionalMaterialRequest.findActiveApprovedRequest.mockResolvedValue({ id: 'amr-1', approvedQty: 150, usedQty: 0 });
+    additionalMaterialRequest.consume.mockResolvedValue(50); // less than the 100 needed
+    await expect(service.create(makeDto(500) as any, user)).rejects.toThrow(/capacity changed concurrently/);
   });
 });

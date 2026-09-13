@@ -6,6 +6,7 @@ import { MrpService } from '../mrp/mrp.service';
 import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
 import { MaterialIssueOverrideService } from '../material-issue-override/material-issue-override.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
+import { AdditionalMaterialRequestService } from '../additional-material-request/additional-material-request.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class ProductionIssueService {
     private materialReturnService: ProductionMaterialReturnService,
     private overrideService: MaterialIssueOverrideService,
     private materialReservation: MaterialReservationService,
+    private additionalMaterialRequest: AdditionalMaterialRequestService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -72,8 +74,24 @@ export class ProductionIssueService {
     // block, override is a separate, explicit path built on top of it.
     const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
     const overridesToConsume: { id: string; qty: number }[] = [];
+    const additionalRequestsToConsume: { id: string; qty: number }[] = [];
 
     for (const item of dto.items) {
+      // STORE-013 sections 2-4, 9: only the portion of this issue that
+      // exceeds the WO's original BOM requirement (net of everything
+      // already issued) counts as "additional" - a plain remaining-qty
+      // issue never needs this approval, no matter how large.
+      const { originalRemaining } = await this.additionalMaterialRequest.getOriginalRemaining(dto.workOrderId, item.itemCode, user);
+      const extraPortion = Math.max(0, item.issuedQty - originalRemaining);
+      if (extraPortion > 0.0001) {
+        const additionalRequest = await this.additionalMaterialRequest.findActiveApprovedRequest(dto.workOrderId, item.itemCode, user);
+        const additionalRemaining = additionalRequest ? (additionalRequest.approvedQty || 0) - additionalRequest.usedQty : 0;
+        if (!additionalRequest || additionalRemaining < extraPortion - 0.0001) {
+          throw new BadRequestException(`Additional material approval required for ${extraPortion} ${item.uom} of ${item.itemCode} - only ${originalRemaining} remains of the original approved requirement${additionalRequest ? ` (only ${additionalRemaining} remaining of the current additional approval)` : ''}.`);
+        }
+        additionalRequestsToConsume.push({ id: additionalRequest.id, qty: extraPortion });
+      }
+
       const itemStatus = status.items.find(i => i.itemCode === item.itemCode);
       if (itemStatus && itemStatus.status === 'PENDING') {
         // An approved, still-valid (within its 5-hour window) override
@@ -140,6 +158,13 @@ export class ProductionIssueService {
         // issue could have drawn the same capacity in between - fail loud
         // rather than silently under-covering an exception.
         throw new BadRequestException('Override approval capacity changed concurrently - please retry this issue.');
+      }
+    }
+
+    for (const use of additionalRequestsToConsume) {
+      const claimed = await this.additionalMaterialRequest.consume(use.id, issue.id, use.qty, user);
+      if (claimed < use.qty - 0.0001) {
+        throw new BadRequestException('Additional material approval capacity changed concurrently - please retry this issue.');
       }
     }
 

@@ -18,8 +18,9 @@ const mrp_service_1 = require("../mrp/mrp.service");
 const production_material_return_service_1 = require("../production-material-return/production-material-return.service");
 const material_issue_override_service_1 = require("../material-issue-override/material-issue-override.service");
 const material_reservation_service_1 = require("../work-orders/material-reservation.service");
+const additional_material_request_service_1 = require("../additional-material-request/additional-material-request.service");
 let ProductionIssueService = class ProductionIssueService {
-    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation) {
+    constructor(prisma, audit, stockLedger, mrpService, materialReturnService, overrideService, materialReservation, additionalMaterialRequest) {
         this.prisma = prisma;
         this.audit = audit;
         this.stockLedger = stockLedger;
@@ -27,6 +28,7 @@ let ProductionIssueService = class ProductionIssueService {
         this.materialReturnService = materialReturnService;
         this.overrideService = overrideService;
         this.materialReservation = materialReservation;
+        this.additionalMaterialRequest = additionalMaterialRequest;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.productionIssue.count({ where: { companyId } });
@@ -72,7 +74,18 @@ let ProductionIssueService = class ProductionIssueService {
         }
         const status = await this.materialReturnService.getPreviousMaterialStatus(dto.workOrderId, user);
         const overridesToConsume = [];
+        const additionalRequestsToConsume = [];
         for (const item of dto.items) {
+            const { originalRemaining } = await this.additionalMaterialRequest.getOriginalRemaining(dto.workOrderId, item.itemCode, user);
+            const extraPortion = Math.max(0, item.issuedQty - originalRemaining);
+            if (extraPortion > 0.0001) {
+                const additionalRequest = await this.additionalMaterialRequest.findActiveApprovedRequest(dto.workOrderId, item.itemCode, user);
+                const additionalRemaining = additionalRequest ? (additionalRequest.approvedQty || 0) - additionalRequest.usedQty : 0;
+                if (!additionalRequest || additionalRemaining < extraPortion - 0.0001) {
+                    throw new common_1.BadRequestException(`Additional material approval required for ${extraPortion} ${item.uom} of ${item.itemCode} - only ${originalRemaining} remains of the original approved requirement${additionalRequest ? ` (only ${additionalRemaining} remaining of the current additional approval)` : ''}.`);
+                }
+                additionalRequestsToConsume.push({ id: additionalRequest.id, qty: extraPortion });
+            }
             const itemStatus = status.items.find(i => i.itemCode === item.itemCode);
             if (itemStatus && itemStatus.status === 'PENDING') {
                 const override = await this.overrideService.findActiveApprovedOverride(dto.workOrderId, item.itemCode, user);
@@ -119,6 +132,12 @@ let ProductionIssueService = class ProductionIssueService {
             const claimed = await this.overrideService.consume(use.id, issue.id, use.qty, user);
             if (claimed < use.qty - 0.0001) {
                 throw new common_1.BadRequestException('Override approval capacity changed concurrently - please retry this issue.');
+            }
+        }
+        for (const use of additionalRequestsToConsume) {
+            const claimed = await this.additionalMaterialRequest.consume(use.id, issue.id, use.qty, user);
+            if (claimed < use.qty - 0.0001) {
+                throw new common_1.BadRequestException('Additional material approval capacity changed concurrently - please retry this issue.');
             }
         }
         return issue;
@@ -231,6 +250,7 @@ exports.ProductionIssueService = ProductionIssueService = __decorate([
         mrp_service_1.MrpService,
         production_material_return_service_1.ProductionMaterialReturnService,
         material_issue_override_service_1.MaterialIssueOverrideService,
-        material_reservation_service_1.MaterialReservationService])
+        material_reservation_service_1.MaterialReservationService,
+        additional_material_request_service_1.AdditionalMaterialRequestService])
 ], ProductionIssueService);
 //# sourceMappingURL=production-issue.service.js.map

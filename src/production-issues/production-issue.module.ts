@@ -8,9 +8,10 @@ import { MrpModule } from '../mrp/mrp.module';
 import { ProductionMaterialReturnModule } from '../production-material-return/production-material-return.module';
 import { MaterialIssueOverrideModule } from '../material-issue-override/material-issue-override.module';
 import { WorkOrderModule } from '../work-orders/work-order.module';
+import { AdditionalMaterialRequestModule } from '../additional-material-request/additional-material-request.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule, StockLedgerModule, MrpModule, ProductionMaterialReturnModule, MaterialIssueOverrideModule, WorkOrderModule],
+  imports: [PrismaModule, CommonModule, StockLedgerModule, MrpModule, ProductionMaterialReturnModule, MaterialIssueOverrideModule, WorkOrderModule, AdditionalMaterialRequestModule],
   controllers: [ProductionIssueController],
   providers: [ProductionIssueService],
   exports: [ProductionIssueService],

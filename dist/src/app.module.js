@@ -95,6 +95,7 @@ const production_reports_module_1 = require("./production-reports/production-rep
 const product_target_module_1 = require("./product-standard-productivity/product-target.module");
 const production_material_return_module_1 = require("./production-material-return/production-material-return.module");
 const material_issue_override_module_1 = require("./material-issue-override/material-issue-override.module");
+const additional_material_request_module_1 = require("./additional-material-request/additional-material-request.module");
 const product_selling_price_module_1 = require("./product-selling-price/product-selling-price.module");
 const grn_discrepancy_module_1 = require("./grn-discrepancy/grn-discrepancy.module");
 const ncr_module_1 = require("./ncr/ncr.module");
@@ -259,6 +260,7 @@ exports.AppModule = AppModule = __decorate([
             product_target_module_1.ProductTargetModule,
             production_material_return_module_1.ProductionMaterialReturnModule,
             material_issue_override_module_1.MaterialIssueOverrideModule,
+            additional_material_request_module_1.AdditionalMaterialRequestModule,
             product_selling_price_module_1.ProductSellingPriceModule,
             grn_discrepancy_module_1.GrnDiscrepancyModule,
             ncr_module_1.NcrModule,

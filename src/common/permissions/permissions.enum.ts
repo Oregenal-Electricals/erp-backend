@@ -123,6 +123,13 @@ export enum Permission {
 
   // Material Issue Override (Phase C - WO Material Issue reconciliation exception)
   MATERIAL_ISSUE_OVERRIDE_APPROVE = 'MATERIAL_ISSUE_OVERRIDE_APPROVE',
+  // STORE-013: separate from MATERIAL_ISSUE_OVERRIDE_APPROVE - that
+  // approval is "previous material unresolved, allow this issue
+  // anyway"; this one is "increase the approved material demand for
+  // this WO/material." Different question, different authority,
+  // deliberately never combined per the spec's own instruction.
+  ADDITIONAL_MATERIAL_REQUEST = 'ADDITIONAL_MATERIAL_REQUEST',
+  ADDITIONAL_MATERIAL_APPROVE = 'ADDITIONAL_MATERIAL_APPROVE',
 
   PRODUCT_SELLING_PRICE_VIEW = 'PRODUCT_SELLING_PRICE_VIEW',
   PRODUCT_SELLING_PRICE_MANAGE = 'PRODUCT_SELLING_PRICE_MANAGE',

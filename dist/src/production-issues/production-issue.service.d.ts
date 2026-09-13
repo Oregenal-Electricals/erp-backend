@@ -5,6 +5,7 @@ import { MrpService } from '../mrp/mrp.service';
 import { ProductionMaterialReturnService } from '../production-material-return/production-material-return.service';
 import { MaterialIssueOverrideService } from '../material-issue-override/material-issue-override.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
+import { AdditionalMaterialRequestService } from '../additional-material-request/additional-material-request.service';
 import { CreateProductionIssueDto } from './dto/production-issue.dto';
 export declare class ProductionIssueService {
     private prisma;
@@ -14,7 +15,8 @@ export declare class ProductionIssueService {
     private materialReturnService;
     private overrideService;
     private materialReservation;
-    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, mrpService: MrpService, materialReturnService: ProductionMaterialReturnService, overrideService: MaterialIssueOverrideService, materialReservation: MaterialReservationService);
+    private additionalMaterialRequest;
+    constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService, mrpService: MrpService, materialReturnService: ProductionMaterialReturnService, overrideService: MaterialIssueOverrideService, materialReservation: MaterialReservationService, additionalMaterialRequest: AdditionalMaterialRequestService);
     private generateNumber;
     private includes;
     createFromMrp(workOrderId: string, user: any): Promise<{
