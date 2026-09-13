@@ -2,9 +2,11 @@ export declare class AdjustmentItemDto {
     itemCode: string;
     itemName: string;
     uom: string;
-    systemQty: number;
     physicalQty: number;
     unitCost: number;
+    status?: string;
+    binId?: string;
+    batchId?: string;
 }
 export declare class CreateAdjustmentDto {
     warehouseId: string;

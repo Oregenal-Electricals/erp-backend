@@ -31,20 +31,41 @@ let StockAdjustmentService = class StockAdjustmentService {
             items: { where: { isActive: true } },
         };
     }
+    async getSystemQty(itemCode, status, user) {
+        const summary = await this.stockLedger.getMaterialSummary(itemCode, user);
+        switch (status) {
+            case 'HOLD': return summary.hold;
+            case 'REJECTED': return summary.rejected;
+            case 'QC_PENDING': return summary.qcPending;
+            case 'AVAILABLE':
+            default: return summary.available;
+        }
+    }
     async create(dto, user) {
         if (!dto.items || dto.items.length === 0)
             throw new common_1.BadRequestException('Adjustment must have at least one item');
         const adjustmentNumber = await this.generateNumber(user.companyId);
-        const items = dto.items.map(item => {
-            const adjustmentQty = item.physicalQty - item.systemQty;
+        const seen = new Set();
+        for (const item of dto.items) {
+            const key = `${item.itemCode}|${item.status || 'AVAILABLE'}|${item.batchId || ''}|${item.binId || ''}`;
+            if (seen.has(key)) {
+                throw new common_1.BadRequestException(`${item.itemCode} (${item.status || 'AVAILABLE'}) appears more than once in this count - each material/status/batch/location combination may only be counted once per submission.`);
+            }
+            seen.add(key);
+        }
+        const items = [];
+        for (const item of dto.items) {
+            const status = item.status || 'AVAILABLE';
+            const systemQty = await this.getSystemQty(item.itemCode, status, user);
+            const adjustmentQty = item.physicalQty - systemQty;
             if (dto.adjustmentType === 'INCREASE' && adjustmentQty < 0) {
                 throw new common_1.BadRequestException(`${item.itemCode}: physicalQty is less than systemQty - this is a decrease, not an increase. Use adjustmentType DECREASE or RECOUNT.`);
             }
             if (dto.adjustmentType === 'DECREASE' && adjustmentQty > 0) {
                 throw new common_1.BadRequestException(`${item.itemCode}: physicalQty is more than systemQty - this is an increase, not a decrease. Use adjustmentType INCREASE or RECOUNT.`);
             }
-            return Object.assign(Object.assign({}, item), { adjustmentQty });
-        });
+            items.push(Object.assign(Object.assign({}, item), { status, systemQty, adjustmentQty }));
+        }
         const adjustment = await this.prisma.stockAdjustment.create({
             data: {
                 adjustmentNumber, warehouseId: dto.warehouseId,
@@ -71,12 +92,20 @@ let StockAdjustmentService = class StockAdjustmentService {
             const diff = item.adjustmentQty;
             if (diff === 0)
                 continue;
+            const status = item.status || 'AVAILABLE';
+            if (status !== 'AVAILABLE') {
+                throw new common_1.BadRequestException(`${item.itemCode} has a ${status} variance (${diff > 0 ? '+' : ''}${diff}) - this is recorded for review, but posting a ${status} adjustment must go through the existing ${status === 'HOLD' ? 'Hold reinspection' : status === 'QC_PENDING' ? 'IQC' : 'Rejected-stock'} workflow, not a generic stock adjustment.`);
+            }
+            const balance = await this.prisma.stockBalance.findFirst({
+                where: { companyId: user.companyId, warehouseId: adj.warehouseId, itemCode: item.itemCode },
+            });
             if (diff < 0) {
-                const balance = await this.prisma.stockBalance.findFirst({
-                    where: { companyId: user.companyId, warehouseId: adj.warehouseId, itemCode: item.itemCode },
-                });
                 if (!balance || balance.availableQty < Math.abs(diff)) {
                     throw new common_1.BadRequestException(`Insufficient stock for ${item.itemCode}. Available: ${(balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0}`);
+                }
+                const newAvailable = balance.availableQty - Math.abs(diff);
+                if (balance.reservedQty > newAvailable + 0.0001) {
+                    throw new common_1.BadRequestException(`Posting this decrease would leave Reserved (${balance.reservedQty}) greater than the new Available (${newAvailable}) for ${item.itemCode} - resolve the reservation shortfall (release or reallocate the affected reservations) before posting this adjustment.`);
                 }
             }
             await this.stockLedger.postTransaction({
@@ -98,6 +127,63 @@ let StockAdjustmentService = class StockAdjustmentService {
         });
         await this.audit.log({ tableName: 'stock_adjustments', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
+    }
+    async reverse(id, user, reason) {
+        const adj = await this.prisma.stockAdjustment.findFirst({
+            where: { id, companyId: user.companyId },
+            include: { items: true },
+        });
+        if (!adj)
+            throw new common_1.NotFoundException('Adjustment not found');
+        if (adj.status !== 'APPROVED')
+            throw new common_1.BadRequestException('Only an APPROVED adjustment can be reversed');
+        for (const item of adj.items) {
+            const diff = item.adjustmentQty;
+            if (diff === 0)
+                continue;
+            if (diff > 0) {
+                const balance = await this.prisma.stockBalance.findFirst({
+                    where: { companyId: user.companyId, warehouseId: adj.warehouseId, itemCode: item.itemCode },
+                });
+                if (!balance || balance.availableQty < diff) {
+                    throw new common_1.BadRequestException(`Cannot reverse ${item.itemCode}: only ${(balance === null || balance === void 0 ? void 0 : balance.availableQty) || 0} remains available, but the original adjustment added ${diff} - some of it has already been used downstream. A full reversal would create invalid stock.`);
+                }
+            }
+            await this.stockLedger.postTransaction({
+                companyId: user.companyId,
+                itemCode: item.itemCode, itemName: item.itemName,
+                warehouseId: adj.warehouseId,
+                transactionType: 'ADJUSTMENT',
+                referenceType: 'STOCK_ADJUSTMENT_REVERSAL',
+                referenceId: adj.id, referenceNumber: `${adj.adjustmentNumber}-REV`,
+                inQty: diff < 0 ? Math.abs(diff) : 0,
+                outQty: diff > 0 ? diff : 0,
+                unitCost: item.unitCost,
+                remarks: `Reversal of ${adj.adjustmentNumber}: ${reason}`,
+                userId: user.id,
+            });
+        }
+        const reversal = await this.prisma.stockAdjustment.create({
+            data: {
+                adjustmentNumber: `${adj.adjustmentNumber}-REV`,
+                warehouseId: adj.warehouseId, adjustmentType: adj.adjustmentType === 'INCREASE' ? 'DECREASE' : (adj.adjustmentType === 'DECREASE' ? 'INCREASE' : 'RECOUNT'),
+                reason: adj.reason, remarks: `Reversal of ${adj.adjustmentNumber}: ${reason}`,
+                status: 'APPROVED', reversedAdjustmentId: adj.id,
+                companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+                items: {
+                    create: adj.items.map(item => ({
+                        companyId: user.companyId, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
+                        status: item.status, binId: item.binId, batchId: item.batchId,
+                        systemQty: item.physicalQty, physicalQty: item.systemQty, adjustmentQty: -item.adjustmentQty,
+                        unitCost: item.unitCost, createdBy: user.id, updatedBy: user.id,
+                    })),
+                },
+            },
+            include: this.includes(),
+        });
+        await this.prisma.stockAdjustment.update({ where: { id }, data: { status: 'REVERSED', updatedBy: user.id } });
+        await this.audit.log({ tableName: 'stock_adjustments', recordId: reversal.id, action: 'CREATE', newValues: reversal, changedBy: user.id });
+        return reversal;
     }
     async cancel(id, user) {
         const adj = await this.prisma.stockAdjustment.findFirst({ where: { id, companyId: user.companyId } });

@@ -4243,7 +4243,11 @@ model StockAdjustment {
   warehouse        Warehouse             @relation(fields: [warehouseId], references: [id])
   adjustmentType   String                @default("DECREASE") // INCREASE, DECREASE, RECOUNT
   reason           String                @default("OTHER") // DAMAGE, EXPIRY, THEFT, FOUND, OPENING, AUDIT, OTHER
-  status           String                @default("DRAFT") // DRAFT, APPROVED, CANCELLED
+  status           String                @default("DRAFT") // DRAFT, APPROVED, CANCELLED, REVERSED
+  // STORE-016 sections 69-70: a posted adjustment is never deleted -
+  // a wrongly-posted one gets a controlled, validated reversal instead,
+  // linked back here so the original stays in the audit trail.
+  reversedAdjustmentId String?
   remarks          String?
   isActive         Boolean               @default(true)
   isTestData       Boolean               @default(false)
@@ -4266,6 +4270,16 @@ model StockAdjustmentItem {
   itemCode        String
   itemName        String
   uom             String
+  // STORE-016 section 19-20, 46-47: which controlled status this count
+  // line belongs to - a Hold/Rejected variance must stay Hold/Rejected,
+  // never silently become Available just because a total matched.
+  status          String          @default("AVAILABLE") // AVAILABLE, HOLD, REJECTED, QC_PENDING
+  // STORE-016 sections 14-17: optional bin/batch scoping so a count
+  // can distinguish a true quantity variance from a location or batch
+  // mismatch (same total, wrong bin/batch) rather than treating every
+  // count line as a plain warehouse-level quantity difference.
+  binId           String?
+  batchId         String?
   systemQty       Float           @default(0)
   physicalQty     Float           @default(0)
   adjustmentQty   Float           @default(0)

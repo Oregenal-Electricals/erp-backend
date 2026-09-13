@@ -9,6 +9,7 @@ export declare class StockAdjustmentService {
     constructor(prisma: PrismaService, audit: AuditService, stockLedger: StockLedgerService);
     private generateNumber;
     private includes;
+    private getSystemQty;
     create(dto: CreateAdjustmentDto, user: any): Promise<{
         items: {
             id: string;
@@ -19,12 +20,15 @@ export declare class StockAdjustmentService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            status: string;
             itemCode: string;
             itemName: string;
             uom: string;
             unitCost: number;
-            systemQty: number;
+            batchId: string | null;
+            binId: string | null;
             physicalQty: number;
+            systemQty: number;
             adjustmentQty: number;
             adjustmentId: string;
         }[];
@@ -47,6 +51,7 @@ export declare class StockAdjustmentService {
         warehouseId: string;
         adjustmentType: string;
         adjustmentNumber: string;
+        reversedAdjustmentId: string | null;
     }>;
     approve(id: string, user: any): Promise<{
         items: {
@@ -58,12 +63,15 @@ export declare class StockAdjustmentService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            status: string;
             itemCode: string;
             itemName: string;
             uom: string;
             unitCost: number;
-            systemQty: number;
+            batchId: string | null;
+            binId: string | null;
             physicalQty: number;
+            systemQty: number;
             adjustmentQty: number;
             adjustmentId: string;
         }[];
@@ -86,6 +94,50 @@ export declare class StockAdjustmentService {
         warehouseId: string;
         adjustmentType: string;
         adjustmentNumber: string;
+        reversedAdjustmentId: string | null;
+    }>;
+    reverse(id: string, user: any, reason: string): Promise<{
+        items: {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            itemCode: string;
+            itemName: string;
+            uom: string;
+            unitCost: number;
+            batchId: string | null;
+            binId: string | null;
+            physicalQty: number;
+            systemQty: number;
+            adjustmentQty: number;
+            adjustmentId: string;
+        }[];
+        warehouse: {
+            name: string;
+            code: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string;
+        remarks: string | null;
+        warehouseId: string;
+        adjustmentType: string;
+        adjustmentNumber: string;
+        reversedAdjustmentId: string | null;
     }>;
     cancel(id: string, user: any): Promise<{
         items: {
@@ -97,12 +149,15 @@ export declare class StockAdjustmentService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            status: string;
             itemCode: string;
             itemName: string;
             uom: string;
             unitCost: number;
-            systemQty: number;
+            batchId: string | null;
+            binId: string | null;
             physicalQty: number;
+            systemQty: number;
             adjustmentQty: number;
             adjustmentId: string;
         }[];
@@ -125,6 +180,7 @@ export declare class StockAdjustmentService {
         warehouseId: string;
         adjustmentType: string;
         adjustmentNumber: string;
+        reversedAdjustmentId: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -149,6 +205,7 @@ export declare class StockAdjustmentService {
             warehouseId: string;
             adjustmentType: string;
             adjustmentNumber: string;
+            reversedAdjustmentId: string | null;
         })[];
         total: number;
         page: number;
@@ -165,12 +222,15 @@ export declare class StockAdjustmentService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
+            status: string;
             itemCode: string;
             itemName: string;
             uom: string;
             unitCost: number;
-            systemQty: number;
+            batchId: string | null;
+            binId: string | null;
             physicalQty: number;
+            systemQty: number;
             adjustmentQty: number;
             adjustmentId: string;
         }[];
@@ -193,6 +253,7 @@ export declare class StockAdjustmentService {
         warehouseId: string;
         adjustmentType: string;
         adjustmentNumber: string;
+        reversedAdjustmentId: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

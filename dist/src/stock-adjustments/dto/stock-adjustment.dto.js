@@ -13,7 +13,13 @@ exports.CreateAdjustmentDto = exports.AdjustmentItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const ADJ_TYPES = ['INCREASE', 'DECREASE', 'RECOUNT'];
-const REASONS = ['DAMAGE', 'EXPIRY', 'THEFT', 'FOUND', 'OPENING', 'AUDIT', 'OTHER'];
+const REASONS = [
+    'COUNTING_ERROR', 'UNRECORDED_LOCATION_TRANSFER', 'MATERIAL_LOSS', 'MATERIAL_FOUND',
+    'INCORRECT_PREVIOUS_ISSUE', 'INCORRECT_RETURN', 'DAMAGE', 'PACKING_DIFFERENCE',
+    'UOM_ERROR', 'BATCH_MISCLASSIFICATION', 'HISTORICAL_MIGRATION_DIFFERENCE', 'OTHER',
+    'EXPIRY', 'THEFT', 'FOUND', 'OPENING', 'AUDIT',
+];
+const STOCK_STATUSES = ['AVAILABLE', 'HOLD', 'REJECTED', 'QC_PENDING'];
 class AdjustmentItemDto {
 }
 exports.AdjustmentItemDto = AdjustmentItemDto;
@@ -33,17 +39,27 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], AdjustmentItemDto.prototype, "systemQty", void 0);
-__decorate([
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
 ], AdjustmentItemDto.prototype, "physicalQty", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], AdjustmentItemDto.prototype, "unitCost", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(STOCK_STATUSES),
+    __metadata("design:type", String)
+], AdjustmentItemDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AdjustmentItemDto.prototype, "binId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AdjustmentItemDto.prototype, "batchId", void 0);
 class CreateAdjustmentDto {
 }
 exports.CreateAdjustmentDto = CreateAdjustmentDto;

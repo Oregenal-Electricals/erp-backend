@@ -30,6 +30,7 @@ let StockAdjustmentController = class StockAdjustmentController {
     create(dto, req) { return this.saService.create(dto, req.user); }
     approve(id, req) { return this.saService.approve(id, req.user); }
     cancel(id, req) { return this.saService.cancel(id, req.user); }
+    reverse(id, reason, req) { return this.saService.reverse(id, req.user, reason); }
 };
 exports.StockAdjustmentController = StockAdjustmentController;
 __decorate([
@@ -85,6 +86,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], StockAdjustmentController.prototype, "cancel", null);
+__decorate([
+    (0, common_1.Post)(':id/reverse'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.STORE_STOCK_ADJUST_REVERSE),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('reason')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", void 0)
+], StockAdjustmentController.prototype, "reverse", null);
 exports.StockAdjustmentController = StockAdjustmentController = __decorate([
     (0, common_1.Controller)('stock-adjustments'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

@@ -34,4 +34,8 @@ export class StockAdjustmentController {
   @Post(':id/cancel')
   @RequirePermissions(Permission.INVENTORY_EDIT)
   cancel(@Param('id') id: string, @Request() req: any) { return this.saService.cancel(id, req.user); }
+
+  @Post(':id/reverse')
+  @RequirePermissions(Permission.STORE_STOCK_ADJUST_REVERSE)
+  reverse(@Param('id') id: string, @Body('reason') reason: string, @Request() req: any) { return this.saService.reverse(id, req.user, reason); }
 }
