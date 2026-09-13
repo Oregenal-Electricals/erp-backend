@@ -6,5 +6,7 @@ export declare class CreateMaterialReturnDto {
     uom: string;
     qty: number;
     reason?: string;
+    condition?: string;
+    originalIssueItemId?: string;
     remarks?: string;
 }

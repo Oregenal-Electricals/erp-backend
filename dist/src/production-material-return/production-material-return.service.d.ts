@@ -26,6 +26,9 @@ export declare class ProductionMaterialReturnService {
         warehouseId: string;
         returnedAt: Date;
         workOrderId: string;
+        batchId: string | null;
+        condition: string;
+        originalIssueItemId: string | null;
         returnNumber: string;
         returnedById: string;
     }>;

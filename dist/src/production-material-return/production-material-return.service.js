@@ -32,23 +32,61 @@ let ProductionMaterialReturnService = class ProductionMaterialReturnService {
         const warehouse = await this.prisma.warehouse.findFirst({ where: { id: dto.warehouseId, companyId: user.companyId } });
         if (!warehouse)
             throw new common_1.NotFoundException('Warehouse not found');
+        const status = await this.getPreviousMaterialStatus(dto.workOrderId, user);
+        const itemStatus = status.items.find(i => i.itemCode === dto.itemCode);
+        const returnableQty = itemStatus ? itemStatus.outstandingQty : 0;
+        if (dto.qty > returnableQty + 0.0001) {
+            throw new common_1.BadRequestException(`Return qty (${dto.qty}) exceeds the outstanding returnable quantity (${returnableQty}) for ${dto.itemCode} on this Work Order.`);
+        }
+        let batchId;
+        if (dto.originalIssueItemId) {
+            const originalItem = await this.prisma.productionIssueItem.findFirst({ where: { id: dto.originalIssueItemId, companyId: user.companyId } });
+            if (!originalItem)
+                throw new common_1.NotFoundException('Original issue line not found');
+            if (originalItem.itemCode !== dto.itemCode) {
+                throw new common_1.BadRequestException(`This issue line is for ${originalItem.itemCode}, not ${dto.itemCode} - cannot link a mismatched return to it.`);
+            }
+            batchId = originalItem.batchId || undefined;
+        }
+        const condition = dto.condition || 'GOOD';
         const returnNumber = await this.generateNumber(user.companyId);
         const record = await this.prisma.productionMaterialReturn.create({
             data: {
                 companyId: user.companyId, returnNumber,
                 workOrderId: dto.workOrderId, warehouseId: dto.warehouseId,
                 itemCode: dto.itemCode, itemName: dto.itemName, uom: dto.uom, qty: dto.qty,
-                reason: dto.reason || 'EXCESS_UNUSED', remarks: dto.remarks,
+                reason: dto.reason || 'EXCESS_UNUSED', condition,
+                originalIssueItemId: dto.originalIssueItemId, batchId,
+                remarks: dto.remarks,
                 returnedById: user.id, createdBy: user.id, updatedBy: user.id,
             },
         });
-        await this.stockLedger.postTransaction({
-            companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
-            warehouseId: dto.warehouseId, transactionType: 'RETURN',
-            referenceType: 'PRODUCTION_MATERIAL_RETURN', referenceId: record.id, referenceNumber: returnNumber,
-            inQty: dto.qty, remarks: `Returned from WO ${wo.woNumber}: ${dto.reason || 'EXCESS_UNUSED'}`,
-            userId: user.id,
-        });
+        if (condition === 'GOOD') {
+            await this.stockLedger.postTransaction({
+                companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
+                warehouseId: dto.warehouseId, transactionType: 'RETURN',
+                referenceType: 'PRODUCTION_MATERIAL_RETURN', referenceId: record.id, referenceNumber: returnNumber,
+                inQty: dto.qty, remarks: `Returned from WO ${wo.woNumber}: ${dto.reason || 'EXCESS_UNUSED'}`,
+                userId: user.id,
+            });
+        }
+        else {
+            const holdNumber = `HOLD-RET-${new Date().getFullYear()}-${String(record.id).slice(0, 6)}`;
+            await this.prisma.holdStock.create({
+                data: {
+                    companyId: user.companyId, holdNumber, warehouseId: dto.warehouseId,
+                    totalHoldQty: dto.qty, remarks: `Production return from WO ${wo.woNumber} - condition: ${condition}`,
+                    createdBy: user.id, updatedBy: user.id,
+                    items: {
+                        create: [{
+                                companyId: user.companyId, itemCode: dto.itemCode, itemName: dto.itemName,
+                                uom: dto.uom, holdQty: dto.qty, holdReason: `Returned material condition: ${condition}`,
+                                createdBy: user.id, updatedBy: user.id,
+                            }],
+                    },
+                },
+            });
+        }
         await this.audit.log({
             tableName: 'production_material_returns', recordId: record.id, action: 'CREATE',
             newValues: record, changedBy: user.id,

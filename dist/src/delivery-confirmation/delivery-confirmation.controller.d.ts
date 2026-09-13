@@ -32,11 +32,11 @@ export declare class DeliveryConfirmationController {
             deliveryDate: Date;
             dcNumber: string;
             shortageQty: number;
+            condition: string;
             dispatchId: string;
             receiverName: string;
             receiverPhone: string | null;
             podNumber: string | null;
-            condition: string;
             damageNotes: string | null;
         })[];
         total: number;
@@ -70,11 +70,11 @@ export declare class DeliveryConfirmationController {
         deliveryDate: Date;
         dcNumber: string;
         shortageQty: number;
+        condition: string;
         dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
-        condition: string;
         damageNotes: string | null;
     }>;
     create(dto: CreateDeliveryConfirmationDto, req: any): Promise<{
@@ -104,11 +104,11 @@ export declare class DeliveryConfirmationController {
         deliveryDate: Date;
         dcNumber: string;
         shortageQty: number;
+        condition: string;
         dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
-        condition: string;
         damageNotes: string | null;
     }>;
 }

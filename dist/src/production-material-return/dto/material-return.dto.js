@@ -11,6 +11,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateMaterialReturnDto = void 0;
 const class_validator_1 = require("class-validator");
+const RETURN_REASONS = [
+    'UNUSED_MATERIAL', 'EXCESS_ISSUED', 'WO_COMPLETED', 'STAGE_COMPLETED',
+    'MATERIAL_NOT_REQUIRED', 'WRONG_MATERIAL_ISSUED', 'CHANGE_IN_PLAN',
+    'BALANCE_RETURN', 'REJECTED_MATERIAL', 'OTHER',
+    'EXCESS_UNUSED',
+];
+const RETURN_CONDITIONS = ['GOOD', 'DAMAGED', 'SUSPECT'];
 class CreateMaterialReturnDto {
 }
 exports.CreateMaterialReturnDto = CreateMaterialReturnDto;
@@ -41,9 +48,19 @@ __decorate([
 ], CreateMaterialReturnDto.prototype, "qty", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsIn)(['EXCESS_UNUSED', 'REJECTED_MATERIAL', 'OTHER']),
+    (0, class_validator_1.IsIn)(RETURN_REASONS),
     __metadata("design:type", String)
 ], CreateMaterialReturnDto.prototype, "reason", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(RETURN_CONDITIONS),
+    __metadata("design:type", String)
+], CreateMaterialReturnDto.prototype, "condition", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMaterialReturnDto.prototype, "originalIssueItemId", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

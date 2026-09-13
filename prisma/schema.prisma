@@ -1695,6 +1695,20 @@ model ProductionMaterialReturn {
   uom             String
   qty             Float
   reason          String    @default("EXCESS_UNUSED") // EXCESS_UNUSED, REJECTED_MATERIAL, OTHER
+  // STORE-014 sections 9-11, 28, 38-39: what actually happens to
+  // returned stock depends on its physical condition at receipt -
+  // GOOD material can go straight to Available, anything else must
+  // route to Hold rather than being silently trusted.
+  condition       String    @default("GOOD") // GOOD, DAMAGED, SUSPECT
+  // STORE-014 sections 5, 21-23: links this return back to the exact
+  // original issue line and batch it's returning against, so the
+  // returnable-qty ceiling and batch-mismatch check both have
+  // something concrete to validate against - a return with no
+  // traceable source is exactly what section 5 says not to allow.
+  originalIssueItemId String?
+  originalIssueItem   ProductionIssueItem? @relation(fields: [originalIssueItemId], references: [id])
+  batchId         String?
+  batch           StockBatch? @relation("ProductionMaterialReturnBatch", fields: [batchId], references: [id])
   remarks         String?
   returnedById    String
   returnedBy      User      @relation("ProductionMaterialReturnedBy", fields: [returnedById], references: [id])
@@ -4071,6 +4085,7 @@ model StockBatch {
   issueItems StockIssueItem[]
   transferItems StockTransferItem[]
   productionIssueItems ProductionIssueItem[] @relation("ProductionIssueBatch")
+  productionMaterialReturns ProductionMaterialReturn[] @relation("ProductionMaterialReturnBatch")
   putawayItems StockPutawayItem[]
   @@unique([companyId, batchNumber])
   @@index([companyId, itemCode])
@@ -4560,6 +4575,8 @@ model ProductionIssueItem {
   updatedAt           DateTime        @updatedAt
   createdBy           String?
   updatedBy           String?
+
+  productionMaterialReturns ProductionMaterialReturn[]
 
   @@map("production_issue_items")
 }

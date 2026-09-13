@@ -28,9 +28,19 @@ describe('ProductionMaterialReturnService', () => {
   });
 
   describe('create - returning material to Store', () => {
-    it('creates the return record and posts a RETURN stock-ledger transaction', async () => {
+    beforeEach(() => {
+      // STORE-014: returnable qty is derived from the same reconciliation
+      // as STORE-012's previous-material-status - give this item plenty
+      // of outstanding qty (issued 1000, nothing consumed/returned yet)
+      // so a 20-unit return has capacity, unless a test overrides this.
+      prisma.workOrder.findFirst.mockResolvedValue({ ...wo, bom: { items: [{ itemCode: 'DRIVER-01', itemName: 'LED Driver', quantity: 1, effectiveQty: 1 }] } });
+      prisma.productionIssueItem.findMany.mockResolvedValue([{ itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', issuedQty: 1000 }]);
+    });
+
+    it('creates the return record and posts a RETURN stock-ledger transaction for GOOD condition', async () => {
       const r = await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, reason: 'EXCESS_UNUSED' } as any, user);
       expect(r.qty).toBe(20);
+      expect(r.condition).toBe('GOOD');
       expect(stockLedger.postTransaction).toHaveBeenCalledWith(expect.objectContaining({
         itemCode: 'DRIVER-01', warehouseId: 'wh-1', transactionType: 'RETURN', inQty: 20,
       }));
@@ -46,6 +56,40 @@ describe('ProductionMaterialReturnService', () => {
     it('logs the audit trail', async () => {
       const r = await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20 } as any, user);
       expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ tableName: 'production_material_returns', action: 'CREATE', recordId: r.id }));
+    });
+
+    it('blocks a return that exceeds the outstanding returnable quantity', async () => {
+      prisma.productionIssueItem.findMany.mockResolvedValue([{ itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', issuedQty: 15 }]);
+      await expect(service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20 } as any, user))
+        .rejects.toThrow(/exceeds the outstanding returnable quantity/);
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('routes a DAMAGED-condition return to Hold instead of posting to available stock', async () => {
+      prisma.holdStock = { create: jest.fn().mockResolvedValue({ id: 'hold-1' }) };
+      const r = await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, condition: 'DAMAGED' } as any, user);
+      expect(r.condition).toBe('DAMAGED');
+      expect(prisma.holdStock.create).toHaveBeenCalled();
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('routes a SUSPECT-condition return to Hold too', async () => {
+      prisma.holdStock = { create: jest.fn().mockResolvedValue({ id: 'hold-1' }) };
+      await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, condition: 'SUSPECT' } as any, user);
+      expect(stockLedger.postTransaction).not.toHaveBeenCalled();
+    });
+
+    it('links the return to the original issue line and preserves its batch', async () => {
+      prisma.productionIssueItem.findFirst = jest.fn().mockResolvedValue({ id: 'pii-1', itemCode: 'DRIVER-01', batchId: 'batch-1' });
+      const r = await service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, originalIssueItemId: 'pii-1' } as any, user);
+      expect(r.originalIssueItemId).toBe('pii-1');
+      expect(r.batchId).toBe('batch-1');
+    });
+
+    it('blocks linking a return to an issue line for a different material', async () => {
+      prisma.productionIssueItem.findFirst = jest.fn().mockResolvedValue({ id: 'pii-1', itemCode: 'PCB-01', batchId: 'batch-1' });
+      await expect(service.create({ workOrderId: 'wo-1', warehouseId: 'wh-1', itemCode: 'DRIVER-01', itemName: 'LED Driver', uom: 'PCS', qty: 20, originalIssueItemId: 'pii-1' } as any, user))
+        .rejects.toThrow(/not DRIVER-01/);
     });
   });
 

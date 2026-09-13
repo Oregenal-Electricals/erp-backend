@@ -34,11 +34,11 @@ export declare class DeliveryConfirmationService {
         deliveryDate: Date;
         dcNumber: string;
         shortageQty: number;
+        condition: string;
         dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
-        condition: string;
         damageNotes: string | null;
     }>;
     findAll(user: any, query: any): Promise<{
@@ -64,11 +64,11 @@ export declare class DeliveryConfirmationService {
             deliveryDate: Date;
             dcNumber: string;
             shortageQty: number;
+            condition: string;
             dispatchId: string;
             receiverName: string;
             receiverPhone: string | null;
             podNumber: string | null;
-            condition: string;
             damageNotes: string | null;
         })[];
         total: number;
@@ -102,11 +102,11 @@ export declare class DeliveryConfirmationService {
         deliveryDate: Date;
         dcNumber: string;
         shortageQty: number;
+        condition: string;
         dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
-        condition: string;
         damageNotes: string | null;
     }>;
     getStats(user: any): Promise<{
