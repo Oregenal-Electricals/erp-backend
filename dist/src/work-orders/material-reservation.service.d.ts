@@ -10,6 +10,7 @@ export declare class MaterialReservationService {
         released: number;
     }>;
     recordIssueAgainstReservations(workOrderId: string, itemCode: string, issuedQty: number, user: any): Promise<number>;
+    reserveAdditionalQty(workOrderId: string, itemCode: string, itemName: string, warehouseId: string, qty: number, companyId: string, userId: string): Promise<number>;
     findForWorkOrder(workOrderId: string): Promise<{
         id: string;
         companyId: string;

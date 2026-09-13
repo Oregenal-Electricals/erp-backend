@@ -149,6 +149,28 @@ export class MaterialReservationService {
     return remaining;
   }
 
+  // STORE-013 section 28: an approved additional material request
+  // should be reservable too, same as the original BOM requirement -
+  // otherwise the approved extra quantity can be issued out from under
+  // another WO's legitimate claim on Free Available. Best-effort: if
+  // stock isn't free right now, this simply reserves whatever it can
+  // (possibly 0) and the caller proceeds - the approval itself remains
+  // valid regardless, per section 29 ("approval does not create stock").
+  async reserveAdditionalQty(workOrderId: string, itemCode: string, itemName: string, warehouseId: string, qty: number, companyId: string, userId: string): Promise<number> {
+    if (qty <= 0.0001) return 0;
+    const reservedNow = await this.reserveQtyAtomically(companyId, itemCode, warehouseId, qty, userId);
+    if (reservedNow > 0) {
+      await this.prisma.materialReservation.create({
+        data: {
+          companyId, workOrderId, itemCode, itemName, warehouseId,
+          reservedQty: reservedNow, status: 'ACTIVE',
+          createdBy: userId, updatedBy: userId,
+        },
+      });
+    }
+    return reservedNow;
+  }
+
   async findForWorkOrder(workOrderId: string) {
     return this.prisma.materialReservation.findMany({
       where: { workOrderId },

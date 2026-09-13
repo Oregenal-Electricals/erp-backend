@@ -14,11 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const workflows_service_1 = require("../workflows/workflows.service");
+const material_reservation_service_1 = require("../work-orders/material-reservation.service");
 let AdditionalMaterialRequestService = class AdditionalMaterialRequestService {
-    constructor(prisma, audit, workflows) {
+    constructor(prisma, audit, workflows, materialReservation) {
         this.prisma = prisma;
         this.audit = audit;
         this.workflows = workflows;
+        this.materialReservation = materialReservation;
     }
     async getOriginalRemaining(workOrderId, itemCode, user) {
         var _a, _b;
@@ -95,6 +97,12 @@ let AdditionalMaterialRequestService = class AdditionalMaterialRequestService {
                 approverComments: dto.comments, updatedBy: user.id,
             },
         });
+        if (dto.action === 'APPROVED' && approvedQty) {
+            const wo = await this.prisma.workOrder.findFirst({ where: { id: updated.workOrderId } });
+            if (wo) {
+                await this.materialReservation.reserveAdditionalQty(updated.workOrderId, updated.itemCode, updated.itemName, wo.warehouseId, approvedQty, updated.companyId, user.id);
+            }
+        }
         await this.audit.log({ tableName: 'additional_material_requests', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }
@@ -173,6 +181,7 @@ exports.AdditionalMaterialRequestService = AdditionalMaterialRequestService = __
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
-        workflows_service_1.WorkflowsService])
+        workflows_service_1.WorkflowsService,
+        material_reservation_service_1.MaterialReservationService])
 ], AdditionalMaterialRequestService);
 //# sourceMappingURL=additional-material-request.service.js.map

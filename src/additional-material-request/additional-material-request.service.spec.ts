@@ -35,7 +35,9 @@ describe('AdditionalMaterialRequestService - STORE-013', () => {
       submit: jest.fn().mockResolvedValue({ requiresApproval: true, request: { id: 'approval-1' } }),
       act: jest.fn().mockResolvedValue({}),
     };
-    service = new AdditionalMaterialRequestService(prisma, audit, workflows);
+    prisma.workOrder.findFirst = jest.fn().mockResolvedValue({ ...wo, warehouseId: 'wh-1' });
+    const materialReservation = { reserveAdditionalQty: jest.fn().mockResolvedValue(0) };
+    service = new AdditionalMaterialRequestService(prisma, audit, workflows, materialReservation as any);
   });
 
   describe('getOriginalRemaining', () => {
@@ -102,6 +104,26 @@ describe('AdditionalMaterialRequestService - STORE-013', () => {
     it('rejects a decision on an already-decided request', async () => {
       prisma.additionalMaterialRequest.findFirst.mockResolvedValue({ ...pending, status: 'REJECTED' });
       await expect(service.decide('amr-1', { action: 'APPROVED' } as any, user)).rejects.toThrow(/already REJECTED/);
+    });
+
+    it('reserves the approved qty against the WO (STORE-013 section 28)', async () => {
+      const materialReservationSpy = { reserveAdditionalQty: jest.fn().mockResolvedValue(120) };
+      const svc = new AdditionalMaterialRequestService(prisma, audit, workflows, materialReservationSpy as any);
+      prisma.additionalMaterialRequest.findFirst.mockResolvedValue(pending);
+      await svc.decide('amr-1', { action: 'APPROVED', approvedQty: 120 } as any, user);
+      expect(materialReservationSpy.reserveAdditionalQty).toHaveBeenCalled();
+      const callArgs = materialReservationSpy.reserveAdditionalQty.mock.calls[0];
+      expect(callArgs[3]).toBe('wh-1'); // warehouseId comes from the fetched WO
+      expect(callArgs[4]).toBe(120);    // the approved qty, not the original requested qty
+      expect(callArgs[6]).toBe('user-1');
+    });
+
+    it('does not attempt to reserve anything on rejection', async () => {
+      const materialReservationSpy = { reserveAdditionalQty: jest.fn().mockResolvedValue(0) };
+      const svc = new AdditionalMaterialRequestService(prisma, audit, workflows, materialReservationSpy as any);
+      prisma.additionalMaterialRequest.findFirst.mockResolvedValue(pending);
+      await svc.decide('amr-1', { action: 'REJECTED' } as any, user);
+      expect(materialReservationSpy.reserveAdditionalQty).not.toHaveBeenCalled();
     });
   });
 

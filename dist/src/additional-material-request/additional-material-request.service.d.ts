@@ -1,12 +1,14 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { WorkflowsService } from '../workflows/workflows.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { RequestAdditionalMaterialDto, DecideAdditionalMaterialDto } from './dto/additional-material-request.dto';
 export declare class AdditionalMaterialRequestService {
     private prisma;
     private audit;
     private workflows;
-    constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService);
+    private materialReservation;
+    constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService, materialReservation: MaterialReservationService);
     getOriginalRemaining(workOrderId: string, itemCode: string, user: any): Promise<{
         originalRequirement: number;
         totalIssued: number;

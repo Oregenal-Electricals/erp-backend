@@ -13,12 +13,13 @@ const additional_material_request_service_1 = require("./additional-material-req
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const workflows_module_1 = require("../workflows/workflows.module");
+const work_order_module_1 = require("../work-orders/work-order.module");
 let AdditionalMaterialRequestModule = class AdditionalMaterialRequestModule {
 };
 exports.AdditionalMaterialRequestModule = AdditionalMaterialRequestModule;
 exports.AdditionalMaterialRequestModule = AdditionalMaterialRequestModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, workflows_module_1.WorkflowsModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, workflows_module_1.WorkflowsModule, work_order_module_1.WorkOrderModule],
         controllers: [additional_material_request_controller_1.AdditionalMaterialRequestController],
         providers: [additional_material_request_service_1.AdditionalMaterialRequestService],
         exports: [additional_material_request_service_1.AdditionalMaterialRequestService],

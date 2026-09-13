@@ -121,6 +121,21 @@ let MaterialReservationService = class MaterialReservationService {
         }
         return remaining;
     }
+    async reserveAdditionalQty(workOrderId, itemCode, itemName, warehouseId, qty, companyId, userId) {
+        if (qty <= 0.0001)
+            return 0;
+        const reservedNow = await this.reserveQtyAtomically(companyId, itemCode, warehouseId, qty, userId);
+        if (reservedNow > 0) {
+            await this.prisma.materialReservation.create({
+                data: {
+                    companyId, workOrderId, itemCode, itemName, warehouseId,
+                    reservedQty: reservedNow, status: 'ACTIVE',
+                    createdBy: userId, updatedBy: userId,
+                },
+            });
+        }
+        return reservedNow;
+    }
     async findForWorkOrder(workOrderId) {
         return this.prisma.materialReservation.findMany({
             where: { workOrderId },

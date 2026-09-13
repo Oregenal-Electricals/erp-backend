@@ -4,9 +4,10 @@ import { AdditionalMaterialRequestService } from './additional-material-request.
 import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
 import { WorkflowsModule } from '../workflows/workflows.module';
+import { WorkOrderModule } from '../work-orders/work-order.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule, WorkflowsModule],
+  imports: [PrismaModule, CommonModule, WorkflowsModule, WorkOrderModule],
   controllers: [AdditionalMaterialRequestController],
   providers: [AdditionalMaterialRequestService],
   exports: [AdditionalMaterialRequestService],

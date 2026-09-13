@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { WorkflowsService } from '../workflows/workflows.service';
+import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { RequestAdditionalMaterialDto, DecideAdditionalMaterialDto } from './dto/additional-material-request.dto';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class AdditionalMaterialRequestService {
     private prisma: PrismaService,
     private audit: AuditService,
     private workflows: WorkflowsService,
+    private materialReservation: MaterialReservationService,
   ) {}
 
   // STORE-013 sections 2-4, 6: the line between "still within the
@@ -103,6 +105,19 @@ export class AdditionalMaterialRequestService {
         approverComments: dto.comments, updatedBy: user.id,
       },
     });
+
+    // STORE-013 section 28: reserve the approved qty too, same as the
+    // original BOM requirement - best-effort, never blocks the
+    // approval itself if stock isn't free right now (section 29).
+    if (dto.action === 'APPROVED' && approvedQty) {
+      const wo = await this.prisma.workOrder.findFirst({ where: { id: updated.workOrderId } });
+      if (wo) {
+        await this.materialReservation.reserveAdditionalQty(
+          updated.workOrderId, updated.itemCode, updated.itemName, wo.warehouseId,
+          approvedQty, updated.companyId, user.id,
+        );
+      }
+    }
 
     await this.audit.log({ tableName: 'additional_material_requests', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
