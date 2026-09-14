@@ -100,4 +100,29 @@ export declare class InventoryDashboardService {
         }[];
         totalValue: number;
     }>;
+    getActionCards(user: any): Promise<{
+        waitingFromGate: number;
+        physicalVerificationPending: number;
+        iqcPending: number;
+        iqcPassedPutAwayPending: number;
+        iqcFailedRejectedPlacementPending: number;
+        holdMaterial: number;
+        woWaitingForMaterial: number;
+        previousMaterialOverridePending: number;
+        additionalMaterialApprovalPending: number;
+        productionReturnsPending: {
+            notApplicable: boolean;
+            reason: string;
+        };
+        stockCountVariancePending: number;
+        rtvApprovalPending: number;
+        rtvGateOutPending: number;
+        reservationShortfall: number;
+    }>;
+    getReconciliation(user: any): Promise<{
+        health: string;
+        criticalCount: number;
+        amberCount: number;
+        issues: any[];
+    }>;
 }

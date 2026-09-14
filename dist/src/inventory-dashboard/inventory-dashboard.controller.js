@@ -27,6 +27,8 @@ let InventoryDashboardController = class InventoryDashboardController {
     getAlerts(req) { return this.idService.getAlerts(req.user); }
     getActivity(req) { return this.idService.getActivity(req.user); }
     getTopItems(req) { return this.idService.getTopItems(req.user); }
+    getActionCards(req) { return this.idService.getActionCards(req.user); }
+    getReconciliation(req) { return this.idService.getReconciliation(req.user); }
 };
 exports.InventoryDashboardController = InventoryDashboardController;
 __decorate([
@@ -61,6 +63,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], InventoryDashboardController.prototype, "getTopItems", null);
+__decorate([
+    (0, common_1.Get)('action-cards'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_DASHBOARD_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], InventoryDashboardController.prototype, "getActionCards", null);
+__decorate([
+    (0, common_1.Get)('reconciliation'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_DASHBOARD_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], InventoryDashboardController.prototype, "getReconciliation", null);
 exports.InventoryDashboardController = InventoryDashboardController = __decorate([
     (0, common_1.Controller)('inventory-dashboard'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

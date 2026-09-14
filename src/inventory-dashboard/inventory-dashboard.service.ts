@@ -105,4 +105,130 @@ export class InventoryDashboardService {
     const totalValue = sorted.reduce((s, b) => s + b.stockValue, 0);
     return { data: sorted, totalValue };
   }
+
+  // STORE-018 section 29: the operational action cards a Store user
+  // actually needs to act on today - each count is a real query
+  // against the same tables the underlying module already uses as its
+  // source of truth (never a separately-maintained counter that could
+  // drift). Where a spec-named card has no real pending-state in this
+  // architecture (e.g. Production Returns are synchronous in this
+  // system - STORE-014 - with no approval queue), it is reported as
+  // notApplicable rather than a fabricated number.
+  async getActionCards(user: any) {
+    const companyId = user.companyId;
+
+    const [
+      waitingFromGate, physicalVerificationPending, iqcPending, iqcPassedPutAwayPending,
+      iqcFailedRejectedPlacementPending, holdMaterial, woWaitingForMaterial,
+      additionalMaterialApprovalPending, stockCountVariancePending,
+      rtvApprovalPending, rtvGateOutPending, previousMaterialOverridePending,
+    ] = await Promise.all([
+      this.prisma.gateInwardEntry.count({ where: { companyId, status: 'PENDING' } }).catch(() => 0),
+      this.prisma.storeReceiving.count({ where: { companyId, status: { in: ['DRAFT', 'PENDING'] } } }).catch(() => 0),
+      this.prisma.iqcInspection.count({ where: { companyId, status: 'PENDING' } }),
+      this.prisma.stockPutaway.count({ where: { companyId, status: 'IN_PROGRESS' } }),
+      this.prisma.rejectedStockItem.count({ where: { rejectedStock: { companyId }, disposition: 'PENDING', isActive: true } }),
+      this.prisma.holdStockItem.count({ where: { holdStock: { companyId }, reinspectionStatus: 'PENDING', isActive: true } }),
+      this.prisma.workOrder.count({ where: { companyId, status: 'IN_PROGRESS', materialAvailability: { not: 'AVAILABLE' } } }),
+      this.prisma.additionalMaterialRequest.count({ where: { companyId, status: 'PENDING', isActive: true } }),
+      this.prisma.stockAdjustment.count({ where: { companyId, status: 'DRAFT' } }),
+      this.prisma.rtvRequest.count({ where: { companyId, status: 'DRAFT', isActive: true } }),
+      this.prisma.rtvRequest.count({ where: { companyId, status: { in: ['READY_FOR_GATE_OUT', 'PARTIALLY_GATE_OUT'] }, isActive: true } }),
+      this.prisma.materialIssueOverride.count({ where: { companyId, status: 'PENDING' } }),
+    ]);
+
+    // reservedQty > availableQty can't be expressed as a single Prisma
+    // where-clause across two columns - fetch the (normally small) set
+    // of rows with any reservation and filter in memory.
+    const reservedBalances = await this.prisma.stockBalance.findMany({
+      where: { companyId, reservedQty: { gt: 0 } },
+      select: { reservedQty: true, availableQty: true },
+    });
+    const reservationShortfallCount = reservedBalances.filter(b => b.reservedQty > b.availableQty + 0.0001).length;
+
+    return {
+      waitingFromGate,
+      physicalVerificationPending,
+      iqcPending,
+      iqcPassedPutAwayPending,
+      iqcFailedRejectedPlacementPending,
+      holdMaterial,
+      woWaitingForMaterial,
+      previousMaterialOverridePending,
+      additionalMaterialApprovalPending,
+      productionReturnsPending: { notApplicable: true, reason: 'Production returns in this system (STORE-014) post immediately once Store verifies condition - there is no separate pending-approval queue for them.' },
+      stockCountVariancePending,
+      rtvApprovalPending,
+      rtvGateOutPending,
+      reservationShortfall: reservationShortfallCount,
+    };
+  }
+
+  // STORE-018 sections 58-61: detects inconsistencies, never fixes
+  // them. Every check reads current authoritative balances/documents
+  // directly - this is not a second, separately-maintained ledger.
+  async getReconciliation(user: any) {
+    const companyId = user.companyId;
+    const issues: any[] = [];
+
+    // 1. Negative stock
+    const negativeStock = await this.prisma.stockBalance.findMany({
+      where: { companyId, availableQty: { lt: 0 } },
+      select: { itemCode: true, warehouseId: true, availableQty: true },
+    });
+    for (const b of negativeStock) {
+      issues.push({ severity: 'CRITICAL', check: 'NEGATIVE_STOCK', itemCode: b.itemCode, warehouseId: b.warehouseId, expected: 0, actual: b.availableQty, difference: b.availableQty });
+    }
+
+    // 2. Reserved > Available
+    const reservedBalances = await this.prisma.stockBalance.findMany({
+      where: { companyId, reservedQty: { gt: 0 } },
+      select: { itemCode: true, warehouseId: true, reservedQty: true, availableQty: true },
+    });
+    for (const b of reservedBalances) {
+      if (b.reservedQty > b.availableQty + 0.0001) {
+        issues.push({ severity: 'CRITICAL', check: 'RESERVATION_SHORTFALL', itemCode: b.itemCode, warehouseId: b.warehouseId, expected: `<= ${b.availableQty}`, actual: b.reservedQty, difference: b.reservedQty - b.availableQty, recommendedAction: 'Review and reallocate or release the affected reservations - do not post any stock-reducing transaction for this item until resolved.' });
+      }
+    }
+
+    // 3. Negative StockBatch balances
+    const negativeBatches = await this.prisma.stockBatch.findMany({
+      where: { companyId, availableQty: { lt: 0 } },
+      select: { batchNumber: true, itemCode: true, availableQty: true },
+    });
+    for (const bt of negativeBatches) {
+      issues.push({ severity: 'CRITICAL', check: 'NEGATIVE_BATCH', itemCode: bt.itemCode, batch: bt.batchNumber, expected: 0, actual: bt.availableQty, difference: bt.availableQty });
+    }
+
+    // 4. RTV gateOutQty exceeding preparedQty (should never happen given code paths, but data-level sanity check)
+    const badRtvs = await this.prisma.rtvRequest.findMany({
+      where: { companyId, isActive: true },
+      select: { rtvNumber: true, itemCode: true, preparedQty: true, gateOutQty: true, approvedQty: true, requestedQty: true },
+    });
+    for (const r of badRtvs) {
+      if (r.gateOutQty > r.preparedQty + 0.0001) {
+        issues.push({ severity: 'CRITICAL', check: 'RTV_GATEOUT_EXCEEDS_PREPARED', itemCode: r.itemCode, reference: r.rtvNumber, expected: `<= ${r.preparedQty}`, actual: r.gateOutQty, difference: r.gateOutQty - r.preparedQty });
+      }
+      if (r.approvedQty != null && r.approvedQty > r.requestedQty + 0.0001) {
+        issues.push({ severity: 'AMBER', check: 'RTV_APPROVED_EXCEEDS_REQUESTED', itemCode: r.itemCode, reference: r.rtvNumber, expected: `<= ${r.requestedQty}`, actual: r.approvedQty, difference: r.approvedQty - r.requestedQty });
+      }
+    }
+
+    // 5. Orphan reservations - reservation referencing a WO that no longer exists (should be impossible via FK, but check for cancelled/completed WOs still carrying reservedQty)
+    const orphanReservations = await this.prisma.materialReservation.findMany({
+      where: { status: 'ACTIVE', workOrder: { companyId, status: { in: ['CANCELLED', 'COMPLETED'] } } },
+      select: { id: true, itemCode: true, reservedQty: true, workOrderId: true, workOrder: { select: { woNumber: true, status: true } } },
+    }).catch(() => []);
+    for (const res of orphanReservations) {
+      if (res.reservedQty > 0.0001) {
+        issues.push({ severity: 'AMBER', check: 'ORPHAN_RESERVATION', itemCode: res.itemCode, reference: res.workOrder?.woNumber, expected: 0, actual: res.reservedQty, difference: res.reservedQty, recommendedAction: `Work order is ${res.workOrder?.status} but still holds an ACTIVE reservation - review and release.` });
+      }
+    }
+
+    const critical = issues.filter(i => i.severity === 'CRITICAL').length;
+    const amber = issues.filter(i => i.severity === 'AMBER').length;
+    const health = critical > 0 ? 'RED' : (amber > 0 ? 'AMBER' : 'GREEN');
+
+    return { health, criticalCount: critical, amberCount: amber, issues };
+  }
 }

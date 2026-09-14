@@ -25,4 +25,12 @@ export class InventoryDashboardController {
   @Get('top-items')
   @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
   getTopItems(@Request() req: any) { return this.idService.getTopItems(req.user); }
+
+  @Get('action-cards')
+  @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
+  getActionCards(@Request() req: any) { return this.idService.getActionCards(req.user); }
+
+  @Get('reconciliation')
+  @RequirePermissions(Permission.INVENTORY_DASHBOARD_VIEW)
+  getReconciliation(@Request() req: any) { return this.idService.getReconciliation(req.user); }
 }

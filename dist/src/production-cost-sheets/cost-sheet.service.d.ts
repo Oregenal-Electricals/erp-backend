@@ -21,6 +21,9 @@ export declare class CostSheetService {
         totalCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -28,9 +31,6 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
         reworkCost: number;
@@ -106,6 +106,9 @@ export declare class CostSheetService {
             totalCost: number;
             completedQty: number;
             workOrderId: string;
+            costSheetNumber: string;
+            materialCost: number;
+            totalShifts: number;
             laborHours: number;
             laborRatePerHour: number;
             laborCost: number;
@@ -113,9 +116,6 @@ export declare class CostSheetService {
             overheadRemarks: string | null;
             otherCost: number;
             otherRemarks: string | null;
-            costSheetNumber: string;
-            materialCost: number;
-            totalShifts: number;
             plannedMaterialCost: number;
             varianceCost: number;
             reworkCost: number;
@@ -151,6 +151,9 @@ export declare class CostSheetService {
         totalCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -158,9 +161,6 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
         reworkCost: number;
@@ -190,6 +190,9 @@ export declare class CostSheetService {
         totalCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -197,9 +200,6 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
         reworkCost: number;
@@ -232,6 +232,9 @@ export declare class CostSheetService {
             totalCost: number;
             completedQty: number;
             workOrderId: string;
+            costSheetNumber: string;
+            materialCost: number;
+            totalShifts: number;
             laborHours: number;
             laborRatePerHour: number;
             laborCost: number;
@@ -239,9 +242,6 @@ export declare class CostSheetService {
             overheadRemarks: string | null;
             otherCost: number;
             otherRemarks: string | null;
-            costSheetNumber: string;
-            materialCost: number;
-            totalShifts: number;
             plannedMaterialCost: number;
             varianceCost: number;
             reworkCost: number;
@@ -296,6 +296,9 @@ export declare class CostSheetService {
         totalCost: number;
         completedQty: number;
         workOrderId: string;
+        costSheetNumber: string;
+        materialCost: number;
+        totalShifts: number;
         laborHours: number;
         laborRatePerHour: number;
         laborCost: number;
@@ -303,9 +306,6 @@ export declare class CostSheetService {
         overheadRemarks: string | null;
         otherCost: number;
         otherRemarks: string | null;
-        costSheetNumber: string;
-        materialCost: number;
-        totalShifts: number;
         plannedMaterialCost: number;
         varianceCost: number;
         reworkCost: number;
