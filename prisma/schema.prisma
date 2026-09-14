@@ -374,6 +374,7 @@ model Company {
   materialIssueOverrides MaterialIssueOverride[]
   additionalMaterialRequests AdditionalMaterialRequest[]
   stockLocationBalances StockLocationBalance[]
+  rtvRequests RtvRequest[]
   productSellingPrices ProductSellingPrice[]
   grnItemDiscrepancies GrnItemDiscrepancy[]
 }
@@ -587,6 +588,9 @@ model User {
   materialIssueOverridesApproved MaterialIssueOverride[] @relation("MaterialIssueOverrideApprovedBy")
   additionalMaterialRequestsRequested AdditionalMaterialRequest[] @relation("AdditionalMaterialRequestedBy")
   additionalMaterialRequestsApproved AdditionalMaterialRequest[] @relation("AdditionalMaterialApprovedBy")
+  rtvRequestsRequested RtvRequest[] @relation("RtvRequestedBy")
+  rtvRequestsAuthorized RtvRequest[] @relation("RtvAuthorizedBy")
+  rtvGateOuts RtvGateOut[] @relation("RtvGatedOutBy")
   grnDiscrepanciesRaised GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyRaisedBy")
   grnDiscrepanciesResolved GrnItemDiscrepancy[] @relation("GrnItemDiscrepancyResolvedBy")
   grnReversals GrnHeader[] @relation("GrnHeaderReversedBy")
@@ -2223,6 +2227,7 @@ model Vendor {
   rfqVendors      RfqVendor[]
   quotations      VendorQuotation[]
   comparisonSelections QuotationComparison[] @relation("ComparisonVendor")
+  rtvRequests RtvRequest[]
   importPurchaseOrders ImportPurchaseOrder[]
   purchaseOrders  PurchaseOrder[]
 
@@ -3848,7 +3853,83 @@ model RejectedStockItem {
   createdBy         String?
   updatedBy         String?
 
+  rtvRequests RtvRequest[]
+
   @@map("rejected_stock_items")
+}
+
+// STORE-017: Return to Vendor. Deliberately its own lean model rather
+// than reusing GateOutwardEntry, which is built for customer sales
+// dispatch (customerGstin, salesOrderNumber, invoiceNumber) - a vendor
+// return has a different shape (PO/GRN/vendor reference, no invoice).
+// RejectedStockItem remains the single source of truth for what's
+// physically in the plant's rejected custody - this model only tracks
+// how much of one specific rejected line has been authorized/prepared/
+// gated-out for return, it is never a second place to record quantity.
+model RtvRequest {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  rtvNumber         String
+  rejectedStockItemId String
+  rejectedStockItem RejectedStockItem @relation(fields: [rejectedStockItemId], references: [id])
+  vendorId          String
+  vendor            Vendor    @relation(fields: [vendorId], references: [id])
+  itemCode          String
+  itemName          String
+  uom               String
+  batchId           String?
+  reason            String    // IQC_FAILED, WRONG_SPECIFICATION, DAMAGE, WRONG_MATERIAL, SUPPLIER_QUALITY_REJECTION, EXCESS_MATERIAL_RETURN, OTHER
+  requestedQty      Float
+  approvedQty       Float?
+  preparedQty       Float     @default(0)
+  gateOutQty        Float     @default(0)
+  status            String    @default("DRAFT") // DRAFT, AUTHORIZED, PICKING, READY_FOR_GATE_OUT, PARTIALLY_GATE_OUT, COMPLETED, CANCELLED
+  approvalRequestId String?
+  requestedById     String
+  requestedBy       User      @relation("RtvRequestedBy", fields: [requestedById], references: [id])
+  authorizedById    String?
+  authorizedBy      User?     @relation("RtvAuthorizedBy", fields: [authorizedById], references: [id])
+  authorizedAt      DateTime?
+  remarks           String?
+  isActive          Boolean   @default(true)
+  isTestData        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  gateOuts          RtvGateOut[]
+
+  @@map("rtv_requests")
+  @@index([companyId, rejectedStockItemId])
+  @@index([companyId, status])
+}
+
+// One row per actual physical Gate-Out event against an RtvRequest -
+// separate from the request itself because a single RTV can leave the
+// plant across more than one vehicle/trip (partial Gate-Out).
+model RtvGateOut {
+  id           String     @id @default(uuid())
+  companyId    String
+  rtvRequestId String
+  rtvRequest   RtvRequest @relation(fields: [rtvRequestId], references: [id])
+  qty          Float
+  vehicleNumber String?
+  challanNumber String?
+  gatedOutById String
+  gatedOutBy   User       @relation("RtvGatedOutBy", fields: [gatedOutById], references: [id])
+  gatedOutAt   DateTime   @default(now())
+  remarks      String?
+  isActive     Boolean    @default(true)
+  isTestData   Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  createdBy    String?
+  updatedBy    String?
+
+  @@map("rtv_gate_outs")
+  @@index([companyId, rtvRequestId])
 }
 
 // STORE-008 sections 19-24: Hold/Quarantine tracking, deliberately

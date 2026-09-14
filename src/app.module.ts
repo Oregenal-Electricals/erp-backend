@@ -86,6 +86,7 @@ import { MaterialIssueOverrideModule } from './material-issue-override/material-
 import { AdditionalMaterialRequestModule } from './additional-material-request/additional-material-request.module';
 import { StockLocationBalanceModule } from './stock-location-balance/stock-location-balance.module';
 import { StockLocationTransferModule } from './stock-location-transfer/stock-location-transfer.module';
+import { RtvModule } from './rtv/rtv.module';
 import { ProductSellingPriceModule } from './product-selling-price/product-selling-price.module';
 import { GrnDiscrepancyModule } from './grn-discrepancy/grn-discrepancy.module';
 import { NcrModule } from './ncr/ncr.module';
@@ -247,6 +248,7 @@ import configuration from './config/configuration';
     AdditionalMaterialRequestModule,
     StockLocationBalanceModule,
     StockLocationTransferModule,
+    RtvModule,
     ProductSellingPriceModule,
     GrnDiscrepancyModule,
     NcrModule,

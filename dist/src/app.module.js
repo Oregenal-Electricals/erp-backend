@@ -98,6 +98,7 @@ const material_issue_override_module_1 = require("./material-issue-override/mate
 const additional_material_request_module_1 = require("./additional-material-request/additional-material-request.module");
 const stock_location_balance_module_1 = require("./stock-location-balance/stock-location-balance.module");
 const stock_location_transfer_module_1 = require("./stock-location-transfer/stock-location-transfer.module");
+const rtv_module_1 = require("./rtv/rtv.module");
 const product_selling_price_module_1 = require("./product-selling-price/product-selling-price.module");
 const grn_discrepancy_module_1 = require("./grn-discrepancy/grn-discrepancy.module");
 const ncr_module_1 = require("./ncr/ncr.module");
@@ -265,6 +266,7 @@ exports.AppModule = AppModule = __decorate([
             additional_material_request_module_1.AdditionalMaterialRequestModule,
             stock_location_balance_module_1.StockLocationBalanceModule,
             stock_location_transfer_module_1.StockLocationTransferModule,
+            rtv_module_1.RtvModule,
             product_selling_price_module_1.ProductSellingPriceModule,
             grn_discrepancy_module_1.GrnDiscrepancyModule,
             ncr_module_1.NcrModule,
