@@ -99,6 +99,7 @@ const additional_material_request_module_1 = require("./additional-material-requ
 const stock_location_balance_module_1 = require("./stock-location-balance/stock-location-balance.module");
 const stock_location_transfer_module_1 = require("./stock-location-transfer/stock-location-transfer.module");
 const rtv_module_1 = require("./rtv/rtv.module");
+const trace_module_1 = require("./trace/trace.module");
 const product_selling_price_module_1 = require("./product-selling-price/product-selling-price.module");
 const grn_discrepancy_module_1 = require("./grn-discrepancy/grn-discrepancy.module");
 const ncr_module_1 = require("./ncr/ncr.module");
@@ -267,6 +268,7 @@ exports.AppModule = AppModule = __decorate([
             stock_location_balance_module_1.StockLocationBalanceModule,
             stock_location_transfer_module_1.StockLocationTransferModule,
             rtv_module_1.RtvModule,
+            trace_module_1.TraceModule,
             product_selling_price_module_1.ProductSellingPriceModule,
             grn_discrepancy_module_1.GrnDiscrepancyModule,
             ncr_module_1.NcrModule,
