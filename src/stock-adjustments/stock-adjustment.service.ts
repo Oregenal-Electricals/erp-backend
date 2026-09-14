@@ -30,8 +30,11 @@ export class StockAdjustmentService {
   // table is that status's own existing source of truth (mirroring
   // STORE-010's getMaterialSummary(), which this reuses directly rather
   // than recomputing the same numbers a second way).
-  private async getSystemQty(itemCode: string, status: string, user: any): Promise<number> {
-    const summary = await this.stockLedger.getMaterialSummary(itemCode, user);
+  private async getSystemQty(itemCode: string, status: string, user: any, warehouseId: string): Promise<number> {
+    // STORE-018 follow-up: now scoped to this specific warehouse -
+    // getMaterialSummary() was company-wide, which would have been
+    // wrong for any company with more than one warehouse.
+    const summary = await this.stockLedger.getMaterialSummary(itemCode, user, warehouseId);
     switch (status) {
       case 'HOLD': return summary.hold;
       case 'REJECTED': return summary.rejected;
@@ -70,7 +73,7 @@ export class StockAdjustmentService {
     const items: any[] = [];
     for (const item of dto.items) {
       const status = item.status || 'AVAILABLE';
-      const systemQty = await this.getSystemQty(item.itemCode, status, user);
+      const systemQty = await this.getSystemQty(item.itemCode, status, user, dto.warehouseId);
       const adjustmentQty = item.physicalQty - systemQty;
       if (dto.adjustmentType === 'INCREASE' && adjustmentQty < 0) {
         throw new BadRequestException(`${item.itemCode}: physicalQty is less than systemQty - this is a decrease, not an increase. Use adjustmentType DECREASE or RECOUNT.`);

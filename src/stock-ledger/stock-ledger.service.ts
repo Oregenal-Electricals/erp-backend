@@ -423,10 +423,17 @@ export class StockLedgerService {
   // and RejectedStock) rather than maintaining a separate summary
   // balance that could drift - the same "single stock truth" principle
   // section 3 asks for.
-  async getMaterialSummary(itemCode: string, user: any) {
+  // STORE-018 follow-up: warehouseId is optional and defaults to the
+  // prior company-wide behavior (backward compatible for existing
+  // callers) - when a caller does have a specific warehouse in hand
+  // (e.g. STORE-016's stock count, which is always scoped to one
+  // warehouse), passing it scopes every sub-query below to that
+  // warehouse rather than summing across all of them.
+  async getMaterialSummary(itemCode: string, user: any, warehouseId?: string) {
     const companyFilter = user.role !== 'SUPER_ADMIN' ? { companyId: user.companyId } : {};
+    const warehouseFilter = warehouseId ? { warehouseId } : {};
 
-    const balances = await this.prisma.stockBalance.findMany({ where: { itemCode, ...companyFilter } });
+    const balances = await this.prisma.stockBalance.findMany({ where: { itemCode, ...companyFilter, ...warehouseFilter } });
     const available = balances.reduce((s, b) => s + b.availableQty, 0);
     const reserved = balances.reduce((s, b) => s + b.reservedQty, 0);
     const putAwayPending = balances.reduce((s, b) => s + (b.putAwayPendingQty || 0), 0);
@@ -437,19 +444,19 @@ export class StockLedgerService {
     // maintained counter (StockBalance.inQcQty is dead precisely because
     // it tried to be that and nothing ever kept it in sync).
     const pendingIqcItems = await this.prisma.iqcItem.findMany({
-      where: { itemCode, isActive: true, iqc: { status: { not: 'APPROVED' }, ...companyFilter } },
+      where: { itemCode, isActive: true, iqc: { status: { not: 'APPROVED' }, ...companyFilter, ...(warehouseId ? { grn: { warehouseId } } : {}) } },
       select: { receivedQty: true },
     });
     const qcPending = pendingIqcItems.reduce((s, i) => s + i.receivedQty, 0);
 
     const holdItems = await this.prisma.holdStockItem.findMany({
-      where: { itemCode, isActive: true, reinspectionStatus: 'PENDING', holdStock: { ...companyFilter } },
+      where: { itemCode, isActive: true, reinspectionStatus: 'PENDING', holdStock: { ...companyFilter, ...warehouseFilter } },
       select: { holdQty: true },
     });
     const hold = holdItems.reduce((s, i) => s + i.holdQty, 0);
 
     const rejectedItems = await this.prisma.rejectedStockItem.findMany({
-      where: { itemCode, isActive: true, rejectedStock: { ...companyFilter } },
+      where: { itemCode, isActive: true, rejectedStock: { ...companyFilter, ...warehouseFilter } },
       select: { rejectedQty: true },
     });
     const rejected = rejectedItems.reduce((s, i) => s + i.rejectedQty, 0);

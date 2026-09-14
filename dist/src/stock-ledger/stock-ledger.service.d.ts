@@ -240,7 +240,7 @@ export declare class StockLedgerService {
         })[];
         lowStockCount: number;
     }>;
-    getMaterialSummary(itemCode: string, user: any): Promise<{
+    getMaterialSummary(itemCode: string, user: any, warehouseId?: string): Promise<{
         itemCode: string;
         itemName: string;
         physicalTotal: number;

@@ -31,8 +31,8 @@ let StockAdjustmentService = class StockAdjustmentService {
             items: { where: { isActive: true } },
         };
     }
-    async getSystemQty(itemCode, status, user) {
-        const summary = await this.stockLedger.getMaterialSummary(itemCode, user);
+    async getSystemQty(itemCode, status, user, warehouseId) {
+        const summary = await this.stockLedger.getMaterialSummary(itemCode, user, warehouseId);
         switch (status) {
             case 'HOLD': return summary.hold;
             case 'REJECTED': return summary.rejected;
@@ -56,7 +56,7 @@ let StockAdjustmentService = class StockAdjustmentService {
         const items = [];
         for (const item of dto.items) {
             const status = item.status || 'AVAILABLE';
-            const systemQty = await this.getSystemQty(item.itemCode, status, user);
+            const systemQty = await this.getSystemQty(item.itemCode, status, user, dto.warehouseId);
             const adjustmentQty = item.physicalQty - systemQty;
             if (dto.adjustmentType === 'INCREASE' && adjustmentQty < 0) {
                 throw new common_1.BadRequestException(`${item.itemCode}: physicalQty is less than systemQty - this is a decrease, not an increase. Use adjustmentType DECREASE or RECOUNT.`);

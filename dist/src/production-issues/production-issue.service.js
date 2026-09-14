@@ -177,7 +177,14 @@ let ProductionIssueService = class ProductionIssueService {
                     data: { availableQty: { decrement: item.issuedQty }, updatedBy: user.id },
                 });
             }
-            await this.locationBalance.consumeAcrossBins(user.companyId, item.itemCode, item.batchId, item.issuedQty, user.id);
+            const locationCovered = await this.locationBalance.consumeAcrossBins(user.companyId, item.itemCode, item.batchId, item.issuedQty, user.id);
+            if (locationCovered < item.issuedQty - 0.0001) {
+                await this.audit.log({
+                    tableName: 'stock_location_balances', recordId: item.itemCode, action: 'UPDATE',
+                    newValues: { note: `Location view could only account for ${locationCovered} of ${item.issuedQty} issued - bin-level location may be stale or incomplete for this item/batch.` },
+                    changedBy: user.id,
+                });
+            }
             const decrementReserved = Math.min(item.issuedQty, balance.reservedQty);
             if (decrementReserved > 0.0001) {
                 await this.prisma.stockBalance.updateMany({

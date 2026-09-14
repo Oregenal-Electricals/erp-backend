@@ -44,7 +44,7 @@ describe('StockAdjustmentService - STORE-016', () => {
   describe('create - systemQty is server-computed, never trusted from the caller', () => {
     it('computes systemQty from getMaterialSummary(), ignoring anything the caller might have sent for it', async () => {
       const r = await service.create(makeDto() as any, user);
-      expect(stockLedger.getMaterialSummary).toHaveBeenCalledWith('DRIVER-01', user);
+      expect(stockLedger.getMaterialSummary).toHaveBeenCalledWith('DRIVER-01', user, 'wh-1');
       expect(r.items[0].systemQty).toBe(1000);
       expect(r.items[0].adjustmentQty).toBe(-20); // 980 - 1000
     });

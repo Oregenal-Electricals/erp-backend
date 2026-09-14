@@ -215,7 +215,19 @@ export class ProductionIssueService {
       // best-effort, never blocks the issue itself if the location
       // view can't fully cover this qty (StockBalance/StockBatch above
       // remain the authoritative gate on whether this issue was valid).
-      await this.locationBalance.consumeAcrossBins(user.companyId, item.itemCode, item.batchId, item.issuedQty, user.id);
+      const locationCovered = await this.locationBalance.consumeAcrossBins(user.companyId, item.itemCode, item.batchId, item.issuedQty, user.id);
+      // STORE-018 follow-up: the location view is best-effort and can
+      // legitimately fall short (a batch predating the STORE-015
+      // backfill, or a non-batch-tracked item) - never block the issue
+      // for that, but the gap should be visible, not silently
+      // swallowed, so Store can investigate if it recurs.
+      if (locationCovered < item.issuedQty - 0.0001) {
+        await this.audit.log({
+          tableName: 'stock_location_balances', recordId: item.itemCode, action: 'UPDATE',
+          newValues: { note: `Location view could only account for ${locationCovered} of ${item.issuedQty} issued - bin-level location may be stale or incomplete for this item/batch.` },
+          changedBy: user.id,
+        });
+      }
 
       // STORE-011: this is the actual physical departure - the material
       // was reserved (StockBalance.reservedQty went up, availableQty
