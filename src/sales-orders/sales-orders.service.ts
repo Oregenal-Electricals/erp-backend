@@ -403,6 +403,21 @@ export class SalesOrdersService {
     return updated;
   }
 
+  // DSP-001 sections 7-10: what the SO creation form needs to populate
+  // the SFG stage dropdown - only stages actually marked saleable for
+  // this specific product's routing, scoped to Sales permissions (not
+  // Production's) since this is consumed at order-entry time by Sales
+  // staff, not by Production.
+  async getSaleableStages(itemCode: string, user: any) {
+    const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: itemCode, isActive: true } });
+    if (!product) return [];
+    const stages = await this.prisma.routingStage.findMany({
+      where: { companyId: user.companyId, isSaleable: true, routing: { finalProductId: product.id } },
+      orderBy: { sequence: 'asc' },
+    });
+    return stages.map(s => ({ id: s.id, stageName: s.stageName, sequence: s.sequence }));
+  }
+
   // DSP-001 section 21, 25: what Dispatch actually reads - only
   // released, still-open lines (pendingQty > 0), never a line whose
   // parent SO has since been cancelled. Filterable by saleType so

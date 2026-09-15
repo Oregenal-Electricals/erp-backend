@@ -27,6 +27,7 @@ let SalesOrdersController = class SalesOrdersController {
     getStats(req) { return this.soService.getStats(req.user); }
     getByCpo(cpoId, req) { return this.soService.getByCpo(cpoId, req.user); }
     findAll(req, query) { return this.soService.findAll(req.user, query); }
+    getSaleableStages(itemCode, req) { return this.soService.getSaleableStages(itemCode, req.user); }
     getDispatchReadyLines(req, query) { return this.soService.getDispatchReadyLines(req.user, query); }
     findOne(id, req) { return this.soService.findOne(id, req.user); }
     create(dto, req) { return this.soService.create(dto, req.user); }
@@ -61,6 +62,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], SalesOrdersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('saleable-stages/:itemCode'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),
+    __param(0, (0, common_1.Param)('itemCode')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], SalesOrdersController.prototype, "getSaleableStages", null);
 __decorate([
     (0, common_1.Get)('dispatch-ready'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DISPATCH_VIEW),

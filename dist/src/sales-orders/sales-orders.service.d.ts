@@ -380,6 +380,11 @@ export declare class SalesOrdersService {
         releasedBy: string | null;
         soId: string;
     }>;
+    getSaleableStages(itemCode: string, user: any): Promise<{
+        id: string;
+        stageName: string;
+        sequence: number;
+    }[]>;
     getDispatchReadyLines(user: any, query: any): Promise<{
         soItemId: string;
         soNumber: string;

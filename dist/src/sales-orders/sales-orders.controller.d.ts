@@ -115,6 +115,11 @@ export declare class SalesOrdersController {
         page: number;
         totalPages: number;
     }>;
+    getSaleableStages(itemCode: string, req: any): Promise<{
+        id: string;
+        stageName: string;
+        sequence: number;
+    }[]>;
     getDispatchReadyLines(req: any, query: any): Promise<{
         soItemId: string;
         soNumber: string;

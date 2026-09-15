@@ -315,6 +315,16 @@ let SalesOrdersService = class SalesOrdersService {
         await this.audit.log({ tableName: 'sales_order_items', recordId: soItemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }
+    async getSaleableStages(itemCode, user) {
+        const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: itemCode, isActive: true } });
+        if (!product)
+            return [];
+        const stages = await this.prisma.routingStage.findMany({
+            where: { companyId: user.companyId, isSaleable: true, routing: { finalProductId: product.id } },
+            orderBy: { sequence: 'asc' },
+        });
+        return stages.map(s => ({ id: s.id, stageName: s.stageName, sequence: s.sequence }));
+    }
     async getDispatchReadyLines(user, query) {
         const { saleType } = query || {};
         const where = {

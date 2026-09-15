@@ -24,6 +24,10 @@ export class SalesOrdersController {
   findAll(@Request() req: any, @Query() query: any) { return this.soService.findAll(req.user, query); }
 
 
+  @Get('saleable-stages/:itemCode')
+  @RequirePermissions(Permission.SALES_VIEW)
+  getSaleableStages(@Param('itemCode') itemCode: string, @Request() req: any) { return this.soService.getSaleableStages(itemCode, req.user); }
+
   @Get('dispatch-ready')
   @RequirePermissions(Permission.DISPATCH_VIEW)
   getDispatchReadyLines(@Request() req: any, @Query() query: any) { return this.soService.getDispatchReadyLines(req.user, query); }
