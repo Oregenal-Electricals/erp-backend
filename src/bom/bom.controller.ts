@@ -12,7 +12,7 @@ export class BomController {
   constructor(private readonly bomService: BomService) {}
 
   @Get('stats')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.BOM_VIEW)
   getStats(@Request() req: any) { return this.bomService.getStats(req.user); }
 
   @Get()
