@@ -11,7 +11,11 @@ export declare class SalesOrdersService {
     private validateSaleTypeItem;
     private includes;
     create(dto: CreateSoDto, user: any): Promise<{
-        items: {
+        items: ({
+            requiredStage: {
+                stageName: string;
+            };
+        } & {
             id: string;
             description: string | null;
             isActive: boolean;
@@ -39,7 +43,7 @@ export declare class SalesOrdersService {
             releasedAt: Date | null;
             releasedBy: string | null;
             soId: string;
-        }[];
+        })[];
         cpo: {
             status: string;
             deliveryDate: Date;
@@ -71,7 +75,11 @@ export declare class SalesOrdersService {
         confirmedBy: string | null;
     }>;
     confirm(id: string, user: any): Promise<{
-        items: {
+        items: ({
+            requiredStage: {
+                stageName: string;
+            };
+        } & {
             id: string;
             description: string | null;
             isActive: boolean;
@@ -99,7 +107,7 @@ export declare class SalesOrdersService {
             releasedAt: Date | null;
             releasedBy: string | null;
             soId: string;
-        }[];
+        })[];
         cpo: {
             status: string;
             deliveryDate: Date;
@@ -131,7 +139,11 @@ export declare class SalesOrdersService {
         confirmedBy: string | null;
     }>;
     cancel(id: string, dto: CancelSoDto, user: any): Promise<{
-        items: {
+        items: ({
+            requiredStage: {
+                stageName: string;
+            };
+        } & {
             id: string;
             description: string | null;
             isActive: boolean;
@@ -159,7 +171,7 @@ export declare class SalesOrdersService {
             releasedAt: Date | null;
             releasedBy: string | null;
             soId: string;
-        }[];
+        })[];
         cpo: {
             status: string;
             deliveryDate: Date;
@@ -232,7 +244,11 @@ export declare class SalesOrdersService {
         totalPages: number;
     }>;
     findOne(id: string, user: any): Promise<{
-        items: {
+        items: ({
+            requiredStage: {
+                stageName: string;
+            };
+        } & {
             id: string;
             description: string | null;
             isActive: boolean;
@@ -260,7 +276,7 @@ export declare class SalesOrdersService {
             releasedAt: Date | null;
             releasedBy: string | null;
             soId: string;
-        }[];
+        })[];
         cpo: {
             status: string;
             deliveryDate: Date;
@@ -292,7 +308,11 @@ export declare class SalesOrdersService {
         confirmedBy: string | null;
     }>;
     getByCpo(cpoId: string, user: any): Promise<({
-        items: {
+        items: ({
+            requiredStage: {
+                stageName: string;
+            };
+        } & {
             id: string;
             description: string | null;
             isActive: boolean;
@@ -320,7 +340,7 @@ export declare class SalesOrdersService {
             releasedAt: Date | null;
             releasedBy: string | null;
             soId: string;
-        }[];
+        })[];
         cpo: {
             status: string;
             deliveryDate: Date;

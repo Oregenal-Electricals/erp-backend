@@ -150,7 +150,7 @@ export class SalesOrdersService {
 
   private includes() {
     return {
-      items: true,
+      items: { include: { requiredStage: { select: { stageName: true } } } },
       cpo: {
         select: {
           cpoNumber: true,
