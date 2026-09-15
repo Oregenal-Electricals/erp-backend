@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CancelSoDto = exports.CreateSoDto = exports.SoItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
+const SALE_TYPES = ['RM', 'SFG', 'FG'];
 class SoItemDto {
 }
 exports.SoItemDto = SoItemDto;
@@ -60,6 +61,17 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], SoItemDto.prototype, "gstRate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsIn)(SALE_TYPES),
+    __metadata("design:type", String)
+], SoItemDto.prototype, "saleType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SoItemDto.prototype, "requiredStageId", void 0);
 class CreateSoDto {
 }
 exports.CreateSoDto = CreateSoDto;

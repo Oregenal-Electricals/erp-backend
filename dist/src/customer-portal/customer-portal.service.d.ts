@@ -42,9 +42,14 @@ export declare class CustomerPortalService {
                 discount: number;
                 gstRate: number;
                 cpoItemId: string | null;
+                saleType: string;
+                requiredStageId: string | null;
                 taxableAmt: number;
                 gstAmount: number;
                 dispatchedQty: number;
+                releasedForDispatch: boolean;
+                releasedAt: Date | null;
+                releasedBy: string | null;
                 soId: string;
             }[];
         } & {

@@ -38,4 +38,12 @@ export class SalesOrdersController {
   @Post(':id/cancel')
   @RequirePermissions(Permission.SALES_EDIT)
   cancel(@Param('id') id: string, @Body() dto: CancelSoDto, @Request() req: any) { return this.soService.cancel(id, dto, req.user); }
+
+  @Post('items/:soItemId/release-for-dispatch')
+  @RequirePermissions(Permission.SALES_ORDER_RELEASE_DISPATCH)
+  releaseLineForDispatch(@Param('soItemId') soItemId: string, @Request() req: any) { return this.soService.releaseLineForDispatch(soItemId, req.user); }
+
+  @Get('dispatch-ready')
+  @RequirePermissions(Permission.DISPATCH_VIEW)
+  getDispatchReadyLines(@Request() req: any, @Query() query: any) { return this.soService.getDispatchReadyLines(req.user, query); }
 }

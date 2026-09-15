@@ -259,6 +259,7 @@ export declare class CostSheetController {
             productName: string;
             bomId: string | null;
             requiredDate: Date | null;
+            releasedAt: Date | null;
             woNumber: string;
             salesOrderId: string | null;
             routingGroupId: string | null;
@@ -276,7 +277,6 @@ export declare class CostSheetController {
             actualStartDate: Date | null;
             actualEndDate: Date | null;
             releasedById: string | null;
-            releasedAt: Date | null;
             materialAvailability: string | null;
             plannedManpower: number | null;
             plannedLabourHours: number | null;

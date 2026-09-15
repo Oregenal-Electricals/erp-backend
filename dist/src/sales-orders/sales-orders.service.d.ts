@@ -8,6 +8,7 @@ export declare class SalesOrdersService {
     private generateNumber;
     createFromCpo(cpo: any, cpoItems: any[], user: any, tx?: any): Promise<any>;
     private calcItem;
+    private validateSaleTypeItem;
     private includes;
     create(dto: CreateSoDto, user: any): Promise<{
         items: {
@@ -29,9 +30,14 @@ export declare class SalesOrdersService {
             discount: number;
             gstRate: number;
             cpoItemId: string | null;
+            saleType: string;
+            requiredStageId: string | null;
             taxableAmt: number;
             gstAmount: number;
             dispatchedQty: number;
+            releasedForDispatch: boolean;
+            releasedAt: Date | null;
+            releasedBy: string | null;
             soId: string;
         }[];
         cpo: {
@@ -84,9 +90,14 @@ export declare class SalesOrdersService {
             discount: number;
             gstRate: number;
             cpoItemId: string | null;
+            saleType: string;
+            requiredStageId: string | null;
             taxableAmt: number;
             gstAmount: number;
             dispatchedQty: number;
+            releasedForDispatch: boolean;
+            releasedAt: Date | null;
+            releasedBy: string | null;
             soId: string;
         }[];
         cpo: {
@@ -139,9 +150,14 @@ export declare class SalesOrdersService {
             discount: number;
             gstRate: number;
             cpoItemId: string | null;
+            saleType: string;
+            requiredStageId: string | null;
             taxableAmt: number;
             gstAmount: number;
             dispatchedQty: number;
+            releasedForDispatch: boolean;
+            releasedAt: Date | null;
+            releasedBy: string | null;
             soId: string;
         }[];
         cpo: {
@@ -235,9 +251,14 @@ export declare class SalesOrdersService {
             discount: number;
             gstRate: number;
             cpoItemId: string | null;
+            saleType: string;
+            requiredStageId: string | null;
             taxableAmt: number;
             gstAmount: number;
             dispatchedQty: number;
+            releasedForDispatch: boolean;
+            releasedAt: Date | null;
+            releasedBy: string | null;
             soId: string;
         }[];
         cpo: {
@@ -290,9 +311,14 @@ export declare class SalesOrdersService {
             discount: number;
             gstRate: number;
             cpoItemId: string | null;
+            saleType: string;
+            requiredStageId: string | null;
             taxableAmt: number;
             gstAmount: number;
             dispatchedQty: number;
+            releasedForDispatch: boolean;
+            releasedAt: Date | null;
+            releasedBy: string | null;
             soId: string;
         }[];
         cpo: {
@@ -325,6 +351,51 @@ export declare class SalesOrdersService {
         confirmedDate: Date | null;
         confirmedBy: string | null;
     })[]>;
+    releaseLineForDispatch(soItemId: string, user: any): Promise<{
+        id: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        itemCode: string;
+        itemName: string;
+        uom: string;
+        totalAmount: number;
+        qty: number;
+        pendingQty: number;
+        unitPrice: number;
+        discount: number;
+        gstRate: number;
+        cpoItemId: string | null;
+        saleType: string;
+        requiredStageId: string | null;
+        taxableAmt: number;
+        gstAmount: number;
+        dispatchedQty: number;
+        releasedForDispatch: boolean;
+        releasedAt: Date | null;
+        releasedBy: string | null;
+        soId: string;
+    }>;
+    getDispatchReadyLines(user: any, query: any): Promise<{
+        soItemId: string;
+        soNumber: string;
+        customerName: string;
+        customerPoNumber: string;
+        itemCode: string;
+        itemName: string;
+        saleType: string;
+        requiredStageName: string;
+        orderedQty: number;
+        dispatchedQty: number;
+        pendingQty: number;
+        uom: string;
+        deliveryDate: Date;
+        salesOrderStatus: string;
+    }[]>;
     getStats(user: any): Promise<{
         total: number;
         draft: number;

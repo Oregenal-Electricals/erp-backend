@@ -113,6 +113,41 @@ export class SalesOrdersService {
     return { taxableAmt, gstAmount, totalAmount, pendingQty: qty };
   }
 
+  private async validateSaleTypeItem(item: any, user: any) {
+    const saleType = item.saleType || 'FG';
+    if (!['RM', 'SFG', 'FG'].includes(saleType)) {
+      throw new BadRequestException(`Invalid saleType "${saleType}" for ${item.itemCode} - must be RM, SFG, or FG.`);
+    }
+
+    if (saleType === 'RM') {
+      const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+      if (!rm) throw new BadRequestException(`"${item.itemCode}" is marked as an RM sale but no active Raw Material with that code exists.`);
+      return { saleType, requiredStageId: null };
+    }
+
+    const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+    if (!product) throw new BadRequestException(`"${item.itemCode}" is marked as a ${saleType} sale but no active Product with that code exists.`);
+
+    if (saleType === 'FG') {
+      return { saleType, requiredStageId: null };
+    }
+
+    if (!item.requiredStageId) {
+      throw new BadRequestException(`"${item.itemCode}" is marked as an SFG sale but no required Production Stage was selected.`);
+    }
+    const stage = await this.prisma.routingStage.findFirst({
+      where: { id: item.requiredStageId, companyId: user.companyId, routing: { finalProductId: product.id } },
+      include: { routing: { select: { routingName: true } } },
+    });
+    if (!stage) {
+      throw new BadRequestException(`Selected stage is not a valid Production Stage for "${item.itemCode}".`);
+    }
+    if (!stage.isSaleable) {
+      throw new BadRequestException(`${stage.stageName} stage is not configured as saleable for this product.`);
+    }
+    return { saleType, requiredStageId: stage.id };
+  }
+
   private includes() {
     return {
       items: true,
@@ -155,20 +190,26 @@ export class SalesOrdersService {
 
     const soNumber = await this.generateNumber(user.companyId);
 
-    const calcItems = dto.items.map((item) => ({
-      cpoItemId: item.cpoItemId,
-      itemCode: item.itemCode,
-      itemName: item.itemName,
-      description: item.description,
-      qty: item.qty,
-      uom: item.uom || 'PCS',
-      unitPrice: item.unitPrice,
-      discount: item.discount || 0,
-      gstRate: item.gstRate ?? 18,
-      ...this.calcItem(item),
-      createdBy: user.id,
-      updatedBy: user.id,
-    }));
+    const calcItems = [];
+    for (const item of dto.items) {
+      const { saleType, requiredStageId } = await this.validateSaleTypeItem(item, user);
+      calcItems.push({
+        cpoItemId: item.cpoItemId,
+        itemCode: item.itemCode,
+        itemName: item.itemName,
+        description: item.description,
+        qty: item.qty,
+        uom: item.uom || 'PCS',
+        unitPrice: item.unitPrice,
+        discount: item.discount || 0,
+        gstRate: item.gstRate ?? 18,
+        saleType,
+        requiredStageId,
+        ...this.calcItem(item),
+        createdBy: user.id,
+        updatedBy: user.id,
+      });
+    }
 
     const subtotal = calcItems.reduce((s, i) => s + i.qty * i.unitPrice, 0);
     const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
@@ -323,6 +364,84 @@ export class SalesOrdersService {
       include: this.includes(),
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // DSP-001 sections 13-15, 21: explicit per-line release action - a
+  // line only becomes visible to Dispatch once released, separately
+  // from the SO header's own approval status, so different lines on
+  // the same SO can release independently (RM ready, SFG ready, FG
+  // not yet). Re-validates SFG saleable-stage configuration at release
+  // time, not just at line-creation time, since routing/saleable
+  // config can change in between.
+  async releaseLineForDispatch(soItemId: string, user: any) {
+    const item = await this.prisma.salesOrderItem.findFirst({
+      where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
+      include: { salesOrder: true, requiredStage: true },
+    });
+    if (!item) throw new NotFoundException('Sales Order line not found');
+    if (!['CONFIRMED', 'IN_PRODUCTION'].includes(item.salesOrder.status)) {
+      throw new BadRequestException(`Sales Order must be CONFIRMED or IN_PRODUCTION to release a line for Dispatch (currently ${item.salesOrder.status})`);
+    }
+    if (item.releasedForDispatch) {
+      throw new BadRequestException('This line is already released for Dispatch');
+    }
+
+    if (item.saleType === 'SFG') {
+      if (!item.requiredStage) {
+        throw new BadRequestException(`"${item.itemCode}" is marked as an SFG sale but has no required Production Stage on record.`);
+      }
+      if (!item.requiredStage.isSaleable) {
+        throw new BadRequestException(`${item.requiredStage.stageName} stage is not configured as saleable for this product.`);
+      }
+    }
+
+    const updated = await this.prisma.salesOrderItem.update({
+      where: { id: soItemId },
+      data: { releasedForDispatch: true, releasedAt: new Date(), releasedBy: user.id, updatedBy: user.id },
+    });
+    await this.audit.log({ tableName: 'sales_order_items', recordId: soItemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
+  // DSP-001 section 21, 25: what Dispatch actually reads - only
+  // released, still-open lines (pendingQty > 0), never a line whose
+  // parent SO has since been cancelled. Filterable by saleType so
+  // Dispatch can show ALL/RM/SFG/FG without needing separate pages.
+  async getDispatchReadyLines(user: any, query: any) {
+    const { saleType } = query || {};
+    const where: any = {
+      releasedForDispatch: true,
+      isActive: true,
+      pendingQty: { gt: 0 },
+      salesOrder: { companyId: user.companyId, status: { notIn: ['CANCELLED'] } },
+    };
+    if (saleType) where.saleType = saleType;
+
+    const items = await this.prisma.salesOrderItem.findMany({
+      where,
+      include: {
+        salesOrder: { select: { soNumber: true, customerName: true, deliveryDate: true, status: true, cpo: { select: { customerPoNumber: true } } } },
+        requiredStage: { select: { stageName: true } },
+      },
+      orderBy: { salesOrder: { deliveryDate: 'asc' } },
+    });
+
+    return items.map(i => ({
+      soItemId: i.id,
+      soNumber: i.salesOrder.soNumber,
+      customerName: i.salesOrder.customerName,
+      customerPoNumber: i.salesOrder.cpo?.customerPoNumber,
+      itemCode: i.itemCode,
+      itemName: i.itemName,
+      saleType: i.saleType,
+      requiredStageName: i.requiredStage?.stageName || null,
+      orderedQty: i.qty,
+      dispatchedQty: i.dispatchedQty,
+      pendingQty: i.pendingQty,
+      uom: i.uom,
+      deliveryDate: i.salesOrder.deliveryDate,
+      salesOrderStatus: i.salesOrder.status,
+    }));
   }
 
   async getStats(user: any) {

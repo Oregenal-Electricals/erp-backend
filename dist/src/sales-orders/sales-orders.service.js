@@ -76,6 +76,38 @@ let SalesOrdersService = class SalesOrdersService {
         const totalAmount = Math.round((taxableAmt + gstAmount) * 100) / 100;
         return { taxableAmt, gstAmount, totalAmount, pendingQty: qty };
     }
+    async validateSaleTypeItem(item, user) {
+        const saleType = item.saleType || 'FG';
+        if (!['RM', 'SFG', 'FG'].includes(saleType)) {
+            throw new common_1.BadRequestException(`Invalid saleType "${saleType}" for ${item.itemCode} - must be RM, SFG, or FG.`);
+        }
+        if (saleType === 'RM') {
+            const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+            if (!rm)
+                throw new common_1.BadRequestException(`"${item.itemCode}" is marked as an RM sale but no active Raw Material with that code exists.`);
+            return { saleType, requiredStageId: null };
+        }
+        const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+        if (!product)
+            throw new common_1.BadRequestException(`"${item.itemCode}" is marked as a ${saleType} sale but no active Product with that code exists.`);
+        if (saleType === 'FG') {
+            return { saleType, requiredStageId: null };
+        }
+        if (!item.requiredStageId) {
+            throw new common_1.BadRequestException(`"${item.itemCode}" is marked as an SFG sale but no required Production Stage was selected.`);
+        }
+        const stage = await this.prisma.routingStage.findFirst({
+            where: { id: item.requiredStageId, companyId: user.companyId, routing: { finalProductId: product.id } },
+            include: { routing: { select: { routingName: true } } },
+        });
+        if (!stage) {
+            throw new common_1.BadRequestException(`Selected stage is not a valid Production Stage for "${item.itemCode}".`);
+        }
+        if (!stage.isSaleable) {
+            throw new common_1.BadRequestException(`${stage.stageName} stage is not configured as saleable for this product.`);
+        }
+        return { saleType, requiredStageId: stage.id };
+    }
     includes() {
         return {
             items: true,
@@ -90,6 +122,7 @@ let SalesOrdersService = class SalesOrdersService {
         };
     }
     async create(dto, user) {
+        var _a;
         const cpo = await this.prisma.customerPo.findFirst({
             where: { id: dto.cpoId, companyId: user.companyId },
         });
@@ -103,10 +136,12 @@ let SalesOrdersService = class SalesOrdersService {
         if (existingSo)
             throw new common_1.BadRequestException(`This CPO already has Sales Order ${existingSo.soNumber}. A CPO can only have one Sales Order - split shipments in Work Orders / Dispatch Planning instead.`);
         const soNumber = await this.generateNumber(user.companyId);
-        const calcItems = dto.items.map((item) => {
-            var _a;
-            return (Object.assign(Object.assign({ cpoItemId: item.cpoItemId, itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id }));
-        });
+        const calcItems = [];
+        for (const item of dto.items) {
+            const { saleType, requiredStageId } = await this.validateSaleTypeItem(item, user);
+            calcItems.push(Object.assign(Object.assign({ cpoItemId: item.cpoItemId, itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18, saleType,
+                requiredStageId }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id }));
+        }
         const subtotal = calcItems.reduce((s, i) => s + i.qty * i.unitPrice, 0);
         const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
         const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
@@ -250,6 +285,72 @@ let SalesOrdersService = class SalesOrdersService {
             where: { cpoId, companyId: user.companyId },
             include: this.includes(),
             orderBy: { createdAt: 'desc' },
+        });
+    }
+    async releaseLineForDispatch(soItemId, user) {
+        const item = await this.prisma.salesOrderItem.findFirst({
+            where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
+            include: { salesOrder: true, requiredStage: true },
+        });
+        if (!item)
+            throw new common_1.NotFoundException('Sales Order line not found');
+        if (!['CONFIRMED', 'IN_PRODUCTION'].includes(item.salesOrder.status)) {
+            throw new common_1.BadRequestException(`Sales Order must be CONFIRMED or IN_PRODUCTION to release a line for Dispatch (currently ${item.salesOrder.status})`);
+        }
+        if (item.releasedForDispatch) {
+            throw new common_1.BadRequestException('This line is already released for Dispatch');
+        }
+        if (item.saleType === 'SFG') {
+            if (!item.requiredStage) {
+                throw new common_1.BadRequestException(`"${item.itemCode}" is marked as an SFG sale but has no required Production Stage on record.`);
+            }
+            if (!item.requiredStage.isSaleable) {
+                throw new common_1.BadRequestException(`${item.requiredStage.stageName} stage is not configured as saleable for this product.`);
+            }
+        }
+        const updated = await this.prisma.salesOrderItem.update({
+            where: { id: soItemId },
+            data: { releasedForDispatch: true, releasedAt: new Date(), releasedBy: user.id, updatedBy: user.id },
+        });
+        await this.audit.log({ tableName: 'sales_order_items', recordId: soItemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
+        return updated;
+    }
+    async getDispatchReadyLines(user, query) {
+        const { saleType } = query || {};
+        const where = {
+            releasedForDispatch: true,
+            isActive: true,
+            pendingQty: { gt: 0 },
+            salesOrder: { companyId: user.companyId, status: { notIn: ['CANCELLED'] } },
+        };
+        if (saleType)
+            where.saleType = saleType;
+        const items = await this.prisma.salesOrderItem.findMany({
+            where,
+            include: {
+                salesOrder: { select: { soNumber: true, customerName: true, deliveryDate: true, status: true, cpo: { select: { customerPoNumber: true } } } },
+                requiredStage: { select: { stageName: true } },
+            },
+            orderBy: { salesOrder: { deliveryDate: 'asc' } },
+        });
+        return items.map(i => {
+            var _a, _b;
+            return ({
+                soItemId: i.id,
+                soNumber: i.salesOrder.soNumber,
+                customerName: i.salesOrder.customerName,
+                customerPoNumber: (_a = i.salesOrder.cpo) === null || _a === void 0 ? void 0 : _a.customerPoNumber,
+                itemCode: i.itemCode,
+                itemName: i.itemName,
+                saleType: i.saleType,
+                requiredStageName: ((_b = i.requiredStage) === null || _b === void 0 ? void 0 : _b.stageName) || null,
+                orderedQty: i.qty,
+                dispatchedQty: i.dispatchedQty,
+                pendingQty: i.pendingQty,
+                uom: i.uom,
+                deliveryDate: i.salesOrder.deliveryDate,
+                salesOrderStatus: i.salesOrder.status,
+            });
         });
     }
     async getStats(user) {

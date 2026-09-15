@@ -4534,12 +4534,18 @@ model RoutingStage {
   bomId      String
   bom        Bom            @relation(fields: [bomId], references: [id])
   warehouseId String?
+  // DSP-001 section 9: per-product, per-stage sale control - whether
+  // this stage's output can be sold to a customer as SFG. Defaults to
+  // false so existing routing stages are not retroactively saleable.
+  isSaleable Boolean        @default(false)
   isActive   Boolean        @default(true)
   isTestData Boolean        @default(false)
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   createdBy  String?
   updatedBy  String?
+
+  salesOrderItems SalesOrderItem[]
 
   @@map("routing_stages")
   @@index([routingId])
@@ -5505,6 +5511,26 @@ model SalesOrderItem {
   totalAmount   Float       @default(0)
   dispatchedQty Float       @default(0)
   pendingQty    Float       @default(0)
+  // DSP-001 section 4-5: what kind of item the customer is buying on
+  // THIS line - RM, SFG, or FG. Line-level, not header-level, since one
+  // Sales Order can mix all three. Defaults to FG for backward
+  // compatibility with every existing row and with CPO-originated SOs
+  // (which don't yet capture this at the CPO stage).
+  saleType      String      @default("FG") // RM, SFG, FG
+  // DSP-001 sections 7-10: for SFG lines only - which specific saleable
+  // Production Stage the customer wants output from. Nullable because
+  // RM and FG lines never set it. Validated at release time against
+  // isSaleable on the referenced stage, not just at data-entry time,
+  // since routing/saleable configuration can change between order entry
+  // and release.
+  requiredStageId String?
+  requiredStage   RoutingStage? @relation(fields: [requiredStageId], references: [id])
+  // DSP-001 sections 14-15, 21: explicit release action, separate from
+  // the SO header's own status - a line only becomes visible to Dispatch
+  // once released, and lines on the same SO can release independently.
+  releasedForDispatch Boolean   @default(false)
+  releasedAt          DateTime?
+  releasedBy          String?
   isActive      Boolean     @default(true)
   isTestData    Boolean     @default(false)
   createdAt     DateTime    @default(now())

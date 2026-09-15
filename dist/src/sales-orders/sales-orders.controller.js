@@ -31,6 +31,8 @@ let SalesOrdersController = class SalesOrdersController {
     create(dto, req) { return this.soService.create(dto, req.user); }
     confirm(id, req) { return this.soService.confirm(id, req.user); }
     cancel(id, dto, req) { return this.soService.cancel(id, dto, req.user); }
+    releaseLineForDispatch(soItemId, req) { return this.soService.releaseLineForDispatch(soItemId, req.user); }
+    getDispatchReadyLines(req, query) { return this.soService.getDispatchReadyLines(req.user, query); }
 };
 exports.SalesOrdersController = SalesOrdersController;
 __decorate([
@@ -96,6 +98,24 @@ __decorate([
     __metadata("design:paramtypes", [String, sales_order_dto_1.CancelSoDto, Object]),
     __metadata("design:returntype", void 0)
 ], SalesOrdersController.prototype, "cancel", null);
+__decorate([
+    (0, common_1.Post)('items/:soItemId/release-for-dispatch'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_ORDER_RELEASE_DISPATCH),
+    __param(0, (0, common_1.Param)('soItemId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], SalesOrdersController.prototype, "releaseLineForDispatch", null);
+__decorate([
+    (0, common_1.Get)('dispatch-ready'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DISPATCH_VIEW),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], SalesOrdersController.prototype, "getDispatchReadyLines", null);
 exports.SalesOrdersController = SalesOrdersController = __decorate([
     (0, common_1.Controller)('sales-orders'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),

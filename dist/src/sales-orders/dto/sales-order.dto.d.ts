@@ -8,6 +8,8 @@ export declare class SoItemDto {
     unitPrice: number;
     discount?: number;
     gstRate?: number;
+    saleType?: string;
+    requiredStageId?: string;
 }
 export declare class CreateSoDto {
     cpoId: string;
