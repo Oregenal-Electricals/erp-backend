@@ -115,6 +115,22 @@ export declare class SalesOrdersController {
         page: number;
         totalPages: number;
     }>;
+    getDispatchReadyLines(req: any, query: any): Promise<{
+        soItemId: string;
+        soNumber: string;
+        customerName: string;
+        customerPoNumber: string;
+        itemCode: string;
+        itemName: string;
+        saleType: string;
+        requiredStageName: string;
+        orderedQty: number;
+        dispatchedQty: number;
+        pendingQty: number;
+        uom: string;
+        deliveryDate: Date;
+        salesOrderStatus: string;
+    }[]>;
     findOne(id: string, req: any): Promise<{
         items: {
             id: string;
@@ -384,20 +400,4 @@ export declare class SalesOrdersController {
         releasedBy: string | null;
         soId: string;
     }>;
-    getDispatchReadyLines(req: any, query: any): Promise<{
-        soItemId: string;
-        soNumber: string;
-        customerName: string;
-        customerPoNumber: string;
-        itemCode: string;
-        itemName: string;
-        saleType: string;
-        requiredStageName: string;
-        orderedQty: number;
-        dispatchedQty: number;
-        pendingQty: number;
-        uom: string;
-        deliveryDate: Date;
-        salesOrderStatus: string;
-    }[]>;
 }

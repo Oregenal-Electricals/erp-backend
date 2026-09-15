@@ -23,6 +23,10 @@ export class SalesOrdersController {
   @RequirePermissions(Permission.SALES_ORDER_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.soService.findAll(req.user, query); }
 
+
+  @Get('dispatch-ready')
+  @RequirePermissions(Permission.DISPATCH_VIEW)
+  getDispatchReadyLines(@Request() req: any, @Query() query: any) { return this.soService.getDispatchReadyLines(req.user, query); }
   @Get(':id')
   @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.soService.findOne(id, req.user); }
@@ -42,8 +46,4 @@ export class SalesOrdersController {
   @Post('items/:soItemId/release-for-dispatch')
   @RequirePermissions(Permission.SALES_ORDER_RELEASE_DISPATCH)
   releaseLineForDispatch(@Param('soItemId') soItemId: string, @Request() req: any) { return this.soService.releaseLineForDispatch(soItemId, req.user); }
-
-  @Get('dispatch-ready')
-  @RequirePermissions(Permission.DISPATCH_VIEW)
-  getDispatchReadyLines(@Request() req: any, @Query() query: any) { return this.soService.getDispatchReadyLines(req.user, query); }
 }
