@@ -170,6 +170,41 @@ export declare class SalesOrdersController {
         sourceResolvedAt: Date;
         sourceResolvedBy: string;
     }>;
+    checkAvailability(soItemId: string, req: any): Promise<{
+        soItemId: string;
+        status: string;
+        reasons: string[];
+        checkedAt: Date;
+        itemCode?: undefined;
+        saleType?: undefined;
+        sourceType?: undefined;
+        requestedQty?: undefined;
+        alreadyDispatchedQty?: undefined;
+        remainingOrderQty?: undefined;
+        physicalQty?: undefined;
+        reservedQty?: undefined;
+        freeQty?: undefined;
+        dispatchableNow?: undefined;
+        shortage?: undefined;
+        breakdown?: undefined;
+    } | {
+        soItemId: string;
+        itemCode: string;
+        saleType: string;
+        sourceType: string;
+        requestedQty: number;
+        alreadyDispatchedQty: number;
+        remainingOrderQty: number;
+        physicalQty: number;
+        reservedQty: number;
+        freeQty: number;
+        dispatchableNow: number;
+        shortage: number;
+        status: string;
+        reasons: string[];
+        breakdown: any;
+        checkedAt: Date;
+    }>;
     findOne(id: string, req: any): Promise<{
         items: ({
             requiredStage: {

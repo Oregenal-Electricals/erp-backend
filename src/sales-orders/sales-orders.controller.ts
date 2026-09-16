@@ -35,6 +35,10 @@ export class SalesOrdersController {
   @RequirePermissions(Permission.DISPATCH_SOURCE_VIEW)
   getSourceDetail(@Param('soItemId') soItemId: string, @Request() req: any) { return this.soService.getSourceDetail(soItemId, req.user); }
 
+  @Get('items/:soItemId/availability')
+  @RequirePermissions(Permission.DISPATCH_AVAILABILITY_VIEW)
+  checkAvailability(@Param('soItemId') soItemId: string, @Request() req: any) { return this.soService.checkAvailability(soItemId, req.user); }
+
   @Get(':id')
   @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.soService.findOne(id, req.user); }

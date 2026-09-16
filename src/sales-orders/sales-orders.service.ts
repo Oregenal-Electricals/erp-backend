@@ -555,6 +555,98 @@ export class SalesOrdersService {
     };
   }
 
+  // DSP-003 sections 5-30: read-only availability check. Never
+  // reserves, never deducts, never touches Production stage transfer -
+  // it only reads the authoritative balances DSP-002 already pointed
+  // at, and answers 'how much could actually be dispatched right now'.
+  async checkAvailability(soItemId: string, user: any) {
+    const item = await this.prisma.salesOrderItem.findFirst({
+      where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
+      include: { requiredStage: true },
+    });
+    if (!item) throw new NotFoundException('Sales Order line not found');
+    if (!item.releasedForDispatch || !item.sourceValid) {
+      return { soItemId, status: 'BLOCKED', reasons: ['SOURCE_NOT_RESOLVED'], checkedAt: new Date() };
+    }
+
+    const remainingOrderQty = item.pendingQty;
+    let physicalQty = 0, reservedQty = 0, freeQty = 0;
+    const reasons: string[] = [];
+    const breakdown: any = {};
+
+    if (item.sourceType === 'RM_INVENTORY' || item.sourceType === 'FG_INVENTORY') {
+      // DSP-003 section 6: StockBalance.availableQty already excludes
+      // QC-pending/hold/rejected (those live in separate fields/tables),
+      // so subtracting reservedQty once is the whole calculation -
+      // never subtract Hold/Rejected again on top of it.
+      const warehouseType = item.sourceType === 'RM_INVENTORY' ? 'RAW_MATERIAL' : 'FINISHED_GOOD';
+      const warehouses = await this.prisma.warehouse.findMany({
+        where: { companyId: user.companyId, plantId: item.sourcePlantId, type: { in: [warehouseType, 'GENERAL'] }, isActive: true },
+        select: { id: true },
+      });
+      const warehouseIds = warehouses.map(w => w.id);
+      const balances = await this.prisma.stockBalance.findMany({
+        where: { companyId: user.companyId, itemCode: item.itemCode, warehouseId: { in: warehouseIds }, isActive: true },
+      });
+      physicalQty = balances.reduce((s, b) => s + b.availableQty, 0);
+      reservedQty = balances.reduce((s, b) => s + b.reservedQty, 0);
+      freeQty = Math.max(physicalQty - reservedQty, 0);
+      breakdown.acceptedStock = physicalQty;
+      breakdown.reserved = reservedQty;
+      if (reservedQty > 0 && freeQty < remainingOrderQty) reasons.push('PRODUCTION_OR_SALES_RESERVED');
+    } else if (item.sourceType === 'SFG_STAGE') {
+      // DSP-003 sections 11-17: aggregate every active Work Order at the
+      // exact required stage for this product - each routing stage is
+      // already its own WorkOrder, so this naturally spans multiple WOs
+      // without losing per-WO traceability (returned in breakdown.byWo).
+      const wos = await this.prisma.workOrder.findMany({
+        where: {
+          companyId: user.companyId, productCode: item.itemCode, stageName: item.requiredStage?.stageName,
+          status: { in: ['RELEASED', 'IN_PROGRESS', 'COMPLETED'] },
+          warehouse: { plantId: item.sourcePlantId },
+        },
+        select: { id: true, woNumber: true, completedQty: true, cumulativeHandoverQty: true, stageStatus: true },
+      });
+      const byWo = wos.map(w => {
+        const netFree = w.stageStatus === 'BLOCKED' ? 0 : Math.max(w.completedQty - w.cumulativeHandoverQty, 0);
+        return { woNumber: w.woNumber, accepted: w.completedQty, transferredForward: w.cumulativeHandoverQty, blocked: w.stageStatus === 'BLOCKED', free: netFree };
+      });
+      const acceptedPool = byWo.reduce((s, w) => s + w.free, 0);
+      // Already dispatched as SFG at this exact stage, across all Sales
+      // Orders - and active Sales reservations, once DSP-005 exists.
+      // Neither mechanism exists yet, so both are correctly 0 today; the
+      // formula is here so DSP-005 only has to populate them, not redesign this.
+      const alreadyDispatchedAgg = await this.prisma.salesOrderItem.aggregate({
+        where: { saleType: 'SFG', requiredStageId: item.requiredStageId, isActive: true, salesOrder: { companyId: user.companyId } },
+        _sum: { dispatchedQty: true },
+      });
+      const alreadyDispatched = alreadyDispatchedAgg._sum.dispatchedQty || 0;
+      const activeSalesReservations = 0;
+      physicalQty = wos.reduce((s, w) => s + w.completedQty, 0);
+      freeQty = Math.max(acceptedPool - alreadyDispatched - activeSalesReservations, 0);
+      breakdown.stageAccepted = physicalQty;
+      breakdown.transferredForward = wos.reduce((s, w) => s + w.cumulativeHandoverQty, 0);
+      breakdown.alreadyDispatched = alreadyDispatched;
+      breakdown.byWo = byWo;
+      if (breakdown.transferredForward > 0 && freeQty < remainingOrderQty) reasons.push('STAGE_OUTPUT_TRANSFERRED_FORWARD');
+    }
+
+    const dispatchableNow = Math.min(remainingOrderQty, freeQty);
+    const shortage = Math.max(remainingOrderQty - freeQty, 0);
+    let status: string;
+    if (shortage === 0) status = 'AVAILABLE';
+    else if (dispatchableNow > 0) status = 'PARTIALLY_AVAILABLE';
+    else status = 'NOT_AVAILABLE';
+    if (shortage > 0 && reasons.length === 0) reasons.push('INSUFFICIENT_FREE_STOCK');
+
+    return {
+      soItemId, itemCode: item.itemCode, saleType: item.saleType, sourceType: item.sourceType,
+      requestedQty: item.qty, alreadyDispatchedQty: item.dispatchedQty, remainingOrderQty,
+      physicalQty, reservedQty, freeQty, dispatchableNow, shortage, status, reasons, breakdown,
+      checkedAt: new Date(),
+    };
+  }
+
   async getStats(user: any) {
     const where: any = { companyId: user.companyId };
     const [

@@ -53,6 +53,7 @@ describe('SalesOrdersService - DSP-001', () => {
           return Promise.resolve(itemRecords[idx]);
         }),
         findMany: jest.fn().mockResolvedValue([]),
+        aggregate: jest.fn().mockResolvedValue({ _sum: { dispatchedQty: 0 } }),
       },
       rawMaterial: { findFirst: jest.fn().mockImplementation(({ where }: any) => Promise.resolve(where.code === rawMaterial.code ? rawMaterial : null)) },
       product: { findFirst: jest.fn().mockImplementation(({ where }: any) => Promise.resolve(where.code === product.code ? product : null)) },
@@ -62,8 +63,13 @@ describe('SalesOrdersService - DSP-001', () => {
         return Promise.resolve(null);
       }) },
       plant: { findFirst: jest.fn().mockResolvedValue({ id: 'plant-1', companyId: 'company-1' }) },
-      warehouse: { findFirst: jest.fn().mockResolvedValue({ id: 'wh-1', companyId: 'company-1', plantId: 'plant-1', type: 'RAW_MATERIAL', isActive: true }) },
+      warehouse: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'wh-1', companyId: 'company-1', plantId: 'plant-1', type: 'RAW_MATERIAL', isActive: true }),
+        findMany: jest.fn().mockResolvedValue([{ id: 'wh-1' }]),
+      },
       stockBatch: { findFirst: jest.fn().mockResolvedValue(null) },
+      stockBalance: { findMany: jest.fn().mockResolvedValue([{ availableQty: 10000, reservedQty: 0 }]) },
+      workOrder: { findMany: jest.fn().mockResolvedValue([]) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     service = new SalesOrdersService(prisma, audit);
@@ -210,6 +216,112 @@ describe('SalesOrdersService - DSP-001', () => {
     });
   });
 
+  describe('DSP-003: Availability Check', () => {
+    async function releasedLine(saleType: string, qtyOverride?: number) {
+      const items = saleType === 'SFG' ? [sfgLine(qtyOverride ? { qty: qtyOverride } : {})] : saleType === 'FG' ? [fgLine(qtyOverride ? { qty: qtyOverride } : {})] : [rmLine(qtyOverride ? { qty: qtyOverride } : {})];
+      const so = await service.create({ cpoId: 'cpo-1', deliveryDate: '2026-12-01', items } as any, user);
+      await service.confirm(so.id, user);
+      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      return released;
+    }
+
+    it('reports full availability when free stock covers the remaining order qty (RM)', async () => {
+      prisma.stockBalance.findMany.mockResolvedValue([{ availableQty: 10000, reservedQty: 6000 }]);
+      const released = await releasedLine('RM', 1500);
+      const result = await service.checkAvailability(released.id, user);
+      expect(result.physicalQty).toBe(10000);
+      expect(result.reservedQty).toBe(6000);
+      expect(result.freeQty).toBe(4000);
+      expect(result.status).toBe('AVAILABLE');
+      expect(result.shortage).toBe(0);
+    });
+
+    it('reports PARTIALLY_AVAILABLE and a visible shortage when free stock is less than remaining order qty', async () => {
+      prisma.stockBalance.findMany.mockResolvedValue([{ availableQty: 3000, reservedQty: 2000 }]);
+      const released = await releasedLine('RM', 1500);
+      const result = await service.checkAvailability(released.id, user);
+      expect(result.freeQty).toBe(1000);
+      expect(result.dispatchableNow).toBe(1000);
+      expect(result.shortage).toBeGreaterThan(0);
+      expect(result.status).toBe('PARTIALLY_AVAILABLE');
+    });
+
+    it('never steals a Production reservation - free stock is 0 when fully reserved (section 7, test 58)', async () => {
+      prisma.stockBalance.findMany.mockResolvedValue([{ availableQty: 5000, reservedQty: 5000 }]);
+      const released = await releasedLine('RM');
+      const result = await service.checkAvailability(released.id, user);
+      expect(result.freeQty).toBe(0);
+      expect(result.status).toBe('NOT_AVAILABLE');
+    });
+
+    it('does not double-subtract Hold/Rejected on top of availableQty, which already excludes them (section 6, 71)', async () => {
+      // availableQty already excludes Hold(500)/Rejected(500) out of a
+      // 10,000 physical total - the correct free figure only subtracts
+      // reservedQty once from the 9,000 already-eligible balance.
+      prisma.stockBalance.findMany.mockResolvedValue([{ availableQty: 9000, reservedQty: 6000 }]);
+      const released = await releasedLine('RM');
+      const result = await service.checkAvailability(released.id, user);
+      expect(result.freeQty).toBe(3000);
+      expect(result.freeQty).not.toBe(2000);
+    });
+
+    it('resolves FG availability the same way as RM, from FINISHED_GOOD-eligible balances', async () => {
+      prisma.stockBalance.findMany.mockResolvedValue([{ availableQty: 7500, reservedQty: 2000 }]);
+      const released = await releasedLine('FG');
+      const result = await service.checkAvailability(released.id, user);
+      expect(result.freeQty).toBe(5500);
+      expect(result.status).toBe('AVAILABLE');
+    });
+
+    it('aggregates SFG availability across multiple Work Orders at the exact stage without losing per-WO traceability (sections 12, 16, 72)', async () => {
+      prisma.workOrder.findMany.mockResolvedValue([
+        { id: 'wo-1', woNumber: 'WO-101', completedQty: 3000, cumulativeHandoverQty: 1000, stageStatus: 'COMPLETED' },
+        { id: 'wo-2', woNumber: 'WO-102', completedQty: 2000, cumulativeHandoverQty: 1000, stageStatus: 'COMPLETED' },
+        { id: 'wo-3', woNumber: 'WO-103', completedQty: 600, cumulativeHandoverQty: 0, stageStatus: 'BLOCKED' },
+      ]);
+      const released = await releasedLine('SFG');
+      const result = await service.checkAvailability(released.id, user);
+      // WO-101: 3000-1000=2000, WO-102: 2000-1000=1000, WO-103: blocked -> 0
+      expect(result.freeQty).toBe(3000);
+      expect(result.breakdown.byWo).toHaveLength(3);
+      expect(result.breakdown.byWo[2].blocked).toBe(true);
+    });
+
+    it('excludes SFG output already transferred forward to the next stage, per Work Order (sections 12, 72)', async () => {
+      prisma.workOrder.findMany.mockResolvedValue([
+        { id: 'wo-1', woNumber: 'WO-101', completedQty: 5000, cumulativeHandoverQty: 2000, stageStatus: 'COMPLETED' },
+      ]);
+      const released = await releasedLine('SFG');
+      const result = await service.checkAvailability(released.id, user);
+      expect(result.freeQty).toBe(3000);
+      expect(result.breakdown.transferredForward).toBe(2000);
+    });
+
+    it('creates no reservation as a side effect of checking availability (section 37, 67)', async () => {
+      prisma.stockBalance.findMany.mockResolvedValue([{ availableQty: 10000, reservedQty: 6000 }]);
+      const released = await releasedLine('RM');
+      await service.checkAvailability(released.id, user);
+      expect(prisma.stockBalance.findMany).toHaveBeenCalled();
+      // No update/create call was made anywhere on stockBalance or
+      // salesOrderItem beyond the release itself.
+      expect((prisma.stockBalance as any).update).toBeUndefined();
+    });
+
+    it('creates no stock or Production movement as a side effect of checking availability (section 38-39, 68)', async () => {
+      prisma.workOrder.findMany.mockResolvedValue([{ id: 'wo-1', woNumber: 'WO-101', completedQty: 5000, cumulativeHandoverQty: 2000, stageStatus: 'COMPLETED' }]);
+      const released = await releasedLine('SFG');
+      await service.checkAvailability(released.id, user);
+      expect((prisma.workOrder as any).update).toBeUndefined();
+    });
+
+    it('returns BLOCKED without a physical/free calculation when the line has no valid resolved source', async () => {
+      const so = await service.create({ cpoId: 'cpo-1', deliveryDate: '2026-12-01', items: [rmLine()] } as any, user);
+      const result = await service.checkAvailability(so.items[0].id, user);
+      expect(result.status).toBe('BLOCKED');
+      expect(result.reasons).toContain('SOURCE_NOT_RESOLVED');
+    });
+  });
+
   describe('Dispatch-ready lines (sections 21, 25)', () => {
     it('only returns released lines with remaining pending qty, filterable by saleType', async () => {
       prisma.salesOrderItem.findMany.mockResolvedValue([
@@ -235,7 +347,7 @@ describe('SalesOrdersService - DSP-001', () => {
       // The mock prisma object never had stockBalance/stockLedger/workOrder
       // clients defined at all - if the service tried to touch them it
       // would throw "Cannot read properties of undefined", not pass silently.
-      expect(prisma.stockBalance).toBeUndefined();
+      expect(prisma.stockBalance.findMany).not.toHaveBeenCalled();
       expect(prisma.stockLedger).toBeUndefined();
     });
   });
