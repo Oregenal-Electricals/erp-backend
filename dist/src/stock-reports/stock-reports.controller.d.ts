@@ -57,8 +57,8 @@ export declare class StockReportsController {
             warehouseId: string;
             totalValue: number;
             unitCost: number;
-            reservedQty: number;
             availableQty: number;
+            reservedQty: number;
             inQcQty: number;
             putAwayPendingQty: number;
             lastUpdated: Date;
@@ -87,8 +87,8 @@ export declare class StockReportsController {
             warehouseId: string;
             totalValue: number;
             unitCost: number;
-            reservedQty: number;
             availableQty: number;
+            reservedQty: number;
             inQcQty: number;
             putAwayPendingQty: number;
             lastUpdated: Date;
@@ -148,9 +148,9 @@ export declare class StockReportsController {
             receivedDate: Date;
             grnId: string | null;
             unitCost: number;
-            reservedQty: number;
-            availableQty: number;
             originalQty: number;
+            availableQty: number;
+            reservedQty: number;
         })[];
         summary: {
             totalIn: number;
@@ -187,9 +187,9 @@ export declare class StockReportsController {
             receivedDate: Date;
             grnId: string | null;
             unitCost: number;
-            reservedQty: number;
-            availableQty: number;
             originalQty: number;
+            availableQty: number;
+            reservedQty: number;
         })[];
         total: number;
         page: number;

@@ -50,6 +50,15 @@ export declare class CustomerPortalController {
                 releasedForDispatch: boolean;
                 releasedAt: Date | null;
                 releasedBy: string | null;
+                sourceType: string | null;
+                sourceWarehouseType: string | null;
+                sourcePlantId: string | null;
+                sourceValid: boolean | null;
+                sourceInvalidReason: string | null;
+                sourceBatchControlled: boolean | null;
+                sourceSerialControlled: boolean | null;
+                sourceResolvedAt: Date | null;
+                sourceResolvedBy: string | null;
                 soId: string;
             }[];
         } & {
@@ -72,6 +81,7 @@ export declare class CustomerPortalController {
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
+            dispatchPlantId: string | null;
             soNumber: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;

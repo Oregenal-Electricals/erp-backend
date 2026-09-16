@@ -31,6 +31,10 @@ export class SalesOrdersController {
   @Get('dispatch-ready')
   @RequirePermissions(Permission.DISPATCH_VIEW)
   getDispatchReadyLines(@Request() req: any, @Query() query: any) { return this.soService.getDispatchReadyLines(req.user, query); }
+  @Get('items/:soItemId/source')
+  @RequirePermissions(Permission.DISPATCH_SOURCE_VIEW)
+  getSourceDetail(@Param('soItemId') soItemId: string, @Request() req: any) { return this.soService.getSourceDetail(soItemId, req.user); }
+
   @Get(':id')
   @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.soService.findOne(id, req.user); }

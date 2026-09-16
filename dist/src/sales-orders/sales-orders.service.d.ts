@@ -42,6 +42,15 @@ export declare class SalesOrdersService {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -70,6 +79,7 @@ export declare class SalesOrdersService {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -106,6 +116,15 @@ export declare class SalesOrdersService {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -134,6 +153,7 @@ export declare class SalesOrdersService {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -170,6 +190,15 @@ export declare class SalesOrdersService {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -198,6 +227,7 @@ export declare class SalesOrdersService {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -235,6 +265,7 @@ export declare class SalesOrdersService {
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
+            dispatchPlantId: string | null;
             soNumber: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
@@ -275,6 +306,15 @@ export declare class SalesOrdersService {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -303,6 +343,7 @@ export declare class SalesOrdersService {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -339,6 +380,15 @@ export declare class SalesOrdersService {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -367,10 +417,13 @@ export declare class SalesOrdersService {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
     })[]>;
+    private resolveDispatchPlant;
+    private resolveSource;
     releaseLineForDispatch(soItemId: string, user: any): Promise<{
         id: string;
         description: string | null;
@@ -398,6 +451,15 @@ export declare class SalesOrdersService {
         releasedForDispatch: boolean;
         releasedAt: Date | null;
         releasedBy: string | null;
+        sourceType: string | null;
+        sourceWarehouseType: string | null;
+        sourcePlantId: string | null;
+        sourceValid: boolean | null;
+        sourceInvalidReason: string | null;
+        sourceBatchControlled: boolean | null;
+        sourceSerialControlled: boolean | null;
+        sourceResolvedAt: Date | null;
+        sourceResolvedBy: string | null;
         soId: string;
     }>;
     getSaleableStages(itemCode: string, user: any): Promise<{
@@ -420,7 +482,26 @@ export declare class SalesOrdersService {
         uom: string;
         deliveryDate: Date;
         salesOrderStatus: string;
+        sourceType: string;
+        sourceWarehouseType: string;
+        sourceValid: boolean;
     }[]>;
+    getSourceDetail(soItemId: string, user: any): Promise<{
+        soItemId: string;
+        itemCode: string;
+        saleType: string;
+        releasedForDispatch: boolean;
+        sourceType: string;
+        sourceWarehouseType: string;
+        sourcePlantId: string;
+        sourceValid: boolean;
+        sourceInvalidReason: string;
+        sourceBatchControlled: boolean;
+        sourceSerialControlled: boolean;
+        requiredStageName: string;
+        sourceResolvedAt: Date;
+        sourceResolvedBy: string;
+    }>;
     getStats(user: any): Promise<{
         total: number;
         draft: number;

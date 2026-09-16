@@ -273,6 +273,15 @@ export declare class DispatchPlanningService {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         }[];
     }>;

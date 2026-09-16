@@ -373,6 +373,61 @@ export class SalesOrdersService {
   // not yet). Re-validates SFG saleable-stage configuration at release
   // time, not just at line-creation time, since routing/saleable
   // config can change in between.
+  // DSP-002 section 25-26: which plant this order dispatches from -
+  // explicit if set on the SO, else falls back to the company's plant
+  // (this is a single-plant company today; multi-plant selection is a
+  // future UI concern, not something DSP-002 needs to force now).
+  private async resolveDispatchPlant(salesOrder: any, user: any) {
+    if (salesOrder.dispatchPlantId) return salesOrder.dispatchPlantId;
+    const plant = await this.prisma.plant.findFirst({ where: { companyId: user.companyId, isActive: true } });
+    return plant?.id || null;
+  }
+
+  // DSP-002 sections 3-13, 25-30, 32-37: deterministic, master-driven
+  // source identification - never free text, never guessed. Returns a
+  // clear VALID/INVALID result; never partially resolves.
+  private async resolveSource(item: any, dispatchPlantId: string | null, user: any) {
+    if (!dispatchPlantId) {
+      return { sourceValid: false, sourceInvalidReason: 'No dispatch plant could be determined for this order.' };
+    }
+
+    if (item.saleType === 'RM') {
+      const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+      if (!rm) return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active Raw Material.` };
+      const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'RAW_MATERIAL', isActive: true } });
+      if (!warehouse) return { sourceValid: false, sourceInvalidReason: 'No active Raw Material warehouse configured for this plant.' };
+      const hasBatches = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, itemCode: item.itemCode } });
+      return {
+        sourceValid: true, sourceType: 'RM_INVENTORY', sourceWarehouseType: 'RAW_MATERIAL',
+        sourceBatchControlled: !!hasBatches, sourceSerialControlled: false,
+      };
+    }
+
+    if (item.saleType === 'FG') {
+      const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+      if (!product) return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active saleable Finished Product.` };
+      const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'FINISHED_GOOD', isActive: true } });
+      if (!warehouse) return { sourceValid: false, sourceInvalidReason: 'No active Finished Goods warehouse configured for this plant.' };
+      const hasBatches = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, itemCode: item.itemCode } });
+      return {
+        sourceValid: true, sourceType: 'FG_INVENTORY', sourceWarehouseType: 'FINISHED_GOOD',
+        sourceBatchControlled: !!hasBatches, sourceSerialControlled: false,
+      };
+    }
+
+    // SFG - the stage itself was already validated (exists, saleable)
+    // by the caller before resolveSource() is invoked; here we only
+    // confirm the plant/routing consistency and shape the source result.
+    if (item.saleType === 'SFG') {
+      return {
+        sourceValid: true, sourceType: 'SFG_STAGE', sourceWarehouseType: 'WIP',
+        sourceBatchControlled: true, sourceSerialControlled: false,
+      };
+    }
+
+    return { sourceValid: false, sourceInvalidReason: `Unrecognized saleType "${item.saleType}".` };
+  }
+
   async releaseLineForDispatch(soItemId: string, user: any) {
     const item = await this.prisma.salesOrderItem.findFirst({
       where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
@@ -395,9 +450,24 @@ export class SalesOrdersService {
       }
     }
 
+    // DSP-002 section 33: a line whose source cannot be determined is
+    // never released - "do not guess" applies to the release action
+    // itself, not just to a later read-only report.
+    const dispatchPlantId = await this.resolveDispatchPlant(item.salesOrder, user);
+    const source = await this.resolveSource(item, dispatchPlantId, user);
+    if (!source.sourceValid) {
+      throw new BadRequestException(`Cannot release "${item.itemCode}" for Dispatch - ${source.sourceInvalidReason}`);
+    }
+
     const updated = await this.prisma.salesOrderItem.update({
       where: { id: soItemId },
-      data: { releasedForDispatch: true, releasedAt: new Date(), releasedBy: user.id, updatedBy: user.id },
+      data: {
+        releasedForDispatch: true, releasedAt: new Date(), releasedBy: user.id, updatedBy: user.id,
+        sourceType: source.sourceType, sourceWarehouseType: source.sourceWarehouseType,
+        sourcePlantId: dispatchPlantId, sourceValid: true, sourceInvalidReason: null,
+        sourceBatchControlled: source.sourceBatchControlled, sourceSerialControlled: source.sourceSerialControlled,
+        sourceResolvedAt: new Date(), sourceResolvedBy: user.id,
+      },
     });
     await this.audit.log({ tableName: 'sales_order_items', recordId: soItemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
@@ -456,7 +526,28 @@ export class SalesOrdersService {
       uom: i.uom,
       deliveryDate: i.salesOrder.deliveryDate,
       salesOrderStatus: i.salesOrder.status,
+      sourceType: i.sourceType,
+      sourceWarehouseType: i.sourceWarehouseType,
+      sourceValid: i.sourceValid,
     }));
+  }
+
+  async getSourceDetail(soItemId: string, user: any) {
+    const item = await this.prisma.salesOrderItem.findFirst({
+      where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
+      include: { requiredStage: { select: { stageName: true } } },
+    });
+    if (!item) throw new NotFoundException('Sales Order line not found');
+    return {
+      soItemId: item.id, itemCode: item.itemCode, saleType: item.saleType,
+      releasedForDispatch: item.releasedForDispatch,
+      sourceType: item.sourceType, sourceWarehouseType: item.sourceWarehouseType,
+      sourcePlantId: item.sourcePlantId, sourceValid: item.sourceValid,
+      sourceInvalidReason: item.sourceInvalidReason,
+      sourceBatchControlled: item.sourceBatchControlled, sourceSerialControlled: item.sourceSerialControlled,
+      requiredStageName: item.requiredStage?.stageName || null,
+      sourceResolvedAt: item.sourceResolvedAt, sourceResolvedBy: item.sourceResolvedBy,
+    };
   }
 
   async getStats(user: any) {

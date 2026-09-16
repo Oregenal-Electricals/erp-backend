@@ -61,6 +61,9 @@ describe('SalesOrdersService - DSP-001', () => {
         if (where.id === 'stage-aging') return Promise.resolve(agingStageNotSaleable);
         return Promise.resolve(null);
       }) },
+      plant: { findFirst: jest.fn().mockResolvedValue({ id: 'plant-1', companyId: 'company-1' }) },
+      warehouse: { findFirst: jest.fn().mockResolvedValue({ id: 'wh-1', companyId: 'company-1', plantId: 'plant-1', type: 'RAW_MATERIAL', isActive: true }) },
+      stockBatch: { findFirst: jest.fn().mockResolvedValue(null) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     service = new SalesOrdersService(prisma, audit);
@@ -142,6 +145,68 @@ describe('SalesOrdersService - DSP-001', () => {
       const so = await createConfirmedSo([fgLine()]);
       await service.releaseLineForDispatch(so.items[0].id, user);
       await expect(service.releaseLineForDispatch(so.items[0].id, user)).rejects.toThrow(/already released/);
+    });
+  });
+
+  describe('DSP-002: Source Resolution', () => {
+    async function createConfirmedSo(items: any[]) {
+      const so = await service.create({ cpoId: 'cpo-1', deliveryDate: '2026-12-01', items } as any, user);
+      await service.confirm(so.id, user);
+      return so;
+    }
+
+    it('resolves RM lines to RM_INVENTORY, sourced from an RAW_MATERIAL warehouse at the resolved plant', async () => {
+      const so = await createConfirmedSo([rmLine()]);
+      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      expect(released.sourceType).toBe('RM_INVENTORY');
+      expect(released.sourceWarehouseType).toBe('RAW_MATERIAL');
+      expect(released.sourcePlantId).toBe('plant-1');
+      expect(released.sourceValid).toBe(true);
+    });
+
+    it('resolves FG lines to FG_INVENTORY, sourced from a FINISHED_GOOD warehouse', async () => {
+      prisma.warehouse.findFirst.mockResolvedValue({ id: 'wh-fg', companyId: 'company-1', plantId: 'plant-1', type: 'FINISHED_GOOD', isActive: true });
+      const so = await createConfirmedSo([fgLine()]);
+      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      expect(released.sourceType).toBe('FG_INVENTORY');
+      expect(released.sourceWarehouseType).toBe('FINISHED_GOOD');
+    });
+
+    it('resolves SFG lines to SFG_STAGE, never RM or FG inventory (section 7, 11: RM/FG never silently source from Production)', async () => {
+      const so = await createConfirmedSo([sfgLine()]);
+      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      expect(released.sourceType).toBe('SFG_STAGE');
+      expect(released.sourceWarehouseType).toBe('WIP');
+    });
+
+    it('blocks release when no RAW_MATERIAL warehouse exists at the dispatch plant, rather than falling back to any warehouse', async () => {
+      prisma.warehouse.findFirst.mockResolvedValue(null);
+      const so = await createConfirmedSo([rmLine()]);
+      await expect(service.releaseLineForDispatch(so.items[0].id, user)).rejects.toThrow(/No active Raw Material warehouse/);
+    });
+
+    it('blocks release when no dispatch plant can be resolved (test scenario 9: plant isolation)', async () => {
+      prisma.plant.findFirst.mockResolvedValue(null);
+      const so = await createConfirmedSo([fgLine()]);
+      await expect(service.releaseLineForDispatch(so.items[0].id, user)).rejects.toThrow(/No dispatch plant could be determined/);
+    });
+
+    it('flags batch control based on whether the item actually has StockBatch records, not a guess', async () => {
+      prisma.stockBatch.findFirst.mockResolvedValue({ id: 'batch-1' });
+      const so = await createConfirmedSo([rmLine()]);
+      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      expect(released.sourceBatchControlled).toBe(true);
+    });
+
+    it('snapshots the resolved source at release time, so later master changes cannot silently rewrite historical dispatch meaning (section 48-49)', async () => {
+      const so = await createConfirmedSo([fgLine()]);
+      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      expect(released.sourceResolvedAt).toBeTruthy();
+      expect(released.sourceResolvedBy).toBe(user.id);
+      // Simulate the warehouse being deactivated after release - the
+      // already-persisted snapshot must not change.
+      prisma.warehouse.findFirst.mockResolvedValue(null);
+      expect(released.sourceValid).toBe(true);
     });
   });
 

@@ -1,0 +1,11 @@
+ALTER TABLE "sales_orders" ADD COLUMN "dispatchPlantId" TEXT;
+ALTER TABLE "sales_orders" ADD CONSTRAINT "sales_orders_dispatchPlantId_fkey" FOREIGN KEY ("dispatchPlantId") REFERENCES "plants"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceType" TEXT;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceWarehouseType" TEXT;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourcePlantId" TEXT;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceValid" BOOLEAN;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceInvalidReason" TEXT;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceBatchControlled" BOOLEAN;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceSerialControlled" BOOLEAN;
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceResolvedAt" TIMESTAMP(3);
+ALTER TABLE "sales_order_items" ADD COLUMN "sourceResolvedBy" TEXT;

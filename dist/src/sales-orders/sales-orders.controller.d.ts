@@ -46,6 +46,15 @@ export declare class SalesOrdersController {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -74,6 +83,7 @@ export declare class SalesOrdersController {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -111,6 +121,7 @@ export declare class SalesOrdersController {
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
+            dispatchPlantId: string | null;
             soNumber: string;
             confirmedDate: Date | null;
             confirmedBy: string | null;
@@ -139,7 +150,26 @@ export declare class SalesOrdersController {
         uom: string;
         deliveryDate: Date;
         salesOrderStatus: string;
+        sourceType: string;
+        sourceWarehouseType: string;
+        sourceValid: boolean;
     }[]>;
+    getSourceDetail(soItemId: string, req: any): Promise<{
+        soItemId: string;
+        itemCode: string;
+        saleType: string;
+        releasedForDispatch: boolean;
+        sourceType: string;
+        sourceWarehouseType: string;
+        sourcePlantId: string;
+        sourceValid: boolean;
+        sourceInvalidReason: string;
+        sourceBatchControlled: boolean;
+        sourceSerialControlled: boolean;
+        requiredStageName: string;
+        sourceResolvedAt: Date;
+        sourceResolvedBy: string;
+    }>;
     findOne(id: string, req: any): Promise<{
         items: ({
             requiredStage: {
@@ -172,6 +202,15 @@ export declare class SalesOrdersController {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -200,6 +239,7 @@ export declare class SalesOrdersController {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -236,6 +276,15 @@ export declare class SalesOrdersController {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -264,6 +313,7 @@ export declare class SalesOrdersController {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -300,6 +350,15 @@ export declare class SalesOrdersController {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -328,6 +387,7 @@ export declare class SalesOrdersController {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -364,6 +424,15 @@ export declare class SalesOrdersController {
             releasedForDispatch: boolean;
             releasedAt: Date | null;
             releasedBy: string | null;
+            sourceType: string | null;
+            sourceWarehouseType: string | null;
+            sourcePlantId: string | null;
+            sourceValid: boolean | null;
+            sourceInvalidReason: string | null;
+            sourceBatchControlled: boolean | null;
+            sourceSerialControlled: boolean | null;
+            sourceResolvedAt: Date | null;
+            sourceResolvedBy: string | null;
             soId: string;
         })[];
         cpo: {
@@ -392,6 +461,7 @@ export declare class SalesOrdersController {
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
+        dispatchPlantId: string | null;
         soNumber: string;
         confirmedDate: Date | null;
         confirmedBy: string | null;
@@ -423,6 +493,15 @@ export declare class SalesOrdersController {
         releasedForDispatch: boolean;
         releasedAt: Date | null;
         releasedBy: string | null;
+        sourceType: string | null;
+        sourceWarehouseType: string | null;
+        sourcePlantId: string | null;
+        sourceValid: boolean | null;
+        sourceInvalidReason: string | null;
+        sourceBatchControlled: boolean | null;
+        sourceSerialControlled: boolean | null;
+        sourceResolvedAt: Date | null;
+        sourceResolvedBy: string | null;
         soId: string;
     }>;
 }

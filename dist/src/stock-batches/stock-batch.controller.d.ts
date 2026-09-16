@@ -41,9 +41,9 @@ export declare class StockBatchController {
             receivedDate: Date;
             grnId: string | null;
             unitCost: number;
-            reservedQty: number;
-            availableQty: number;
             originalQty: number;
+            availableQty: number;
+            reservedQty: number;
         })[];
         total: number;
         page: number;
@@ -77,9 +77,9 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     })[]>;
     findOne(id: string, req: any): Promise<{
         warehouse: {
@@ -108,9 +108,9 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     create(dto: CreateBatchDto, req: any): Promise<{
         warehouse: {
@@ -140,9 +140,9 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     createFromGrn(grnId: string, req: any): Promise<{
         created: number;
@@ -175,9 +175,9 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     quarantine(id: string, req: any): Promise<{
         id: string;
@@ -202,8 +202,8 @@ export declare class StockBatchController {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
 }

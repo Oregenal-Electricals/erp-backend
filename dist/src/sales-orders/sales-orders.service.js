@@ -287,6 +287,50 @@ let SalesOrdersService = class SalesOrdersService {
             orderBy: { createdAt: 'desc' },
         });
     }
+    async resolveDispatchPlant(salesOrder, user) {
+        if (salesOrder.dispatchPlantId)
+            return salesOrder.dispatchPlantId;
+        const plant = await this.prisma.plant.findFirst({ where: { companyId: user.companyId, isActive: true } });
+        return (plant === null || plant === void 0 ? void 0 : plant.id) || null;
+    }
+    async resolveSource(item, dispatchPlantId, user) {
+        if (!dispatchPlantId) {
+            return { sourceValid: false, sourceInvalidReason: 'No dispatch plant could be determined for this order.' };
+        }
+        if (item.saleType === 'RM') {
+            const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+            if (!rm)
+                return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active Raw Material.` };
+            const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'RAW_MATERIAL', isActive: true } });
+            if (!warehouse)
+                return { sourceValid: false, sourceInvalidReason: 'No active Raw Material warehouse configured for this plant.' };
+            const hasBatches = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, itemCode: item.itemCode } });
+            return {
+                sourceValid: true, sourceType: 'RM_INVENTORY', sourceWarehouseType: 'RAW_MATERIAL',
+                sourceBatchControlled: !!hasBatches, sourceSerialControlled: false,
+            };
+        }
+        if (item.saleType === 'FG') {
+            const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+            if (!product)
+                return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active saleable Finished Product.` };
+            const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'FINISHED_GOOD', isActive: true } });
+            if (!warehouse)
+                return { sourceValid: false, sourceInvalidReason: 'No active Finished Goods warehouse configured for this plant.' };
+            const hasBatches = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, itemCode: item.itemCode } });
+            return {
+                sourceValid: true, sourceType: 'FG_INVENTORY', sourceWarehouseType: 'FINISHED_GOOD',
+                sourceBatchControlled: !!hasBatches, sourceSerialControlled: false,
+            };
+        }
+        if (item.saleType === 'SFG') {
+            return {
+                sourceValid: true, sourceType: 'SFG_STAGE', sourceWarehouseType: 'WIP',
+                sourceBatchControlled: true, sourceSerialControlled: false,
+            };
+        }
+        return { sourceValid: false, sourceInvalidReason: `Unrecognized saleType "${item.saleType}".` };
+    }
     async releaseLineForDispatch(soItemId, user) {
         const item = await this.prisma.salesOrderItem.findFirst({
             where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
@@ -308,9 +352,20 @@ let SalesOrdersService = class SalesOrdersService {
                 throw new common_1.BadRequestException(`${item.requiredStage.stageName} stage is not configured as saleable for this product.`);
             }
         }
+        const dispatchPlantId = await this.resolveDispatchPlant(item.salesOrder, user);
+        const source = await this.resolveSource(item, dispatchPlantId, user);
+        if (!source.sourceValid) {
+            throw new common_1.BadRequestException(`Cannot release "${item.itemCode}" for Dispatch - ${source.sourceInvalidReason}`);
+        }
         const updated = await this.prisma.salesOrderItem.update({
             where: { id: soItemId },
-            data: { releasedForDispatch: true, releasedAt: new Date(), releasedBy: user.id, updatedBy: user.id },
+            data: {
+                releasedForDispatch: true, releasedAt: new Date(), releasedBy: user.id, updatedBy: user.id,
+                sourceType: source.sourceType, sourceWarehouseType: source.sourceWarehouseType,
+                sourcePlantId: dispatchPlantId, sourceValid: true, sourceInvalidReason: null,
+                sourceBatchControlled: source.sourceBatchControlled, sourceSerialControlled: source.sourceSerialControlled,
+                sourceResolvedAt: new Date(), sourceResolvedBy: user.id,
+            },
         });
         await this.audit.log({ tableName: 'sales_order_items', recordId: soItemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
@@ -360,8 +415,30 @@ let SalesOrdersService = class SalesOrdersService {
                 uom: i.uom,
                 deliveryDate: i.salesOrder.deliveryDate,
                 salesOrderStatus: i.salesOrder.status,
+                sourceType: i.sourceType,
+                sourceWarehouseType: i.sourceWarehouseType,
+                sourceValid: i.sourceValid,
             });
         });
+    }
+    async getSourceDetail(soItemId, user) {
+        var _a;
+        const item = await this.prisma.salesOrderItem.findFirst({
+            where: { id: soItemId, isActive: true, salesOrder: { companyId: user.companyId } },
+            include: { requiredStage: { select: { stageName: true } } },
+        });
+        if (!item)
+            throw new common_1.NotFoundException('Sales Order line not found');
+        return {
+            soItemId: item.id, itemCode: item.itemCode, saleType: item.saleType,
+            releasedForDispatch: item.releasedForDispatch,
+            sourceType: item.sourceType, sourceWarehouseType: item.sourceWarehouseType,
+            sourcePlantId: item.sourcePlantId, sourceValid: item.sourceValid,
+            sourceInvalidReason: item.sourceInvalidReason,
+            sourceBatchControlled: item.sourceBatchControlled, sourceSerialControlled: item.sourceSerialControlled,
+            requiredStageName: ((_a = item.requiredStage) === null || _a === void 0 ? void 0 : _a.stageName) || null,
+            sourceResolvedAt: item.sourceResolvedAt, sourceResolvedBy: item.sourceResolvedBy,
+        };
     }
     async getStats(user) {
         const where = { companyId: user.companyId };

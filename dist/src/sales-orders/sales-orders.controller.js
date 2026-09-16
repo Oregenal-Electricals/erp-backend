@@ -29,6 +29,7 @@ let SalesOrdersController = class SalesOrdersController {
     findAll(req, query) { return this.soService.findAll(req.user, query); }
     getSaleableStages(itemCode, req) { return this.soService.getSaleableStages(itemCode, req.user); }
     getDispatchReadyLines(req, query) { return this.soService.getDispatchReadyLines(req.user, query); }
+    getSourceDetail(soItemId, req) { return this.soService.getSourceDetail(soItemId, req.user); }
     findOne(id, req) { return this.soService.findOne(id, req.user); }
     create(dto, req) { return this.soService.create(dto, req.user); }
     confirm(id, req) { return this.soService.confirm(id, req.user); }
@@ -80,6 +81,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], SalesOrdersController.prototype, "getDispatchReadyLines", null);
+__decorate([
+    (0, common_1.Get)('items/:soItemId/source'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DISPATCH_SOURCE_VIEW),
+    __param(0, (0, common_1.Param)('soItemId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], SalesOrdersController.prototype, "getSourceDetail", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_VIEW),

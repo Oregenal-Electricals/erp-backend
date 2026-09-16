@@ -411,6 +411,7 @@ model Plant {
   gateOutwardEntries GateOutwardEntry[] @relation("GateOutwardPlant")
   gatePasses         GatePass[]         @relation("GatePassPlant")
   warehouses         Warehouse[]        @relation("WarehousePlant")
+  dispatchSalesOrders SalesOrder[]
 
   @@map("plants")
   @@index([companyId])
@@ -5460,6 +5461,12 @@ model SalesOrder {
   id              String    @id @default(uuid())
   companyId       String
   company         Company   @relation(fields: [companyId], references: [id])
+  // DSP-002 section 25-26: which plant this order dispatches from -
+  // nullable since this is a single-plant company today; resolveSource()
+  // falls back to the company's plant when unset. Prevents RM/SFG/FG
+  // stock at a different plant from being silently treated as usable.
+  dispatchPlantId String?
+  dispatchPlant   Plant?    @relation(fields: [dispatchPlantId], references: [id])
   soNumber        String
   cpoId           String
   cpo             CustomerPo @relation(fields: [cpoId], references: [id])
@@ -5531,6 +5538,15 @@ model SalesOrderItem {
   releasedForDispatch Boolean   @default(false)
   releasedAt          DateTime?
   releasedBy          String?
+  sourceType          String?
+  sourceWarehouseType String?
+  sourcePlantId       String?
+  sourceValid         Boolean?
+  sourceInvalidReason String?
+  sourceBatchControlled Boolean?
+  sourceSerialControlled Boolean?
+  sourceResolvedAt    DateTime?
+  sourceResolvedBy    String?
   isActive      Boolean     @default(true)
   isTestData    Boolean     @default(false)
   createdAt     DateTime    @default(now())

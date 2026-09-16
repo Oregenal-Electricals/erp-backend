@@ -34,9 +34,9 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     createFromGrn(grnId: string, user: any): Promise<{
         created: number;
@@ -71,9 +71,9 @@ export declare class StockBatchService {
             receivedDate: Date;
             grnId: string | null;
             unitCost: number;
-            reservedQty: number;
-            availableQty: number;
             originalQty: number;
+            availableQty: number;
+            reservedQty: number;
         })[];
         total: number;
         page: number;
@@ -107,9 +107,9 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     findByItem(itemCode: string, user: any): Promise<({
         warehouse: {
@@ -138,9 +138,9 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     })[]>;
     update(id: string, dto: UpdateBatchDto, user: any): Promise<{
         warehouse: {
@@ -169,9 +169,9 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     quarantine(id: string, user: any): Promise<{
         id: string;
@@ -196,9 +196,9 @@ export declare class StockBatchService {
         receivedDate: Date;
         grnId: string | null;
         unitCost: number;
-        reservedQty: number;
-        availableQty: number;
         originalQty: number;
+        availableQty: number;
+        reservedQty: number;
     }>;
     getStats(user: any): Promise<{
         total: number;
