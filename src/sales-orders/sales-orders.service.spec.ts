@@ -182,7 +182,7 @@ describe('SalesOrdersService - DSP-001', () => {
     it('blocks release when no RAW_MATERIAL warehouse exists at the dispatch plant, rather than falling back to any warehouse', async () => {
       prisma.warehouse.findFirst.mockResolvedValue(null);
       const so = await createConfirmedSo([rmLine()]);
-      await expect(service.releaseLineForDispatch(so.items[0].id, user)).rejects.toThrow(/No active Raw Material warehouse/);
+      await expect(service.releaseLineForDispatch(so.items[0].id, user)).rejects.toThrow(/No active Raw Material or General warehouse/);
     });
 
     it('blocks release when no dispatch plant can be resolved (test scenario 9: plant isolation)', async () => {

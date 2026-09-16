@@ -394,8 +394,12 @@ export class SalesOrdersService {
     if (item.saleType === 'RM') {
       const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
       if (!rm) return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active Raw Material.` };
-      const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'RAW_MATERIAL', isActive: true } });
-      if (!warehouse) return { sourceValid: false, sourceInvalidReason: 'No active Raw Material warehouse configured for this plant.' };
+      // Prefer a warehouse explicitly typed RAW_MATERIAL; fall back to
+      // GENERAL since many real plants run one general-purpose store
+      // rather than separately typed RM/FG warehouses.
+      const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'RAW_MATERIAL', isActive: true } })
+        || await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'GENERAL', isActive: true } });
+      if (!warehouse) return { sourceValid: false, sourceInvalidReason: 'No active Raw Material or General warehouse configured for this plant.' };
       const hasBatches = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, itemCode: item.itemCode } });
       return {
         sourceValid: true, sourceType: 'RM_INVENTORY', sourceWarehouseType: 'RAW_MATERIAL',
@@ -406,8 +410,9 @@ export class SalesOrdersService {
     if (item.saleType === 'FG') {
       const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
       if (!product) return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active saleable Finished Product.` };
-      const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'FINISHED_GOOD', isActive: true } });
-      if (!warehouse) return { sourceValid: false, sourceInvalidReason: 'No active Finished Goods warehouse configured for this plant.' };
+      const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'FINISHED_GOOD', isActive: true } })
+        || await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'GENERAL', isActive: true } });
+      if (!warehouse) return { sourceValid: false, sourceInvalidReason: 'No active Finished Goods or General warehouse configured for this plant.' };
       const hasBatches = await this.prisma.stockBatch.findFirst({ where: { companyId: user.companyId, itemCode: item.itemCode } });
       return {
         sourceValid: true, sourceType: 'FG_INVENTORY', sourceWarehouseType: 'FINISHED_GOOD',
