@@ -624,6 +624,7 @@ export declare class BomService {
         draft: number;
         approved: number;
         obsolete: number;
+        active: number;
         totalItems: number;
     }>;
 }

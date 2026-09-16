@@ -8,6 +8,7 @@ export declare class BomController {
         draft: number;
         approved: number;
         obsolete: number;
+        active: number;
         totalItems: number;
     }>;
     findAll(req: any, query: any): Promise<{

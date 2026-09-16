@@ -663,15 +663,19 @@ export class BomService {
   }
 
   async getStats(user: any) {
-    const where: any = { isActive: true };
+    const where: any = { isActive: true, bomType: 'MASTER' };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
-    const [total, draft, approved, obsolete] = await Promise.all([
+    const now = new Date();
+    const activeWhere = { ...where, status: 'APPROVED', OR: [{ effectiveTo: null }, { effectiveTo: { gt: now } }] };
+    const [total, draft, approved, obsolete, active] = await Promise.all([
       this.prisma.bom.count({ where }),
       this.prisma.bom.count({ where: { ...where, status: 'DRAFT' } }),
       this.prisma.bom.count({ where: { ...where, status: 'APPROVED' } }),
       this.prisma.bom.count({ where: { ...where, status: 'OBSOLETE' } }),
+      this.prisma.bom.count({ where: activeWhere }),
     ]);
-    const totalItems = await this.prisma.bomItem.count({ where: { companyId: user.companyId, isActive: true } });
-    return { total, draft, approved, obsolete, totalItems };
+    const activeBomIds = (await this.prisma.bom.findMany({ where: activeWhere, select: { id: true } })).map(b => b.id);
+    const totalItems = await this.prisma.bomItem.count({ where: { companyId: user.companyId, isActive: true, bomId: { in: activeBomIds } } });
+    return { total, draft, approved, obsolete, active, totalItems };
   }
 }
