@@ -15,6 +15,7 @@ export declare class DispatchPlanningController {
         soNumber: string;
         customerName: string;
         items: {
+            unplannedRemaining: number;
             id: string;
             description: string | null;
             isActive: boolean;
@@ -105,8 +106,15 @@ export declare class DispatchPlanningController {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -152,8 +160,15 @@ export declare class DispatchPlanningController {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -199,8 +214,15 @@ export declare class DispatchPlanningController {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -246,8 +268,15 @@ export declare class DispatchPlanningController {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {

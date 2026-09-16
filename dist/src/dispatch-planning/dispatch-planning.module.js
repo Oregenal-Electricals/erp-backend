@@ -12,12 +12,13 @@ const dispatch_planning_controller_1 = require("./dispatch-planning.controller")
 const dispatch_planning_service_1 = require("./dispatch-planning.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const sales_orders_module_1 = require("../sales-orders/sales-orders.module");
 let DispatchPlanningModule = class DispatchPlanningModule {
 };
 exports.DispatchPlanningModule = DispatchPlanningModule;
 exports.DispatchPlanningModule = DispatchPlanningModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, sales_orders_module_1.SalesOrdersModule],
         controllers: [dispatch_planning_controller_1.DispatchPlanningController],
         providers: [dispatch_planning_service_1.DispatchPlanningService],
         exports: [dispatch_planning_service_1.DispatchPlanningService],

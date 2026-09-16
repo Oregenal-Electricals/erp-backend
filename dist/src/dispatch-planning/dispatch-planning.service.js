@@ -13,10 +13,20 @@ exports.DispatchPlanningService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const sales_orders_service_1 = require("../sales-orders/sales-orders.service");
 let DispatchPlanningService = class DispatchPlanningService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, soService) {
         this.prisma = prisma;
         this.audit = audit;
+        this.soService = soService;
+    }
+    async unplannedRemaining(tx, soItemId, pendingQty) {
+        const activePlans = await tx.dispatchPlanItem.aggregate({
+            where: { soItemId, isActive: true, plan: { status: { not: 'CANCELLED' } } },
+            _sum: { plannedQty: true },
+        });
+        const activePlanned = activePlans._sum.plannedQty || 0;
+        return Math.max(pendingQty - activePlanned, 0);
     }
     async generateNumber(companyId) {
         const count = await this.prisma.dispatchPlan.count({ where: { companyId } });
@@ -38,31 +48,51 @@ let DispatchPlanningService = class DispatchPlanningService {
             throw new common_1.NotFoundException('Sales Order not found');
         if (!['CONFIRMED', 'IN_PRODUCTION'].includes(so.status))
             throw new common_1.BadRequestException('SO must be CONFIRMED or IN_PRODUCTION');
+        const lineData = [];
         for (const planItem of dto.items) {
             const soItem = so.items.find(i => i.id === planItem.soItemId);
             if (!soItem)
                 throw new common_1.NotFoundException(`SO item ${planItem.soItemId} not found`);
-            if (planItem.plannedQty > soItem.pendingQty)
-                throw new common_1.BadRequestException(`Planned qty ${planItem.plannedQty} exceeds pending qty ${soItem.pendingQty} for ${planItem.itemCode}`);
+            if (!soItem.releasedForDispatch || !soItem.sourceValid) {
+                throw new common_1.BadRequestException(`"${planItem.itemCode}" has not been released for Dispatch with a valid source yet.`);
+            }
+            if (planItem.plannedQty <= 0)
+                throw new common_1.BadRequestException(`Planned qty must be greater than 0 for ${planItem.itemCode}`);
+            lineData.push({ planItem, soItem });
         }
-        const planNumber = await this.generateNumber(user.companyId);
-        const plan = await this.prisma.dispatchPlan.create({
-            data: {
-                planNumber, soId: dto.soId, customerName: so.customerName,
-                deliveryAddress: dto.deliveryAddress, plannedDate: new Date(dto.plannedDate),
-                transportMode: dto.transportMode || 'ROAD',
-                transporterName: dto.transporterName, vehicleNumber: dto.vehicleNumber,
-                driverName: dto.driverName, driverPhone: dto.driverPhone, remarks: dto.remarks,
-                companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
-                items: {
-                    create: dto.items.map(item => ({
-                        soItemId: item.soItemId, itemCode: item.itemCode, itemName: item.itemName,
-                        plannedQty: item.plannedQty, uom: item.uom || 'PCS',
-                        createdBy: user.id, updatedBy: user.id,
-                    })),
+        const plan = await this.prisma.$transaction(async (tx) => {
+            var _a;
+            const items = [];
+            for (const { planItem, soItem } of lineData) {
+                const remaining = await this.unplannedRemaining(tx, soItem.id, soItem.pendingQty);
+                if (planItem.plannedQty > remaining) {
+                    throw new common_1.BadRequestException(`Planned qty ${planItem.plannedQty} exceeds unplanned remaining demand ${remaining} for ${planItem.itemCode} (other active plans already cover the rest).`);
+                }
+                const avail = await this.soService.checkAvailability(soItem.id, user);
+                const lineStatus = planItem.plannedQty <= (avail.freeQty || 0) ? 'READY_FOR_RESERVATION' : 'STOCK_PENDING';
+                items.push({
+                    soItemId: soItem.id, itemCode: planItem.itemCode, itemName: planItem.itemName,
+                    plannedQty: planItem.plannedQty, uom: planItem.uom || soItem.uom || 'PCS',
+                    saleType: soItem.saleType, requiredStageId: soItem.requiredStageId,
+                    sourceType: soItem.sourceType, sourcePlantId: soItem.sourcePlantId,
+                    availableSnapshot: (_a = avail.freeQty) !== null && _a !== void 0 ? _a : null, snapshotCheckedAt: avail.checkedAt || new Date(),
+                    lineStatus,
+                    createdBy: user.id, updatedBy: user.id,
+                });
+            }
+            const planNumber = await this.generateNumber(user.companyId);
+            return tx.dispatchPlan.create({
+                data: {
+                    planNumber, soId: dto.soId, customerName: so.customerName,
+                    deliveryAddress: dto.deliveryAddress, plannedDate: new Date(dto.plannedDate),
+                    transportMode: dto.transportMode || 'ROAD',
+                    transporterName: dto.transporterName, vehicleNumber: dto.vehicleNumber,
+                    driverName: dto.driverName, driverPhone: dto.driverPhone, remarks: dto.remarks,
+                    companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+                    items: { create: items },
                 },
-            },
-            include: this.includes(),
+                include: this.includes(),
+            });
         });
         await this.audit.log({ tableName: 'dispatch_plans', recordId: plan.id, action: 'CREATE', newValues: plan, changedBy: user.id });
         return plan;
@@ -144,12 +174,13 @@ let DispatchPlanningService = class DispatchPlanningService {
         if (!so)
             throw new common_1.NotFoundException('Sales Order not found');
         const pendingItems = so.items.filter(i => i.pendingQty > 0);
-        return { soNumber: so.soNumber, customerName: so.customerName, items: pendingItems };
+        const items = await Promise.all(pendingItems.map(async (i) => (Object.assign(Object.assign({}, i), { unplannedRemaining: await this.unplannedRemaining(this.prisma, i.id, i.pendingQty) }))));
+        return { soNumber: so.soNumber, customerName: so.customerName, items };
     }
 };
 exports.DispatchPlanningService = DispatchPlanningService;
 exports.DispatchPlanningService = DispatchPlanningService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService])
 ], DispatchPlanningService);
 //# sourceMappingURL=dispatch-planning.service.js.map

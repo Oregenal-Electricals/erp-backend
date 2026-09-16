@@ -2,10 +2,25 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateDispatchPlanDto, CancelPlanDto } from './dto/dispatch-plan.dto';
+import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 
 @Injectable()
 export class DispatchPlanningService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private soService: SalesOrdersService) {}
+
+  // DSP-004 sections 46-51, 77: the real fix - active planned qty across
+  // EVERY non-cancelled Dispatch Plan for this SO line, not just the raw
+  // pendingQty, so two planners can never together plan more than the SO
+  // actually has left. Read inside the same transaction as the create()
+  // that uses it, so a concurrent create can't slip past a stale read.
+  private async unplannedRemaining(tx: any, soItemId: string, pendingQty: number) {
+    const activePlans = await tx.dispatchPlanItem.aggregate({
+      where: { soItemId, isActive: true, plan: { status: { not: 'CANCELLED' } } },
+      _sum: { plannedQty: true },
+    });
+    const activePlanned = activePlans._sum.plannedQty || 0;
+    return Math.max(pendingQty - activePlanned, 0);
+  }
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.dispatchPlan.count({ where: { companyId } });
@@ -28,32 +43,50 @@ export class DispatchPlanningService {
     if (!so) throw new NotFoundException('Sales Order not found');
     if (!['CONFIRMED','IN_PRODUCTION'].includes(so.status)) throw new BadRequestException('SO must be CONFIRMED or IN_PRODUCTION');
 
-    // Validate planned qty vs pending qty
+    const lineData: any[] = [];
     for (const planItem of dto.items) {
       const soItem = so.items.find(i => i.id === planItem.soItemId);
       if (!soItem) throw new NotFoundException(`SO item ${planItem.soItemId} not found`);
-      if (planItem.plannedQty > soItem.pendingQty) throw new BadRequestException(`Planned qty ${planItem.plannedQty} exceeds pending qty ${soItem.pendingQty} for ${planItem.itemCode}`);
+      if (!soItem.releasedForDispatch || !soItem.sourceValid) {
+        throw new BadRequestException(`"${planItem.itemCode}" has not been released for Dispatch with a valid source yet.`);
+      }
+      if (planItem.plannedQty <= 0) throw new BadRequestException(`Planned qty must be greater than 0 for ${planItem.itemCode}`);
+      lineData.push({ planItem, soItem });
     }
 
-    const planNumber = await this.generateNumber(user.companyId);
+    const plan = await this.prisma.$transaction(async (tx) => {
+      const items = [];
+      for (const { planItem, soItem } of lineData) {
+        const remaining = await this.unplannedRemaining(tx, soItem.id, soItem.pendingQty);
+        if (planItem.plannedQty > remaining) {
+          throw new BadRequestException(`Planned qty ${planItem.plannedQty} exceeds unplanned remaining demand ${remaining} for ${planItem.itemCode} (other active plans already cover the rest).`);
+        }
+        const avail = await this.soService.checkAvailability(soItem.id, user);
+        const lineStatus = planItem.plannedQty <= (avail.freeQty || 0) ? 'READY_FOR_RESERVATION' : 'STOCK_PENDING';
+        items.push({
+          soItemId: soItem.id, itemCode: planItem.itemCode, itemName: planItem.itemName,
+          plannedQty: planItem.plannedQty, uom: planItem.uom || soItem.uom || 'PCS',
+          saleType: soItem.saleType, requiredStageId: soItem.requiredStageId,
+          sourceType: soItem.sourceType, sourcePlantId: soItem.sourcePlantId,
+          availableSnapshot: avail.freeQty ?? null, snapshotCheckedAt: avail.checkedAt || new Date(),
+          lineStatus,
+          createdBy: user.id, updatedBy: user.id,
+        });
+      }
 
-    const plan = await this.prisma.dispatchPlan.create({
-      data: {
-        planNumber, soId: dto.soId, customerName: so.customerName,
-        deliveryAddress: dto.deliveryAddress, plannedDate: new Date(dto.plannedDate),
-        transportMode: dto.transportMode || 'ROAD',
-        transporterName: dto.transporterName, vehicleNumber: dto.vehicleNumber,
-        driverName: dto.driverName, driverPhone: dto.driverPhone, remarks: dto.remarks,
-        companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
-        items: {
-          create: dto.items.map(item => ({
-            soItemId: item.soItemId, itemCode: item.itemCode, itemName: item.itemName,
-            plannedQty: item.plannedQty, uom: item.uom || 'PCS',
-            createdBy: user.id, updatedBy: user.id,
-          })),
+      const planNumber = await this.generateNumber(user.companyId);
+      return tx.dispatchPlan.create({
+        data: {
+          planNumber, soId: dto.soId, customerName: so.customerName,
+          deliveryAddress: dto.deliveryAddress, plannedDate: new Date(dto.plannedDate),
+          transportMode: dto.transportMode || 'ROAD',
+          transporterName: dto.transporterName, vehicleNumber: dto.vehicleNumber,
+          driverName: dto.driverName, driverPhone: dto.driverPhone, remarks: dto.remarks,
+          companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+          items: { create: items },
         },
-      },
-      include: this.includes(),
+        include: this.includes(),
+      });
     });
 
     await this.audit.log({ tableName: 'dispatch_plans', recordId: plan.id, action: 'CREATE', newValues: plan, changedBy: user.id });
@@ -136,6 +169,14 @@ export class DispatchPlanningService {
     });
     if (!so) throw new NotFoundException('Sales Order not found');
     const pendingItems = so.items.filter(i => i.pendingQty > 0);
-    return { soNumber: so.soNumber, customerName: so.customerName, items: pendingItems };
+    // DSP-004 sections 48-49, 59: show what's ACTUALLY still plannable -
+    // pendingQty minus whatever other active plans already claim - not
+    // the raw pendingQty, which would let two planners each see the
+    // full remaining amount and double-plan it.
+    const items = await Promise.all(pendingItems.map(async (i) => ({
+      ...i,
+      unplannedRemaining: await this.unplannedRemaining(this.prisma, i.id, i.pendingQty),
+    })));
+    return { soNumber: so.soNumber, customerName: so.customerName, items };
   }
 }

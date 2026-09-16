@@ -4539,6 +4539,7 @@ model RoutingStage {
   // this stage's output can be sold to a customer as SFG. Defaults to
   // false so existing routing stages are not retroactively saleable.
   isSaleable Boolean        @default(false)
+  dispatchPlanItems DispatchPlanItem[] @relation("DispatchPlanItemStage")
   isActive   Boolean        @default(true)
   isTestData Boolean        @default(false)
   createdAt  DateTime       @default(now())
@@ -5606,6 +5607,14 @@ model DispatchPlanItem {
   itemName      String
   plannedQty    Float        @default(0)
   uom           String       @default("PCS")
+  saleType      String?
+  requiredStageId String?
+  requiredStage RoutingStage? @relation("DispatchPlanItemStage", fields: [requiredStageId], references: [id])
+  sourceType    String?
+  sourcePlantId String?
+  availableSnapshot Float?
+  snapshotCheckedAt DateTime?
+  lineStatus    String       @default("READY_FOR_RESERVATION") // READY_FOR_RESERVATION, STOCK_PENDING
   isActive      Boolean      @default(true)
   isTestData    Boolean      @default(false)
   createdAt     DateTime     @default(now())

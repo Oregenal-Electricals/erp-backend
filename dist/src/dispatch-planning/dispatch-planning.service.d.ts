@@ -1,10 +1,13 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateDispatchPlanDto, CancelPlanDto } from './dto/dispatch-plan.dto';
+import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 export declare class DispatchPlanningService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private soService;
+    constructor(prisma: PrismaService, audit: AuditService, soService: SalesOrdersService);
+    private unplannedRemaining;
     private generateNumber;
     private includes;
     create(dto: CreateDispatchPlanDto, user: any): Promise<{
@@ -19,8 +22,15 @@ export declare class DispatchPlanningService {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -66,8 +76,15 @@ export declare class DispatchPlanningService {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -113,8 +130,15 @@ export declare class DispatchPlanningService {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -200,8 +224,15 @@ export declare class DispatchPlanningService {
             itemCode: string;
             itemName: string;
             uom: string;
+            saleType: string | null;
+            requiredStageId: string | null;
+            sourceType: string | null;
+            sourcePlantId: string | null;
             soItemId: string;
             plannedQty: number;
+            availableSnapshot: number | null;
+            snapshotCheckedAt: Date | null;
+            lineStatus: string;
             planId: string;
         }[];
         salesOrder: {
@@ -247,6 +278,7 @@ export declare class DispatchPlanningService {
         soNumber: string;
         customerName: string;
         items: {
+            unplannedRemaining: number;
             id: string;
             description: string | null;
             isActive: boolean;
