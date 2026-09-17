@@ -10,7 +10,7 @@ describe('StageTransferService — PROD-006: Partial Stage Handover', () => {
   const smtWo = {
     id: 'wo-smt', companyId: 'company-1', woNumber: 'WO-2026-0001-SMT', status: 'IN_PROGRESS',
     productCode: '9W-LED', productName: '9W Emergency LED Bulb',
-    completedQty: 200, cumulativeHandoverQty: 0,
+    completedQty: 200, cumulativeHandoverQty: 0, dispatchReservedQty: 0,
     routingGroupId: 'rg-1', parentWorkOrderId: null,
   };
   const miWo = {
@@ -162,7 +162,7 @@ describe('StageTransferService — PROD-006: Partial Stage Handover', () => {
     const packagingWo = {
       id: 'wo-packaging', companyId: 'company-1', woNumber: 'WO-2026-0001-PACKAGING', status: 'IN_PROGRESS',
       productCode: '9W-LED', productName: '9W Emergency LED Bulb',
-      completedQty: 500, cumulativeHandoverQty: 200,
+      completedQty: 500, cumulativeHandoverQty: 200, dispatchReservedQty: 0,
       routingGroupId: 'routing-1', stageName: 'Packaging',
     };
     const assemblyWo = { ...packagingWo, id: 'wo-assembly', stageName: 'Assembly', completedQty: 300, cumulativeHandoverQty: 0 };
@@ -213,6 +213,17 @@ describe('StageTransferService — PROD-006: Partial Stage Handover', () => {
       it('blocks a handover exceeding the transferable balance', async () => {
         await expect(
           service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 301 } as any, user),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('DSP-005 CRITICAL: SFG reserved for customer Dispatch cannot simultaneously move to the next Production Stage (section 96) - a handover that would otherwise succeed is blocked once dispatchReservedQty protects that output', async () => {
+        // Without any reservation: transferable = 500 completed - 200
+        // already given = 300, so qty=100 would normally succeed.
+        // With 250 protected for Dispatch: transferable drops to 50 -
+        // the same 100 request must now be blocked.
+        prisma.workOrder.findFirst.mockResolvedValue({ ...packagingWo, dispatchReservedQty: 250 });
+        await expect(
+          service.giveToQc({ fromWorkOrderId: 'wo-packaging', qty: 100 } as any, user),
         ).rejects.toThrow(BadRequestException);
       });
 

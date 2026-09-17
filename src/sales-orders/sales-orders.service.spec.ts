@@ -275,9 +275,9 @@ describe('SalesOrdersService - DSP-001', () => {
 
     it('aggregates SFG availability across multiple Work Orders at the exact stage without losing per-WO traceability (sections 12, 16, 72)', async () => {
       prisma.workOrder.findMany.mockResolvedValue([
-        { id: 'wo-1', woNumber: 'WO-101', completedQty: 3000, cumulativeHandoverQty: 1000, stageStatus: 'COMPLETED' },
-        { id: 'wo-2', woNumber: 'WO-102', completedQty: 2000, cumulativeHandoverQty: 1000, stageStatus: 'COMPLETED' },
-        { id: 'wo-3', woNumber: 'WO-103', completedQty: 600, cumulativeHandoverQty: 0, stageStatus: 'BLOCKED' },
+        { id: 'wo-1', woNumber: 'WO-101', completedQty: 3000, cumulativeHandoverQty: 1000, dispatchReservedQty: 0, stageStatus: 'COMPLETED' },
+        { id: 'wo-2', woNumber: 'WO-102', completedQty: 2000, cumulativeHandoverQty: 1000, dispatchReservedQty: 0, stageStatus: 'COMPLETED' },
+        { id: 'wo-3', woNumber: 'WO-103', completedQty: 600, cumulativeHandoverQty: 0, dispatchReservedQty: 0, stageStatus: 'BLOCKED' },
       ]);
       const released = await releasedLine('SFG');
       const result = await service.checkAvailability(released.id, user);
@@ -289,7 +289,7 @@ describe('SalesOrdersService - DSP-001', () => {
 
     it('excludes SFG output already transferred forward to the next stage, per Work Order (sections 12, 72)', async () => {
       prisma.workOrder.findMany.mockResolvedValue([
-        { id: 'wo-1', woNumber: 'WO-101', completedQty: 5000, cumulativeHandoverQty: 2000, stageStatus: 'COMPLETED' },
+        { id: 'wo-1', woNumber: 'WO-101', completedQty: 5000, cumulativeHandoverQty: 2000, dispatchReservedQty: 0, stageStatus: 'COMPLETED' },
       ]);
       const released = await releasedLine('SFG');
       const result = await service.checkAvailability(released.id, user);
@@ -308,7 +308,7 @@ describe('SalesOrdersService - DSP-001', () => {
     });
 
     it('creates no stock or Production movement as a side effect of checking availability (section 38-39, 68)', async () => {
-      prisma.workOrder.findMany.mockResolvedValue([{ id: 'wo-1', woNumber: 'WO-101', completedQty: 5000, cumulativeHandoverQty: 2000, stageStatus: 'COMPLETED' }]);
+      prisma.workOrder.findMany.mockResolvedValue([{ id: 'wo-1', woNumber: 'WO-101', completedQty: 5000, cumulativeHandoverQty: 2000, dispatchReservedQty: 0, stageStatus: 'COMPLETED' }]);
       const released = await releasedLine('SFG');
       await service.checkAvailability(released.id, user);
       expect((prisma.workOrder as any).update).toBeUndefined();

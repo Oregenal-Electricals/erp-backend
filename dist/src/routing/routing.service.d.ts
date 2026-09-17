@@ -159,6 +159,7 @@ export declare class RoutingService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;

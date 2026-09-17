@@ -43,7 +43,7 @@ let StageTransferService = class StageTransferService {
                 throw new common_1.BadRequestException(`${toWo.woNumber} is not the immediate next stage after ${fromWo.woNumber} in this routing - handover would skip a stage`);
             }
         }
-        const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty;
+        const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty - fromWo.dispatchReservedQty;
         const qty = (_a = dto.qty) !== null && _a !== void 0 ? _a : transferable;
         if (qty <= 0)
             throw new common_1.BadRequestException('No transferable quantity available to hand over');
@@ -52,7 +52,7 @@ let StageTransferService = class StageTransferService {
         }
         const updated = await this.prisma.$executeRaw `
       UPDATE work_orders SET "cumulativeHandoverQty" = "cumulativeHandoverQty" + ${qty}, "updatedBy" = ${user.id}
-      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" >= ${qty}
+      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" - "dispatchReservedQty" >= ${qty}
     `;
         if (updated === 0) {
             throw new common_1.BadRequestException('Transferable quantity changed since this was checked - please retry');
@@ -97,7 +97,7 @@ let StageTransferService = class StageTransferService {
                 }
             }
         }
-        const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty;
+        const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty - fromWo.dispatchReservedQty;
         const qty = (_a = dto.qty) !== null && _a !== void 0 ? _a : transferable;
         if (qty <= 0)
             throw new common_1.BadRequestException('No transferable quantity available to hand over to QC');
@@ -106,7 +106,7 @@ let StageTransferService = class StageTransferService {
         }
         const updated = await this.prisma.$executeRaw `
       UPDATE work_orders SET "cumulativeHandoverQty" = "cumulativeHandoverQty" + ${qty}, "updatedBy" = ${user.id}
-      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" >= ${qty}
+      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" - "dispatchReservedQty" >= ${qty}
     `;
         if (updated === 0) {
             throw new common_1.BadRequestException('Transferable quantity changed since this was checked - please retry');

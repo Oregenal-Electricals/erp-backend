@@ -365,6 +365,7 @@ model Company {
   reworks                Rework[]
   scraps                 Scrap[]
 
+  dispatchReservations DispatchReservation[]
   @@map("companies")
   @@index([code])
   @@index([isActive])
@@ -2107,6 +2108,7 @@ model Warehouse {
   warehouseRacks WarehouseRack[]
   warehouseBins  WarehouseBin[]
   stockBalances StockBalance[]
+  dispatchReservations DispatchReservation[]
   @@map("warehouses")
   @@unique([companyId, code])
   @@index([companyId])
@@ -4412,6 +4414,13 @@ model WorkOrder {
   cumulativeInputQty     Float  @default(0) // total received via StageTransferNote from the previous stage
   cumulativeProcessedQty Float  @default(0) // how much of that received input this stage has consumed
   cumulativeHandoverQty  Float  @default(0) // total already given onward to the next stage
+  // DSP-005 sections 13-17: quantity reserved for customer Dispatch
+  // at THIS stage - subtracted from the transferable pool in
+  // stage-transfers.service.ts so reserved output can never also
+  // move forward to the next stage. Separate from cumulativeHandoverQty
+  // (already-moved) since reserved output hasn't moved yet, just protected.
+  dispatchReservedQty Float @default(0)
+  dispatchReservations DispatchReservation[]
   stageStatus String @default("NOT_READY") // NOT_READY, READY_FOR_START, IN_PRODUCTION, PARTIALLY_COMPLETED, COMPLETED, BLOCKED
   plannedStartDate  DateTime
   plannedEndDate    DateTime
@@ -4540,6 +4549,7 @@ model RoutingStage {
   // false so existing routing stages are not retroactively saleable.
   isSaleable Boolean        @default(false)
   dispatchPlanItems DispatchPlanItem[] @relation("DispatchPlanItemStage")
+  dispatchReservationLines DispatchReservation[] @relation("DispatchReservationStage")
   isActive   Boolean        @default(true)
   isTestData Boolean        @default(false)
   createdAt  DateTime       @default(now())
@@ -5496,6 +5506,7 @@ model SalesOrder {
   @@index([companyId, status])
   dispatchPlans DispatchPlan[]
   dispatches Dispatch[]
+  dispatchReservations DispatchReservation[]
   arInvoices ArInvoice[]
   workOrders WorkOrder[]
   @@map("sales_orders")
@@ -5556,6 +5567,7 @@ model SalesOrderItem {
   updatedBy     String?
 
   dispatchPlanItems DispatchPlanItem[]
+  dispatchReservations DispatchReservation[] @relation("DispatchReservationSoItem")
   dispatchItems DispatchItem[]
   @@map("sales_order_items")
 }
@@ -5594,6 +5606,7 @@ model DispatchPlan {
   @@unique([companyId, planNumber])
   @@index([companyId, status])
   dispatches Dispatch[]
+  dispatchReservations DispatchReservation[]
   @@map("dispatch_plans")
 }
 
@@ -5622,8 +5635,49 @@ model DispatchPlanItem {
   createdBy     String?
   updatedBy     String?
 
+  dispatchReservations DispatchReservation[]
   @@map("dispatch_plan_items")
 }
+model DispatchReservation {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  reservationNumber   String
+  dispatchPlanId      String
+  dispatchPlan        DispatchPlan     @relation(fields: [dispatchPlanId], references: [id])
+  dispatchPlanItemId  String
+  dispatchPlanItem    DispatchPlanItem @relation(fields: [dispatchPlanItemId], references: [id])
+  soId                String
+  salesOrder          SalesOrder       @relation(fields: [soId], references: [id])
+  soItemId            String
+  soItem              SalesOrderItem   @relation("DispatchReservationSoItem", fields: [soItemId], references: [id])
+  itemCode            String
+  itemName            String
+  reservationType     String  // RM_DISPATCH, SFG_DISPATCH, FG_DISPATCH
+  warehouseId         String?
+  warehouse           Warehouse? @relation(fields: [warehouseId], references: [id])
+  // DSP-005 sections 18-19: SFG reservation may draw from MULTIPLE
+  // Work Orders to fulfil one requested qty - one DispatchReservation
+  // row per WO actually drawn from, all sharing the same
+  // reservationNumber, so WO-level traceability is never lost.
+  workOrderId         String?
+  workOrder           WorkOrder? @relation(fields: [workOrderId], references: [id])
+  requiredStageId     String?
+  requiredStage       RoutingStage? @relation("DispatchReservationStage", fields: [requiredStageId], references: [id])
+  reservedQty         Float
+  releasedQty         Float   @default(0)
+  status              String  @default("ACTIVE") // ACTIVE, PARTIALLY_RELEASED, RELEASED, CANCELLED
+  releaseReason       String?
+  isActive            Boolean  @default(true)
+  isTestData           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@map("dispatch_reservations")
+}
+
 
 // MODULE 101 — DISPATCH
 // ============================================================

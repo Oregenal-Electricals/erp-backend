@@ -85,6 +85,7 @@ export declare class WorkOrderController {
             cumulativeInputQty: number;
             cumulativeProcessedQty: number;
             cumulativeHandoverQty: number;
+            dispatchReservedQty: number;
             stageStatus: string;
             plannedStartDate: Date;
             plannedEndDate: Date;
@@ -147,6 +148,7 @@ export declare class WorkOrderController {
             cumulativeInputQty: number;
             cumulativeProcessedQty: number;
             cumulativeHandoverQty: number;
+            dispatchReservedQty: number;
             stageStatus: string;
             plannedStartDate: Date;
             plannedEndDate: Date;
@@ -254,6 +256,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -328,6 +331,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -384,6 +388,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -449,6 +454,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -505,6 +511,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -608,6 +615,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -664,6 +672,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -720,6 +729,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -776,6 +786,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -832,6 +843,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -935,6 +947,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -1016,6 +1029,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -1127,6 +1141,7 @@ export declare class WorkOrderController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;

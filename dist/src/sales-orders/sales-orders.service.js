@@ -482,11 +482,11 @@ let SalesOrdersService = class SalesOrdersService {
                     status: { in: ['RELEASED', 'IN_PROGRESS', 'COMPLETED'] },
                     warehouse: { plantId: item.sourcePlantId },
                 },
-                select: { id: true, woNumber: true, completedQty: true, cumulativeHandoverQty: true, stageStatus: true },
+                select: { id: true, woNumber: true, completedQty: true, cumulativeHandoverQty: true, dispatchReservedQty: true, stageStatus: true },
             });
             const byWo = wos.map(w => {
-                const netFree = w.stageStatus === 'BLOCKED' ? 0 : Math.max(w.completedQty - w.cumulativeHandoverQty, 0);
-                return { woNumber: w.woNumber, accepted: w.completedQty, transferredForward: w.cumulativeHandoverQty, blocked: w.stageStatus === 'BLOCKED', free: netFree };
+                const netFree = w.stageStatus === 'BLOCKED' ? 0 : Math.max(w.completedQty - w.cumulativeHandoverQty - w.dispatchReservedQty, 0);
+                return { woNumber: w.woNumber, accepted: w.completedQty, transferredForward: w.cumulativeHandoverQty, dispatchReserved: w.dispatchReservedQty, blocked: w.stageStatus === 'BLOCKED', free: netFree };
             });
             const acceptedPool = byWo.reduce((s, w) => s + w.free, 0);
             const alreadyDispatchedAgg = await this.prisma.salesOrderItem.aggregate({

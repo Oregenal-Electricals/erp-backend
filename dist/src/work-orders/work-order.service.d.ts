@@ -59,6 +59,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -116,6 +117,7 @@ export declare class WorkOrderService {
             cumulativeInputQty: number;
             cumulativeProcessedQty: number;
             cumulativeHandoverQty: number;
+            dispatchReservedQty: number;
             stageStatus: string;
             plannedStartDate: Date;
             plannedEndDate: Date;
@@ -223,6 +225,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -279,6 +282,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -344,6 +348,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -402,6 +407,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -505,6 +511,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -561,6 +568,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -617,6 +625,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -720,6 +729,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -879,6 +889,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -990,6 +1001,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -1050,6 +1062,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;
@@ -1106,6 +1119,7 @@ export declare class WorkOrderService {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;

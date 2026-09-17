@@ -118,6 +118,7 @@ export declare class RoutingController {
         cumulativeInputQty: number;
         cumulativeProcessedQty: number;
         cumulativeHandoverQty: number;
+        dispatchReservedQty: number;
         stageStatus: string;
         plannedStartDate: Date;
         plannedEndDate: Date;

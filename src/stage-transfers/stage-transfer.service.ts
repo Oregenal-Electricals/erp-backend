@@ -49,7 +49,7 @@ export class StageTransferService {
     // output not already given can be handed over - never the gross
     // completed quantity as a whole, and never more than once across
     // repeated handovers.
-    const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty;
+    const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty - fromWo.dispatchReservedQty;
     const qty = dto.qty ?? transferable;
     if (qty <= 0) throw new BadRequestException('No transferable quantity available to hand over');
     if (qty > transferable) {
@@ -64,7 +64,7 @@ export class StageTransferService {
     // database level in the same statement that applies the increment.
     const updated = await this.prisma.$executeRaw`
       UPDATE work_orders SET "cumulativeHandoverQty" = "cumulativeHandoverQty" + ${qty}, "updatedBy" = ${user.id}
-      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" >= ${qty}
+      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" - "dispatchReservedQty" >= ${qty}
     `;
     if (updated === 0) {
       throw new BadRequestException('Transferable quantity changed since this was checked - please retry');
@@ -132,7 +132,7 @@ export class StageTransferService {
       }
     }
 
-    const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty;
+    const transferable = fromWo.completedQty - fromWo.cumulativeHandoverQty - fromWo.dispatchReservedQty;
     const qty = dto.qty ?? transferable;
     if (qty <= 0) throw new BadRequestException('No transferable quantity available to hand over to QC');
     if (qty > transferable) {
@@ -141,7 +141,7 @@ export class StageTransferService {
 
     const updated = await this.prisma.$executeRaw`
       UPDATE work_orders SET "cumulativeHandoverQty" = "cumulativeHandoverQty" + ${qty}, "updatedBy" = ${user.id}
-      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" >= ${qty}
+      WHERE id = ${fromWo.id} AND "completedQty" - "cumulativeHandoverQty" - "dispatchReservedQty" >= ${qty}
     `;
     if (updated === 0) {
       throw new BadRequestException('Transferable quantity changed since this was checked - please retry');
