@@ -105,6 +105,7 @@ import { RolesModule } from './roles/roles.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 import { DispatchPlanningModule } from './dispatch-planning/dispatch-planning.module';
 import { DispatchReservationModule } from './dispatch-reservations/dispatch-reservation.module';
+import { PickListModule } from './pick-lists/pick-list.module';
 import { DispatchModule } from './dispatch/dispatch.module';
 import { DeliveryConfirmationModule } from './delivery-confirmation/delivery-confirmation.module';
 import { AccountsModule } from './accounts/accounts.module';
@@ -269,6 +270,7 @@ import configuration from './config/configuration';
     SalesOrdersModule,
     DispatchPlanningModule,
     DispatchReservationModule,
+    PickListModule,
     DispatchModule,
     DeliveryConfirmationModule,
     AccountsModule,
