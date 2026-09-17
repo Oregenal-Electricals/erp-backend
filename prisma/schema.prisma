@@ -367,6 +367,7 @@ model Company {
 
   dispatchReservations DispatchReservation[]
   pickLists PickList[]
+  dispatchVerifications DispatchVerification[]
   @@map("companies")
   @@index([code])
   @@index([isActive])
@@ -5510,6 +5511,7 @@ model SalesOrder {
   dispatches Dispatch[]
   dispatchReservations DispatchReservation[]
   pickLists PickList[]
+  dispatchVerifications DispatchVerification[]
   arInvoices ArInvoice[]
   workOrders WorkOrder[]
   @@map("sales_orders")
@@ -5572,6 +5574,7 @@ model SalesOrderItem {
   dispatchPlanItems DispatchPlanItem[]
   dispatchReservations DispatchReservation[] @relation("DispatchReservationSoItem")
   pickListItems PickListItem[] @relation("PickListItemSoItem")
+  dispatchVerificationItems DispatchVerificationItem[] @relation("DispatchVerificationItemSoItem")
   dispatchItems DispatchItem[]
   @@map("sales_order_items")
 }
@@ -5704,6 +5707,7 @@ model PickList {
 
   items PickListItem[]
 
+  verifications DispatchVerification[]
   @@map("pick_lists")
 }
 
@@ -5741,8 +5745,65 @@ model PickListItem {
   createdBy             String?
   updatedBy             String?
 
+  verificationItems DispatchVerificationItem[]
   @@map("pick_list_items")
 }
+model DispatchVerification {
+  id                  String   @id @default(uuid())
+  companyId            String
+  company              Company  @relation(fields: [companyId], references: [id])
+  verificationNumber   String
+  pickListId           String
+  pickList             PickList @relation(fields: [pickListId], references: [id])
+  soId                 String
+  salesOrder           SalesOrder @relation(fields: [soId], references: [id])
+  customerName         String
+  status               String   @default("PENDING") // PENDING, IN_VERIFICATION, PARTIALLY_VERIFIED, VERIFIED, EXCEPTION, CANCELLED
+  remarks              String?
+  isActive             Boolean  @default(true)
+  isTestData           Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  createdBy            String?
+  updatedBy            String?
+
+  items DispatchVerificationItem[]
+
+  @@map("dispatch_verifications")
+}
+
+model DispatchVerificationItem {
+  id                   String   @id @default(uuid())
+  verificationId       String
+  verification         DispatchVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+  pickListItemId        String
+  pickListItem          PickListItem @relation(fields: [pickListItemId], references: [id])
+  soItemId              String
+  soItem                SalesOrderItem @relation("DispatchVerificationItemSoItem", fields: [soItemId], references: [id])
+  itemCode               String
+  itemName               String
+  saleType                String
+  // DSP-007 sections 19-24, 44-45: verified is a nested subset of
+  // picked, never a second independent commitment - multiple rows
+  // can share the same pickListItemId (multiple verification
+  // events), their sum minus reversedQty is what must never exceed
+  // that pick event's own pickedQty - reversedQty.
+  verifiedQty            Float
+  exceptionQty            Float  @default(0)
+  exceptionReason         String? // ITEM_MISMATCH, QTY_SHORT, QTY_EXCESS, BATCH_MISMATCH, SERIAL_MISMATCH, STAGE_MISMATCH, WO_MISMATCH, QC_HOLD, QC_REJECTED, QC_PENDING, WRONG_PLANT, INVALID_UOM, BLOCKED_STOCK, LOCATION_MISMATCH
+  reversedQty             Float  @default(0)
+  status                  String @default("VERIFIED") // VERIFIED, EXCEPTION, REVERSED
+  reason                  String?
+  isActive                Boolean  @default(true)
+  isTestData              Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  createdBy               String?
+  updatedBy               String?
+
+  @@map("dispatch_verification_items")
+}
+
 
 
 

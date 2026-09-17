@@ -118,6 +118,7 @@ const sales_orders_module_1 = require("./sales-orders/sales-orders.module");
 const dispatch_planning_module_1 = require("./dispatch-planning/dispatch-planning.module");
 const dispatch_reservation_module_1 = require("./dispatch-reservations/dispatch-reservation.module");
 const pick_list_module_1 = require("./pick-lists/pick-list.module");
+const dispatch_verification_module_1 = require("./dispatch-verifications/dispatch-verification.module");
 const dispatch_module_1 = require("./dispatch/dispatch.module");
 const delivery_confirmation_module_1 = require("./delivery-confirmation/delivery-confirmation.module");
 const accounts_module_1 = require("./accounts/accounts.module");
@@ -289,6 +290,7 @@ exports.AppModule = AppModule = __decorate([
             dispatch_planning_module_1.DispatchPlanningModule,
             dispatch_reservation_module_1.DispatchReservationModule,
             pick_list_module_1.PickListModule,
+            dispatch_verification_module_1.DispatchVerificationModule,
             dispatch_module_1.DispatchModule,
             delivery_confirmation_module_1.DeliveryConfirmationModule,
             accounts_module_1.AccountsModule,
