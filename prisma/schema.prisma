@@ -368,6 +368,7 @@ model Company {
   dispatchReservations DispatchReservation[]
   pickLists PickList[]
   dispatchVerifications DispatchVerification[]
+  dispatchPackings DispatchPacking[]
   @@map("companies")
   @@index([code])
   @@index([isActive])
@@ -5512,6 +5513,7 @@ model SalesOrder {
   dispatchReservations DispatchReservation[]
   pickLists PickList[]
   dispatchVerifications DispatchVerification[]
+  dispatchPackings DispatchPacking[]
   arInvoices ArInvoice[]
   workOrders WorkOrder[]
   @@map("sales_orders")
@@ -5769,6 +5771,7 @@ model DispatchVerification {
 
   items DispatchVerificationItem[]
 
+  packings DispatchPacking[]
   @@map("dispatch_verifications")
 }
 
@@ -5801,8 +5804,77 @@ model DispatchVerificationItem {
   createdBy               String?
   updatedBy               String?
 
+  packageItems DispatchPackageItem[]
   @@map("dispatch_verification_items")
 }
+model DispatchPacking {
+  id                  String   @id @default(uuid())
+  companyId           String
+  company             Company  @relation(fields: [companyId], references: [id])
+  packingNumber       String
+  verificationId      String
+  verification        DispatchVerification @relation(fields: [verificationId], references: [id])
+  soId                String
+  salesOrder          SalesOrder @relation(fields: [soId], references: [id])
+  customerName        String
+  status              String   @default("DRAFT")
+  remarks             String?
+  isActive            Boolean  @default(true)
+  isTestData          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  packages DispatchPackage[]
+
+  @@map("dispatch_packings")
+}
+
+model DispatchPackage {
+  id                  String   @id @default(uuid())
+  packingId           String
+  packing             DispatchPacking @relation(fields: [packingId], references: [id], onDelete: Cascade)
+  packageNumber       String
+  packageType         String   @default("CARTON")
+  netWeight           Float?
+  grossWeight         Float?
+  status              String   @default("ACTIVE")
+  isActive            Boolean  @default(true)
+  isTestData          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  items DispatchPackageItem[]
+
+  @@map("dispatch_packages")
+}
+
+model DispatchPackageItem {
+  id                    String   @id @default(uuid())
+  packageId             String
+  package               DispatchPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  verificationItemId    String
+  verificationItem      DispatchVerificationItem @relation(fields: [verificationItemId], references: [id])
+  itemCode              String
+  itemName              String
+  saleType              String
+  packedQty             Float
+  reversedQty           Float    @default(0)
+  status                String   @default("PACKED")
+  reason                String?
+  isActive              Boolean  @default(true)
+  isTestData            Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  @@map("dispatch_package_items")
+}
+
 
 
 
