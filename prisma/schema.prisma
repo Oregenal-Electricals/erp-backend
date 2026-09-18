@@ -369,6 +369,7 @@ model Company {
   pickLists PickList[]
   dispatchVerifications DispatchVerification[]
   dispatchPackings DispatchPacking[]
+  dispatchTransportAssignments DispatchTransportAssignment[]
   @@map("companies")
   @@index([code])
   @@index([isActive])
@@ -787,6 +788,7 @@ model Vehicle {
 
   logs VehicleLog[]
   gateEvents GateEvent[]
+  transportAssignments DispatchTransportAssignment[]
 
   @@map("vehicles")
   @@unique([companyId, vehicleNumber])
@@ -5514,6 +5516,7 @@ model SalesOrder {
   pickLists PickList[]
   dispatchVerifications DispatchVerification[]
   dispatchPackings DispatchPacking[]
+  transportAssignments DispatchTransportAssignment[]
   arInvoices ArInvoice[]
   workOrders WorkOrder[]
   @@map("sales_orders")
@@ -5616,6 +5619,7 @@ model DispatchPlan {
   @@index([companyId, status])
   dispatches Dispatch[]
   dispatchReservations DispatchReservation[]
+  transportAssignments DispatchTransportAssignment[]
   pickLists PickList[]
   @@map("dispatch_plans")
 }
@@ -5849,6 +5853,8 @@ model DispatchPackage {
 
   items DispatchPackageItem[]
 
+  assignedTransportAssignmentId String?
+  assignedTransportAssignment   DispatchTransportAssignment? @relation(fields: [assignedTransportAssignmentId], references: [id])
   @@map("dispatch_packages")
 }
 
@@ -5874,6 +5880,39 @@ model DispatchPackageItem {
 
   @@map("dispatch_package_items")
 }
+model DispatchTransportAssignment {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  assignmentNumber  String
+  dispatchPlanId    String
+  dispatchPlan      DispatchPlan @relation(fields: [dispatchPlanId], references: [id])
+  soId              String
+  salesOrder        SalesOrder @relation(fields: [soId], references: [id])
+  customerName      String
+  transportType     String   @default("TRANSPORTER_VEHICLE")
+  transporterName   String?
+  vehicleId         String?
+  vehicle           Vehicle? @relation(fields: [vehicleId], references: [id])
+  vehicleNumber     String?
+  vehicleType       String?
+  driverName        String?
+  driverPhone       String?
+  lrNumber          String?
+  status            String   @default("DRAFT")
+  remarks           String?
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  packages DispatchPackage[]
+
+  @@map("dispatch_transport_assignments")
+}
+
 
 
 

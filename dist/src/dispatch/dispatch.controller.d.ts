@@ -42,9 +42,9 @@ export declare class DispatchController {
             transporterName: string | null;
             driverPhone: string | null;
             planId: string;
+            lrNumber: string | null;
             dispatchNumber: string;
             dispatchDate: Date;
-            lrNumber: string | null;
             ewayBillNumber: string | null;
         })[];
         total: number;
@@ -103,9 +103,9 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        lrNumber: string | null;
         dispatchNumber: string;
         dispatchDate: Date;
-        lrNumber: string | null;
         ewayBillNumber: string | null;
     }>;
     create(dto: CreateDispatchDto, req: any): Promise<{
@@ -160,9 +160,9 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        lrNumber: string | null;
         dispatchNumber: string;
         dispatchDate: Date;
-        lrNumber: string | null;
         ewayBillNumber: string | null;
     }>;
     markDelivered(id: string, req: any): Promise<{
@@ -217,9 +217,9 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        lrNumber: string | null;
         dispatchNumber: string;
         dispatchDate: Date;
-        lrNumber: string | null;
         ewayBillNumber: string | null;
     }>;
 }

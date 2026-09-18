@@ -18,8 +18,8 @@ export declare class ArService {
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -75,8 +75,8 @@ export declare class ArService {
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -196,8 +196,8 @@ export declare class ArService {
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;

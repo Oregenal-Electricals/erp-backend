@@ -101,8 +101,8 @@ export declare class ArController {
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -158,8 +158,8 @@ export declare class ArController {
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
@@ -215,8 +215,8 @@ export declare class ArController {
             };
         };
         dispatch: {
-            dispatchNumber: string;
             lrNumber: string;
+            dispatchNumber: string;
         };
         payments: {
             id: string;
