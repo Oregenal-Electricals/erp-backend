@@ -16,11 +16,11 @@ export declare class DispatchLoadingController {
             reason: string | null;
             exceptionReason: string | null;
             packageId: string;
+            loadingId: string;
             loadedBy: string | null;
             loadedAt: Date;
             unloadedBy: string | null;
             unloadedAt: Date | null;
-            loadingId: string;
         }[];
         salesOrder: {
             customerName: string;
@@ -64,6 +64,7 @@ export declare class DispatchLoadingController {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -104,11 +105,11 @@ export declare class DispatchLoadingController {
             reason: string | null;
             exceptionReason: string | null;
             packageId: string;
+            loadingId: string;
             loadedBy: string | null;
             loadedAt: Date;
             unloadedBy: string | null;
             unloadedAt: Date | null;
-            loadingId: string;
         }[];
         salesOrder: {
             customerName: string;
@@ -152,6 +153,7 @@ export declare class DispatchLoadingController {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -191,11 +193,11 @@ export declare class DispatchLoadingController {
         reason: string | null;
         exceptionReason: string | null;
         packageId: string;
+        loadingId: string;
         loadedBy: string | null;
         loadedAt: Date;
         unloadedBy: string | null;
         unloadedAt: Date | null;
-        loadingId: string;
     }>;
     unloadPackage(itemId: string, dto: UnloadPackageDto, req: any): Promise<{
         id: string;
@@ -209,11 +211,11 @@ export declare class DispatchLoadingController {
         reason: string | null;
         exceptionReason: string | null;
         packageId: string;
+        loadingId: string;
         loadedBy: string | null;
         loadedAt: Date;
         unloadedBy: string | null;
         unloadedAt: Date | null;
-        loadingId: string;
     }>;
     completeLoading(id: string, req: any): Promise<{
         items: {
@@ -228,11 +230,11 @@ export declare class DispatchLoadingController {
             reason: string | null;
             exceptionReason: string | null;
             packageId: string;
+            loadingId: string;
             loadedBy: string | null;
             loadedAt: Date;
             unloadedBy: string | null;
             unloadedAt: Date | null;
-            loadingId: string;
         }[];
         salesOrder: {
             customerName: string;
@@ -276,6 +278,7 @@ export declare class DispatchLoadingController {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;

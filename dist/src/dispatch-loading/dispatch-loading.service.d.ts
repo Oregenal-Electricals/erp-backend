@@ -20,11 +20,11 @@ export declare class DispatchLoadingService {
             reason: string | null;
             exceptionReason: string | null;
             packageId: string;
+            loadingId: string;
             loadedBy: string | null;
             loadedAt: Date;
             unloadedBy: string | null;
             unloadedAt: Date | null;
-            loadingId: string;
         }[];
         salesOrder: {
             customerName: string;
@@ -68,6 +68,7 @@ export declare class DispatchLoadingService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -108,11 +109,11 @@ export declare class DispatchLoadingService {
         reason: string | null;
         exceptionReason: string | null;
         packageId: string;
+        loadingId: string;
         loadedBy: string | null;
         loadedAt: Date;
         unloadedBy: string | null;
         unloadedAt: Date | null;
-        loadingId: string;
     }>;
     private refreshLoadingStatus;
     unloadPackage(loadingItemId: string, reason: string | undefined, user: any): Promise<{
@@ -127,11 +128,11 @@ export declare class DispatchLoadingService {
         reason: string | null;
         exceptionReason: string | null;
         packageId: string;
+        loadingId: string;
         loadedBy: string | null;
         loadedAt: Date;
         unloadedBy: string | null;
         unloadedAt: Date | null;
-        loadingId: string;
     }>;
     completeLoading(loadingId: string, user: any): Promise<{
         items: {
@@ -146,11 +147,11 @@ export declare class DispatchLoadingService {
             reason: string | null;
             exceptionReason: string | null;
             packageId: string;
+            loadingId: string;
             loadedBy: string | null;
             loadedAt: Date;
             unloadedBy: string | null;
             unloadedAt: Date | null;
-            loadingId: string;
         }[];
         salesOrder: {
             customerName: string;
@@ -194,6 +195,7 @@ export declare class DispatchLoadingService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -234,11 +236,11 @@ export declare class DispatchLoadingService {
             reason: string | null;
             exceptionReason: string | null;
             packageId: string;
+            loadingId: string;
             loadedBy: string | null;
             loadedAt: Date;
             unloadedBy: string | null;
             unloadedAt: Date | null;
-            loadingId: string;
         }[];
         salesOrder: {
             customerName: string;
@@ -282,6 +284,7 @@ export declare class DispatchLoadingService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;

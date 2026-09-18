@@ -123,6 +123,7 @@ const dispatch_packing_module_1 = require("./dispatch-packing/dispatch-packing.m
 const dispatch_document_readiness_module_1 = require("./dispatch-document-readiness/dispatch-document-readiness.module");
 const dispatch_transport_module_1 = require("./dispatch-transport/dispatch-transport.module");
 const dispatch_loading_module_1 = require("./dispatch-loading/dispatch-loading.module");
+const dispatch_confirmation_module_1 = require("./dispatch-confirmation/dispatch-confirmation.module");
 const dispatch_module_1 = require("./dispatch/dispatch.module");
 const delivery_confirmation_module_1 = require("./delivery-confirmation/delivery-confirmation.module");
 const accounts_module_1 = require("./accounts/accounts.module");
@@ -299,6 +300,7 @@ exports.AppModule = AppModule = __decorate([
             dispatch_document_readiness_module_1.DispatchDocumentReadinessModule,
             dispatch_transport_module_1.DispatchTransportModule,
             dispatch_loading_module_1.DispatchLoadingModule,
+            dispatch_confirmation_module_1.DispatchConfirmationModule,
             dispatch_module_1.DispatchModule,
             delivery_confirmation_module_1.DeliveryConfirmationModule,
             accounts_module_1.AccountsModule,

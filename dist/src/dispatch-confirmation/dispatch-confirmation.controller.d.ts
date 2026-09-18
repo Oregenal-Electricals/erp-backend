@@ -1,74 +1,9 @@
-import { PrismaService } from '../prisma/prisma.service';
-import { AuditService } from '../common/services/audit.service';
-export declare class DispatchPackingService {
-    private prisma;
-    private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
-    private generatePackingNumber;
-    private generatePackageNumber;
-    private includes;
-    createPacking(verificationId: string, user: any): Promise<{
-        salesOrder: {
-            customerName: string;
-            soNumber: string;
-        };
-        verification: {
-            verificationNumber: string;
-        };
-        packages: ({
-            items: {
-                id: string;
-                isActive: boolean;
-                isTestData: boolean;
-                createdAt: Date;
-                updatedAt: Date;
-                createdBy: string | null;
-                updatedBy: string | null;
-                status: string;
-                reason: string | null;
-                itemCode: string;
-                itemName: string;
-                saleType: string;
-                reversedQty: number;
-                verificationItemId: string;
-                packedQty: number;
-                packageId: string;
-            }[];
-        } & {
-            id: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            status: string;
-            netWeight: number | null;
-            grossWeight: number | null;
-            packageNumber: string;
-            packageType: string;
-            packingId: string;
-            assignedTransportAssignmentId: string | null;
-            loadedInLoadingId: string | null;
-            confirmedInConfirmationId: string | null;
-        })[];
-    } & {
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        remarks: string | null;
-        customerName: string;
-        soId: string;
-        verificationId: string;
-        packingNumber: string;
-    }>;
-    createPackage(packingId: string, user: any, packageType?: string, netWeight?: number, grossWeight?: number): Promise<{
+import { DispatchConfirmationService } from './dispatch-confirmation.service';
+import { CreateConfirmationDto, ConfirmPackageDto, ReverseConfirmationDto } from './dto/dispatch-confirmation.dto';
+export declare class DispatchConfirmationController {
+    private readonly confirmationService;
+    constructor(confirmationService: DispatchConfirmationService);
+    findOne(id: string, req: any): Promise<{
         items: {
             id: string;
             isActive: boolean;
@@ -79,78 +14,20 @@ export declare class DispatchPackingService {
             updatedBy: string | null;
             status: string;
             reason: string | null;
-            itemCode: string;
-            itemName: string;
-            saleType: string;
-            reversedQty: number;
-            verificationItemId: string;
-            packedQty: number;
+            reversedAt: Date | null;
+            reversedBy: string | null;
+            confirmedBy: string | null;
+            exceptionReason: string | null;
             packageId: string;
+            confirmedAt: Date;
+            confirmationId: string;
         }[];
-    } & {
-        id: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        netWeight: number | null;
-        grossWeight: number | null;
-        packageNumber: string;
-        packageType: string;
-        packingId: string;
-        assignedTransportAssignmentId: string | null;
-        loadedInLoadingId: string | null;
-        confirmedInConfirmationId: string | null;
-    }>;
-    private remainingToPack;
-    private revalidateQuality;
-    addPackageItem(packageId: string, verificationItemId: string, packedQty: number, user: any): Promise<{
-        id: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        reason: string | null;
-        itemCode: string;
-        itemName: string;
-        saleType: string;
-        reversedQty: number;
-        verificationItemId: string;
-        packedQty: number;
-        packageId: string;
-    }>;
-    private refreshPackingStatus;
-    reversePackageItem(packageItemId: string, reverseQty: number, reason: string | undefined, user: any): Promise<{
-        id: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        reason: string | null;
-        itemCode: string;
-        itemName: string;
-        saleType: string;
-        reversedQty: number;
-        verificationItemId: string;
-        packedQty: number;
-        packageId: string;
-    }>;
-    findOne(id: string, user: any): Promise<{
         salesOrder: {
             customerName: string;
             soNumber: string;
         };
-        verification: {
-            verificationNumber: string;
+        dispatchPlan: {
+            planNumber: string;
         };
         packages: ({
             items: {
@@ -189,6 +66,14 @@ export declare class DispatchPackingService {
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
         })[];
+        transportAssignment: {
+            vehicleNumber: string;
+            transporterName: string;
+            assignmentNumber: string;
+        };
+        loading: {
+            loadingNumber: string;
+        };
     } & {
         id: string;
         companyId: string;
@@ -201,8 +86,141 @@ export declare class DispatchPackingService {
         status: string;
         remarks: string | null;
         customerName: string;
+        confirmedBy: string | null;
         soId: string;
-        verificationId: string;
-        packingNumber: string;
+        dispatchPlanId: string;
+        transportAssignmentId: string;
+        confirmationNumber: string;
+        loadingId: string;
+        confirmationType: string | null;
+        confirmedAt: Date | null;
+    }>;
+    createConfirmation(dto: CreateConfirmationDto, req: any): Promise<{
+        items: {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            reason: string | null;
+            reversedAt: Date | null;
+            reversedBy: string | null;
+            confirmedBy: string | null;
+            exceptionReason: string | null;
+            packageId: string;
+            confirmedAt: Date;
+            confirmationId: string;
+        }[];
+        salesOrder: {
+            customerName: string;
+            soNumber: string;
+        };
+        dispatchPlan: {
+            planNumber: string;
+        };
+        packages: ({
+            items: {
+                id: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                status: string;
+                reason: string | null;
+                itemCode: string;
+                itemName: string;
+                saleType: string;
+                reversedQty: number;
+                verificationItemId: string;
+                packedQty: number;
+                packageId: string;
+            }[];
+        } & {
+            id: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            netWeight: number | null;
+            grossWeight: number | null;
+            packageNumber: string;
+            packageType: string;
+            packingId: string;
+            assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
+        })[];
+        transportAssignment: {
+            vehicleNumber: string;
+            transporterName: string;
+            assignmentNumber: string;
+        };
+        loading: {
+            loadingNumber: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        remarks: string | null;
+        customerName: string;
+        confirmedBy: string | null;
+        soId: string;
+        dispatchPlanId: string;
+        transportAssignmentId: string;
+        confirmationNumber: string;
+        loadingId: string;
+        confirmationType: string | null;
+        confirmedAt: Date | null;
+    }>;
+    confirmPackage(id: string, dto: ConfirmPackageDto, req: any): Promise<{
+        id: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string | null;
+        reversedAt: Date | null;
+        reversedBy: string | null;
+        confirmedBy: string | null;
+        exceptionReason: string | null;
+        packageId: string;
+        confirmedAt: Date;
+        confirmationId: string;
+    }>;
+    reverseConfirmationItem(itemId: string, dto: ReverseConfirmationDto, req: any): Promise<{
+        id: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        reason: string | null;
+        reversedAt: Date | null;
+        reversedBy: string | null;
+        confirmedBy: string | null;
+        exceptionReason: string | null;
+        packageId: string;
+        confirmedAt: Date;
+        confirmationId: string;
     }>;
 }

@@ -56,6 +56,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
     } & {
         id: string;
@@ -129,6 +130,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
     } & {
         id: string;
@@ -202,6 +204,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
     } & {
         id: string;
@@ -275,6 +278,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
     } & {
         id: string;
@@ -349,6 +353,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
         id: string;
         companyId: string;
@@ -421,6 +426,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
     } & {
         id: string;
@@ -529,6 +535,7 @@ export declare class DispatchTransportService {
             packingId: string;
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
+            confirmedInConfirmationId: string | null;
         })[];
     } & {
         id: string;

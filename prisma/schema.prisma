@@ -371,6 +371,7 @@ model Company {
   dispatchPackings DispatchPacking[]
   dispatchTransportAssignments DispatchTransportAssignment[]
   dispatchLoadings DispatchLoading[]
+  dispatchConfirmations DispatchConfirmation[]
   @@map("companies")
   @@index([code])
   @@index([isActive])
@@ -5519,6 +5520,7 @@ model SalesOrder {
   dispatchPackings DispatchPacking[]
   transportAssignments DispatchTransportAssignment[]
   loadings DispatchLoading[]
+  confirmations DispatchConfirmation[]
   arInvoices ArInvoice[]
   workOrders WorkOrder[]
   @@map("sales_orders")
@@ -5623,6 +5625,7 @@ model DispatchPlan {
   dispatchReservations DispatchReservation[]
   transportAssignments DispatchTransportAssignment[]
   loadings DispatchLoading[]
+  confirmations DispatchConfirmation[]
   pickLists PickList[]
   @@map("dispatch_plans")
 }
@@ -5861,6 +5864,9 @@ model DispatchPackage {
   loadedInLoadingId              String?
   loadedInLoading                DispatchLoading? @relation(fields: [loadedInLoadingId], references: [id])
   loadingItems DispatchLoadingItem[]
+  confirmedInConfirmationId      String?
+  confirmedInConfirmation        DispatchConfirmation? @relation(fields: [confirmedInConfirmationId], references: [id])
+  confirmationItems DispatchConfirmationItem[]
   @@map("dispatch_packages")
 }
 
@@ -5917,6 +5923,7 @@ model DispatchTransportAssignment {
   packages DispatchPackage[]
 
   loadings DispatchLoading[]
+  confirmations DispatchConfirmation[]
   @@map("dispatch_transport_assignments")
 }
 
@@ -5948,6 +5955,7 @@ model DispatchLoading {
   packages DispatchPackage[]
   items    DispatchLoadingItem[]
 
+  confirmations DispatchConfirmation[]
   @@map("dispatch_loadings")
 }
 
@@ -5972,6 +5980,61 @@ model DispatchLoadingItem {
   updatedBy     String?
 
   @@map("dispatch_loading_items")
+}
+
+model DispatchConfirmation {
+  id                     String   @id @default(uuid())
+  companyId              String
+  company                Company  @relation(fields: [companyId], references: [id])
+  confirmationNumber     String
+  loadingId              String
+  loading                DispatchLoading @relation(fields: [loadingId], references: [id])
+  transportAssignmentId  String
+  transportAssignment    DispatchTransportAssignment @relation(fields: [transportAssignmentId], references: [id])
+  dispatchPlanId         String
+  dispatchPlan           DispatchPlan @relation(fields: [dispatchPlanId], references: [id])
+  soId                   String
+  salesOrder             SalesOrder @relation(fields: [soId], references: [id])
+  customerName           String
+  confirmationType       String?  // PARTIAL, FULL - computed, never manually set
+  status                 String   @default("PENDING_CONFIRMATION") // PENDING_CONFIRMATION, PARTIALLY_CONFIRMED, READY_FOR_GATE_OUT, EXCEPTION, CANCELLED
+  confirmedAt            DateTime?
+  confirmedBy            String?
+  remarks                String?
+  isActive               Boolean  @default(true)
+  isTestData             Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  createdBy              String?
+  updatedBy              String?
+
+  packages DispatchPackage[]
+  items    DispatchConfirmationItem[]
+
+  @@map("dispatch_confirmations")
+}
+
+model DispatchConfirmationItem {
+  id              String   @id @default(uuid())
+  confirmationId  String
+  confirmation    DispatchConfirmation @relation(fields: [confirmationId], references: [id], onDelete: Cascade)
+  packageId       String
+  package         DispatchPackage @relation(fields: [packageId], references: [id])
+  status          String   @default("CONFIRMED") // CONFIRMED, REVERSED, EXCEPTION
+  exceptionReason String?
+  confirmedBy     String?
+  confirmedAt     DateTime @default(now())
+  reversedBy      String?
+  reversedAt      DateTime?
+  reason          String?
+  isActive        Boolean  @default(true)
+  isTestData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("dispatch_confirmation_items")
 }
 
 
