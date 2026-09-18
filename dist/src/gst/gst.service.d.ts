@@ -69,9 +69,9 @@ export declare class GstService {
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;
-            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            voucherId: string | null;
         })[];
     }>;
     getGstr3b(user: any, period: string): Promise<{

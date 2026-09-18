@@ -66,9 +66,9 @@ export declare class GstController {
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;
-            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            voucherId: string | null;
         })[];
     }>;
     getGstr3b(req: any, period: string): Promise<{

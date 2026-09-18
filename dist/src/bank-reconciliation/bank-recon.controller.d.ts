@@ -37,10 +37,10 @@ export declare class BankReconController {
         createdBy: string | null;
         updatedBy: string | null;
         amount: number;
+        voucherId: string;
         accountId: string;
         entryType: string;
         narration: string | null;
-        voucherId: string;
     })[]>;
     findAll(req: any, query: any): Promise<({
         lines: {

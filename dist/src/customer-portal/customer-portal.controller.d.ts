@@ -109,10 +109,10 @@ export declare class CustomerPortalController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }[]>;
     getComplaints(customerId: string, req: any): Promise<{
         id: string;

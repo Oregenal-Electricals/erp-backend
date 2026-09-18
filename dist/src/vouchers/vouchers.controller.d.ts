@@ -70,10 +70,10 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
+            voucherId: string;
             accountId: string;
             entryType: string;
             narration: string | null;
-            voucherId: string;
         })[];
     } & {
         id: string;
@@ -116,10 +116,10 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
+            voucherId: string;
             accountId: string;
             entryType: string;
             narration: string | null;
-            voucherId: string;
         })[];
     } & {
         id: string;
@@ -162,10 +162,10 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
+            voucherId: string;
             accountId: string;
             entryType: string;
             narration: string | null;
-            voucherId: string;
         })[];
     } & {
         id: string;
@@ -208,10 +208,10 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
+            voucherId: string;
             accountId: string;
             entryType: string;
             narration: string | null;
-            voucherId: string;
         })[];
     } & {
         id: string;
@@ -254,10 +254,10 @@ export declare class VouchersController {
             createdBy: string | null;
             updatedBy: string | null;
             amount: number;
+            voucherId: string;
             accountId: string;
             entryType: string;
             narration: string | null;
-            voucherId: string;
         })[];
     } & {
         id: string;

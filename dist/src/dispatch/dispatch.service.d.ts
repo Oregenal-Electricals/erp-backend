@@ -27,8 +27,8 @@ export declare class DispatchService {
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
         }[];
         salesOrder: {
             customerName: string;
@@ -61,10 +61,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -98,10 +98,10 @@ export declare class DispatchService {
             transporterName: string | null;
             driverPhone: string | null;
             planId: string;
+            dispatchNumber: string;
             dispatchDate: Date;
             lrNumber: string | null;
             ewayBillNumber: string | null;
-            dispatchNumber: string;
         })[];
         total: number;
         page: number;
@@ -125,8 +125,8 @@ export declare class DispatchService {
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
         }[];
         salesOrder: {
             customerName: string;
@@ -159,10 +159,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     markDelivered(id: string, user: any): Promise<{
         items: {
@@ -182,8 +182,8 @@ export declare class DispatchService {
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
         }[];
         salesOrder: {
             customerName: string;
@@ -216,10 +216,10 @@ export declare class DispatchService {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     getStats(user: any): Promise<{
         total: number;

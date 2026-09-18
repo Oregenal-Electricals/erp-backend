@@ -18,8 +18,8 @@ export declare class ArService {
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -62,9 +62,9 @@ export declare class ArService {
         totalGst: number;
         soId: string | null;
         dispatchId: string | null;
-        voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        voucherId: string | null;
     }>;
     create(dto: CreateArInvoiceDto, user: any): Promise<{
         salesOrder: {
@@ -75,8 +75,8 @@ export declare class ArService {
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -119,9 +119,9 @@ export declare class ArService {
         totalGst: number;
         soId: string | null;
         dispatchId: string | null;
-        voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        voucherId: string | null;
     }>;
     private createInvoiceVoucher;
     recordPayment(dto: CreateArPaymentDto, user: any): Promise<{
@@ -179,9 +179,9 @@ export declare class ArService {
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;
-            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            voucherId: string | null;
         })[];
         total: number;
         page: number;
@@ -196,8 +196,8 @@ export declare class ArService {
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -240,9 +240,9 @@ export declare class ArService {
         totalGst: number;
         soId: string | null;
         dispatchId: string | null;
-        voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        voucherId: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;
@@ -285,9 +285,9 @@ export declare class ArService {
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;
-            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            voucherId: string | null;
         }[];
     }>;
 }

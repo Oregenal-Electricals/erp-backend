@@ -44,9 +44,9 @@ export declare class ArController {
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;
-            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            voucherId: string | null;
         }[];
     }>;
     findAll(req: any, query: any): Promise<{
@@ -84,9 +84,9 @@ export declare class ArController {
             totalGst: number;
             soId: string | null;
             dispatchId: string | null;
-            voucherId: string | null;
             paidAmount: number;
             outstandingAmount: number;
+            voucherId: string | null;
         })[];
         total: number;
         page: number;
@@ -101,8 +101,8 @@ export declare class ArController {
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -145,9 +145,9 @@ export declare class ArController {
         totalGst: number;
         soId: string | null;
         dispatchId: string | null;
-        voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        voucherId: string | null;
     }>;
     create(dto: CreateArInvoiceDto, req: any): Promise<{
         salesOrder: {
@@ -158,8 +158,8 @@ export declare class ArController {
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -202,9 +202,9 @@ export declare class ArController {
         totalGst: number;
         soId: string | null;
         dispatchId: string | null;
-        voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        voucherId: string | null;
     }>;
     createFromDispatch(dispatchId: string, req: any): Promise<{
         salesOrder: {
@@ -215,8 +215,8 @@ export declare class ArController {
             };
         };
         dispatch: {
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
         payments: {
             id: string;
@@ -259,9 +259,9 @@ export declare class ArController {
         totalGst: number;
         soId: string | null;
         dispatchId: string | null;
-        voucherId: string | null;
         paidAmount: number;
         outstandingAmount: number;
+        voucherId: string | null;
     }>;
     recordPayment(dto: CreateArPaymentDto, req: any): Promise<{
         id: string;

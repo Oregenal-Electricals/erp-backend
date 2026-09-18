@@ -54,8 +54,8 @@ export declare class DeliveryConfirmationController {
                 };
             };
             vehicleNumber: string;
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
     } & {
         id: string;
@@ -88,8 +88,8 @@ export declare class DeliveryConfirmationController {
                 };
             };
             vehicleNumber: string;
-            lrNumber: string;
             dispatchNumber: string;
+            lrNumber: string;
         };
     } & {
         id: string;

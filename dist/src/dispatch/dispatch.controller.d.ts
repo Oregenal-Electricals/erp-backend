@@ -42,10 +42,10 @@ export declare class DispatchController {
             transporterName: string | null;
             driverPhone: string | null;
             planId: string;
+            dispatchNumber: string;
             dispatchDate: Date;
             lrNumber: string | null;
             ewayBillNumber: string | null;
-            dispatchNumber: string;
         })[];
         total: number;
         page: number;
@@ -69,8 +69,8 @@ export declare class DispatchController {
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
         }[];
         salesOrder: {
             customerName: string;
@@ -103,10 +103,10 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     create(dto: CreateDispatchDto, req: any): Promise<{
         items: {
@@ -126,8 +126,8 @@ export declare class DispatchController {
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
         }[];
         salesOrder: {
             customerName: string;
@@ -160,10 +160,10 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
     markDelivered(id: string, req: any): Promise<{
         items: {
@@ -183,8 +183,8 @@ export declare class DispatchController {
             gstAmount: number;
             dispatchedQty: number;
             soItemId: string;
-            planItemId: string | null;
             dispatchId: string;
+            planItemId: string | null;
         }[];
         salesOrder: {
             customerName: string;
@@ -217,9 +217,9 @@ export declare class DispatchController {
         transporterName: string | null;
         driverPhone: string | null;
         planId: string;
+        dispatchNumber: string;
         dispatchDate: Date;
         lrNumber: string | null;
         ewayBillNumber: string | null;
-        dispatchNumber: string;
     }>;
 }
