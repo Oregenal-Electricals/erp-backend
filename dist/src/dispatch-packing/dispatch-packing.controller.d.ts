@@ -45,6 +45,7 @@ export declare class DispatchPackingController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -104,6 +105,7 @@ export declare class DispatchPackingController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -155,6 +157,7 @@ export declare class DispatchPackingController {
         packageType: string;
         packingId: string;
         assignedTransportAssignmentId: string | null;
+        loadedInLoadingId: string | null;
     }>;
     addPackageItem(packageId: string, dto: AddPackageItemDto, req: any): Promise<{
         id: string;

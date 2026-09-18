@@ -49,6 +49,7 @@ export declare class DispatchPackingService {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -100,6 +101,7 @@ export declare class DispatchPackingService {
         packageType: string;
         packingId: string;
         assignedTransportAssignmentId: string | null;
+        loadedInLoadingId: string | null;
     }>;
     private remainingToPack;
     private revalidateQuality;
@@ -182,6 +184,7 @@ export declare class DispatchPackingService {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;

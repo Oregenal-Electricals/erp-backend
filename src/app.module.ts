@@ -110,6 +110,7 @@ import { DispatchVerificationModule } from './dispatch-verifications/dispatch-ve
 import { DispatchPackingModule } from './dispatch-packing/dispatch-packing.module';
 import { DispatchDocumentReadinessModule } from './dispatch-document-readiness/dispatch-document-readiness.module';
 import { DispatchTransportModule } from './dispatch-transport/dispatch-transport.module';
+import { DispatchLoadingModule } from './dispatch-loading/dispatch-loading.module';
 import { DispatchModule } from './dispatch/dispatch.module';
 import { DeliveryConfirmationModule } from './delivery-confirmation/delivery-confirmation.module';
 import { AccountsModule } from './accounts/accounts.module';
@@ -279,6 +280,7 @@ import configuration from './config/configuration';
     DispatchPackingModule,
     DispatchDocumentReadinessModule,
     DispatchTransportModule,
+    DispatchLoadingModule,
     DispatchModule,
     DeliveryConfirmationModule,
     AccountsModule,

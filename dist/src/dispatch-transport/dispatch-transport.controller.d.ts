@@ -50,6 +50,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -157,6 +158,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -229,6 +231,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -301,6 +304,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -373,6 +377,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
@@ -446,6 +451,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
         id: string;
         companyId: string;
@@ -517,6 +523,7 @@ export declare class DispatchTransportController {
             packageType: string;
             packingId: string;
             assignedTransportAssignmentId: string | null;
+            loadedInLoadingId: string | null;
         })[];
     } & {
         id: string;
