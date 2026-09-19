@@ -165,13 +165,14 @@ export class ProductionQcService {
   }
 
   async findAll(user: any, query: any) {
-    const { page = 1, limit = 20, search, result, workOrderId } = query;
+    const { page = 1, limit = 20, search, result, workOrderId, status } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const where: any = {};
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     if (search) where.OR = [{ qcNumber: { contains: search, mode: 'insensitive' } }];
     if (result) where.result = result;
     if (workOrderId) where.workOrderId = workOrderId;
+    if (status) where.status = status;
 
     const [data, total] = await Promise.all([
       this.prisma.productionQc.findMany({
