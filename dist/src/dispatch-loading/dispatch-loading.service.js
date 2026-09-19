@@ -130,6 +130,9 @@ let DispatchLoadingService = class DispatchLoadingService {
             throw new common_1.NotFoundException('Loading event not found');
         if (item.status !== 'LOADED')
             throw new common_1.BadRequestException(`This item is ${item.status}, not currently loaded`);
+        const pkgForUnload = await this.prisma.dispatchPackage.findUnique({ where: { id: item.packageId } });
+        if (pkgForUnload === null || pkgForUnload === void 0 ? void 0 : pkgForUnload.gateOutId)
+            throw new common_1.BadRequestException('This package has already been Gated-Out - simple unload is no longer permitted');
         await this.prisma.dispatchPackage.updateMany({ where: { id: item.packageId, loadedInLoadingId: item.loadingId }, data: { loadedInLoadingId: null } });
         const updated = await this.prisma.dispatchLoadingItem.update({
             where: { id: item.id },

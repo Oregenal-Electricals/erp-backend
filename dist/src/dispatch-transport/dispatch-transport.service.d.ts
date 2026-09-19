@@ -57,6 +57,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -131,6 +132,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -205,6 +207,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -279,6 +282,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -354,6 +358,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         id: string;
         companyId: string;
@@ -427,6 +432,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -536,6 +542,7 @@ export declare class DispatchTransportService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;

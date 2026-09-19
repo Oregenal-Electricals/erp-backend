@@ -65,6 +65,7 @@ export declare class DispatchConfirmationController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -157,6 +158,7 @@ export declare class DispatchConfirmationController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;

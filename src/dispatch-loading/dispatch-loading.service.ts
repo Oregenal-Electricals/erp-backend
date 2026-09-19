@@ -134,6 +134,10 @@ export class DispatchLoadingService {
     if (!item) throw new NotFoundException('Loading event not found');
     if (item.status !== 'LOADED') throw new BadRequestException(`This item is ${item.status}, not currently loaded`);
 
+    // DSP-013 section 63: once physically Gated-Out, simple unload is blocked.
+    const pkgForUnload = await this.prisma.dispatchPackage.findUnique({ where: { id: item.packageId } });
+    if (pkgForUnload?.gateOutId) throw new BadRequestException('This package has already been Gated-Out - simple unload is no longer permitted');
+
     await this.prisma.dispatchPackage.updateMany({ where: { id: item.packageId, loadedInLoadingId: item.loadingId }, data: { loadedInLoadingId: null } });
     const updated = await this.prisma.dispatchLoadingItem.update({
       where: { id: item.id },

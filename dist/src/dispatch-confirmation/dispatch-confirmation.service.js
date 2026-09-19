@@ -142,6 +142,9 @@ let DispatchConfirmationService = class DispatchConfirmationService {
             throw new common_1.NotFoundException('Confirmation event not found');
         if (item.status !== 'CONFIRMED')
             throw new common_1.BadRequestException(`This item is ${item.status}, not currently confirmed`);
+        const pkgForReversal = await this.prisma.dispatchPackage.findUnique({ where: { id: item.packageId } });
+        if (pkgForReversal === null || pkgForReversal === void 0 ? void 0 : pkgForReversal.gateOutId)
+            throw new common_1.BadRequestException('This package has already been Gated-Out - simple confirmation reversal is no longer permitted');
         await this.prisma.dispatchPackage.updateMany({ where: { id: item.packageId, confirmedInConfirmationId: item.confirmationId }, data: { confirmedInConfirmationId: null } });
         const updated = await this.prisma.dispatchConfirmationItem.update({
             where: { id: item.id },

@@ -25,7 +25,7 @@ describe('DispatchLoadingService - DSP-011', () => {
         findUnique: jest.fn().mockResolvedValue({ id: 'ld-1', status: 'IN_PROGRESS', transportAssignment: { packages: [{ id: 'pkg-1' }] }, items: [{ isActive: true, status: 'LOADED' }] }),
         update: jest.fn().mockImplementation(({ where, data }: any) => Promise.resolve({ id: where.id, ...data })),
       },
-      dispatchPackage: { findFirst: jest.fn().mockResolvedValue(pkg()), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      dispatchPackage: { findFirst: jest.fn().mockResolvedValue(pkg()), findUnique: jest.fn().mockResolvedValue({ gateOutId: null }), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
       dispatchLoadingItem: {
         create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: `dli-${Math.random()}`, ...data })),
         findFirst: jest.fn(),
@@ -97,6 +97,12 @@ describe('DispatchLoadingService - DSP-011', () => {
     expect(prisma.dispatchPackage.updateMany).toHaveBeenCalledWith({ where: { id: 'pkg-1', loadedInLoadingId: 'ld-1' }, data: { loadedInLoadingId: null } });
     expect(Object.keys(prisma)).not.toContain('dispatchPackingItem');
     expect(Object.keys(prisma)).not.toContain('dispatchVerificationItem2');
+  });
+
+  it('DSP-013 POST-GATE-OUT GUARD: unload is blocked once the package has already been Gated-Out', async () => {
+    prisma.dispatchLoadingItem.findFirst.mockResolvedValue({ id: 'dli-1', loadingId: 'ld-1', packageId: 'pkg-1', status: 'LOADED' });
+    prisma.dispatchPackage.findUnique.mockResolvedValue({ gateOutId: 'go-1' });
+    await expect(service.unloadPackage('dli-1', 'reason', user)).rejects.toThrow(/already been Gated-Out/);
   });
 
   it('COMPLETION requires at least one loaded package (section 47)', async () => {

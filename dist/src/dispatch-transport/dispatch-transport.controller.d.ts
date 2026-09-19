@@ -52,6 +52,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -161,6 +162,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -235,6 +237,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -309,6 +312,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -383,6 +387,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;
@@ -458,6 +463,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         id: string;
         companyId: string;
@@ -531,6 +537,7 @@ export declare class DispatchTransportController {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
     } & {
         id: string;

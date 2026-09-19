@@ -151,6 +151,10 @@ export class DispatchConfirmationService {
     if (!item) throw new NotFoundException('Confirmation event not found');
     if (item.status !== 'CONFIRMED') throw new BadRequestException(`This item is ${item.status}, not currently confirmed`);
 
+    // DSP-013 section 65: once physically Gated-Out, simple DSP-012 reversal is blocked.
+    const pkgForReversal = await this.prisma.dispatchPackage.findUnique({ where: { id: item.packageId } });
+    if (pkgForReversal?.gateOutId) throw new BadRequestException('This package has already been Gated-Out - simple confirmation reversal is no longer permitted');
+
     await this.prisma.dispatchPackage.updateMany({ where: { id: item.packageId, confirmedInConfirmationId: item.confirmationId }, data: { confirmedInConfirmationId: null } });
     const updated = await this.prisma.dispatchConfirmationItem.update({
       where: { id: item.id },

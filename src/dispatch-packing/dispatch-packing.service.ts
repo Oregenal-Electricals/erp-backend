@@ -162,6 +162,11 @@ export class DispatchPackingService {
       where: { id: packageItemId, isActive: true, package: { packing: { companyId: user.companyId } } },
     });
     if (!item) throw new NotFoundException('Package item not found');
+
+    // DSP-013 section 64: once physically Gated-Out, simple unpack/repack is blocked.
+    const pkgForUnpack = await this.prisma.dispatchPackage.findUnique({ where: { id: item.packageId } });
+    if (pkgForUnpack?.gateOutId) throw new BadRequestException('This package has already been Gated-Out - simple unpack/repack is no longer permitted');
+
     const stillPacked = item.packedQty - item.reversedQty;
     if (reverseQty > stillPacked) throw new BadRequestException(`Cannot reverse ${reverseQty} - only ${stillPacked} is currently packed.`);
 

@@ -148,6 +148,9 @@ let DispatchPackingService = class DispatchPackingService {
         });
         if (!item)
             throw new common_1.NotFoundException('Package item not found');
+        const pkgForUnpack = await this.prisma.dispatchPackage.findUnique({ where: { id: item.packageId } });
+        if (pkgForUnpack === null || pkgForUnpack === void 0 ? void 0 : pkgForUnpack.gateOutId)
+            throw new common_1.BadRequestException('This package has already been Gated-Out - simple unpack/repack is no longer permitted');
         const stillPacked = item.packedQty - item.reversedQty;
         if (reverseQty > stillPacked)
             throw new common_1.BadRequestException(`Cannot reverse ${reverseQty} - only ${stillPacked} is currently packed.`);

@@ -32,7 +32,7 @@ describe('DispatchConfirmationService - DSP-012', () => {
         }),
         update: jest.fn().mockImplementation(({ where, data }: any) => Promise.resolve({ id: where.id, ...data })),
       },
-      dispatchPackage: { findFirst: jest.fn().mockResolvedValue(pkg()), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      dispatchPackage: { findFirst: jest.fn().mockResolvedValue(pkg()), findUnique: jest.fn().mockResolvedValue({ gateOutId: null }), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
       dispatchConfirmationItem: {
         create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: `dci-${Math.random()}`, ...data })),
         findFirst: jest.fn(),
@@ -123,6 +123,12 @@ describe('DispatchConfirmationService - DSP-012', () => {
     expect(result.status).toBe('REVERSED');
     expect(prisma.dispatchPackage.updateMany).toHaveBeenCalledWith({ where: { id: 'pkg-1', confirmedInConfirmationId: 'dc-1' }, data: { confirmedInConfirmationId: null } });
     expect(Object.keys(prisma)).not.toContain('dispatchLoadingItem');
+  });
+
+  it('DSP-013 POST-GATE-OUT GUARD: reversal is blocked once the package has already been Gated-Out', async () => {
+    prisma.dispatchConfirmationItem.findFirst.mockResolvedValue({ id: 'dci-1', confirmationId: 'dc-1', packageId: 'pkg-1', status: 'CONFIRMED' });
+    prisma.dispatchPackage.findUnique.mockResolvedValue({ gateOutId: 'go-1' });
+    await expect(service.reverseConfirmationItem('dci-1', 'reason', user)).rejects.toThrow(/already been Gated-Out/);
   });
 
   it('CRITICAL BOUNDARY PROOF (section 4, 63-66): confirming a package never calls any inventory/SO-dispatch write - the mock exposes no such methods', async () => {

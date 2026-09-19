@@ -69,6 +69,7 @@ export declare class DispatchLoadingService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -196,6 +197,7 @@ export declare class DispatchLoadingService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -285,6 +287,7 @@ export declare class DispatchLoadingService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;

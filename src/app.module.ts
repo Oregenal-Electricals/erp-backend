@@ -112,6 +112,7 @@ import { DispatchDocumentReadinessModule } from './dispatch-document-readiness/d
 import { DispatchTransportModule } from './dispatch-transport/dispatch-transport.module';
 import { DispatchLoadingModule } from './dispatch-loading/dispatch-loading.module';
 import { DispatchConfirmationModule } from './dispatch-confirmation/dispatch-confirmation.module';
+import { DispatchGateOutModule } from './dispatch-gate-out/dispatch-gate-out.module';
 import { DispatchModule } from './dispatch/dispatch.module';
 import { DeliveryConfirmationModule } from './delivery-confirmation/delivery-confirmation.module';
 import { AccountsModule } from './accounts/accounts.module';
@@ -283,6 +284,7 @@ import configuration from './config/configuration';
     DispatchTransportModule,
     DispatchLoadingModule,
     DispatchConfirmationModule,
+    DispatchGateOutModule,
     DispatchModule,
     DeliveryConfirmationModule,
     AccountsModule,

@@ -70,6 +70,7 @@ export declare class DispatchConfirmationService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
@@ -200,6 +201,7 @@ export declare class DispatchConfirmationService {
             assignedTransportAssignmentId: string | null;
             loadedInLoadingId: string | null;
             confirmedInConfirmationId: string | null;
+            gateOutId: string | null;
         })[];
         transportAssignment: {
             vehicleNumber: string;
