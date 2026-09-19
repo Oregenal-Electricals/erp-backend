@@ -165,6 +165,17 @@ export class DispatchConfirmationService {
     return updated;
   }
 
+  async findAll(status: string | undefined, user: any) {
+    return this.prisma.dispatchConfirmation.findFirst
+      ? this.prisma.dispatchConfirmation.findMany({
+          where: { companyId: user.companyId, ...(status ? { status } : {}) },
+          include: this.includes(),
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+        })
+      : [];
+  }
+
   async findOne(id: string, user: any) {
     const confirmation = await this.prisma.dispatchConfirmation.findFirst({ where: { id, companyId: user.companyId }, include: this.includes() });
     if (!confirmation) throw new NotFoundException('Confirmation not found');

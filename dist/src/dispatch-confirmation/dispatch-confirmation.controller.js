@@ -24,6 +24,9 @@ let DispatchConfirmationController = class DispatchConfirmationController {
     constructor(confirmationService) {
         this.confirmationService = confirmationService;
     }
+    findAll(status, req) {
+        return this.confirmationService.findAll(status, req.user);
+    }
     findOne(id, req) {
         return this.confirmationService.findOne(id, req.user);
     }
@@ -38,6 +41,15 @@ let DispatchConfirmationController = class DispatchConfirmationController {
     }
 };
 exports.DispatchConfirmationController = DispatchConfirmationController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DISPATCH_CONFIRM_VIEW),
+    __param(0, (0, common_1.Query)('status')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], DispatchConfirmationController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.DISPATCH_CONFIRM_VIEW),

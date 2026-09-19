@@ -22,6 +22,7 @@ describe('DispatchConfirmationService - DSP-012', () => {
         findFirst: jest.fn().mockResolvedValue({ id: 'ld-1', transportAssignmentId: 'ta-1', dispatchPlanId: 'plan-1', soId: 'so-1', customerName: 'ABC Corp', items: [{ isActive: true, status: 'LOADED' }] }),
       },
       dispatchConfirmation: {
+        findMany: jest.fn().mockResolvedValue([{ id: 'dc-1', status: 'READY_FOR_GATE_OUT' }]),
         count: jest.fn().mockResolvedValue(0),
         create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'dc-1', ...data })),
         findFirst: jest.fn().mockResolvedValue({ id: 'dc-1', status: 'PENDING_CONFIRMATION', loadingId: 'ld-1', dispatchPlanId: 'plan-1' }),
@@ -48,6 +49,14 @@ describe('DispatchConfirmationService - DSP-012', () => {
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     readiness = { checkReadiness: jest.fn().mockResolvedValue({ overall: 'DOCUMENTS_READY' }) };
     service = new DispatchConfirmationService(prisma, audit, readiness);
+  });
+
+  it('findAll returns Confirmations scoped to the company, optionally filtered by status', async () => {
+    const result = await service.findAll('READY_FOR_GATE_OUT', user);
+    expect(prisma.dispatchConfirmation.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { companyId: user.companyId, status: 'READY_FOR_GATE_OUT' },
+    }));
+    expect(result).toEqual([{ id: 'dc-1', status: 'READY_FOR_GATE_OUT' }]);
   });
 
   it('creates a Confirmation only when the Loading has valid loaded packages (section 8-9)', async () => {

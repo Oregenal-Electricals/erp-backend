@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { DispatchConfirmationService } from './dispatch-confirmation.service';
 import { CreateConfirmationDto, ConfirmPackageDto, ReverseConfirmationDto } from './dto/dispatch-confirmation.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -10,6 +10,12 @@ import { Permission } from '../common/permissions/permissions.enum';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class DispatchConfirmationController {
   constructor(private readonly confirmationService: DispatchConfirmationService) {}
+
+  @Get()
+  @RequirePermissions(Permission.DISPATCH_CONFIRM_VIEW)
+  findAll(@Query('status') status: string, @Request() req: any) {
+    return this.confirmationService.findAll(status, req.user);
+  }
 
   @Get(':id')
   @RequirePermissions(Permission.DISPATCH_CONFIRM_VIEW)
