@@ -121,25 +121,29 @@ let DispatchGateOutService = class DispatchGateOutService {
                 const soItem = await this.prisma.salesOrderItem.findUnique({ where: { id: pickListItem.soItemId } });
                 if (!soItem)
                     continue;
-                if (pickListItem.batchId) {
-                    const batch = await this.prisma.stockBatch.findUnique({ where: { id: pickListItem.batchId } });
-                    if (batch) {
-                        const balance = await this.prisma.stockBalance.findFirst({ where: { companyId: user.companyId, itemCode: verificationItem.itemCode, warehouseId: batch.warehouseId } });
-                        if (balance) {
-                            await this.stockLedger.postTransaction({
-                                companyId: user.companyId, itemCode: verificationItem.itemCode, itemName: verificationItem.itemName,
-                                warehouseId: batch.warehouseId, transactionType: 'ISSUE', referenceType: 'DISPATCH_GATE_OUT', referenceNumber: gateOutNumber,
-                                outQty: netQty, unitCost: balance.unitCost, remarks: `Gate-Out against SO ${confirmation.customerName}`, userId: user.id,
-                            });
-                        }
-                    }
-                }
-                else if (verificationItem.saleType === 'SFG') {
+                if (verificationItem.saleType === 'SFG') {
                     const reservation = await this.prisma.dispatchReservation.findUnique({ where: { id: pickListItem.dispatchReservationId } });
                     if (reservation === null || reservation === void 0 ? void 0 : reservation.workOrderId) {
                         await this.prisma.workOrder.update({
                             where: { id: reservation.workOrderId },
                             data: { dispatchReservedQty: { decrement: netQty } },
+                        });
+                    }
+                }
+                else {
+                    let warehouseIdForBalance;
+                    if (pickListItem.batchId) {
+                        const batch = await this.prisma.stockBatch.findUnique({ where: { id: pickListItem.batchId } });
+                        warehouseIdForBalance = batch === null || batch === void 0 ? void 0 : batch.warehouseId;
+                    }
+                    const balance = warehouseIdForBalance
+                        ? await this.prisma.stockBalance.findFirst({ where: { companyId: user.companyId, itemCode: verificationItem.itemCode, warehouseId: warehouseIdForBalance } })
+                        : await this.prisma.stockBalance.findFirst({ where: { companyId: user.companyId, itemCode: verificationItem.itemCode }, orderBy: { availableQty: 'desc' } });
+                    if (balance) {
+                        await this.stockLedger.postTransaction({
+                            companyId: user.companyId, itemCode: verificationItem.itemCode, itemName: verificationItem.itemName,
+                            warehouseId: balance.warehouseId, transactionType: 'ISSUE', referenceType: 'DISPATCH_GATE_OUT', referenceNumber: gateOutNumber,
+                            outQty: netQty, unitCost: balance.unitCost, remarks: `Gate-Out against SO ${confirmation.customerName}`, userId: user.id,
                         });
                     }
                 }

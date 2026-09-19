@@ -43,7 +43,7 @@ describe('DispatchGateOutService - DSP-013', () => {
       dispatchVerificationItem: { findUnique: jest.fn().mockResolvedValue({ pickListItemId: 'pli-1', saleType: 'RM', itemCode: 'ITM-001', itemName: 'LED Driver' }) },
       pickListItem: { findUnique: jest.fn().mockResolvedValue({ batchId: 'batch-1', dispatchReservationId: 'res-1', soItemId: 'soi-1' }) },
       stockBatch: { findUnique: jest.fn().mockResolvedValue({ status: 'ACTIVE', warehouseId: 'wh-1' }) },
-      stockBalance: { findFirst: jest.fn().mockResolvedValue({ unitCost: 10 }) },
+      stockBalance: { findFirst: jest.fn().mockResolvedValue({ unitCost: 10, warehouseId: 'wh-1' }) },
       salesOrderItem: { findUnique: jest.fn().mockResolvedValue({ id: 'soi-1', qty: 500, dispatchedQty: 0, pendingQty: 500 }), update: jest.fn().mockResolvedValue({}) },
       dispatchReservation: { findUnique: jest.fn().mockResolvedValue({ id: 'res-1', reservedQty: 100, releasedQty: 0, workOrderId: null }), update: jest.fn().mockResolvedValue({}) },
       workOrder: { findUnique: jest.fn(), update: jest.fn().mockResolvedValue({}) },
@@ -87,6 +87,14 @@ describe('DispatchGateOutService - DSP-013', () => {
     await service.confirmGateOut('dc-1', 'HR55AB1234', user);
     expect(stockLedger.postTransaction).toHaveBeenCalledWith(expect.objectContaining({
       itemCode: 'ITM-001', warehouseId: 'wh-1', transactionType: 'ISSUE', outQty: 100,
+    }));
+  });
+
+  it('REGRESSION GUARD (live UAT finding): a non-batch-tracked RM item still posts through the stock ledger via the itemCode-only fallback - matching the pre-existing dispatch.service.ts convention exactly, rather than silently skipping the physical deduction', async () => {
+    prisma.pickListItem.findUnique.mockResolvedValue({ batchId: null, dispatchReservationId: 'res-1', soItemId: 'soi-1' });
+    await service.confirmGateOut('dc-1', undefined, user);
+    expect(stockLedger.postTransaction).toHaveBeenCalledWith(expect.objectContaining({
+      itemCode: 'ITM-001', transactionType: 'ISSUE', outQty: 100,
     }));
   });
 

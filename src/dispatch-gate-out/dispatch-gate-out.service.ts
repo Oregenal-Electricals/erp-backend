@@ -139,29 +139,39 @@ export class DispatchGateOutService {
         if (!soItem) continue;
 
         // DSP-013 sections 26-29, 79-81: exactly-once physical
-        // deduction. RM/FG post through the authoritative stock
-        // ledger (StockBalance.availableQty); SFG permanently
-        // decrements WorkOrder.dispatchReservedQty (the exact counter
-        // DSP-005 committed) rather than any StockBalance row - it
-        // never returns to Production and never becomes FG.
-        if (pickListItem.batchId) {
-          const batch = await this.prisma.stockBatch.findUnique({ where: { id: pickListItem.batchId } });
-          if (batch) {
-            const balance = await this.prisma.stockBalance.findFirst({ where: { companyId: user.companyId, itemCode: verificationItem.itemCode, warehouseId: batch.warehouseId } });
-            if (balance) {
-              await this.stockLedger.postTransaction({
-                companyId: user.companyId, itemCode: verificationItem.itemCode, itemName: verificationItem.itemName,
-                warehouseId: batch.warehouseId, transactionType: 'ISSUE', referenceType: 'DISPATCH_GATE_OUT', referenceNumber: gateOutNumber,
-                outQty: netQty, unitCost: balance.unitCost, remarks: `Gate-Out against SO ${confirmation.customerName}`, userId: user.id,
-              });
-            }
-          }
-        } else if (verificationItem.saleType === 'SFG') {
+        // deduction. SFG permanently decrements
+        // WorkOrder.dispatchReservedQty (the exact counter DSP-005
+        // committed) rather than any StockBalance row - it never
+        // returns to Production and never becomes FG. RM/FG post
+        // through the authoritative stock ledger regardless of
+        // whether the picked stock was batch-tracked - a batch, when
+        // present, only narrows which warehouse balance to debit; its
+        // absence must never silently skip the physical deduction
+        // (this exactly mirrors the pre-existing dispatch.service.ts,
+        // which looks up StockBalance by itemCode alone with no batch
+        // precondition at all).
+        if (verificationItem.saleType === 'SFG') {
           const reservation = await this.prisma.dispatchReservation.findUnique({ where: { id: pickListItem.dispatchReservationId } });
           if (reservation?.workOrderId) {
             await this.prisma.workOrder.update({
               where: { id: reservation.workOrderId },
               data: { dispatchReservedQty: { decrement: netQty } },
+            });
+          }
+        } else {
+          let warehouseIdForBalance: string | undefined;
+          if (pickListItem.batchId) {
+            const batch = await this.prisma.stockBatch.findUnique({ where: { id: pickListItem.batchId } });
+            warehouseIdForBalance = batch?.warehouseId;
+          }
+          const balance = warehouseIdForBalance
+            ? await this.prisma.stockBalance.findFirst({ where: { companyId: user.companyId, itemCode: verificationItem.itemCode, warehouseId: warehouseIdForBalance } })
+            : await this.prisma.stockBalance.findFirst({ where: { companyId: user.companyId, itemCode: verificationItem.itemCode }, orderBy: { availableQty: 'desc' } });
+          if (balance) {
+            await this.stockLedger.postTransaction({
+              companyId: user.companyId, itemCode: verificationItem.itemCode, itemName: verificationItem.itemName,
+              warehouseId: balance.warehouseId, transactionType: 'ISSUE', referenceType: 'DISPATCH_GATE_OUT', referenceNumber: gateOutNumber,
+              outQty: netQty, unitCost: balance.unitCost, remarks: `Gate-Out against SO ${confirmation.customerName}`, userId: user.id,
             });
           }
         }
