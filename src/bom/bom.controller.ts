@@ -20,19 +20,19 @@ export class BomController {
   findAll(@Request() req: any, @Query() query: any) { return this.bomService.findAll(req.user, query); }
 
   @Get('product/:productId')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.BOM_VIEW)
   findByProduct(@Param('productId') productId: string, @Request() req: any) { return this.bomService.findByProduct(productId, req.user); }
 
   @Get(':id/stages')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.BOM_VIEW)
   getStages(@Param('id') id: string, @Request() req: any) { return this.bomService.getStages(id, req.user); }
 
   @Get(':id/history')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.BOM_VIEW)
   getHistory(@Param('id') id: string, @Request() req: any) { return this.bomService.getHistory(id, req.user); }
 
   @Get(':id')
-  @RequirePermissions(Permission.INVENTORY_VIEW)
+  @RequirePermissions(Permission.BOM_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.bomService.findOne(id, req.user); }
 
   @Post()

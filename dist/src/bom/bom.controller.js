@@ -64,7 +64,7 @@ __decorate([
 ], BomController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('product/:productId'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_VIEW),
     __param(0, (0, common_1.Param)('productId')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -73,7 +73,7 @@ __decorate([
 ], BomController.prototype, "findByProduct", null);
 __decorate([
     (0, common_1.Get)(':id/stages'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -82,7 +82,7 @@ __decorate([
 ], BomController.prototype, "getStages", null);
 __decorate([
     (0, common_1.Get)(':id/history'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -91,7 +91,7 @@ __decorate([
 ], BomController.prototype, "getHistory", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.INVENTORY_VIEW),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_VIEW),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
