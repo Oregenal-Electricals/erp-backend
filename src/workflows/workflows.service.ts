@@ -222,11 +222,12 @@ export class WorkflowsService {
   }
 
   async findAllRequests(user: any, query: any) {
-    const { page = 1, limit = 20, status, documentType, myPending } = query;
+    const { page = 1, limit = 20, status, documentType, documentId, myPending } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const where: any = { companyId: user.companyId };
     if (status) where.status = status;
     if (documentType) where.documentType = documentType;
+    if (documentId) where.documentId = documentId;
     if (myPending === 'true') { where.status = 'PENDING'; where.requestedBy = user.id; }
 
     const [data, total] = await Promise.all([
@@ -239,13 +240,32 @@ export class WorkflowsService {
     return { data, total, page: Number(page), totalPages: Math.ceil(total / Number(limit)) };
   }
 
+  // Enriched with actor names (requester, each step's assigned approver, each
+  // action's actor) so the panel can show "Approved by Priya Sharma" rather
+  // than a bare user id - this is the single source both the approvals panel
+  // AND a document's own detail page (BOM/Product) read from to render the
+  // complete approval timeline, from submission through to wherever it
+  // currently stands.
   async findOneRequest(id: string, user: any) {
     const req = await this.prisma.approvalRequest.findFirst({
       where: { id, companyId: user.companyId },
       include: { workflow: { include: { steps: { orderBy: { level: 'asc' } } } }, actions: { orderBy: { level: 'asc' } } },
     });
     if (!req) throw new NotFoundException('Request not found');
-    return req;
+    return this.attachActorNames(req, user);
+  }
+
+  private async attachActorNames(req: any, user: any) {
+    const userIds = new Set<string>();
+    userIds.add(req.requestedBy);
+    for (const step of req.workflow?.steps || []) if (step.approverUserId) userIds.add(step.approverUserId);
+    for (const action of req.actions || []) userIds.add(action.actionBy);
+    const users = userIds.size > 0
+      ? await this.prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, firstName: true, lastName: true, email: true } })
+      : [];
+    const names: Record<string, any> = {};
+    for (const u of users) names[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email };
+    return { ...req, actorNames: names };
   }
 
   async getStats(user: any) {

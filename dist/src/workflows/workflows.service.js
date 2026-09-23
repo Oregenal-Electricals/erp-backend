@@ -213,13 +213,15 @@ let WorkflowsService = class WorkflowsService {
         });
     }
     async findAllRequests(user, query) {
-        const { page = 1, limit = 20, status, documentType, myPending } = query;
+        const { page = 1, limit = 20, status, documentType, documentId, myPending } = query;
         const skip = (Number(page) - 1) * Number(limit);
         const where = { companyId: user.companyId };
         if (status)
             where.status = status;
         if (documentType)
             where.documentType = documentType;
+        if (documentId)
+            where.documentId = documentId;
         if (myPending === 'true') {
             where.status = 'PENDING';
             where.requestedBy = user.id;
@@ -240,7 +242,24 @@ let WorkflowsService = class WorkflowsService {
         });
         if (!req)
             throw new common_1.NotFoundException('Request not found');
-        return req;
+        return this.attachActorNames(req, user);
+    }
+    async attachActorNames(req, user) {
+        var _a;
+        const userIds = new Set();
+        userIds.add(req.requestedBy);
+        for (const step of ((_a = req.workflow) === null || _a === void 0 ? void 0 : _a.steps) || [])
+            if (step.approverUserId)
+                userIds.add(step.approverUserId);
+        for (const action of req.actions || [])
+            userIds.add(action.actionBy);
+        const users = userIds.size > 0
+            ? await this.prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, firstName: true, lastName: true, email: true } })
+            : [];
+        const names = {};
+        for (const u of users)
+            names[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email };
+        return Object.assign(Object.assign({}, req), { actorNames: names });
     }
     async getStats(user) {
         const where = { companyId: user.companyId };

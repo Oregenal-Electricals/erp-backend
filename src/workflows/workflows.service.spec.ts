@@ -37,6 +37,10 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
         findMany: jest.fn().mockResolvedValue([]),
       },
       approvalAction: { create: jest.fn() },
+      user: { findMany: jest.fn().mockResolvedValue([
+        { id: 'approver-1', firstName: 'Priya', lastName: 'Sharma', email: 'priya@example.com' },
+        { id: 'user-1', firstName: 'RND', lastName: 'User', email: 'rnd@example.com' },
+      ]) },
     };
     bomService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
     productService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
@@ -161,5 +165,24 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
   it('update() on a workflow definition that does not exist for this company throws NotFoundException', async () => {
     prisma.workflowDefinition.findFirst.mockResolvedValue(null);
     await expect(service.update('nonexistent', {} as any, user)).rejects.toThrow(NotFoundException);
+  });
+
+  it('CRITICAL: findOneRequest() attaches real names for every actor - requester, assigned approvers, and anyone who has acted - so the panel can show who did what, not just a bare id', async () => {
+    prisma.approvalRequest.findFirst.mockResolvedValue({
+      id: 'req-1', requestedBy: 'user-1', status: 'PENDING', currentLevel: 2, totalLevels: 4,
+      workflow: fourLevelWorkflow,
+      actions: [{ level: 1, action: 'APPROVED', actionBy: 'approver-1', comments: 'Fine' }],
+    });
+    const result = await service.findOneRequest('req-1', user);
+    expect(result.actorNames['approver-1']).toEqual(expect.objectContaining({ firstName: 'Priya', lastName: 'Sharma' }));
+    expect(result.actorNames['user-1']).toEqual(expect.objectContaining({ firstName: 'RND' }));
+  });
+
+  it('findAllRequests() supports filtering by documentId - lets a BOM/Product detail page look up its own approval history directly', async () => {
+    prisma.approvalRequest.findMany.mockResolvedValue([]);
+    await service.findAllRequests(user, { documentType: 'BOM', documentId: 'bom-1' });
+    expect(prisma.approvalRequest.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ documentType: 'BOM', documentId: 'bom-1' }),
+    }));
   });
 });

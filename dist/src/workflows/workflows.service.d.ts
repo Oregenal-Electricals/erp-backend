@@ -282,75 +282,8 @@ export declare class WorkflowsService {
         page: number;
         totalPages: number;
     }>;
-    findOneRequest(id: string, user: any): Promise<{
-        workflow: {
-            steps: {
-                level: number;
-                id: string;
-                companyId: string;
-                isActive: boolean;
-                isTestData: boolean;
-                createdAt: Date;
-                updatedAt: Date;
-                createdBy: string | null;
-                updatedBy: string | null;
-                stepName: string;
-                approverUserId: string | null;
-                timeoutHours: number | null;
-                workflowId: string;
-            }[];
-        } & {
-            id: string;
-            companyId: string;
-            name: string;
-            description: string | null;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            documentType: string;
-            triggerCondition: string;
-            triggerAmount: number | null;
-            levels: number;
-        };
-        actions: {
-            level: number;
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            comments: string | null;
-            action: string;
-            actionBy: string;
-            actionDate: Date;
-            requestId: string;
-        }[];
-    } & {
-        id: string;
-        companyId: string;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        documentType: string;
-        requestedBy: string;
-        remarks: string | null;
-        documentId: string;
-        documentNumber: string;
-        amount: number | null;
-        currentLevel: number;
-        totalLevels: number;
-        workflowId: string | null;
-    }>;
+    findOneRequest(id: string, user: any): Promise<any>;
+    private attachActorNames;
     getStats(user: any): Promise<{
         total: number;
         pending: number;
