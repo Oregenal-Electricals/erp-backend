@@ -282,6 +282,26 @@ export declare class WorkflowsService {
         page: number;
         totalPages: number;
     }>;
+    findMyApprovals(user: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        documentId: string;
+        documentNumber: string;
+        amount: number | null;
+        currentLevel: number;
+        totalLevels: number;
+        workflowId: string | null;
+    }[]>;
     findOneRequest(id: string, user: any): Promise<any>;
     private attachActorNames;
     getStats(user: any): Promise<{

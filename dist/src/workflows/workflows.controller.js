@@ -27,6 +27,7 @@ let WorkflowsController = class WorkflowsController {
     getStats(req) { return this.wfService.getStats(req.user); }
     findAllWorkflows(req) { return this.wfService.findAllWorkflows(req.user); }
     findAllRequests(req, query) { return this.wfService.findAllRequests(req.user, query); }
+    findMyApprovals(req) { return this.wfService.findMyApprovals(req.user); }
     findOneRequest(id, req) { return this.wfService.findOneRequest(id, req.user); }
     seed(req) { return this.wfService.seedDefaults(req.user.companyId, req.user.id); }
     create(dto, req) { return this.wfService.create(dto, req.user); }
@@ -61,6 +62,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], WorkflowsController.prototype, "findAllRequests", null);
+__decorate([
+    (0, common_1.Get)('my-approvals'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORKFLOW_ACT),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], WorkflowsController.prototype, "findMyApprovals", null);
 __decorate([
     (0, common_1.Get)('requests/:id'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORKFLOW_VIEW),

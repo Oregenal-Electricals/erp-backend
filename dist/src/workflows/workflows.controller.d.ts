@@ -91,6 +91,26 @@ export declare class WorkflowsController {
         page: number;
         totalPages: number;
     }>;
+    findMyApprovals(req: any): Promise<{
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        documentType: string;
+        requestedBy: string;
+        remarks: string | null;
+        documentId: string;
+        documentNumber: string;
+        amount: number | null;
+        currentLevel: number;
+        totalLevels: number;
+        workflowId: string | null;
+    }[]>;
     findOneRequest(id: string, req: any): Promise<any>;
     seed(req: any): Promise<{
         message: string;

@@ -185,4 +185,37 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
       where: expect.objectContaining({ documentType: 'BOM', documentId: 'bom-1' }),
     }));
   });
+
+  it('CRITICAL: findMyApprovals() returns a PENDING request when the current level is specifically assigned to this user', async () => {
+    prisma.approvalRequest.findMany.mockResolvedValue([
+      { id: 'req-1', currentLevel: 1, workflow: { steps: [{ level: 1, approverUserId: 'user-1' }] } },
+    ]);
+    const result = await service.findMyApprovals(user);
+    expect(result.map((r: any) => r.id)).toEqual(['req-1']);
+  });
+
+  it('findMyApprovals() excludes a PENDING request assigned to someone else', async () => {
+    prisma.approvalRequest.findMany.mockResolvedValue([
+      { id: 'req-1', currentLevel: 1, workflow: { steps: [{ level: 1, approverUserId: 'someone-else' }] } },
+    ]);
+    const result = await service.findMyApprovals(user);
+    expect(result).toEqual([]);
+  });
+
+  it('findMyApprovals() includes a PENDING request whose current level is unassigned - open to any approver', async () => {
+    prisma.approvalRequest.findMany.mockResolvedValue([
+      { id: 'req-1', currentLevel: 1, workflow: { steps: [{ level: 1, approverUserId: null }] } },
+    ]);
+    const result = await service.findMyApprovals(user);
+    expect(result.map((r: any) => r.id)).toEqual(['req-1']);
+  });
+
+  it('findMyApprovals() returns everything PENDING for SUPER_ADMIN, unfiltered by assignment', async () => {
+    prisma.approvalRequest.findMany.mockResolvedValue([
+      { id: 'req-1', currentLevel: 1, workflow: { steps: [{ level: 1, approverUserId: 'someone-else' }] } },
+      { id: 'req-2', currentLevel: 1, workflow: { steps: [{ level: 1, approverUserId: 'another-person' }] } },
+    ]);
+    const result = await service.findMyApprovals(superAdmin);
+    expect(result.map((r: any) => r.id)).toEqual(['req-1', 'req-2']);
+  });
 });

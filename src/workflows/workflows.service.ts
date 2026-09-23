@@ -246,6 +246,29 @@ export class WorkflowsService {
   // AND a document's own detail page (BOM/Product) read from to render the
   // complete approval timeline, from submission through to wherever it
   // currently stands.
+  async findMyApprovals(user: any) {
+    if (user.role === 'SUPER_ADMIN') {
+      const all = await this.prisma.approvalRequest.findMany({
+        where: { companyId: user.companyId, status: 'PENDING' },
+        include: { workflow: { include: { steps: true } } },
+        orderBy: { createdAt: 'desc' },
+      });
+      return all.map(({ workflow, ...r }) => r);
+    }
+    const pending = await this.prisma.approvalRequest.findMany({
+      where: { companyId: user.companyId, status: 'PENDING' },
+      include: { workflow: { include: { steps: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return pending
+      .filter((req) => {
+        const step = req.workflow?.steps.find((s) => s.level === req.currentLevel);
+        if (!step) return false;
+        return !step.approverUserId || step.approverUserId === user.id;
+      })
+      .map(({ workflow, ...r }) => r);
+  }
+
   async findOneRequest(id: string, user: any) {
     const req = await this.prisma.approvalRequest.findFirst({
       where: { id, companyId: user.companyId },

@@ -11,6 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkflowsService = void 0;
 const common_1 = require("@nestjs/common");
@@ -234,6 +245,36 @@ let WorkflowsService = class WorkflowsService {
             this.prisma.approvalRequest.count({ where }),
         ]);
         return { data, total, page: Number(page), totalPages: Math.ceil(total / Number(limit)) };
+    }
+    async findMyApprovals(user) {
+        if (user.role === 'SUPER_ADMIN') {
+            const all = await this.prisma.approvalRequest.findMany({
+                where: { companyId: user.companyId, status: 'PENDING' },
+                include: { workflow: { include: { steps: true } } },
+                orderBy: { createdAt: 'desc' },
+            });
+            return all.map((_a) => {
+                var { workflow } = _a, r = __rest(_a, ["workflow"]);
+                return r;
+            });
+        }
+        const pending = await this.prisma.approvalRequest.findMany({
+            where: { companyId: user.companyId, status: 'PENDING' },
+            include: { workflow: { include: { steps: true } } },
+            orderBy: { createdAt: 'desc' },
+        });
+        return pending
+            .filter((req) => {
+            var _a;
+            const step = (_a = req.workflow) === null || _a === void 0 ? void 0 : _a.steps.find((s) => s.level === req.currentLevel);
+            if (!step)
+                return false;
+            return !step.approverUserId || step.approverUserId === user.id;
+        })
+            .map((_a) => {
+            var { workflow } = _a, r = __rest(_a, ["workflow"]);
+            return r;
+        });
     }
     async findOneRequest(id, user) {
         const req = await this.prisma.approvalRequest.findFirst({

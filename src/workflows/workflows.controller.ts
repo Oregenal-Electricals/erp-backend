@@ -23,6 +23,10 @@ export class WorkflowsController {
   @RequirePermissions(Permission.WORKFLOW_VIEW)
   findAllRequests(@Request() req: any, @Query() query: any) { return this.wfService.findAllRequests(req.user, query); }
 
+  @Get('my-approvals')
+  @RequirePermissions(Permission.WORKFLOW_ACT)
+  findMyApprovals(@Request() req: any) { return this.wfService.findMyApprovals(req.user); }
+
   @Get('requests/:id')
   @RequirePermissions(Permission.WORKFLOW_VIEW)
   findOneRequest(@Param('id') id: string, @Request() req: any) { return this.wfService.findOneRequest(id, req.user); }
