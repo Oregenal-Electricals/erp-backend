@@ -1,15 +1,51 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
+import { CreateWorkflowDto, UpdateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
+import { BomService } from '../bom/bom.service';
+import { ProductService } from '../products/product.service';
 export declare class WorkflowsService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private bomService;
+    private productService;
+    constructor(prisma: PrismaService, audit: AuditService, bomService: BomService, productService: ProductService);
     seedDefaults(companyId: string, userId: string): Promise<{
         message: string;
         count: number;
     }>;
     create(dto: CreateWorkflowDto, user: any): Promise<{
+        steps: {
+            level: number;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            stepName: string;
+            approverUserId: string | null;
+            timeoutHours: number | null;
+            workflowId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        documentType: string;
+        triggerCondition: string;
+        triggerAmount: number | null;
+        levels: number;
+    }>;
+    update(id: string, dto: UpdateWorkflowDto, user: any): Promise<{
         steps: {
             level: number;
             id: string;
@@ -96,12 +132,12 @@ export declare class WorkflowsService {
             documentType: string;
             requestedBy: string;
             remarks: string | null;
-            amount: number | null;
-            documentNumber: string;
             documentId: string;
-            workflowId: string | null;
+            documentNumber: string;
+            amount: number | null;
             currentLevel: number;
             totalLevels: number;
+            workflowId: string | null;
         };
         message?: undefined;
         autoApproved?: undefined;
@@ -139,12 +175,12 @@ export declare class WorkflowsService {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     cancel(requestId: string, user: any): Promise<{
         id: string;
@@ -159,12 +195,12 @@ export declare class WorkflowsService {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     findAllWorkflows(user: any): Promise<({
         _count: {
@@ -235,12 +271,12 @@ export declare class WorkflowsService {
             documentType: string;
             requestedBy: string;
             remarks: string | null;
-            amount: number | null;
-            documentNumber: string;
             documentId: string;
-            workflowId: string | null;
+            documentNumber: string;
+            amount: number | null;
             currentLevel: number;
             totalLevels: number;
+            workflowId: string | null;
         })[];
         total: number;
         page: number;
@@ -308,12 +344,12 @@ export declare class WorkflowsService {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     getStats(user: any): Promise<{
         total: number;

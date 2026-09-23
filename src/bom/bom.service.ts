@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { WorkflowsService } from '../workflows/workflows.service';
 import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 
 @Injectable()
 export class BomService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private notifications: NotificationsService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private notifications: NotificationsService,
+    @Inject(forwardRef(() => WorkflowsService)) private workflows: WorkflowsService,
+  ) {}
 
   private itemIncludes() {
     return { items: { where: { isActive: true }, orderBy: { sequence: 'asc' as const } } };
@@ -69,7 +75,7 @@ export class BomService {
       where, orderBy: { createdAt: 'desc' },
       include: { product: { select: { code: true, name: true, uom: { select: { code: true } } } }, _count: { select: { items: true } } },
     });
-    const rank = (s: string) => (s === 'APPROVED' ? 2 : s === 'DRAFT' ? 1 : 0);
+    const rank = (s: string) => (s === 'APPROVED' ? 3 : s === 'PENDING_APPROVAL' ? 2 : s === 'DRAFT' ? 1 : 0); // REJECTED/OBSOLETE rank lowest
     const verNum = (v: string) => parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
     const groups = new Map<string, any>();
     for (const b of all) {
@@ -116,7 +122,7 @@ export class BomService {
     // (prefer APPROVED, then DRAFT, then OBSOLETE; highest version as
     // tiebreaker) - same rule as the main list, so obsolete stage versions
     // don't clutter this panel either.
-    const rank = (s: string) => (s === 'APPROVED' ? 2 : s === 'DRAFT' ? 1 : 0);
+    const rank = (s: string) => (s === 'APPROVED' ? 3 : s === 'PENDING_APPROVAL' ? 2 : s === 'DRAFT' ? 1 : 0); // REJECTED/OBSOLETE rank lowest
     const verNum = (v: string) =>
       parseInt((v || 'v1').replace(/[^0-9]/g, '') || '1');
     const groups = new Map<string, any>();
@@ -216,42 +222,35 @@ export class BomService {
    * is still unresolved - an open question must be answered before the
    * BOM can move forward at all.
    */
-  async verify(id: string, user: any) {
+  async submitForApproval(id: string, user: any) {
     const bom = await this.findOne(id, user);
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Only DRAFT BOMs can be verified');
-    if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot verify BOM with no items');
+    if (bom.status !== 'DRAFT') throw new BadRequestException('Only DRAFT BOMs can be submitted for approval');
+    if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot submit BOM with no items for approval');
     const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
-    if (openQuery) throw new BadRequestException('Cannot verify this BOM while a query on it is still open');
+    if (openQuery) throw new BadRequestException('Cannot submit this BOM for approval while a query on it is still open');
+
+    await this.workflows.submit({ documentType: 'BOM', documentId: bom.id, documentNumber: bom.bomNumber }, user);
+
     const updated = await this.prisma.bom.update({
       where: { id },
-      data: { status: 'VERIFIED', verifiedBy: user.id, verifiedAt: new Date(), updatedBy: user.id },
+      data: { status: 'PENDING_APPROVAL', updatedBy: user.id },
       include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
     });
     await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
     // A MASTER BOM's stages move through the chain together with it, not
-    // as a separate manual step per stage - verifying the master verifies
-    // every DRAFT stage beneath it in the same action.
+    // as a separate manual step per stage - submitting the master submits
+    // every DRAFT stage beneath it in the same action (stages share the
+    // master's approval outcome rather than running their own separate
+    // workflow request).
     if (bom.bomType === 'MASTER') {
-      const draftStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'DRAFT', isActive: true } });
-      for (const stage of draftStages) {
-        const updatedStage = await this.prisma.bom.update({
-          where: { id: stage.id },
-          data: { status: 'VERIFIED', verifiedBy: user.id, verifiedAt: new Date(), updatedBy: user.id },
-        });
-        await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: updatedStage, changedBy: user.id });
-      }
+      await this.prisma.bom.updateMany({
+        where: { sourceBomId: id, bomType: 'STAGE', status: 'DRAFT', isActive: true },
+        data: { status: 'PENDING_APPROVAL', updatedBy: user.id },
+      });
     }
     return updated;
   }
 
-  /**
-   * A query can be raised to whichever of the two people is relevant at
-   * this BOM's current stage - its creator or its verifier. Explicitly
-   * validated server-side against those two specific people rather than
-   * allowing a query to any arbitrary user, so this stays a real,
-   * accountable exchange between the two parties who actually worked on
-   * the BOM.
-   */
   async raiseQuery(dto: { bomId: string; raisedToUserId: string; message: string }, user: any) {
     const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
     if (!bom) throw new NotFoundException('BOM not found');
@@ -299,24 +298,26 @@ export class BomService {
     return updated;
   }
 
-  async approve(id: string, user: any) {
-    const bom = await this.findOne(id, user);
-    if (bom.status !== 'VERIFIED') throw new BadRequestException('Only VERIFIED BOMs can be approved');
-    if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot approve BOM with no items');
-    const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
-    if (openQuery) throw new BadRequestException('Cannot approve this BOM while a query on it is still open');
+  // Called by WorkflowsService once the BOM's ApprovalRequest reaches its
+  // final level and is fully APPROVED. Runs the exact same cascade the old
+  // manual approve() used to run directly - stage cascade, obsoleting any
+  // previously-approved version of this same BOM number, and carrying
+  // forward that version's own approved stages as fresh DRAFTs against the
+  // new master - just triggered by workflow completion instead of one
+  // person's click.
+  async onWorkflowApproved(id: string, user: any) {
+    const bom = await this.prisma.bom.findFirst({ where: { id } });
+    if (!bom) return;
     const updated = await this.prisma.bom.update({
       where: { id },
       data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
       include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
     });
     await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
-    // Same cascade as verify() above - approving the master approves every
-    // VERIFIED stage beneath it in the same action, so master and stages
-    // always move through the chain together as one synchronized unit.
+
     if (bom.bomType === 'MASTER') {
-      const verifiedStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'VERIFIED', isActive: true } });
-      for (const stage of verifiedStages) {
+      const pendingStages = await this.prisma.bom.findMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'PENDING_APPROVAL', isActive: true } });
+      for (const stage of pendingStages) {
         const updatedStage = await this.prisma.bom.update({
           where: { id: stage.id },
           data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
@@ -326,31 +327,26 @@ export class BomService {
     }
 
     const previousApproved = await this.prisma.bom.findMany({
-      where: { companyId: user.companyId, bomNumber: bom.bomNumber, status: 'APPROVED', id: { not: id } },
+      where: { companyId: bom.companyId, bomNumber: bom.bomNumber, status: 'APPROVED', id: { not: id } },
     });
     for (const prev of previousApproved) {
       await this.prisma.bom.update({ where: { id: prev.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
       await this.audit.log({ tableName: 'boms', recordId: prev.id, action: 'UPDATE', oldValues: prev, newValues: { status: 'OBSOLETE' }, changedBy: user.id });
 
-      // Cascade: when a MASTER's new version replaces an old approved one,
-      // the old master's stage-BOMs are now orphaned to an obsolete parent.
-      // Obsolete them too, and auto-create a DRAFT clone of each pointing at
-      // the new master, so the whole chain (master + stages) stays consistent
-      // and nothing is left silently APPROVED-but-orphaned.
       if (bom.bomType === 'MASTER') {
         const orphanedStages = await this.prisma.bom.findMany({
-          where: { companyId: user.companyId, sourceBomId: prev.id, bomType: 'STAGE', status: 'APPROVED' },
+          where: { companyId: bom.companyId, sourceBomId: prev.id, bomType: 'STAGE', status: 'APPROVED' },
           include: this.itemIncludes(),
         });
         for (const stage of orphanedStages) {
           await this.prisma.bom.update({ where: { id: stage.id }, data: { status: 'OBSOLETE', updatedBy: user.id } });
           await this.audit.log({ tableName: 'boms', recordId: stage.id, action: 'UPDATE', oldValues: stage, newValues: { status: 'OBSOLETE' }, changedBy: user.id });
 
-          const siblings = await this.prisma.bom.findMany({ where: { companyId: user.companyId, bomNumber: stage.bomNumber }, select: { version: true } });
+          const siblings = await this.prisma.bom.findMany({ where: { companyId: bom.companyId, bomNumber: stage.bomNumber }, select: { version: true } });
           const maxVersion = Math.max(0, ...siblings.map(s => parseInt((s.version || 'v1').replace(/[^0-9]/g, '') || '1')));
           const newStage = await this.prisma.bom.create({
             data: {
-              companyId: user.companyId, productId: stage.productId,
+              companyId: bom.companyId, productId: stage.productId,
               bomNumber: stage.bomNumber, version: `v${maxVersion + 1}`,
               bomType: 'STAGE', sourceBomId: updated.id,
               description: `Carried forward from ${stage.bomNumber} ${stage.version} after master ${bom.bomNumber} was re-approved - review and approve`,
@@ -361,7 +357,7 @@ export class BomService {
           if (stage.items && stage.items.length > 0) {
             await this.prisma.bomItem.createMany({
               data: stage.items.map(item => ({
-                bomId: newStage.id, companyId: user.companyId,
+                bomId: newStage.id, companyId: bom.companyId,
                 sequence: item.sequence, itemType: item.itemType,
                 rawMaterialId: item.rawMaterialId,
                 itemCode: item.itemCode, itemName: item.itemName, uom: item.uom,
@@ -376,6 +372,18 @@ export class BomService {
       }
     }
 
+    return updated;
+  }
+
+  // Called by WorkflowsService when any level rejects the BOM's ApprovalRequest.
+  async onWorkflowRejected(id: string, user: any) {
+    const bom = await this.prisma.bom.findFirst({ where: { id } });
+    if (!bom) return;
+    const updated = await this.prisma.bom.update({ where: { id }, data: { status: 'REJECTED', updatedBy: user.id } });
+    await this.audit.log({ tableName: 'boms', recordId: id, action: 'UPDATE', oldValues: bom, newValues: updated, changedBy: user.id });
+    if (bom.bomType === 'MASTER') {
+      await this.prisma.bom.updateMany({ where: { sourceBomId: id, bomType: 'STAGE', status: 'PENDING_APPROVAL', isActive: true }, data: { status: 'REJECTED', updatedBy: user.id } });
+    }
     return updated;
   }
 

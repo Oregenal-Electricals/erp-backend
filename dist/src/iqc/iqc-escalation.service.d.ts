@@ -38,9 +38,9 @@ export declare class IqcEscalationService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        revision: string | null;
         version: number;
         rawMaterialId: string | null;
+        revision: string | null;
         docCode: string | null;
         isCurrent: boolean;
         reviewed: boolean;
@@ -63,9 +63,9 @@ export declare class IqcEscalationService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        revision: string | null;
         version: number;
         rawMaterialId: string | null;
+        revision: string | null;
         docCode: string | null;
         isCurrent: boolean;
         reviewed: boolean;
@@ -101,9 +101,9 @@ export declare class IqcEscalationService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        revision: string | null;
         version: number;
         rawMaterialId: string | null;
+        revision: string | null;
         docCode: string | null;
         isCurrent: boolean;
         reviewed: boolean;
@@ -135,9 +135,9 @@ export declare class IqcEscalationService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        revision: string | null;
         version: number;
         rawMaterialId: string | null;
+        revision: string | null;
         docCode: string | null;
         isCurrent: boolean;
         reviewed: boolean;
@@ -170,9 +170,9 @@ export declare class IqcEscalationService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        revision: string | null;
         version: number;
         rawMaterialId: string | null;
+        revision: string | null;
         docCode: string | null;
         isCurrent: boolean;
         reviewed: boolean;
@@ -204,9 +204,9 @@ export declare class IqcEscalationService {
         updatedAt: Date;
         createdBy: string | null;
         updatedBy: string | null;
-        revision: string | null;
         version: number;
         rawMaterialId: string | null;
+        revision: string | null;
         docCode: string | null;
         isCurrent: boolean;
         reviewed: boolean;
@@ -253,9 +253,9 @@ export declare class IqcEscalationService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            revision: string | null;
             version: number;
             rawMaterialId: string | null;
+            revision: string | null;
             docCode: string | null;
             isCurrent: boolean;
             reviewed: boolean;
@@ -381,9 +381,9 @@ export declare class IqcEscalationService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            revision: string | null;
             version: number;
             rawMaterialId: string | null;
+            revision: string | null;
             docCode: string | null;
             isCurrent: boolean;
             reviewed: boolean;
@@ -509,9 +509,9 @@ export declare class IqcEscalationService {
             updatedAt: Date;
             createdBy: string | null;
             updatedBy: string | null;
-            revision: string | null;
             version: number;
             rawMaterialId: string | null;
+            revision: string | null;
             docCode: string | null;
             isCurrent: boolean;
             reviewed: boolean;

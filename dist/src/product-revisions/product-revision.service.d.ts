@@ -23,8 +23,8 @@ export declare class ProductRevisionService {
         approvedBy: string | null;
         approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        drawingNumber: string | null;
         productId: string;
+        drawingNumber: string | null;
         revisionNumber: string;
         changeDescription: string;
         changeType: string;
@@ -50,8 +50,8 @@ export declare class ProductRevisionService {
             approvedBy: string | null;
             approvedAt: Date | null;
             specifications: import("@prisma/client/runtime/library").JsonValue | null;
-            drawingNumber: string | null;
             productId: string;
+            drawingNumber: string | null;
             revisionNumber: string;
             changeDescription: string;
             changeType: string;
@@ -81,8 +81,8 @@ export declare class ProductRevisionService {
         approvedBy: string | null;
         approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        drawingNumber: string | null;
         productId: string;
+        drawingNumber: string | null;
         revisionNumber: string;
         changeDescription: string;
         changeType: string;
@@ -107,8 +107,8 @@ export declare class ProductRevisionService {
         approvedBy: string | null;
         approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        drawingNumber: string | null;
         productId: string;
+        drawingNumber: string | null;
         revisionNumber: string;
         changeDescription: string;
         changeType: string;
@@ -133,8 +133,8 @@ export declare class ProductRevisionService {
         approvedBy: string | null;
         approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        drawingNumber: string | null;
         productId: string;
+        drawingNumber: string | null;
         revisionNumber: string;
         changeDescription: string;
         changeType: string;
@@ -159,8 +159,8 @@ export declare class ProductRevisionService {
         approvedBy: string | null;
         approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        drawingNumber: string | null;
         productId: string;
+        drawingNumber: string | null;
         revisionNumber: string;
         changeDescription: string;
         changeType: string;
@@ -185,8 +185,8 @@ export declare class ProductRevisionService {
         approvedBy: string | null;
         approvedAt: Date | null;
         specifications: import("@prisma/client/runtime/library").JsonValue | null;
-        drawingNumber: string | null;
         productId: string;
+        drawingNumber: string | null;
         revisionNumber: string;
         changeDescription: string;
         changeType: string;

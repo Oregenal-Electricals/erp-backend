@@ -12,12 +12,14 @@ const workflows_controller_1 = require("./workflows.controller");
 const workflows_service_1 = require("./workflows.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const bom_module_1 = require("../bom/bom.module");
+const product_module_1 = require("../products/product.module");
 let WorkflowsModule = class WorkflowsModule {
 };
 exports.WorkflowsModule = WorkflowsModule;
 exports.WorkflowsModule = WorkflowsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, (0, common_1.forwardRef)(() => bom_module_1.BomModule), (0, common_1.forwardRef)(() => product_module_1.ProductModule)],
         controllers: [workflows_controller_1.WorkflowsController],
         providers: [workflows_service_1.WorkflowsService],
         exports: [workflows_service_1.WorkflowsService],

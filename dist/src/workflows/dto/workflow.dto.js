@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApproveRejectDto = exports.SubmitForApprovalDto = exports.CreateWorkflowDto = exports.WorkflowStepDto = void 0;
+exports.ApproveRejectDto = exports.SubmitForApprovalDto = exports.UpdateWorkflowDto = exports.CreateWorkflowDto = exports.WorkflowStepDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class WorkflowStepDto {
@@ -68,6 +68,42 @@ __decorate([
     (0, class_transformer_1.Type)(() => WorkflowStepDto),
     __metadata("design:type", Array)
 ], CreateWorkflowDto.prototype, "steps", void 0);
+class UpdateWorkflowDto {
+}
+exports.UpdateWorkflowDto = UpdateWorkflowDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateWorkflowDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsIn)(['ALWAYS', 'ABOVE_AMOUNT']),
+    __metadata("design:type", String)
+], UpdateWorkflowDto.prototype, "triggerCondition", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], UpdateWorkflowDto.prototype, "triggerAmount", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateWorkflowDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateWorkflowDto.prototype, "isActive", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => WorkflowStepDto),
+    __metadata("design:type", Array)
+], UpdateWorkflowDto.prototype, "steps", void 0);
 class SubmitForApprovalDto {
 }
 exports.SubmitForApprovalDto = SubmitForApprovalDto;

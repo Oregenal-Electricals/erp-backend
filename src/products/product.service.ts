@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { WorkflowsService } from '../workflows/workflows.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 
 @Injectable()
 export class ProductService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    @Inject(forwardRef(() => WorkflowsService)) private workflows: WorkflowsService,
+  ) {}
 
   private includes() {
     return { category: true, uom: true, family: true };
@@ -18,11 +23,36 @@ export class ProductService {
     if (exists) throw new ConflictException(`Product code ${dto.code} already exists`);
 
     const product = await this.prisma.product.create({
-      data: { ...dto, code: dto.code.toUpperCase(), companyId: user.companyId, createdBy: user.id, updatedBy: user.id },
+      data: { ...dto, code: dto.code.toUpperCase(), status: 'DRAFT', companyId: user.companyId, createdBy: user.id, updatedBy: user.id },
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'products', recordId: product.id, action: 'CREATE', newValues: product, changedBy: user.id });
-    return product;
+
+    await this.workflows.submit({ documentType: 'PRODUCT', documentId: product.id, documentNumber: product.code }, user);
+    const submitted = await this.prisma.product.update({
+      where: { id: product.id }, data: { status: 'PENDING_APPROVAL', updatedBy: user.id }, include: this.includes(),
+    });
+    return submitted;
+  }
+
+  async onWorkflowApproved(id: string, user: any) {
+    const product = await this.prisma.product.findFirst({ where: { id } });
+    if (!product) return;
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'products', recordId: id, action: 'UPDATE', oldValues: product, newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
+  async onWorkflowRejected(id: string, user: any) {
+    const product = await this.prisma.product.findFirst({ where: { id } });
+    if (!product) return;
+    const updated = await this.prisma.product.update({ where: { id }, data: { status: 'REJECTED', updatedBy: user.id }, include: this.includes() });
+    await this.audit.log({ tableName: 'products', recordId: id, action: 'UPDATE', oldValues: product, newValues: updated, changedBy: user.id });
+    return updated;
   }
 
   async findAll(user: any, query: any) {

@@ -23,8 +23,8 @@ export declare class DocumentsService {
             title: string;
             referenceType: string;
             referenceNumber: string;
-            version: number;
             documentNumber: string;
+            version: number;
             fileType: string;
             fileName: string;
             fileSize: number;

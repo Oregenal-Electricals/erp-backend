@@ -17,6 +17,15 @@ export class CreateWorkflowDto {
   @IsArray() @ValidateNested({ each: true }) @Type(() => WorkflowStepDto) steps: WorkflowStepDto[];
 }
 
+export class UpdateWorkflowDto {
+  @IsOptional() @IsString() name?: string;
+  @IsOptional() @IsString() @IsIn(['ALWAYS','ABOVE_AMOUNT']) triggerCondition?: string;
+  @IsOptional() @IsNumber() @Min(0) triggerAmount?: number;
+  @IsOptional() @IsString() description?: string;
+  @IsOptional() isActive?: boolean;
+  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => WorkflowStepDto) steps?: WorkflowStepDto[];
+}
+
 export class SubmitForApprovalDto {
   @IsString() documentType: string;
   @IsString() documentId: string;

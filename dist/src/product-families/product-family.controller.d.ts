@@ -129,6 +129,9 @@ export declare class ProductFamilyController {
         createdBy: string | null;
         updatedBy: string | null;
         code: string;
+        status: string;
+        approvedBy: string | null;
+        approvedAt: Date | null;
         hsnCode: string | null;
         categoryId: string | null;
         uomId: string | null;

@@ -13,12 +13,13 @@ const bom_service_1 = require("./bom.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const notifications_module_1 = require("../notifications/notifications.module");
+const workflows_module_1 = require("../workflows/workflows.module");
 let BomModule = class BomModule {
 };
 exports.BomModule = BomModule;
 exports.BomModule = BomModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, notifications_module_1.NotificationsModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, notifications_module_1.NotificationsModule, (0, common_1.forwardRef)(() => workflows_module_1.WorkflowsModule)],
         controllers: [bom_controller_1.BomController],
         providers: [bom_service_1.BomService],
         exports: [bom_service_1.BomService],

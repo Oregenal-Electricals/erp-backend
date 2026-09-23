@@ -775,12 +775,12 @@ export declare class WorkOrderService {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     rejectRequest(requestId: string, user: any, comments?: string): Promise<{
         workflow: {
@@ -815,12 +815,12 @@ export declare class WorkOrderService {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     private applyPendingReassign;
     previewReassignQty(id: string, newPlannedQty: number, user: any): Promise<{

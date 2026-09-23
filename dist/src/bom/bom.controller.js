@@ -33,8 +33,7 @@ let BomController = class BomController {
     create(dto, req) { return this.bomService.create(dto, req.user); }
     update(id, dto, req) { return this.bomService.update(id, dto, req.user); }
     remove(id, req) { return this.bomService.remove(id, req.user); }
-    verify(id, req) { return this.bomService.verify(id, req.user); }
-    approve(id, req) { return this.bomService.approve(id, req.user); }
+    submitForApproval(id, req) { return this.bomService.submitForApproval(id, req.user); }
     raiseQuery(dto, req) { return this.bomService.raiseQuery(dto, req.user); }
     resolveQuery(id, dto, req) { return this.bomService.resolveQuery(id, dto, req.user); }
     obsolete(id, req) { return this.bomService.obsolete(id, req.user); }
@@ -127,23 +126,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BomController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Post)(':id/verify'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_VERIFY),
+    (0, common_1.Post)(':id/submit-for-approval'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.WORKFLOW_SUBMIT),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], BomController.prototype, "verify", null);
-__decorate([
-    (0, common_1.Post)(':id/approve'),
-    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_APPROVE),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], BomController.prototype, "approve", null);
+], BomController.prototype, "submitForApproval", null);
 __decorate([
     (0, common_1.Post)('queries'),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.BOM_VIEW),

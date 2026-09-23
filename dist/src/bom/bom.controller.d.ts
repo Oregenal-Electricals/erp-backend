@@ -286,62 +286,7 @@ export declare class BomController {
     remove(id: string, req: any): Promise<{
         message: string;
     }>;
-    verify(id: string, req: any): Promise<{
-        items: {
-            id: string;
-            companyId: string;
-            isActive: boolean;
-            isTestData: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            updatedBy: string | null;
-            itemCode: string;
-            itemName: string;
-            uom: string;
-            quantity: number;
-            notes: string | null;
-            sequence: number;
-            itemType: string;
-            section: string | null;
-            rawMaterialId: string | null;
-            wastagePercent: number | null;
-            unitCost: number | null;
-            isCritical: boolean;
-            bomId: string;
-            totalCost: number | null;
-            effectiveQty: number;
-        }[];
-        product: {
-            name: string;
-            code: string;
-        };
-    } & {
-        id: string;
-        companyId: string;
-        description: string | null;
-        isActive: boolean;
-        isTestData: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
-        updatedBy: string | null;
-        status: string;
-        verifiedAt: Date | null;
-        verifiedBy: string | null;
-        approvedBy: string | null;
-        approvedAt: Date | null;
-        productId: string;
-        revisionId: string | null;
-        version: string;
-        effectiveFrom: Date;
-        effectiveTo: Date | null;
-        bomNumber: string;
-        bomType: string;
-        sourceBomId: string | null;
-        totalCost: number | null;
-    }>;
-    approve(id: string, req: any): Promise<{
+    submitForApproval(id: string, req: any): Promise<{
         items: {
             id: string;
             companyId: string;

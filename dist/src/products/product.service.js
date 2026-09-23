@@ -8,15 +8,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const workflows_service_1 = require("../workflows/workflows.service");
 let ProductService = class ProductService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, workflows) {
         this.prisma = prisma;
         this.audit = audit;
+        this.workflows = workflows;
     }
     includes() {
         return { category: true, uom: true, family: true };
@@ -28,11 +33,35 @@ let ProductService = class ProductService {
         if (exists)
             throw new common_1.ConflictException(`Product code ${dto.code} already exists`);
         const product = await this.prisma.product.create({
-            data: Object.assign(Object.assign({}, dto), { code: dto.code.toUpperCase(), companyId: user.companyId, createdBy: user.id, updatedBy: user.id }),
+            data: Object.assign(Object.assign({}, dto), { code: dto.code.toUpperCase(), status: 'DRAFT', companyId: user.companyId, createdBy: user.id, updatedBy: user.id }),
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'products', recordId: product.id, action: 'CREATE', newValues: product, changedBy: user.id });
-        return product;
+        await this.workflows.submit({ documentType: 'PRODUCT', documentId: product.id, documentNumber: product.code }, user);
+        const submitted = await this.prisma.product.update({
+            where: { id: product.id }, data: { status: 'PENDING_APPROVAL', updatedBy: user.id }, include: this.includes(),
+        });
+        return submitted;
+    }
+    async onWorkflowApproved(id, user) {
+        const product = await this.prisma.product.findFirst({ where: { id } });
+        if (!product)
+            return;
+        const updated = await this.prisma.product.update({
+            where: { id },
+            data: { status: 'APPROVED', approvedBy: user.id, approvedAt: new Date(), updatedBy: user.id },
+            include: this.includes(),
+        });
+        await this.audit.log({ tableName: 'products', recordId: id, action: 'UPDATE', oldValues: product, newValues: updated, changedBy: user.id });
+        return updated;
+    }
+    async onWorkflowRejected(id, user) {
+        const product = await this.prisma.product.findFirst({ where: { id } });
+        if (!product)
+            return;
+        const updated = await this.prisma.product.update({ where: { id }, data: { status: 'REJECTED', updatedBy: user.id }, include: this.includes() });
+        await this.audit.log({ tableName: 'products', recordId: id, action: 'UPDATE', oldValues: product, newValues: updated, changedBy: user.id });
+        return updated;
     }
     async findAll(user, query) {
         const { page = 1, limit = 20, search, productType, isActive } = query;
@@ -103,6 +132,9 @@ let ProductService = class ProductService {
 exports.ProductService = ProductService;
 exports.ProductService = ProductService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
+    __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => workflows_service_1.WorkflowsService))),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService,
+        workflows_service_1.WorkflowsService])
 ], ProductService);
 //# sourceMappingURL=product.service.js.map

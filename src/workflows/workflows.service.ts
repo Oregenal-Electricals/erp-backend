@@ -1,26 +1,48 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
+import { CreateWorkflowDto, UpdateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
+import { BomService } from '../bom/bom.service';
+import { ProductService } from '../products/product.service';
 
 const DEFAULT_WORKFLOWS = [
   { name:'Purchase Order Approval', documentType:'PURCHASE_ORDER', triggerCondition:'ALWAYS', levels:1, description:'All POs require manager approval', steps:[{ level:1, stepName:'Manager Approval', timeoutHours:48 }] },
   { name:'Sales Order Approval', documentType:'SALES_ORDER', triggerCondition:'ABOVE_AMOUNT', triggerAmount:500000, levels:1, description:'SOs above ₹5 lakh require approval', steps:[{ level:1, stepName:'Sales Head Approval', timeoutHours:24 }] },
-  { name:'AP Bill Approval', documentType:'AP_BILL', triggerCondition:'ABOVE_AMOUNT', triggerAmount:100000, levels:2, description:'Bills above ₹1 lakh require 2-level approval', steps:[{ level:1, stepName:'Finance Manager', timeoutHours:24 },{ level:2, stepName:'CFO Approval', timeoutHours:48 }] },
+  { name:'AP Bill Approval', documentType:'AP_BILL', triggerCondition:'ABOVE_AMOUNT', triggerAmount:100000, levels:2,description:'Bills above ₹1 lakh require 2-level approval', steps:[{ level:1, stepName:'Finance Manager', timeoutHours:24 },{ level:2, stepName:'CFO Approval', timeoutHours:48 }] },
   { name:'Credit Override Approval', documentType:'CREDIT_OVERRIDE', triggerCondition:'ALWAYS', levels:1, description:'All credit limit overrides require approval', steps:[{ level:1, stepName:'Credit Controller', timeoutHours:4 }] },
   { name:'Journal Voucher Approval', documentType:'VOUCHER', triggerCondition:'ABOVE_AMOUNT', triggerAmount:50000, levels:1, description:'Vouchers above ₹50k require CFO approval', steps:[{ level:1, stepName:'CFO Approval', timeoutHours:48 }] },
+  { name:'BOM Approval', documentType:'BOM', triggerCondition:'ALWAYS', levels:4, description:'New/revised BOMs require 4-level sequential approval before they become usable', steps:[
+    { level:1, stepName:'Level 1 Review', timeoutHours:48 },
+    { level:2, stepName:'Level 2 Review', timeoutHours:48 },
+    { level:3, stepName:'Level 3 Review', timeoutHours:48 },
+    { level:4, stepName:'Final Approval', timeoutHours:48 },
+  ] },
+  { name:'Product Approval', documentType:'PRODUCT', triggerCondition:'ALWAYS', levels:4, description:'New products require 4-level sequential approval before they become usable', steps:[
+    { level:1, stepName:'Level 1 Review', timeoutHours:48 },
+    { level:2, stepName:'Level 2 Review', timeoutHours:48 },
+    { level:3, stepName:'Level 3 Review', timeoutHours:48 },
+    { level:4, stepName:'Final Approval', timeoutHours:48 },
+  ] },
 ];
 
 @Injectable()
 export class WorkflowsService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    @Inject(forwardRef(() => BomService)) private bomService: BomService,
+    @Inject(forwardRef(() => ProductService)) private productService: ProductService,
+  ) {}
 
   async seedDefaults(companyId: string, userId: string) {
-    const existing = await this.prisma.workflowDefinition.count({ where: { companyId } });
-    if (existing > 0) return { message: 'Workflows already seeded', count: existing };
-
+    const existingTypes = new Set(
+      (await this.prisma.workflowDefinition.findMany({ where: { companyId }, select: { documentType: true } }))
+        .map(w => w.documentType),
+    );
+    let createdCount = 0;
     for (const wf of DEFAULT_WORKFLOWS) {
-      const created = await this.prisma.workflowDefinition.create({
+      if (existingTypes.has(wf.documentType)) continue;
+      await this.prisma.workflowDefinition.create({
         data: {
           name: wf.name, documentType: wf.documentType,
           triggerCondition: wf.triggerCondition, triggerAmount: wf.triggerAmount,
@@ -29,8 +51,10 @@ export class WorkflowsService {
           steps: { create: wf.steps.map(s => ({ ...s, companyId, createdBy: userId, updatedBy: userId })) },
         },
       });
+      createdCount++;
     }
-    return { message: 'Default workflows seeded', count: DEFAULT_WORKFLOWS.length };
+    if (createdCount === 0) return { message: 'Workflows already seeded', count: existingTypes.size };
+    return { message: 'Missing default workflows seeded', count: createdCount };
   }
 
   async create(dto: CreateWorkflowDto, user: any) {
@@ -49,21 +73,48 @@ export class WorkflowsService {
     return wf;
   }
 
+  // Admin reconfigures an existing workflow definition - name/trigger/description,
+  // and/or replaces its ordered step list wholesale (add/remove/reorder steps,
+  // reassign which specific person approves each level). A document type can
+  // only have one active definition (see the unique constraint on
+  // [companyId, documentType]), so this is how Admin changes level count or
+  // approvers after the fact, rather than creating a competing duplicate.
+  async update(id: string, dto: UpdateWorkflowDto, user: any) {
+    const existing = await this.prisma.workflowDefinition.findFirst({ where: { id, companyId: user.companyId } });
+    if (!existing) throw new NotFoundException('Workflow definition not found');
+
+    const data: any = { updatedBy: user.id };
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.triggerCondition !== undefined) data.triggerCondition = dto.triggerCondition;
+    if (dto.triggerAmount !== undefined) data.triggerAmount = dto.triggerAmount;
+    if (dto.description !== undefined) data.description = dto.description;
+    if (dto.isActive !== undefined) data.isActive = dto.isActive;
+    if (dto.steps) data.levels = dto.steps.length;
+
+    if (dto.steps) {
+      await this.prisma.workflowStep.deleteMany({ where: { workflowId: id } });
+      data.steps = { create: dto.steps.map(s => ({ level: s.level, stepName: s.stepName, approverUserId: s.approverUserId, timeoutHours: s.timeoutHours || 48, companyId: user.companyId, createdBy: user.id, updatedBy: user.id })) };
+    }
+
+    const updated = await this.prisma.workflowDefinition.update({
+      where: { id }, data, include: { steps: { orderBy: { level: 'asc' } } },
+    });
+    await this.audit.log({ tableName: 'workflow_definitions', recordId: id, action: 'UPDATE', oldValues: existing, newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
   async submit(dto: SubmitForApprovalDto, user: any) {
-    // Find applicable workflow
     const workflow = await this.prisma.workflowDefinition.findFirst({
       where: { companyId: user.companyId, documentType: dto.documentType, isActive: true },
       include: { steps: { orderBy: { level: 'asc' } } },
     });
 
-    // Check if approval is needed
     if (workflow) {
       if (workflow.triggerCondition === 'ABOVE_AMOUNT' && dto.amount && dto.amount <= (workflow.triggerAmount || 0)) {
-        return { requiresApproval: false, message: 'Amount below threshold — auto-approved', autoApproved: true };
+        return { requiresApproval: false, message: 'Amount below threshold - auto-approved', autoApproved: true };
       }
     }
 
-    // Check if already pending
     const existing = await this.prisma.approvalRequest.findFirst({
       where: { companyId: user.companyId, documentId: dto.documentId, status: 'PENDING' },
     });
@@ -93,7 +144,17 @@ export class WorkflowsService {
     if (!request) throw new NotFoundException('Approval request not found');
     if (request.status !== 'PENDING') throw new BadRequestException(`Request is already ${request.status}`);
 
-    // Record action
+    // Per-step approver enforcement: when the current level has a specific
+    // person assigned, only that person (or SUPER_ADMIN) may act at this
+    // level - holding the generic WORKFLOW_ACT permission is not by itself
+    // enough. A level left unassigned (no approverUserId configured yet)
+    // stays open to anyone with WORKFLOW_ACT, so a freshly-seeded workflow
+    // is usable before Admin has assigned specific people to every step.
+    const currentStep = request.workflow?.steps.find(s => s.level === request.currentLevel);
+    if (currentStep?.approverUserId && currentStep.approverUserId !== user.id && user.role !== 'SUPER_ADMIN') {
+      throw new ForbiddenException(`Only the assigned approver for "${currentStep.stepName}" (level ${request.currentLevel}) can act on this request`);
+    }
+
     await this.prisma.approvalAction.create({
       data: {
         requestId, level: request.currentLevel,
@@ -112,7 +173,7 @@ export class WorkflowsService {
       if (request.currentLevel >= request.totalLevels) {
         newStatus = 'APPROVED';
       } else {
-        newLevel = request.currentLevel + 1; // advance to next level
+        newLevel = request.currentLevel + 1;
       }
     }
 
@@ -123,6 +184,21 @@ export class WorkflowsService {
     });
 
     await this.audit.log({ tableName: 'approval_requests', recordId: requestId, action: 'UPDATE', newValues: updated, changedBy: user.id });
+
+    // Terminal state reached - sync the originating document's own status.
+    // The engine stays generic (any documentType can submit into it); this
+    // is the one place that knows how to route a finished request back to
+    // its source record.
+    if (newStatus === 'APPROVED' || newStatus === 'REJECTED') {
+      if (request.documentType === 'BOM') {
+        if (newStatus === 'APPROVED') await this.bomService.onWorkflowApproved(request.documentId, user);
+        else await this.bomService.onWorkflowRejected(request.documentId, user);
+      } else if (request.documentType === 'PRODUCT') {
+        if (newStatus === 'APPROVED') await this.productService.onWorkflowApproved(request.documentId, user);
+        else await this.productService.onWorkflowRejected(request.documentId, user);
+      }
+    }
+
     return updated;
   }
 

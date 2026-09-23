@@ -2275,6 +2275,9 @@ model Product {
   minOrderQty     Float?
   leadTimeDays    Int?
   iqcRequired     Boolean       @default(true)
+  status          String        @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, REJECTED
+  approvedBy      String?
+  approvedAt      DateTime?
   isActive        Boolean       @default(true)
   isTestData      Boolean       @default(false)
   createdAt       DateTime      @default(now())

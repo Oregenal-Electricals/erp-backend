@@ -12,6 +12,14 @@ export declare class CreateWorkflowDto {
     description?: string;
     steps: WorkflowStepDto[];
 }
+export declare class UpdateWorkflowDto {
+    name?: string;
+    triggerCondition?: string;
+    triggerAmount?: number;
+    description?: string;
+    isActive?: boolean;
+    steps?: WorkflowStepDto[];
+}
 export declare class SubmitForApprovalDto {
     documentType: string;
     documentId: string;

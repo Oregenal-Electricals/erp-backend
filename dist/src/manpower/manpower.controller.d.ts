@@ -690,12 +690,12 @@ export declare class ManpowerController {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     rejectRequest(requestId: string, dto: {
         comments?: string;
@@ -732,12 +732,12 @@ export declare class ManpowerController {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     assignEmployees(dto: AssignEmployeesDto, req: any): Promise<{
         created: any[];

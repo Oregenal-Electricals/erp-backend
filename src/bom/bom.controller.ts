@@ -47,12 +47,9 @@ export class BomController {
   @RequirePermissions(Permission.INVENTORY_EDIT)
   remove(@Param('id') id: string, @Request() req: any) { return this.bomService.remove(id, req.user); }
 
-  @Post(':id/verify')
-  @RequirePermissions(Permission.BOM_VERIFY)
-  verify(@Param('id') id: string, @Request() req: any) { return this.bomService.verify(id, req.user); }
-  @Post(':id/approve')
-  @RequirePermissions(Permission.BOM_APPROVE)
-  approve(@Param('id') id: string, @Request() req: any) { return this.bomService.approve(id, req.user); }
+  @Post(':id/submit-for-approval')
+  @RequirePermissions(Permission.WORKFLOW_SUBMIT)
+  submitForApproval(@Param('id') id: string, @Request() req: any) { return this.bomService.submitForApproval(id, req.user); }
   @Post('queries')
   @RequirePermissions(Permission.BOM_VIEW)
   raiseQuery(@Body() dto: RaiseBomQueryDto, @Request() req: any) { return this.bomService.raiseQuery(dto, req.user); }

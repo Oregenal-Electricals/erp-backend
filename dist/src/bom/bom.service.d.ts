@@ -1,12 +1,14 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { WorkflowsService } from '../workflows/workflows.service';
 import { CreateBomDto, UpdateBomDto, CreateBomItemDto, UpdateBomItemDto, GenerateStagesDto } from './dto/bom.dto';
 export declare class BomService {
     private prisma;
     private audit;
     private notifications;
-    constructor(prisma: PrismaService, audit: AuditService, notifications: NotificationsService);
+    private workflows;
+    constructor(prisma: PrismaService, audit: AuditService, notifications: NotificationsService, workflows: WorkflowsService);
     private itemIncludes;
     private sanitizeBrandPrefix;
     private generateBomNumber;
@@ -314,7 +316,7 @@ export declare class BomService {
     remove(id: string, user: any): Promise<{
         message: string;
     }>;
-    verify(id: string, user: any): Promise<{
+    submitForApproval(id: string, user: any): Promise<{
         items: {
             id: string;
             companyId: string;
@@ -407,7 +409,7 @@ export declare class BomService {
         response: string | null;
         raisedByUserId: string;
     }>;
-    approve(id: string, user: any): Promise<{
+    onWorkflowApproved(id: string, user: any): Promise<{
         items: {
             id: string;
             companyId: string;
@@ -438,6 +440,31 @@ export declare class BomService {
             code: string;
         };
     } & {
+        id: string;
+        companyId: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        status: string;
+        verifiedAt: Date | null;
+        verifiedBy: string | null;
+        approvedBy: string | null;
+        approvedAt: Date | null;
+        productId: string;
+        revisionId: string | null;
+        version: string;
+        effectiveFrom: Date;
+        effectiveTo: Date | null;
+        bomNumber: string;
+        bomType: string;
+        sourceBomId: string | null;
+        totalCost: number | null;
+    }>;
+    onWorkflowRejected(id: string, user: any): Promise<{
         id: string;
         companyId: string;
         description: string | null;

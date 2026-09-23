@@ -28,8 +28,8 @@ export declare class DocumentsController {
             title: string;
             referenceType: string;
             referenceNumber: string;
-            version: number;
             documentNumber: string;
+            version: number;
             fileType: string;
             fileName: string;
             fileSize: number;

@@ -1,5 +1,5 @@
 import { WorkflowsService } from './workflows.service';
-import { CreateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
+import { CreateWorkflowDto, UpdateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
 export declare class WorkflowsController {
     private readonly wfService;
     constructor(wfService: WorkflowsService);
@@ -80,12 +80,12 @@ export declare class WorkflowsController {
             documentType: string;
             requestedBy: string;
             remarks: string | null;
-            amount: number | null;
-            documentNumber: string;
             documentId: string;
-            workflowId: string | null;
+            documentNumber: string;
+            amount: number | null;
             currentLevel: number;
             totalLevels: number;
+            workflowId: string | null;
         })[];
         total: number;
         page: number;
@@ -153,18 +153,50 @@ export declare class WorkflowsController {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     seed(req: any): Promise<{
         message: string;
         count: number;
     }>;
     create(dto: CreateWorkflowDto, req: any): Promise<{
+        steps: {
+            level: number;
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            stepName: string;
+            approverUserId: string | null;
+            timeoutHours: number | null;
+            workflowId: string;
+        }[];
+    } & {
+        id: string;
+        companyId: string;
+        name: string;
+        description: string | null;
+        isActive: boolean;
+        isTestData: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        createdBy: string | null;
+        updatedBy: string | null;
+        documentType: string;
+        triggerCondition: string;
+        triggerAmount: number | null;
+        levels: number;
+    }>;
+    update(id: string, dto: UpdateWorkflowDto, req: any): Promise<{
         steps: {
             level: number;
             id: string;
@@ -251,12 +283,12 @@ export declare class WorkflowsController {
             documentType: string;
             requestedBy: string;
             remarks: string | null;
-            amount: number | null;
-            documentNumber: string;
             documentId: string;
-            workflowId: string | null;
+            documentNumber: string;
+            amount: number | null;
             currentLevel: number;
             totalLevels: number;
+            workflowId: string | null;
         };
         message?: undefined;
         autoApproved?: undefined;
@@ -294,12 +326,12 @@ export declare class WorkflowsController {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
     cancel(id: string, req: any): Promise<{
         id: string;
@@ -314,11 +346,11 @@ export declare class WorkflowsController {
         documentType: string;
         requestedBy: string;
         remarks: string | null;
-        amount: number | null;
-        documentNumber: string;
         documentId: string;
-        workflowId: string | null;
+        documentNumber: string;
+        amount: number | null;
         currentLevel: number;
         totalLevels: number;
+        workflowId: string | null;
     }>;
 }
