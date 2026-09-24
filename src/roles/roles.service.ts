@@ -12,8 +12,10 @@ export class RolesService {
   }
 
   async findAll(user: any) {
+    const where: any = { companyId: user.companyId, isActive: true };
+    if (user.role !== 'SUPER_ADMIN') where.isProtected = false;
     const roles = await this.prisma.role.findMany({
-      where: { companyId: user.companyId, isActive: true },
+      where,
       include: this.includes(),
       orderBy: [{ isProtected: 'desc' }, { name: 'asc' }],
     });
@@ -47,6 +49,7 @@ export class RolesService {
       include: this.includes(),
     });
     if (!role) throw new NotFoundException('Role not found');
+    if (role.isProtected && user.role !== 'SUPER_ADMIN') throw new NotFoundException('Role not found');
     const userCount = await this.prisma.user.count({ where: { companyId: user.companyId, role: role.name } });
     return {
       id: role.id, name: role.name, label: role.label, description: role.description,
