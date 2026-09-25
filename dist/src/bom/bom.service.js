@@ -176,10 +176,21 @@ let BomService = class BomService {
             include: { product: { select: { code: true, name: true } }, _count: { select: { items: true } } },
         });
     }
+    async assertBomEditable(bom, user, action) {
+        if (bom.status === 'DRAFT')
+            return;
+        if (bom.status === 'PENDING_APPROVAL' && bom.createdBy === user.id) {
+            const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: bom.id, status: 'OPEN' } });
+            if (openQuery) {
+                await this.workflows.restartForEdit('BOM', bom.id, bom.bomNumber, user);
+                return;
+            }
+        }
+        throw new common_1.BadRequestException(`Can only ${action} while the BOM is DRAFT, or by its creator while a query on it is open`);
+    }
     async update(id, dto, user) {
         const bom = await this.findOne(id, user);
-        if (bom.status !== 'DRAFT')
-            throw new common_1.BadRequestException('Only DRAFT BOMs can be edited');
+        await this.assertBomEditable(bom, user, 'edit this BOM');
         const updated = await this.prisma.bom.update({
             where: { id }, data: Object.assign(Object.assign({}, dto), { updatedBy: user.id }),
             include: Object.assign({ product: { select: { code: true, name: true } } }, this.itemIncludes()),
@@ -459,8 +470,7 @@ let BomService = class BomService {
         const bom = client === this.prisma ? await this.findOne(bomId, user) : await client.bom.findFirst({ where: { id: bomId, companyId: user.companyId } });
         if (!bom)
             throw new common_1.NotFoundException('BOM not found');
-        if (bom.status !== 'DRAFT')
-            throw new common_1.BadRequestException('Can only add items to DRAFT BOMs');
+        await this.assertBomEditable(bom, user, 'add items to this BOM');
         const wastage = dto.wastagePercent || 0;
         const effectiveQty = dto.quantity * (1 + wastage / 100);
         let unitCost = dto.unitCost;
@@ -546,8 +556,7 @@ let BomService = class BomService {
     async updateItem(bomId, itemId, dto, user) {
         var _a, _b, _c, _d;
         const bom = await this.findOne(bomId, user);
-        if (bom.status !== 'DRAFT')
-            throw new common_1.BadRequestException('Can only edit items in DRAFT BOMs');
+        await this.assertBomEditable(bom, user, 'edit items in this BOM');
         const item = await this.prisma.bomItem.findFirst({ where: { id: itemId, bomId } });
         if (!item)
             throw new common_1.NotFoundException('BOM item not found');
@@ -565,8 +574,7 @@ let BomService = class BomService {
     }
     async removeItem(bomId, itemId, user) {
         const bom = await this.findOne(bomId, user);
-        if (bom.status !== 'DRAFT')
-            throw new common_1.BadRequestException('Can only remove items from DRAFT BOMs');
+        await this.assertBomEditable(bom, user, 'remove items from this BOM');
         const item = await this.prisma.bomItem.findFirst({ where: { id: itemId, bomId } });
         if (!item)
             throw new common_1.NotFoundException('BOM item not found');

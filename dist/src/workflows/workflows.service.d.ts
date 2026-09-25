@@ -142,6 +142,71 @@ export declare class WorkflowsService {
         message?: undefined;
         autoApproved?: undefined;
     }>;
+    restartForEdit(documentType: string, documentId: string, documentNumber: string, user: any): Promise<{
+        requiresApproval: boolean;
+        message: string;
+        autoApproved: boolean;
+        request?: undefined;
+    } | {
+        requiresApproval: boolean;
+        request: {
+            workflow: {
+                name: string;
+                steps: {
+                    level: number;
+                    id: string;
+                    companyId: string;
+                    isActive: boolean;
+                    isTestData: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    createdBy: string | null;
+                    updatedBy: string | null;
+                    stepName: string;
+                    approverUserId: string | null;
+                    timeoutHours: number | null;
+                    workflowId: string;
+                }[];
+            };
+            actions: {
+                level: number;
+                id: string;
+                companyId: string;
+                isActive: boolean;
+                isTestData: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                createdBy: string | null;
+                updatedBy: string | null;
+                comments: string | null;
+                action: string;
+                actionBy: string;
+                actionDate: Date;
+                requestId: string;
+            }[];
+        } & {
+            id: string;
+            companyId: string;
+            isActive: boolean;
+            isTestData: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            createdBy: string | null;
+            updatedBy: string | null;
+            status: string;
+            documentType: string;
+            requestedBy: string;
+            remarks: string | null;
+            documentId: string;
+            documentNumber: string;
+            amount: number | null;
+            currentLevel: number;
+            totalLevels: number;
+            workflowId: string | null;
+        };
+        message?: undefined;
+        autoApproved?: undefined;
+    }>;
     act(requestId: string, dto: ApproveRejectDto, user: any): Promise<{
         workflow: {
             name: string;

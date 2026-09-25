@@ -136,6 +136,30 @@ export class WorkflowsService {
     return { requiresApproval: true, request };
   }
 
+  // Called when a document under review is edited (currently: a BOM,
+  // by its creator, while an open query flagged something to fix). The
+  // in-progress chain is cancelled - not deleted, so its history stays
+  // visible - and a brand new request starts fresh at level 1, so every
+  // approver reviews the corrected content rather than resuming from
+  // wherever the old, now-outdated chain had gotten to.
+  async restartForEdit(documentType: string, documentId: string, documentNumber: string, user: any) {
+    const existing = await this.prisma.approvalRequest.findFirst({
+      where: { companyId: user.companyId, documentType, documentId, status: 'PENDING' },
+    });
+    if (existing) {
+      await this.prisma.approvalRequest.update({
+        where: { id: existing.id },
+        data: { status: 'CANCELLED', updatedBy: user.id },
+      });
+      await this.audit.log({
+        tableName: 'approval_requests', recordId: existing.id, action: 'UPDATE',
+        newValues: { status: 'CANCELLED', reason: 'Document edited after a query - chain restarted' },
+        changedBy: user.id,
+      });
+    }
+    return this.submit({ documentType, documentId, documentNumber }, user);
+  }
+
   async act(requestId: string, dto: ApproveRejectDto, user: any) {
     const request = await this.prisma.approvalRequest.findFirst({
       where: { id: requestId, companyId: user.companyId },

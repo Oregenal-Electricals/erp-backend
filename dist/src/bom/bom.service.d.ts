@@ -258,6 +258,7 @@ export declare class BomService {
         sourceBomId: string | null;
         totalCost: number | null;
     })[]>;
+    private assertBomEditable;
     update(id: string, dto: UpdateBomDto, user: any): Promise<{
         items: {
             id: string;

@@ -195,9 +195,27 @@ export class BomService {
     });
   }
 
+  // Normally only a DRAFT BOM can be edited. The one exception: the
+  // creator can still edit it while it's PENDING_APPROVAL, but only while
+  // a query on it is genuinely open - that's the signal something needs
+  // fixing. The moment they do, the in-progress chain is restarted from
+  // level 1 so every approver reviews the corrected content, not the
+  // version that prompted the question in the first place.
+  private async assertBomEditable(bom: any, user: any, action: string) {
+    if (bom.status === 'DRAFT') return;
+    if (bom.status === 'PENDING_APPROVAL' && bom.createdBy === user.id) {
+      const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: bom.id, status: 'OPEN' } });
+      if (openQuery) {
+        await this.workflows.restartForEdit('BOM', bom.id, bom.bomNumber, user);
+        return;
+      }
+    }
+    throw new BadRequestException(`Can only ${action} while the BOM is DRAFT, or by its creator while a query on it is open`);
+  }
+
   async update(id: string, dto: UpdateBomDto, user: any) {
     const bom = await this.findOne(id, user);
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Only DRAFT BOMs can be edited');
+    await this.assertBomEditable(bom, user, 'edit this BOM');
     const updated = await this.prisma.bom.update({
       where: { id }, data: { ...dto, updatedBy: user.id },
       include: { product: { select: { code: true, name: true } }, ...this.itemIncludes() },
@@ -520,7 +538,7 @@ export class BomService {
   async addItem(bomId: string, dto: CreateBomItemDto, user: any, client: any = this.prisma, options: { skipCostRecalc?: boolean; skipAudit?: boolean; defaultWarehouseId?: string } = {}) {
     const bom = client === this.prisma ? await this.findOne(bomId, user) : await client.bom.findFirst({ where: { id: bomId, companyId: user.companyId } });
     if (!bom) throw new NotFoundException('BOM not found');
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Can only add items to DRAFT BOMs');
+    await this.assertBomEditable(bom, user, 'add items to this BOM');
 
     const wastage = dto.wastagePercent || 0;
     const effectiveQty = dto.quantity * (1 + wastage / 100);
@@ -624,7 +642,7 @@ export class BomService {
 
   async updateItem(bomId: string, itemId: string, dto: UpdateBomItemDto, user: any) {
     const bom = await this.findOne(bomId, user);
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Can only edit items in DRAFT BOMs');
+    await this.assertBomEditable(bom, user, 'edit items in this BOM');
 
     const item = await this.prisma.bomItem.findFirst({ where: { id: itemId, bomId } });
     if (!item) throw new NotFoundException('BOM item not found');
@@ -645,7 +663,7 @@ export class BomService {
 
   async removeItem(bomId: string, itemId: string, user: any) {
     const bom = await this.findOne(bomId, user);
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Can only remove items from DRAFT BOMs');
+    await this.assertBomEditable(bom, user, 'remove items from this BOM');
 
     const item = await this.prisma.bomItem.findFirst({ where: { id: itemId, bomId } });
     if (!item) throw new NotFoundException('BOM item not found');

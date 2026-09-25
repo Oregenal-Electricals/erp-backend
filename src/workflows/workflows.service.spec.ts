@@ -218,4 +218,27 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
     const result = await service.findMyApprovals(superAdmin);
     expect(result.map((r: any) => r.id)).toEqual(['req-1', 'req-2']);
   });
+
+  it('CRITICAL: restartForEdit() cancels the existing PENDING request (preserving it, not deleting it) and starts a brand new one fresh at level 1', async () => {
+    prisma.approvalRequest.findFirst
+      .mockResolvedValueOnce({ id: 'old-req-1', status: 'PENDING' })
+      .mockResolvedValueOnce(null);
+    prisma.approvalRequest.create.mockResolvedValue({ id: 'new-req-1', currentLevel: 1, totalLevels: 4 });
+    const result = await service.restartForEdit('BOM', 'bom-1', 'GEN-0001', user);
+    expect(prisma.approvalRequest.update).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'old-req-1' }, data: expect.objectContaining({ status: 'CANCELLED' }),
+    }));
+    expect(prisma.approvalRequest.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ documentType: 'BOM', documentId: 'bom-1', currentLevel: 1 }),
+    }));
+    expect(result.requiresApproval).toBe(true);
+  });
+
+  it('restartForEdit() with no existing PENDING request just submits fresh - nothing to cancel', async () => {
+    prisma.approvalRequest.findFirst.mockResolvedValue(null);
+    prisma.approvalRequest.create.mockResolvedValue({ id: 'new-req-1', currentLevel: 1, totalLevels: 4 });
+    await service.restartForEdit('BOM', 'bom-1', 'GEN-0001', user);
+    expect(prisma.approvalRequest.update).not.toHaveBeenCalled();
+    expect(prisma.approvalRequest.create).toHaveBeenCalled();
+  });
 });

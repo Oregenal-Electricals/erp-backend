@@ -148,6 +148,23 @@ let WorkflowsService = class WorkflowsService {
         await this.audit.log({ tableName: 'approval_requests', recordId: request.id, action: 'CREATE', newValues: request, changedBy: user.id });
         return { requiresApproval: true, request };
     }
+    async restartForEdit(documentType, documentId, documentNumber, user) {
+        const existing = await this.prisma.approvalRequest.findFirst({
+            where: { companyId: user.companyId, documentType, documentId, status: 'PENDING' },
+        });
+        if (existing) {
+            await this.prisma.approvalRequest.update({
+                where: { id: existing.id },
+                data: { status: 'CANCELLED', updatedBy: user.id },
+            });
+            await this.audit.log({
+                tableName: 'approval_requests', recordId: existing.id, action: 'UPDATE',
+                newValues: { status: 'CANCELLED', reason: 'Document edited after a query - chain restarted' },
+                changedBy: user.id,
+            });
+        }
+        return this.submit({ documentType, documentId, documentNumber }, user);
+    }
     async act(requestId, dto, user) {
         var _a;
         const request = await this.prisma.approvalRequest.findFirst({

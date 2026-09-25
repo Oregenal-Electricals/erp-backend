@@ -24,8 +24,9 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
       bomQuery: { findFirst: jest.fn().mockResolvedValue(null), create: jest.fn().mockResolvedValue({ id: 'q-1' }) },
       bomItem: { createMany: jest.fn() },
       approvalRequest: { findFirst: jest.fn().mockResolvedValue(null) },
+      user: { findMany: jest.fn().mockResolvedValue([]) },
     };
-    workflows = { submit: jest.fn().mockResolvedValue({ requiresApproval: true }) };
+    workflows = { submit: jest.fn().mockResolvedValue({ requiresApproval: true }), restartForEdit: jest.fn().mockResolvedValue({ requiresApproval: true }) };
     service = new BomService(prisma, { log: jest.fn() } as any, { create: jest.fn() } as any, workflows);
   });
 
@@ -124,5 +125,25 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
       workflow: { steps: [{ level: 1, approverUserId: null }] },
     });
     await expect(service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'anyone', message: 'Hi' }, user)).rejects.toThrow(BadRequestException);
+  });
+
+  it('CRITICAL: update() blocks editing a PENDING_APPROVAL BOM when no query is open, even for the creator', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, status: 'PENDING_APPROVAL', createdBy: user.id });
+    prisma.bomQuery.findFirst.mockResolvedValue(null);
+    await expect(service.update('bom-1', {} as any, user)).rejects.toThrow(BadRequestException);
+  });
+
+  it('update() blocks a non-creator from editing even while a query on the BOM is open', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, status: 'PENDING_APPROVAL', createdBy: 'someone-else' });
+    prisma.bomQuery.findFirst.mockResolvedValue({ id: 'q-1', status: 'OPEN' });
+    await expect(service.update('bom-1', {} as any, user)).rejects.toThrow(BadRequestException);
+  });
+
+  it('CRITICAL: update() allows the creator to edit a PENDING_APPROVAL BOM while a query is open, and restarts the approval chain from level 1', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, status: 'PENDING_APPROVAL', createdBy: user.id });
+    prisma.bomQuery.findFirst.mockResolvedValue({ id: 'q-1', status: 'OPEN' });
+    prisma.bom.update.mockResolvedValue({ ...draftBom, status: 'PENDING_APPROVAL' });
+    await service.update('bom-1', { description: 'fixed' } as any, user);
+    expect(workflows.restartForEdit).toHaveBeenCalledWith('BOM', 'bom-1', 'GEN-0001', user);
   });
 });
