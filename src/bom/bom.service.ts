@@ -254,12 +254,21 @@ export class BomService {
   async raiseQuery(dto: { bomId: string; raisedToUserId: string; message: string }, user: any) {
     const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
     if (!bom) throw new NotFoundException('BOM not found');
-    // Any of the three parties on this BOM's chain - creator, verifier,
-    // approver - can ask any of the others a question. Whoever raises it
-    // is automatically excluded as a target, so nobody can query themselves.
-    const validTargets = [bom.createdBy, bom.verifiedBy, bom.approvedBy].filter((id) => id && id !== user.id);
+    // Valid targets are the creator plus every level's actually assigned
+    // approver in the live approval chain - not the old fixed
+    // verifiedBy/approvedBy fields, which the workflow engine replaced and
+    // barely ever populate anymore. An unassigned level has no single
+    // person to target. Whoever raises it is automatically excluded, so
+    // nobody can query themselves.
+    const request = await this.prisma.approvalRequest.findFirst({
+      where: { companyId: user.companyId, documentType: 'BOM', documentId: dto.bomId },
+      orderBy: { createdAt: 'desc' },
+      include: { workflow: { include: { steps: true } } },
+    });
+    const chainApproverIds = (request?.workflow?.steps || []).map((s) => s.approverUserId).filter(Boolean) as string[];
+    const validTargets = [bom.createdBy, ...chainApproverIds].filter((id) => id && id !== user.id);
     if (!validTargets.includes(dto.raisedToUserId)) {
-      throw new BadRequestException('Queries on this BOM can only be raised to its creator, verifier, or approver');
+      throw new BadRequestException('Queries on this BOM can only be raised to its creator or an assigned approver in the approval chain');
     }
     const created = await this.prisma.bomQuery.create({
       data: {

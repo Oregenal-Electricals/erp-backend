@@ -21,8 +21,9 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
         findMany: jest.fn().mockResolvedValue([]),
         create: jest.fn(),
       },
-      bomQuery: { findFirst: jest.fn().mockResolvedValue(null) },
+      bomQuery: { findFirst: jest.fn().mockResolvedValue(null), create: jest.fn().mockResolvedValue({ id: 'q-1' }) },
       bomItem: { createMany: jest.fn() },
+      approvalRequest: { findFirst: jest.fn().mockResolvedValue(null) },
     };
     workflows = { submit: jest.fn().mockResolvedValue({ requiresApproval: true }) };
     service = new BomService(prisma, { log: jest.fn() } as any, { create: jest.fn() } as any, workflows);
@@ -97,5 +98,31 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
       where: expect.objectContaining({ sourceBomId: 'bom-1', status: 'PENDING_APPROVAL' }),
       data: expect.objectContaining({ status: 'REJECTED' }),
     }));
+  });
+
+  it('CRITICAL: raiseQuery() allows targeting any assigned approver in the live approval chain, not just the old fixed verifiedBy/approvedBy fields', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
+    prisma.approvalRequest.findFirst.mockResolvedValue({
+      workflow: { steps: [{ level: 1, approverUserId: 'qm-1' }, { level: 2, approverUserId: 'plant-mgr-1' }] },
+    });
+    const result = await service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'plant-mgr-1', message: 'Please check this' }, user);
+    expect(result.id).toBe('q-1');
+    expect(prisma.bomQuery.create).toHaveBeenCalled();
+  });
+
+  it('raiseQuery() still rejects a target who is neither the creator nor an assigned approver anywhere in the chain', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
+    prisma.approvalRequest.findFirst.mockResolvedValue({
+      workflow: { steps: [{ level: 1, approverUserId: 'qm-1' }] },
+    });
+    await expect(service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'random-person', message: 'Hi' }, user)).rejects.toThrow(BadRequestException);
+  });
+
+  it('raiseQuery() skips an unassigned level - no valid target from a level open to anyone', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
+    prisma.approvalRequest.findFirst.mockResolvedValue({
+      workflow: { steps: [{ level: 1, approverUserId: null }] },
+    });
+    await expect(service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'anyone', message: 'Hi' }, user)).rejects.toThrow(BadRequestException);
   });
 });

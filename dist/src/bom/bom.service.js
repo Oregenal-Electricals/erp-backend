@@ -220,12 +220,19 @@ let BomService = class BomService {
         return updated;
     }
     async raiseQuery(dto, user) {
+        var _a;
         const bom = await this.prisma.bom.findFirst({ where: { id: dto.bomId, companyId: user.companyId } });
         if (!bom)
             throw new common_1.NotFoundException('BOM not found');
-        const validTargets = [bom.createdBy, bom.verifiedBy, bom.approvedBy].filter((id) => id && id !== user.id);
+        const request = await this.prisma.approvalRequest.findFirst({
+            where: { companyId: user.companyId, documentType: 'BOM', documentId: dto.bomId },
+            orderBy: { createdAt: 'desc' },
+            include: { workflow: { include: { steps: true } } },
+        });
+        const chainApproverIds = (((_a = request === null || request === void 0 ? void 0 : request.workflow) === null || _a === void 0 ? void 0 : _a.steps) || []).map((s) => s.approverUserId).filter(Boolean);
+        const validTargets = [bom.createdBy, ...chainApproverIds].filter((id) => id && id !== user.id);
         if (!validTargets.includes(dto.raisedToUserId)) {
-            throw new common_1.BadRequestException('Queries on this BOM can only be raised to its creator, verifier, or approver');
+            throw new common_1.BadRequestException('Queries on this BOM can only be raised to its creator or an assigned approver in the approval chain');
         }
         const created = await this.prisma.bomQuery.create({
             data: {
