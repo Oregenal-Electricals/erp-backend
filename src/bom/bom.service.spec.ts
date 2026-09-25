@@ -101,9 +101,10 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
     }));
   });
 
-  it('CRITICAL: raiseQuery() allows targeting any assigned approver in the live approval chain, not just the old fixed verifiedBy/approvedBy fields', async () => {
+  it('CRITICAL: raiseQuery() allows targeting an assigned approver whose level has already received the request (at or before the current level)', async () => {
     prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
     prisma.approvalRequest.findFirst.mockResolvedValue({
+      currentLevel: 2,
       workflow: { steps: [{ level: 1, approverUserId: 'qm-1' }, { level: 2, approverUserId: 'plant-mgr-1' }] },
     });
     const result = await service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'plant-mgr-1', message: 'Please check this' }, user);
@@ -111,9 +112,19 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
     expect(prisma.bomQuery.create).toHaveBeenCalled();
   });
 
+  it('CRITICAL: raiseQuery() rejects a level further down the chain that has not received the request yet - nobody there to ask', async () => {
+    prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
+    prisma.approvalRequest.findFirst.mockResolvedValue({
+      currentLevel: 1,
+      workflow: { steps: [{ level: 1, approverUserId: 'qm-1' }, { level: 2, approverUserId: 'plant-mgr-1' }] },
+    });
+    await expect(service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'plant-mgr-1', message: 'Hi' }, user)).rejects.toThrow(BadRequestException);
+  });
+
   it('raiseQuery() still rejects a target who is neither the creator nor an assigned approver anywhere in the chain', async () => {
     prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
     prisma.approvalRequest.findFirst.mockResolvedValue({
+      currentLevel: 1,
       workflow: { steps: [{ level: 1, approverUserId: 'qm-1' }] },
     });
     await expect(service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'random-person', message: 'Hi' }, user)).rejects.toThrow(BadRequestException);
@@ -122,6 +133,7 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
   it('raiseQuery() skips an unassigned level - no valid target from a level open to anyone', async () => {
     prisma.bom.findFirst.mockResolvedValue({ ...draftBom, createdBy: 'creator-1' });
     prisma.approvalRequest.findFirst.mockResolvedValue({
+      currentLevel: 1,
       workflow: { steps: [{ level: 1, approverUserId: null }] },
     });
     await expect(service.raiseQuery({ bomId: 'bom-1', raisedToUserId: 'anyone', message: 'Hi' }, user)).rejects.toThrow(BadRequestException);

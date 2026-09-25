@@ -283,7 +283,7 @@ export class BomService {
       orderBy: { createdAt: 'desc' },
       include: { workflow: { include: { steps: true } } },
     });
-    const chainApproverIds = (request?.workflow?.steps || []).map((s) => s.approverUserId).filter(Boolean) as string[];
+    const chainApproverIds = (request?.workflow?.steps || []).filter((s) => s.level <= (request?.currentLevel ?? 0)).map((s) => s.approverUserId).filter(Boolean) as string[];
     const validTargets = [bom.createdBy, ...chainApproverIds].filter((id) => id && id !== user.id);
     if (!validTargets.includes(dto.raisedToUserId)) {
       throw new BadRequestException('Queries on this BOM can only be raised to its creator or an assigned approver in the approval chain');
