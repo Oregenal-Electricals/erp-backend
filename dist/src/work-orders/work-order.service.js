@@ -150,8 +150,8 @@ let WorkOrderService = class WorkOrderService {
         const bom = await this.prisma.bom.findFirst({ where: { id: wo.bomId, companyId: wo.companyId } });
         if (!bom)
             throw new common_1.NotFoundException('Linked BOM not found');
-        if (!['VERIFIED', 'APPROVED'].includes(bom.status)) {
-            throw new common_1.BadRequestException(`Linked BOM ${bom.bomNumber} is ${bom.status} - only a VERIFIED or APPROVED BOM can be released for production`);
+        if (bom.status !== 'APPROVED') {
+            throw new common_1.BadRequestException(`Linked BOM ${bom.bomNumber} is ${bom.status} - only an APPROVED BOM can be released for production`);
         }
         const materialCheck = await this.checkMaterialAvailability(wo, bom);
         const blockOnShortage = (await this.settings.getSettingValue('WO_BLOCK_RELEASE_ON_SHORTAGE', 'false')) === 'true';

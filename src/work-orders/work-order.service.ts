@@ -154,8 +154,11 @@ export class WorkOrderService {
     if (!wo.bomId) throw new BadRequestException('A BOM must be attached before this Work Order can be released');
     const bom = await this.prisma.bom.findFirst({ where: { id: wo.bomId, companyId: wo.companyId } });
     if (!bom) throw new NotFoundException('Linked BOM not found');
-    if (!['VERIFIED', 'APPROVED'].includes(bom.status)) {
-      throw new BadRequestException(`Linked BOM ${bom.bomNumber} is ${bom.status} - only a VERIFIED or APPROVED BOM can be released for production`);
+    // BOM's old fixed Verify->Approve step was replaced by the configurable
+    // multi-level approval workflow - a BOM is never "VERIFIED" anymore,
+    // only DRAFT, PENDING_APPROVAL, APPROVED, REJECTED or OBSOLETE.
+    if (bom.status !== 'APPROVED') {
+      throw new BadRequestException(`Linked BOM ${bom.bomNumber} is ${bom.status} - only an APPROVED BOM can be released for production`);
     }
 
     // Material availability - read-only check, never mutates inventory.
