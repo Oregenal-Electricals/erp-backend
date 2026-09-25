@@ -308,10 +308,10 @@ export class WorkflowsService {
     for (const step of req.workflow?.steps || []) if (step.approverUserId) userIds.add(step.approverUserId);
     for (const action of req.actions || []) userIds.add(action.actionBy);
     const users = userIds.size > 0
-      ? await this.prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, firstName: true, lastName: true, email: true } })
+      ? await this.prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, firstName: true, lastName: true, email: true, role: true } })
       : [];
     const names: Record<string, any> = {};
-    for (const u of users) names[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email };
+    for (const u of users) names[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role };
     return { ...req, actorNames: names };
   }
 

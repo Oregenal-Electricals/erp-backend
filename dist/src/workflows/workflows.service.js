@@ -312,11 +312,11 @@ let WorkflowsService = class WorkflowsService {
         for (const action of req.actions || [])
             userIds.add(action.actionBy);
         const users = userIds.size > 0
-            ? await this.prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, firstName: true, lastName: true, email: true } })
+            ? await this.prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, firstName: true, lastName: true, email: true, role: true } })
             : [];
         const names = {};
         for (const u of users)
-            names[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email };
+            names[u.id] = { firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role };
         return Object.assign(Object.assign({}, req), { actorNames: names });
     }
     async getStats(user) {
