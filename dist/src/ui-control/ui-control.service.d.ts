@@ -148,6 +148,7 @@ export declare class UiControlService {
     getPageElements(companyId: string): Promise<Record<string, any[]>>;
     private buildRoleAwareSidebar;
     getMySidebar(companyId: string, userId: string, allRoles: string[]): Promise<any[]>;
+    getMyPageElements(companyId: string, userId: string, allRoles: string[], page: string): Promise<Record<string, boolean>>;
     upsertOverride(companyId: string, dto: UpsertOverrideDto, userId: string): Promise<{
         id: string;
         companyId: string;

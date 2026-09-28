@@ -34,6 +34,9 @@ let UiControlController = class UiControlController {
     async mySidebar(user) {
         return this.service.getMySidebar(user.companyId, user.id, rolesOf(user));
     }
+    async myPageElements(user, page) {
+        return this.service.getMyPageElements(user.companyId, user.id, rolesOf(user), typeof page === 'string' ? page : '');
+    }
     async previewSidebar(user, roleName) {
         return this.service.getSidebarForRole(user.companyId, roleName);
     }
@@ -83,6 +86,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UiControlController.prototype, "mySidebar", null);
+__decorate([
+    (0, common_1.Get)('my-page-elements'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UiControlController.prototype, "myPageElements", null);
 __decorate([
     (0, common_1.Get)('preview-sidebar'),
     (0, common_1.UseGuards)(permissions_guard_1.PermissionsGuard),

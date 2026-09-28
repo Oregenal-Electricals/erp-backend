@@ -34,6 +34,14 @@ export class UiControlController {
     return this.service.getMySidebar(user.companyId, user.id, rolesOf(user));
   }
 
+  // Any logged-in user can read their OWN effective visibility for one page's
+  // controllable elements (buttons/columns/fields). No admin permission needed:
+  // it only ever returns the caller's own resolved answer, never other roles' settings.
+  @Get('my-page-elements')
+  async myPageElements(@CurrentUser() user: any, @Query('page') page?: string) {
+    return this.service.getMyPageElements(user.companyId, user.id, rolesOf(user), typeof page === 'string' ? page : '');
+  }
+
   // ── Everything below requires UI_CONTROL_MANAGE ──
   @Get('preview-sidebar')
   @UseGuards(PermissionsGuard) @RequirePermissions(Permission.UI_CONTROL_MANAGE)

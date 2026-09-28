@@ -172,6 +172,21 @@ let UiControlService = class UiControlService {
         const visMap = await this.getEffectiveVisibility(companyId, userId, allRoles);
         return this.buildRoleAwareSidebar(elements, (key) => visMap[key]);
     }
+    async getMyPageElements(companyId, userId, allRoles, page) {
+        var _a, _b;
+        if (!page)
+            return {};
+        const elements = await this.prisma.uiControlElement.findMany({
+            where: { companyId, isActive: true, page, elementType: { in: ['FIELD', 'COLUMN', 'BUTTON', 'TAB', 'SECTION', 'STAT_CARD'] } },
+            select: { key: true },
+        });
+        const isSuper = allRoles.includes('SUPER_ADMIN');
+        const visMap = isSuper ? {} : await this.getEffectiveVisibility(companyId, userId, allRoles);
+        const result = {};
+        for (const el of elements)
+            result[el.key] = isSuper ? true : ((_b = (_a = visMap[el.key]) === null || _a === void 0 ? void 0 : _a.visible) !== null && _b !== void 0 ? _b : true);
+        return result;
+    }
     async upsertOverride(companyId, dto, userId) {
         var _a, _b;
         const existing = await this.prisma.uiControlOverride.findFirst({

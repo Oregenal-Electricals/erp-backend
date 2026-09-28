@@ -11,6 +11,7 @@ export declare class UiControlController {
         page?: string | null;
     }>>;
     mySidebar(user: any): Promise<any[]>;
+    myPageElements(user: any, page?: string): Promise<Record<string, boolean>>;
     previewSidebar(user: any, roleName: string): Promise<any[]>;
     listElements(user: any, module?: string): Promise<({
         overrides: {
