@@ -135,6 +135,18 @@ let CustomerPoService = class CustomerPoService {
         if (existing.status !== 'RECEIVED') {
             throw new common_1.BadRequestException(`Cannot edit a CPO once it is ${existing.status}. Cancel and create a new one instead.`);
         }
+        if (dto.quotationId) {
+            const qt = await this.prisma.quotation.findFirst({ where: { id: dto.quotationId, companyId: user.companyId } });
+            if (!qt)
+                throw new common_1.NotFoundException('Quotation not found');
+            if (qt.status !== 'ACCEPTED')
+                throw new common_1.BadRequestException('Quotation must be ACCEPTED to link to a CPO');
+        }
+        if (dto.customerId) {
+            const cust = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
+            if (!cust)
+                throw new common_1.NotFoundException('Customer not found');
+        }
         const customerPoNumber = dto.poType === 'VERBAL'
             ? existing.customerPoNumber.startsWith('VERBAL-') ? existing.customerPoNumber : `VERBAL-${existing.cpoNumber}`
             : dto.customerPoNumber;
@@ -151,27 +163,35 @@ let CustomerPoService = class CustomerPoService {
         const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
         const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
         const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
-        await this.prisma.customerPoItem.deleteMany({ where: { cpoId: id } });
-        const updated = await this.prisma.customerPo.update({
-            where: { id },
-            data: {
-                customerPoNumber,
-                poType: dto.poType,
-                verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : null,
-                verbalConfirmedDate: dto.poType === 'VERBAL' && dto.verbalConfirmedDate ? new Date(dto.verbalConfirmedDate) : null,
-                quotationId: dto.quotationId,
-                customerId: dto.customerId || undefined,
-                customerName: dto.customerName, customerEmail: dto.customerEmail,
-                customerPhone: dto.customerPhone, deliveryAddress: dto.deliveryAddress,
-                poDate: new Date(dto.poDate), deliveryDate: new Date(dto.deliveryDate),
-                currency: dto.currency || 'INR', remarks: dto.remarks,
-                subtotal: Math.round(subtotal * 100) / 100,
-                totalGst: Math.round(totalGst * 100) / 100,
-                totalAmount: Math.round(totalAmount * 100) / 100,
-                updatedBy: user.id,
-                items: { create: calcItems },
-            },
-            include: this.includes(),
+        const updated = await this.prisma.$transaction(async (tx) => {
+            const current = await tx.customerPo.findFirst({ where: { id, companyId: user.companyId } });
+            if (!current)
+                throw new common_1.NotFoundException('CPO not found');
+            if (current.status !== 'RECEIVED') {
+                throw new common_1.BadRequestException(`Cannot edit a CPO once it is ${current.status}. Cancel and create a new one instead.`);
+            }
+            await tx.customerPoItem.deleteMany({ where: { cpoId: id } });
+            return tx.customerPo.update({
+                where: { id },
+                data: {
+                    customerPoNumber,
+                    poType: dto.poType,
+                    verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : null,
+                    verbalConfirmedDate: dto.poType === 'VERBAL' && dto.verbalConfirmedDate ? new Date(dto.verbalConfirmedDate) : null,
+                    quotationId: dto.quotationId,
+                    customerId: dto.customerId || undefined,
+                    customerName: dto.customerName, customerEmail: dto.customerEmail,
+                    customerPhone: dto.customerPhone, deliveryAddress: dto.deliveryAddress,
+                    poDate: new Date(dto.poDate), deliveryDate: new Date(dto.deliveryDate),
+                    currency: dto.currency || 'INR', remarks: dto.remarks,
+                    subtotal: Math.round(subtotal * 100) / 100,
+                    totalGst: Math.round(totalGst * 100) / 100,
+                    totalAmount: Math.round(totalAmount * 100) / 100,
+                    updatedBy: user.id,
+                    items: { create: calcItems },
+                },
+                include: this.includes(),
+            });
         });
         await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         try {

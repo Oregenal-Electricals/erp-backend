@@ -351,4 +351,31 @@ describe('SalesOrdersService - DSP-001', () => {
       expect(prisma.stockLedger).toBeUndefined();
     });
   });
+
+  describe('Price Integrity (rule 10)', () => {
+    it("createFromCpo() copies the CPO item prices onto the Sales Order unchanged", async () => {
+      const cpoRecord = { id: 'cpo-2', companyId: 'company-1', customerName: 'ABC Lighting', currency: 'INR', deliveryDate: new Date(), cpoNumber: 'CPO-2026-0002' };
+      const cpoItems = [{ id: 'cpoitem-1', itemCode: 'BULB-9W', itemName: '9W LED Bulb', qty: 500, uom: 'PCS', unitPrice: 95, discount: 0, gstRate: 18 }];
+      const so = await service.createFromCpo(cpoRecord, cpoItems, user);
+      expect(so.items[0].unitPrice).toBe(95);
+      expect(so.status).toBe('CONFIRMED');
+    });
+
+    it('confirm() never touches line prices - it only flips status', async () => {
+      const created = await service.create({ cpoId: 'cpo-3', deliveryDate: '2026-12-01', items: [fgLine({ unitPrice: 150 })] } as any, user);
+      const confirmed = await service.confirm(created.id, user);
+      expect(confirmed.items[0].unitPrice).toBe(150);
+    });
+
+    it('cancel() never touches line prices - it only flips status', async () => {
+      const created = await service.create({ cpoId: 'cpo-4', deliveryDate: '2026-12-01', items: [fgLine({ unitPrice: 150 })] } as any, user);
+      await service.confirm(created.id, user);
+      const cancelled = await service.cancel(created.id, { cancelReason: 'customer backed out' } as any, user);
+      expect(cancelled.items[0].unitPrice).toBe(150);
+    });
+
+    it('has no update() method that could rewrite a confirmed line price', () => {
+      expect((service as any).update).toBeUndefined();
+    });
+  });
 });

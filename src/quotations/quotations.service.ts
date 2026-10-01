@@ -97,24 +97,39 @@ export class QuotationsService {
 
     const totals = this.calcTotals(calcItems);
 
-    const revised = await this.prisma.quotation.create({
-      data: {
-        quotationNumber: original.quotationNumber,
-        revision: original.revision + 1,
-        leadId: original.leadId, customerName: dto.customerName || original.customerName,
-        customerEmail: dto.customerEmail, customerPhone: dto.customerPhone,
-        customerAddress: dto.customerAddress,
-        validUntil: new Date(dto.validUntil),
-        currency: original.currency,
-        termsConditions: dto.termsConditions, notes: dto.notes,
-        ...totals,
-        companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
-        items: { create: calcItems },
-      },
-      include: this.includes(),
+    // Superseding the old SENT revision, in the same transaction as
+    // creating the new one, closes the gap where an older revision -
+    // still sitting at SENT with its own prices - could be Accepted
+    // after a newer revision already exists. A REJECTED original stays
+    // REJECTED; it was never acceptable to begin with.
+    const wasSent = original.status === 'SENT';
+    const revised = await this.prisma.$transaction(async (tx) => {
+      if (wasSent) {
+        await tx.quotation.update({ where: { id: original.id }, data: { status: 'SUPERSEDED', updatedBy: user.id } });
+      }
+
+      return tx.quotation.create({
+        data: {
+          quotationNumber: original.quotationNumber,
+          revision: original.revision + 1,
+          leadId: original.leadId, customerName: dto.customerName || original.customerName,
+          customerEmail: dto.customerEmail, customerPhone: dto.customerPhone,
+          customerAddress: dto.customerAddress,
+          validUntil: new Date(dto.validUntil),
+          currency: original.currency,
+          termsConditions: dto.termsConditions, notes: dto.notes,
+          ...totals,
+          companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+          items: { create: calcItems },
+        },
+        include: this.includes(),
+      });
     });
 
     await this.audit.log({ tableName: 'quotations', recordId: revised.id, action: 'CREATE', newValues: revised, changedBy: user.id });
+    if (wasSent) {
+      await this.audit.log({ tableName: 'quotations', recordId: original.id, action: 'UPDATE', newValues: { status: 'SUPERSEDED' }, changedBy: user.id });
+    }
     return revised;
   }
 
@@ -135,6 +150,9 @@ export class QuotationsService {
     const qt = await this.prisma.quotation.findFirst({ where: { id, companyId: user.companyId } });
     if (!qt) throw new NotFoundException('Quotation not found');
     if (qt.status !== 'SENT') throw new BadRequestException('Only SENT quotations can be accepted');
+    if (qt.validUntil < new Date()) {
+      throw new BadRequestException(`This quotation expired on ${qt.validUntil.toISOString().slice(0, 10)} - create a new revision with an updated validity date instead.`);
+    }
 
     const updated = await this.prisma.quotation.update({
       where: { id }, data: { status: 'ACCEPTED', acceptedDate: new Date(), updatedBy: user.id },

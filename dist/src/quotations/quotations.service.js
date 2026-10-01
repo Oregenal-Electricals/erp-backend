@@ -80,11 +80,20 @@ let QuotationsService = class QuotationsService {
             return (Object.assign(Object.assign({ itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id }));
         });
         const totals = this.calcTotals(calcItems);
-        const revised = await this.prisma.quotation.create({
-            data: Object.assign(Object.assign({ quotationNumber: original.quotationNumber, revision: original.revision + 1, leadId: original.leadId, customerName: dto.customerName || original.customerName, customerEmail: dto.customerEmail, customerPhone: dto.customerPhone, customerAddress: dto.customerAddress, validUntil: new Date(dto.validUntil), currency: original.currency, termsConditions: dto.termsConditions, notes: dto.notes }, totals), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id, items: { create: calcItems } }),
-            include: this.includes(),
+        const wasSent = original.status === 'SENT';
+        const revised = await this.prisma.$transaction(async (tx) => {
+            if (wasSent) {
+                await tx.quotation.update({ where: { id: original.id }, data: { status: 'SUPERSEDED', updatedBy: user.id } });
+            }
+            return tx.quotation.create({
+                data: Object.assign(Object.assign({ quotationNumber: original.quotationNumber, revision: original.revision + 1, leadId: original.leadId, customerName: dto.customerName || original.customerName, customerEmail: dto.customerEmail, customerPhone: dto.customerPhone, customerAddress: dto.customerAddress, validUntil: new Date(dto.validUntil), currency: original.currency, termsConditions: dto.termsConditions, notes: dto.notes }, totals), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id, items: { create: calcItems } }),
+                include: this.includes(),
+            });
         });
         await this.audit.log({ tableName: 'quotations', recordId: revised.id, action: 'CREATE', newValues: revised, changedBy: user.id });
+        if (wasSent) {
+            await this.audit.log({ tableName: 'quotations', recordId: original.id, action: 'UPDATE', newValues: { status: 'SUPERSEDED' }, changedBy: user.id });
+        }
         return revised;
     }
     async send(id, user) {
@@ -106,6 +115,9 @@ let QuotationsService = class QuotationsService {
             throw new common_1.NotFoundException('Quotation not found');
         if (qt.status !== 'SENT')
             throw new common_1.BadRequestException('Only SENT quotations can be accepted');
+        if (qt.validUntil < new Date()) {
+            throw new common_1.BadRequestException(`This quotation expired on ${qt.validUntil.toISOString().slice(0, 10)} - create a new revision with an updated validity date instead.`);
+        }
         const updated = await this.prisma.quotation.update({
             where: { id }, data: { status: 'ACCEPTED', acceptedDate: new Date(), updatedBy: user.id },
             include: this.includes(),
