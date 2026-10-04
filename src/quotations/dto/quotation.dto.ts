@@ -14,6 +14,7 @@ export class QuotationItemDto {
 
 export class CreateQuotationDto {
   @IsOptional() @IsString() leadId?: string;
+  @IsString() customerId: string;
   @IsString() customerName: string;
   @IsOptional() @IsString() customerEmail?: string;
   @IsOptional() @IsString() customerPhone?: string;

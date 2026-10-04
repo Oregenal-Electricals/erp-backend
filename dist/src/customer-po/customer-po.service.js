@@ -54,6 +54,9 @@ let CustomerPoService = class CustomerPoService {
         };
     }
     async create(dto, user) {
+        const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
+        if (!customer)
+            throw new common_1.NotFoundException('Customer not found');
         if (dto.quotationId) {
             const qt = await this.prisma.quotation.findFirst({ where: { id: dto.quotationId, companyId: user.companyId } });
             if (!qt)
@@ -218,6 +221,7 @@ let CustomerPoService = class CustomerPoService {
             verbalConfirmedBy: dto.poType === 'VERBAL' ? dto.verbalConfirmedBy : undefined,
             verbalConfirmedDate: dto.poType === 'VERBAL' ? dto.verbalConfirmedDate : undefined,
             quotationId: undefined,
+            customerId: original.customerId,
             customerName: original.customerName,
             customerEmail: original.customerEmail || undefined,
             customerPhone: original.customerPhone || undefined,

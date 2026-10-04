@@ -19,7 +19,7 @@ describe('CustomerPoService - Price Integrity', () => {
 
   function createDto(overrides: any = {}) {
     return {
-      poType: 'WRITTEN', customerPoNumber: 'PO-001', customerName: 'Havells',
+      poType: 'WRITTEN', customerPoNumber: 'PO-001', customerId: customer.id, customerName: 'Havells',
       poDate: '2026-01-01', deliveryDate: '2026-02-01', currency: 'INR',
       items: [cpoItem()],
       ...overrides,

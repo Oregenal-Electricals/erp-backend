@@ -67,6 +67,10 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], CreateQuotationDto.prototype, "customerId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateQuotationDto.prototype, "customerName", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

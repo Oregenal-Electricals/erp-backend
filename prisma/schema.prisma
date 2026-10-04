@@ -5256,6 +5256,8 @@ model Quotation {
   leadId            String?
   lead              Lead?     @relation(fields: [leadId], references: [id])
   customerName      String
+  customerId        String?   @map("customer_id")
+  customer          Customer? @relation(fields: [customerId], references: [id])
   customerEmail     String?
   customerPhone     String?
   customerAddress   String?
@@ -5388,6 +5390,8 @@ model Customer {
   contacts   CustomerContact[]
   gstNumbers CustomerGst[]
   customerPos       CustomerPo[]
+  quotations        Quotation[]
+  salesOrders        SalesOrder[]
 
   @@unique([companyId, code])
   @@map("customers")
@@ -5494,6 +5498,8 @@ model SalesOrder {
   cpoId           String
   cpo             CustomerPo @relation(fields: [cpoId], references: [id])
   customerName    String
+  customerId      String?   @map("customer_id")
+  customer        Customer? @relation(fields: [customerId], references: [id])
   deliveryDate    DateTime
   currency        String    @default("INR")
   subtotal        Float     @default(0)

@@ -49,6 +49,9 @@ export class QuotationsService {
   }
 
   async create(dto: CreateQuotationDto, user: any) {
+    const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
+    if (!customer) throw new NotFoundException('Customer not found');
+
     const quotationNumber = await this.generateNumber(user.companyId);
 
     // Calculate items
@@ -65,7 +68,7 @@ export class QuotationsService {
     const quotation = await this.prisma.quotation.create({
       data: {
         quotationNumber, revision: 0,
-        leadId: dto.leadId, customerName: dto.customerName,
+        leadId: dto.leadId, customerId: dto.customerId, customerName: dto.customerName,
         customerEmail: dto.customerEmail, customerPhone: dto.customerPhone,
         customerAddress: dto.customerAddress,
         validUntil: new Date(dto.validUntil),
@@ -86,6 +89,9 @@ export class QuotationsService {
     const original = await this.prisma.quotation.findFirst({ where: { id, companyId: user.companyId } });
     if (!original) throw new NotFoundException('Quotation not found');
     if (!['SENT','REJECTED'].includes(original.status)) throw new BadRequestException('Can only revise SENT or REJECTED quotations');
+
+    const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
+    if (!customer) throw new NotFoundException('Customer not found');
 
     const calcItems = dto.items.map(item => ({
       itemCode: item.itemCode, itemName: item.itemName, description: item.description,
@@ -112,7 +118,7 @@ export class QuotationsService {
         data: {
           quotationNumber: original.quotationNumber,
           revision: original.revision + 1,
-          leadId: original.leadId, customerName: dto.customerName || original.customerName,
+          leadId: original.leadId, customerId: dto.customerId, customerName: dto.customerName || original.customerName,
           customerEmail: dto.customerEmail, customerPhone: dto.customerPhone,
           customerAddress: dto.customerAddress,
           validUntil: new Date(dto.validUntil),

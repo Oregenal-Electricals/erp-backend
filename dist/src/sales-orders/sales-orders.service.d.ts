@@ -76,6 +76,7 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -150,6 +151,7 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -224,6 +226,7 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -262,6 +265,7 @@ export declare class SalesOrdersService {
             subtotal: number;
             totalAmount: number;
             cancelReason: string | null;
+            customerId: string | null;
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
@@ -340,6 +344,7 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -414,6 +419,7 @@ export declare class SalesOrdersService {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;

@@ -56,6 +56,9 @@ let QuotationsService = class QuotationsService {
         return { items: true, lead: { select: { leadNumber: true, companyName: true } } };
     }
     async create(dto, user) {
+        const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
+        if (!customer)
+            throw new common_1.NotFoundException('Customer not found');
         const quotationNumber = await this.generateNumber(user.companyId);
         const calcItems = dto.items.map(item => {
             var _a;
@@ -63,7 +66,7 @@ let QuotationsService = class QuotationsService {
         });
         const totals = this.calcTotals(calcItems);
         const quotation = await this.prisma.quotation.create({
-            data: Object.assign(Object.assign({ quotationNumber, revision: 0, leadId: dto.leadId, customerName: dto.customerName, customerEmail: dto.customerEmail, customerPhone: dto.customerPhone, customerAddress: dto.customerAddress, validUntil: new Date(dto.validUntil), currency: dto.currency || 'INR', termsConditions: dto.termsConditions, notes: dto.notes }, totals), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id, items: { create: calcItems } }),
+            data: Object.assign(Object.assign({ quotationNumber, revision: 0, leadId: dto.leadId, customerId: dto.customerId, customerName: dto.customerName, customerEmail: dto.customerEmail, customerPhone: dto.customerPhone, customerAddress: dto.customerAddress, validUntil: new Date(dto.validUntil), currency: dto.currency || 'INR', termsConditions: dto.termsConditions, notes: dto.notes }, totals), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id, items: { create: calcItems } }),
             include: this.includes(),
         });
         await this.audit.log({ tableName: 'quotations', recordId: quotation.id, action: 'CREATE', newValues: quotation, changedBy: user.id });
@@ -75,6 +78,9 @@ let QuotationsService = class QuotationsService {
             throw new common_1.NotFoundException('Quotation not found');
         if (!['SENT', 'REJECTED'].includes(original.status))
             throw new common_1.BadRequestException('Can only revise SENT or REJECTED quotations');
+        const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
+        if (!customer)
+            throw new common_1.NotFoundException('Customer not found');
         const calcItems = dto.items.map(item => {
             var _a;
             return (Object.assign(Object.assign({ itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id }));
@@ -86,7 +92,7 @@ let QuotationsService = class QuotationsService {
                 await tx.quotation.update({ where: { id: original.id }, data: { status: 'SUPERSEDED', updatedBy: user.id } });
             }
             return tx.quotation.create({
-                data: Object.assign(Object.assign({ quotationNumber: original.quotationNumber, revision: original.revision + 1, leadId: original.leadId, customerName: dto.customerName || original.customerName, customerEmail: dto.customerEmail, customerPhone: dto.customerPhone, customerAddress: dto.customerAddress, validUntil: new Date(dto.validUntil), currency: original.currency, termsConditions: dto.termsConditions, notes: dto.notes }, totals), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id, items: { create: calcItems } }),
+                data: Object.assign(Object.assign({ quotationNumber: original.quotationNumber, revision: original.revision + 1, leadId: original.leadId, customerId: dto.customerId, customerName: dto.customerName || original.customerName, customerEmail: dto.customerEmail, customerPhone: dto.customerPhone, customerAddress: dto.customerAddress, validUntil: new Date(dto.validUntil), currency: original.currency, termsConditions: dto.termsConditions, notes: dto.notes }, totals), { companyId: user.companyId, createdBy: user.id, updatedBy: user.id, items: { create: calcItems } }),
                 include: this.includes(),
             });
         });

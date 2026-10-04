@@ -37,6 +37,7 @@ let SalesOrdersService = class SalesOrdersService {
             data: {
                 soNumber,
                 cpoId: cpo.id,
+                customerId: cpo.customerId,
                 customerName: cpo.customerName,
                 deliveryDate: cpo.deliveryDate,
                 currency: cpo.currency,

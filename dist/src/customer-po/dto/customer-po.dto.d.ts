@@ -14,7 +14,7 @@ export declare class CreateCpoDto {
     verbalConfirmedBy?: string;
     verbalConfirmedDate?: string;
     quotationId?: string;
-    customerId?: string;
+    customerId: string;
     customerName: string;
     customerEmail?: string;
     customerPhone?: string;

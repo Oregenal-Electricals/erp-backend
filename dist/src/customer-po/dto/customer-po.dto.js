@@ -83,7 +83,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCpoDto.prototype, "quotationId", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCpoDto.prototype, "customerId", void 0);

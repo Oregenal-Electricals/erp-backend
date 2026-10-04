@@ -11,11 +11,13 @@ describe('QuotationsService - Price Integrity', () => {
     return { itemCode: 'BULB-9W', itemName: '9W LED Bulb', qty: 1000, uom: 'PCS', unitPrice: 80, discount: 0, gstRate: 18, ...overrides };
   }
 
+  const customer = { id: 'cust-1', companyId: 'company-1', code: 'HAV01', name: 'Havells' };
+
   function dto(overrides: any = {}) {
     const future = new Date();
     future.setDate(future.getDate() + 30);
     return {
-      customerName: 'Havells', validUntil: future.toISOString(),
+      customerId: customer.id, customerName: 'Havells', validUntil: future.toISOString(),
       items: [item()],
       ...overrides,
     } as any;
@@ -50,6 +52,7 @@ describe('QuotationsService - Price Integrity', () => {
         }),
       },
       lead: { update: jest.fn().mockResolvedValue({}) },
+      customer: { findFirst: jest.fn().mockImplementation(({ where }: any) => Promise.resolve(where.id === customer.id ? customer : null)) },
       $transaction: jest.fn().mockImplementation((cb: any) => cb(prisma)),
     };
 
@@ -71,6 +74,11 @@ describe('QuotationsService - Price Integrity', () => {
       const qt = await service.create(dto({ items: [item({ unitPrice: 80 })] }), user);
       expect(qt.revision).toBe(0);
       expect(qt.totalAmount).toBeCloseTo(80 * 1000 * 1.18, 1);
+      expect(qt.customerId).toBe(customer.id);
+    });
+
+    it('requires customerId to resolve to a real Customer in this company', async () => {
+      await expect(service.create(dto({ customerId: 'someone-elses-customer' }), user)).rejects.toThrow(NotFoundException);
     });
   });
 

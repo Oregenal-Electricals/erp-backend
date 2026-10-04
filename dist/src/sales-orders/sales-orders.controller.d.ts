@@ -80,6 +80,7 @@ export declare class SalesOrdersController {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -118,6 +119,7 @@ export declare class SalesOrdersController {
             subtotal: number;
             totalAmount: number;
             cancelReason: string | null;
+            customerId: string | null;
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
@@ -271,6 +273,7 @@ export declare class SalesOrdersController {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -345,6 +348,7 @@ export declare class SalesOrdersController {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -419,6 +423,7 @@ export declare class SalesOrdersController {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;
@@ -493,6 +498,7 @@ export declare class SalesOrdersController {
         subtotal: number;
         totalAmount: number;
         cancelReason: string | null;
+        customerId: string | null;
         cpoId: string;
         totalGst: number;
         cancelledDate: Date | null;

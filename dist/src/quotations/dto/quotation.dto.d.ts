@@ -10,6 +10,7 @@ export declare class QuotationItemDto {
 }
 export declare class CreateQuotationDto {
     leadId?: string;
+    customerId: string;
     customerName: string;
     customerEmail?: string;
     customerPhone?: string;

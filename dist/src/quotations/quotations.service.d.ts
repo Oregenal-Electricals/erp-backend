@@ -59,6 +59,7 @@ export declare class QuotationsService {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -120,6 +121,7 @@ export declare class QuotationsService {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -181,6 +183,7 @@ export declare class QuotationsService {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -242,6 +245,7 @@ export declare class QuotationsService {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -303,6 +307,7 @@ export declare class QuotationsService {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -342,6 +347,7 @@ export declare class QuotationsService {
             revision: number;
             validUntil: Date;
             quotationNumber: string;
+            customerId: string | null;
             customerEmail: string | null;
             customerPhone: string | null;
             totalGst: number;
@@ -407,6 +413,7 @@ export declare class QuotationsService {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;

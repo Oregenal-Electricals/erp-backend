@@ -40,6 +40,7 @@ export declare class QuotationsController {
             revision: number;
             validUntil: Date;
             quotationNumber: string;
+            customerId: string | null;
             customerEmail: string | null;
             customerPhone: string | null;
             totalGst: number;
@@ -105,6 +106,7 @@ export declare class QuotationsController {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -166,6 +168,7 @@ export declare class QuotationsController {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -227,6 +230,7 @@ export declare class QuotationsController {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -288,6 +292,7 @@ export declare class QuotationsController {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -349,6 +354,7 @@ export declare class QuotationsController {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -410,6 +416,7 @@ export declare class QuotationsController {
         revision: number;
         validUntil: Date;
         quotationNumber: string;
+        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;

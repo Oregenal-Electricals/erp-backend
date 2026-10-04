@@ -78,6 +78,7 @@ export declare class CustomerPortalController {
             subtotal: number;
             totalAmount: number;
             cancelReason: string | null;
+            customerId: string | null;
             cpoId: string;
             totalGst: number;
             cancelledDate: Date | null;
