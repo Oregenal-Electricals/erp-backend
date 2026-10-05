@@ -57,9 +57,9 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
+        customerId: string | null;
         validUntil: Date;
         quotationNumber: string;
-        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -119,9 +119,9 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
+        customerId: string | null;
         validUntil: Date;
         quotationNumber: string;
-        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -181,9 +181,9 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
+        customerId: string | null;
         validUntil: Date;
         quotationNumber: string;
-        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -243,9 +243,9 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
+        customerId: string | null;
         validUntil: Date;
         quotationNumber: string;
-        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -305,9 +305,9 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
+        customerId: string | null;
         validUntil: Date;
         quotationNumber: string;
-        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;
@@ -345,9 +345,9 @@ export declare class QuotationsService {
             notes: string | null;
             termsConditions: string | null;
             revision: number;
+            customerId: string | null;
             validUntil: Date;
             quotationNumber: string;
-            customerId: string | null;
             customerEmail: string | null;
             customerPhone: string | null;
             totalGst: number;
@@ -411,9 +411,9 @@ export declare class QuotationsService {
         notes: string | null;
         termsConditions: string | null;
         revision: number;
+        customerId: string | null;
         validUntil: Date;
         quotationNumber: string;
-        customerId: string | null;
         customerEmail: string | null;
         customerPhone: string | null;
         totalGst: number;

@@ -5,6 +5,7 @@ describe('SalesOrdersService - DSP-001', () => {
   let service: SalesOrdersService;
   let prisma: any;
   let audit: any;
+  let customerItemMapping: any;
   const user = { id: 'user-1', companyId: 'company-1' };
 
   const cpo = { id: 'cpo-1', companyId: 'company-1', status: 'ACKNOWLEDGED', customerName: 'ABC Lighting', currency: 'INR' };
@@ -72,7 +73,10 @@ describe('SalesOrdersService - DSP-001', () => {
       workOrder: { findMany: jest.fn().mockResolvedValue([]) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new SalesOrdersService(prisma, audit);
+    customerItemMapping = {
+      resolve: jest.fn().mockImplementation((_customerId: string, itemCode: string) => Promise.resolve({ product: { code: itemCode, name: itemCode } })),
+    } as any;
+    service = new SalesOrdersService(prisma, audit, customerItemMapping);
   });
 
   describe('RM sale (DSP-001 sections 6, 35)', () => {
@@ -376,6 +380,20 @@ describe('SalesOrdersService - DSP-001', () => {
 
     it('has no update() method that could rewrite a confirmed line price', () => {
       expect((service as any).update).toBeUndefined();
+    });
+  });
+
+  describe('Customer item mapping (createFromCpo)', () => {
+    it("writes the mapped product's code/name onto the SO line, not the CPO's raw customer item code", async () => {
+      customerItemMapping.resolve.mockResolvedValue({ product: { code: 'BULB-9W-WW', name: '9W LED Bulb Warm White' } });
+      const so = await service.createFromCpo(cpo, [{ id: 'cpoitem-1', itemCode: 'HAV-BULB-WARM-9', itemName: "Customer's own name", qty: 100, uom: 'PCS', unitPrice: 80, discount: 0, gstRate: 18 }], user);
+      expect(so.items[0].itemCode).toBe('BULB-9W-WW');
+      expect(so.items[0].itemName).toBe('9W LED Bulb Warm White');
+    });
+
+    it('blocks creating the Sales Order when a CPO line has no mapping yet', async () => {
+      customerItemMapping.resolve.mockResolvedValue(null);
+      await expect(service.createFromCpo(cpo, [{ id: 'cpoitem-1', itemCode: 'UNMAPPED-CODE', itemName: 'Something', qty: 10, uom: 'PCS', unitPrice: 50, discount: 0, gstRate: 18 }], user)).rejects.toThrow(BadRequestException);
     });
   });
 });

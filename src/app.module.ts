@@ -127,6 +127,7 @@ import { CreditControlModule } from './credit-control/credit-control.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { WorkflowsModule } from './workflows/workflows.module';
+import { CustomerItemMappingModule } from './customer-item-mapping/customer-item-mapping.module';
 import { DeleteRequestModule } from './delete-requests/delete-request.module';
 import { TasksModule } from './tasks/tasks.module';
 import { DocumentsModule } from './documents/documents.module';
@@ -300,6 +301,7 @@ import configuration from './config/configuration';
     NotificationsModule,
     AlertsModule,
     WorkflowsModule,
+    CustomerItemMappingModule,
     DeleteRequestModule,
     TasksModule,
     DocumentsModule,

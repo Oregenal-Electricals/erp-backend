@@ -301,6 +301,7 @@ model Company {
   quotations         Quotation[]
   customerPos        CustomerPo[]
   salesOrders        SalesOrder[]
+  customerItemMappings CustomerItemMapping[]
   rawMaterialBrands  RawMaterialBrand[]
   dispatchPlans      DispatchPlan[]
   dispatches         Dispatch[]
@@ -2290,6 +2291,7 @@ model Product {
   bomRevisions    BomRevision[] @relation("BomRevisionProduct")
   routings        ProductRouting[]
   standardProductivity ProductStandardProductivity[]
+  customerItemMappings CustomerItemMapping[]
 
   @@unique([companyId, code])
   @@map("products")
@@ -5392,9 +5394,43 @@ model Customer {
   customerPos       CustomerPo[]
   quotations        Quotation[]
   salesOrders        SalesOrder[]
+  itemMappings       CustomerItemMapping[]
 
   @@unique([companyId, code])
   @@map("customers")
+}
+
+// Maps a customer's own item code/name (as written on their CPO) to our
+// internal Product - so the CPO can keep the customer's exact wording
+// while the auto-created Sales Order resolves to our own naming. A
+// first-time mapping is created directly; CHANGING an existing one goes
+// through the generic WorkflowsService approval chain (documentType
+// 'CUSTOMER_ITEM_MAPPING') rather than taking effect immediately, since
+// a wrong correction here would silently misroute production/dispatch.
+model CustomerItemMapping {
+  id                String    @id @default(uuid())
+  companyId         String    @map("company_id")
+  company           Company   @relation(fields: [companyId], references: [id])
+  customerId        String    @map("customer_id")
+  customer          Customer  @relation(fields: [customerId], references: [id])
+  customerItemCode  String    @map("customer_item_code")
+  customerItemName  String?   @map("customer_item_name")
+  productId         String    @map("product_id")
+  product           Product   @relation(fields: [productId], references: [id])
+  // Staged new productId while an edit to an existing mapping awaits
+  // approval - the live productId above is untouched until then.
+  pendingProductId  String?   @map("pending_product_id")
+  status            String    @default("ACTIVE") // ACTIVE, PENDING_CHANGE
+  isActive          Boolean   @default(true) @map("is_active")
+  isTestData        Boolean   @default(false) @map("is_test_data")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  createdBy         String?   @map("created_by")
+  updatedBy         String?   @map("updated_by")
+
+  @@unique([companyId, customerId, customerItemCode])
+  @@index([companyId, customerId])
+  @@map("customer_item_mappings")
 }
 
 model CustomerAddress {

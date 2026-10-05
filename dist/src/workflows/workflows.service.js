@@ -29,6 +29,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const bom_service_1 = require("../bom/bom.service");
 const product_service_1 = require("../products/product.service");
+const customer_item_mapping_service_1 = require("../customer-item-mapping/customer-item-mapping.service");
 const DEFAULT_WORKFLOWS = [
     { name: 'Purchase Order Approval', documentType: 'PURCHASE_ORDER', triggerCondition: 'ALWAYS', levels: 1, description: 'All POs require manager approval', steps: [{ level: 1, stepName: 'Manager Approval', timeoutHours: 48 }] },
     { name: 'Sales Order Approval', documentType: 'SALES_ORDER', triggerCondition: 'ABOVE_AMOUNT', triggerAmount: 500000, levels: 1, description: 'SOs above ₹5 lakh require approval', steps: [{ level: 1, stepName: 'Sales Head Approval', timeoutHours: 24 }] },
@@ -47,13 +48,17 @@ const DEFAULT_WORKFLOWS = [
             { level: 3, stepName: 'Level 3 Review', timeoutHours: 48 },
             { level: 4, stepName: 'Final Approval', timeoutHours: 48 },
         ] },
+    { name: 'Customer Item Mapping Change Approval', documentType: 'CUSTOMER_ITEM_MAPPING', triggerCondition: 'ALWAYS', levels: 1, description: 'Changing an existing customer item mapping requires Admin approval - a first-time mapping does not', steps: [
+            { level: 1, stepName: 'Admin Approval', timeoutHours: 48 },
+        ] },
 ];
 let WorkflowsService = class WorkflowsService {
-    constructor(prisma, audit, bomService, productService) {
+    constructor(prisma, audit, bomService, productService, customerItemMappingService) {
         this.prisma = prisma;
         this.audit = audit;
         this.bomService = bomService;
         this.productService = productService;
+        this.customerItemMappingService = customerItemMappingService;
     }
     async seedDefaults(companyId, userId) {
         const existingTypes = new Set((await this.prisma.workflowDefinition.findMany({ where: { companyId }, select: { documentType: true } }))
@@ -219,6 +224,12 @@ let WorkflowsService = class WorkflowsService {
                 else
                     await this.productService.onWorkflowRejected(request.documentId, user);
             }
+            else if (request.documentType === 'CUSTOMER_ITEM_MAPPING') {
+                if (newStatus === 'APPROVED')
+                    await this.customerItemMappingService.onWorkflowApproved(request.documentId, user);
+                else
+                    await this.customerItemMappingService.onWorkflowRejected(request.documentId, user);
+            }
         }
         return updated;
     }
@@ -337,9 +348,11 @@ exports.WorkflowsService = WorkflowsService = __decorate([
     (0, common_1.Injectable)(),
     __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => bom_service_1.BomService))),
     __param(3, (0, common_1.Inject)((0, common_1.forwardRef)(() => product_service_1.ProductService))),
+    __param(4, (0, common_1.Inject)((0, common_1.forwardRef)(() => customer_item_mapping_service_1.CustomerItemMappingService))),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         audit_service_1.AuditService,
         bom_service_1.BomService,
-        product_service_1.ProductService])
+        product_service_1.ProductService,
+        customer_item_mapping_service_1.CustomerItemMappingService])
 ], WorkflowsService);
 //# sourceMappingURL=workflows.service.js.map

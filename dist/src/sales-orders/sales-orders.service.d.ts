@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateSoDto, CancelSoDto } from './dto/sales-order.dto';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 export declare class SalesOrdersService {
     private prisma;
     private audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private customerItemMapping;
+    constructor(prisma: PrismaService, audit: AuditService, customerItemMapping: CustomerItemMappingService);
     private generateNumber;
     createFromCpo(cpo: any, cpoItems: any[], user: any, tx?: any): Promise<any>;
     private calcItem;

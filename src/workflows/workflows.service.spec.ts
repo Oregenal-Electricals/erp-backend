@@ -44,7 +44,8 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
     };
     bomService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
     productService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
-    service = new WorkflowsService(prisma, { log: jest.fn() } as any, bomService, productService);
+    const customerItemMappingService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() } as any;
+    service = new WorkflowsService(prisma, { log: jest.fn() } as any, bomService, productService, customerItemMappingService);
   });
 
   it('submit() creates a PENDING ApprovalRequest at level 1 with totalLevels taken from the matching workflow definition', async () => {

@@ -7,12 +7,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateSoDto, CancelSoDto } from './dto/sales-order.dto';
 import { isTestSessionActive } from '../common/context/test-session.context';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 
 @Injectable()
 export class SalesOrdersService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private customerItemMapping: CustomerItemMappingService,
   ) {}
 
   private async generateNumber(
@@ -43,21 +45,35 @@ export class SalesOrdersService {
   ) {
     const soNumber = await this.generateNumber(user.companyId, tx);
 
-    const calcItems = cpoItems.map((item) => ({
-      cpoItemId: item.id,
-      itemCode: item.itemCode,
-      itemName: item.itemName,
-      description: item.description,
-      qty: item.qty,
-      uom: item.uom || 'PCS',
-      unitPrice: item.unitPrice,
-      discount: item.discount || 0,
-      gstRate: item.gstRate ?? 18,
-      ...this.calcItem(item),
-      createdBy: user.id,
-      updatedBy: user.id,
-      isTestData: isTestSessionActive(),
-    }));
+    // Each line is resolved through the customer's item mapping before
+    // becoming a Sales Order line - the CPO keeps the customer's own
+    // wording, but the SO (and everything downstream: Production,
+    // Dispatch) runs on our internal product code/name. Every line
+    // should already be mapped by the time a PO reaches Acknowledge
+    // (the CPO entry flow maps as items are entered); this is the
+    // safety net in case one somehow wasn't.
+    const calcItems: any[] = [];
+    for (const item of cpoItems) {
+      const mapping = await this.customerItemMapping.resolve(cpo.customerId, item.itemCode, user);
+      if (!mapping) {
+        throw new BadRequestException(`"${item.itemCode}" has no customer item mapping yet - map it on the Customer PO before acknowledging.`);
+      }
+      calcItems.push({
+        cpoItemId: item.id,
+        itemCode: mapping.product.code,
+        itemName: mapping.product.name,
+        description: item.description,
+        qty: item.qty,
+        uom: item.uom || 'PCS',
+        unitPrice: item.unitPrice,
+        discount: item.discount || 0,
+        gstRate: item.gstRate ?? 18,
+        ...this.calcItem(item),
+        createdBy: user.id,
+        updatedBy: user.id,
+        isTestData: isTestSessionActive(),
+      });
+    }
 
     const subtotal = calcItems.reduce((s, i) => s + i.qty * i.unitPrice, 0);
     const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);

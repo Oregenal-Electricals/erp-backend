@@ -14,10 +14,12 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const test_session_context_1 = require("../common/context/test-session.context");
+const customer_item_mapping_service_1 = require("../customer-item-mapping/customer-item-mapping.service");
 let SalesOrdersService = class SalesOrdersService {
-    constructor(prisma, audit) {
+    constructor(prisma, audit, customerItemMapping) {
         this.prisma = prisma;
         this.audit = audit;
+        this.customerItemMapping = customerItemMapping;
     }
     async generateNumber(companyId, client = this.prisma) {
         const count = await client.salesOrder.count({ where: { companyId } });
@@ -25,11 +27,16 @@ let SalesOrdersService = class SalesOrdersService {
         return `SO-${year}-${String(count + 1).padStart(4, '0')}`;
     }
     async createFromCpo(cpo, cpoItems, user, tx = this.prisma) {
+        var _a;
         const soNumber = await this.generateNumber(user.companyId, tx);
-        const calcItems = cpoItems.map((item) => {
-            var _a;
-            return (Object.assign(Object.assign({ cpoItemId: item.id, itemCode: item.itemCode, itemName: item.itemName, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id, isTestData: (0, test_session_context_1.isTestSessionActive)() }));
-        });
+        const calcItems = [];
+        for (const item of cpoItems) {
+            const mapping = await this.customerItemMapping.resolve(cpo.customerId, item.itemCode, user);
+            if (!mapping) {
+                throw new common_1.BadRequestException(`"${item.itemCode}" has no customer item mapping yet - map it on the Customer PO before acknowledging.`);
+            }
+            calcItems.push(Object.assign(Object.assign({ cpoItemId: item.id, itemCode: mapping.product.code, itemName: mapping.product.name, description: item.description, qty: item.qty, uom: item.uom || 'PCS', unitPrice: item.unitPrice, discount: item.discount || 0, gstRate: (_a = item.gstRate) !== null && _a !== void 0 ? _a : 18 }, this.calcItem(item)), { createdBy: user.id, updatedBy: user.id, isTestData: (0, test_session_context_1.isTestSessionActive)() }));
+        }
         const subtotal = calcItems.reduce((s, i) => s + i.qty * i.unitPrice, 0);
         const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
         const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
@@ -568,6 +575,7 @@ exports.SalesOrdersService = SalesOrdersService;
 exports.SalesOrdersService = SalesOrdersService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        audit_service_1.AuditService])
+        audit_service_1.AuditService,
+        customer_item_mapping_service_1.CustomerItemMappingService])
 ], SalesOrdersService);
 //# sourceMappingURL=sales-orders.service.js.map

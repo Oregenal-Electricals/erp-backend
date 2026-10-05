@@ -3,12 +3,14 @@ import { AuditService } from '../common/services/audit.service';
 import { CreateWorkflowDto, UpdateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
 import { BomService } from '../bom/bom.service';
 import { ProductService } from '../products/product.service';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 export declare class WorkflowsService {
     private prisma;
     private audit;
     private bomService;
     private productService;
-    constructor(prisma: PrismaService, audit: AuditService, bomService: BomService, productService: ProductService);
+    private customerItemMappingService;
+    constructor(prisma: PrismaService, audit: AuditService, bomService: BomService, productService: ProductService, customerItemMappingService: CustomerItemMappingService);
     seedDefaults(companyId: string, userId: string): Promise<{
         message: string;
         count: number;

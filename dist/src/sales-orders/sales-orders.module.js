@@ -12,12 +12,13 @@ const sales_orders_controller_1 = require("./sales-orders.controller");
 const sales_orders_service_1 = require("./sales-orders.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
+const customer_item_mapping_module_1 = require("../customer-item-mapping/customer-item-mapping.module");
 let SalesOrdersModule = class SalesOrdersModule {
 };
 exports.SalesOrdersModule = SalesOrdersModule;
 exports.SalesOrdersModule = SalesOrdersModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, customer_item_mapping_module_1.CustomerItemMappingModule],
         controllers: [sales_orders_controller_1.SalesOrdersController],
         providers: [sales_orders_service_1.SalesOrdersService],
         exports: [sales_orders_service_1.SalesOrdersService],

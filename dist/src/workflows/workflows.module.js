@@ -14,12 +14,13 @@ const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const bom_module_1 = require("../bom/bom.module");
 const product_module_1 = require("../products/product.module");
+const customer_item_mapping_module_1 = require("../customer-item-mapping/customer-item-mapping.module");
 let WorkflowsModule = class WorkflowsModule {
 };
 exports.WorkflowsModule = WorkflowsModule;
 exports.WorkflowsModule = WorkflowsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, (0, common_1.forwardRef)(() => bom_module_1.BomModule), (0, common_1.forwardRef)(() => product_module_1.ProductModule)],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, (0, common_1.forwardRef)(() => bom_module_1.BomModule), (0, common_1.forwardRef)(() => product_module_1.ProductModule), (0, common_1.forwardRef)(() => customer_item_mapping_module_1.CustomerItemMappingModule)],
         controllers: [workflows_controller_1.WorkflowsController],
         providers: [workflows_service_1.WorkflowsService],
         exports: [workflows_service_1.WorkflowsService],

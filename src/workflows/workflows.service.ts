@@ -4,6 +4,7 @@ import { AuditService } from '../common/services/audit.service';
 import { CreateWorkflowDto, UpdateWorkflowDto, SubmitForApprovalDto, ApproveRejectDto } from './dto/workflow.dto';
 import { BomService } from '../bom/bom.service';
 import { ProductService } from '../products/product.service';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 
 const DEFAULT_WORKFLOWS = [
   { name:'Purchase Order Approval', documentType:'PURCHASE_ORDER', triggerCondition:'ALWAYS', levels:1, description:'All POs require manager approval', steps:[{ level:1, stepName:'Manager Approval', timeoutHours:48 }] },
@@ -23,6 +24,9 @@ const DEFAULT_WORKFLOWS = [
     { level:3, stepName:'Level 3 Review', timeoutHours:48 },
     { level:4, stepName:'Final Approval', timeoutHours:48 },
   ] },
+  { name: 'Customer Item Mapping Change Approval', documentType: 'CUSTOMER_ITEM_MAPPING', triggerCondition: 'ALWAYS', levels: 1, description: 'Changing an existing customer item mapping requires Admin approval - a first-time mapping does not', steps: [
+    { level: 1, stepName: 'Admin Approval', timeoutHours: 48 },
+  ] },
 ];
 
 @Injectable()
@@ -32,6 +36,7 @@ export class WorkflowsService {
     private audit: AuditService,
     @Inject(forwardRef(() => BomService)) private bomService: BomService,
     @Inject(forwardRef(() => ProductService)) private productService: ProductService,
+    @Inject(forwardRef(() => CustomerItemMappingService)) private customerItemMappingService: CustomerItemMappingService,
   ) {}
 
   async seedDefaults(companyId: string, userId: string) {
@@ -220,6 +225,9 @@ export class WorkflowsService {
       } else if (request.documentType === 'PRODUCT') {
         if (newStatus === 'APPROVED') await this.productService.onWorkflowApproved(request.documentId, user);
         else await this.productService.onWorkflowRejected(request.documentId, user);
+      } else if (request.documentType === 'CUSTOMER_ITEM_MAPPING') {
+        if (newStatus === 'APPROVED') await this.customerItemMappingService.onWorkflowApproved(request.documentId, user);
+        else await this.customerItemMappingService.onWorkflowRejected(request.documentId, user);
       }
     }
 
