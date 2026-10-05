@@ -14,12 +14,13 @@ const prisma_module_1 = require("../prisma/prisma.module");
 const common_module_1 = require("../common/common.module");
 const sales_orders_module_1 = require("../sales-orders/sales-orders.module");
 const mrp_module_1 = require("../mrp/mrp.module");
+const credit_control_module_1 = require("../credit-control/credit-control.module");
 let CustomerPoModule = class CustomerPoModule {
 };
 exports.CustomerPoModule = CustomerPoModule;
 exports.CustomerPoModule = CustomerPoModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, sales_orders_module_1.SalesOrdersModule, mrp_module_1.MrpModule],
+        imports: [prisma_module_1.PrismaModule, common_module_1.CommonModule, sales_orders_module_1.SalesOrdersModule, mrp_module_1.MrpModule, credit_control_module_1.CreditControlModule],
         controllers: [customer_po_controller_1.CustomerPoController],
         providers: [customer_po_service_1.CustomerPoService],
         exports: [customer_po_service_1.CustomerPoService],

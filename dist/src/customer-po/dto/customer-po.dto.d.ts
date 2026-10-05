@@ -24,6 +24,8 @@ export declare class CreateCpoDto {
     currency?: string;
     remarks?: string;
     items: CpoItemDto[];
+    creditOverride?: boolean;
+    creditOverrideReason?: string;
 }
 export declare class UpdateCpoDto {
     poType: string;

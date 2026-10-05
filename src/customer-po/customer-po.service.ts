@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { MrpService } from '../mrp/mrp.service';
+import { CreditControlService } from '../credit-control/credit-control.service';
 
 @Injectable()
 export class CustomerPoService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService, private mrpService: MrpService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService, private mrpService: MrpService, private creditControl: CreditControlService) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -32,6 +33,22 @@ export class CustomerPoService {
     const gstAmount = Math.round(taxableAmt * gstRate / 100 * 100) / 100;
     const totalAmount = Math.round((taxableAmt + gstAmount) * 100) / 100;
     return { taxableAmt, gstAmount, totalAmount, pendingQty: qty };
+  }
+
+  /**
+   * Checks whether the current user holds CREDIT_CONTROL_OVERRIDE, the
+   * same lookup PermissionsGuard performs - needed here because whether
+   * an override is allowed is a runtime business decision made partway
+   * through create(), not something an endpoint-level guard can express.
+   */
+  private async userHasCreditOverride(user: any): Promise<boolean> {
+    const allRoles: string[] = user.allRoles || [user.role, ...(user.additionalRoles || [])].filter((v: string, i: number, a: string[]) => a.indexOf(v) === i);
+    if (allRoles.includes('SUPER_ADMIN')) return true;
+    const roles = await this.prisma.role.findMany({
+      where: { name: { in: allRoles }, companyId: user.companyId, isActive: true },
+      include: { permissions: { where: { isActive: true, permission: 'CREDIT_CONTROL_OVERRIDE' } } },
+    });
+    return roles.some((r) => r.permissions.length > 0);
   }
 
   private includes() {
@@ -77,6 +94,34 @@ export class CustomerPoService {
     const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
     const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
     const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
+
+    // Credit control, enforced at PO entry rather than Acknowledge - a PO
+    // that would push the customer's outstanding balance past their
+    // credit limit is blocked, with a hold recorded for visibility,
+    // unless management explicitly overrides it with a reason and holds
+    // CREDIT_CONTROL_OVERRIDE. A customer with no credit limit configured
+    // is never blocked (checkCredit's own behavior, preserved here).
+    const creditResult = await this.creditControl.checkCredit(
+      { customerName: dto.customerName, orderAmount: Math.round(totalAmount * 100) / 100, referenceType: 'CUSTOMER_PO', referenceNumber: cpoNumber },
+      user,
+    );
+    if (!creditResult.allowed) {
+      if (!dto.creditOverride) {
+        throw new BadRequestException(creditResult.reason);
+      }
+      if (!dto.creditOverrideReason) {
+        throw new BadRequestException('An override reason is required to bypass a credit hold.');
+      }
+      const canOverride = await this.userHasCreditOverride(user);
+      if (!canOverride) {
+        throw new ForbiddenException('You do not have permission to override a credit hold.');
+      }
+      await this.audit.log({
+        tableName: 'customer_pos', recordId: cpoNumber, action: 'CREATE',
+        newValues: { creditOverride: true, reason: dto.creditOverrideReason, creditCheck: creditResult },
+        changedBy: user.id,
+      });
+    }
 
     const cpo = await this.prisma.customerPo.create({
       data: {

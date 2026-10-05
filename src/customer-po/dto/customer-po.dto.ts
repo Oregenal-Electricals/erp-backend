@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString, IsArray, ValidateNested, Min, IsIn, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, IsArray, ValidateNested, Min, IsIn, ValidateIf, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CpoItemDto {
@@ -40,6 +40,11 @@ export class CreateCpoDto {
   @IsOptional() @IsString() currency?: string;
   @IsOptional() @IsString() remarks?: string;
   @IsArray() @ValidateNested({ each: true }) @Type(() => CpoItemDto) items: CpoItemDto[];
+
+  // Set when the PO would exceed the customer's credit limit and
+  // management chooses to proceed anyway - requires CREDIT_CONTROL_OVERRIDE.
+  @IsOptional() @IsBoolean() creditOverride?: boolean;
+  @ValidateIf(o => o.creditOverride === true) @IsString() creditOverrideReason?: string;
 }
 
 export class UpdateCpoDto {

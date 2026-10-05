@@ -68,9 +68,9 @@ export declare class GstService {
             notes: string | null;
             totalGst: number;
             soId: string | null;
-            dispatchId: string | null;
-            paidAmount: number;
             outstandingAmount: number;
+            paidAmount: number;
+            dispatchId: string | null;
             voucherId: string | null;
         })[];
     }>;

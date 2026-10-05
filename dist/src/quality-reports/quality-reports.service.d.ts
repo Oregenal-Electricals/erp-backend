@@ -124,6 +124,7 @@ export declare class QualityReportsService {
             inspectorName: string | null;
             passQty: number;
             failQty: number;
+            releasedDate: Date | null;
             oqcNumber: string;
             fgReceiptId: string | null;
             visualCheck: string | null;
@@ -133,7 +134,6 @@ export declare class QualityReportsService {
             labellingCheck: string | null;
             defectsFound: string | null;
             cocNumber: string | null;
-            releasedDate: Date | null;
         })[];
         total: number;
         totalSampled: number;

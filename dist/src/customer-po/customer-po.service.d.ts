@@ -3,15 +3,18 @@ import { AuditService } from '../common/services/audit.service';
 import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { MrpService } from '../mrp/mrp.service';
+import { CreditControlService } from '../credit-control/credit-control.service';
 export declare class CustomerPoService {
     private prisma;
     private audit;
     private salesOrders;
     private mrpService;
-    constructor(prisma: PrismaService, audit: AuditService, salesOrders: SalesOrdersService, mrpService: MrpService);
+    private creditControl;
+    constructor(prisma: PrismaService, audit: AuditService, salesOrders: SalesOrdersService, mrpService: MrpService, creditControl: CreditControlService);
     private generateNumber;
     private generateTaskNumber;
     private calcItem;
+    private userHasCreditOverride;
     private includes;
     create(dto: CreateCpoDto, user: any): Promise<{
         items: {

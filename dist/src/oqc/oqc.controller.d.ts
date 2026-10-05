@@ -53,6 +53,7 @@ export declare class OqcController {
             inspectorName: string | null;
             passQty: number;
             failQty: number;
+            releasedDate: Date | null;
             oqcNumber: string;
             fgReceiptId: string | null;
             visualCheck: string | null;
@@ -62,7 +63,6 @@ export declare class OqcController {
             labellingCheck: string | null;
             defectsFound: string | null;
             cocNumber: string | null;
-            releasedDate: Date | null;
         })[];
         total: number;
         page: number;
@@ -102,6 +102,7 @@ export declare class OqcController {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -111,7 +112,6 @@ export declare class OqcController {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     create(dto: CreateOqcDto, req: any): Promise<{
         passRate: number;
@@ -147,6 +147,7 @@ export declare class OqcController {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -156,7 +157,6 @@ export declare class OqcController {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     complete(id: string, dto: CompleteOqcDto, req: any): Promise<{
         workOrder: {
@@ -192,6 +192,7 @@ export declare class OqcController {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -201,7 +202,6 @@ export declare class OqcController {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     release(id: string, req: any): Promise<{
         workOrder: {
@@ -237,6 +237,7 @@ export declare class OqcController {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -246,6 +247,5 @@ export declare class OqcController {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
 }

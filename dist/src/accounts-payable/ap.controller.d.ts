@@ -43,8 +43,8 @@ export declare class ApController {
             totalAmount: number;
             vendorName: string;
             totalGst: number;
-            paidAmount: number;
             outstandingAmount: number;
+            paidAmount: number;
             voucherId: string | null;
             vendorBillNumber: string;
             billDate: Date;
@@ -90,8 +90,8 @@ export declare class ApController {
             totalAmount: number;
             vendorName: string;
             totalGst: number;
-            paidAmount: number;
             outstandingAmount: number;
+            paidAmount: number;
             voucherId: string | null;
             vendorBillNumber: string;
             billDate: Date;
@@ -147,8 +147,8 @@ export declare class ApController {
         totalAmount: number;
         vendorName: string;
         totalGst: number;
-        paidAmount: number;
         outstandingAmount: number;
+        paidAmount: number;
         voucherId: string | null;
         vendorBillNumber: string;
         billDate: Date;
@@ -200,8 +200,8 @@ export declare class ApController {
         totalAmount: number;
         vendorName: string;
         totalGst: number;
-        paidAmount: number;
         outstandingAmount: number;
+        paidAmount: number;
         voucherId: string | null;
         vendorBillNumber: string;
         billDate: Date;

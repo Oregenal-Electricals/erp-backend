@@ -33,9 +33,9 @@ export declare class DeliveryConfirmationService {
         remarks: string | null;
         deliveryDate: Date;
         dcNumber: string;
+        dispatchId: string;
         shortageQty: number;
         condition: string;
-        dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;
@@ -63,9 +63,9 @@ export declare class DeliveryConfirmationService {
             remarks: string | null;
             deliveryDate: Date;
             dcNumber: string;
+            dispatchId: string;
             shortageQty: number;
             condition: string;
-            dispatchId: string;
             receiverName: string;
             receiverPhone: string | null;
             podNumber: string | null;
@@ -101,9 +101,9 @@ export declare class DeliveryConfirmationService {
         remarks: string | null;
         deliveryDate: Date;
         dcNumber: string;
+        dispatchId: string;
         shortageQty: number;
         condition: string;
-        dispatchId: string;
         receiverName: string;
         receiverPhone: string | null;
         podNumber: string | null;

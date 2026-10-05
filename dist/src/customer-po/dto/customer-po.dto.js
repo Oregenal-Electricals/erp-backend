@@ -129,6 +129,16 @@ __decorate([
     (0, class_transformer_1.Type)(() => CpoItemDto),
     __metadata("design:type", Array)
 ], CreateCpoDto.prototype, "items", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateCpoDto.prototype, "creditOverride", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)(o => o.creditOverride === true),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCpoDto.prototype, "creditOverrideReason", void 0);
 class UpdateCpoDto {
 }
 exports.UpdateCpoDto = UpdateCpoDto;

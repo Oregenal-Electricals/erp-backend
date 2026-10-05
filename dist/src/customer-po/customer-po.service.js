@@ -15,12 +15,14 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
 const sales_orders_service_1 = require("../sales-orders/sales-orders.service");
 const mrp_service_1 = require("../mrp/mrp.service");
+const credit_control_service_1 = require("../credit-control/credit-control.service");
 let CustomerPoService = class CustomerPoService {
-    constructor(prisma, audit, salesOrders, mrpService) {
+    constructor(prisma, audit, salesOrders, mrpService, creditControl) {
         this.prisma = prisma;
         this.audit = audit;
         this.salesOrders = salesOrders;
         this.mrpService = mrpService;
+        this.creditControl = creditControl;
     }
     async generateNumber(companyId) {
         const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -44,6 +46,16 @@ let CustomerPoService = class CustomerPoService {
         const gstAmount = Math.round(taxableAmt * gstRate / 100 * 100) / 100;
         const totalAmount = Math.round((taxableAmt + gstAmount) * 100) / 100;
         return { taxableAmt, gstAmount, totalAmount, pendingQty: qty };
+    }
+    async userHasCreditOverride(user) {
+        const allRoles = user.allRoles || [user.role, ...(user.additionalRoles || [])].filter((v, i, a) => a.indexOf(v) === i);
+        if (allRoles.includes('SUPER_ADMIN'))
+            return true;
+        const roles = await this.prisma.role.findMany({
+            where: { name: { in: allRoles }, companyId: user.companyId, isActive: true },
+            include: { permissions: { where: { isActive: true, permission: 'CREDIT_CONTROL_OVERRIDE' } } },
+        });
+        return roles.some((r) => r.permissions.length > 0);
     }
     includes() {
         return {
@@ -81,6 +93,24 @@ let CustomerPoService = class CustomerPoService {
         const subtotal = calcItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
         const totalGst = calcItems.reduce((s, i) => s + i.gstAmount, 0);
         const totalAmount = calcItems.reduce((s, i) => s + i.totalAmount, 0);
+        const creditResult = await this.creditControl.checkCredit({ customerName: dto.customerName, orderAmount: Math.round(totalAmount * 100) / 100, referenceType: 'CUSTOMER_PO', referenceNumber: cpoNumber }, user);
+        if (!creditResult.allowed) {
+            if (!dto.creditOverride) {
+                throw new common_1.BadRequestException(creditResult.reason);
+            }
+            if (!dto.creditOverrideReason) {
+                throw new common_1.BadRequestException('An override reason is required to bypass a credit hold.');
+            }
+            const canOverride = await this.userHasCreditOverride(user);
+            if (!canOverride) {
+                throw new common_1.ForbiddenException('You do not have permission to override a credit hold.');
+            }
+            await this.audit.log({
+                tableName: 'customer_pos', recordId: cpoNumber, action: 'CREATE',
+                newValues: { creditOverride: true, reason: dto.creditOverrideReason, creditCheck: creditResult },
+                changedBy: user.id,
+            });
+        }
         const cpo = await this.prisma.customerPo.create({
             data: {
                 cpoNumber,
@@ -606,6 +636,6 @@ let CustomerPoService = class CustomerPoService {
 exports.CustomerPoService = CustomerPoService;
 exports.CustomerPoService = CustomerPoService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService, mrp_service_1.MrpService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService, mrp_service_1.MrpService, credit_control_service_1.CreditControlService])
 ], CustomerPoService);
 //# sourceMappingURL=customer-po.service.js.map

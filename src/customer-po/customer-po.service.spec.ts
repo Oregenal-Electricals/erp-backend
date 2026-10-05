@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CustomerPoService } from './customer-po.service';
 
 describe('CustomerPoService - Price Integrity', () => {
@@ -7,6 +7,7 @@ describe('CustomerPoService - Price Integrity', () => {
   let audit: any;
   let salesOrders: any;
   let mrpService: any;
+  let creditControl: any;
   const user = { id: 'user-1', companyId: 'company-1' };
 
   const acceptedQuotation = { id: 'qt-1', companyId: 'company-1', status: 'ACCEPTED' };
@@ -83,9 +84,11 @@ describe('CustomerPoService - Price Integrity', () => {
       product: { findFirst: jest.fn().mockResolvedValue(null) },
       rawMaterial: { findFirst: jest.fn().mockResolvedValue(null) },
       $transaction: jest.fn().mockImplementation((cb: any) => cb(prisma)),
+      role: { findMany: jest.fn().mockResolvedValue([]) },
     };
 
     audit = { log: jest.fn().mockResolvedValue(undefined) };
+    creditControl = { checkCredit: jest.fn().mockResolvedValue({ allowed: true, reason: 'Credit check passed', position: {}, holdCreated: false }) };
     salesOrders = {
       createFromCpo: jest.fn().mockImplementation((cpo: any, items: any[]) => Promise.resolve({
         id: 'so-1', soNumber: 'SO-2026-0001', status: 'CONFIRMED',
@@ -94,7 +97,7 @@ describe('CustomerPoService - Price Integrity', () => {
     };
     mrpService = { explodeMultiCpoMaterialNeeds: jest.fn().mockRejectedValue(new Error('shortage check not under test')) };
 
-    service = new CustomerPoService(prisma, audit, salesOrders, mrpService);
+    service = new CustomerPoService(prisma, audit, salesOrders, mrpService, creditControl);
   });
 
   async function seedReceivedCpo() {
@@ -201,6 +204,46 @@ describe('CustomerPoService - Price Integrity', () => {
       expect(newCpo.amendmentOfId).toBe(cpo.id);
       const originalAfter = await prisma.customerPo.findFirst({ where: { id: cpo.id, companyId: user.companyId } });
       expect(originalAfter.totalAmount).toBeCloseTo(80 * 100 * 1.18, 1);
+    });
+  });
+
+  describe('Credit control (enforced at PO entry)', () => {
+    it('blocks the PO when checkCredit reports it is not allowed and no override is given', async () => {
+      creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true, holdId: 'hold-1' });
+      await expect(service.create(createDto(), user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('requires an override reason when creditOverride is set', async () => {
+      creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true });
+      await expect(service.create(createDto({ creditOverride: true }), user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('blocks the override for a user without CREDIT_CONTROL_OVERRIDE', async () => {
+      creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true });
+      prisma.role.findMany.mockResolvedValue([]);
+      await expect(service.create(createDto({ creditOverride: true, creditOverrideReason: 'Approved by Sales Director' }), user)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('allows the override for a user whose role grants CREDIT_CONTROL_OVERRIDE, and logs it', async () => {
+      creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true });
+      prisma.role.findMany.mockResolvedValue([{ permissions: [{ permission: 'CREDIT_CONTROL_OVERRIDE' }] }]);
+      const cpo = await service.create(createDto({ creditOverride: true, creditOverrideReason: 'Approved by Sales Director' }), user);
+      expect(cpo.status).toBe('RECEIVED');
+      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ newValues: expect.objectContaining({ creditOverride: true }) }));
+    });
+
+    it('SUPER_ADMIN can always override, even with no explicit DB grant', async () => {
+      creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true });
+      prisma.role.findMany.mockResolvedValue([]);
+      const superUser = { ...user, allRoles: ['SUPER_ADMIN'] };
+      const cpo = await service.create(createDto({ creditOverride: true, creditOverrideReason: 'Approved' }), superUser);
+      expect(cpo.status).toBe('RECEIVED');
+    });
+
+    it('creates the PO normally when credit is allowed, without touching role lookups', async () => {
+      const cpo = await service.create(createDto(), user);
+      expect(cpo.status).toBe('RECEIVED');
+      expect(prisma.role.findMany).not.toHaveBeenCalled();
     });
   });
 });

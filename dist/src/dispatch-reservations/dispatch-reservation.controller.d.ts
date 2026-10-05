@@ -35,10 +35,10 @@ export declare class DispatchReservationController {
         reservedQty: number;
         soItemId: string;
         workOrderId: string | null;
+        releaseReason: string | null;
         releasedQty: number;
         reservationNumber: string;
         reservationType: string;
-        releaseReason: string | null;
         dispatchPlanId: string;
         dispatchPlanItemId: string;
     })[]>;
@@ -74,10 +74,10 @@ export declare class DispatchReservationController {
         reservedQty: number;
         soItemId: string;
         workOrderId: string | null;
+        releaseReason: string | null;
         releasedQty: number;
         reservationNumber: string;
         reservationType: string;
-        releaseReason: string | null;
         dispatchPlanId: string;
         dispatchPlanItemId: string;
     })[]>;

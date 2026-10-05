@@ -43,6 +43,7 @@ export declare class OqcService {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -52,7 +53,6 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     complete(id: string, dto: CompleteOqcDto, user: any): Promise<{
         workOrder: {
@@ -88,6 +88,7 @@ export declare class OqcService {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -97,7 +98,6 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     release(id: string, user: any): Promise<{
         workOrder: {
@@ -133,6 +133,7 @@ export declare class OqcService {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -142,7 +143,6 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     findAll(user: any, query: any): Promise<{
         data: ({
@@ -179,6 +179,7 @@ export declare class OqcService {
             inspectorName: string | null;
             passQty: number;
             failQty: number;
+            releasedDate: Date | null;
             oqcNumber: string;
             fgReceiptId: string | null;
             visualCheck: string | null;
@@ -188,7 +189,6 @@ export declare class OqcService {
             labellingCheck: string | null;
             defectsFound: string | null;
             cocNumber: string | null;
-            releasedDate: Date | null;
         })[];
         total: number;
         page: number;
@@ -228,6 +228,7 @@ export declare class OqcService {
         inspectorName: string | null;
         passQty: number;
         failQty: number;
+        releasedDate: Date | null;
         oqcNumber: string;
         fgReceiptId: string | null;
         visualCheck: string | null;
@@ -237,7 +238,6 @@ export declare class OqcService {
         labellingCheck: string | null;
         defectsFound: string | null;
         cocNumber: string | null;
-        releasedDate: Date | null;
     }>;
     getPendingFgReceipts(user: any): Promise<{
         data: any[];

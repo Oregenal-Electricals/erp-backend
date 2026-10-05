@@ -43,9 +43,9 @@ export declare class ArController {
             notes: string | null;
             totalGst: number;
             soId: string | null;
-            dispatchId: string | null;
-            paidAmount: number;
             outstandingAmount: number;
+            paidAmount: number;
+            dispatchId: string | null;
             voucherId: string | null;
         }[];
     }>;
@@ -83,9 +83,9 @@ export declare class ArController {
             notes: string | null;
             totalGst: number;
             soId: string | null;
-            dispatchId: string | null;
-            paidAmount: number;
             outstandingAmount: number;
+            paidAmount: number;
+            dispatchId: string | null;
             voucherId: string | null;
         })[];
         total: number;
@@ -144,9 +144,9 @@ export declare class ArController {
         notes: string | null;
         totalGst: number;
         soId: string | null;
-        dispatchId: string | null;
-        paidAmount: number;
         outstandingAmount: number;
+        paidAmount: number;
+        dispatchId: string | null;
         voucherId: string | null;
     }>;
     create(dto: CreateArInvoiceDto, req: any): Promise<{
@@ -201,9 +201,9 @@ export declare class ArController {
         notes: string | null;
         totalGst: number;
         soId: string | null;
-        dispatchId: string | null;
-        paidAmount: number;
         outstandingAmount: number;
+        paidAmount: number;
+        dispatchId: string | null;
         voucherId: string | null;
     }>;
     createFromDispatch(dispatchId: string, req: any): Promise<{
@@ -258,9 +258,9 @@ export declare class ArController {
         notes: string | null;
         totalGst: number;
         soId: string | null;
-        dispatchId: string | null;
-        paidAmount: number;
         outstandingAmount: number;
+        paidAmount: number;
+        dispatchId: string | null;
         voucherId: string | null;
     }>;
     recordPayment(dto: CreateArPaymentDto, req: any): Promise<{
