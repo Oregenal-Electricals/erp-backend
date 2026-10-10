@@ -20,9 +20,15 @@ export class CustomerPoService {
    * direct-sale lines are not part of the mapping feature (mapping is
    * Product-only) and are matched by raw code elsewhere, unchanged.
    */
-  private async resolveCpoItemProduct(companyId: string, customerId: string, itemCode: string, user: any) {
-    const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
-    if (mapping?.product) return mapping.product;
+  private async resolveCpoItemProduct(companyId: string, customerId: string | null | undefined, itemCode: string, user: any) {
+    // A CPO can be entered against free-text customerName with no linked
+    // Customer master record (customerId is nullable on CustomerPo), in
+    // which case there is no mapping to resolve against - skip straight
+    // to the direct code fallback rather than querying with a null id.
+    if (customerId) {
+      const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
+      if (mapping?.product) return mapping.product;
+    }
     return this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
   }
 
