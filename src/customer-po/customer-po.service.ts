@@ -5,10 +5,26 @@ import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } f
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { MrpService } from '../mrp/mrp.service';
 import { CreditControlService } from '../credit-control/credit-control.service';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 
 @Injectable()
 export class CustomerPoService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService, private mrpService: MrpService, private creditControl: CreditControlService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService, private mrpService: MrpService, private creditControl: CreditControlService, private customerItemMapping: CustomerItemMappingService) {}
+
+  /**
+   * A CPO line's itemCode is the CUSTOMER's own wording. Material
+   * checks must resolve it through the customer's item mapping first
+   * (if one exists) to get OUR Product - only falling back to a direct
+   * code match for backward compatibility with lines whose customer
+   * code happens to equal our product code outright. Raw-material
+   * direct-sale lines are not part of the mapping feature (mapping is
+   * Product-only) and are matched by raw code elsewhere, unchanged.
+   */
+  private async resolveCpoItemProduct(companyId: string, customerId: string, itemCode: string, user: any) {
+    const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
+    if (mapping?.product) return mapping.product;
+    return this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+  }
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -507,10 +523,11 @@ export class CustomerPoService {
     const buckets: { bucketKey: string; itemCode: string; itemName: string; uom: string; qty: number }[] = [];
     for (const otherCpo of openCpos) {
       for (const item of otherCpo.items) {
-        const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
+        const product = await this.resolveCpoItemProduct(companyId, otherCpo.customerId, item.itemCode, user);
         const rawMaterial = product ? null : await this.prisma.rawMaterial.findFirst({ where: { companyId, code: item.itemCode } });
         if (!product && !rawMaterial) continue;
-        buckets.push({ bucketKey: otherCpo.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
+        const effectiveCode = product ? product.code : item.itemCode;
+        buckets.push({ bucketKey: otherCpo.id, itemCode: effectiveCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
       }
     }
 
@@ -524,10 +541,11 @@ export class CustomerPoService {
     let hasShortage = false;
 
     for (const cpoItem of cpo.items) {
-      const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+      const product = await this.resolveCpoItemProduct(companyId, cpo.customerId, cpoItem.itemCode, user);
 
       if (product) {
-        const lz = cpoLevelZero.get(cpoItem.itemCode);
+        const effectiveCode = product.code;
+        const lz = cpoLevelZero.get(effectiveCode);
         const fgAvailableQty = lz?.availableQty ?? 0;
         const fgAllocatedQty = lz?.allocatedQty ?? 0;
         const netProductionQty = lz ? lz.netQty : cpoItem.qty;
@@ -586,7 +604,7 @@ export class CustomerPoService {
         // stage's own output (SMT board, MI assembly, etc.) only shows up
         // here if IT genuinely lacks stock; otherwise it's invisible, and
         // its own raw materials never needed to be checked at all.
-        const reachableLeaves = leavesOf.get(cpoItem.itemCode) || new Set<string>();
+        const reachableLeaves = leavesOf.get(effectiveCode) || new Set<string>();
         const componentResults = cpoLeafShortages
           .filter(s => reachableLeaves.has(s.itemCode))
           .map(s => ({
@@ -658,7 +676,7 @@ export class CustomerPoService {
       itemResults.push({
         itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
         status: 'NO_PRODUCT_MASTER',
-        message: 'No matching Product or Raw Material master found for this item code.',
+        message: 'Not mapped to a Product yet, and no Product or Raw Material master matches this item code directly. Map this item (see the Mapping column) before running the shortage check.',
       });
     }
     if (shortageRows.length > 0) {

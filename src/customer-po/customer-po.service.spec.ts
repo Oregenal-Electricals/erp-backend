@@ -8,6 +8,7 @@ describe('CustomerPoService - Price Integrity', () => {
   let salesOrders: any;
   let mrpService: any;
   let creditControl: any;
+  let customerItemMapping: any;
   const user = { id: 'user-1', companyId: 'company-1' };
 
   const acceptedQuotation = { id: 'qt-1', companyId: 'company-1', status: 'ACCEPTED' };
@@ -96,8 +97,9 @@ describe('CustomerPoService - Price Integrity', () => {
       })),
     };
     mrpService = { explodeMultiCpoMaterialNeeds: jest.fn().mockRejectedValue(new Error('shortage check not under test')) };
+    customerItemMapping = { resolve: jest.fn().mockResolvedValue(null) };
 
-    service = new CustomerPoService(prisma, audit, salesOrders, mrpService, creditControl);
+    service = new CustomerPoService(prisma, audit, salesOrders, mrpService, creditControl, customerItemMapping);
   });
 
   async function seedReceivedCpo() {
