@@ -109,7 +109,13 @@ export class BomImportService {
     for (let i = headerRowIdx + 1; i < rows.length; i++) {
       const row = rows[i] || [];
       const firstCell = cellStr(row[0]) || '';
-      if (STOP_MARKERS.some((m) => firstCell.includes(m))) break;
+      // Case-insensitive: real-world sheets write this footer row in all
+      // sorts of casing ("PREPARED BY", "Prepared by", ...). Matching
+      // case-sensitively let a footer row like "PREPARED BY: CHECKED BY:
+      // VERIFIED BY: CHECKED BY:" slip past this stop check entirely and
+      // get imported as a bogus empty section instead of ending the item
+      // list here.
+      if (STOP_MARKERS.some((m) => firstCell.toUpperCase().includes(m.toUpperCase()))) break;
 
       const partCode = cellStr(row[1]) || '';
       const descriptionCell = cellStr(row[2]);
