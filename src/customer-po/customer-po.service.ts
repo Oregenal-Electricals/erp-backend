@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
@@ -9,6 +9,8 @@ import { CustomerItemMappingService } from '../customer-item-mapping/customer-it
 
 @Injectable()
 export class CustomerPoService {
+  private readonly logger = new Logger(CustomerPoService.name);
+
   constructor(private prisma: PrismaService, private audit: AuditService, private salesOrders: SalesOrdersService, private mrpService: MrpService, private creditControl: CreditControlService, private customerItemMapping: CustomerItemMappingService) {}
 
   /**
@@ -176,8 +178,14 @@ export class CustomerPoService {
     try {
       await this.runShortageCheck(cpo.id, user);
     } catch (e) {
-      // swallow - PO creation should still succeed even if the shortage
-      // check has an issue (e.g. transient DB error); it can be re-run.
+      // PO creation should still succeed even if the shortage check has
+      // an issue (e.g. transient DB error) - but log it loudly instead
+      // of swallowing silently, or failures like this are invisible and
+      // show up only as "shortage check never ran" with no clue why.
+      this.logger.error(
+        `Automatic shortage check failed for CPO ${cpo.id} (${cpo.cpoNumber}), created by user ${user?.id}: ${e?.message}`,
+        e?.stack,
+      );
     }
 
     return cpo;
@@ -309,9 +317,13 @@ export class CustomerPoService {
     // shortage check so stock requirements reflect the current order.
     try {
       await this.runShortageCheck(id, user);
-    } catch (e) {
-      // swallow - edit should still succeed even if the shortage check
-      // has an issue; it can be re-run.
+    } catch (e: any) {
+      // edit should still succeed even if the shortage check has an
+      // issue - but log it instead of swallowing silently.
+      this.logger.error(
+        `Automatic re-check after edit failed for CPO ${id}, edited by user ${user?.id}: ${e?.message}`,
+        e?.stack,
+      );
     }
 
     return updated;
