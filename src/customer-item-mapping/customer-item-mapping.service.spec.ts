@@ -11,8 +11,18 @@ describe('CustomerItemMappingService', () => {
   const customer = { id: 'cust-1', companyId: 'company-1', code: 'HAV01', name: 'Havells' };
   const product = { id: 'prod-1', companyId: 'company-1', code: 'BULB-9W-WW', name: '9W LED Bulb Warm White' };
   const otherProduct = { id: 'prod-2', companyId: 'company-1', code: 'BULB-9W-CW', name: '9W LED Bulb Cool White' };
+  const rawMaterial = { id: 'rm-1', companyId: 'company-1', code: 'RM-COPPER-WIRE', name: 'Copper Wire 1mm' };
 
   let records: Record<string, any>;
+
+  function hydrate(rec: any) {
+    return {
+      ...rec,
+      product: rec.productId === product.id ? product : rec.productId === otherProduct.id ? otherProduct : null,
+      rawMaterial: rec.rawMaterialId === rawMaterial.id ? rawMaterial : null,
+      customer,
+    };
+  }
 
   beforeEach(() => {
     records = {};
@@ -25,30 +35,34 @@ describe('CustomerItemMappingService', () => {
         if (where.id === otherProduct.id) return Promise.resolve(otherProduct);
         return Promise.resolve(null);
       }) },
+      rawMaterial: { findFirst: jest.fn().mockImplementation(({ where }: any) => {
+        if (where.id === rawMaterial.id) return Promise.resolve(rawMaterial);
+        return Promise.resolve(null);
+      }) },
       customerItemMapping: {
         findFirst: jest.fn().mockImplementation(({ where }: any) => {
           if (where.id) {
             const rec = records[where.id];
             if (!rec) return Promise.resolve(null);
             if (where.companyId && rec.companyId !== where.companyId) return Promise.resolve(null);
-            return Promise.resolve({ ...rec, product: rec.productId === product.id ? product : otherProduct, customer });
+            return Promise.resolve(hydrate(rec));
           }
           const found = Object.values(records).find((r: any) =>
             r.companyId === where.companyId && r.customerId === where.customerId && r.customerItemCode === where.customerItemCode
             && (where.isActive === undefined || r.isActive === where.isActive),
           );
           if (!found) return Promise.resolve(null);
-          return Promise.resolve({ ...(found as any), product: (found as any).productId === product.id ? product : otherProduct, customer });
+          return Promise.resolve(hydrate(found as any));
         }),
         create: jest.fn().mockImplementation(({ data }: any) => {
           const id = `map-${++idCounter}`;
           records[id] = { id, isActive: true, ...data };
-          return Promise.resolve({ ...records[id], product, customer });
+          return Promise.resolve(hydrate(records[id]));
         }),
         update: jest.fn().mockImplementation(({ where, data }: any) => {
           const rec = records[where.id];
           Object.assign(rec, data);
-          return Promise.resolve({ ...rec, product: rec.productId === product.id ? product : otherProduct, customer });
+          return Promise.resolve(hydrate(rec));
         }),
       },
     };
@@ -74,10 +88,19 @@ describe('CustomerItemMappingService', () => {
   });
 
   describe('createIfMissing() - first-time mapping needs no approval', () => {
-    it('creates a new ACTIVE mapping when none exists', async () => {
+    it('creates a new ACTIVE mapping to a Product when none exists', async () => {
       const mapping = await service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-BULB-WW-9', customerItemName: 'Bulb Warm White 9W', productId: product.id } as any, user);
       expect(mapping?.status).toBe('ACTIVE');
       expect(mapping?.product.code).toBe(product.code);
+      expect(mapping?.rawMaterial).toBeNull();
+      expect(workflows.submit).not.toHaveBeenCalled();
+    });
+
+    it('creates a new ACTIVE mapping to a Raw Material when none exists - customers can order a raw material directly', async () => {
+      const mapping = await service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-WIRE-1MM', rawMaterialId: rawMaterial.id } as any, user);
+      expect(mapping?.status).toBe('ACTIVE');
+      expect(mapping?.rawMaterial.code).toBe(rawMaterial.code);
+      expect(mapping?.product).toBeNull();
       expect(workflows.submit).not.toHaveBeenCalled();
     });
 
@@ -88,8 +111,12 @@ describe('CustomerItemMappingService', () => {
       expect(second?.product.code).toBe(product.code); // still the original mapping, not otherProduct
     });
 
-    it('requires productId to create a new mapping', async () => {
+    it('requires a target to create a new mapping', async () => {
       await expect(service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-NEW' } as any, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects both productId and rawMaterialId given together', async () => {
+      await expect(service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-NEW', productId: product.id, rawMaterialId: rawMaterial.id } as any, user)).rejects.toThrow(BadRequestException);
     });
 
     it('requires the customer to belong to this company', async () => {
@@ -112,10 +139,26 @@ describe('CustomerItemMappingService', () => {
       );
     });
 
+    it('stages a switch from a Product mapping to a Raw Material mapping', async () => {
+      const mapping = await service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-BULB-WW-9', productId: product.id } as any, user);
+      const updated = await service.requestChange(mapping!.id, { rawMaterialId: rawMaterial.id } as any, user);
+
+      expect(updated.status).toBe('PENDING_CHANGE');
+      expect(updated.pendingRawMaterialId).toBe(rawMaterial.id);
+      expect(updated.pendingProductId).toBeNull();
+      // the LIVE target is still the original product until approved
+      expect(updated.productId).toBe(product.id);
+    });
+
     it('blocks requesting a second change while one is already pending', async () => {
       const mapping = await service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-BULB-WW-9', productId: product.id } as any, user);
       await service.requestChange(mapping!.id, { productId: otherProduct.id } as any, user);
       await expect(service.requestChange(mapping!.id, { productId: otherProduct.id } as any, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects both productId and rawMaterialId given together', async () => {
+      const mapping = await service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-BULB-WW-9', productId: product.id } as any, user);
+      await expect(service.requestChange(mapping!.id, { productId: otherProduct.id, rawMaterialId: rawMaterial.id } as any, user)).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -129,6 +172,19 @@ describe('CustomerItemMappingService', () => {
       expect(after.status).toBe('ACTIVE');
       expect(after.productId).toBe(otherProduct.id);
       expect(after.pendingProductId).toBeNull();
+    });
+
+    it('promotes a Product -> Raw Material switch on approval, clearing the old productId', async () => {
+      const mapping = await service.createIfMissing({ customerId: customer.id, customerItemCode: 'HAV-BULB-WW-9', productId: product.id } as any, user);
+      await service.requestChange(mapping!.id, { rawMaterialId: rawMaterial.id } as any, user);
+
+      await service.onWorkflowApproved(mapping!.id, user);
+      const after = await service.findOne(mapping!.id, user);
+      expect(after.status).toBe('ACTIVE');
+      expect(after.rawMaterialId).toBe(rawMaterial.id);
+      expect(after.productId).toBeNull();
+      expect(after.pendingProductId).toBeNull();
+      expect(after.pendingRawMaterialId).toBeNull();
     });
 
     it('discards the pending product on rejection, keeping the original live', async () => {

@@ -2389,6 +2389,7 @@ model RawMaterial {
   prItems         PurchaseRequisitionItem[]
   brands          RawMaterialBrand[]
   iqcCheckTemplates IqcCheckTemplate[]
+  customerItemMappings CustomerItemMapping[]
 
   @@unique([companyId, code])
   @@map("raw_materials")
@@ -5415,11 +5416,21 @@ model CustomerItemMapping {
   customer          Customer  @relation(fields: [customerId], references: [id])
   customerItemCode  String    @map("customer_item_code")
   customerItemName  String?   @map("customer_item_name")
-  productId         String    @map("product_id")
-  product           Product   @relation(fields: [productId], references: [id])
-  // Staged new productId while an edit to an existing mapping awaits
-  // approval - the live productId above is untouched until then.
-  pendingProductId  String?   @map("pending_product_id")
+  // A mapping points at exactly one of productId/rawMaterialId - a
+  // customer PO line can be for a Product (FINISHED_GOOD/SEMI_FINISHED/
+  // BY_PRODUCT all live in Product) or for a Raw Material sold directly
+  // (trading/resale lines). Enforced in the service layer and by a DB
+  // CHECK constraint (see the hand-written migration SQL), not by Prisma
+  // itself.
+  productId         String?   @map("product_id")
+  product           Product?  @relation(fields: [productId], references: [id])
+  rawMaterialId     String?   @map("raw_material_id")
+  rawMaterial       RawMaterial? @relation(fields: [rawMaterialId], references: [id])
+  // Staged new target while an edit to an existing mapping awaits
+  // approval - the live productId/rawMaterialId above are untouched
+  // until then. Exactly one of these two is set, mirroring the live pair.
+  pendingProductId     String?   @map("pending_product_id")
+  pendingRawMaterialId String?   @map("pending_raw_material_id")
   status            String    @default("ACTIVE") // ACTIVE, PENDING_CHANGE
   isActive          Boolean   @default(true) @map("is_active")
   isTestData        Boolean   @default(false) @map("is_test_data")

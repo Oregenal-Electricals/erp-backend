@@ -18,9 +18,10 @@ export class CustomerPoService {
    * checks must resolve it through the customer's item mapping first
    * (if one exists) to get OUR Product - only falling back to a direct
    * code match for backward compatibility with lines whose customer
-   * code happens to equal our product code outright. Raw-material
-   * direct-sale lines are not part of the mapping feature (mapping is
-   * Product-only) and are matched by raw code elsewhere, unchanged.
+   * code happens to equal our product code outright. A mapping can
+   * instead point at a Raw Material (see resolveCpoItemRawMaterial
+   * below) - a customer PO line isn't always for a finished/
+   * semi-finished Product.
    */
   private async resolveCpoItemProduct(companyId: string, customerId: string | null | undefined, itemCode: string, user: any) {
     // A CPO can be entered against free-text customerName with no linked
@@ -32,6 +33,21 @@ export class CustomerPoService {
       if (mapping?.product) return mapping.product;
     }
     return this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+  }
+
+  /**
+   * Sibling of resolveCpoItemProduct() for the Raw Material side of the
+   * same mapping - a customer can place a PO directly against a raw
+   * material (trading/resale lines), not only a Product. Callers only
+   * need this once resolveCpoItemProduct() has already come back empty
+   * for the line.
+   */
+  private async resolveCpoItemRawMaterial(companyId: string, customerId: string | null | undefined, itemCode: string, user: any) {
+    if (customerId) {
+      const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
+      if (mapping?.rawMaterial) return mapping.rawMaterial;
+    }
+    return this.prisma.rawMaterial.findFirst({ where: { companyId, code: itemCode } });
   }
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -542,9 +558,9 @@ export class CustomerPoService {
     for (const otherCpo of openCpos) {
       for (const item of otherCpo.items) {
         const product = await this.resolveCpoItemProduct(companyId, otherCpo.customerId, item.itemCode, user);
-        const rawMaterial = product ? null : await this.prisma.rawMaterial.findFirst({ where: { companyId, code: item.itemCode } });
+        const rawMaterial = product ? null : await this.resolveCpoItemRawMaterial(companyId, otherCpo.customerId, item.itemCode, user);
         if (!product && !rawMaterial) continue;
-        const effectiveCode = product ? product.code : item.itemCode;
+        const effectiveCode = product ? product.code : rawMaterial.code;
         buckets.push({ bucketKey: otherCpo.id, itemCode: effectiveCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
       }
     }
@@ -658,12 +674,11 @@ export class CustomerPoService {
         continue;
       }
 
-      const rawMaterial = await this.prisma.rawMaterial.findFirst({
-        where: { companyId, code: cpoItem.itemCode },
-      });
+      const rawMaterial = await this.resolveCpoItemRawMaterial(companyId, cpo.customerId, cpoItem.itemCode, user);
       if (rawMaterial) {
-        const leaf = cpoLeafShortages.find(s => s.itemCode === cpoItem.itemCode);
-        const lz = cpoLevelZero.get(cpoItem.itemCode);
+        const effectiveCode = rawMaterial.code;
+        const leaf = cpoLeafShortages.find(s => s.itemCode === effectiveCode);
+        const lz = cpoLevelZero.get(effectiveCode);
         const availableQty = lz?.availableQty ?? 0;
         const shortage = leaf?.shortage ?? 0;
         if (shortage > 0) {
