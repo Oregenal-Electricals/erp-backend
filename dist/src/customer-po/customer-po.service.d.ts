@@ -1,21 +1,30 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto, ParseCpoSourceFileDto } from './dto/customer-po.dto';
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { MrpService } from '../mrp/mrp.service';
 import { CreditControlService } from '../credit-control/credit-control.service';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 export declare class CustomerPoService {
     private prisma;
     private audit;
     private salesOrders;
     private mrpService;
     private creditControl;
-    constructor(prisma: PrismaService, audit: AuditService, salesOrders: SalesOrdersService, mrpService: MrpService, creditControl: CreditControlService);
+    private customerItemMapping;
+    private readonly logger;
+    constructor(prisma: PrismaService, audit: AuditService, salesOrders: SalesOrdersService, mrpService: MrpService, creditControl: CreditControlService, customerItemMapping: CustomerItemMappingService);
+    private resolveCpoItemProduct;
+    private resolveCpoItemRawMaterial;
     private generateNumber;
     private generateTaskNumber;
     private calcItem;
     private userHasCreditOverride;
     private includes;
+    parseSourceFile(dto: ParseCpoSourceFileDto, user: any): Promise<{
+        isTextExtractable: boolean;
+        extracted: import("./cpo-source-parser").CpoParsedData;
+    }>;
     create(dto: CreateCpoDto, user: any): Promise<{
         items: {
             id: string;

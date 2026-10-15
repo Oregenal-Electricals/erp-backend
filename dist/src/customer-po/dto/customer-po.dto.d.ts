@@ -47,6 +47,11 @@ export declare class UpdateCpoDto {
 export declare class CancelCpoDto {
     cancelReason: string;
 }
+export declare class ParseCpoSourceFileDto {
+    fileName: string;
+    mimeType: string;
+    fileData: string;
+}
 export declare class CreateQuantityIncreaseDto {
     poType: string;
     customerPoNumber?: string;

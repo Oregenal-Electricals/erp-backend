@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto, ParseCpoSourceFileDto } from './dto/customer-po.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -36,6 +36,16 @@ export class CustomerPoController {
   @Get(':id/shortages')
   @RequirePermissions(Permission.PURCHASE_VIEW)
   getShortages(@Param('id') id: string, @Request() req: any) { return this.cpoService.getShortages(id, req.user); }
+
+  // Reads an uploaded PO file (before the CPO itself is saved) and
+  // returns best-effort extracted fields for the create form to
+  // pre-fill. Same SALES_CREATE permission as creating the CPO itself,
+  // since this is just a step within that same action. Never persists
+  // anything - the file is attached as proof via the existing Documents
+  // module once the CPO has been created.
+  @Post('parse-source-file')
+  @RequirePermissions(Permission.SALES_CREATE)
+  parseSourceFile(@Body() dto: ParseCpoSourceFileDto, @Request() req: any) { return this.cpoService.parseSourceFile(dto, req.user); }
 
   @Post()
   @RequirePermissions(Permission.SALES_CREATE)

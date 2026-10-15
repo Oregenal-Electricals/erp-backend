@@ -32,6 +32,7 @@ let CustomerPoController = class CustomerPoController {
     findAll(req, query) { return this.cpoService.findAll(req.user, query); }
     findOne(id, req) { return this.cpoService.findOne(id, req.user); }
     getShortages(id, req) { return this.cpoService.getShortages(id, req.user); }
+    parseSourceFile(dto, req) { return this.cpoService.parseSourceFile(dto, req.user); }
     create(dto, req) { return this.cpoService.create(dto, req.user); }
     update(id, dto, req) { return this.cpoService.update(id, dto, req.user); }
     acknowledge(id, req) { return this.cpoService.acknowledge(id, req.user); }
@@ -92,6 +93,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], CustomerPoController.prototype, "getShortages", null);
+__decorate([
+    (0, common_1.Post)('parse-source-file'),
+    (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_CREATE),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [customer_po_dto_1.ParseCpoSourceFileDto, Object]),
+    __metadata("design:returntype", void 0)
+], CustomerPoController.prototype, "parseSourceFile", null);
 __decorate([
     (0, common_1.Post)(),
     (0, permissions_decorator_1.RequirePermissions)(permissions_enum_1.Permission.SALES_CREATE),

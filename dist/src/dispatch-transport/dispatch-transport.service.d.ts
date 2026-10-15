@@ -11,7 +11,7 @@ export declare class DispatchTransportService {
     createAssignment(dto: any, user: any): Promise<{
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {
@@ -86,7 +86,7 @@ export declare class DispatchTransportService {
     assignPackage(assignmentId: string, packageId: string, user: any): Promise<{
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {
@@ -161,7 +161,7 @@ export declare class DispatchTransportService {
     unassignPackage(assignmentId: string, packageId: string, user: any): Promise<{
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {
@@ -236,7 +236,7 @@ export declare class DispatchTransportService {
     confirmAssignment(assignmentId: string, user: any): Promise<{
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {
@@ -312,7 +312,7 @@ export declare class DispatchTransportService {
         documentRecheckRequired: boolean;
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {
@@ -386,7 +386,7 @@ export declare class DispatchTransportService {
     cancelAssignment(assignmentId: string, reason: string | undefined, user: any): Promise<{
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {
@@ -496,7 +496,7 @@ export declare class DispatchTransportService {
     findOne(id: string, user: any): Promise<{
         vehicle: {
             vehicleNumber: string;
-            vehicleType: import("@prisma/client").$Enums.VehicleType;
+            vehicleType: import(".prisma/client").$Enums.VehicleType;
             isCompanyVehicle: boolean;
         };
         salesOrder: {

@@ -161,12 +161,12 @@ export declare class ItemMasterController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ItemStatus;
+        status: import(".prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
         shortName: string | null;
-        itemType: import("@prisma/client").$Enums.ItemType;
+        itemType: import(".prisma/client").$Enums.ItemType;
         categoryId: string | null;
         uomId: string;
         purchaseUomId: string | null;
@@ -224,12 +224,12 @@ export declare class ItemMasterController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ItemStatus;
+        status: import(".prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
         shortName: string | null;
-        itemType: import("@prisma/client").$Enums.ItemType;
+        itemType: import(".prisma/client").$Enums.ItemType;
         categoryId: string | null;
         uomId: string;
         purchaseUomId: string | null;
@@ -259,7 +259,7 @@ export declare class ItemMasterController {
     getStats(user: any): Promise<{
         total: number;
         active: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.ItemGroupByOutputType, "itemType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.ItemGroupByOutputType, "itemType"[]> & {
             _count: {
                 id: number;
             };
@@ -296,12 +296,12 @@ export declare class ItemMasterController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ItemStatus;
+        status: import(".prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
         shortName: string | null;
-        itemType: import("@prisma/client").$Enums.ItemType;
+        itemType: import(".prisma/client").$Enums.ItemType;
         categoryId: string | null;
         uomId: string;
         purchaseUomId: string | null;
@@ -359,12 +359,12 @@ export declare class ItemMasterController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ItemStatus;
+        status: import(".prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
         shortName: string | null;
-        itemType: import("@prisma/client").$Enums.ItemType;
+        itemType: import(".prisma/client").$Enums.ItemType;
         categoryId: string | null;
         uomId: string;
         purchaseUomId: string | null;
@@ -401,12 +401,12 @@ export declare class ItemMasterController {
         updatedAt: Date;
         createdBy: string;
         updatedBy: string;
-        status: import("@prisma/client").$Enums.ItemStatus;
+        status: import(".prisma/client").$Enums.ItemStatus;
         itemCode: string;
         itemName: string;
         hsnCode: string | null;
         shortName: string | null;
-        itemType: import("@prisma/client").$Enums.ItemType;
+        itemType: import(".prisma/client").$Enums.ItemType;
         categoryId: string | null;
         uomId: string;
         purchaseUomId: string | null;

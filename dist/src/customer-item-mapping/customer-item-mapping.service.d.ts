@@ -8,8 +8,14 @@ export declare class CustomerItemMappingService {
     private workflows;
     constructor(prisma: PrismaService, audit: AuditService, workflows: WorkflowsService);
     private includes;
+    private validateExactlyOneTarget;
     resolve(customerId: string, customerItemCode: string, user: any): Promise<{
         product: {
+            id: string;
+            name: string;
+            code: string;
+        };
+        rawMaterial: {
             id: string;
             name: string;
             code: string;
@@ -29,11 +35,13 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     createIfMissing(dto: ResolveOrCreateMappingDto, user: any): Promise<{
         product: {
@@ -41,6 +49,11 @@ export declare class CustomerItemMappingService {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -56,11 +69,13 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     requestChange(id: string, dto: RequestMappingChangeDto, user: any): Promise<{
         product: {
@@ -68,6 +83,11 @@ export declare class CustomerItemMappingService {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -83,11 +103,13 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     onWorkflowApproved(id: string, user: any): Promise<{
         id: string;
@@ -99,11 +121,13 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     onWorkflowRejected(id: string, user: any): Promise<{
         id: string;
@@ -115,11 +139,13 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     findAll(user: any, query: any): Promise<({
         product: {
@@ -127,6 +153,11 @@ export declare class CustomerItemMappingService {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -142,11 +173,13 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     })[]>;
     findOne(id: string, user: any): Promise<{
         product: {
@@ -154,6 +187,11 @@ export declare class CustomerItemMappingService {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -169,10 +207,12 @@ export declare class CustomerItemMappingService {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
 }

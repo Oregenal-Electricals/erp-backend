@@ -517,7 +517,7 @@ export declare class ShipmentService {
         arrived: number;
         delivered: number;
         cancelled: number;
-        byMode: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.ShipmentGroupByOutputType, "shipmentMode"[]> & {
+        byMode: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.ShipmentGroupByOutputType, "shipmentMode"[]> & {
             _count: number;
         })[];
     }>;

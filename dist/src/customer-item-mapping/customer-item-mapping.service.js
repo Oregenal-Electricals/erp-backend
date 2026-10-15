@@ -27,7 +27,15 @@ let CustomerItemMappingService = class CustomerItemMappingService {
         return {
             customer: { select: { id: true, code: true, name: true } },
             product: { select: { id: true, code: true, name: true } },
+            rawMaterial: { select: { id: true, code: true, name: true } },
         };
+    }
+    validateExactlyOneTarget(productId, rawMaterialId) {
+        const hasProduct = !!productId;
+        const hasRawMaterial = !!rawMaterialId;
+        if (hasProduct === hasRawMaterial) {
+            throw new common_1.BadRequestException('Exactly one of productId or rawMaterialId is required');
+        }
     }
     async resolve(customerId, customerItemCode, user) {
         return this.prisma.customerItemMapping.findFirst({
@@ -42,19 +50,28 @@ let CustomerItemMappingService = class CustomerItemMappingService {
         if (existing) {
             return this.prisma.customerItemMapping.findFirst({ where: { id: existing.id }, include: this.includes() });
         }
-        if (!dto.productId)
-            throw new common_1.BadRequestException('productId is required to create a new mapping');
+        if (!dto.productId && !dto.rawMaterialId) {
+            throw new common_1.BadRequestException('productId or rawMaterialId is required to create a new mapping');
+        }
+        this.validateExactlyOneTarget(dto.productId, dto.rawMaterialId);
         const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
         if (!customer)
             throw new common_1.NotFoundException('Customer not found');
-        const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
-        if (!product)
-            throw new common_1.NotFoundException('Product not found');
+        if (dto.productId) {
+            const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+            if (!product)
+                throw new common_1.NotFoundException('Product not found');
+        }
+        else {
+            const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { id: dto.rawMaterialId, companyId: user.companyId } });
+            if (!rawMaterial)
+                throw new common_1.NotFoundException('Raw Material not found');
+        }
         const mapping = await this.prisma.customerItemMapping.create({
             data: {
                 companyId: user.companyId, customerId: dto.customerId,
                 customerItemCode: dto.customerItemCode, customerItemName: dto.customerItemName,
-                productId: dto.productId, status: 'ACTIVE',
+                productId: dto.productId || null, rawMaterialId: dto.rawMaterialId || null, status: 'ACTIVE',
                 createdBy: user.id, updatedBy: user.id,
             },
             include: this.includes(),
@@ -68,30 +85,54 @@ let CustomerItemMappingService = class CustomerItemMappingService {
             throw new common_1.NotFoundException('Mapping not found');
         if (mapping.status === 'PENDING_CHANGE')
             throw new common_1.BadRequestException('A change is already pending approval for this mapping');
-        const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
-        if (!product)
-            throw new common_1.NotFoundException('Product not found');
+        this.validateExactlyOneTarget(dto.productId, dto.rawMaterialId);
+        let targetCode;
+        if (dto.productId) {
+            const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+            if (!product)
+                throw new common_1.NotFoundException('Product not found');
+            targetCode = product.code;
+        }
+        else {
+            const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { id: dto.rawMaterialId, companyId: user.companyId } });
+            if (!rawMaterial)
+                throw new common_1.NotFoundException('Raw Material not found');
+            targetCode = rawMaterial.code;
+        }
         const updated = await this.prisma.customerItemMapping.update({
             where: { id },
-            data: { status: 'PENDING_CHANGE', pendingProductId: dto.productId, updatedBy: user.id },
+            data: {
+                status: 'PENDING_CHANGE',
+                pendingProductId: dto.productId || null,
+                pendingRawMaterialId: dto.rawMaterialId || null,
+                updatedBy: user.id,
+            },
             include: this.includes(),
         });
         await this.workflows.submit({
             documentType: 'CUSTOMER_ITEM_MAPPING',
             documentId: id,
-            documentNumber: `${mapping.customerItemCode} -> ${product.code}`,
+            documentNumber: `${mapping.customerItemCode} -> ${targetCode}`,
             remarks: dto.remarks,
         }, user);
         await this.audit.log({ tableName: 'customer_item_mappings', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
     }
     async onWorkflowApproved(id, user) {
+        var _a, _b;
         const mapping = await this.prisma.customerItemMapping.findFirst({ where: { id } });
         if (!mapping)
             return;
         const updated = await this.prisma.customerItemMapping.update({
             where: { id },
-            data: { productId: mapping.pendingProductId, pendingProductId: null, status: 'ACTIVE', updatedBy: user.id },
+            data: {
+                productId: (_a = mapping.pendingProductId) !== null && _a !== void 0 ? _a : null,
+                rawMaterialId: (_b = mapping.pendingRawMaterialId) !== null && _b !== void 0 ? _b : null,
+                pendingProductId: null,
+                pendingRawMaterialId: null,
+                status: 'ACTIVE',
+                updatedBy: user.id,
+            },
         });
         await this.audit.log({ tableName: 'customer_item_mappings', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;
@@ -102,7 +143,7 @@ let CustomerItemMappingService = class CustomerItemMappingService {
             return;
         const updated = await this.prisma.customerItemMapping.update({
             where: { id },
-            data: { pendingProductId: null, status: 'ACTIVE', updatedBy: user.id },
+            data: { pendingProductId: null, pendingRawMaterialId: null, status: 'ACTIVE', updatedBy: user.id },
         });
         await this.audit.log({ tableName: 'customer_item_mappings', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
         return updated;

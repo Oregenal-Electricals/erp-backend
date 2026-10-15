@@ -121,7 +121,7 @@ let BomImportService = class BomImportService {
         for (let i = headerRowIdx + 1; i < rows.length; i++) {
             const row = rows[i] || [];
             const firstCell = cellStr(row[0]) || '';
-            if (STOP_MARKERS.some((m) => firstCell.includes(m)))
+            if (STOP_MARKERS.some((m) => firstCell.toUpperCase().includes(m.toUpperCase())))
                 break;
             const partCode = cellStr(row[1]) || '';
             const descriptionCell = cellStr(row[2]);

@@ -213,7 +213,7 @@ export declare class AccountingService {
     getStats(user: any): Promise<{
         totalGroups: number;
         totalAccounts: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.AccountHeadGroupByOutputType, "type"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.AccountHeadGroupByOutputType, "type"[]> & {
             _count: {
                 id: number;
             };

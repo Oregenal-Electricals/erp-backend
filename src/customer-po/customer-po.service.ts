@@ -1,7 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto, ParseCpoSourceFileDto } from './dto/customer-po.dto';
+import { parseCpoSourceText } from './cpo-source-parser';
+// pdf-parse is CommonJS-only; importing it as an ES default sometimes
+// resolves to the wrong shape depending on tsconfig interop settings,
+// so require() it directly instead.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pdfParse = require('pdf-parse');
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { MrpService } from '../mrp/mrp.service';
 import { CreditControlService } from '../credit-control/credit-control.service';
@@ -98,6 +104,63 @@ export class CustomerPoService {
       amendmentOf: { select: { id: true, cpoNumber: true, customerPoNumber: true } },
       amendmentChildren: { select: { id: true, cpoNumber: true, status: true, totalAmount: true, createdAt: true } },
     };
+  }
+
+  /**
+   * Best-effort read of an uploaded CPO source file, called from the
+   * create-CPO form before the CPO itself is saved. Returns extracted
+   * field guesses for the form to pre-fill - it never writes anything
+   * to the database. The actual file (as "proof of order") is attached
+   * afterwards via the existing Documents module once the CPO has an
+   * id, exactly like any other CPO attachment.
+   *
+   * Only a PDF can have an embedded text layer, so a scanned/photographed
+   * PO (image file, or a PDF that's really just a scanned image) is
+   * never even attempted - it comes back as not-extractable and the
+   * caller just attaches the file with no auto-fill, rather than
+   * guessing from nothing.
+   */
+  async parseSourceFile(dto: ParseCpoSourceFileDto, user: any) {
+    const MAX_SIZE = 10 * 1024 * 1024; // matches the Documents module's own limit
+    let buffer: Buffer;
+    try {
+      buffer = Buffer.from(dto.fileData, 'base64');
+    } catch {
+      throw new BadRequestException('Invalid file data');
+    }
+    if (buffer.length === 0) throw new BadRequestException('Empty file');
+    if (buffer.length > MAX_SIZE) throw new BadRequestException('File size exceeds 10MB limit');
+
+    if (!dto.mimeType || !dto.mimeType.includes('pdf')) {
+      return { isTextExtractable: false, extracted: null };
+    }
+
+    let text = '';
+    try {
+      const result = await pdfParse(buffer);
+      text = result?.text || '';
+    } catch (e) {
+      this.logger.warn(`parseSourceFile: pdf-parse failed for ${dto.fileName}: ${e?.message || e}`);
+      return { isTextExtractable: false, extracted: null };
+    }
+
+    // A scanned PDF (image-only, no real text layer) still "succeeds" at
+    // the library level but yields near-empty text - treat that the
+    // same as "can't read this one automatically" rather than running
+    // the extractors on noise.
+    if (text.trim().length < 30) {
+      return { isTextExtractable: false, extracted: null };
+    }
+
+    const extracted = parseCpoSourceText(text);
+    await this.audit.log({
+      tableName: 'customer_pos',
+      recordId: 'PRE_CREATE',
+      action: 'VIEW',
+      changedBy: user.id,
+      reason: `Parsed uploaded CPO source file: ${dto.fileName}`,
+    });
+    return { isTextExtractable: true, extracted };
   }
 
   async create(dto: CreateCpoDto, user: any) {

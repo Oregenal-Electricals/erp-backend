@@ -6,7 +6,7 @@ export declare class DocumentsController {
     constructor(docsService: DocumentsService);
     getStats(req: any): Promise<{
         total: number;
-        byCategory: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.DocumentGroupByOutputType, "category"[]> & {
+        byCategory: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.DocumentGroupByOutputType, "category"[]> & {
             _count: {
                 id: number;
             };
@@ -30,10 +30,10 @@ export declare class DocumentsController {
             referenceNumber: string;
             documentNumber: string;
             version: number;
-            fileType: string;
             fileName: string;
-            fileSize: number;
             mimeType: string;
+            fileType: string;
+            fileSize: number;
         }[];
         total: number;
         page: number;

@@ -3,8 +3,10 @@ export declare class ResolveOrCreateMappingDto {
     customerItemCode: string;
     customerItemName?: string;
     productId?: string;
+    rawMaterialId?: string;
 }
 export declare class RequestMappingChangeDto {
-    productId: string;
+    productId?: string;
+    rawMaterialId?: string;
     remarks?: string;
 }

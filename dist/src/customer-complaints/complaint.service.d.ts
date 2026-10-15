@@ -223,7 +223,7 @@ export declare class ComplaintService {
         closed: number;
         critical: number;
         major: number;
-        byType: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.CustomerComplaintGroupByOutputType, "complaintType"[]> & {
+        byType: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.CustomerComplaintGroupByOutputType, "complaintType"[]> & {
             _count: {
                 id: number;
             };

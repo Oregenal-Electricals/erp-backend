@@ -8,21 +8,43 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var CustomerPoService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomerPoService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const audit_service_1 = require("../common/services/audit.service");
+const cpo_source_parser_1 = require("./cpo-source-parser");
+const pdfParse = require('pdf-parse');
 const sales_orders_service_1 = require("../sales-orders/sales-orders.service");
 const mrp_service_1 = require("../mrp/mrp.service");
 const credit_control_service_1 = require("../credit-control/credit-control.service");
-let CustomerPoService = class CustomerPoService {
-    constructor(prisma, audit, salesOrders, mrpService, creditControl) {
+const customer_item_mapping_service_1 = require("../customer-item-mapping/customer-item-mapping.service");
+let CustomerPoService = CustomerPoService_1 = class CustomerPoService {
+    constructor(prisma, audit, salesOrders, mrpService, creditControl, customerItemMapping) {
         this.prisma = prisma;
         this.audit = audit;
         this.salesOrders = salesOrders;
         this.mrpService = mrpService;
         this.creditControl = creditControl;
+        this.customerItemMapping = customerItemMapping;
+        this.logger = new common_1.Logger(CustomerPoService_1.name);
+    }
+    async resolveCpoItemProduct(companyId, customerId, itemCode, user) {
+        if (customerId) {
+            const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
+            if (mapping === null || mapping === void 0 ? void 0 : mapping.product)
+                return mapping.product;
+        }
+        return this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+    }
+    async resolveCpoItemRawMaterial(companyId, customerId, itemCode, user) {
+        if (customerId) {
+            const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
+            if (mapping === null || mapping === void 0 ? void 0 : mapping.rawMaterial)
+                return mapping.rawMaterial;
+        }
+        return this.prisma.rawMaterial.findFirst({ where: { companyId, code: itemCode } });
     }
     async generateNumber(companyId) {
         const count = await this.prisma.customerPo.count({ where: { companyId } });
@@ -64,6 +86,44 @@ let CustomerPoService = class CustomerPoService {
             amendmentOf: { select: { id: true, cpoNumber: true, customerPoNumber: true } },
             amendmentChildren: { select: { id: true, cpoNumber: true, status: true, totalAmount: true, createdAt: true } },
         };
+    }
+    async parseSourceFile(dto, user) {
+        const MAX_SIZE = 10 * 1024 * 1024;
+        let buffer;
+        try {
+            buffer = Buffer.from(dto.fileData, 'base64');
+        }
+        catch (_a) {
+            throw new common_1.BadRequestException('Invalid file data');
+        }
+        if (buffer.length === 0)
+            throw new common_1.BadRequestException('Empty file');
+        if (buffer.length > MAX_SIZE)
+            throw new common_1.BadRequestException('File size exceeds 10MB limit');
+        if (!dto.mimeType || !dto.mimeType.includes('pdf')) {
+            return { isTextExtractable: false, extracted: null };
+        }
+        let text = '';
+        try {
+            const result = await pdfParse(buffer);
+            text = (result === null || result === void 0 ? void 0 : result.text) || '';
+        }
+        catch (e) {
+            this.logger.warn(`parseSourceFile: pdf-parse failed for ${dto.fileName}: ${(e === null || e === void 0 ? void 0 : e.message) || e}`);
+            return { isTextExtractable: false, extracted: null };
+        }
+        if (text.trim().length < 30) {
+            return { isTextExtractable: false, extracted: null };
+        }
+        const extracted = (0, cpo_source_parser_1.parseCpoSourceText)(text);
+        await this.audit.log({
+            tableName: 'customer_pos',
+            recordId: 'PRE_CREATE',
+            action: 'VIEW',
+            changedBy: user.id,
+            reason: `Parsed uploaded CPO source file: ${dto.fileName}`,
+        });
+        return { isTextExtractable: true, extracted };
     }
     async create(dto, user) {
         const customer = await this.prisma.customer.findFirst({ where: { id: dto.customerId, companyId: user.companyId } });
@@ -137,6 +197,7 @@ let CustomerPoService = class CustomerPoService {
             await this.runShortageCheck(cpo.id, user);
         }
         catch (e) {
+            this.logger.error(`Automatic shortage check failed for CPO ${cpo.id} (${cpo.cpoNumber}), created by user ${user === null || user === void 0 ? void 0 : user.id}: ${e === null || e === void 0 ? void 0 : e.message}`, e === null || e === void 0 ? void 0 : e.stack);
         }
         return cpo;
     }
@@ -231,6 +292,7 @@ let CustomerPoService = class CustomerPoService {
             await this.runShortageCheck(id, user);
         }
         catch (e) {
+            this.logger.error(`Automatic re-check after edit failed for CPO ${id}, edited by user ${user === null || user === void 0 ? void 0 : user.id}: ${e === null || e === void 0 ? void 0 : e.message}`, e === null || e === void 0 ? void 0 : e.stack);
         }
         return updated;
     }
@@ -380,11 +442,12 @@ let CustomerPoService = class CustomerPoService {
         const buckets = [];
         for (const otherCpo of openCpos) {
             for (const item of otherCpo.items) {
-                const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
-                const rawMaterial = product ? null : await this.prisma.rawMaterial.findFirst({ where: { companyId, code: item.itemCode } });
+                const product = await this.resolveCpoItemProduct(companyId, otherCpo.customerId, item.itemCode, user);
+                const rawMaterial = product ? null : await this.resolveCpoItemRawMaterial(companyId, otherCpo.customerId, item.itemCode, user);
                 if (!product && !rawMaterial)
                     continue;
-                buckets.push({ bucketKey: otherCpo.id, itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
+                const effectiveCode = product ? product.code : rawMaterial.code;
+                buckets.push({ bucketKey: otherCpo.id, itemCode: effectiveCode, itemName: item.itemName, uom: item.uom, qty: item.qty });
             }
         }
         const { levelZero, leafShortages, leavesOf } = await this.mrpService.explodeMultiCpoMaterialNeeds(companyId, buckets, bucketOrder);
@@ -395,9 +458,10 @@ let CustomerPoService = class CustomerPoService {
         const bomTasksCreated = [];
         let hasShortage = false;
         for (const cpoItem of cpo.items) {
-            const product = await this.prisma.product.findFirst({ where: { companyId, code: cpoItem.itemCode } });
+            const product = await this.resolveCpoItemProduct(companyId, cpo.customerId, cpoItem.itemCode, user);
             if (product) {
-                const lz = cpoLevelZero.get(cpoItem.itemCode);
+                const effectiveCode = product.code;
+                const lz = cpoLevelZero.get(effectiveCode);
                 const fgAvailableQty = (_a = lz === null || lz === void 0 ? void 0 : lz.availableQty) !== null && _a !== void 0 ? _a : 0;
                 const fgAllocatedQty = (_b = lz === null || lz === void 0 ? void 0 : lz.allocatedQty) !== null && _b !== void 0 ? _b : 0;
                 const netProductionQty = lz ? lz.netQty : cpoItem.qty;
@@ -448,7 +512,7 @@ let CustomerPoService = class CustomerPoService {
                     include: { bom: true, routing: true },
                 }))) === null || _c === void 0 ? void 0 : _c.bom;
                 const bomNumber = (masterBom === null || masterBom === void 0 ? void 0 : masterBom.bomNumber) || (stageBom === null || stageBom === void 0 ? void 0 : stageBom.bomNumber) || null;
-                const reachableLeaves = leavesOf.get(cpoItem.itemCode) || new Set();
+                const reachableLeaves = leavesOf.get(effectiveCode) || new Set();
                 const componentResults = cpoLeafShortages
                     .filter(s => reachableLeaves.has(s.itemCode))
                     .map(s => ({
@@ -481,12 +545,11 @@ let CustomerPoService = class CustomerPoService {
                 });
                 continue;
             }
-            const rawMaterial = await this.prisma.rawMaterial.findFirst({
-                where: { companyId, code: cpoItem.itemCode },
-            });
+            const rawMaterial = await this.resolveCpoItemRawMaterial(companyId, cpo.customerId, cpoItem.itemCode, user);
             if (rawMaterial) {
-                const leaf = cpoLeafShortages.find(s => s.itemCode === cpoItem.itemCode);
-                const lz = cpoLevelZero.get(cpoItem.itemCode);
+                const effectiveCode = rawMaterial.code;
+                const leaf = cpoLeafShortages.find(s => s.itemCode === effectiveCode);
+                const lz = cpoLevelZero.get(effectiveCode);
                 const availableQty = (_e = lz === null || lz === void 0 ? void 0 : lz.availableQty) !== null && _e !== void 0 ? _e : 0;
                 const shortage = (_f = leaf === null || leaf === void 0 ? void 0 : leaf.shortage) !== null && _f !== void 0 ? _f : 0;
                 if (shortage > 0) {
@@ -517,7 +580,7 @@ let CustomerPoService = class CustomerPoService {
             itemResults.push({
                 itemCode: cpoItem.itemCode, itemName: cpoItem.itemName,
                 status: 'NO_PRODUCT_MASTER',
-                message: 'No matching Product or Raw Material master found for this item code.',
+                message: 'Not mapped to a Product yet, and no Product or Raw Material master matches this item code directly. Map this item (see the Mapping column) before running the shortage check.',
             });
         }
         if (shortageRows.length > 0) {
@@ -634,8 +697,8 @@ let CustomerPoService = class CustomerPoService {
     }
 };
 exports.CustomerPoService = CustomerPoService;
-exports.CustomerPoService = CustomerPoService = __decorate([
+exports.CustomerPoService = CustomerPoService = CustomerPoService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService, mrp_service_1.MrpService, credit_control_service_1.CreditControlService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, sales_orders_service_1.SalesOrdersService, mrp_service_1.MrpService, credit_control_service_1.CreditControlService, customer_item_mapping_service_1.CustomerItemMappingService])
 ], CustomerPoService);
 //# sourceMappingURL=customer-po.service.js.map

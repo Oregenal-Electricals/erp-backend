@@ -1,5 +1,5 @@
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, CreateQuantityIncreaseDto, ParseCpoSourceFileDto } from './dto/customer-po.dto';
 export declare class CustomerPoController {
     private readonly cpoService;
     constructor(cpoService: CustomerPoService);
@@ -190,6 +190,10 @@ export declare class CustomerPoController {
             shortageQty: number;
         }[];
         openCount: number;
+    }>;
+    parseSourceFile(dto: ParseCpoSourceFileDto, req: any): Promise<{
+        isTextExtractable: boolean;
+        extracted: import("./cpo-source-parser").CpoParsedData;
     }>;
     create(dto: CreateCpoDto, req: any): Promise<{
         items: {

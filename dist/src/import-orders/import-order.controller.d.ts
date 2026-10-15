@@ -12,7 +12,7 @@ export declare class ImportOrderController {
         cancelled: number;
         totalValueInr: number;
         totalValueForeign: number;
-        byCurrency: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.ImportPurchaseOrderGroupByOutputType, "currency"[]> & {
+        byCurrency: (import(".prisma/client").Prisma.PickEnumerable<import(".prisma/client").Prisma.ImportPurchaseOrderGroupByOutputType, "currency"[]> & {
             _count: number;
             _sum: {
                 subtotalForeign: number;

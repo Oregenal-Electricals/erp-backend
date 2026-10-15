@@ -38,7 +38,7 @@ export declare class StoreReceivingController {
         createdBy: string;
         updatedBy: string;
         plantId: string;
-        status: import("@prisma/client").$Enums.GateInwardStatus;
+        status: import(".prisma/client").$Enums.GateInwardStatus;
         unit: string;
         vehicleNumber: string | null;
         remarks: string | null;
@@ -123,7 +123,7 @@ export declare class StoreReceivingController {
                 storeReceivingId: string;
             }[];
             gateInwardEntry: {
-                status: import("@prisma/client").$Enums.GateInwardStatus;
+                status: import(".prisma/client").$Enums.GateInwardStatus;
                 remarks: string;
                 supplierName: string;
                 poNumber: string;
@@ -416,7 +416,7 @@ export declare class StoreReceivingController {
             storeReceivingId: string;
         }[];
         gateInwardEntry: {
-            status: import("@prisma/client").$Enums.GateInwardStatus;
+            status: import(".prisma/client").$Enums.GateInwardStatus;
             remarks: string;
             supplierName: string;
             poNumber: string;

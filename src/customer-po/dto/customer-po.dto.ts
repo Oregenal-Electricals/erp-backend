@@ -79,6 +79,17 @@ export class CancelCpoDto {
   @IsString() cancelReason: string;
 }
 
+// Body for POST /customer-po/parse-source-file - the raw uploaded file,
+// sent the same way the existing Documents module (/documents) already
+// does it (base64 JSON body, no multipart), so no new upload plumbing
+// is needed. This endpoint never persists anything; it only returns
+// best-effort extracted fields for the create-CPO form to pre-fill.
+export class ParseCpoSourceFileDto {
+  @IsString() fileName: string;
+  @IsString() mimeType: string;
+  @IsString() fileData: string; // base64
+}
+
 export class CreateQuantityIncreaseDto {
   @IsIn(['WRITTEN', 'VERBAL']) poType: string;
 

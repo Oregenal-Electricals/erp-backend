@@ -9,6 +9,11 @@ export declare class CustomerItemMappingController {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -24,11 +29,13 @@ export declare class CustomerItemMappingController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     })[]>;
     resolve(req: any, customerId: string, customerItemCode: string): Promise<{
         product: {
@@ -36,6 +43,11 @@ export declare class CustomerItemMappingController {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -51,11 +63,13 @@ export declare class CustomerItemMappingController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     findOne(id: string, req: any): Promise<{
         product: {
@@ -63,6 +77,11 @@ export declare class CustomerItemMappingController {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -78,11 +97,13 @@ export declare class CustomerItemMappingController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     createIfMissing(dto: ResolveOrCreateMappingDto, req: any): Promise<{
         product: {
@@ -90,6 +111,11 @@ export declare class CustomerItemMappingController {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -105,11 +131,13 @@ export declare class CustomerItemMappingController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
     requestChange(id: string, dto: RequestMappingChangeDto, req: any): Promise<{
         product: {
@@ -117,6 +145,11 @@ export declare class CustomerItemMappingController {
             name: string;
             code: string;
         };
+        rawMaterial: {
+            id: string;
+            name: string;
+            code: string;
+        };
         customer: {
             id: string;
             name: string;
@@ -132,10 +165,12 @@ export declare class CustomerItemMappingController {
         createdBy: string | null;
         updatedBy: string | null;
         status: string;
-        productId: string;
+        productId: string | null;
+        rawMaterialId: string | null;
         customerId: string;
         customerItemCode: string;
         customerItemName: string | null;
         pendingProductId: string | null;
+        pendingRawMaterialId: string | null;
     }>;
 }
