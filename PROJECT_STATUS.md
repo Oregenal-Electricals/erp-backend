@@ -1,6 +1,6 @@
 # Oregenal Electricals ERP — Project Status
 
-**Last updated:** August 15, 2026
+**Last updated:** October 16, 2026
 **Purpose:** If you're Claude starting a fresh chat with no memory of prior sessions, read this file first. It tells you exactly what's built, what's pending, and how to pick up work correctly.
 
 ---
@@ -8,17 +8,275 @@
 ## Project basics
 
 - **Company:** Oregenal Electricals India Pvt Ltd — Smart Manufacturing ERP/MES
-- **Backend:** NestJS + TypeScript + Prisma → Render (`erp-backend-ry5v.onrender.com`), repo `Oregenal-Electricals/erp-backend`
-- **Frontend:** Next.js + Tailwind → Vercel, repo `Oregenal-Electricals/erp-frontend`
-- **DB:** Neon Postgres. Dev: `ep-rough-rain-aoif6ijx/erp_development`. Staging: `ep-square-feather-aogpdkfj/erp_staging`
-- **Local repos:** `~/Desktop/websites/erp/erp-backend` and `~/Desktop/websites/erp/erp-frontend`
-- Every push to `main` on either repo auto-deploys to staging (there is no separate production environment yet).
+- **Backend:** NestJS + TypeScript + Prisma on **AWS ECS** (cluster `default`, ap-south-1) — services `oregenal-backend-dev` / `oregenal-backend-staging`, auto-deployed by GitHub Actions on push to `dev`/`staging`. Repo `Oregenal-Electricals/erp-backend`. (Render is **no longer used** — corrects every earlier mention of Render/`erp-backend-ry5v.onrender.com` elsewhere in this file; those entries are historical only.)
+- **Frontend:** Next.js + Tailwind on **AWS Amplify** — two apps: `erp-frontend-dev` (tracks `dev`) and `erp-frontend-staging` (serves `essenpro.oregenalelectrical.com`, **tracks `main`**, not `staging` — a naming leftover from before `dev` existed). Repo `Oregenal-Electricals/erp-frontend`. (Vercel is **no longer used** — corrects every earlier mention of Vercel elsewhere in this file.) Push order for anything that must reach the live staging site: `dev` → `staging` → `main`, `main` last.
+- **DB:** **AWS RDS Postgres** (not Neon — corrects every earlier mention of Neon elsewhere in this file). Instances `oregenal-dev` / `oregenal-staging`, databases `erp_development` / `erp_staging`, master user `postgres`, both require `sslmode=require`. Credentials load from `.env` (dev) and `~/.erp-secrets.env` (staging) on the user's machine — never typed into chat.
+- **Local repos:** `~/Desktop/websites/erp/erp-backend` and `~/Desktop/websites/erp/erp-frontend`, plus `~/Desktop/websites/erp/erp-docs` (the original planning docs: `MODULE_LIST.md`, `ROADMAP.md`, etc. — largely superseded by this file for current status, but still the source for the original 138-module scope referenced in the table below).
+- Every push to `staging`/`dev` auto-deploys to that environment's live site (see above). There is no separate production environment yet (Phase 20 / Module 138, Go Live, not started).
 - Login: `superadmin@oregenalelectrical.com` / `Oregenal@123`. Company ID: `83eda866-ba63-472c-902f-561f05b6b1c1`
-- **Workflow with the user:** Claude has a sandboxed copy of both repos and makes all edits there first, verifies with a build, then hands the user a patch to run on their real machine. The user does not code themselves — Claude does 100% of the implementation and the user copy-pastes and reports build output back.
+- **Workflow with the user, current (Oct 2026):** this session is linked to the user's actual machine via a device bridge — Claude can read/write files on disk directly, run most shell commands (builds, lint, `git`), and stage/commit files back, without routing every step through a copy-paste-and-report cycle. **Confirmed exception: `psql` is not reachable from the device-bridge shell** (binary not found in that sandboxed context, even though it works fine in the user's own terminal) — any direct database query/mutation still has to go through the user running an exact `psql "..."` command themselves and pasting the output back. The bridge also can't read files outside the connected folder(s) (e.g. `~/.erp-secrets.env`). The user still runs anything that needs their own interactive terminal context (credentials sourced from their shell profile, `psql`, commands they want visibility into) and reports output back when asked. Claude asks only when a decision is genuinely ambiguous, destructive, or needs the user's judgment — not for routine steps it can do directly. (Earlier entries in this file describing a pure "Claude hands over a patch, user runs everything" workflow are historical; both modes coexist as of this update.) **Also confirmed this session: `device_commit_files` has a real, repeatable reliability bug** — it can report success (`"written": [...]`) while the file on disk is actually unchanged. The only reliable check is re-reading the real file via `device_bash` right after every commit call; retry with `force: true` if the content didn't actually change.
 - **Critical Prisma rule:** never use `prisma migrate dev` — always hand-write SQL DDL and apply directly to both dev and staging DBs via psql, then update `schema.prisma` to match and run `npx prisma generate`. (Exception: `prisma db push --force-reset` is fine for a deliberate full wipe-and-rebuild of an empty database — see item 20 below. It's incremental drift on a database with existing data that this rule guards against.)
 - **`prisma/seeds/seed.ts`** creates the real Company/Plant/Warehouse/all 14 role logins directly via Prisma Client (bypasses HTTP/JWT - the only way to bootstrap back in after a full wipe, since login itself requires an existing User). It does **not** seed products, raw materials, BOMs, routing, customers, or vendors - no automated script exists for any of that yet.
 - Always run `rm -rf dist && npx nest build` before committing on the backend (dist/ is committed to the repo for Render deployment - see the "dist/ tracking incident" lesson below, this has broken silently before).
 - **Companion doc:** `ERP_Manual_Testing_Guide.md` (added this session) is a sequential, top-to-bottom manual testing walkthrough organized by business flow (login → masters → sales → planning → production → store/QC → dispatch → etc.), separate from this file's per-session changelog format. Update it alongside this file when a flow's behavior changes.
+
+## Module Status Overview — read this first, edit this to tell Claude what's next
+
+This table is built by matching the original 138-module plan (`erp-docs/MODULE_LIST.md`) against what actually exists in the two repos (backend `src/<folder>` modules + frontend `app/(app)/<folder>` pages), not against memory or assumption. Status marks:
+
+- ✅ **Built** — backend module + frontend page both exist, and there's direct evidence elsewhere in this file (or this session) that it's been exercised live.
+- 🟡 **Partial** — something exists but is incomplete, unconfirmed, or folded into another module rather than standalone. Read the note.
+- ⬜ **Not started** — no matching backend folder found anywhere in `src/`.
+
+**How to use this table:** this was generated by scanning folder names, not by testing every single feature. Correct anything that's wrong, and write what you want next directly into this file (a new row, a note next to an existing one, anything in plain words) — Claude reads this file at the start of a session and will build what's marked here without needing it re-explained from scratch each time. Only things that genuinely need a decision (ambiguous scope, a destructive DB change, a judgment call) get asked about; everything else gets built and reported back.
+
+### Phase 0 — Infrastructure Foundation
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 0.1 | GitHub Repositories | ✅ | `erp-frontend`, `erp-backend`, `erp-docs` all exist and active |
+| 0.2 | Development Environment | ✅ | Local setup, `.env`, Prisma all working |
+| 0.3 | Live Staging Environment | ✅ | **Real stack differs from the original plan** — see corrected infra below |
+| 0.4 | CI/CD Pipeline | ✅ | GitHub Actions on backend (auto-deploys `dev`+`staging` to ECS); Amplify webhook deploys frontend on push (no Actions deploy step there, Actions only lints/builds) |
+| 0.5 | Monitoring & Logging | 🟡 | Health-check endpoint (`/api/v1/health`) exists and is used by CI; no error-tracking service (Sentry etc.) confirmed set up |
+
+**Corrected infrastructure (as of Oct 2026, confirmed via AWS CLI — supersedes anything saying Render/Vercel/Neon anywhere in this file or `erp-docs/`):**
+- Backend: NestJS on **AWS ECS** (cluster `default`, ap-south-1), services `oregenal-backend-dev` / `oregenal-backend-staging`, each with its own ECR repo, auto-deployed by `.github/workflows/deploy.yml` on push to `dev`/`staging` respectively (~12-14 min per deploy, includes a post-deploy health check).
+- Database: **AWS RDS Postgres**, instances `oregenal-dev` / `oregenal-staging`, databases `erp_development` / `erp_staging`, both `sslmode=require`.
+- Frontend: **AWS Amplify**, NOT Vercel. Two apps: `erp-frontend-dev` (tracks `dev` branch) and `erp-frontend-staging` (serves `essenpro.oregenalelectrical.com` — **tracks `main`, not `staging`**, a naming leftover from before `dev` existed). So any frontend fix meant to reach the live staging site must be pushed to `dev` → `staging` → `main`, in that order, `main` last.
+- Credentials for dev/staging DB access live in `~/.erp-secrets.env` on the user's machine, never typed into chat.
+
+### Phase 1 — Core ERP Foundation
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 1 | Master Setup | ✅ | Company/Plant/Unit/Department/Branch/Financial Year — `masters/` backend, `masters/*` frontend |
+| 2 | Users Management | ✅ | `users/` |
+| 3 | Roles & Permissions | ✅ | `roles/`, `permissions/` — DB-driven RBAC (`roles`/`role_permissions` tables), confirmed working/debugged this session |
+| 4 | Super Admin Settings | 🟡 | `settings/` exists; numbering-series specifics not individually confirmed |
+| 5 | Change Request Management | ✅ | `change-requests/` |
+| 6 | Dummy Data Management | ✅ | `dummy-data/` — extensive Test Mode tagging/filtering/purge system, well beyond the original scope (see changelog items 21/26/27/34) |
+
+### Phase 2 — Security & Gate Management
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 7 | Visitor Management | ✅ | `visitor-management/` |
+| 8 | Vehicle Management | ✅ | `vehicle-management/` |
+| 9 | Gate Inward | ✅ | `gate-inward/` — **known gap**: doesn't yet link to Import shipments (see Not yet started) |
+| 10 | Gate Outward | ✅ | `gate-outward/` |
+| 11 | Gate Pass System | ✅ | `gate-pass/` |
+| 12 | Gate Security Dashboard | ✅ | `gate-dashboard/` |
+
+### Phase 3 — Master Data Management
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 13 | Customer Master | ✅ | `customers/`, linked to Customer PO this session (changelog #38) |
+| 14 | Vendor Master | ✅ | `vendors/` |
+| 15 | Product Master | ✅ | `products/` |
+| 16 | Raw Material Master | ✅ | `raw-materials/` — plus a newer **Customer Item Mapping** feature (`customer-item-mapping/`) letting a Customer PO line map to either a Product or a Raw Material |
+| 17 | HSN/SAC Master | ✅ | `hsn-sac/` |
+| 18 | Price List Management | ✅ | `price-lists/` |
+| 19 | Price History Management | ✅ | `price-history/` |
+| 20 | Product Revision Control | ✅ | `product-revisions/` |
+| 21 | BOM Management | ✅ | `bom/`, `bom-import/` (spreadsheet upload) — extensively built out this session's history (changelog items 23-24, 32-33, 47) |
+| 22 | BOM Revision Control | 🟡 | A separate `bom-revisions` module was found dead/unused and **deleted** (changelog #36) — real BOM versioning lives in `BomService.getHistory()`/`getVersions()` instead. A 3-tier approval chain (Created → Verified → Approved, with a query/discussion system) was built in changelog #47 — more sophisticated than plain "revision control" |
+
+### Phase 4 — Purchase Management
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 23 | Purchase Requisition | ✅ | `purchase-requisitions/` |
+| 24 | RFQ Management | ✅ | `rfq/` |
+| 25 | Vendor Quotation | ✅ | `vendor-quotations/` |
+| 26 | Quotation Comparison | ✅ | `quotation-comparison/` |
+| 27 | Purchase Order | ✅ | `purchase-orders/` |
+| 28 | Purchase Order Approval | ✅ | `po-approvals/` |
+| 29 | Purchase Order Amendment | ✅ | `po-amendments/` |
+| 30 | Purchase Analytics | ✅ | `purchase-analytics/` |
+
+### Phase 5 — Import Management
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 31 | Import Purchase Order | ✅ | `import-orders/` |
+| 32 | Proforma Invoice | ✅ | `proforma-invoices/` |
+| 33 | LC / TT Management | ⬜ | No dedicated backend folder found |
+| 34 | Shipment Tracking | ✅ | `shipments/` |
+| 35 | BL / AWB Tracking | 🟡 | Likely covered by `shipping-documents/` — not individually confirmed |
+| 36 | Customs & Duty Management | ✅ | `customs-entries/` |
+| 37 | Landed Cost Calculation | ✅ | `landed-costs/` |
+
+### Phase 6 — Inventory & Warehouse Management
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 38 | GRN | ✅ | `grn/`, `grn-discrepancy/` |
+| 39 | IQC Pending Stock | ✅ | `iqc/` — raw-material stock gate, well-established pattern (reused for OQC, changelog #14) |
+| 40 | Accepted Stock | 🟡 | Folded into `store-receiving/`/`stock-ledger/`, not a standalone module |
+| 41 | Rejected Stock | ✅ | `rejected-stock/` |
+| 42 | Warehouse Master | ✅ | `warehouse/` |
+| 43-44 | Rack / Bin Management | ✅ | Combined in `rack-bin/` |
+| 45 | Batch Management | ✅ | `stock-batches/` |
+| 46 | Lot Tracking | 🟡 | Covered via batch tracking + `trace/`, not a standalone concept |
+| 47 | FIFO / FEFO | ✅ | FIFO confirmed live in the shortage/MRP engine (`mrp/`, changelog #13) |
+| 48 | Stock Reservation | ✅ | `dispatch-reservations/`, `hold-stock/` |
+| 49 | Stock Transfer | ✅ | `stock-transfers/`, `stock-location-transfer/` |
+| 50 | Stock Adjustment | ✅ | `stock-adjustments/` — had a real sign bug, fixed (changelog #17) |
+| 51 | Stock Ledger | ✅ | `stock-ledger/` |
+| 52 | Inventory Dashboard | ✅ | `inventory-dashboard/` |
+
+### Phase 7 — Quality Management System
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 53 | IQC | ✅ | (see #39) |
+| 54 | PQC | ✅ | In-process QC = `production-qc/` ("IPQC" throughout this codebase's own naming), now a real enforcement gate (changelog #19) |
+| 55 | OQC | ✅ | `oqc/` — real finished-goods stock gate (changelog #14) |
+| 56 | NCR | ✅ | `ncr/` |
+| 57 | CAPA | ✅ | `capa/` |
+| 58 | Root Cause Analysis | ✅ | `rca/` |
+| 59 | 5 Why Analysis | 🟡 | Likely folded into `rca/`, not standalone |
+| 60 | Fishbone Analysis | 🟡 | Likely folded into `rca/`, not standalone |
+| 61 | Supplier Quality | ✅ | `supplier-quality/` |
+| 62 | Customer Complaint Management | ✅ | `customer-complaints/` |
+
+### Phase 8 — Production Planning
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 63 | Production Planning | ✅ | `production/planning` frontend, backed by `mrp/` |
+| 64 | Capacity Planning | 🟡 | No standalone folder; may be folded into Planning |
+| 65 | Material Planning | ✅ | `mrp/` — major recursive multi-level shortage engine (changelog #13, #42) |
+| 66 | Shift Planning | ⬜ | Not found |
+| 67 | Resource Planning | 🟡 | `manpower/` covers labor resourcing specifically, not general resource planning |
+| 68 | APS Scheduling | ⬜ | Not found |
+
+### Phase 9 — MES Production Execution
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 69 | Work Orders | ✅ | `work-orders/` |
+| 70 | Material Issue | ✅ | `production-issues/`, `material-issue-override/` |
+| 71 | Kitting | ⬜ | Not found |
+| 72-74 | SMT / MI / Assembly Production | ✅ | Routing chain (`routing/`), SMT→MI→Assembly→Packaging, verified live multiple times |
+| 75 | Testing | 🟡 | Covered under IPQC/OQC, not a standalone "Testing" module |
+| 76 | Quality Hold | ✅ | `hold-stock/` |
+| 77 | Packing | ✅ | `dispatch-packing/` |
+| 78 | Finished Goods Transfer | ✅ | `fg-receipts/`, `stage-transfers/` |
+| 79 | Production Dashboard | ✅ | `production-dashboard/` — hourly monitoring added (changelog #15) |
+| 80 | WIP Management | 🟡 | Implicit via Work Orders/stock, no standalone WIP module |
+| 81 | Line Balancing | ⬜ | Not found |
+| 82 | OEE Tracking | 🟡 | Referenced in project conventions (aggregate-then-ratio math rule) — likely lives inside `production-dashboard/`, not confirmed standalone |
+| 83 | Downtime Tracking | ✅ | `downtime/` |
+
+### Phase 10 — Traceability
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 84 | Serial Number Management | ⬜ | Not found |
+| 85 | Barcode Management | ⬜ | Not found |
+| 86 | QR Code Management | ⬜ | Not found |
+| 87 | Batch Genealogy | 🟡 | `trace/` exists, scope not individually confirmed |
+| 88 | End-to-End Traceability | 🟡 | Same `trace/` module |
+
+### Phase 11 — Maintenance Management
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 89-94 | Machine Master, PM, Breakdown, Predictive Maintenance, Tool Management, Calibration | ⬜ | **Entire phase not started** — no matching backend folder for any of these six |
+
+### Phase 12 — Sales & Dispatch
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 95 | Lead Management | ✅ | `leads/` |
+| 96 | Quotation | ✅ | `quotations/` |
+| 97 | Customer PO | ✅ | `customer-po/` — heavily extended this session: customer-item mapping, PO source-file upload with auto-fill (PDF text extraction), proof-of-order attachment |
+| 98 | Sales Order | ✅ | `sales-orders/` — auto-confirms from CPO (changelog #48) |
+| 99 | Credit Control | ✅ | `credit-control/` — enforced at CPO entry |
+| 100 | Dispatch Planning | ✅ | `dispatch-planning/` |
+| 101 | Dispatch | ✅ | `dispatch/`, `dispatch-loading/`, `dispatch-gate-out/`, `dispatch-packing/`, `dispatch-verifications/`, `dispatch-reconciliation/`, `dispatch-transport/`, `dispatch-document-readiness/` — extensively built out (per project memory: DSP-001 workflow) |
+| 102 | Delivery Confirmation | ✅ | `delivery-confirmation/` |
+
+### Phase 13 — Finance & GST
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 103 | Chart of Accounts | ✅ | `accounting/`, `accounts/` |
+| 104 | Voucher Engine | ✅ | `vouchers/` |
+| 105 | Accounts Receivable | ✅ | `accounts-receivable/` |
+| 106 | Accounts Payable | ✅ | `accounts-payable/` |
+| 107 | GST Management | ✅ | `gst/` |
+| 108 | Bank Reconciliation | ✅ | `bank-reconciliation/` |
+| 109 | Financial Reports | ✅ | `financial-reports/` |
+
+### Phase 14 — Communication & Workflow
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 110 | Internal Messaging | ⬜ | Not found |
+| 111 | Notifications | ✅ | `notifications/` |
+| 112 | Approval Engine | ✅ | `workflows/` — generic multi-level approval engine, explicitly reused (not duplicated) for Work Order starts, BOM approval, Manpower, PO approval |
+| 113 | Escalation Management | ⬜ | Not found, may be folded into `workflows/` |
+
+### Phase 15 — Documents & Reports
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 114 | Document Center | ✅ | `documents/` — shared attachment system used across the app (Customer PO proof-of-order, BOM source files, etc.) |
+| 115 | PDF Engine | ✅ | `pdf-engine/` |
+| 116 | Excel Export Engine | ✅ | `excel-export/` |
+| 117 | MIS Reports | ✅ | `mis-reports/` |
+| 118 | Executive Reports | 🟡 | No standalone folder, likely folded into `mis-reports/`/`analytics/` |
+
+### Phase 16 — Dashboards & BI
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 119 | Executive Dashboard | 🟡 | Main `dashboard/` frontend page exists; "executive"-specific scope not confirmed |
+| 120 | Production Dashboard | ✅ | (see #79) |
+| 121 | Quality Dashboard | ✅ | `quality-dashboard/` |
+| 122 | Inventory Dashboard | ✅ | (see #52) |
+| 123 | Finance Dashboard | ⬜ | Not found as standalone |
+| 124 | Plant Dashboard | ⬜ | Not found |
+
+### Phase 17 — Portals
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 125 | Vendor Portal | ✅ | `vendor-portal/` |
+| 126 | Customer Portal | ✅ | `customer-portal/` |
+
+### Phase 18 — Industry 4.0
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 127 | AI Analytics | ⬜ | `analytics/` exists but appears to be standard BI, not AI-specific |
+| 128 | Predictive Analytics | ⬜ | Not found |
+| 129 | IoT Integration | 🟡 | `iot/` folder exists both backend and frontend — some work started, scope unconfirmed |
+| 130 | Machine Connectivity | ⬜ | Not found beyond `iot/` |
+
+### Phase 19 — Enterprise Expansion
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 131 | Multi Plant Management | 🟡 | Data model supports multiple Plants; full multi-plant workflow coverage not confirmed |
+| 132 | Multi Company Management | 🟡 | Data model supports multiple Companies (`companyId` on every table); full multi-company UX not confirmed |
+| 133 | Multi Country Management | ⬜ | Not found |
+
+### Phase 20 — Production Deployment
+
+| # | Module | Status | Note |
+|---|--------|--------|------|
+| 134 | AWS Infrastructure | ✅ | ECS + RDS + Amplify, confirmed live this session |
+| 135 | Security Hardening | 🟡 | JWT + DB-driven RBAC extensively implemented; broader hardening (rate limiting present via `@nestjs/throttler`, WAF, etc.) not individually audited |
+| 136 | Backup & Recovery | ⬜ | Not confirmed/unknown — worth asking about explicitly |
+| 137 | Performance Optimization | ⬜ | Not confirmed |
+| 138 | Go Live | ⬜ | Still dev/staging only — no separate production environment exists yet |
+
+---
 
 ### Patch delivery lessons (read this before handing the user any patch)
 
@@ -437,6 +695,30 @@ Two small, real fixes.
 **Sales Orders created from a Customer PO now auto-confirm at creation** instead of sitting in `DRAFT` waiting for a separate manual confirm click. `createFromCpo()` now sets `status: 'CONFIRMED'`, `confirmedDate`, and `confirmedBy` directly at creation - the exact same fields `confirm()` itself sets, just done in one step. Scoped specifically to `createFromCpo()`, so any Sales Order created through a different path (manual creation, if one exists) is unaffected and still goes through the normal confirm step.
 
 **Run Allocation no longer fails the entire batch when one item is a genuine raw material.** `runAllocation()`'s first-pass validation loop used to hard-`throw` if a submitted item had no `Product` master or no approved BOM - correct behavior for a real data gap, but wrong for an item that was never meant to be manufactured at all (e.g. a raw material sold directly to a customer, entered as a Raw Material record, never as a Product). That single item failing would abort the whole submission, even when every other item in the batch was perfectly fine. Now skips that item gracefully (added to the existing `skipped` array with a clear reason: "Not a manufactured product...") and continues processing the rest of the batch normally.
+
+---
+
+### 49. Customer Item Mapping (Customer PO lines can map to a Raw Material, not just a Product)
+
+A Customer PO line previously had to map to a `Product` record. In practice, some customers order plain raw materials directly (no manufacturing involved) - these were being forced into fake Product records just so the CPO form would accept them. Added `customer-item-mapping/` so a CPO line can map to **either** a Product or a Raw Material, keyed per-customer (the same raw material can have different customer-facing codes/names for different customers). This is read by the Customer PO form when looking up what a given customer calls a given item.
+
+---
+
+### 50. Customer PO source-file upload - proof of order + auto-fill, text-based PDFs only
+
+New feature on the Customer PO creation form only (not Purchase PO), positioned directly above Remarks: a file-upload field that does two things at once - (a) always keeps the uploaded file as proof of the order via the existing shared Documents module, and (b) for text-based PDFs, auto-extracts the CPO number, PO date, delivery date, and line items, and auto-saves the CPO form with **no manual review step**. Restricted to PDF/JPG/JPEG/PNG only (Excel/Word deliberately excluded per explicit user decision - the input's `accept` attribute and a matching runtime check both enforce this).
+
+**Backend** (`src/customer-po/`): `POST /customer-po/parse-source-file` (guarded `Permission.SALES_CREATE`) runs `pdf-parse` against the uploaded PDF's base64 content (10MB cap, requires a `pdf` mimeType), extracts text, and runs a regex-based heuristic parser (`cpo-source-parser.ts` - not AI/OCR) to pull CPO number, dates, and line items. If the extracted text is under 30 characters (i.e. a scanned/photo PDF with no real text layer), it's reported as not-extractable so the frontend falls back to attach-only, with no auto-fill attempt.
+
+**Frontend** (`src/app/(app)/customer-po/page.jsx`): on file select, validates type/size, reads as base64, calls the parse endpoint. If extraction succeeds and a customer is already selected on the form, it auto-saves immediately via a direct `POST /customer-po` (falling back to a generated `FROM-FILE-<timestamp>` CPO number or today's date for anything the file didn't contain), then attaches the original file to the newly-created CPO as proof of order. If no customer is selected yet, the extracted data is held (`pendingExtraction`) and auto-saves the moment a customer is picked (via a `useEffect` watching `form.customerId`). If extraction fails or the file isn't a PDF (a JPG/PNG, or a scanned PDF), the file is still attached as proof of order on manual save, with no auto-fill.
+
+**Two real bugs found and fixed after the user tested this live, both traced to the same root cause**: the "Material Shortage Check" box on the CPO detail page falsely showed "not run yet" (even though the check had genuinely run - confirmed via direct DB query showing a real `mrpRunAt` timestamp), and the uploaded proof-of-order file never actually showed up as an attachment after CPO creation (confirmed via DB query - zero rows ever created in `documents` for that reference). Both came down to the `SALES` role being missing permissions on endpoints this feature depends on but that predate it: `GET /customer-po/:id/shortages` requires `Permission.PURCHASE_VIEW` (a different permission than the `SALES_VIEW` that loads the rest of the detail page), and `POST /documents` requires `Permission.SYSTEM_CREATE`. Both silently failed closed - the shortage box's frontend code quietly sets `shortages` to `null` on any non-ok response instead of surfacing an error, and `attachSourceFileTo()` was deliberately written as "best-effort, never block CPO creation," wrapped in a try/catch that swallows the failure with zero visible feedback to the user. **Fixed at the data layer** (the correct fix - not a frontend workaround) by granting `SALES` the `PURCHASE_VIEW` and `SYSTEM_CREATE`/`SYSTEM_VIEW` permissions via direct SQL against both dev and staging `role_permissions`, confirmed by the user re-testing successfully afterward.
+
+**A third bug found the same way**: the delete button on attachments didn't work for the `SALES` role either - `DELETE /documents/:id` requires `Permission.SYSTEM_EDIT`, also missing. Fixed the same way (SQL grant).
+
+**Known non-bugs, investigated and explained, not fixed**: clicking "View" on an uploaded Excel file downloads it instead of opening it inline - this is normal browser behavior (no browser has a native `.xlsx` renderer) and not fixable without integrating a third-party document viewer, which isn't worth building for this use case. PDF initially behaved the same way for the user but was resolved by a Chrome setting ("Always download PDF files") on their end, not a code change - `documents.service.ts` correctly returns the real stored `mimeType` and the frontend opens it via `fetch()+blob()+window.open()`, which Chrome's download setting can override independently of any server header.
+
+**Not yet fixed, flagged for later**: `attachSourceFileTo()`'s silent try/catch still swallows any future attach failure with no user-visible message. The RBAC gap that was causing it is now fixed, but the underlying "fails silently" pattern in the code itself was not changed - worth hardening so a future permission gap (or any other attach failure) shows up as a visible status message instead of just vanishing.
 
 ---
 
