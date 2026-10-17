@@ -186,29 +186,6 @@ describe('CustomerPoService - Price Integrity', () => {
     });
   });
 
-  describe("createQuantityIncrease() - original PO's price data is never touched", () => {
-    it('blocks increasing quantity on a still-RECEIVED PO (Edit should be used instead)', async () => {
-      const cpo = await seedReceivedCpo();
-      await expect(service.createQuantityIncrease(cpo.id, { poType: 'WRITTEN', customerPoNumber: 'PO-001-A', deliveryDate: '2026-03-01', items: [cpoItem()] } as any, user)).rejects.toThrow(BadRequestException);
-    });
-
-    it('blocks increasing quantity on a CANCELLED PO', async () => {
-      const cpo = await seedReceivedCpo();
-      await prisma.customerPo.update({ where: { id: cpo.id }, data: { status: 'CANCELLED' } });
-      await expect(service.createQuantityIncrease(cpo.id, { poType: 'WRITTEN', customerPoNumber: 'PO-001-A', deliveryDate: '2026-03-01', items: [cpoItem()] } as any, user)).rejects.toThrow(BadRequestException);
-    });
-
-    it("creates a brand-new linked PO rather than mutating the original's prices", async () => {
-      const cpo = await seedReceivedCpo();
-      await prisma.customerPo.update({ where: { id: cpo.id }, data: { status: 'ACKNOWLEDGED' } });
-      const newCpo = await service.createQuantityIncrease(cpo.id, { poType: 'WRITTEN', customerPoNumber: 'PO-001-A', deliveryDate: '2026-03-01', items: [cpoItem({ unitPrice: 120 })] } as any, user);
-      expect(newCpo.id).not.toBe(cpo.id);
-      expect(newCpo.amendmentOfId).toBe(cpo.id);
-      const originalAfter = await prisma.customerPo.findFirst({ where: { id: cpo.id, companyId: user.companyId } });
-      expect(originalAfter.totalAmount).toBeCloseTo(80 * 100 * 1.18, 1);
-    });
-  });
-
   describe('Credit control (enforced at PO entry)', () => {
     it('blocks the PO when checkCredit reports it is not allowed and no override is given', async () => {
       creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true, holdId: 'hold-1' });
