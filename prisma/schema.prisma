@@ -865,7 +865,9 @@ model GateInwardEntry {
   // routine vendor arrival without first creating a full VehicleLog -
   // vehicleLogId above remains available when one already exists.
   driverName    String?
+  driverMobile  String?
   vehicleNumber String?
+  vehicleType   VehicleType?
   supplierName    String
   supplierMobile  String?
   supplierGstin   String?
