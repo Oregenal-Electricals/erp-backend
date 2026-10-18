@@ -421,6 +421,7 @@ model Plant {
   gatePasses         GatePass[]         @relation("GatePassPlant")
   warehouses         Warehouse[]        @relation("WarehousePlant")
   dispatchSalesOrders SalesOrder[]
+  users              User[]
 
   @@map("plants")
   @@index([companyId])
@@ -534,6 +535,8 @@ model User {
   mustChangePwd Boolean  @default(true)
   companyId     String
   company       Company  @relation(fields: [companyId], references: [id])
+  plantId       String?
+  plant         Plant?   @relation(fields: [plantId], references: [id])
   lastLoginAt   DateTime?
   isLocked      Boolean   @default(false)
   loginAttempts Int       @default(0)

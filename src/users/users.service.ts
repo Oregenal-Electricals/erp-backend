@@ -84,6 +84,7 @@ export class UsersService {
         role: dto.role,
         additionalRoles: dto.additionalRoles || [],
         companyId: dto.companyId,
+        plantId: dto.plantId,
         mustChangePwd: dto.mustChangePwd ?? true,
         assignedStage: dto.assignedStage,
         isTestUser: dto.isTestUser ?? false,
@@ -100,12 +101,14 @@ export class UsersService {
         phone: true,
         role: true,
         companyId: true,
+        plantId: true,
         mustChangePwd: true,
         isActive: true,
         isLocked: true,
         isTestUser: true,
         createdAt: true,
         company: { select: { id: true, name: true, code: true } },
+        plant: { select: { id: true, name: true, code: true } },
       },
     });
 
@@ -154,6 +157,7 @@ export class UsersService {
         phone: true,
         role: true,
         companyId: true,
+        plantId: true,
         mustChangePwd: true,
         isActive: true,
         isLocked: true,
@@ -161,6 +165,7 @@ export class UsersService {
         lastLoginAt: true,
         createdAt: true,
         company: { select: { id: true, name: true, code: true } },
+        plant: { select: { id: true, name: true, code: true } },
       },
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
     });
@@ -182,6 +187,7 @@ export class UsersService {
         role: true,
         assignedStage: true,
         companyId: true,
+        plantId: true,
         mustChangePwd: true,
         isActive: true,
         isLocked: true,
@@ -192,6 +198,7 @@ export class UsersService {
         updatedAt: true,
         createdBy: true,
         company: { select: { id: true, name: true, code: true } },
+        plant: { select: { id: true, name: true, code: true } },
       },
     });
     if (!user) throw new NotFoundException('User not found');
@@ -247,9 +254,11 @@ export class UsersService {
         phone: true,
         role: true,
         assignedStage: true,
+        plantId: true,
         isActive: true,
         isTestUser: true,
         company: { select: { id: true, name: true } },
+        plant: { select: { id: true, name: true, code: true } },
       },
     });
 
