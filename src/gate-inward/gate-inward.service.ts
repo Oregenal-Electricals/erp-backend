@@ -83,6 +83,8 @@ export class GateInwardService {
       const autoLog = await this.vehicleManagement.findOrCreateActiveLog({
         vehicleNumber: dto.vehicleNumber,
         driverName: dto.driverName,
+        driverMobile: dto.driverMobile,
+        vehicleType: dto.vehicleType,
         plantId: dto.plantId,
         purpose: 'INWARD',
         companyId: user.companyId,
@@ -203,6 +205,8 @@ export class GateInwardService {
         vehicleLogId: resolvedVehicleLogId,
         vehicleNumber: dto.vehicleNumber,
         driverName:    dto.driverName,
+        driverMobile:  dto.driverMobile,
+        vehicleType:   dto.vehicleType,
         supplierName:  dto.supplierName,
         supplierMobile: dto.supplierMobile,
         supplierGstin:  dto.supplierGstin,

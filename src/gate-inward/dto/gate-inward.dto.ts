@@ -5,6 +5,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { VehicleType } from '@prisma/client';
 export class GateInwardItemDto {
   @ApiPropertyOptional({ example: 'uuid-of-po-item' })
   @IsOptional()
@@ -48,6 +49,14 @@ export class CreateGateInwardDto {
   @IsOptional()
   @IsString()
   driverName?: string;
+  @ApiPropertyOptional({ example: '9876543210' })
+  @IsOptional()
+  @IsString()
+  driverMobile?: string;
+  @ApiPropertyOptional({ enum: VehicleType, example: 'TRUCK' })
+  @IsOptional()
+  @IsEnum(VehicleType)
+  vehicleType?: VehicleType;
   @ApiProperty({ example: 'ABC Steel Suppliers' })
   @IsString()
   @MinLength(2)

@@ -213,6 +213,8 @@ export class VehicleManagementService {
   async findOrCreateActiveLog(params: {
     vehicleNumber: string;
     driverName?: string;
+    driverMobile?: string;
+    vehicleType?: string;
     plantId: string;
     purpose: string;
     companyId: string;
@@ -228,7 +230,16 @@ export class VehicleManagementService {
     });
     if (!vehicle) {
       vehicle = await this.prisma.vehicle.create({
-        data: { vehicleNumber: upperNumber, companyId: params.companyId, createdBy: params.userId, updatedBy: params.userId },
+        data: {
+          vehicleNumber: upperNumber,
+          companyId: params.companyId,
+          // Only set from params on first registration - never silently
+          // overwrite an existing vehicle's recorded type from a later
+          // gate entry that may have been filled in carelessly.
+          ...(params.vehicleType ? { vehicleType: params.vehicleType as any } : {}),
+          createdBy: params.userId,
+          updatedBy: params.userId,
+        },
       });
       await this.audit.log({ tableName: 'vehicles', recordId: vehicle.id, action: 'CREATE', newValues: { vehicleNumber: upperNumber, autoCreated: true }, changedBy: params.userId });
     }
@@ -255,6 +266,7 @@ export class VehicleManagementService {
         vehicleId: vehicle.id,
         plantId: params.plantId,
         driverName: params.driverName || 'Not captured',
+        driverMobile: params.driverMobile,
         purpose: params.purpose as any,
         materialDescription: params.materialDescription,
         supplierName: params.supplierName,
