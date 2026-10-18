@@ -63,11 +63,6 @@ export class CreateUserDto {
   @IsUUID('4', { message: 'companyId must be a valid UUID' })
   companyId: string;
 
-  @ApiPropertyOptional({ description: 'Home plant for this user - used to auto-select/lock the Plant field on plant-specific screens like Gate Inward Entry' })
-  @IsOptional()
-  @IsUUID('4', { message: 'plantId must be a valid UUID' })
-  plantId?: string;
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
@@ -117,11 +112,6 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   assignedStage?: string;
-
-  @ApiPropertyOptional({ description: 'Home plant for this user - used to auto-select/lock the Plant field on plant-specific screens like Gate Inward Entry' })
-  @IsOptional()
-  @IsUUID('4', { message: 'plantId must be a valid UUID' })
-  plantId?: string;
 
   @ApiPropertyOptional({ description: 'Every entry this account creates is always auto-tagged as test data, regardless of any Test Mode setting' })
   @IsOptional()

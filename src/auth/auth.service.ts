@@ -140,8 +140,6 @@ export class AuthService {
         role: true, additionalRoles: true,
         companyId: true, mustChangePwd: true, lastLoginAt: true,
         isTestUser: true,
-        plantId: true,
-        plant: { select: { id: true, name: true, code: true } },
         company: { select: { id: true, name: true, code: true } },
       },
     });
