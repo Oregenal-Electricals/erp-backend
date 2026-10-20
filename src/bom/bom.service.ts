@@ -242,7 +242,7 @@ export class BomService {
    */
   async submitForApproval(id: string, user: any) {
     const bom = await this.findOne(id, user);
-    if (bom.status !== 'DRAFT') throw new BadRequestException('Only DRAFT BOMs can be submitted for approval');
+    if (bom.status !== 'DRAFT' && bom.status !== 'REJECTED') throw new BadRequestException('Only DRAFT or REJECTED BOMs can be submitted for approval');
     if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot submit BOM with no items for approval');
     const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
     if (openQuery) throw new BadRequestException('Cannot submit this BOM for approval while a query on it is still open');
@@ -262,7 +262,7 @@ export class BomService {
     // workflow request).
     if (bom.bomType === 'MASTER') {
       await this.prisma.bom.updateMany({
-        where: { sourceBomId: id, bomType: 'STAGE', status: 'DRAFT', isActive: true },
+        where: { sourceBomId: id, bomType: 'STAGE', status: { in: ['DRAFT', 'REJECTED'] }, isActive: true },
         data: { status: 'PENDING_APPROVAL', updatedBy: user.id },
       });
     }
