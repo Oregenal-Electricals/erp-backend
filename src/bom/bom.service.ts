@@ -240,14 +240,17 @@ export class BomService {
    * is still unresolved - an open question must be answered before the
    * BOM can move forward at all.
    */
-  async submitForApproval(id: string, user: any) {
+  async submitForApproval(id: string, user: any, remarks?: string) {
     const bom = await this.findOne(id, user);
     if (bom.status !== 'DRAFT' && bom.status !== 'REJECTED') throw new BadRequestException('Only DRAFT or REJECTED BOMs can be submitted for approval');
     if (!bom.items || bom.items.length === 0) throw new BadRequestException('Cannot submit BOM with no items for approval');
     const openQuery = await this.prisma.bomQuery.findFirst({ where: { bomId: id, status: 'OPEN' } });
     if (openQuery) throw new BadRequestException('Cannot submit this BOM for approval while a query on it is still open');
 
-    await this.workflows.submit({ documentType: 'BOM', documentId: bom.id, documentNumber: bom.bomNumber }, user);
+    // On a resubmission (previous status REJECTED), remarks carries the
+    // user's "what changed / why resubmitting" note so it shows up in the
+    // approval history alongside the earlier rejection reason.
+    await this.workflows.submit({ documentType: 'BOM', documentId: bom.id, documentNumber: bom.bomNumber, remarks }, user);
 
     const updated = await this.prisma.bom.update({
       where: { id },
