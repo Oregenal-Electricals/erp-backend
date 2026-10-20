@@ -69,3 +69,7 @@ export class RaiseBomQueryDto {
 export class ResolveBomQueryDto {
   @IsString() response: string;
 }
+
+export class SubmitBomForApprovalDto {
+  @IsOptional() @IsString() remarks?: string;
+}
