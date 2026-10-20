@@ -561,7 +561,22 @@ export class BomService {
       where: { bomId, isActive: true },
       orderBy: { sequence: 'desc' },
     });
-    const nextSequence = (lastItem?.sequence || 0) + 1;
+    let nextSequence = (lastItem?.sequence || 0) + 1;
+    const targetSection = dto.section || null;
+    if (targetSection) {
+      const lastInSection = await client.bomItem.findFirst({
+        where: { bomId, isActive: true, section: targetSection },
+        orderBy: { sequence: 'desc' },
+      });
+      if (lastInSection) {
+        const insertAt = lastInSection.sequence + 1;
+        await client.bomItem.updateMany({
+          where: { bomId, isActive: true, sequence: { gte: insertAt } },
+          data: { sequence: { increment: 1 } },
+        });
+        nextSequence = insertAt;
+      }
+    }
 
     const item = await client.bomItem.create({
       data: { ...dto, unitCost, sequence: nextSequence, bomId, companyId: user.companyId, effectiveQty, totalCost, createdBy: user.id, updatedBy: user.id },
