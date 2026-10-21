@@ -57,7 +57,7 @@ describe('BomService - submitForApproval / onWorkflowApproved / onWorkflowReject
     }));
   });
 
-  it('submitForApproval() cascades a MASTER BOM\'s DRAFT or REJECTED stage-BOMs to PENDING_APPROVAL too, so master and stages move together', async () => {
+  it('submitForApproval() cascades a MASTER BOM\'s DRAFT (and REJECTED, so a resubmitted stage-BOM moves too) stage-BOMs to PENDING_APPROVAL, so master and stages move together', async () => {
     prisma.bom.update.mockResolvedValue({ ...draftBom, status: 'PENDING_APPROVAL' });
     await service.submitForApproval('bom-1', user);
     expect(prisma.bom.updateMany).toHaveBeenCalledWith(expect.objectContaining({
