@@ -50,6 +50,37 @@ export class PrismaService
       // silent degradation, not an outage.
       this.logger.error('Failed to install test-data auto-tagging - continuing without it', e as Error);
     }
+    try {
+      await this.ensurePlantIdColumn();
+    } catch (e) {
+      this.logger.error('Failed to ensure users.plantId column - see 150_user_default_plant.sql', e as Error);
+    }
+  }
+
+  /**
+   * One-time, idempotent startup check for 150_user_default_plant.sql
+   * (adds users.plantId + FK to plants + index). Lets an environment
+   * self-apply this migration on boot - using this same connection this
+   * service already holds - instead of needing a manual psql run against
+   * that environment's DB. Every statement below is a no-op once the
+   * column/constraint/index already exist (IF NOT EXISTS / a pg_constraint
+   * check), so this is safe to leave running on every boot in every
+   * environment, including one that already has it applied. Remove once
+   * 150_user_default_plant.sql is confirmed applied everywhere (dev,
+   * staging, production) and this has had a chance to run at least once
+   * in each.
+   */
+  private async ensurePlantIdColumn() {
+    await this.$executeRawUnsafe(`ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "plantId" TEXT;`);
+    await this.$executeRawUnsafe(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_plantId_fkey') THEN
+          ALTER TABLE "users" ADD CONSTRAINT "users_plantId_fkey" FOREIGN KEY ("plantId") REFERENCES "plants"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+        END IF;
+      END $$;
+    `);
+    await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "users_plantId_idx" ON "users"("plantId");`);
+    this.logger.log('users.plantId column/constraint/index ensured');
   }
 
   /**
