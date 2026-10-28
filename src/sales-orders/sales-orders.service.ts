@@ -62,6 +62,18 @@ export class SalesOrdersService {
         cpoItemId: item.id,
         itemCode: mapping.product.code,
         itemName: mapping.product.name,
+        // Carried through unresolved, exactly as the customer wrote it on
+        // their PO - downstream naming-display rule: the CPO shows the
+        // customer's own wording, the SO above shows OUR internal
+        // product code/name (for Production/Dispatch), and the eventual
+        // Sales Invoice must print the customer's own wording again (so
+        // the customer recognizes their own item on the bill). Rather
+        // than have the invoice step re-derive this by joining back
+        // through cpoItemId -> CustomerPoItem, it's captured here once,
+        // at SO-creation time, immutable from then on like every other
+        // field on this line.
+        customerItemCode: item.itemCode,
+        customerItemName: item.itemName,
         description: item.description,
         qty: item.qty,
         uom: item.uom || 'PCS',
@@ -210,10 +222,29 @@ export class SalesOrdersService {
     const calcItems = [];
     for (const item of dto.items) {
       const { saleType, requiredStageId } = await this.validateSaleTypeItem(item, user);
+      // This manual path is a fallback (normal flow is createFromCpo(),
+      // triggered automatically on CPO acknowledgment) and takes
+      // itemCode/itemName as already-resolved internal codes from the
+      // form - but the customer's own original wording still needs to
+      // carry through to the eventual Sales Invoice, so pull it from the
+      // linked CPO line whenever one was selected on the form.
+      let customerItemCode: string | null = null;
+      let customerItemName: string | null = null;
+      if (item.cpoItemId) {
+        const cpoItem = await this.prisma.customerPoItem.findFirst({
+          where: { id: item.cpoItemId, cpo: { companyId: user.companyId } },
+        });
+        if (cpoItem) {
+          customerItemCode = cpoItem.itemCode;
+          customerItemName = cpoItem.itemName;
+        }
+      }
       calcItems.push({
         cpoItemId: item.cpoItemId,
         itemCode: item.itemCode,
         itemName: item.itemName,
+        customerItemCode,
+        customerItemName,
         description: item.description,
         qty: item.qty,
         uom: item.uom || 'PCS',
