@@ -4081,6 +4081,15 @@ model WarehouseBin {
   status      String        @default("EMPTY") // EMPTY, PARTIAL, FULL, RESERVED, BLOCKED
   currentQty  Float         @default(0)
   itemCode    String?
+  // STORE: vertical-first rack numbering (task #56) — racks are physically
+  // vertical (bay/column x shelf level), so bins generated via
+  // generateRackLocations() carry their bay/level coordinates plus a
+  // numeric sequenceOrder that reflects true vertical-first display order.
+  // All three are nullable so existing manually-entered bin codes (which
+  // never had bay/level structure) remain valid and unaffected.
+  bay           String?
+  level         Int?
+  sequenceOrder Int?
   isActive    Boolean       @default(true)
   isTestData  Boolean       @default(false)
   createdAt   DateTime      @default(now())
@@ -4092,6 +4101,7 @@ model WarehouseBin {
   preferredByMaterials RawMaterial[]
   stockLocationBalances StockLocationBalance[]
   @@unique([companyId, warehouseId, code])
+  @@index([rackId, sequenceOrder])
   @@map("warehouse_bins")
   discrepancies GrnItemDiscrepancy[]
 }
