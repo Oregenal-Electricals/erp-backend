@@ -15,12 +15,20 @@ export class StockLocationBalanceService {
   // Creates the row on first use. Never allows the result to go
   // negative - a decrement larger than what's actually there is a
   // caller bug (stale read) and must fail loud, not silently floor at 0.
+  //
+  // TASK-057: binId may be null - used by FG receipts, which have no
+  // put-away/bin-assignment step yet and so are only ever accounted for
+  // at the warehouse level, not a specific bin. Migration 162 adds a
+  // partial unique index covering the binId IS NULL case specifically,
+  // so the same find-then-create-or-update retry logic below stays
+  // correct (one row per item/batch/status) for bin-less rows too.
   async adjustQty(params: {
     companyId: string; itemCode: string; itemName: string;
-    warehouseId: string; binId: string; batchId?: string | null; status?: string;
+    warehouseId: string; binId?: string | null; batchId?: string | null; status?: string;
     deltaQty: number; userId: string;
   }): Promise<number> {
-    const { companyId, itemCode, itemName, warehouseId, binId, userId } = params;
+    const { companyId, itemCode, itemName, warehouseId, userId } = params;
+    const binId = params.binId ?? null;
     const batchId = params.batchId ?? null;
     const status = params.status || 'AVAILABLE';
     const MAX_RETRIES = 5;
@@ -32,7 +40,7 @@ export class StockLocationBalanceService {
 
       if (!existing) {
         if (params.deltaQty < 0) {
-          throw new BadRequestException(`No stock of ${itemCode} found in this bin to move/decrement.`);
+          throw new BadRequestException(`No stock of ${itemCode} found${binId ? ' in this bin' : ''} to move/decrement.`);
         }
         try {
           const created = await this.prisma.stockLocationBalance.create({

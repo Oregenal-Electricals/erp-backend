@@ -80,3 +80,56 @@ describe('StockLocationBalanceService - STORE-015 foundation', () => {
     expect(callCount).toBeGreaterThan(1);
   });
 });
+
+// TASK-057: FG receipts have no put-away/bin-assignment step, so they
+// credit this table with binId: null (warehouse-level, not yet binned)
+// rather than a real bin - these tests cover that this is just an
+// ordinary (item, batch, status) grouping with binId omitted, not a
+// special case in adjustQty() itself.
+describe('StockLocationBalanceService - TASK-057 bin-less (FG) rows', () => {
+  let service: StockLocationBalanceService;
+  let prisma: any;
+  const base = { companyId: 'company-1', itemCode: '9W-LED', itemName: '9W Emergency LED Bulb', warehouseId: 'wh-fg', binId: null, userId: 'user-1' };
+
+  beforeEach(() => {
+    let record: any = null;
+    prisma = {
+      stockLocationBalance: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(record ? { ...record } : null)),
+        create: jest.fn().mockImplementation(({ data }: any) => { record = { id: 'slb-fg-1', ...data }; return Promise.resolve(record); }),
+        updateMany: jest.fn().mockImplementation(({ where, data }: any) => {
+          if (!record) return Promise.resolve({ count: 0 });
+          if (where.qty !== undefined && where.qty !== record.qty) return Promise.resolve({ count: 0 });
+          record = { ...record, ...data };
+          return Promise.resolve({ count: 1 });
+        }),
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+    };
+    service = new StockLocationBalanceService(prisma);
+  });
+
+  it('creates a bin-less row (binId: null) when no bin is given', async () => {
+    const qty = await service.adjustQty({ ...base, deltaQty: 150 });
+    expect(qty).toBe(150);
+    expect(prisma.stockLocationBalance.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ itemCode: '9W-LED', binId: null, batchId: null, status: 'AVAILABLE', qty: 150 }),
+    }));
+  });
+
+  it('defaults binId to null when the caller omits it entirely', async () => {
+    const { binId, ...withoutBinId } = base;
+    const qty = await service.adjustQty({ ...withoutBinId, deltaQty: 80 });
+    expect(qty).toBe(80);
+    expect(prisma.stockLocationBalance.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ binId: null }),
+    }));
+  });
+
+  it('increments the same bin-less row on a second receipt rather than creating a duplicate', async () => {
+    await service.adjustQty({ ...base, deltaQty: 150 });
+    const qty = await service.adjustQty({ ...base, deltaQty: 50 });
+    expect(qty).toBe(200);
+    expect(prisma.stockLocationBalance.create).toHaveBeenCalledTimes(1);
+  });
+});
