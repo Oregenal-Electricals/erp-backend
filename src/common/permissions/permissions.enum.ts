@@ -138,6 +138,14 @@ export enum Permission {
   PURCHASE_RTV_AUTHORIZE = 'PURCHASE_RTV_AUTHORIZE',
   GATE_RTV_OUT_CONFIRM = 'GATE_RTV_OUT_CONFIRM',
 
+  // Material Hold-Days Rules - per material+vendor Store aging/liability
+  // threshold. Admin/Super Admin only (configuration governance), kept
+  // separate from INVENTORY_DASHBOARD_VIEW which still gates the
+  // resulting aging-alert *read* on the Store Dashboard for every role
+  // that already sees that dashboard.
+  STORE_HOLD_DAYS_RULE_VIEW = 'STORE_HOLD_DAYS_RULE_VIEW',
+  STORE_HOLD_DAYS_RULE_MANAGE = 'STORE_HOLD_DAYS_RULE_MANAGE',
+
   PRODUCT_SELLING_PRICE_VIEW = 'PRODUCT_SELLING_PRICE_VIEW',
   PRODUCT_SELLING_PRICE_MANAGE = 'PRODUCT_SELLING_PRICE_MANAGE',
 
