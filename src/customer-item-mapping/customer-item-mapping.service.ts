@@ -48,6 +48,33 @@ export class CustomerItemMappingService {
     });
   }
 
+  /**
+   * The reverse of resolve() - given OUR product/raw material and a
+   * customer, find how that customer themselves refers to it (their own
+   * code/name from their PO). Used when printing something customer-
+   * facing (e.g. the AR Invoice) that must show the customer's original
+   * wording for a line we only hold internally as productId/
+   * rawMaterialId. Returns null (never throws) when no mapping exists,
+   * so callers can fall back to our own item name without this ever
+   * blocking document creation.
+   */
+  async resolveByInternalItem(
+    customerId: string | null | undefined,
+    target: { productId?: string | null; rawMaterialId?: string | null },
+    user: any,
+  ) {
+    if (!customerId || (!target.productId && !target.rawMaterialId)) return null;
+    return this.prisma.customerItemMapping.findFirst({
+      where: {
+        companyId: user.companyId,
+        customerId,
+        isActive: true,
+        ...(target.productId ? { productId: target.productId } : { rawMaterialId: target.rawMaterialId }),
+      },
+      include: this.includes(),
+    });
+  }
+
   async createIfMissing(dto: ResolveOrCreateMappingDto, user: any) {
     const existing = await this.prisma.customerItemMapping.findFirst({
       where: { companyId: user.companyId, customerId: dto.customerId, customerItemCode: dto.customerItemCode },
