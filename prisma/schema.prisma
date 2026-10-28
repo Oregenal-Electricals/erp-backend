@@ -386,6 +386,7 @@ model Company {
   rtvRequests RtvRequest[]
   productSellingPrices ProductSellingPrice[]
   grnItemDiscrepancies GrnItemDiscrepancy[]
+  materialHoldDaysRules MaterialHoldDaysRule[]
 }
 
 model Plant {
@@ -2252,6 +2253,7 @@ model Vendor {
   qualityRatings SupplierQualityRating[]
   apBills        ApBill[] @relation("ApBillVendor")
   supplierCars   SupplierCar[] @relation("SupplierCarVendor")
+  holdDaysRules  MaterialHoldDaysRule[]
   @@map("vendors")
 }
 
@@ -2395,6 +2397,7 @@ model RawMaterial {
   brands          RawMaterialBrand[]
   iqcCheckTemplates IqcCheckTemplate[]
   customerItemMappings CustomerItemMapping[]
+  holdDaysRules   MaterialHoldDaysRule[]
 
   @@unique([companyId, code])
   @@map("raw_materials")
@@ -2422,6 +2425,56 @@ model RawMaterialBrand {
 
   @@unique([rawMaterialId, preferenceOrder])
   @@map("raw_material_brands")
+}
+
+// MODULE 16b — MATERIAL HOLD-DAYS RULES (Store aging / liability threshold)
+// ============================================================
+// Business requirement: material sitting in Store beyond a configured
+// number of days carries no quality/liability guarantee. There is
+// deliberately no single global number for this - the same RawMaterial
+// can get a different hold-days limit per Vendor (Vendor A's lot might
+// be trusted for 14 days, Vendor B's for 30), and the user sets/updates
+// these himself at any time via src/material-hold-days. A row with
+// vendorId = null is that material's own default, used whenever no
+// vendor-specific row exists for the batch at hand; if even that is
+// missing, MaterialHoldDaysService falls back to the SystemSetting key
+// 'store_default_hold_days' (category STORE, seeded by migration 153) -
+// a single company-wide number so Store aging never silently skips the
+// check for an unconfigured item/vendor combination.
+model MaterialHoldDaysRule {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id])
+  rawMaterialId String
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  // Null = this material's own default (applies to every vendor that
+  // has no row of its own below). Non-null = a rule scoped to exactly
+  // that vendor's supply of this material, which always takes priority
+  // over the material-level default. A material can have at most one
+  // default row (vendorId IS NULL) and at most one row per vendor - the
+  // @@unique below covers the per-vendor case, but Postgres treats every
+  // NULL as distinct so it can NOT stop two default rows on its own;
+  // a partial unique index (companyId, rawMaterialId WHERE vendorId IS
+  // NULL) is added by hand in the migration SQL (Prisma's schema
+  // language has no partial-unique-index syntax without the
+  // extendedIndexes preview feature, which this project does not
+  // enable). The service layer also re-checks before every write, so
+  // the conflict surfaces as a clean 409 rather than a raw DB error.
+  vendorId      String?
+  vendor        Vendor?     @relation(fields: [vendorId], references: [id])
+  holdDays      Int
+  remarks       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  createdBy     String?
+  updatedBy     String?
+  isActive      Boolean     @default(true)
+  isTestData    Boolean     @default(false)
+
+  @@unique([companyId, rawMaterialId, vendorId])
+  @@index([companyId, rawMaterialId])
+  @@index([companyId, vendorId])
+  @@map("material_hold_days_rules")
 }
 
 // MODULE 17 — HSN/SAC MASTER
