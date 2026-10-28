@@ -2,8 +2,10 @@ import { IsString, IsOptional, IsNumber, IsDateString, IsIn, Min } from 'class-v
 
 const RESULTS = ['PASS','FAIL','CONDITIONAL','PENDING'];
 const CHECKS = ['PASS','FAIL','NA'];
+export const OQC_STAGES = ['PRE_PACK','POST_PACK'];
 
 export class CreateOqcDto {
+  @IsString() @IsIn(OQC_STAGES) stage: string;
   @IsString() fgReceiptId: string;
   @IsOptional() @IsString() workOrderId?: string;
   @IsString() itemCode: string;
