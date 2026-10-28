@@ -17,6 +17,9 @@ export class CreateProductDto {
   @IsOptional() @IsObject() specifications?: Record<string, any>;
   @IsOptional() @IsNumber() @Min(0) minOrderQty?: number;
   @IsOptional() @IsInt() @Min(0) leadTimeDays?: number;
+  // Management-only (PRODUCTION_TARGET_MANAGE) - see ProductService.
+  @IsOptional() @IsNumber() @Min(0) hourlyTarget?: number;
+  @IsOptional() @IsNumber() @Min(0) dailyTarget?: number;
 }
 
 export class UpdateProductDto {
@@ -36,4 +39,7 @@ export class UpdateProductDto {
   @IsOptional() @IsNumber() @Min(0) minOrderQty?: number;
   @IsOptional() @IsInt() @Min(0) leadTimeDays?: number;
   @IsOptional() @IsBoolean() isActive?: boolean;
+  // Management-only (PRODUCTION_TARGET_MANAGE) - see ProductService.
+  @IsOptional() @IsNumber() @Min(0) hourlyTarget?: number;
+  @IsOptional() @IsNumber() @Min(0) dailyTarget?: number;
 }
