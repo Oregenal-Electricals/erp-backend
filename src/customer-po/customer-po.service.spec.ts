@@ -188,6 +188,18 @@ describe('CustomerPoService - Price Integrity', () => {
       expect(cpo.status).toBe('ACKNOWLEDGED');
       expect(cpo.totalAmount).toBeCloseTo(80 * 100 * 1.18, 1);
     });
+
+    // Naming display rule across CPO -> SO -> Invoice: the CPO line must
+    // keep the customer's own item wording exactly as Sales typed it -
+    // never silently resolved to our internal product code/name here.
+    // (The Sales Order created on Acknowledge is what shows OUR naming -
+    // see SalesOrdersService.createFromCpo().)
+    it("stores the customer's own itemCode/itemName on the CPO line verbatim, never the mapped internal product's", async () => {
+      customerItemMapping.resolve.mockResolvedValue({ product: { id: 'prod-1', code: 'BULB-9W-INTERNAL', name: 'Internal 9W Bulb' } });
+      const cpo = await service.create(createDto({ items: [cpoItem({ itemCode: 'HAV-BULB-WARM-9', itemName: "Customer's own name" })] }), user);
+      expect(cpo.items[0].itemCode).toBe('HAV-BULB-WARM-9');
+      expect(cpo.items[0].itemName).toBe("Customer's own name");
+    });
   });
 
   describe('automatic acknowledge + Sales Order creation (replaces the manual Acknowledge click)', () => {
