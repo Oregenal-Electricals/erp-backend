@@ -3,10 +3,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { AdjustStockDto } from './dto/stock-ledger.dto';
 import { CustomerPoService } from '../customer-po/customer-po.service';
+import { StockLocationBalanceService } from '../stock-location-balance/stock-location-balance.service';
 
 @Injectable()
 export class StockLedgerService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private customerPoService: CustomerPoService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private customerPoService: CustomerPoService,
+    private locationBalance: StockLocationBalanceService,
+  ) {}
 
   // Core method: update stock balance and create ledger entry
   async postTransaction(data: {
@@ -277,8 +283,9 @@ export class StockLedgerService {
       userId: user.id,
     });
 
+    let stockBatchId: string | null = null;
     if (fgReceipt.batchNumber) {
-      await this.prisma.stockBatch.create({
+      const batch = await this.prisma.stockBatch.create({
         data: {
           batchNumber: fgReceipt.batchNumber, itemCode: fgReceipt.itemCode,
           itemName: fgReceipt.itemName, warehouseId: fgReceipt.warehouseId,
@@ -286,8 +293,24 @@ export class StockLedgerService {
           unitCost: fgReceipt.unitCost, status: 'ACTIVE',
           companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
         },
-      }).catch(() => {});
+      }).catch(() => null);
+      stockBatchId = batch?.id ?? null;
     }
+
+    // TASK-057: RM gets a bin-level StockLocationBalance row once
+    // StockPutawayService.complete() picks a bin (see that service) -
+    // FG never had an equivalent row at all, so it was invisible to any
+    // bin-level/location query (trace, rack-bin lookups) even though it
+    // was already correctly counted in StockBalance. FG has no
+    // put-away/bin-assignment step of its own yet, so this is recorded
+    // with binId: null (warehouse-level, not yet binned) rather than
+    // inventing a placeholder bin - see StockLocationBalance's schema
+    // comment for why that's safe.
+    await this.locationBalance.adjustQty({
+      companyId: user.companyId, itemCode: fgReceipt.itemCode, itemName: fgReceipt.itemName,
+      warehouseId: fgReceipt.warehouseId, binId: null, batchId: stockBatchId,
+      status: 'AVAILABLE', deltaQty: fgReceipt.receivedQty, userId: user.id,
+    });
 
     await this.audit.log({ tableName: 'stock_ledger', recordId: oqcId, action: 'CREATE', newValues: { entry }, changedBy: user.id });
     return { message: 'Stock entry created', entry };

@@ -12,7 +12,7 @@ describe('StockLedgerService.getMaterialSummary - STORE-010', () => {
       holdStockItem: { findMany: jest.fn().mockResolvedValue([]) },
       rejectedStockItem: { findMany: jest.fn().mockResolvedValue([]) },
     };
-    service = new StockLedgerService(prisma, {} as any, {} as any);
+    service = new StockLedgerService(prisma, {} as any, {} as any, {} as any);
   });
 
   it('matches the spec example: 800+700 available, 200 QC pending, 100 hold, 50 rejected -> physical total 1850', async () => {

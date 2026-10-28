@@ -25,7 +25,7 @@ describe('StockLedgerService.receiveFromIqc - STORE-009 raw material StockBatch 
       stockBatch: { create: jest.fn().mockResolvedValue({}) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new StockLedgerService(prisma, audit, {} as any);
+    service = new StockLedgerService(prisma, audit, {} as any, { adjustQty: jest.fn().mockResolvedValue(0) } as any);
   });
 
   it('creates a StockBatch when the accepted IqcItem has a batchNumber', async () => {

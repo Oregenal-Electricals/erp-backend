@@ -25,7 +25,7 @@ describe('StockLedgerService.postTransaction - STORE-010 concurrency-safe balanc
       },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new StockLedgerService(prisma, audit, { recheckAllOpenPos: jest.fn().mockResolvedValue(undefined) } as any);
+    service = new StockLedgerService(prisma, audit, { recheckAllOpenPos: jest.fn().mockResolvedValue(undefined) } as any, { adjustQty: jest.fn().mockResolvedValue(0) } as any);
   });
 
   it('credits stock normally and posts a matching ledger entry', async () => {
@@ -118,7 +118,7 @@ describe('StockLedgerService.postTransaction - STORE-010 targetField (Available 
       },
       stockLedger: { create: jest.fn().mockImplementation(({ data }: any) => Promise.resolve({ id: 'ledger-1', ...data })) },
     };
-    service = new StockLedgerService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, { recheckAllOpenPos: jest.fn().mockResolvedValue(undefined) } as any);
+    service = new StockLedgerService(prisma, { log: jest.fn().mockResolvedValue(undefined) } as any, { recheckAllOpenPos: jest.fn().mockResolvedValue(undefined) } as any, { adjustQty: jest.fn().mockResolvedValue(0) } as any);
   });
 
   it('defaults to crediting availableQty when targetField is omitted (backward-compatible)', async () => {
