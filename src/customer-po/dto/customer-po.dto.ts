@@ -1,6 +1,23 @@
 import { IsString, IsOptional, IsNumber, IsDateString, IsArray, ValidateNested, Min, IsIn, ValidateIf, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
+// Store's response to a single material_shortages row (task #52).
+// verifiedQty is always sent by the Store screen, pre-filled with the
+// system-calculated shortageQty - leaving it unchanged is a "confirm
+// as accurate"; changing it is an override. reason is validated as
+// mandatory in the service (not here) only when verifiedQty differs
+// from the row's current shortageQty, since that check needs the DB
+// row, not just the DTO shape.
+export class VerifyMaterialShortageDto {
+  @IsNumber()
+  @Min(0)
+  verifiedQty: number;
+
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
+
 export class CpoItemDto {
   @IsString() itemCode: string;
   @IsString() itemName: string;
