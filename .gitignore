@@ -34,3 +34,6 @@ Thumbs.db
 coverage/
 .env.*
 
+
+# Claude Code internal worktrees
+.claude/
