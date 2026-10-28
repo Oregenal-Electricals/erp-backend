@@ -3783,6 +3783,14 @@ model StockLedger {
   @@map("stock_ledger")
 }
 
+// TASK-057 note: this is NOT an FG-specific or legacy model. It is the
+// single item+warehouse quantity/cost rollup already shared by raw
+// material (StockLedgerService.receiveFromIqc) and finished goods
+// (StockLedgerService.receiveFromOqc) alike, and is read by ~20 other
+// modules (dispatch, MRP, stock reports, dashboards, valuation...).
+// TASK-057 added bin-level tracking for FG via StockLocationBalance
+// (see that model's comment) without touching this one - it stays the
+// shared aggregate source of truth for availableQty/reservedQty/cost.
 model StockBalance {
   id            String    @id @default(uuid())
   companyId     String
@@ -4310,6 +4318,21 @@ model StockTransferItem {
 // then kept current by STORE-009 put-away, STORE-012 issue, and
 // STORE-014 return, so a transfer always debits/credits real numbers
 // rather than a second, parallel, eventually-inconsistent ledger.
+//
+// TASK-057: binId is nullable to let FG receipts (OqcInspection.release()
+// -> StockLedgerService.receiveFromOqc()) record a row here too, even
+// though FG has no put-away/bin-assignment step of its own yet - unlike
+// RM, which only ever gets a row once StockPutawayService.complete()
+// actually picks a bin. A null binId means "accounted for at the
+// warehouse level, not yet binned", not "nowhere" - the same meaning
+// StockBalance.availableQty already carried for FG before this change,
+// just now also visible through this table so a bin-location query
+// (trace, rack-bin lookups) and item+warehouse+batch rollups cover FG
+// too. The plain @@unique below does not by itself stop two concurrent
+// bin-less rows for the same item/batch/status (Postgres treats each
+// NULL binId as distinct), so migration 162 adds a partial unique index
+// on (companyId, itemCode, batchId, status) WHERE "binId" IS NULL to
+// close that gap at the database level.
 model StockLocationBalance {
   id          String        @id @default(uuid())
   companyId   String
@@ -4318,8 +4341,8 @@ model StockLocationBalance {
   itemName    String
   warehouseId String
   warehouse   Warehouse     @relation(fields: [warehouseId], references: [id])
-  binId       String
-  bin         WarehouseBin  @relation(fields: [binId], references: [id])
+  binId       String?
+  bin         WarehouseBin? @relation(fields: [binId], references: [id])
   batchId     String?
   batch       StockBatch?   @relation("StockLocationBalanceBatch", fields: [batchId], references: [id])
   status      String        @default("AVAILABLE") // AVAILABLE, HOLD, REJECTED, QC_PENDING
