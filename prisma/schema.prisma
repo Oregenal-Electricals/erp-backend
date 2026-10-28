@@ -359,6 +359,7 @@ model Company {
   gatePassTypeMasters     GatePassTypeMaster[]
   securityReasons         SecurityReason[]
   gateEvents              GateEvent[]
+  hourlyProductionReports HourlyProductionReport[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
   downtimes              Downtime[]
@@ -373,6 +374,7 @@ model Company {
   dispatchLoadings DispatchLoading[]
   dispatchConfirmations DispatchConfirmation[]
   dispatchGateOuts DispatchGateOut[]
+  dispatchTrackingUpdates DispatchTrackingUpdate[]
   @@map("companies")
   @@index([code])
   @@index([isActive])
@@ -578,6 +580,7 @@ model User {
   manpowerFrom     ManpowerAllocation[] @relation("ManpowerFrom")
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerAssignmentsMade ManpowerAssignment[] @relation("ManpowerAssignmentBy")
+  hourlyProductionReports HourlyProductionReport[] @relation("HourlyReportSupervisor")
   gateEventsRecorded GateEvent[] @relation("GateEventSecurityUser")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
@@ -1220,6 +1223,41 @@ model Contractor {
 
   @@map("contractors")
   @@index([companyId])
+}
+
+// Supervisor's hour-by-hour target vs actual for a stage/Work Order -
+// the same shape as the physical whiteboard (9-10, 10-11, ... rows
+// with a target and actual per column). Manpower headcount for
+// costing is NOT re-entered here - it's derived from whichever
+// ManpowerAssignment records were active during this exact hour
+// window, since supervisors already shift people within the hour via
+// the existing assignment records and re-typing a count would just
+// invite it to drift from reality.
+model HourlyProductionReport {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  supervisorId    String
+  supervisor      User      @relation("HourlyReportSupervisor", fields: [supervisorId], references: [id])
+  workOrderId     String?
+  workOrder       WorkOrder? @relation(fields: [workOrderId], references: [id])
+  stageName       String
+  hourStart       DateTime
+  hourEnd         DateTime
+  targetQty       Float     @default(0)
+  actualQty       Float     @default(0)
+  gapReason       String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("hourly_production_reports")
+  @@unique([companyId, stageName, workOrderId, hourStart])
+  @@index([companyId, hourStart])
+  @@index([companyId, workOrderId])
 }
 
 // ============================================================
@@ -2247,15 +2285,6 @@ model Product {
   specifications  Json?
   minOrderQty     Float?
   leadTimeDays    Int?
-  // Real target output numbers for Production/Planning, independent of
-  // (though typically set with reference to) piecesPerManHour on
-  // ProductStandardProductivity - that figure is a per-worker-hour
-  // productivity rate used for manpower costing/planning, whereas these
-  // are the actual hourly/daily output targets Production is expected to
-  // hit for this product. Nullable because not every product has a
-  // target set yet. Management-only editable - see PRODUCTION_TARGET_MANAGE.
-  hourlyTarget    Float?
-  dailyTarget     Float?
   iqcRequired     Boolean       @default(true)
   status          String        @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, REJECTED
   approvedBy      String?
@@ -4610,6 +4639,7 @@ model WorkOrder {
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
   manpowerAssignments ManpowerAssignment[]
+  hourlyProductionReports HourlyProductionReport[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
@@ -6282,8 +6312,57 @@ model DispatchGateOut {
 
   packages DispatchPackage[]
   items    DispatchGateOutItem[]
+  trackingUpdates DispatchTrackingUpdate[]
 
   @@map("dispatch_gate_outs")
+}
+
+// MODULE 102 — DSP-015: POST-GATE-OUT TRACKING
+// ============================================================
+// Manual status timeline for a shipment after it has physically left the
+// gate (DispatchGateOut). Multiple rows per gateOut - this is an
+// append-only log, not a single mutable field, so the full history
+// (IN_TRANSIT -> DELAYED -> IN_TRANSIT -> DELIVERED, etc.) stays visible.
+//
+// Entry is manual-only today (Dispatch role, via DISPATCH_TRACKING_CREATE/
+// EDIT), but the shape is deliberately feed-ready for a future carrier
+// integration (webhook or tracking-ID lookup) without a schema change:
+//   - eventAt: when the status actually occurred per the source (may
+//     differ from createdAt, e.g. a feed backfilling a delayed webhook).
+//   - source: 'MANUAL' today; a future feed sets 'CARRIER_WEBHOOK' /
+//     'CARRIER_LOOKUP' etc. on the SAME column.
+//   - enteredBy: the user who entered this row manually; null once a
+//     feed populates it instead.
+//   - carrierReference: the carrier's tracking/consignment/AWB number a
+//     feed would key off of; also usable today for manual entries that
+//     already have a reference.
+//   - rawPayload: the raw carrier payload a webhook/lookup would hand
+//     back, kept verbatim for reconciliation/debugging; null for manual
+//     entries.
+model DispatchTrackingUpdate {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  gateOutId         String
+  gateOut           DispatchGateOut @relation(fields: [gateOutId], references: [id], onDelete: Cascade)
+  status            String   @default("IN_TRANSIT") // IN_TRANSIT, DELAYED, DELIVERED
+  location          String?
+  notes             String?
+  eventAt           DateTime @default(now())
+  source            String   @default("MANUAL") // MANUAL, CARRIER_WEBHOOK, CARRIER_LOOKUP
+  enteredBy         String?
+  carrierReference  String?
+  rawPayload        Json?
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  @@map("dispatch_tracking_updates")
+  @@index([gateOutId])
+  @@index([companyId, status])
 }
 
 model DispatchGateOutItem {
