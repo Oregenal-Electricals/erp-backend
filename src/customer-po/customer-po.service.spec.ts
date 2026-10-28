@@ -84,7 +84,25 @@ describe('CustomerPoService - Price Integrity', () => {
       materialShortage: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }), createMany: jest.fn().mockResolvedValue({ count: 0 }) },
       product: { findFirst: jest.fn().mockResolvedValue(null) },
       rawMaterial: { findFirst: jest.fn().mockResolvedValue(null) },
-      $transaction: jest.fn().mockImplementation((cb: any) => cb(prisma)),
+      // Mimics real Prisma transaction atomicity: this in-memory fake store
+      // has no ACID semantics of its own, so if the callback throws (e.g.
+      // createFromCpo() rejecting partway through acknowledge()), undo any
+      // mutation it made first - otherwise a status flip to ACKNOWLEDGED
+      // would "stick" even though the real acknowledgment is supposed to
+      // have rolled back with it.
+      $transaction: jest.fn().mockImplementation(async (cb: any) => {
+        const recordsSnapshot = structuredClone(cpoRecords);
+        const itemsSnapshot = structuredClone(cpoItems);
+        try {
+          return await cb(prisma);
+        } catch (e) {
+          for (const k of Object.keys(cpoRecords)) delete cpoRecords[k];
+          Object.assign(cpoRecords, recordsSnapshot);
+          for (const k of Object.keys(cpoItems)) delete cpoItems[k];
+          Object.assign(cpoItems, itemsSnapshot);
+          throw e;
+        }
+      }),
       role: { findMany: jest.fn().mockResolvedValue([]) },
     };
 
@@ -102,8 +120,28 @@ describe('CustomerPoService - Price Integrity', () => {
     service = new CustomerPoService(prisma, audit, salesOrders, mrpService, creditControl, customerItemMapping);
   });
 
+  // create() now auto-acknowledges (see autoAcknowledge() in the
+  // service) and, with this suite's default mocks, that succeeds
+  // immediately - moving the fixture straight to ACKNOWLEDGED before
+  // the tests below ever run. Those tests are specifically about
+  // behavior for a CPO that is *still* RECEIVED (the edit window, and
+  // exercising acknowledge() directly) - a real case that still occurs
+  // whenever auto-conversion itself fails (e.g. an unmapped item code)
+  // and the CPO is left for manual handling. Force the fixture back to
+  // that state here rather than re-deriving every one of those tests;
+  // the new auto-conversion behavior itself is covered by its own
+  // dedicated tests further below.
   async function seedReceivedCpo() {
-    return service.create(createDto(), user);
+    const cpo = await service.create(createDto(), user);
+    cpoRecords[cpo.id].status = 'RECEIVED';
+    cpoRecords[cpo.id].acknowledgedDate = null;
+    // create() may have already auto-acknowledged (and called
+    // createFromCpo) before the status was forced back above - clear
+    // that call history so tests built on this helper that inspect
+    // createFromCpo's call args (e.g. "prices flow to the Sales Order
+    // unchanged") see only the call they are actually testing.
+    salesOrders.createFromCpo.mockClear();
+    return { ...cpo, status: 'RECEIVED', acknowledgedDate: null };
   }
 
   describe('create()', () => {
@@ -111,10 +149,53 @@ describe('CustomerPoService - Price Integrity', () => {
       await expect(service.create(createDto({ quotationId: draftQuotation.id }), user)).rejects.toThrow(BadRequestException);
     });
 
-    it('creates a RECEIVED CPO with the submitted line prices, unchanged', async () => {
+    it('creates a CPO with the submitted line prices, unchanged, then auto-converts it to ACKNOWLEDGED', async () => {
       const cpo = await service.create(createDto({ items: [cpoItem({ unitPrice: 80 })] }), user);
-      expect(cpo.status).toBe('RECEIVED');
+      // Auto-conversion (autoAcknowledge()) fires at the end of create()
+      // and succeeds with this suite's default mocks - replacing the old
+      // "stays RECEIVED until a human Acknowledges it" behavior.
+      expect(cpo.status).toBe('ACKNOWLEDGED');
       expect(cpo.totalAmount).toBeCloseTo(80 * 100 * 1.18, 1);
+    });
+  });
+
+  describe('automatic acknowledge + Sales Order creation (replaces the manual Acknowledge click)', () => {
+    it('auto-converts a freshly created CPO straight to ACKNOWLEDGED with its Sales Order, with no Acknowledge call needed', async () => {
+      const cpo = await service.create(createDto(), user);
+      expect(cpo.status).toBe('ACKNOWLEDGED');
+      expect(cpo.acknowledgedDate).toBeTruthy();
+      expect(salesOrders.createFromCpo).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves the CPO RECEIVED and does not fail create(), if auto-conversion itself fails (e.g. an unmapped item)', async () => {
+      salesOrders.createFromCpo.mockRejectedValueOnce(
+        new BadRequestException('"BULB-9W" has no customer item mapping yet - map it on the Customer PO before acknowledging.'),
+      );
+      const cpo = await service.create(createDto(), user);
+      expect(cpo.status).toBe('RECEIVED');
+    });
+
+    it('does not re-acknowledge (or double-create a Sales Order for) a CPO that already auto-converted', async () => {
+      const cpo = await service.create(createDto(), user); // auto-acknowledged
+      expect(cpo.status).toBe('ACKNOWLEDGED');
+      salesOrders.createFromCpo.mockClear();
+
+      // update() only allows editing a RECEIVED CPO - an already
+      // ACKNOWLEDGED one (the normal post-auto-conversion state) is
+      // rejected, exactly as it would be for a manually-acknowledged one.
+      await expect(service.update(cpo.id, createDto() as any, user)).rejects.toThrow(BadRequestException);
+      expect(salesOrders.createFromCpo).not.toHaveBeenCalled();
+
+      // And calling the manual endpoint directly is equally guarded.
+      await expect(service.acknowledge(cpo.id, user)).rejects.toThrow(BadRequestException);
+      expect(salesOrders.createFromCpo).not.toHaveBeenCalled();
+    });
+
+    it('auto-converts on update() too, when the CPO is still RECEIVED (e.g. a retry after an earlier mapping fix)', async () => {
+      const cpo = await seedReceivedCpo();
+      const updated = await service.update(cpo.id, createDto({ items: [cpoItem({ unitPrice: 95 })] }) as any, user);
+      expect(updated.status).toBe('ACKNOWLEDGED');
+      expect(salesOrders.createFromCpo).toHaveBeenCalled();
     });
   });
 
@@ -207,7 +288,10 @@ describe('CustomerPoService - Price Integrity', () => {
       creditControl.checkCredit.mockResolvedValue({ allowed: false, reason: 'Credit limit exceeded', position: {}, holdCreated: true });
       prisma.role.findMany.mockResolvedValue([{ permissions: [{ permission: 'CREDIT_CONTROL_OVERRIDE' }] }]);
       const cpo = await service.create(createDto({ creditOverride: true, creditOverrideReason: 'Approved by Sales Director' }), user);
-      expect(cpo.status).toBe('RECEIVED');
+      // An allowed-via-override CPO is, by definition, clear to proceed -
+      // autoAcknowledge() still runs and converts it, same as any other
+      // successfully created CPO (see autoAcknowledge()'s credit-holds note).
+      expect(cpo.status).toBe('ACKNOWLEDGED');
       expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ newValues: expect.objectContaining({ creditOverride: true }) }));
     });
 
@@ -216,12 +300,12 @@ describe('CustomerPoService - Price Integrity', () => {
       prisma.role.findMany.mockResolvedValue([]);
       const superUser = { ...user, allRoles: ['SUPER_ADMIN'] };
       const cpo = await service.create(createDto({ creditOverride: true, creditOverrideReason: 'Approved' }), superUser);
-      expect(cpo.status).toBe('RECEIVED');
+      expect(cpo.status).toBe('ACKNOWLEDGED');
     });
 
     it('creates the PO normally when credit is allowed, without touching role lookups', async () => {
       const cpo = await service.create(createDto(), user);
-      expect(cpo.status).toBe('RECEIVED');
+      expect(cpo.status).toBe('ACKNOWLEDGED');
       expect(prisma.role.findMany).not.toHaveBeenCalled();
     });
   });
