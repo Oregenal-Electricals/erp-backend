@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { WorkflowsService } from '../workflows/workflows.service';
@@ -16,7 +16,38 @@ export class ProductService {
     return { category: true, uom: true, family: true };
   }
 
+  /**
+   * Checks whether the current user holds PRODUCTION_TARGET_MANAGE, the
+   * same lookup PermissionsGuard performs - needed here because setting
+   * hourlyTarget/dailyTarget is gated separately from the rest of the
+   * Product record, which only requires INVENTORY_CREATE/INVENTORY_EDIT
+   * at the controller level.
+   */
+  private async userHasProductionTargetManage(user: any): Promise<boolean> {
+    const allRoles: string[] = user.allRoles || [user.role, ...(user.additionalRoles || [])].filter((v: string, i: number, a: string[]) => a.indexOf(v) === i);
+    if (allRoles.includes('SUPER_ADMIN')) return true;
+    const roles = await this.prisma.role.findMany({
+      where: { name: { in: allRoles }, companyId: user.companyId, isActive: true },
+      include: { permissions: { where: { isActive: true, permission: 'PRODUCTION_TARGET_MANAGE' } } },
+    });
+    return roles.some((r) => r.permissions.length > 0);
+  }
+
+  // Both hourlyTarget and dailyTarget are management-only - a caller
+  // without PRODUCTION_TARGET_MANAGE can still create/update every other
+  // Product field via INVENTORY_CREATE/INVENTORY_EDIT, but is blocked the
+  // moment either target field is actually present in the payload (not
+  // just falsy - 0 is a value someone could legitimately set).
+  private async assertCanSetTargets(dto: CreateProductDto | UpdateProductDto, user: any) {
+    if (dto.hourlyTarget === undefined && dto.dailyTarget === undefined) return;
+    const allowed = await this.userHasProductionTargetManage(user);
+    if (!allowed) {
+      throw new ForbiddenException('Only users with PRODUCTION_TARGET_MANAGE can set hourly/daily production targets on a product');
+    }
+  }
+
   async create(dto: CreateProductDto, user: any) {
+    await this.assertCanSetTargets(dto, user);
     const exists = await this.prisma.product.findUnique({
       where: { companyId_code: { companyId: user.companyId, code: dto.code.toUpperCase() } },
     });
@@ -86,6 +117,7 @@ export class ProductService {
   }
 
   async update(id: string, dto: UpdateProductDto, user: any) {
+    await this.assertCanSetTargets(dto, user);
     const product = await this.findOne(id, user);
     const updated = await this.prisma.product.update({
       where: { id },
