@@ -359,6 +359,7 @@ model Company {
   gatePassTypeMasters     GatePassTypeMaster[]
   securityReasons         SecurityReason[]
   gateEvents              GateEvent[]
+  hourlyProductionReports HourlyProductionReport[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
   downtimes              Downtime[]
@@ -578,6 +579,7 @@ model User {
   manpowerFrom     ManpowerAllocation[] @relation("ManpowerFrom")
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerAssignmentsMade ManpowerAssignment[] @relation("ManpowerAssignmentBy")
+  hourlyProductionReports HourlyProductionReport[] @relation("HourlyReportSupervisor")
   gateEventsRecorded GateEvent[] @relation("GateEventSecurityUser")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
@@ -1220,6 +1222,41 @@ model Contractor {
 
   @@map("contractors")
   @@index([companyId])
+}
+
+// Supervisor's hour-by-hour target vs actual for a stage/Work Order -
+// the same shape as the physical whiteboard (9-10, 10-11, ... rows
+// with a target and actual per column). Manpower headcount for
+// costing is NOT re-entered here - it's derived from whichever
+// ManpowerAssignment records were active during this exact hour
+// window, since supervisors already shift people within the hour via
+// the existing assignment records and re-typing a count would just
+// invite it to drift from reality.
+model HourlyProductionReport {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id])
+  supervisorId    String
+  supervisor      User      @relation("HourlyReportSupervisor", fields: [supervisorId], references: [id])
+  workOrderId     String?
+  workOrder       WorkOrder? @relation(fields: [workOrderId], references: [id])
+  stageName       String
+  hourStart       DateTime
+  hourEnd         DateTime
+  targetQty       Float     @default(0)
+  actualQty       Float     @default(0)
+  gapReason       String?
+  isActive        Boolean   @default(true)
+  isTestData      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  @@map("hourly_production_reports")
+  @@unique([companyId, stageName, workOrderId, hourStart])
+  @@index([companyId, hourStart])
+  @@index([companyId, workOrderId])
 }
 
 // ============================================================
@@ -2247,15 +2284,6 @@ model Product {
   specifications  Json?
   minOrderQty     Float?
   leadTimeDays    Int?
-  // Real target output numbers for Production/Planning, independent of
-  // (though typically set with reference to) piecesPerManHour on
-  // ProductStandardProductivity - that figure is a per-worker-hour
-  // productivity rate used for manpower costing/planning, whereas these
-  // are the actual hourly/daily output targets Production is expected to
-  // hit for this product. Nullable because not every product has a
-  // target set yet. Management-only editable - see PRODUCTION_TARGET_MANAGE.
-  hourlyTarget    Float?
-  dailyTarget     Float?
   iqcRequired     Boolean       @default(true)
   status          String        @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, REJECTED
   approvedBy      String?
@@ -4610,6 +4638,7 @@ model WorkOrder {
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
   manpowerAssignments ManpowerAssignment[]
+  hourlyProductionReports HourlyProductionReport[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
@@ -5189,11 +5218,30 @@ model RcaRecord {
 
 // MODULE 65 — OUTGOING QUALITY CONTROL (OQC)
 // ============================================================
+// TASK-060: OQC was a single bundled gate (visual/dimensional/
+// functional + packaging/labelling all on one record, released once).
+// It is now two distinct, sequential stages on the same model rather
+// than a second table: the existing fields already split cleanly along
+// the stage boundary (visual/dimensional/functional belong to the
+// full-product PRE_PACK check; packaging/labelling belong to the
+// packing-specific POST_PACK check), there's no itemized checklist
+// model to fork, and every downstream consumer (analytics, quality
+// dashboard/reports, stock-ledger) already queries this table directly
+// - a stage field lets all of that keep working unchanged while
+// OqcService enforces the two-gate sequence and FG-stock-on-release
+// rule. See OqcService.create()/release() for the stage dependency and
+// gating logic.
 model OqcInspection {
   id              String    @id @default(uuid())
   companyId       String
   company         Company   @relation(fields: [companyId], references: [id])
   oqcNumber       String
+  // PRE_PACK: full-product check (visual/dimensional/functional) done
+  // before the item goes into its shipping pack/carton. POST_PACK: the
+  // narrower packing-specific check (packaging/labelling/carton
+  // marking) done after it's packed. Both must be RELEASED with result
+  // PASS before FG stock is credited - see OqcService.release().
+  stage           String    @default("PRE_PACK") // PRE_PACK, POST_PACK
   fgReceiptId     String?
   fgReceipt       FgReceipt? @relation(fields: [fgReceiptId], references: [id])
   workOrderId     String?
@@ -5209,7 +5257,9 @@ model OqcInspection {
   sampleSize      Int       @default(0)
   passQty         Int       @default(0)
   failQty         Int       @default(0)
-  // Inspection parameters
+  // Inspection parameters - PRE_PACK uses visual/dimensional/functional;
+  // POST_PACK uses packaging/labelling. OqcService.create() rejects the
+  // stage-inappropriate fields rather than silently storing them.
   visualCheck     String?   // PASS/FAIL/NA
   dimensionalCheck String?  // PASS/FAIL/NA
   functionalCheck String?   // PASS/FAIL/NA
@@ -5231,7 +5281,11 @@ model OqcInspection {
   updatedBy       String?
 
   @@unique([companyId, oqcNumber])
+  // One inspection per FG Receipt per stage, replacing the old
+  // app-level "one OQC per FG Receipt" rule (OqcService.create()).
+  @@unique([companyId, fgReceiptId, stage])
   @@index([companyId, status])
+  @@index([companyId, stage])
   @@map("oqc_inspections")
 }
 
