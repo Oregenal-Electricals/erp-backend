@@ -4,6 +4,7 @@ import { AuditService } from '../common/services/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RejectedStockService } from '../rejected-stock/rejected-stock.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
+import { DebitNotesService } from '../debit-notes/debit-notes.service';
 import {
   CreateIqcCheckTemplateDto,
   UpdateIqcCheckTemplateDto,
@@ -71,6 +72,7 @@ export class IqcEscalationService {
     private notifications: NotificationsService,
     private rejectedStock: RejectedStockService,
     private stockLedger: StockLedgerService,
+    private debitNotes: DebitNotesService,
   ) {}
 
   async createTemplate(dto: CreateIqcCheckTemplateDto, user: any) {
@@ -401,16 +403,35 @@ export class IqcEscalationService {
     const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId } });
     if (!item) return;
 
-    await this.prisma.iqcItem.update({
-      where: { id: itemId },
-      data: {
-        currentStage: 'CLOSED', finalOutcome: 'FAIL',
-        acceptedQty: acceptedQty ?? 0,
-        rejectedQty: rejectedQty ?? item.receivedQty,
-        rejectionReason: rejectionReason ?? undefined,
-        updatedBy: user.id,
-      },
+    const finalRejectedQty = rejectedQty ?? item.receivedQty;
+
+    // IQC-055: Admin-tier (FINAL_AUTHORITY) declining a deviation here
+    // is the one event that must auto-cut a vendor Debit Note - done
+    // in the same transaction as the final-FAIL itself, and
+    // returnedToVendor is flipped alongside it, so neither can happen
+    // without the other.
+    const debitNote = await this.prisma.$transaction(async (tx) => {
+      await tx.iqcItem.update({
+        where: { id: itemId },
+        data: {
+          currentStage: 'CLOSED', finalOutcome: 'FAIL',
+          acceptedQty: acceptedQty ?? 0,
+          rejectedQty: finalRejectedQty,
+          rejectionReason: rejectionReason ?? undefined,
+          returnedToVendor: finalRejectedQty > 0,
+          updatedBy: user.id,
+        },
+      });
+
+      if (finalRejectedQty > 0) {
+        return this.debitNotes.createFromIqcRejection({ iqcItemId: itemId, rejectedQty: finalRejectedQty, rejectionReason }, user, tx);
+      }
+      return null;
     });
+
+    if (debitNote) {
+      await this.audit.log({ tableName: 'debit_notes', recordId: debitNote.id, action: 'CREATE', newValues: debitNote, changedBy: user.id });
+    }
 
     await this.maybeCloseInspection(item.iqcId, user);
   }
