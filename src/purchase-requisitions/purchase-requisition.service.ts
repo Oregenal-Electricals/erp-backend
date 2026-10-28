@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
-import { CreatePurchaseRequisitionDto, UpdatePurchaseRequisitionDto, RejectPrDto } from './dto/purchase-requisition.dto';
+import { CreatePurchaseRequisitionDto, UpdatePurchaseRequisitionDto, RejectPrDto, CreatePrFromShortageDto } from './dto/purchase-requisition.dto';
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -54,6 +54,83 @@ export class PurchaseRequisitionService {
     }
 
     await this.audit.log({ tableName: 'purchase_requisitions', recordId: pr.id, action: 'CREATE', newValues: pr, changedBy: user.id });
+    return pr;
+  }
+
+  /**
+   * Auto-drafts a Purchase Requisition from the Customer PO shortage
+   * check's own output (MaterialShortage, status OPEN) instead of the
+   * full BOM/demand requirement. For each requested itemCode, every OPEN
+   * shortage row across all customer orders is summed into ONE PR line,
+   * so Purchase sees "buy X of item Y" exactly matching the aggregated
+   * view they already see on the shortages screen (getAllOpenShortages) -
+   * never the gross BOM quantity, which ignores stock/incoming already
+   * on hand. The PR is created in DRAFT status: nothing is submitted,
+   * approved, or sent to a vendor here - Purchase can still edit/add/
+   * remove items and adjust quantities via the existing update()/
+   * addItem()/removeItem() endpoints before calling submit() themselves.
+   * Matched shortage rows are tagged PR_RAISED and linked to the new PR
+   * (MaterialShortage.prId) so the shortages screen can trace which PR
+   * now covers which gap - mirroring how markShortagesRaised() already
+   * closes the loop for the direct-to-PO path, but for the PR path this
+   * schema's prId field was actually named for.
+   */
+  async createFromShortages(dto: CreatePrFromShortageDto, user: any) {
+    const itemCodes = Array.from(new Set(dto.itemCodes));
+    const openShortages = await this.prisma.materialShortage.findMany({
+      where: { companyId: user.companyId, status: 'OPEN', itemCode: { in: itemCodes } },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (openShortages.length === 0) {
+      throw new BadRequestException('No OPEN material shortage records found for the given item codes');
+    }
+
+    const byItemCode = new Map<string, { itemName: string; uom: string; rawMaterialId: string | null; shortageQty: number; rowIds: string[] }>();
+    for (const row of openShortages) {
+      const agg = byItemCode.get(row.itemCode);
+      if (agg) {
+        agg.shortageQty = Math.round((agg.shortageQty + row.shortageQty) * 1000) / 1000;
+        agg.rowIds.push(row.id);
+      } else {
+        byItemCode.set(row.itemCode, {
+          itemName: row.itemName, uom: row.uom, rawMaterialId: row.rawMaterialId,
+          shortageQty: Math.round(row.shortageQty * 1000) / 1000, rowIds: [row.id],
+        });
+      }
+    }
+
+    const items = Array.from(byItemCode.entries()).map(([itemCode, agg]) => ({
+      itemType: 'RAW_MATERIAL',
+      rawMaterialId: agg.rawMaterialId,
+      itemCode,
+      itemName: agg.itemName,
+      uom: agg.uom,
+      // Strictly the shortfall figure (MaterialShortage.shortageQty =
+      // BOM/demand requirement minus stock/incoming already netted off
+      // by the shortage check) - never the full BOM requirement.
+      requiredQty: agg.shortageQty,
+      notes: 'Auto-suggested from Customer PO material shortage check - review/adjust qty before submitting.',
+    }));
+
+    const pr = await this.create(
+      {
+        title: dto.title, description: dto.description, requiredDate: dto.requiredDate,
+        department: dto.department, priority: dto.priority, notes: dto.notes, items,
+      } as CreatePurchaseRequisitionDto,
+      user,
+    );
+
+    const allRowIds = Array.from(byItemCode.values()).flatMap(agg => agg.rowIds);
+    await this.prisma.materialShortage.updateMany({
+      where: { id: { in: allRowIds } },
+      data: { status: 'PR_RAISED', prId: pr.id, updatedBy: user.id },
+    });
+
+    await this.audit.log({
+      tableName: 'purchase_requisitions', recordId: pr.id, action: 'CREATE',
+      newValues: { ...pr, sourcedFromShortages: allRowIds }, changedBy: user.id,
+    });
+
     return pr;
   }
 
