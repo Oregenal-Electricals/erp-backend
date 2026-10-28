@@ -13,18 +13,49 @@ import {
 
 const STAGE_ORDER = ['IQC', 'QUALITY_MANAGER', 'PLANT_HEAD', 'FINAL_AUTHORITY'];
 
+// IQC-054: QUALITY_MANAGER and PLANT_HEAD are suggestion-only stages -
+// whoever is authorized there records one recommendation (outcome +
+// remarks, optionally scored parameter results) per item, but that
+// recommendation never closes the item itself. It always moves on to
+// the next stage in STAGE_ORDER, in order (QC Manager's suggestion
+// before Plant Head's, Plant Head's before the Admin-tier decision).
+// Only FINAL_AUTHORITY can actually grant a deviation (PASS) or
+// confirm a fail (FAIL) - see submitStageResult below.
+const SUGGESTION_ONLY_STAGES = ['QUALITY_MANAGER', 'PLANT_HEAD'];
+
+// Roles authorized to act at the FINAL_AUTHORITY stage - the only
+// stage that can grant a deviation (pass despite a fail) or confirm a
+// final reject. This codebase's established top tier below SUPER_ADMIN
+// is ADMIN (141_org_roles_setup.sql renamed the legacy CORPORATE_ADMIN
+// role to ADMIN as part of the 15-role restructuring); CORPORATE_ADMIN
+// and the never-actually-provisioned literal 'FINAL_AUTHORITY' role
+// name are kept as aliases so a company still on pre-restructuring
+// role names, or any seed/test data using the old literal role, keeps
+// working. QUALITY_MANAGER/QC_MANAGER and PLANT_HEAD/PLANT_MANAGER are
+// deliberately NOT included here - that is the IQC-054 fix.
+const MANAGEMENT_TIER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'FINAL_AUTHORITY'];
+
 function isAuthorizedForStage(stage: string, user: any): boolean {
   const allRoles: string[] = user.allRoles || [user.role, ...(user.additionalRoles || [])];
   if (allRoles.includes('SUPER_ADMIN')) return true;
   switch (stage) {
     case 'IQC':
-      return allRoles.some(r => ['QC_MANAGER', 'CORPORATE_ADMIN'].includes(r));
+      // Initial inspection - the dedicated IQC role from the current
+      // 15-role structure, plus the legacy QC_MANAGER/CORPORATE_ADMIN
+      // role names this already allowed before the restructuring.
+      return allRoles.some(r => ['IQC', 'QC_MANAGER', 'CORPORATE_ADMIN'].includes(r));
     case 'QUALITY_MANAGER':
-      return allRoles.includes('QC_MANAGER');
+      // Suggestion stage. QUALITY_MANAGER is the current role name
+      // (post 141_org_roles_setup.sql); QC_MANAGER kept as an alias
+      // for the pre-restructuring name.
+      return allRoles.some(r => ['QUALITY_MANAGER', 'QC_MANAGER'].includes(r));
     case 'PLANT_HEAD':
-      return allRoles.includes('PLANT_HEAD');
+      // Suggestion stage. PLANT_MANAGER is the current role name;
+      // PLANT_HEAD kept as an alias for the pre-restructuring name.
+      return allRoles.some(r => ['PLANT_MANAGER', 'PLANT_HEAD'].includes(r));
     case 'FINAL_AUTHORITY':
-      return allRoles.includes('FINAL_AUTHORITY');
+      // Decision stage - Admin/Super Admin/Management tier only.
+      return allRoles.some(r => MANAGEMENT_TIER_ROLES.includes(r));
     default:
       return false;
   }
@@ -279,10 +310,16 @@ export class IqcEscalationService {
       throw new ForbiddenException(`You are not authorized to record a decision at the ${item.currentStage} stage`);
     }
 
-    if (dto.acceptedQty != null && dto.rejectedQty != null && dto.acceptedQty + dto.rejectedQty > item.receivedQty) {
+    // At a suggestion-only stage, acceptedQty/rejectedQty don't move
+    // stock yet (see SubmitIqcStageResultDto's comment), so the
+    // reconciliation/reason checks below only apply at a stage whose
+    // outcome can actually close the item.
+    const isSuggestionStage = SUGGESTION_ONLY_STAGES.includes(item.currentStage);
+
+    if (!isSuggestionStage && dto.acceptedQty != null && dto.rejectedQty != null && dto.acceptedQty + dto.rejectedQty > item.receivedQty) {
       throw new BadRequestException(`Accepted (${dto.acceptedQty}) + Rejected (${dto.rejectedQty}) cannot exceed received quantity (${item.receivedQty})`);
     }
-    if (dto.rejectedQty && dto.rejectedQty > 0 && (!dto.rejectionReason || !dto.rejectionReason.trim())) {
+    if (!isSuggestionStage && dto.rejectedQty && dto.rejectedQty > 0 && (!dto.rejectionReason || !dto.rejectionReason.trim())) {
       throw new BadRequestException('A rejection reason is required when any quantity is rejected');
     }
 
@@ -308,7 +345,24 @@ export class IqcEscalationService {
       include: { parameterResults: true },
     });
 
-    if (dto.outcome === 'PASS') {
+    if (isSuggestionStage) {
+      // IQC-054: QC Manager's and Plant Head's outcome here is a
+      // recommendation only, never a final decision - it always moves
+      // the item to the next stage in STAGE_ORDER regardless of
+      // PASS/FAIL, so a "PASS" recommendation can never be mistaken
+      // for a granted deviation and a "FAIL" recommendation can never
+      // be mistaken for a confirmed reject. Only whoever is authorized
+      // at the terminal FINAL_AUTHORITY stage (Admin/Super Admin/
+      // Management tier - see isAuthorizedForStage/MANAGEMENT_TIER_ROLES)
+      // can actually grant the deviation or confirm the fail, and they
+      // can only do so once the item has reached that stage - i.e.
+      // after both the QC Manager's and the Plant Head's suggestion
+      // have been recorded, in that order.
+      const currentIdx = STAGE_ORDER.indexOf(item.currentStage);
+      const nextStage = STAGE_ORDER[currentIdx + 1];
+      await this.prisma.iqcItem.update({ where: { id: itemId }, data: { currentStage: nextStage, updatedBy: user.id } });
+      await this.notifyEscalation(itemId, nextStage, user);
+    } else if (dto.outcome === 'PASS') {
       await this.closeAsPass(itemId, user, dto.acceptedQty, dto.rejectedQty);
     } else {
       const currentIdx = STAGE_ORDER.indexOf(item.currentStage);
@@ -421,9 +475,9 @@ export class IqcEscalationService {
   private async notifyEscalation(itemId: string, nextStage: string, user: any) {
     const item = await this.prisma.iqcItem.findFirst({ where: { id: itemId }, include: { iqc: { select: { iqcNumber: true } } } });
     const roleForStage: Record<string, string[]> = {
-      QUALITY_MANAGER: ['QC_MANAGER'],
-      PLANT_HEAD: ['PLANT_HEAD'],
-      FINAL_AUTHORITY: ['FINAL_AUTHORITY'],
+      QUALITY_MANAGER: ['QUALITY_MANAGER', 'QC_MANAGER'],
+      PLANT_HEAD: ['PLANT_MANAGER', 'PLANT_HEAD'],
+      FINAL_AUTHORITY: MANAGEMENT_TIER_ROLES,
     };
     const roles = roleForStage[nextStage] || [];
     const targets = await this.prisma.user.findMany({
