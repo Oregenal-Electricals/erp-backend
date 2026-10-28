@@ -359,7 +359,6 @@ model Company {
   gatePassTypeMasters     GatePassTypeMaster[]
   securityReasons         SecurityReason[]
   gateEvents              GateEvent[]
-  hourlyProductionReports HourlyProductionReport[]
   bomQueries             BomQuery[]
   stageTransferNotes     StageTransferNote[]
   downtimes              Downtime[]
@@ -577,7 +576,6 @@ model User {
   manpowerFrom     ManpowerAllocation[] @relation("ManpowerFrom")
   manpowerTo       ManpowerAllocation[] @relation("ManpowerTo")
   manpowerAssignmentsMade ManpowerAssignment[] @relation("ManpowerAssignmentBy")
-  hourlyProductionReports HourlyProductionReport[] @relation("HourlyReportSupervisor")
   gateEventsRecorded GateEvent[] @relation("GateEventSecurityUser")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
@@ -1220,41 +1218,6 @@ model Contractor {
 
   @@map("contractors")
   @@index([companyId])
-}
-
-// Supervisor's hour-by-hour target vs actual for a stage/Work Order -
-// the same shape as the physical whiteboard (9-10, 10-11, ... rows
-// with a target and actual per column). Manpower headcount for
-// costing is NOT re-entered here - it's derived from whichever
-// ManpowerAssignment records were active during this exact hour
-// window, since supervisors already shift people within the hour via
-// the existing assignment records and re-typing a count would just
-// invite it to drift from reality.
-model HourlyProductionReport {
-  id              String    @id @default(uuid())
-  companyId       String
-  company         Company   @relation(fields: [companyId], references: [id])
-  supervisorId    String
-  supervisor      User      @relation("HourlyReportSupervisor", fields: [supervisorId], references: [id])
-  workOrderId     String?
-  workOrder       WorkOrder? @relation(fields: [workOrderId], references: [id])
-  stageName       String
-  hourStart       DateTime
-  hourEnd         DateTime
-  targetQty       Float     @default(0)
-  actualQty       Float     @default(0)
-  gapReason       String?
-  isActive        Boolean   @default(true)
-  isTestData      Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  createdBy       String?
-  updatedBy       String?
-
-  @@map("hourly_production_reports")
-  @@unique([companyId, stageName, workOrderId, hourStart])
-  @@index([companyId, hourStart])
-  @@index([companyId, workOrderId])
 }
 
 // ============================================================
@@ -2280,6 +2243,15 @@ model Product {
   specifications  Json?
   minOrderQty     Float?
   leadTimeDays    Int?
+  // Real target output numbers for Production/Planning, independent of
+  // (though typically set with reference to) piecesPerManHour on
+  // ProductStandardProductivity - that figure is a per-worker-hour
+  // productivity rate used for manpower costing/planning, whereas these
+  // are the actual hourly/daily output targets Production is expected to
+  // hit for this product. Nullable because not every product has a
+  // target set yet. Management-only editable - see PRODUCTION_TARGET_MANAGE.
+  hourlyTarget    Float?
+  dailyTarget     Float?
   iqcRequired     Boolean       @default(true)
   status          String        @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, REJECTED
   approvedBy      String?
@@ -4486,7 +4458,6 @@ model WorkOrder {
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
   manpowerAssignments ManpowerAssignment[]
-  hourlyProductionReports HourlyProductionReport[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
