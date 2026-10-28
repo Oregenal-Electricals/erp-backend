@@ -91,3 +91,112 @@ describe('MrpService.calculateMrp - warehouse-scoped stock lookup', () => {
     await expect(service.calculateMrp('wo-1', user)).rejects.toThrow(/completed\/cancelled/);
   });
 });
+
+describe('MrpService.checkSoMaterialCompleteness - SO material-completeness gate (used by WO start)', () => {
+  let service: MrpService;
+  let prisma: any;
+
+  const so = {
+    id: 'so-1', soNumber: 'SO-2026-0001',
+    items: [{ id: 'soi-1', itemCode: 'FG-1', itemName: 'Finished Good 1', uom: 'PCS', qty: 100, pendingQty: 50, isActive: true }],
+  };
+
+  beforeEach(() => {
+    prisma = {
+      salesOrder: { findFirst: jest.fn().mockResolvedValue(so) },
+      workOrder: { findMany: jest.fn().mockResolvedValue([]) },
+      product: {
+        findFirst: jest.fn(({ where }: any) =>
+          where.code === 'FG-1' ? Promise.resolve({ id: 'product-1', name: 'Finished Good 1' }) : Promise.resolve(null),
+        ),
+      },
+      bom: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'bom-1',
+          items: [{ itemCode: 'RM-1', itemName: 'Raw Material 1', uom: 'PCS', effectiveQty: 2, wastagePercent: 0 }],
+        }),
+      },
+      routingStage: { findFirst: jest.fn().mockResolvedValue(null) },
+      stockBalance: { findUnique: jest.fn(), findFirst: jest.fn() },
+      purchaseOrderItem: { findMany: jest.fn().mockResolvedValue([]) },
+      rawMaterial: { findFirst: jest.fn().mockResolvedValue(null) },
+    };
+    service = new MrpService(prisma, {} as any, {} as any, {} as any);
+  });
+
+  // The engine nets the finished-good item itself against its own on-hand
+  // stock first (an already-built FG would need no fresh raw material at
+  // all) before exploding any remainder into its BOM - so FG-1's own
+  // stock is pinned to 0 in these tests, keeping the raw-material (RM-1)
+  // figure the one and only variable under test.
+  function mockStock(rmAvailableQty: number) {
+    prisma.stockBalance.findUnique.mockImplementation(({ where }: any) => {
+      const itemCode = where.companyId_itemCode_warehouseId.itemCode;
+      return Promise.resolve({ availableQty: itemCode === 'FG-1' ? 0 : rmAvailableQty });
+    });
+  }
+
+  it('reports complete=true when stock fully covers the SO\'s pending quantity (reuses the BOM-explosion engine, not a parallel calculation)', async () => {
+    // pendingQty 50 x effectiveQty 2 = 100 required; plenty of RM-1 in stock.
+    mockStock(1000);
+
+    const result = await service.checkSoMaterialCompleteness('so-1', 'company-1', 'wh-1');
+
+    expect(prisma.salesOrder.findFirst).toHaveBeenCalledWith({
+      where: { id: 'so-1', companyId: 'company-1' },
+      include: { items: { where: { isActive: true } } },
+    });
+    expect(result.complete).toBe(true);
+    expect(result.shortItems).toEqual([]);
+    expect(result.soNumber).toBe('SO-2026-0001');
+  });
+
+  it('reports complete=false with the short raw material when stock does not cover the requirement', async () => {
+    // Need 100, only 10 of RM-1 available -> shortage of 90.
+    mockStock(10);
+
+    const result = await service.checkSoMaterialCompleteness('so-1', 'company-1', 'wh-1');
+
+    expect(result.complete).toBe(false);
+    expect(result.shortItems).toHaveLength(1);
+    expect(result.shortItems[0]).toMatchObject({ itemCode: 'RM-1', shortQty: 90 });
+  });
+
+  it('checks the still-PENDING quantity, not the full original order qty, when pendingQty is set', async () => {
+    // 1 short of covering pendingQty(50)*2=100 required - proves qty=100 (full order) was NOT used,
+    // which would show a much larger shortage instead.
+    mockStock(99);
+    const result = await service.checkSoMaterialCompleteness('so-1', 'company-1', 'wh-1');
+    expect(result.shortItems[0].shortQty).toBe(1);
+  });
+
+  it('falls back to the full ordered qty when pendingQty is not set (0)', async () => {
+    prisma.salesOrder.findFirst.mockResolvedValue({
+      ...so, items: [{ ...so.items[0], pendingQty: 0, qty: 75 }],
+    });
+    // 75 x effectiveQty 2 = 150 required; 149 of RM-1 available -> short by exactly 1,
+    // proving qty=75 (not pendingQty=0, which would skip the item entirely) was used.
+    mockStock(149);
+
+    const result = await service.checkSoMaterialCompleteness('so-1', 'company-1', 'wh-1');
+
+    expect(result.complete).toBe(false);
+    expect(result.shortItems[0]).toMatchObject({ itemCode: 'RM-1', requiredQty: 150, shortQty: 1 });
+  });
+
+  it('skips a line item with no producible BOM (a raw material sold as-is) instead of blocking on it', async () => {
+    prisma.bom.findFirst.mockResolvedValue(null);
+    prisma.routingStage.findFirst.mockResolvedValue(null);
+
+    const result = await service.checkSoMaterialCompleteness('so-1', 'company-1', 'wh-1');
+
+    expect(result.complete).toBe(true);
+    expect(result.shortItems).toEqual([]);
+    expect(prisma.stockBalance.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('throws NotFoundException when the Sales Order does not exist (or belongs to another company)', async () => {
+    prisma.salesOrder.findFirst.mockResolvedValue(null);
+    await expect(service.checkSoMaterialCompleteness('missing-so', 'company-1', 'wh-1')).rejects.toThrow(NotFoundException);
+  });
+});
