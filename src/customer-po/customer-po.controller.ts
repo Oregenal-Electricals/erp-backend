@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, ParseCpoSourceFileDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, ParseCpoSourceFileDto, VerifyMaterialShortageDto } from './dto/customer-po.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -14,6 +14,21 @@ export class CustomerPoController {
   @Get('stats')
   @RequirePermissions(Permission.SALES_VIEW)
   getStats(@Request() req: any) { return this.cpoService.getStats(req.user); }
+
+  // Task #52: Store's queue of system-calculated shortages awaiting
+  // verification, before they are visible to Purchase at all.
+  @Get('shortages/pending-verification')
+  @RequirePermissions(Permission.MATERIAL_SHORTAGE_VIEW)
+  getPendingVerificationShortages(@Request() req: any) { return this.cpoService.getPendingVerificationShortages(req.user); }
+
+  // Task #52: Store confirms the system-calculated shortage as accurate,
+  // or corrects it (mandatory reason) to the real figure. Only after this
+  // does the row become visible on shortages/open below.
+  @Post('shortages/:id/verify')
+  @RequirePermissions(Permission.MATERIAL_SHORTAGE_VERIFY)
+  verifyShortage(@Param('id') id: string, @Body() dto: VerifyMaterialShortageDto, @Request() req: any) {
+    return this.cpoService.verifyShortage(id, dto, req.user);
+  }
 
   @Get('shortages/open')
   @RequirePermissions(Permission.PURCHASE_VIEW)

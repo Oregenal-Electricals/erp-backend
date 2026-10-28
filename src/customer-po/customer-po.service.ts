@@ -549,8 +549,13 @@ export class CustomerPoService {
     if (['CANCELLED'].includes(cpo.status)) {
       throw new BadRequestException('Cannot run shortage check on a cancelled CPO');
     }
+    // Clears out anything this check can still safely recompute: rows not
+    // yet raised against a PR (OPEN - Store-verified but un-acted-on by
+    // Purchase - and PENDING_STORE_VERIFICATION - not yet even reviewed by
+    // Store). A row already PR_RAISED or FULFILLED is left alone since
+    // Purchase has already committed to it.
     await this.prisma.materialShortage.deleteMany({
-      where: { companyId, customerPoId: cpoId, status: 'OPEN' },
+      where: { companyId, customerPoId: cpoId, status: { in: ['OPEN', 'PENDING_STORE_VERIFICATION'] } },
     });
 
     const openCpos = await this.prisma.customerPo.findMany({
@@ -671,7 +676,9 @@ export class CustomerPoService {
             availableQty: c.availableQty,
             shortageQty: c.shortage,
             uom: c.uom,
-            status: 'OPEN',
+            // Must clear Store verification before Purchase can see it -
+            // see the status-column comment on the MaterialShortage model.
+            status: 'PENDING_STORE_VERIFICATION',
             createdBy: user.id,
             updatedBy: user.id,
           });
@@ -705,7 +712,9 @@ export class CustomerPoService {
             availableQty,
             shortageQty: Math.round(shortage * 1000) / 1000,
             uom: cpoItem.uom,
-            status: 'OPEN',
+            // Must clear Store verification before Purchase can see it -
+            // see the status-column comment on the MaterialShortage model.
+            status: 'PENDING_STORE_VERIFICATION',
             createdBy: user.id,
             updatedBy: user.id,
           });
@@ -758,6 +767,85 @@ export class CustomerPoService {
     };
   }
 
+
+  /**
+   * Task #52 - Store's queue: every material_shortages row MRP has
+   * calculated but Store has not yet verified. Purchase cannot see any
+   * of these (getAllOpenShortages below only reads status = OPEN), so
+   * this is the only place a freshly-calculated shortage is visible
+   * until Store acts on it.
+   */
+  async getPendingVerificationShortages(user: any) {
+    const companyId = user.companyId;
+    const shortages = await this.prisma.materialShortage.findMany({
+      where: { companyId, status: 'PENDING_STORE_VERIFICATION' },
+      include: { customerPo: { select: { cpoNumber: true, customerName: true, deliveryDate: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    return { data: shortages, totalPending: shortages.length };
+  }
+
+  /**
+   * Task #52 - the Store verification gate itself. Store either confirms
+   * the system-calculated shortageQty as accurate (verifiedQty ===
+   * current shortageQty, no reason needed) or corrects it to the real
+   * figure (verifiedQty differs, reason mandatory - explaining why the
+   * system's number was wrong / why stock wasn't already updated
+   * correctly). Either way the row moves from PENDING_STORE_VERIFICATION
+   * to OPEN, and shortageQty itself is updated to the Store-confirmed
+   * value so every downstream reader (getAllOpenShortages,
+   * markShortagesRaised) acts on that figure from this point on, never
+   * the original system-calculated one. systemCalculatedQty freezes what
+   * the system first said, for traceability.
+   */
+  async verifyShortage(shortageId: string, dto: { verifiedQty: number; reason?: string }, user: any) {
+    const shortage = await this.prisma.materialShortage.findFirst({
+      where: { id: shortageId, companyId: user.companyId },
+    });
+    if (!shortage) throw new NotFoundException('Material shortage record not found');
+    if (shortage.status !== 'PENDING_STORE_VERIFICATION') {
+      throw new BadRequestException(`This shortage is '${shortage.status}', not awaiting Store verification`);
+    }
+    if (dto.verifiedQty < 0) {
+      throw new BadRequestException('Verified shortage quantity cannot be negative');
+    }
+
+    const systemCalculatedQty = shortage.shortageQty;
+    const isOverride = Math.round((dto.verifiedQty - systemCalculatedQty) * 1000) !== 0;
+    if (isOverride && !dto.reason?.trim()) {
+      throw new BadRequestException(
+        'A reason is required when the Store-confirmed quantity differs from the system-calculated shortage ' +
+        `(system calculated ${systemCalculatedQty} ${shortage.uom}, you entered ${dto.verifiedQty} ${shortage.uom})`,
+      );
+    }
+
+    const oldValues = { status: shortage.status, shortageQty: shortage.shortageQty };
+    const updated = await this.prisma.materialShortage.update({
+      where: { id: shortageId },
+      data: {
+        status: 'OPEN',
+        shortageQty: dto.verifiedQty,
+        systemCalculatedQty,
+        verifiedQty: dto.verifiedQty,
+        verificationReason: isOverride ? dto.reason!.trim() : null,
+        verifiedById: user.id,
+        verifiedAt: new Date(),
+        updatedBy: user.id,
+      },
+    });
+
+    await this.audit.log({
+      tableName: 'material_shortages', recordId: shortageId, action: 'UPDATE',
+      oldValues,
+      newValues: {
+        status: 'OPEN', shortageQty: dto.verifiedQty, systemCalculatedQty,
+        isOverride, reason: isOverride ? dto.reason!.trim() : undefined,
+      },
+      changedBy: user.id,
+    });
+
+    return updated;
+  }
 
   /**
    * Aggregated view for Purchase: every OPEN material shortage across
