@@ -5,6 +5,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { RejectedStockService } from '../rejected-stock/rejected-stock.service';
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { DebitNotesService } from '../debit-notes/debit-notes.service';
+import { NcrService } from '../ncr/ncr.service';
 import {
   CreateIqcCheckTemplateDto,
   UpdateIqcCheckTemplateDto,
@@ -73,6 +74,7 @@ export class IqcEscalationService {
     private rejectedStock: RejectedStockService,
     private stockLedger: StockLedgerService,
     private debitNotes: DebitNotesService,
+    private ncrService: NcrService,
   ) {}
 
   async createTemplate(dto: CreateIqcCheckTemplateDto, user: any) {
@@ -489,6 +491,32 @@ export class IqcEscalationService {
             user.companyId, user.id,
           );
         }
+
+        // Same quality-chain closer as the direct/non-templated approve()
+        // path in iqc.service.ts, and the OQC trigger in
+        // production-qc.service.ts this was all modeled on - reuses the
+        // one shared NcrService.createAuto() method rather than adding a
+        // second NCR-creation code path. Guarded by the same `!existing`
+        // check as RejectedStock above, so a re-entrant call into
+        // maybeCloseInspection() (all items are already CLOSED) can never
+        // raise a second NCR for the same inspection. This runs alongside
+        // RejectedStock, not instead of it - they serve different
+        // purposes (stock disposition/vendor-pickup vs. the internal
+        // quality-process record) and neither should suppress the other.
+        const rejectedItems = refreshed.items.filter(i => i.rejectedQty > 0);
+        const singleItem = rejectedItems.length === 1 ? rejectedItems[0] : undefined;
+        await this.ncrService.createAuto({
+          source: 'IQC',
+          sourceReferenceId: iqcId,
+          sourceReferenceNumber: (iqc as any).iqcNumber,
+          itemCode: singleItem?.itemCode,
+          itemName: singleItem?.itemName,
+          description: singleItem
+            ? `IQC rejection from ${(iqc as any).iqcNumber || iqcId} — ${singleItem.itemCode}: ${singleItem.rejectionReason || 'failed inspection'}`
+            : `IQC rejection from ${(iqc as any).iqcNumber || iqcId} — ${rejectedItems.length} item(s) rejected: ${rejectedItems.map(i => i.itemCode).join(', ')}`,
+          qtyAffected: totalRejected,
+          disposition: 'RETURN_TO_VENDOR',
+        }, user);
       }
     }
   }
