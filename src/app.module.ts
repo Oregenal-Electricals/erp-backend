@@ -121,6 +121,7 @@ import { AccountsModule } from './accounts/accounts.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { ArModule } from './accounts-receivable/ar.module';
 import { ApModule } from './accounts-payable/ap.module';
+import { DebitNotesModule } from './debit-notes/debit-notes.module';
 import { GstModule } from './gst/gst.module';
 import { BankReconModule } from './bank-reconciliation/bank-recon.module';
 import { FinancialReportsModule } from './financial-reports/financial-reports.module';
@@ -296,6 +297,7 @@ import configuration from './config/configuration';
     VouchersModule,
     ArModule,
     ApModule,
+    DebitNotesModule,
     GstModule,
     BankReconModule,
     FinancialReportsModule,
