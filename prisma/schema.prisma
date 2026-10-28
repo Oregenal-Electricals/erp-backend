@@ -5745,6 +5745,16 @@ model SalesOrderItem {
   cpoItemId     String?
   itemCode      String
   itemName      String
+  // The customer's own item wording, carried through unresolved from the
+  // CustomerPoItem this line was created from (see createFromCpo() in
+  // sales-orders.service.ts) - itemCode/itemName above are OUR internal
+  // product code/name (used by Production/Dispatch); these two are kept
+  // alongside so a downstream Sales Invoice can print the naming the
+  // customer themselves used, without re-deriving it via cpoItemId once
+  // the CPO/SO chain has moved on. Null for a line with no CPO mapping
+  // available at creation time (manual SO entry with no cpoItemId picked).
+  customerItemCode String?
+  customerItemName String?
   description   String?
   qty           Float       @default(1)
   uom           String      @default("PCS")
