@@ -6379,10 +6379,60 @@ model ArInvoice {
   updatedBy         String?
 
   payments          ArPayment[]
+  items             ArInvoiceItem[]
 
   @@unique([companyId, invoiceNumber])
   @@index([companyId, status])
   @@map("ar_invoices")
+}
+
+// Task #53: line items for the AR Invoice, one row per item, so the
+// invoice itemizes what was billed instead of only carrying header
+// totals. customerItemWording is the whole point of this table - it is
+// what must print on the customer-facing invoice, resolved at invoice-
+// creation time from CustomerItemMapping (the customer's own code/name
+// for OUR product/raw material) and falling back to our own itemName
+// when no mapping exists for that customer+item, so a missing mapping
+// never blocks invoice creation. dispatchItemId/soItemId are soft
+// references (no Prisma relation), mirroring cpoItemId on
+// SalesOrderItem and planItemId on DispatchItem elsewhere in this file.
+model ArInvoiceItem {
+  id                  String    @id @default(uuid())
+  invoiceId           String
+  invoice             ArInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  companyId           String
+  dispatchItemId      String?
+  soItemId            String?
+  // Internal item reference - code/name are what we call it ourselves;
+  // productId/rawMaterialId are soft references to the resolved master
+  // record (exactly one set, mirroring CustomerItemMapping's own
+  // product/rawMaterial split), kept nullable since a manually created
+  // invoice line may not always resolve to a master record.
+  itemCode            String
+  itemName            String
+  productId           String?
+  rawMaterialId       String?
+  // The customer's own original wording for this line, as written on
+  // their PO - sourced via CustomerItemMapping for this invoice's
+  // customer + resolved product/raw material. Falls back to itemName
+  // above when no mapping exists.
+  customerItemWording String
+  customerItemCode    String?
+  qty                 Float     @default(0)
+  uom                 String    @default("PCS")
+  unitPrice           Float     @default(0)
+  gstRate             Float     @default(18)
+  gstAmount           Float     @default(0)
+  totalAmount         Float     @default(0)
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@index([invoiceId])
+  @@map("ar_invoice_items")
 }
 
 model ArPayment {
