@@ -4899,7 +4899,14 @@ model ProductionEntry {
   reworkQty     Float     @default(0)
   // Manpower is quantity-based per the architecture correction - no
   // Employee IDs recorded here, matching PROD-003/004/005.
+  // manpowerQty = actually used this entry (defaults from the approved
+  // allocation below only when the supervisor doesn't override it).
   manpowerQty   Int?
+  // manpowerAllotted = snapshot of the Plant Head's approved
+  // ManpowerAllocation.count at entry time, stored unconditionally so
+  // the allotted-vs-used gap survives even when manpowerQty is
+  // overridden. See 173_production_entry_manpower_allotted.sql.
+  manpowerAllotted Int?
   periodStart   DateTime?
   periodEnd     DateTime?
   // Snapshots taken at entry time so a later productivity/rate master

@@ -69,6 +69,51 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
     });
   });
 
+  describe('manpowerAllotted snapshot survives a manpowerQty override (173_production_entry_manpower_allotted.sql)', () => {
+    it('Plant Head allotted 10, supervisor only had 8 working -> both are kept on the entry, not overwritten', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 10 });
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 8, goodQty: 50,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.manpowerAllotted).toBe(10); // Plant Head's approved allocation, unchanged by the override
+      expect(entry.manpowerQty).toBe(8); // what the supervisor actually had this hour
+      expect(entry.actualLabourHours).toBe(8); // labour cost is still time-based on actual-used, not allotted
+    });
+
+    it('when manpowerQty is left blank, it defaults to the allotted figure and both fields match', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 12 });
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', goodQty: 50,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.manpowerAllotted).toBe(12);
+      expect(entry.manpowerQty).toBe(12);
+    });
+
+    it('no approved allocation exists -> manpowerAllotted is null, not 0 (distinct from "allotted zero")', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue(null);
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 5, goodQty: 50,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.manpowerAllotted).toBeNull();
+      expect(entry.manpowerQty).toBe(5);
+    });
+  });
+
   describe('partial-hour entry uses actual duration, never a fabricated full hour (manual test 3, section 42)', () => {
     it('15 manpower, 40 minutes -> 10 labour-hours, 80 pcs target, ₹150 cost', async () => {
       prisma.workOrder.findFirst.mockResolvedValue({ ...firstStageWo, actualStartDate: new Date('2026-05-10T10:20:00') });
