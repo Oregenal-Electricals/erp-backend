@@ -70,6 +70,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure shortage-verification permissions/nav - see 156_material_shortage_verify_permissions.sql and 172_ui_control_shortage_verification_nav.sql', e as Error);
     }
+    try {
+      await this.ensureRackBinVerticalNumberingColumns();
+    } catch (e) {
+      this.logger.error('Failed to ensure warehouse_bins.bay/level/sequenceOrder columns - see 161_store_rack_bin_vertical_numbering.sql', e as Error);
+    }
   }
 
   /**
@@ -166,6 +171,30 @@ export class PrismaService
       ON CONFLICT (company_id, key) DO NOTHING;
     `);
     this.logger.log('Shortage-verification role permissions and sidebar nav ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 161_store_rack_bin_vertical_numbering.sql (adds warehouse_bins.bay/
+   * level/sequenceOrder + the rackId/sequenceOrder index). Same
+   * self-apply-on-boot pattern as the methods above, for the same reason:
+   * this migration was merged (backing task #56's generateRackLocations())
+   * but never actually run against production. Discovered live
+   * 2026-10-29 while verifying Phase 3: GET /rack-bin/bins/rack/:id -
+   * the endpoint Store uses just to view a rack's bins - was returning a
+   * 500 ("column warehouse_bins.bay does not exist") for every rack,
+   * because findBins()/findEmptyBins() order by sequenceOrder. All
+   * statements are IF NOT EXISTS, so safe on every boot including one
+   * that already has it applied. Remove once
+   * 161_store_rack_bin_vertical_numbering.sql is confirmed applied
+   * everywhere and this has had a chance to run at least once.
+   */
+  private async ensureRackBinVerticalNumberingColumns() {
+    await this.$executeRawUnsafe(`ALTER TABLE "warehouse_bins" ADD COLUMN IF NOT EXISTS "bay" TEXT;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "warehouse_bins" ADD COLUMN IF NOT EXISTS "level" INTEGER;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "warehouse_bins" ADD COLUMN IF NOT EXISTS "sequenceOrder" INTEGER;`);
+    await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "warehouse_bins_rackId_sequenceOrder_idx" ON "warehouse_bins"("rackId", "sequenceOrder");`);
+    this.logger.log('warehouse_bins.bay/level/sequenceOrder columns and index ensured');
   }
 
   /**
