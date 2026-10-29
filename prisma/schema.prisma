@@ -386,6 +386,7 @@ model Company {
   productSellingPrices ProductSellingPrice[]
   grnItemDiscrepancies GrnItemDiscrepancy[]
   materialHoldDaysRules MaterialHoldDaysRule[]
+  debitNotes DebitNote[]
 }
 
 model Plant {
@@ -2217,6 +2218,7 @@ model Vendor {
   apBills        ApBill[] @relation("ApBillVendor")
   supplierCars   SupplierCar[] @relation("SupplierCarVendor")
   holdDaysRules  MaterialHoldDaysRule[]
+  debitNotes     DebitNote[]
   @@map("vendors")
 }
 
@@ -3645,6 +3647,15 @@ model IqcItem {
   sampleSize       Int?
   currentStage     String         @default("IQC") // IQC, QUALITY_MANAGER, PLANT_HEAD, FINAL_AUTHORITY, CLOSED
   finalOutcome     String         @default("PENDING") // PENDING, PASS, FAIL
+  // Set together with the auto-generated DebitNote when FINAL_AUTHORITY
+  // (Admin-tier) declines to grant a deviation and confirms this item as
+  // finally FAILed - the rejected quantity physically goes back to the
+  // vendor. No such flag existed anywhere on the GRN/IQC chain before
+  // this, so it lives here, right where the final rejection itself is
+  // recorded, rather than only being inferable later via
+  // RejectedStockItem.disposition (which is set separately, in bulk,
+  // once the whole inspection closes).
+  returnedToVendor Boolean        @default(false)
   isActive         Boolean        @default(true)
   isTestData       Boolean        @default(false)
   createdAt        DateTime       @default(now())
@@ -3985,6 +3996,61 @@ model RtvGateOut {
 
   @@map("rtv_gate_outs")
   @@index([companyId, rtvRequestId])
+}
+
+// IQC-055: issued automatically when IQC's final escalation stage
+// (Admin/Super Admin/Management, i.e. the FINAL_AUTHORITY stage in
+// IqcEscalationService) declines to grant a deviation and confirms a
+// lot as finally FAILed - the rejected quantity is returned to the
+// vendor, and this is the formal record of what that reduces from
+// what the company owes them. Deliberately its own lean record
+// (same reasoning as RtvRequest above) rather than forcing it onto
+// ApBill, which many of these GRNs will never have had a bill raised
+// against yet - ApService only ever bills acceptedQty (see
+// ApService.getBillableSummary), so a bill for the rejected portion
+// of this line typically never exists to adjust in the first place.
+// poId/grnId/gateInwardEntryId/iqcId/iqcItemId/rejectedStockId/
+// rejectedStockItemId are deliberately plain soft-links (no Prisma
+// relation), mirroring IqcItem.grnItemId elsewhere in this schema -
+// kept this way so this table doesn't force every one of those models
+// to also carry a new back-relation array just to record where a
+// debit note came from.
+model DebitNote {
+  id                  String    @id @default(uuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id])
+  debitNoteNumber     String
+  vendorId            String
+  vendor              Vendor    @relation(fields: [vendorId], references: [id])
+  poId                String?
+  grnId               String?
+  gateInwardEntryId   String?
+  iqcId               String?
+  iqcItemId           String?
+  rejectedStockId     String?
+  rejectedStockItemId String?
+  itemCode            String
+  itemName            String
+  uom                 String
+  rejectedQty         Float     @default(0)
+  unitRate            Float     @default(0)
+  totalAmount         Float     @default(0)
+  reason              String?
+  remarks             String?
+  status              String    @default("DRAFT") // DRAFT, ISSUED, SETTLED, CANCELLED
+  issuedAt            DateTime?
+  voucherId           String?
+  isActive            Boolean   @default(true)
+  isTestData          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  @@unique([companyId, debitNoteNumber])
+  @@index([companyId, vendorId])
+  @@index([companyId, status])
+  @@map("debit_notes")
 }
 
 // STORE-008 sections 19-24: Hold/Quarantine tracking, deliberately

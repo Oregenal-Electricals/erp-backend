@@ -333,6 +333,11 @@ export enum Permission {
   VOUCHER_VIEW = 'VOUCHER_VIEW',
   AR_VIEW = 'AR_VIEW',
   AP_VIEW = 'AP_VIEW',
+  // IQC-055: vendor Debit Notes, auto-issued on a final IQC rejection
+  // (Admin-tier deviation declined) - viewed by Accounts/Purchase,
+  // managed (status transitions) by Accounts/Admin.
+  DEBIT_NOTE_VIEW = 'DEBIT_NOTE_VIEW',
+  DEBIT_NOTE_MANAGE = 'DEBIT_NOTE_MANAGE',
   GST_VIEW = 'GST_VIEW',
   BANK_RECONCILIATION_VIEW = 'BANK_RECONCILIATION_VIEW',
   PAYMENT_INSTRUMENT_VIEW = 'PAYMENT_INSTRUMENT_VIEW',
