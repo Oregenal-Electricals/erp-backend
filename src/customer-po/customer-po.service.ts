@@ -267,14 +267,41 @@ export class CustomerPoService {
       );
     }
 
-    return cpo;
+    // Auto-conversion: the business no longer wants a human "Acknowledge"
+    // click in the normal flow - the moment a CPO is created and its
+    // shortage check has run, move it straight to ACKNOWLEDGED and create
+    // its Sales Order, i.e. do automatically what acknowledge() used to
+    // require a separate call for. See autoAcknowledge() below for why
+    // this runs as `user` (the creator) and why a failure here does not
+    // fail CPO creation itself.
+    await this.autoAcknowledge(cpo.id, user);
+
+    // Re-read rather than returning the stale `cpo` local captured before
+    // the block above ran: callers need to see the real outcome -
+    // ACKNOWLEDGED with its Sales Order, or still RECEIVED if
+    // auto-conversion couldn't complete (e.g. an item with no customer
+    // item mapping yet).
+    return (await this.prisma.customerPo.findFirst({ where: { id: cpo.id, companyId: user.companyId }, include: this.includes() })) || cpo;
   }
 
   /**
-   * Acknowledging a CPO now also automatically creates its linked Sales
+   * Acknowledging a CPO also automatically creates its linked Sales
    * Order in the same database transaction - if SO creation fails for
    * any reason, the acknowledgment itself rolls back too, so a CPO can
    * never end up ACKNOWLEDGED without a corresponding SO.
+   *
+   * In normal use this is no longer what triggers conversion - create()
+   * and update() already do that automatically via autoAcknowledge()
+   * (below) right after their shortage check completes. This method
+   * stays fully intact as:
+   *   - the manual recovery action for a CPO where auto-conversion
+   *     failed (e.g. a line with no customer item mapping yet) and is
+   *     still sitting RECEIVED, and
+   *   - the endpoint for any existing caller/integration that still
+   *     calls it directly.
+   * Its own status guard below is exactly what makes it safe to call
+   * after auto-conversion already ran: the CPO is no longer RECEIVED by
+   * then, so this throws instead of double-creating a Sales Order.
    */
   async acknowledge(id: string, user: any) {
     const existing = await this.prisma.customerPo.findFirst({
@@ -284,9 +311,21 @@ export class CustomerPoService {
     if (!existing) throw new NotFoundException('CPO not found');
     if (existing.status !== 'RECEIVED') throw new BadRequestException('Only RECEIVED CPOs can be acknowledged');
 
+    return this.runAcknowledgeTransaction(existing, user);
+  }
+
+  /**
+   * Shared transaction core for acknowledge() and autoAcknowledge(): flip
+   * status to ACKNOWLEDGED and create the linked Sales Order in one
+   * transaction, then audit-log it - exactly what acknowledge() always
+   * did, just factored out so the automatic path runs the identical code
+   * instead of a parallel copy that could drift from it. Callers are
+   * responsible for the RECEIVED-only guard.
+   */
+  private async runAcknowledgeTransaction(existing: any, user: any) {
     const result = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.customerPo.update({
-        where: { id },
+        where: { id: existing.id },
         data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), updatedBy: user.id },
         include: this.includes(),
       });
@@ -296,8 +335,65 @@ export class CustomerPoService {
       return { cpo: updated, salesOrder: so };
     });
 
-    await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: result.cpo, changedBy: user.id });
+    await this.audit.log({ tableName: 'customer_pos', recordId: existing.id, action: 'UPDATE', newValues: result.cpo, changedBy: user.id });
     return result.cpo;
+  }
+
+  /**
+   * Automatic replacement for a human clicking "Acknowledge" - called
+   * from create() and update() right after their shortage check runs.
+   * Converts a CPO straight to ACKNOWLEDGED + its Sales Order with no
+   * separate API call, reusing the exact same transaction, status guard
+   * and audit logging that acknowledge() itself uses.
+   *
+   * WHO this runs as: the same `user` who created/edited the CPO, not a
+   * synthetic "system" principal. That user already passed the
+   * controller's PermissionsGuard (SALES_CREATE / SALES_EDIT) to reach
+   * create()/update() in the first place, so they are a legitimate actor
+   * for the resulting ACKNOWLEDGED status and Sales Order, and this keeps
+   * a real, attributable user id in the audit trail - AuditService's
+   * changedBy and SalesOrdersService.createFromCpo's createdBy both
+   * expect a real user id, and this codebase has no "system" user
+   * concept to substitute instead.
+   *
+   * Credit holds: by the time create() reaches this point, a CPO that
+   * was blocked by checkCredit() and never overridden has already thrown
+   * and was never persisted - there is nothing to guard against here,
+   * because every CPO that exists at this point is, by construction,
+   * either under its credit limit or an explicitly authorized override,
+   * i.e. already clear to proceed.
+   *
+   * WHY it never throws: auto-conversion is a convenience layered on top
+   * of create()/update(), not a precondition for them to succeed (the
+   * same reasoning create() already applies to its own automatic
+   * shortage check above). The most likely failure is createFromCpo()'s
+   * own "no customer item mapping yet" check - a data-fix problem for a
+   * human, not a reason to fail a save that already happened. On any
+   * failure the CPO is simply left RECEIVED: still editable, still
+   * auto-retried on the next update(), and still reachable via the
+   * manual Acknowledge action once fixed.
+   *
+   * WHY it's idempotent: it only acts on a freshly-read RECEIVED CPO -
+   * the identical guard acknowledge() enforces. If auto-conversion
+   * already succeeded (or a manual Acknowledge call raced ahead of it)
+   * the CPO is no longer RECEIVED, so this is a no-op rather than a
+   * second Sales Order.
+   */
+  private async autoAcknowledge(cpoId: string, user: any): Promise<void> {
+    const fresh = await this.prisma.customerPo.findFirst({
+      where: { id: cpoId, companyId: user.companyId },
+      include: { items: true },
+    });
+    if (!fresh || fresh.status !== 'RECEIVED') return;
+
+    try {
+      await this.runAcknowledgeTransaction(fresh, user);
+    } catch (e: any) {
+      this.logger.error(
+        `Automatic acknowledge/SO-creation failed for CPO ${cpoId} (${fresh.cpoNumber}), triggered by user ${user?.id}: ${e?.message}. CPO remains RECEIVED - fix the issue and re-save, or use the manual Acknowledge action.`,
+        e?.stack,
+      );
+    }
   }
 
   /**
@@ -405,7 +501,19 @@ export class CustomerPoService {
       );
     }
 
-    return updated;
+    // Same auto-conversion as create() (see autoAcknowledge() for the
+    // full reasoning). update() only ever reaches this point for a CPO
+    // that is still RECEIVED (its guard above requires that), which is
+    // exactly the case where this matters: either the CPO is being
+    // edited before it has ever auto-converted, or it's being
+    // re-submitted after an earlier auto-conversion attempt failed (e.g.
+    // a since-fixed item mapping) - either way, it now gets another shot
+    // at going straight to ACKNOWLEDGED with no separate Acknowledge call.
+    await this.autoAcknowledge(id, user);
+
+    // Re-read for the same reason as in create(): `updated` is a stale
+    // pre-acknowledge snapshot once autoAcknowledge() has run.
+    return (await this.prisma.customerPo.findFirst({ where: { id, companyId: user.companyId }, include: this.includes() })) || updated;
   }
 
   async cancel(id: string, dto: CancelCpoDto, user: any) {
