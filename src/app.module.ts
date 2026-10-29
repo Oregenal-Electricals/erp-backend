@@ -54,6 +54,7 @@ import { RejectedStockModule } from './rejected-stock/rejected-stock.module';
 import { RackBinModule } from './rack-bin/rack-bin.module';
 import { StockPutawayModule } from './stock-putaway/stock-putaway.module';
 import { StockBatchModule } from './stock-batches/stock-batch.module';
+import { MaterialHoldDaysModule } from './material-hold-days/material-hold-days.module';
 import { StockIssueModule } from './stock-issues/stock-issue.module';
 import { StockTransferModule } from './stock-transfers/stock-transfer.module';
 import { StockAdjustmentModule } from './stock-adjustments/stock-adjustment.module';
@@ -228,6 +229,7 @@ import configuration from './config/configuration';
     RackBinModule,
     StockPutawayModule,
     StockBatchModule,
+    MaterialHoldDaysModule,
     StockIssueModule,
     StockTransferModule,
     StockAdjustmentModule,

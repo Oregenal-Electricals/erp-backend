@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MaterialHoldDaysService } from '../material-hold-days/material-hold-days.service';
 
 @Injectable()
 export class InventoryDashboardService {
-  constructor(private prisma: PrismaService) {}
+  // materialHoldDays is optional only so this class can still be built
+  // with `new InventoryDashboardService(prisma)` the way the existing
+  // STORE-018 unit tests already do (see inventory-dashboard.service.
+  // spec.ts) - NestJS's own DI still injects the real service at
+  // runtime via MaterialHoldDaysModule, imported by this module.
+  constructor(private prisma: PrismaService, private materialHoldDays?: MaterialHoldDaysService) {}
 
   async getOverview(user: any) {
     const companyId = user.companyId;
@@ -75,7 +81,17 @@ export class InventoryDashboardService {
       this.prisma.stockBatch.count({ where: { companyId, status: 'QUARANTINED' } }),
     ]);
 
-    return { lowStock, expiringBatches, expiredBatches, pendingGrns, pendingIqc, quarantinedBatches };
+    // Store aging / "no guarantee past N days" liability alert - per
+    // material+vendor (else material default, else the company-wide
+    // SystemSetting fallback) hold-days limit from src/material-hold-days.
+    // Guarded because materialHoldDays is only optional for the
+    // STORE-018 unit tests' simpler constructor call - see the comment
+    // on this class's constructor.
+    const agingStock = this.materialHoldDays
+      ? await this.materialHoldDays.getAgingStock(user)
+      : { totalBatchesChecked: 0, overdueCount: 0, overdueValue: 0, globalDefaultHoldDays: null, overdueBatches: [] };
+
+    return { lowStock, expiringBatches, expiredBatches, pendingGrns, pendingIqc, quarantinedBatches, agingStock };
   }
 
   async getActivity(user: any) {
