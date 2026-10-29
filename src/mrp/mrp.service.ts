@@ -282,6 +282,54 @@ export class MrpService {
     return leafShortages.get(SINGLE) || [];
   }
 
+  /**
+   * SO-material-completeness check behind the optional
+   * WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE gate (see WorkOrderService.start()).
+   * Reuses the exact same BOM-explosion/shortage engine (findProducingBom +
+   * explodeMaterialNeeds) that the CPO shortage check and the Planning
+   * Board already rely on, rather than a second calculation that could
+   * disagree with those. Checks EVERY active line item on the Sales
+   * Order - not just the item the Work Order being started will itself
+   * produce - against the given warehouse, for whatever quantity of each
+   * item is still pending (falling back to the full ordered qty if
+   * nothing has been marked pending yet). Items with no producible BOM
+   * (a raw-material line sold as-is) are out of scope for this check -
+   * there is nothing to manufacture, so nothing for a production gate to
+   * hold up.
+   */
+  async checkSoMaterialCompleteness(soId: string, companyId: string, warehouseId: string) {
+    const so = await this.prisma.salesOrder.findFirst({
+      where: { id: soId, companyId },
+      include: { items: { where: { isActive: true } } },
+    });
+    if (!so) throw new NotFoundException('Sales order not found');
+
+    const shortItems: { itemCode: string; itemName: string; uom: string; requiredQty: number; availableQty: number; shortQty: number }[] = [];
+
+    for (const item of so.items) {
+      const qtyToCheck = item.pendingQty > 0 ? item.pendingQty : item.qty;
+      if (!qtyToCheck || qtyToCheck <= 0) continue;
+
+      const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
+      const bom = product ? await this.findProducingBom(companyId, product.id) : null;
+      if (!bom) continue;
+
+      const shortages = await this.explodeMaterialNeeds(companyId, warehouseId, [
+        { itemCode: item.itemCode, itemName: item.itemName, uom: item.uom, qty: qtyToCheck },
+      ]);
+      for (const s of shortages) {
+        if (s.shortage > 0.0001) {
+          shortItems.push({
+            itemCode: s.itemCode, itemName: s.itemName, uom: s.uom,
+            requiredQty: s.netRequired, availableQty: s.availableQty, shortQty: s.shortage,
+          });
+        }
+      }
+    }
+
+    return { soId, soNumber: so.soNumber, complete: shortItems.length === 0, shortItems };
+  }
+
   async calculateMrp(woId: string, user: any) {
     const companyId = user.companyId;
 

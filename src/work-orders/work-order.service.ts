@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from './material-reservation.service';
@@ -6,6 +6,7 @@ import { WorkflowsService } from '../workflows/workflows.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto, CompleteStageDto } from './dto/work-order.dto';
 import { SettingsService } from '../settings/settings.service';
+import { MrpService } from '../mrp/mrp.service';
 
 const PRIORITY_SETTER_ROLES = ['PLANNING_MANAGER', 'PLANT_HEAD', 'UNIT_HEAD', 'CORPORATE_ADMIN', 'SUPER_ADMIN', 'ADMIN'];
 const STAGE_BYPASS_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CORPORATE_ADMIN', 'PLANT_HEAD', 'UNIT_HEAD', 'PLANNING_MANAGER'];
@@ -19,6 +20,7 @@ export class WorkOrderService {
     private workflows: WorkflowsService,
     private notifications: NotificationsService,
     private settings: SettingsService,
+    @Inject(forwardRef(() => MrpService)) private mrp: MrpService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -275,6 +277,27 @@ export class WorkOrderService {
       const availableInput = wo.cumulativeInputQty - wo.cumulativeProcessedQty;
       if (availableInput <= 0) {
         throw new BadRequestException('No previous-stage handover quantity available yet - this stage cannot start until the prior stage hands over output');
+      }
+    }
+
+    // Optional SO material-completeness gate. Defaults OFF
+    // (WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE = 'false') - when off,
+    // this is a complete no-op and start() behaves exactly as before,
+    // preserving today's partial-build behavior. When turned on, a WO
+    // linked to a Sales Order cannot start until every item on that SO
+    // is backed by fully available/allocated material - reusing the
+    // same BOM-explosion/shortage engine (MrpService.checkSoMaterialCompleteness,
+    // which itself reuses findProducingBom/explodeMaterialNeeds) that the
+    // CPO shortage check and Planning Board already rely on, rather than
+    // a second calculation that could disagree with those. A WO with no
+    // linked Sales Order (make-to-stock) has nothing to check and is
+    // never blocked by this gate.
+    const blockOnSoMaterialIncomplete = (await this.settings.getSettingValue('WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE', 'false')) === 'true';
+    if (blockOnSoMaterialIncomplete && wo.salesOrderId) {
+      const completeness = await this.mrp.checkSoMaterialCompleteness(wo.salesOrderId, wo.companyId, wo.warehouseId);
+      if (!completeness.complete) {
+        const shortList = completeness.shortItems.map((i: any) => i.itemCode).join(', ');
+        throw new BadRequestException(`Material for Sales Order ${completeness.soNumber} is not yet fully available/allocated - this Work Order cannot start until it is (configured by WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE). Short items: ${shortList}`);
       }
     }
 

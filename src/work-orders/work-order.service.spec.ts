@@ -9,6 +9,7 @@ describe('WorkOrderService — PROD-001: Work Order Released to Production', () 
   let workflows: any;
   let notifications: any;
   let settings: any;
+  let mrp: any;
   const user = { id: 'user-1', companyId: 'company-1', role: 'PLANT_HEAD' };
 
   const draftWo = {
@@ -38,12 +39,16 @@ describe('WorkOrderService — PROD-001: Work Order Released to Production', () 
     settings = {
       getSettingValue: jest.fn((key: string, def: string) => {
         if (key === 'WO_BLOCK_RELEASE_ON_SHORTAGE') return Promise.resolve('false');
+        if (key === 'WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE') return Promise.resolve('false');
         if (key === 'STANDARD_LABOUR_RATE_PER_SHIFT') return Promise.resolve('120');
         if (key === 'STANDARD_SHIFT_HOURS') return Promise.resolve('8');
         return Promise.resolve(def);
       }),
     };
-    service = new WorkOrderService(prisma, audit, materialReservation, workflows, notifications, settings);
+    mrp = {
+      checkSoMaterialCompleteness: jest.fn().mockResolvedValue({ soId: 'so-1', soNumber: 'SO-2026-0001', complete: true, shortItems: [] }),
+    };
+    service = new WorkOrderService(prisma, audit, materialReservation, workflows, notifications, settings, mrp);
   });
 
   describe('positive: valid release with the manual UAT test data', () => {
@@ -335,6 +340,70 @@ describe('WorkOrderService — PROD-001: Work Order Released to Production', () 
 
         const updateCall = prisma.workOrder.update.mock.calls[0][0];
         expect(updateCall.data.stageStatus).toBe('IN_PRODUCTION');
+      });
+    });
+
+    describe('SO material-completeness gate (optional, default OFF - WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE)', () => {
+      const releasedWithSo = { ...draftWo, status: 'RELEASED', parentWorkOrderId: null, cumulativeInputQty: 0, cumulativeProcessedQty: 0, salesOrderId: 'so-1' };
+
+      it('REGRESSION: gate OFF (default) starts the WO regardless of material completeness - true no-op', async () => {
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWithSo);
+        prisma.workOrder.update.mockResolvedValue({ ...releasedWithSo, status: 'IN_PROGRESS' });
+        // Even though the SO material is reported incomplete, the gate is OFF by
+        // default, so checkSoMaterialCompleteness must never even be consulted.
+        mrp.checkSoMaterialCompleteness.mockResolvedValue({ soId: 'so-1', soNumber: 'SO-2026-0001', complete: false, shortItems: [{ itemCode: 'RM-001' }] });
+
+        const result = await service.start('wo-1', user);
+
+        expect(result.status).toBe('IN_PROGRESS');
+        expect(mrp.checkSoMaterialCompleteness).not.toHaveBeenCalled();
+        expect(materialReservation.reserveForWorkOrder).toHaveBeenCalledWith('wo-1', user);
+      });
+
+      it('gate ON + material complete -> WO starts', async () => {
+        settings.getSettingValue.mockImplementation((key: string, def: string) => {
+          if (key === 'WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE') return Promise.resolve('true');
+          return Promise.resolve(def);
+        });
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWithSo);
+        prisma.workOrder.update.mockResolvedValue({ ...releasedWithSo, status: 'IN_PROGRESS' });
+        mrp.checkSoMaterialCompleteness.mockResolvedValue({ soId: 'so-1', soNumber: 'SO-2026-0001', complete: true, shortItems: [] });
+
+        const result = await service.start('wo-1', user);
+
+        expect(result.status).toBe('IN_PROGRESS');
+        expect(mrp.checkSoMaterialCompleteness).toHaveBeenCalledWith('so-1', 'company-1', 'wh-1');
+      });
+
+      it('gate ON + material incomplete -> WO start blocked with the expected error', async () => {
+        settings.getSettingValue.mockImplementation((key: string, def: string) => {
+          if (key === 'WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE') return Promise.resolve('true');
+          return Promise.resolve(def);
+        });
+        prisma.workOrder.findFirst.mockResolvedValue(releasedWithSo);
+        mrp.checkSoMaterialCompleteness.mockResolvedValue({
+          soId: 'so-1', soNumber: 'SO-2026-0001', complete: false,
+          shortItems: [{ itemCode: 'RM-001', itemName: 'LED Chip', uom: 'PCS', requiredQty: 100, availableQty: 20, shortQty: 80 }],
+        });
+
+        await expect(service.start('wo-1', user)).rejects.toThrow(BadRequestException);
+        expect(prisma.workOrder.update).not.toHaveBeenCalled();
+        expect(materialReservation.reserveForWorkOrder).not.toHaveBeenCalled();
+      });
+
+      it('gate ON but the WO has no linked Sales Order -> never blocked, nothing to check', async () => {
+        settings.getSettingValue.mockImplementation((key: string, def: string) => {
+          if (key === 'WO_BLOCK_START_ON_SO_MATERIAL_INCOMPLETE') return Promise.resolve('true');
+          return Promise.resolve(def);
+        });
+        const releasedNoSo = { ...releasedWithSo, salesOrderId: null };
+        prisma.workOrder.findFirst.mockResolvedValue(releasedNoSo);
+        prisma.workOrder.update.mockResolvedValue({ ...releasedNoSo, status: 'IN_PROGRESS' });
+
+        const result = await service.start('wo-1', user);
+
+        expect(result.status).toBe('IN_PROGRESS');
+        expect(mrp.checkSoMaterialCompleteness).not.toHaveBeenCalled();
       });
     });
   });
