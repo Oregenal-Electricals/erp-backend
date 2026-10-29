@@ -75,6 +75,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure warehouse_bins.bay/level/sequenceOrder columns - see 161_store_rack_bin_vertical_numbering.sql', e as Error);
     }
+    try {
+      await this.ensureOqcStageColumn();
+    } catch (e) {
+      this.logger.error('Failed to ensure oqc_inspections.stage column - see 165_oqc_prepack_postpack_split.sql', e as Error);
+    }
   }
 
   /**
@@ -195,6 +200,30 @@ export class PrismaService
     await this.$executeRawUnsafe(`ALTER TABLE "warehouse_bins" ADD COLUMN IF NOT EXISTS "sequenceOrder" INTEGER;`);
     await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "warehouse_bins_rackId_sequenceOrder_idx" ON "warehouse_bins"("rackId", "sequenceOrder");`);
     this.logger.log('warehouse_bins.bay/level/sequenceOrder columns and index ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 165_oqc_prepack_postpack_split.sql (adds oqc_inspections.stage NOT
+   * NULL DEFAULT 'PRE_PACK', plus its unique/lookup indexes). Same
+   * self-apply-on-boot pattern as the methods above, for the same
+   * reason: this migration was merged (backing task #60's PRE_PACK /
+   * POST_PACK OQC gate) but never actually run against production.
+   * Discovered live 2026-10-29 while starting Phase 4 (task #73):
+   * GET /oqc and GET /oqc/stats were both returning a 500 ("column
+   * oqc_inspections.stage does not exist"), taking down the entire OQC
+   * list/stats screen. ADD COLUMN IF NOT EXISTS with NOT NULL DEFAULT
+   * backfills existing rows the same way the plain ALTER TABLE in the
+   * .sql file would have; the indexes are IF NOT EXISTS. Safe on every
+   * boot including one that already has it applied. Remove once
+   * 165_oqc_prepack_postpack_split.sql is confirmed applied everywhere
+   * and this has had a chance to run at least once.
+   */
+  private async ensureOqcStageColumn() {
+    await this.$executeRawUnsafe(`ALTER TABLE "oqc_inspections" ADD COLUMN IF NOT EXISTS "stage" TEXT NOT NULL DEFAULT 'PRE_PACK';`);
+    await this.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "oqc_inspections_companyId_fgReceiptId_stage_key" ON "oqc_inspections"("companyId", "fgReceiptId", "stage");`);
+    await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "oqc_inspections_companyId_stage_idx" ON "oqc_inspections"("companyId", "stage");`);
+    this.logger.log('oqc_inspections.stage column and indexes ensured');
   }
 
   /**
