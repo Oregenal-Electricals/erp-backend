@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { PurchaseRequisitionService } from './purchase-requisition.service';
-import { CreatePurchaseRequisitionDto, UpdatePurchaseRequisitionDto, PrItemDto, RejectPrDto } from './dto/purchase-requisition.dto';
+import { CreatePurchaseRequisitionDto, UpdatePurchaseRequisitionDto, PrItemDto, RejectPrDto, CreatePrFromShortageDto } from './dto/purchase-requisition.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -26,6 +26,13 @@ export class PurchaseRequisitionController {
   @Post()
   @RequirePermissions(Permission.PURCHASE_CREATE)
   create(@Body() dto: CreatePurchaseRequisitionDto, @Request() req: any) { return this.prService.create(dto, req.user); }
+
+  // Auto-drafts a DRAFT PR whose item quantities are taken strictly from
+  // OPEN MaterialShortage rows (the shortfall figure), not the full BOM
+  // requirement. Purchase still reviews/edits/submits it like any other PR.
+  @Post('from-shortages')
+  @RequirePermissions(Permission.PURCHASE_CREATE)
+  createFromShortages(@Body() dto: CreatePrFromShortageDto, @Request() req: any) { return this.prService.createFromShortages(dto, req.user); }
 
   @Put(':id')
   @RequirePermissions(Permission.PURCHASE_EDIT)

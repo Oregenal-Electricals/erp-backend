@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString, IsArray, IsIn, ValidateNested, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, IsArray, IsIn, ValidateNested, Min, ArrayMinSize } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PrItemDto {
@@ -36,4 +36,22 @@ export class UpdatePurchaseRequisitionDto {
 
 export class RejectPrDto {
   @IsString() rejectionReason: string;
+}
+
+// Auto-drafts a Purchase Requisition straight from OPEN MaterialShortage
+// records (the Customer PO shortage check's output). itemCodes selects
+// which shortage-driven items to pull in; every item's requiredQty is set
+// strictly from the shortfall quantity (BOM/demand requirement minus
+// stock/incoming already netted off by the shortage check) - never the
+// full BOM requirement - and the PR lands in DRAFT so Purchase can still
+// review/edit quantities before submit()/approve(). Nothing here raises
+// a PO or sends anything to a vendor.
+export class CreatePrFromShortageDto {
+  @IsString() title: string;
+  @IsOptional() @IsString() description?: string;
+  @IsDateString() requiredDate: string;
+  @IsOptional() @IsString() department?: string;
+  @IsOptional() @IsString() @IsIn(['LOW', 'NORMAL', 'HIGH', 'URGENT']) priority?: string;
+  @IsOptional() @IsString() notes?: string;
+  @IsArray() @ArrayMinSize(1) @IsString({ each: true }) itemCodes: string[];
 }
