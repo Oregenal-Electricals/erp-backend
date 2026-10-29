@@ -62,7 +62,13 @@ export class MrpService {
       if (ancestors.has(itemCode)) return; // cycle guard - a BOM should never reference itself, but never trust that blindly
       let children = bomOf.get(itemCode);
       if (children === undefined) {
-        const product = await this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+        // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+        // on the live DB (PR #28 not deployed) - an unselected findFirst
+        // would crash. Only id/name are used below.
+        const product = await this.prisma.product.findFirst({
+          where: { companyId, code: itemCode },
+          select: { id: true, name: true },
+        });
         if (!product) { bomOf.set(itemCode, null); return; }
         itemMeta.set(itemCode, { itemName: product.name, uom: 'PCS' });
         const bom = await this.findProducingBom(companyId, product.id);
@@ -496,7 +502,13 @@ export class MrpService {
     const flat: any[] = [];
     for (const so of sos) {
       for (const item of so.items) {
-        const product = await this.prisma.product.findFirst({ where: { companyId, code: item.itemCode } });
+        // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+        // on the live DB (PR #28 not deployed) - an unselected findFirst
+        // would crash. Only id is used below.
+        const product = await this.prisma.product.findFirst({
+          where: { companyId, code: item.itemCode },
+          select: { id: true },
+        });
         const bom = product ? await this.findProducingBom(companyId, product.id) : null;
 
         const alreadyPlanned = await this.prisma.workOrder.aggregate({
@@ -775,7 +787,14 @@ export class MrpService {
         include: { salesOrder: true },
       });
       if (!soItem) throw new NotFoundException(`Sales order item ${a.soItemId} not found`);
-      const product = await this.prisma.product.findFirst({ where: { companyId, code: soItem.itemCode } });
+      // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+      // on the live DB (PR #28 not deployed) - an unselected findFirst
+      // would crash. id/code/name are used below (incl. inside the
+      // `resolved` array consumed further down this function).
+      const product = await this.prisma.product.findFirst({
+        where: { companyId, code: soItem.itemCode },
+        select: { id: true, code: true, name: true },
+      });
       if (!product) {
         skipped.push({
           soItemId: soItem.id, itemCode: soItem.itemCode, itemName: soItem.itemName,

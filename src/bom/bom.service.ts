@@ -33,7 +33,13 @@ export class BomService {
 
   // ── BOM CRUD ─────────────────────────────────────────────────
   async create(dto: CreateBomDto, user: any) {
-    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+    // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+    // on the live DB (PR #28 not deployed) - an unselected findFirst would
+    // crash. id/brand are used below (brand feeds the BOM-number prefix).
+    const product = await this.prisma.product.findFirst({
+      where: { id: dto.productId, companyId: user.companyId },
+      select: { id: true, brand: true },
+    });
     if (!product) throw new NotFoundException('Product not found');
 
     const existingActiveBom = await this.prisma.bom.findFirst({
@@ -483,7 +489,15 @@ export class BomService {
 
       let targetProduct: { id: string; code: string; name: string };
       if (stage.productCode) {
-        const existing = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: stage.productCode } });
+        // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+        // on the live DB (PR #28 not deployed) - an unselected findFirst
+        // would crash. id/code/name match targetProduct's declared type
+        // and are the only fields used on it downstream (incl. the next
+        // loop iteration via previousProduct).
+        const existing = await this.prisma.product.findFirst({
+          where: { companyId: user.companyId, code: stage.productCode },
+          select: { id: true, code: true, name: true },
+        });
         if (existing) {
           targetProduct = existing;
         } else {

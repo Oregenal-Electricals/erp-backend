@@ -256,7 +256,14 @@ export class BomImportService {
       let productBrand: string | null | undefined;
 
       if (dto.useExistingProductId) {
-        const existing = await tx.product.findFirst({ where: { id: dto.useExistingProductId, companyId: user.companyId } });
+        // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+        // on the live DB (PR #28 not deployed) - an unselected findFirst
+        // would crash. id/brand are used below (brand feeds the BOM-number
+        // prefix generator).
+        const existing = await tx.product.findFirst({
+          where: { id: dto.useExistingProductId, companyId: user.companyId },
+          select: { id: true, brand: true },
+        });
         if (!existing) throw new NotFoundException('Selected existing product not found');
         productId = existing.id;
         productBrand = existing.brand;
