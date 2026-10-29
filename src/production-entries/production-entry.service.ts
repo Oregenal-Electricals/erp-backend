@@ -97,7 +97,14 @@ export class ProductionEntryService {
 
     // Target/productivity snapshot (spec sections 7-8, 32) - taken now
     // so a later master change never retroactively alters this entry.
-    const product = await this.prisma.product.findFirst({ where: { code: wo.productCode, companyId: user.companyId } });
+    // See WorkOrderService.release() for why this needs an explicit
+    // select - production is currently missing products.hourlyTarget/
+    // dailyTarget (PR #28 not yet deployed), and only product.id is
+    // used below.
+    const product = await this.prisma.product.findFirst({
+      where: { code: wo.productCode, companyId: user.companyId },
+      select: { id: true },
+    });
     let productivityRateSnapshot: number | null = null;
     let targetQty: number | null = null;
     if (product) {

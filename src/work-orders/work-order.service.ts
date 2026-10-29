@@ -142,8 +142,24 @@ export class WorkOrderService {
     const wo = await this.findOne(id, user);
     if (wo.status !== 'DRAFT') throw new BadRequestException('Only DRAFT work orders can be released');
 
-    // Product must exist and be active
-    const product = await this.prisma.product.findFirst({ where: { code: wo.productCode, companyId: wo.companyId } });
+    // Product must exist and be active.
+    // IMPORTANT: explicit `select` here, not a bare findFirst() - the
+    // production DB is currently missing the products.hourlyTarget /
+    // dailyTarget columns (PR #28's self-healing migration never
+    // actually reached GitHub/prod - see ways-of-working notes), and a
+    // bare findFirst() implicitly selects every scalar column, which
+    // crashes with "column products.hourlyTarget does not exist" and
+    // blocks Work Order Release entirely. Only id/isActive are used
+    // below (by this check and by computePlannedLabourReference()), so
+    // selecting just those sidesteps the missing columns without
+    // needing the migration to land first. This is a targeted unblock
+    // for this one call site, not a fix for the underlying missing
+    // columns - other Product queries elsewhere (e.g. ProductService)
+    // still need the real migration applied.
+    const product = await this.prisma.product.findFirst({
+      where: { code: wo.productCode, companyId: wo.companyId },
+      select: { id: true, isActive: true },
+    });
     if (!product) throw new NotFoundException(`Product ${wo.productCode} not found`);
     if (!product.isActive) throw new BadRequestException(`Product ${wo.productCode} is inactive and cannot be released for production`);
 
