@@ -8,7 +8,9 @@ export class ProductRevisionService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
   async create(dto: CreateProductRevisionDto, user: any) {
-    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+    // Explicit select: products.hourlyTarget/dailyTarget columns are missing in prod (PR #28 not deployed yet),
+    // and this lookup is only an existence/company-scope check, so we avoid selecting those columns.
+    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId }, select: { id: true } });
     if (!product) throw new NotFoundException('Product not found');
 
     const exists = await this.prisma.productRevision.findUnique({

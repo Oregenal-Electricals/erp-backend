@@ -110,7 +110,9 @@ export class ProductFamilyService {
   async removeProduct(productId: string, user: any) {
     const where: any = { id: productId };
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
-    const product = await this.prisma.product.findFirst({ where });
+    // Explicit select: products.hourlyTarget/dailyTarget columns are missing in prod (PR #28 not deployed yet).
+    // Only `id`/`familyId` are read on this record below, so those columns are unaffected.
+    const product = await this.prisma.product.findFirst({ where, select: { id: true, familyId: true } });
     if (!product) throw new NotFoundException('Product not found');
     if (!product.familyId) throw new BadRequestException('Product is not assigned to any Product Family');
 
