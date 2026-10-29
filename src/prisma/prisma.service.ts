@@ -55,6 +55,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure users.plantId column - see 150_user_default_plant.sql', e as Error);
     }
+    try {
+      await this.ensureProductTargetColumns();
+    } catch (e) {
+      this.logger.error('Failed to ensure products.hourlyTarget/dailyTarget columns - see 164_product_hourly_daily_targets.sql', e as Error);
+    }
   }
 
   /**
@@ -81,6 +86,28 @@ export class PrismaService
     `);
     await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "users_plantId_idx" ON "users"("plantId");`);
     this.logger.log('users.plantId column/constraint/index ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for 164_product_hourly_daily_targets.sql
+   * (adds products.hourlyTarget/dailyTarget, drops the dead
+   * hourly_production_reports table). Same self-apply-on-boot pattern as
+   * ensurePlantIdColumn() above, for the same reason: this environment has
+   * no psql/AWS access to run the migration file directly against the DB,
+   * but the app's own Prisma connection can apply the equivalent DDL on
+   * startup. Discovered needed 2026-10-29 when BOM upload's Confirm Import
+   * step failed in production with "column products.hourlyTarget does not
+   * exist" - the PR #21 code had been deployed without this migration ever
+   * having been run against that database. Every statement is IF EXISTS /
+   * IF NOT EXISTS, so safe on every boot including one that already has it
+   * applied. Remove once 164_product_hourly_daily_targets.sql is confirmed
+   * applied everywhere and this has had a chance to run at least once.
+   */
+  private async ensureProductTargetColumns() {
+    await this.$executeRawUnsafe(`ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "hourlyTarget" DOUBLE PRECISION;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "dailyTarget" DOUBLE PRECISION;`);
+    await this.$executeRawUnsafe(`DROP TABLE IF EXISTS "hourly_production_reports";`);
+    this.logger.log('products.hourlyTarget/dailyTarget columns ensured, hourly_production_reports dropped');
   }
 
   /**
