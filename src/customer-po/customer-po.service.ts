@@ -336,7 +336,10 @@ export class CustomerPoService {
     const result = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.customerPo.update({
         where: { id: existing.id },
-        data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), updatedBy: user.id },
+        // conversionError cleared here: a successful conversion (automatic
+        // retry or the manual retry action) means whatever previously
+        // blocked it no longer applies.
+        data: { status: 'ACKNOWLEDGED', acknowledgedDate: new Date(), conversionError: null, updatedBy: user.id },
         include: this.includes(),
       });
 
@@ -400,9 +403,21 @@ export class CustomerPoService {
       await this.runAcknowledgeTransaction(fresh, user);
     } catch (e: any) {
       this.logger.error(
-        `Automatic acknowledge/SO-creation failed for CPO ${cpoId} (${fresh.cpoNumber}), triggered by user ${user?.id}: ${e?.message}. CPO remains RECEIVED - fix the issue and re-save, or use the manual Acknowledge action.`,
+        `Automatic acknowledge/SO-creation failed for CPO ${cpoId} (${fresh.cpoNumber}), triggered by user ${user?.id}: ${e?.message}. CPO remains RECEIVED - fix the issue and re-save, or use the manual retry action.`,
         e?.stack,
       );
+      // Persist the reason so the frontend can show *why* this CPO is
+      // stuck RECEIVED (e.g. "no customer item mapping yet for X") instead
+      // of a human needing server-log access to find out. Best-effort: if
+      // even this write fails, the error above is still logged.
+      try {
+        await this.prisma.customerPo.update({
+          where: { id: cpoId },
+          data: { conversionError: String(e?.message || 'Automatic conversion failed') },
+        });
+      } catch (writeErr) {
+        this.logger.error(`Failed to persist conversionError on CPO ${cpoId}`, writeErr as Error);
+      }
     }
   }
 

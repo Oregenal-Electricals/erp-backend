@@ -5506,6 +5506,12 @@ model CustomerPo {
   totalAmount       Float     @default(0)
   status            String    @default("RECEIVED") // RECEIVED, ACKNOWLEDGED, IN_PROGRESS, COMPLETED, CANCELLED
   acknowledgedDate  DateTime?
+  // Set when automatic CPO->SO conversion (autoAcknowledge) fails and the
+  // CPO is left RECEIVED (e.g. a line has no customer item mapping yet).
+  // Cleared the moment conversion succeeds, manually retried or automatic.
+  // Lets the frontend show *why* a CPO is stuck instead of a human having
+  // to guess or check server logs. See customer-po.service.ts autoAcknowledge().
+  conversionError   String?
   cancelledDate     DateTime?
   cancelReason      String?
   remarks           String?

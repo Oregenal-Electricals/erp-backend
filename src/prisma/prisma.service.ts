@@ -60,6 +60,16 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure products.hourlyTarget/dailyTarget columns - see 164_product_hourly_daily_targets.sql', e as Error);
     }
+    try {
+      await this.ensureCpoConversionErrorColumn();
+    } catch (e) {
+      this.logger.error('Failed to ensure customer_pos.conversionError column - see 171_cpo_conversion_error.sql', e as Error);
+    }
+    try {
+      await this.ensureShortageVerificationAccess();
+    } catch (e) {
+      this.logger.error('Failed to ensure shortage-verification permissions/nav - see 156_material_shortage_verify_permissions.sql and 172_ui_control_shortage_verification_nav.sql', e as Error);
+    }
   }
 
   /**
@@ -108,6 +118,54 @@ export class PrismaService
     await this.$executeRawUnsafe(`ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "dailyTarget" DOUBLE PRECISION;`);
     await this.$executeRawUnsafe(`DROP TABLE IF EXISTS "hourly_production_reports";`);
     this.logger.log('products.hourlyTarget/dailyTarget columns ensured, hourly_production_reports dropped');
+  }
+
+  /**
+   * One-time, idempotent startup check for 171_cpo_conversion_error.sql
+   * (adds customer_pos.conversionError). Same self-apply-on-boot pattern
+   * as ensurePlantIdColumn()/ensureProductTargetColumns() above, for the
+   * same reason: no psql/AWS access from this environment to run the
+   * migration file directly, so the app's own Prisma connection applies
+   * the equivalent DDL on startup instead. Safe on every boot - the
+   * statement is IF NOT EXISTS. Remove once 171_cpo_conversion_error.sql
+   * is confirmed applied everywhere and this has had a chance to run at
+   * least once.
+   */
+  private async ensureCpoConversionErrorColumn() {
+    await this.$executeRawUnsafe(`ALTER TABLE "customer_pos" ADD COLUMN IF NOT EXISTS "conversionError" TEXT;`);
+    this.logger.log('customer_pos.conversionError column ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for two data (not schema) fixes
+   * discovered to be at risk of the exact same "migration file merged but
+   * never actually run against production" gap that 164 hit today:
+   *   - 156_material_shortage_verify_permissions.sql: grants
+   *     MATERIAL_SHORTAGE_VIEW/VERIFY to SUPER_ADMIN/ADMIN/STORE roles.
+   *     Without it, Store cannot see or act on its own shortage
+   *     verification queue (task #52) even though the backend/frontend
+   *     for it are both live.
+   *   - 172_ui_control_shortage_verification_nav.sql: adds the sidebar
+   *     row for that same screen, so Store can actually navigate to it.
+   * Both statements are ON CONFLICT DO NOTHING, so safe on every boot
+   * including one where they already applied. Remove once both files are
+   * confirmed applied everywhere.
+   */
+  private async ensureShortageVerificationAccess() {
+    await this.$executeRawUnsafe(`
+      INSERT INTO role_permissions (id, "companyId", "roleId", permission, "isActive", "isTestData", "createdAt", "updatedAt", "createdBy", "updatedBy")
+      SELECT gen_random_uuid()::text, r."companyId", r.id, perm, true, false, now(), now(), 'material-shortage-verify-migration', 'material-shortage-verify-migration'
+      FROM roles r
+      CROSS JOIN (VALUES ('MATERIAL_SHORTAGE_VIEW'), ('MATERIAL_SHORTAGE_VERIFY')) AS p(perm)
+      WHERE r.name IN ('SUPER_ADMIN', 'ADMIN', 'STORE')
+      ON CONFLICT DO NOTHING;
+    `);
+    await this.$executeRawUnsafe(`
+      INSERT INTO ui_control_elements (id, company_id, key, element_type, module, page, label, icon, parent_key, sort_order, default_visible, created_at, updated_at, is_active, is_test_data)
+      VALUES (gen_random_uuid(), '83eda866-ba63-472c-902f-561f05b6b1c1', 'sidebar.inventory.shortageVerification', 'SIDEBAR_ITEM', 'Inventory', '/inventory/shortage-verification', 'Shortage Verification', NULL, 'sidebar.inventory', 9, true, now(), now(), true, false)
+      ON CONFLICT (company_id, key) DO NOTHING;
+    `);
+    this.logger.log('Shortage-verification role permissions and sidebar nav ensured');
   }
 
   /**
