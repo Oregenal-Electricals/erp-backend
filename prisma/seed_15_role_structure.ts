@@ -492,7 +492,10 @@ const ROLE_DEFS: RoleDef[] = [
       P.PRODUCTION_ENTRY_VIEW,
       P.FG_RECEIPT_VIEW,
       P.PRODUCTION_ISSUE_VIEW,
-      P.PRODUCTION_COST_SHEET_VIEW,
+      // PRODUCTION_COST_SHEET_VIEW deliberately NOT granted here (task #78):
+      // it exposes per-work-order material/labour/rework cost and P&L data,
+      // which stays Super Admin/Admin/Accounts only, same restriction as
+      // ProductionEntry.profitLossAmount (see production-entry.service.ts).
       P.PRODUCTION_REPORT_VIEW,
       P.QUALITY_VIEW,
       P.QUALITY_CREATE,
