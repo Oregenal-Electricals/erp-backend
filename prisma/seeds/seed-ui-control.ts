@@ -38,8 +38,8 @@ const STRUCTURE: Section[] = [
   {
     key: 'sidebar.purchase', label: 'Purchase', icon: 'shopping-cart',
     items: [
-      { key: 'sidebar.purchase.requisitions', label: 'Purchase Requisitions', page: '/purchase-requisitions' },
-      { key: 'sidebar.purchase.orders', label: 'Purchase Orders', page: '/purchase-orders' },
+      { key: 'sidebar.purchase.requisitions', label: 'Purchase Requisitions', page: '/purchase/requisitions' },
+      { key: 'sidebar.purchase.orders', label: 'Purchase Orders', page: '/purchase/orders' },
       { key: 'sidebar.purchase.shortages', label: 'Material Shortages', page: '/purchase/shortages' },
       { key: 'sidebar.purchase.rfqs', label: 'RFQs', page: '/purchase/rfqs' },
       { key: 'sidebar.purchase.quotations', label: 'Vendor Quotations', page: '/purchase/quotations' },
