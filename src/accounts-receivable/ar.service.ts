@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
 import { CreateArInvoiceDto, CreateArPaymentDto } from './dto/ar.dto';
 
 @Injectable()
 export class ArService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private customerItemMapping: CustomerItemMappingService,
+  ) {}
 
   private async generateInvoiceNumber(companyId: string): Promise<string> {
     const count = await this.prisma.arInvoice.count({ where: { companyId } });
@@ -31,13 +36,112 @@ export class ArService {
       dispatch: { select: { dispatchNumber: true, lrNumber: true } },
       salesOrder: { select: { soNumber: true, cpo: { select: { cpoNumber: true, customerPoNumber: true } } } },
       payments: true,
+      items: true,
     };
+  }
+
+  // Resolves the Customer master record for this invoice (via the Sales
+  // Order or, failing that, its Customer PO) so line items can look up
+  // that customer's own item wording. Returns null when the invoice has
+  // no linked SO/CPO or neither carries a customerId - callers must
+  // treat that as "no mapping possible" and fall back to internal
+  // naming, never block invoice creation on it.
+  private async resolveInvoiceCustomerId(soId: string | null | undefined, user: any): Promise<string | null> {
+    if (!soId) return null;
+    const so = await this.prisma.salesOrder.findFirst({
+      where: { id: soId, companyId: user.companyId },
+      select: { customerId: true, cpo: { select: { customerId: true } } },
+    });
+    return so?.customerId || so?.cpo?.customerId || null;
+  }
+
+  // Resolves OUR productId/rawMaterialId for an internal itemCode, given
+  // the saleType (RM sells straight out of Raw Material; SFG/FG both
+  // live in Product - same split used in SalesOrdersService). Needed
+  // because CustomerItemMapping is keyed off the resolved master record,
+  // not the raw code string.
+  private async resolveInternalItem(itemCode: string, saleType: string | null | undefined, user: any) {
+    if (saleType === 'RM') {
+      const rm = await this.prisma.rawMaterial.findFirst({ where: { companyId: user.companyId, code: itemCode } });
+      return { productId: null as string | null, rawMaterialId: rm?.id ?? null };
+    }
+    const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: itemCode } });
+    return { productId: product?.id ?? null, rawMaterialId: null as string | null };
+  }
+
+  // The customer's own original wording for a line, resolved via
+  // CustomerItemMapping (reverse lookup: our product/raw material +
+  // this invoice's customer -> their code/name). Falls back to our own
+  // itemName when no mapping exists, so a missing mapping never blocks
+  // invoice creation - it just prints our internal name for that line.
+  private async resolveCustomerWording(
+    customerId: string | null,
+    productId: string | null,
+    rawMaterialId: string | null,
+    fallbackItemName: string,
+    user: any,
+  ) {
+    const mapping = customerId
+      ? await this.customerItemMapping.resolveByInternalItem(customerId, { productId, rawMaterialId }, user)
+      : null;
+    return {
+      customerItemWording: mapping?.customerItemName || mapping?.customerItemCode || fallbackItemName,
+      customerItemCode: mapping?.customerItemCode || null,
+    };
+  }
+
+  private async buildItemsFromDispatch(dispatch: any, customerId: string | null, user: any) {
+    const rows: any[] = [];
+    for (const di of dispatch.items) {
+      const { productId, rawMaterialId } = await this.resolveInternalItem(di.itemCode, di.soItem?.saleType, user);
+      const { customerItemWording, customerItemCode } = await this.resolveCustomerWording(customerId, productId, rawMaterialId, di.itemName, user);
+      rows.push({
+        companyId: user.companyId,
+        dispatchItemId: di.id,
+        soItemId: di.soItemId,
+        itemCode: di.itemCode,
+        itemName: di.itemName,
+        productId, rawMaterialId,
+        customerItemWording, customerItemCode,
+        qty: di.dispatchedQty, uom: di.uom, unitPrice: di.unitPrice,
+        gstRate: di.gstRate, gstAmount: di.gstAmount, totalAmount: di.totalAmount,
+        createdBy: user.id, updatedBy: user.id,
+      });
+    }
+    return rows;
+  }
+
+  // Manual-create path (CreateArInvoiceDto.items) - the caller already
+  // knows itemCode/productId/rawMaterialId per line (same shape the
+  // frontend would build from a SalesOrderItem), so we only need to
+  // resolve the customer wording, not re-derive the internal item.
+  private async buildItemsFromDto(items: any[], customerId: string | null, user: any) {
+    const rows: any[] = [];
+    for (const it of items) {
+      const { customerItemWording, customerItemCode } = await this.resolveCustomerWording(
+        customerId, it.productId ?? null, it.rawMaterialId ?? null, it.itemName, user,
+      );
+      rows.push({
+        companyId: user.companyId,
+        dispatchItemId: it.dispatchItemId ?? null,
+        soItemId: it.soItemId ?? null,
+        itemCode: it.itemCode,
+        itemName: it.itemName,
+        productId: it.productId ?? null,
+        rawMaterialId: it.rawMaterialId ?? null,
+        customerItemWording, customerItemCode,
+        qty: it.qty, uom: it.uom || 'PCS', unitPrice: it.unitPrice,
+        gstRate: it.gstRate ?? 18, gstAmount: it.gstAmount, totalAmount: it.totalAmount,
+        createdBy: user.id, updatedBy: user.id,
+      });
+    }
+    return rows;
   }
 
   async createFromDispatch(dispatchId: string, user: any) {
     const dispatch = await this.prisma.dispatch.findFirst({
       where: { id: dispatchId, companyId: user.companyId },
-      include: { items: true, salesOrder: { include: { cpo: true } } },
+      include: { items: { include: { soItem: { select: { saleType: true } } } }, salesOrder: { include: { cpo: true } } },
     });
     if (!dispatch) throw new NotFoundException('Dispatch not found');
     if (dispatch.status !== 'DELIVERED') throw new BadRequestException('Dispatch must be DELIVERED to create invoice');
@@ -52,6 +156,8 @@ export class ArService {
     const invoiceDate = new Date();
 
     const invoiceNumber = await this.generateInvoiceNumber(user.companyId);
+    const customerId = dispatch.salesOrder?.customerId || dispatch.salesOrder?.cpo?.customerId || null;
+    const itemRows = await this.buildItemsFromDispatch(dispatch, customerId, user);
 
     const invoice = await this.prisma.arInvoice.create({
       data: {
@@ -62,6 +168,7 @@ export class ArService {
         paymentTerms: terms, subtotal, totalGst, totalAmount,
         outstandingAmount: totalAmount, status: 'SENT',
         companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+        items: { create: itemRows },
       },
       include: this.includes(),
     });
@@ -79,6 +186,9 @@ export class ArService {
     const terms = dto.paymentTerms || 'NET_30';
     const dueDate = dto.dueDate ? new Date(dto.dueDate) : this.calcDueDate(terms, invoiceDate);
 
+    const customerId = await this.resolveInvoiceCustomerId(dto.soId, user);
+    const itemRows = dto.items?.length ? await this.buildItemsFromDto(dto.items, customerId, user) : [];
+
     const invoice = await this.prisma.arInvoice.create({
       data: {
         invoiceNumber, dispatchId: dto.dispatchId, soId: dto.soId,
@@ -88,6 +198,7 @@ export class ArService {
         outstandingAmount: dto.totalAmount, notes: dto.notes,
         status: 'SENT',
         companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+        ...(itemRows.length ? { items: { create: itemRows } } : {}),
       },
       include: this.includes(),
     });

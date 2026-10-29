@@ -159,7 +159,9 @@ export class PdfEngineService {
   async generateArInvoicePdf(id: string, companyId: string): Promise<Buffer> {
     const inv = await this.prisma.arInvoice.findFirst({
       where: { id, companyId },
-      include: { company: true },
+      // Task #53: items.customerItemWording is what must print here - the
+      // customer's own wording for the line, not our internal itemName.
+      include: { company: true, items: true },
     });
     if (!inv) throw new NotFoundException('Invoice not found');
 
@@ -184,6 +186,35 @@ export class PdfEngineService {
 
     doc.moveTo(40, y).lineTo(555, y).strokeColor('#e5e7eb').lineWidth(0.5).stroke();
     y += 15;
+
+    const items = (inv as any).items || [];
+    if (items.length) {
+      const COLS = [
+        { text: '#', x: 40, width: 20 },
+        // The customer's own original wording for this line - the
+        // whole point of task #53 - not our internal item name.
+        { text: 'Item (as per customer PO)', x: 60, width: 185 },
+        { text: 'UOM', x: 245, width: 35 },
+        { text: 'Qty', x: 280, width: 40 },
+        { text: 'Rate', x: 320, width: 55 },
+        { text: 'GST%', x: 375, width: 35 },
+        { text: 'Amount', x: 410, width: 145 },
+      ];
+      y = this.addTableHeader(doc, y, COLS);
+      items.forEach((item: any, idx: number) => {
+        if (y > 700) { doc.addPage(); y = 40; }
+        y = this.addTableRow(doc, y, [
+          { text: String(idx + 1), x: 40, width: 20 },
+          { text: item.customerItemWording || item.itemName, x: 60, width: 185 },
+          { text: item.uom, x: 245, width: 35 },
+          { text: String(item.qty), x: 280, width: 40 },
+          { text: `Rs.${item.unitPrice}`, x: 320, width: 55 },
+          { text: `${item.gstRate || 0}%`, x: 375, width: 35 },
+          { text: fmt(item.totalAmount), x: 410, width: 145 },
+        ], idx % 2 === 0);
+      });
+      y += 10;
+    }
 
     y = this.addSummaryBox(doc, y, [
       { label: 'Subtotal', value: fmt(inv.subtotal) },
