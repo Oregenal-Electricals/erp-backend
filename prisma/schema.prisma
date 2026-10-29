@@ -2745,7 +2745,7 @@ model PurchaseRequisition {
   requiredDate    DateTime
   department      String?
   priority        String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
-  status          String   @default("DRAFT")  // DRAFT, SUBMITTED, APPROVED, REJECTED, PO_RAISED, CLOSED
+  status          String   @default("DRAFT")  // DRAFT, SUBMITTED, APPROVED, REJECTED, PO_RAISED, CLOSED, CANCELLED
   approvedBy      String?
   approvedAt      DateTime?
   rejectedBy      String?
