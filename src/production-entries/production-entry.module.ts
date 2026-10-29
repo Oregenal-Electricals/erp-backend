@@ -5,8 +5,9 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
 import { WorkOrderModule } from '../work-orders/work-order.module';
 import { SettingsModule } from '../settings/settings.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 @Module({
-  imports: [PrismaModule, CommonModule, WorkOrderModule, SettingsModule],
+  imports: [PrismaModule, CommonModule, WorkOrderModule, SettingsModule, NotificationsModule],
   controllers: [ProductionEntryController],
   providers: [ProductionEntryService],
   exports: [ProductionEntryService],
