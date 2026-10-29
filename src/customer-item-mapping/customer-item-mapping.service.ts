@@ -92,7 +92,14 @@ export class CustomerItemMappingService {
     if (!customer) throw new NotFoundException('Customer not found');
 
     if (dto.productId) {
-      const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+      // Explicit `select` - products.hourlyTarget / dailyTarget are
+      // missing on the production DB (PR #28 unmerged), and a bare
+      // findFirst() would select those columns and crash. Only used as
+      // an existence check here, so id alone is enough.
+      const product = await this.prisma.product.findFirst({
+        where: { id: dto.productId, companyId: user.companyId },
+        select: { id: true },
+      });
       if (!product) throw new NotFoundException('Product not found');
     } else {
       const rawMaterial = await this.prisma.rawMaterial.findFirst({ where: { id: dto.rawMaterialId, companyId: user.companyId } });
@@ -120,7 +127,14 @@ export class CustomerItemMappingService {
 
     let targetCode: string;
     if (dto.productId) {
-      const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+      // Explicit `select` - products.hourlyTarget / dailyTarget are
+      // missing on the production DB (PR #28 unmerged), and a bare
+      // findFirst() would select those columns and crash. product.code
+      // is read just below, so it's included alongside id.
+      const product = await this.prisma.product.findFirst({
+        where: { id: dto.productId, companyId: user.companyId },
+        select: { id: true, code: true },
+      });
       if (!product) throw new NotFoundException('Product not found');
       targetCode = product.code;
     } else {

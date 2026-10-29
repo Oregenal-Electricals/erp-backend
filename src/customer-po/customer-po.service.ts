@@ -38,7 +38,17 @@ export class CustomerPoService {
       const mapping = await this.customerItemMapping.resolve(customerId, itemCode, user);
       if (mapping?.product) return mapping.product;
     }
-    return this.prisma.product.findFirst({ where: { companyId, code: itemCode } });
+    // Explicit `select` - products.hourlyTarget / dailyTarget are
+    // missing on the production DB (PR #28 unmerged), and a bare
+    // findFirst() would select those columns and crash. This return
+    // value is read interchangeably with mapping?.product above (shape
+    // { id, code, name } per CustomerItemMappingService.includes()),
+    // and callers here only ever read .id/.code - matching that shape
+    // rather than narrowing to just those two keeps it consistent.
+    return this.prisma.product.findFirst({
+      where: { companyId, code: itemCode },
+      select: { id: true, code: true, name: true },
+    });
   }
 
   /**
