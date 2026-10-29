@@ -58,10 +58,22 @@ export class SalesOrdersService {
       if (!mapping) {
         throw new BadRequestException(`"${item.itemCode}" has no customer item mapping yet - map it on the Customer PO before acknowledging.`);
       }
+      // A mapping targets EITHER a Product OR a RawMaterial (see
+      // CustomerItemMappingService.validateExactlyOneTarget) - never
+      // assume .product is the one that's set. Found live: every CPO
+      // item mapped to a raw material (not a finished-goods product)
+      // crashed Acknowledge with "Cannot read properties of null
+      // (reading 'code')" because this unconditionally read
+      // mapping.product.code/.name even when mapping.product was null
+      // and mapping.rawMaterial was the actual target.
+      const mappedTarget = mapping.product || mapping.rawMaterial;
+      if (!mappedTarget) {
+        throw new BadRequestException(`"${item.itemCode}"'s customer item mapping has no linked product or raw material - re-map it on the Customer PO before acknowledging.`);
+      }
       calcItems.push({
         cpoItemId: item.id,
-        itemCode: mapping.product.code,
-        itemName: mapping.product.name,
+        itemCode: mappedTarget.code,
+        itemName: mappedTarget.name,
         // Carried through unresolved, exactly as the customer wrote it on
         // their PO - downstream naming-display rule: the CPO shows the
         // customer's own wording, the SO above shows OUR internal
