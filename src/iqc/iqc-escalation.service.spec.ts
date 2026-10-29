@@ -8,6 +8,7 @@ describe('IqcEscalationService.submitStageResult - IQC-054 suggestion-only escal
   let notifications: any;
   let rejectedStockSvc: any;
   let stockLedger: any;
+  let debitNotes: any;
 
   const baseItem = {
     id: 'iqc-item-1',
@@ -40,12 +41,18 @@ describe('IqcEscalationService.submitStageResult - IQC-054 suggestion-only escal
       grnHeader: { update: jest.fn().mockResolvedValue({}) },
       rejectedStock: { findFirst: jest.fn().mockResolvedValue(null) },
       user: { findMany: jest.fn().mockResolvedValue([]) },
+      debitNote: { create: jest.fn().mockResolvedValue({ id: 'dn-1', debitNoteNumber: 'DN-1' }) },
     };
+    // closeAsFail wraps the debit-note creation in a transaction (IQC-055);
+    // run the callback against this same mocked client, like the real
+    // PrismaService.$transaction does against its own tables.
+    prisma.$transaction = jest.fn().mockImplementation((cb: any) => cb(prisma));
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
     rejectedStockSvc = { createFromIqc: jest.fn().mockResolvedValue({ id: 'rs-1', rejectionNumber: 'RS-1' }) };
     stockLedger = { receiveFromIqc: jest.fn().mockResolvedValue(undefined) };
-    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger);
+    debitNotes = { createFromIqcRejection: jest.fn().mockResolvedValue({ id: 'dn-1', debitNoteNumber: 'DN-1' }) };
+    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes);
   });
 
   function setStage(stage: string) {
