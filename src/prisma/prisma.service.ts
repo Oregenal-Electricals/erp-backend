@@ -80,6 +80,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure oqc_inspections.stage column - see 165_oqc_prepack_postpack_split.sql', e as Error);
     }
+    try {
+      await this.ensureProductionEntryManpowerAllottedColumn();
+    } catch (e) {
+      this.logger.error('Failed to ensure production_entries.manpowerAllotted column - see 173_production_entry_manpower_allotted.sql', e as Error);
+    }
   }
 
   /**
@@ -224,6 +229,17 @@ export class PrismaService
     await this.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "oqc_inspections_companyId_fgReceiptId_stage_key" ON "oqc_inspections"("companyId", "fgReceiptId", "stage");`);
     await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "oqc_inspections_companyId_stage_idx" ON "oqc_inspections"("companyId", "stage");`);
     this.logger.log('oqc_inspections.stage column and indexes ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 173_production_entry_manpower_allotted.sql (adds
+   * production_entries.manpowerAllotted). Safe on every boot including
+   * one that already has it applied.
+   */
+  private async ensureProductionEntryManpowerAllottedColumn() {
+    await this.$executeRawUnsafe(`ALTER TABLE "production_entries" ADD COLUMN IF NOT EXISTS "manpowerAllotted" INTEGER;`);
+    this.logger.log('production_entries.manpowerAllotted column ensured');
   }
 
   /**

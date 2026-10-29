@@ -71,11 +71,19 @@ export class ProductionEntryService {
     // Manpower default (spec section 18): reuse the WO's approved
     // manpower allocation quantity if not explicitly provided, rather
     // than assuming a different number was actually working.
+    //
+    // manpowerAllotted is looked up unconditionally and stored as its
+    // own snapshot (see 173_production_entry_manpower_allotted.sql) -
+    // previously, an explicit dto.manpowerQty silently discarded the
+    // allotted figure instead of keeping it alongside the actual-used
+    // number, making the allotted-vs-used gap unrecoverable from the
+    // entry afterwards.
+    const approvedAllocation = await this.prisma.manpowerAllocation.findFirst({
+      where: { companyId: user.companyId, workOrderId: dto.workOrderId, status: 'APPROVED', isActive: true },
+    });
+    const manpowerAllotted = approvedAllocation?.count ?? null;
     let manpowerQty = dto.manpowerQty;
     if (manpowerQty === undefined) {
-      const approvedAllocation = await this.prisma.manpowerAllocation.findFirst({
-        where: { companyId: user.companyId, workOrderId: dto.workOrderId, status: 'APPROVED', isActive: true },
-      });
       manpowerQty = approvedAllocation?.count || 0;
     }
 
@@ -141,7 +149,7 @@ export class ProductionEntryService {
         shift: dto.shift || 'MORNING',
         operatorName: dto.operatorName, machineName: dto.machineName,
         goodQty, scrapQty, reworkQty, totalQty,
-        manpowerQty, periodStart, periodEnd,
+        manpowerQty, manpowerAllotted, periodStart, periodEnd,
         productivityRateSnapshot, labourRateSnapshot,
         targetQty, achievementPercent,
         actualLabourHours, actualLabourCost,
