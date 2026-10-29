@@ -37,6 +37,36 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
         catch (e) {
             this.logger.error('Failed to install test-data auto-tagging - continuing without it', e);
         }
+        try {
+            await this.ensurePlantIdColumn();
+        }
+        catch (e) {
+            this.logger.error('Failed to ensure users.plantId column - see 150_user_default_plant.sql', e);
+        }
+        try {
+            await this.ensureProductTargetColumns();
+        }
+        catch (e) {
+            this.logger.error('Failed to ensure products.hourlyTarget/dailyTarget columns - see 164_product_hourly_daily_targets.sql', e);
+        }
+    }
+    async ensurePlantIdColumn() {
+        await this.$executeRawUnsafe(`ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "plantId" TEXT;`);
+        await this.$executeRawUnsafe(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_plantId_fkey') THEN
+          ALTER TABLE "users" ADD CONSTRAINT "users_plantId_fkey" FOREIGN KEY ("plantId") REFERENCES "plants"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+        END IF;
+      END $$;
+    `);
+        await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "users_plantId_idx" ON "users"("plantId");`);
+        this.logger.log('users.plantId column/constraint/index ensured');
+    }
+    async ensureProductTargetColumns() {
+        await this.$executeRawUnsafe(`ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "hourlyTarget" DOUBLE PRECISION;`);
+        await this.$executeRawUnsafe(`ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "dailyTarget" DOUBLE PRECISION;`);
+        await this.$executeRawUnsafe(`DROP TABLE IF EXISTS "hourly_production_reports";`);
+        this.logger.log('products.hourlyTarget/dailyTarget columns ensured, hourly_production_reports dropped');
     }
     installTestDataAutoTagging() {
         this.wrapClient(this);
