@@ -7,6 +7,7 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
   let audit: any;
   let materialReservation: any;
   let settings: any;
+  let notifications: any;
   const user = { id: 'user-1', companyId: 'company-1', role: 'SUPERVISOR' };
 
   const firstStageWo = {
@@ -33,6 +34,7 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
       manpowerAllocation: { findFirst: jest.fn().mockResolvedValue({ count: 25 }) },
       product: { findFirst: jest.fn().mockResolvedValue({ id: 'prod-1', code: '9W-LED' }) },
       productStandardProductivity: { findFirst: jest.fn().mockResolvedValue({ piecesPerManHour: 8, effectiveFrom: new Date('2026-01-01'), effectiveTo: null }) },
+      user: { findMany: jest.fn().mockResolvedValue([]) }, // no PNL alert targets by default - keeps every existing test's assertions about the returned entry unaffected
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     materialReservation = { releaseReservations: jest.fn() };
@@ -43,7 +45,8 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
         return Promise.resolve(def);
       }),
     };
-    service = new ProductionEntryService(prisma, audit, materialReservation, settings);
+    notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
+    service = new ProductionEntryService(prisma, audit, materialReservation, settings, notifications);
   });
 
   describe('the exact spec example: normal hourly entry (manual test 1, section 65)', () => {
@@ -226,6 +229,85 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
       } as any, user);
 
       expect(entry.achievementPercent).toBe(110);
+    });
+  });
+
+  describe('profitLossAmount - the hourly efficiency variance, and its alert to management (175_production_entry_profit_loss.sql)', () => {
+    it('below-target output -> a loss (negative profitLossAmount), and alerts SUPER_ADMIN/ADMIN only', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+      prisma.user.findMany.mockResolvedValue([{ id: 'super-1' }, { id: 'admin-1' }]);
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 160,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      // standard cost/piece = 15/8 = 1.875; standard cost of 160 pcs = 300; actual labour cost = 375 -> loss of 75
+      expect(entry.profitLossAmount).toBe(-75);
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ role: { in: ['SUPER_ADMIN', 'ADMIN'] } }),
+      }));
+      expect(notifications.createBulk).toHaveBeenCalledTimes(1);
+      const [notifs] = notifications.createBulk.mock.calls[0];
+      expect(notifs.map((n: any) => n.userId)).toEqual(['super-1', 'admin-1']);
+      expect(notifs[0].title).toContain('Loss');
+      expect(notifs[0].priority).toBe('HIGH');
+    });
+
+    it('above-target output -> a profit (positive profitLossAmount)', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 220,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      // standard cost of 220 pcs = 412.5; actual labour cost = 375 -> profit of 37.5
+      expect(entry.profitLossAmount).toBe(37.5);
+    });
+
+    it('stays null when there is no productivity rate set for the product (nothing sound to compare against)', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.productStandardProductivity.findFirst.mockResolvedValue(null);
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 160,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.profitLossAmount).toBeNull();
+      expect(notifications.createBulk).not.toHaveBeenCalled();
+    });
+
+    it('stays null when there is no labour rate configured (STANDARD_LABOUR_RATE_PER_SHIFT unset)', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      settings.getSettingValue = jest.fn((key: string, def: string) => Promise.resolve(key === 'STANDARD_LABOUR_RATE_PER_SHIFT' ? '0' : def));
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 160,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.profitLossAmount).toBeNull();
+    });
+
+    it('a notification failure never fails or blocks the production entry itself', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+      prisma.user.findMany.mockResolvedValue([{ id: 'super-1' }]);
+      notifications.createBulk.mockRejectedValue(new Error('notification service down'));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 160,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.profitLossAmount).toBe(-75); // entry still created and returned successfully
     });
   });
 

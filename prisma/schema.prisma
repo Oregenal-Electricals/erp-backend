@@ -4923,6 +4923,12 @@ model ProductionEntry {
   achievementPercent  Float?
   actualLabourHours   Float?
   actualLabourCost    Float?
+  // Labour efficiency variance for this entry: standard labour cost of
+  // the good output actually produced, minus actualLabourCost.
+  // Positive = favorable (profit), negative = unfavorable (loss).
+  // Cost data - see 175_production_entry_profit_loss.sql for why this
+  // must stay restricted to management/accounts, same as the cost sheet.
+  profitLossAmount    Float?
   downtimeMinutes     Float     @default(0)
   downtimeReason      String?
   totalQty      Float     @default(0)

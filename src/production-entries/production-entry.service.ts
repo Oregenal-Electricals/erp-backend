@@ -3,7 +3,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { SettingsService } from '../settings/settings.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateProductionEntryDto } from './dto/production-entry.dto';
+
+// Who the hourly profit/loss alert goes to (175_production_entry_profit_loss.sql).
+// Cost data, same restriction as PRODUCTION_COST_SHEET_VIEW - never
+// Plant Manager/Supervisor/anyone else.
+const PNL_ALERT_ROLES = ['SUPER_ADMIN', 'ADMIN'];
 
 @Injectable()
 export class ProductionEntryService {
@@ -12,6 +18,7 @@ export class ProductionEntryService {
     private audit: AuditService,
     private materialReservation: MaterialReservationService,
     private settings: SettingsService,
+    private notifications: NotificationsService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -141,6 +148,20 @@ export class ProductionEntryService {
       actualLabourCost = Math.round(actualLabourHours * labourRateSnapshot * 100) / 100;
     }
 
+    // Labour efficiency variance ("the hour's profit/loss" per the
+    // master-flow spec): standard labour cost of what was actually
+    // produced, minus what was actually spent on labour to produce it.
+    // Needs both a productivity rate (to know the standard cost per
+    // good piece) and a labour rate (to know actualLabourCost) - if
+    // either master is missing, there is nothing sound to compare
+    // against, so this stays null rather than a misleading 0.
+    let profitLossAmount: number | null = null;
+    if (productivityRateSnapshot && productivityRateSnapshot > 0 && labourRateSnapshot != null && actualLabourCost != null) {
+      const standardCostPerGoodPiece = labourRateSnapshot / productivityRateSnapshot;
+      const standardCostOfOutput = goodQty * standardCostPerGoodPiece;
+      profitLossAmount = Math.round((standardCostOfOutput - actualLabourCost) * 100) / 100;
+    }
+
     const entryNumber = await this.generateNumber(user.companyId);
     const entry = await this.prisma.productionEntry.create({
       data: {
@@ -152,7 +173,7 @@ export class ProductionEntryService {
         manpowerQty, manpowerAllotted, periodStart, periodEnd,
         productivityRateSnapshot, labourRateSnapshot,
         targetQty, achievementPercent,
-        actualLabourHours, actualLabourCost,
+        actualLabourHours, actualLabourCost, profitLossAmount,
         downtimeMinutes: dto.downtimeMinutes || 0, downtimeReason: dto.downtimeReason,
         remarks: dto.remarks, status: 'DRAFT',
         companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
@@ -161,7 +182,47 @@ export class ProductionEntryService {
     });
 
     await this.audit.log({ tableName: 'production_entries', recordId: entry.id, action: 'CREATE', newValues: entry, changedBy: user.id });
+
+    if (profitLossAmount != null) {
+      await this.alertPnlToManagement(entry, profitLossAmount, user);
+    }
+
     return entry;
+  }
+
+  // Every hourly/period entry's profit/loss goes straight to Super
+  // Admin/Admin - this is an in-app notification only. There is no
+  // WhatsApp (or SMS/email) channel wired into this codebase yet
+  // (confirmed - nothing sends to WhatsApp anywhere); when a provider
+  // is chosen, this is the one place that needs an extra call added
+  // (NotificationsService itself is the right place for a new
+  // channel, not this method - keep this method itself channel-agnostic).
+  // Never blocks the production entry on a notification failure.
+  private async alertPnlToManagement(entry: any, profitLossAmount: number, user: any) {
+    try {
+      const targets = await this.prisma.user.findMany({
+        where: { companyId: user.companyId, isActive: true, role: { in: PNL_ALERT_ROLES } },
+        select: { id: true },
+      });
+      if (targets.length === 0) return;
+
+      const verdict = profitLossAmount >= 0 ? 'Profit' : 'Loss';
+      const amountAbs = Math.abs(profitLossAmount).toFixed(2);
+      await this.notifications.createBulk(
+        targets.map(t => ({
+          userId: t.id,
+          type: 'PRODUCTION_PNL',
+          title: `${entry.workOrder?.woNumber || entry.workOrderId} — ${verdict} ₹${amountAbs} this entry`,
+          message: `${entry.entryNumber}: target ${entry.targetQty ?? '—'}, actual ${entry.goodQty}${entry.achievementPercent != null ? ` (${entry.achievementPercent}%)` : ''} — labour ${verdict.toLowerCase()} of ₹${amountAbs} this period.`,
+          referenceType: 'PRODUCTION_ENTRY', referenceId: entry.id, referenceNumber: entry.entryNumber,
+          priority: 'HIGH',
+        })) as any,
+        user.companyId, targets[0].id,
+      );
+    } catch (e) {
+      // A notification failure must never roll back or fail the
+      // production entry itself - it has already been created.
+    }
   }
 
   // PROD-007 correction (spec section 59): no automatic WO completion.
