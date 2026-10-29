@@ -72,6 +72,48 @@ export class NcrService {
     return updated;
   }
 
+  // Shared auto-trigger entry point for quality gates that raise an NCR
+  // as a side effect of a reject decision (OQC's production-qc
+  // disposition, IQC's reject paths) rather than a person filling the
+  // NCR form directly. Deliberately not CreateNcrDto: those callers
+  // don't have (and shouldn't have to fabricate) every field the
+  // manual/validated create() above requires - e.g. detectedBy/remarks
+  // are a human quality-clerk's annotations, not something a reject
+  // event itself knows. Any field left out here (severity included)
+  // just falls through to the NcrRecord schema's own default.
+  async createAuto(
+    data: {
+      source: string;
+      sourceReferenceId?: string;
+      sourceReferenceNumber?: string;
+      itemCode?: string;
+      itemName?: string;
+      workOrderId?: string;
+      description: string;
+      severity?: string;
+      qtyAffected?: number;
+      disposition?: string;
+    },
+    user: any,
+  ) {
+    const ncrNumber = await this.generateNumber(user.companyId);
+    const ncr = await this.prisma.ncrRecord.create({
+      data: {
+        ncrNumber, source: data.source,
+        sourceReferenceId: data.sourceReferenceId,
+        sourceReferenceNumber: data.sourceReferenceNumber,
+        itemCode: data.itemCode, itemName: data.itemName,
+        workOrderId: data.workOrderId,
+        description: data.description, severity: data.severity,
+        qtyAffected: data.qtyAffected || 0,
+        disposition: data.disposition,
+        companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
+      },
+    });
+    await this.audit.log({ tableName: 'ncr_records', recordId: ncr.id, action: 'CREATE', newValues: ncr, changedBy: user.id });
+    return ncr;
+  }
+
   async findAll(user: any, query: any) {
     const { page = 1, limit = 20, search, status, severity, source } = query;
     const skip = (Number(page) - 1) * Number(limit);

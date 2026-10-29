@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductionQcService } from './production-qc.service';
+import { NcrService } from '../ncr/ncr.service';
 
 describe('ProductionQcService PROD014', () => {
   let service: ProductionQcService;
@@ -25,7 +26,13 @@ describe('ProductionQcService PROD014', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     workOrderService = { stop: jest.fn() };
-    service = new ProductionQcService(prisma, audit, workOrderService);
+    // Real NcrService wired to the same prisma/audit mocks, not a stub -
+    // so the existing assertions below (which read prisma.ncrRecord.create
+    // directly) keep working unchanged after the OQC trigger was moved
+    // off its own inline prisma call and onto the shared NcrService
+    // method IQC's new auto-trigger also calls.
+    const ncrService = new NcrService(prisma, audit);
+    service = new ProductionQcService(prisma, audit, workOrderService, ncrService);
   });
 
   describe('positive: mixed QC disposition', () => {

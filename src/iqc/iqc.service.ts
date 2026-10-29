@@ -5,6 +5,7 @@ import { CreateIqcDto, UpdateIqcItemsDto, ConfirmReceiptDto } from './dto/iqc.dt
 import { StockLedgerService } from '../stock-ledger/stock-ledger.service';
 import { RejectedStockService } from '../rejected-stock/rejected-stock.service';
 import { HoldStockService } from '../hold-stock/hold-stock.service';
+import { NcrService } from '../ncr/ncr.service';
 
 @Injectable()
 export class IqcService {
@@ -14,6 +15,7 @@ export class IqcService {
     private stockLedger: StockLedgerService,
     private rejectedStock: RejectedStockService,
     private holdStock: HoldStockService,
+    private ncrService: NcrService,
   ) {}
 
   private async generateIqcNumber(companyId: string): Promise<string> {
@@ -331,6 +333,32 @@ export class IqcService {
     const totalHoldForTracking = (iqc.items as any[]).reduce((s, i) => s + (i.holdQty || 0), 0);
     if (totalRejectedForTracking > 0) {
       await this.rejectedStock.createFromIqc(id, user);
+
+      // Quality-chain closer, same spirit as PROD-014's OQC->NCR trigger
+      // (production-qc.service.ts decideQuantities): a reject is a real
+      // quality-process event, not just a stock-tracking one, so it also
+      // raises an NCR via the same shared NcrService.createAuto() the OQC
+      // path calls. Mapped honestly onto IQC's own shape rather than
+      // force-fit onto OQC's fields: there's no workOrderId here (an
+      // incoming-material inspection predates any work order), and
+      // disposition is RETURN_TO_VENDOR rather than OQC's REWORK/SCRAP -
+      // rejected incoming material always goes back to the vendor, never
+      // reworked/scrapped in-house, which RejectedStockService's own
+      // vendor-pickup flow already assumes.
+      const rejectedItems = (iqc.items as any[]).filter(i => i.rejectedQty > 0);
+      const singleItem = rejectedItems.length === 1 ? rejectedItems[0] : undefined;
+      await this.ncrService.createAuto({
+        source: 'IQC',
+        sourceReferenceId: iqc.id,
+        sourceReferenceNumber: (iqc as any).iqcNumber,
+        itemCode: singleItem?.itemCode,
+        itemName: singleItem?.itemName,
+        description: singleItem
+          ? `IQC rejection from ${(iqc as any).iqcNumber || iqc.id} — ${singleItem.itemCode}: ${singleItem.rejectionReason || 'failed inspection'}`
+          : `IQC rejection from ${(iqc as any).iqcNumber || iqc.id} — ${rejectedItems.length} item(s) rejected: ${rejectedItems.map(i => i.itemCode).join(', ')}`,
+        qtyAffected: totalRejectedForTracking,
+        disposition: 'RETURN_TO_VENDOR',
+      }, user);
     }
     if (totalHoldForTracking > 0) {
       await this.holdStock.createFromIqc(id, user);

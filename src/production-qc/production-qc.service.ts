@@ -3,10 +3,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { CreateProductionQcDto, CompleteQcDto, DecideQcDto } from './dto/production-qc.dto';
 import { WorkOrderService } from '../work-orders/work-order.service';
+import { NcrService } from '../ncr/ncr.service';
 
 @Injectable()
 export class ProductionQcService {
-  constructor(private prisma: PrismaService, private audit: AuditService, private workOrderService: WorkOrderService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private workOrderService: WorkOrderService,
+    private ncrService: NcrService,
+  ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
     const count = await this.prisma.productionQc.count({ where: { companyId } });
@@ -132,18 +138,13 @@ export class ProductionQcService {
     // tracking system. PROD-015/016 own the actual rework/scrap
     // execution; this only creates the reference for them to act on.
     if (dto.reworkQty > 0 || dto.rejectedQty > 0) {
-      const ncrCount = await this.prisma.ncrRecord.count({ where: { companyId: user.companyId } });
-      const ncrNumber = `NCR-${new Date().getFullYear()}-${String(ncrCount + 1).padStart(4, '0')}`;
-      await this.prisma.ncrRecord.create({
-        data: {
-          companyId: user.companyId, ncrNumber, source: 'OQC',
-          sourceReferenceId: qc.id, sourceReferenceNumber: qc.qcNumber,
-          workOrderId: qc.workOrderId, description: dto.defectDescription || `QC rework/reject from ${qc.qcNumber}`,
-          qtyAffected: dto.reworkQty + dto.rejectedQty,
-          disposition: dto.reworkQty > 0 && dto.rejectedQty === 0 ? 'REWORK' : undefined,
-          createdBy: user.id, updatedBy: user.id,
-        },
-      });
+      await this.ncrService.createAuto({
+        source: 'OQC',
+        sourceReferenceId: qc.id, sourceReferenceNumber: qc.qcNumber,
+        workOrderId: qc.workOrderId, description: dto.defectDescription || `QC rework/reject from ${qc.qcNumber}`,
+        qtyAffected: dto.reworkQty + dto.rejectedQty,
+        disposition: dto.reworkQty > 0 && dto.rejectedQty === 0 ? 'REWORK' : undefined,
+      }, user);
     }
 
     // Bug found via manual UAT: completing a rework's re-inspection

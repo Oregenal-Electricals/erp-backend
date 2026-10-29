@@ -10,9 +10,10 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { RejectedStockModule } from '../rejected-stock/rejected-stock.module';
 import { HoldStockModule } from '../hold-stock/hold-stock.module';
 import { DebitNotesModule } from '../debit-notes/debit-notes.module';
+import { NcrModule } from '../ncr/ncr.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule, StockLedgerModule, NotificationsModule, RejectedStockModule, HoldStockModule, DebitNotesModule],
+  imports: [PrismaModule, CommonModule, StockLedgerModule, NotificationsModule, RejectedStockModule, HoldStockModule, DebitNotesModule, NcrModule],
   controllers: [IqcController],
   providers: [IqcService, IqcEscalationService, IqcTemplateImportService],
   exports: [IqcService, IqcEscalationService, IqcTemplateImportService],
