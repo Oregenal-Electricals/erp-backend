@@ -103,9 +103,50 @@ export class PurchaseOrderService {
     });
   }
 
+  /**
+   * Finishes the PR -> PO handoff that create() only half-did before: a PO
+   * carrying a prId already saved correctly (the Prisma relation and the
+   * PoItem.prItemId columns have existed since the schema was written), but
+   * nothing ever moved the PR - or its items - off APPROVED, so every
+   * converted PR sat there forever looking unconverted. Item-level status
+   * is set first (PENDING -> PO_RAISED) for every PO item that carries a
+   * prItemId; the PR itself only flips to PO_RAISED once none of its
+   * active items are left un-raised, so a partial PO (the user removed
+   * some rows in the New PO modal before saving) correctly leaves the PR
+   * at APPROVED with the remaining items still needing a PO.
+   */
+  private async syncPrAfterPoCreate(prId: string, poItems: any[], user: any) {
+    const raisedPrItemIds = Array.from(new Set(poItems.map((i) => i.prItemId).filter(Boolean)));
+    if (raisedPrItemIds.length > 0) {
+      await this.prisma.purchaseRequisitionItem.updateMany({
+        where: { id: { in: raisedPrItemIds }, prId },
+        data: { status: 'PO_RAISED', updatedBy: user.id },
+      });
+    }
+
+    const remaining = await this.prisma.purchaseRequisitionItem.count({
+      where: { prId, isActive: true, status: { not: 'PO_RAISED' } },
+    });
+    if (remaining === 0) {
+      const pr = await this.prisma.purchaseRequisition.findUnique({ where: { id: prId } });
+      if (pr && pr.status !== 'PO_RAISED') {
+        const updated = await this.prisma.purchaseRequisition.update({
+          where: { id: prId }, data: { status: 'PO_RAISED', updatedBy: user.id },
+        });
+        await this.audit.log({ tableName: 'purchase_requisitions', recordId: prId, action: 'UPDATE', oldValues: pr, newValues: updated, changedBy: user.id });
+      }
+    }
+  }
+
   async create(dto: CreatePurchaseOrderDto, user: any) {
     const vendor = await this.prisma.vendor.findFirst({ where: { id: dto.vendorId, companyId: user.companyId } });
     if (!vendor) throw new NotFoundException('Vendor not found');
+
+    if (dto.prId) {
+      const pr = await this.prisma.purchaseRequisition.findFirst({ where: { id: dto.prId, companyId: user.companyId } });
+      if (!pr) throw new NotFoundException('Purchase Requisition not found');
+      if (pr.status !== 'APPROVED') throw new BadRequestException('Only an APPROVED purchase requisition can be converted to a Purchase Order');
+    }
 
     const company = await this.prisma.company.findUnique({ where: { id: user.companyId } });
     const poNumber = await this.generatePoNumber(user.companyId);
@@ -142,6 +183,10 @@ export class PurchaseOrderService {
     });
 
     await this.audit.log({ tableName: 'purchase_orders', recordId: po.id, action: 'CREATE', newValues: po, changedBy: user.id });
+
+    if (dto.prId) {
+      await this.syncPrAfterPoCreate(dto.prId, itemsData, user);
+    }
 
     const { needsApproval, reasons } = await this.computePriceApprovalNeed(user.companyId, itemsData);
     // An empty PO has nothing to price-check, but that's not the same as
@@ -266,6 +311,14 @@ export class PurchaseOrderService {
       },
     });
     await this.recalculateTotals(id);
+
+    // Same PR -> PO item-status handoff as create() - a row added to an
+    // existing PR-linked DRAFT PO one at a time (rather than via the
+    // picker at creation) must still mark its source PR item PO_RAISED,
+    // or that item would stay PENDING forever even though it's on a PO.
+    if (po.prId && dto.prItemId) {
+      await this.syncPrAfterPoCreate(po.prId, [{ prItemId: dto.prItemId }], user);
+    }
 
     const updatedPo = await this.findOne(id, user);
     const { needsApproval, reasons } = await this.computePriceApprovalNeed(user.companyId, updatedPo.items);
