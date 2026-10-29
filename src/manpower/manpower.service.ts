@@ -174,7 +174,14 @@ export class ManpowerService {
         const hours = (lineEnd.getTime() - lineStart.getTime()) / (1000 * 60 * 60);
         plannedLabourHours = Math.round(line.count * hours * 100) / 100;
         if (workOrder) {
-          const product = await this.prisma.product.findFirst({ where: { code: workOrder.productCode, companyId: user.companyId } });
+          // See WorkOrderService.release() for why this needs an
+          // explicit select - production is currently missing
+          // products.hourlyTarget/dailyTarget (PR #28 not yet
+          // deployed), and only product.id is used below.
+          const product = await this.prisma.product.findFirst({
+            where: { code: workOrder.productCode, companyId: user.companyId },
+            select: { id: true },
+          });
           if (product) {
             const now = new Date();
             const productivity = await this.prisma.productStandardProductivity.findFirst({
@@ -692,7 +699,14 @@ export class ManpowerService {
       if (dto.stageName && workOrder.stageName && workOrder.stageName !== dto.stageName) {
         throw new BadRequestException(`Work Order ${workOrder.woNumber} belongs to stage ${workOrder.stageName}, not ${dto.stageName}`);
       }
-      product = await this.prisma.product.findFirst({ where: { code: workOrder.productCode, companyId: user.companyId } });
+      // See WorkOrderService.release() for why this needs an explicit
+      // select - production is currently missing products.hourlyTarget/
+      // dailyTarget (PR #28 not yet deployed), and only product.id is
+      // used below.
+      product = await this.prisma.product.findFirst({
+        where: { code: workOrder.productCode, companyId: user.companyId },
+        select: { id: true },
+      });
     }
 
     const created = [];
