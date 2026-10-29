@@ -18,7 +18,10 @@ export class ProductTargetService {
   // effectiveTo=null for the same product would make "what's the
   // current target" ambiguous.
   async create(dto: CreateProductTargetDto, user: any) {
-    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+    // Explicit select: products.hourlyTarget/dailyTarget columns are missing in prod (PR #28 not deployed yet).
+    // This lookup is only an existence/company-scope check - the actual target rate lives on
+    // ProductStandardProductivity.piecesPerManHour, not on Product, so it's unaffected.
+    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId }, select: { id: true } });
     if (!product) throw new NotFoundException('Product not found');
 
     const existing = await this.prisma.productStandardProductivity.findFirst({

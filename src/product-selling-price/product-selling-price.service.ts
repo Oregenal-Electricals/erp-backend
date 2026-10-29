@@ -16,7 +16,10 @@ export class ProductSellingPriceService {
   // revise() so there's never more than one open-ended (effectiveTo=null)
   // "current" price per product.
   async create(dto: CreateSellingPriceDto, user: any) {
-    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId } });
+    // Explicit select: products.hourlyTarget/dailyTarget columns are missing in prod (PR #28 not deployed yet).
+    // This lookup is only an existence/company-scope check - the actual price lives on
+    // ProductSellingPrice.sellingPrice, not on Product, so it's unaffected.
+    const product = await this.prisma.product.findFirst({ where: { id: dto.productId, companyId: user.companyId }, select: { id: true } });
     if (!product) throw new NotFoundException('Product not found');
 
     const existing = await this.prisma.productSellingPrice.findFirst({
