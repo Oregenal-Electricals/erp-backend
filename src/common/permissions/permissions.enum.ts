@@ -117,6 +117,18 @@ export enum Permission {
   PURCHASE_SHORTAGE_RESOLVE = 'PURCHASE_SHORTAGE_RESOLVE',
   PURCHASE_SHORT_CLOSE_APPROVE = 'PURCHASE_SHORT_CLOSE_APPROVE',
 
+  // MRP Material Shortage - Store verification gate before Purchase can
+  // act on a system-calculated shortage (task #52). Deliberately a
+  // distinct name from STORE_SHORTAGE_* above: that family guards the
+  // unrelated StoreShortage/GRN-receiving-discrepancy screen, not the
+  // MaterialShortage rows CustomerPoService.runShortageCheck() raises
+  // (its availableQty already reflects IQC-rejected stock being pulled
+  // out of usable inventory, so a reject-driven shortfall flows through
+  // this same single creation path - there is no separate IQC code path
+  // to gate).
+  MATERIAL_SHORTAGE_VIEW = 'MATERIAL_SHORTAGE_VIEW',
+  MATERIAL_SHORTAGE_VERIFY = 'MATERIAL_SHORTAGE_VERIFY',
+
   // Production Target (versioned ProductStandardProductivity CRUD)
   PRODUCTION_TARGET_VIEW = 'PRODUCTION_TARGET_VIEW',
   PRODUCTION_TARGET_MANAGE = 'PRODUCTION_TARGET_MANAGE',

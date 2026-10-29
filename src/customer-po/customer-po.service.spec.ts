@@ -30,10 +30,27 @@ describe('CustomerPoService - Price Integrity', () => {
 
   let cpoRecords: Record<string, any>;
   let cpoItems: Record<string, any[]>;
+  let shortageRecords: Record<string, any>;
+
+  function seedShortage(overrides: any = {}) {
+    const rec = {
+      id: 'shortage-1', companyId: 'company-1', customerPoId: 'cpo-1',
+      itemCode: 'RM-01', itemName: 'Raw Material 1', uom: 'PCS',
+      requiredQty: 100, availableQty: 40, shortageQty: 60,
+      status: 'PENDING_STORE_VERIFICATION', prId: null,
+      systemCalculatedQty: null, verifiedQty: null, verificationReason: null,
+      verifiedById: null, verifiedAt: null,
+      createdBy: 'user-1', updatedBy: 'user-1',
+      ...overrides,
+    };
+    shortageRecords[rec.id] = rec;
+    return rec;
+  }
 
   beforeEach(() => {
     cpoRecords = {};
     cpoItems = {};
+    shortageRecords = {};
     let idCounter = 0;
 
     prisma = {
@@ -81,7 +98,21 @@ describe('CustomerPoService - Price Integrity', () => {
         findFirst: jest.fn().mockImplementation(({ where }: any) => Promise.resolve(where.id === customer.id ? customer : null)),
       },
       task: { count: jest.fn().mockResolvedValue(0) },
-      materialShortage: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }), createMany: jest.fn().mockResolvedValue({ count: 0 }) },
+      materialShortage: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+        createMany: jest.fn().mockResolvedValue({ count: 0 }),
+        findFirst: jest.fn().mockImplementation(({ where }: any) => {
+          const rec = shortageRecords[where.id];
+          if (!rec) return Promise.resolve(null);
+          if (where.companyId && rec.companyId !== where.companyId) return Promise.resolve(null);
+          return Promise.resolve(rec);
+        }),
+        update: jest.fn().mockImplementation(({ where, data }: any) => {
+          const rec = shortageRecords[where.id];
+          Object.assign(rec, data);
+          return Promise.resolve({ ...rec });
+        }),
+      },
       product: { findFirst: jest.fn().mockResolvedValue(null) },
       rawMaterial: { findFirst: jest.fn().mockResolvedValue(null) },
       // Mimics real Prisma transaction atomicity: this in-memory fake store
@@ -307,6 +338,72 @@ describe('CustomerPoService - Price Integrity', () => {
       const cpo = await service.create(createDto(), user);
       expect(cpo.status).toBe('ACKNOWLEDGED');
       expect(prisma.role.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyShortage() - Store verification gate (task #52)', () => {
+    it('404s when the shortage does not belong to this company', async () => {
+      seedShortage({ companyId: 'other-company' });
+      await expect(service.verifyShortage('shortage-1', { verifiedQty: 60 }, user)).rejects.toThrow(NotFoundException);
+    });
+
+    it('404s when the shortage id does not exist', async () => {
+      await expect(service.verifyShortage('does-not-exist', { verifiedQty: 60 }, user)).rejects.toThrow(NotFoundException);
+    });
+
+    it('rejects verifying a row that is not PENDING_STORE_VERIFICATION', async () => {
+      seedShortage({ status: 'OPEN' });
+      await expect(service.verifyShortage('shortage-1', { verifiedQty: 60 }, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('confirms the system figure as accurate with no reason required, and opens it for Purchase', async () => {
+      seedShortage({ shortageQty: 60 });
+      const result = await service.verifyShortage('shortage-1', { verifiedQty: 60 }, user);
+      expect(result.status).toBe('OPEN');
+      expect(result.shortageQty).toBe(60);
+      expect(result.systemCalculatedQty).toBe(60);
+      expect(result.verifiedQty).toBe(60);
+      expect(result.verificationReason).toBeNull();
+      expect(result.verifiedById).toBe(user.id);
+      expect(result.verifiedAt).toBeInstanceOf(Date);
+    });
+
+    it('rejects an override with no reason', async () => {
+      seedShortage({ shortageQty: 60 });
+      await expect(service.verifyShortage('shortage-1', { verifiedQty: 45 }, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects an override with a blank/whitespace-only reason', async () => {
+      seedShortage({ shortageQty: 60 });
+      await expect(service.verifyShortage('shortage-1', { verifiedQty: 45, reason: '   ' }, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('accepts an override with a reason, freezing the original system-calculated qty and updating shortageQty to the corrected figure', async () => {
+      seedShortage({ shortageQty: 60 });
+      const result = await service.verifyShortage('shortage-1', { verifiedQty: 45, reason: 'Found 15 more units on the mezzanine rack not yet entered in the system' }, user);
+      expect(result.status).toBe('OPEN');
+      expect(result.shortageQty).toBe(45);
+      expect(result.systemCalculatedQty).toBe(60);
+      expect(result.verifiedQty).toBe(45);
+      expect(result.verificationReason).toBe('Found 15 more units on the mezzanine rack not yet entered in the system');
+      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({
+        tableName: 'material_shortages', recordId: 'shortage-1',
+        newValues: expect.objectContaining({ isOverride: true, shortageQty: 45, systemCalculatedQty: 60 }),
+      }));
+    });
+
+    it('rejects a negative verified quantity', async () => {
+      seedShortage({ shortageQty: 60 });
+      await expect(service.verifyShortage('shortage-1', { verifiedQty: -5 }, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('applies uniformly regardless of why the row was raised - an IQC-reject-driven shortfall is just another PENDING_STORE_VERIFICATION row with no special-case field', async () => {
+      // There is no separate origin/source column on MaterialShortage -
+      // every row (plain BOM-vs-stock mismatch or one inflated by an
+      // IQC reject reducing usable stock) goes through this same gate.
+      seedShortage({ shortageQty: 80, requiredQty: 100, availableQty: 20 });
+      const result = await service.verifyShortage('shortage-1', { verifiedQty: 80 }, user);
+      expect(result.status).toBe('OPEN');
     });
   });
 });

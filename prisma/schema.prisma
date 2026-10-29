@@ -7638,8 +7638,26 @@ model MaterialShortage {
   availableQty     Float
   shortageQty      Float
   uom              String
-  status           String        @default("OPEN") // OPEN, PR_RAISED, FULFILLED
+  // PENDING_STORE_VERIFICATION (just calculated, awaiting Store sign-off) ->
+  // OPEN (Store-verified, visible to Purchase) -> PR_RAISED -> FULFILLED.
+  // Every row is born PENDING_STORE_VERIFICATION regardless of why it was
+  // raised - a plain BOM-vs-stock mismatch and an IQC reject/fail driven
+  // shortfall (IQC-rejected stock is already excluded from the usable
+  // stock figure the shortage calc reads) both flow through the same
+  // single creation path in CustomerPoService.runShortageCheck(), so
+  // there is no separate origin to special-case. Purchase's open-shortage
+  // read path only ever queries status = OPEN, so an unverified row is
+  // invisible to Purchase by construction, not by an extra filter that
+  // could be forgotten.
+  status           String        @default("PENDING_STORE_VERIFICATION")
   prId             String?       // linked PR if raised
+  // Store verification gate (task #52): Store must confirm or correct the
+  // system-calculated shortageQty before it is OPEN for Purchase to act on.
+  systemCalculatedQty Float?     // shortageQty exactly as MRP/IQC first calculated it, frozen at verification time
+  verifiedQty         Float?     // the actual/confirmed shortage Store signed off on (equals systemCalculatedQty when Store simply confirms)
+  verificationReason  String?    // mandatory only when verifiedQty differs from systemCalculatedQty - why the system figure was wrong
+  verifiedById        String?    // Store user who verified
+  verifiedAt          DateTime?
   isActive         Boolean       @default(true)
   isTestData       Boolean       @default(false)
   createdAt        DateTime      @default(now())
