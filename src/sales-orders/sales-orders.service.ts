@@ -154,7 +154,15 @@ export class SalesOrdersService {
       return { saleType, requiredStageId: null };
     }
 
-    const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+    // Explicit `select` - the production DB is currently missing
+    // products.hourlyTarget / dailyTarget (PR #28's migration never
+    // reached prod), and a bare findFirst() implicitly selects every
+    // scalar column, which crashes with "column products.hourlyTarget
+    // does not exist". Only product.id is read below (line ~156).
+    const product = await this.prisma.product.findFirst({
+      where: { companyId: user.companyId, code: item.itemCode, isActive: true },
+      select: { id: true },
+    });
     if (!product) throw new BadRequestException(`"${item.itemCode}" is marked as a ${saleType} sale but no active Product with that code exists.`);
 
     if (saleType === 'FG') {
@@ -456,7 +464,14 @@ export class SalesOrdersService {
     }
 
     if (item.saleType === 'FG') {
-      const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: item.itemCode, isActive: true } });
+      // Explicit `select` - products.hourlyTarget / dailyTarget are
+      // missing on the production DB (PR #28 unmerged), and a bare
+      // findFirst() would select those columns and crash. Only used as
+      // an existence check here, so id alone is enough.
+      const product = await this.prisma.product.findFirst({
+        where: { companyId: user.companyId, code: item.itemCode, isActive: true },
+        select: { id: true },
+      });
       if (!product) return { sourceValid: false, sourceInvalidReason: `"${item.itemCode}" is not a valid active saleable Finished Product.` };
       const warehouse = await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'FINISHED_GOOD', isActive: true } })
         || await this.prisma.warehouse.findFirst({ where: { companyId: user.companyId, plantId: dispatchPlantId, type: 'GENERAL', isActive: true } });
@@ -532,7 +547,14 @@ export class SalesOrdersService {
   // Production's) since this is consumed at order-entry time by Sales
   // staff, not by Production.
   async getSaleableStages(itemCode: string, user: any) {
-    const product = await this.prisma.product.findFirst({ where: { companyId: user.companyId, code: itemCode, isActive: true } });
+    // Explicit `select` - products.hourlyTarget / dailyTarget are
+    // missing on the production DB (PR #28 unmerged), and a bare
+    // findFirst() would select those columns and crash. Only
+    // product.id is read below (line ~507).
+    const product = await this.prisma.product.findFirst({
+      where: { companyId: user.companyId, code: itemCode, isActive: true },
+      select: { id: true },
+    });
     if (!product) return [];
     const stages = await this.prisma.routingStage.findMany({
       where: { companyId: user.companyId, isSaleable: true, routing: { finalProductId: product.id } },
