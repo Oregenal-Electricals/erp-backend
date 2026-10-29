@@ -31,6 +31,9 @@ export class CreateVendorDto {
   @IsOptional() @IsBoolean() tdsApplicable?: boolean;
   @IsOptional() @IsString() tdsSection?: string;
   @IsOptional() @IsNumber() @Min(1) @Max(5) rating?: number;
+  // Days this vendor has to pick up/replace IQC-rejected material before
+  // the company can scrap it. Unset = use the 21-day company default.
+  @IsOptional() @IsNumber() @Min(1) returnWindowDays?: number;
   @IsOptional() @IsString() notes?: string;
 }
 
@@ -64,6 +67,7 @@ export class UpdateVendorDto {
   @IsOptional() @IsBoolean() tdsApplicable?: boolean;
   @IsOptional() @IsString() tdsSection?: string;
   @IsOptional() @IsNumber() @Min(1) @Max(5) rating?: number;
+  @IsOptional() @IsNumber() @Min(1) returnWindowDays?: number;
   @IsOptional() @IsString() notes?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
 }
