@@ -16,20 +16,28 @@ const ESI_WAGE_CEILING = 21000;  // ESI applicable if gross <= 21000
 export class PfEsiService {
   constructor(private prisma: PrismaService) {}
 
+  // `rate * 100` on a binary float (e.g. 0.0367 * 100) can land on
+  // 3.6700000000000004 instead of 3.67 - rounding to 2 decimals before
+  // formatting keeps every rate clean regardless of which ones happen to
+  // hit a floating-point tail for their current values.
+  private pct(rate: number): string {
+    return `${Math.round(rate * 100 * 100) / 100}%`;
+  }
+
   getStatutoryRates() {
     return {
       pf: {
-        employeeRate: PF_EMPLOYEE_RATE * 100 + '%',
-        employerEpfRate: PF_EPF_EMPLOYER * 100 + '%',
-        employerEpsRate: PF_EPS_RATE * 100 + '%',
-        edliRate: PF_EDLI_RATE * 100 + '%',
-        adminRate: PF_ADMIN_RATE * 100 + '%',
+        employeeRate: this.pct(PF_EMPLOYEE_RATE),
+        employerEpfRate: this.pct(PF_EPF_EMPLOYER),
+        employerEpsRate: this.pct(PF_EPS_RATE),
+        edliRate: this.pct(PF_EDLI_RATE),
+        adminRate: this.pct(PF_ADMIN_RATE),
         wageCeiling: PF_WAGE_CEILING,
         note: 'PF computed on min(basicSalary, ₹15,000)',
       },
       esi: {
-        employeeRate: ESI_EMPLOYEE_RATE * 100 + '%',
-        employerRate: ESI_EMPLOYER_RATE * 100 + '%',
+        employeeRate: this.pct(ESI_EMPLOYEE_RATE),
+        employerRate: this.pct(ESI_EMPLOYER_RATE),
         wageCeiling: ESI_WAGE_CEILING,
         note: 'ESI applicable only if gross wages ≤ ₹21,000/month',
       },
