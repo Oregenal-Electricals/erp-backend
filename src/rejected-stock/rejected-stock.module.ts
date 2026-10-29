@@ -3,9 +3,10 @@ import { RejectedStockController } from './rejected-stock.controller';
 import { RejectedStockService } from './rejected-stock.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from '../common/common.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, CommonModule],
+  imports: [PrismaModule, CommonModule, NotificationsModule],
   controllers: [RejectedStockController],
   providers: [RejectedStockService],
   exports: [RejectedStockService],
