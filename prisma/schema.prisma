@@ -5189,11 +5189,30 @@ model RcaRecord {
 
 // MODULE 65 — OUTGOING QUALITY CONTROL (OQC)
 // ============================================================
+// TASK-060: OQC was a single bundled gate (visual/dimensional/
+// functional + packaging/labelling all on one record, released once).
+// It is now two distinct, sequential stages on the same model rather
+// than a second table: the existing fields already split cleanly along
+// the stage boundary (visual/dimensional/functional belong to the
+// full-product PRE_PACK check; packaging/labelling belong to the
+// packing-specific POST_PACK check), there's no itemized checklist
+// model to fork, and every downstream consumer (analytics, quality
+// dashboard/reports, stock-ledger) already queries this table directly
+// - a stage field lets all of that keep working unchanged while
+// OqcService enforces the two-gate sequence and FG-stock-on-release
+// rule. See OqcService.create()/release() for the stage dependency and
+// gating logic.
 model OqcInspection {
   id              String    @id @default(uuid())
   companyId       String
   company         Company   @relation(fields: [companyId], references: [id])
   oqcNumber       String
+  // PRE_PACK: full-product check (visual/dimensional/functional) done
+  // before the item goes into its shipping pack/carton. POST_PACK: the
+  // narrower packing-specific check (packaging/labelling/carton
+  // marking) done after it's packed. Both must be RELEASED with result
+  // PASS before FG stock is credited - see OqcService.release().
+  stage           String    @default("PRE_PACK") // PRE_PACK, POST_PACK
   fgReceiptId     String?
   fgReceipt       FgReceipt? @relation(fields: [fgReceiptId], references: [id])
   workOrderId     String?
@@ -5209,7 +5228,9 @@ model OqcInspection {
   sampleSize      Int       @default(0)
   passQty         Int       @default(0)
   failQty         Int       @default(0)
-  // Inspection parameters
+  // Inspection parameters - PRE_PACK uses visual/dimensional/functional;
+  // POST_PACK uses packaging/labelling. OqcService.create() rejects the
+  // stage-inappropriate fields rather than silently storing them.
   visualCheck     String?   // PASS/FAIL/NA
   dimensionalCheck String?  // PASS/FAIL/NA
   functionalCheck String?   // PASS/FAIL/NA
@@ -5231,7 +5252,11 @@ model OqcInspection {
   updatedBy       String?
 
   @@unique([companyId, oqcNumber])
+  // One inspection per FG Receipt per stage, replacing the old
+  // app-level "one OQC per FG Receipt" rule (OqcService.create()).
+  @@unique([companyId, fgReceiptId, stage])
   @@index([companyId, status])
+  @@index([companyId, stage])
   @@map("oqc_inspections")
 }
 

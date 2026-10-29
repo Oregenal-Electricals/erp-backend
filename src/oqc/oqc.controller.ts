@@ -19,6 +19,12 @@ export class OqcController {
   @RequirePermissions(Permission.OQC_VIEW)
   getPendingFgReceipts(@Request() req: any) { return this.oqcService.getPendingFgReceipts(req.user); }
 
+  @Get('dispatch-ready/:fgReceiptId')
+  @RequirePermissions(Permission.OQC_VIEW)
+  isDispatchReady(@Param('fgReceiptId') fgReceiptId: string, @Request() req: any) {
+    return this.oqcService.isDispatchReady(fgReceiptId, req.user);
+  }
+
   @Get()
   @RequirePermissions(Permission.OQC_VIEW)
   findAll(@Request() req: any, @Query() query: any) { return this.oqcService.findAll(req.user, query); }
