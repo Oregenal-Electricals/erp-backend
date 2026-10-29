@@ -95,6 +95,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure production_entries.profitLossAmount column - see 175_production_entry_profit_loss.sql', e as Error);
     }
+    try {
+      await this.ensurePlantManagerCostSheetPermissionRevoked();
+    } catch (e) {
+      this.logger.error('Failed to revoke PLANT_MANAGER PRODUCTION_COST_SHEET_VIEW - see 176_plant_manager_cost_sheet_permission_revoke.sql', e as Error);
+    }
   }
 
   /**
@@ -271,6 +276,33 @@ export class PrismaService
   private async ensureProductionEntryProfitLossColumn() {
     await this.$executeRawUnsafe(`ALTER TABLE "production_entries" ADD COLUMN IF NOT EXISTS "profitLossAmount" DOUBLE PRECISION;`);
     this.logger.log('production_entries.profitLossAmount column ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 176_plant_manager_cost_sheet_permission_revoke.sql (task #78: costing
+   * visibility must stay Super Admin/Admin/Accounts only).
+   * prisma/seed_15_role_structure.ts seeded PRODUCTION_COST_SHEET_VIEW
+   * directly onto PLANT_MANAGER - a non-management role - leaking
+   * per-work-order material/labour/rework cost data. Soft-revokes that one
+   * permission (isActive=false, the same convention every other
+   * role_permissions row already uses) from any company where
+   * PLANT_MANAGER was already seeded before this fix landed; new companies
+   * seeded after this fix never get it in the first place. Reversible from
+   * Settings > Roles & Permissions if a company genuinely wants it back.
+   * Safe on every boot, including one that already applied it.
+   */
+  private async ensurePlantManagerCostSheetPermissionRevoked() {
+    await this.$executeRawUnsafe(`
+      UPDATE role_permissions rp
+      SET "isActive" = false, "updatedAt" = now(), "updatedBy" = 'plant-manager-cost-sheet-permission-revoke-migration'
+      FROM roles r
+      WHERE rp."roleId" = r.id
+        AND r.name = 'PLANT_MANAGER'
+        AND rp.permission = 'PRODUCTION_COST_SHEET_VIEW'
+        AND rp."isActive" = true;
+    `);
+    this.logger.log('PLANT_MANAGER PRODUCTION_COST_SHEET_VIEW permission revoke ensured');
   }
 
   /**
