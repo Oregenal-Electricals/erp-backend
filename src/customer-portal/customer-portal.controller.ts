@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { CustomerPortalService } from './customer-portal.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -13,24 +20,28 @@ export class CustomerPortalController {
   @Get('dashboard/:customerId')
   @RequirePermissions(Permission.CUSTOMER_PORTAL_VIEW)
   getDashboard(@Param('customerId') customerId: string, @Request() req: any) {
-    return this.cpService.getCustomerDashboard(customerId, req.user.companyId);
+    return this.cpService.getCustomerDashboard(customerId, req.user);
   }
 
   @Get('orders/:customerId')
   @RequirePermissions(Permission.CUSTOMER_PORTAL_VIEW)
-  getOrders(@Param('customerId') customerId: string, @Query() query: any, @Request() req: any) {
-    return this.cpService.getCustomerOrders(customerId, req.user.companyId, query);
+  getOrders(
+    @Param('customerId') customerId: string,
+    @Query() query: any,
+    @Request() req: any,
+  ) {
+    return this.cpService.getCustomerOrders(customerId, req.user, query);
   }
 
   @Get('dispatches/:customerId')
   @RequirePermissions(Permission.CUSTOMER_PORTAL_VIEW)
   getDispatches(@Param('customerId') customerId: string, @Request() req: any) {
-    return this.cpService.getCustomerDispatches(customerId, req.user.companyId);
+    return this.cpService.getCustomerDispatches(customerId, req.user);
   }
 
   @Get('complaints/:customerId')
   @RequirePermissions(Permission.CUSTOMER_PORTAL_VIEW)
   getComplaints(@Param('customerId') customerId: string, @Request() req: any) {
-    return this.cpService.getCustomerComplaints(customerId, req.user.companyId);
+    return this.cpService.getCustomerComplaints(customerId, req.user);
   }
 }
