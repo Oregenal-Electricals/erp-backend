@@ -216,6 +216,20 @@ describe('CustomerPoService - Price Integrity', () => {
       );
       const cpo = await service.create(createDto(), user);
       expect(cpo.status).toBe('RECEIVED');
+      // conversionError lets the frontend show *why* this CPO is stuck,
+      // instead of a human needing server-log access to find out.
+      expect(cpo.conversionError).toContain('no customer item mapping yet');
+    });
+
+    it('clears a previously recorded conversionError once a retry succeeds', async () => {
+      salesOrders.createFromCpo.mockRejectedValueOnce(new BadRequestException('no customer item mapping yet'));
+      const stuck = await service.create(createDto(), user);
+      expect(stuck.status).toBe('RECEIVED');
+      expect(stuck.conversionError).toBeTruthy();
+
+      const retried = await service.acknowledge(stuck.id, user);
+      expect(retried.status).toBe('ACKNOWLEDGED');
+      expect(retried.conversionError).toBeNull();
     });
 
     it('does not re-acknowledge (or double-create a Sales Order for) a CPO that already auto-converted', async () => {

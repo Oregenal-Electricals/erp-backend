@@ -90,6 +90,9 @@ const STRUCTURE: Section[] = [
       { key: 'sidebar.inventory.grn', label: 'GRN', page: '/inventory/grn' },
       { key: 'sidebar.inventory.stock', label: 'Stock Ledger', page: '/inventory/stock' },
       { key: 'sidebar.inventory.rejected', label: 'Rejected Stock', page: '/inventory/rejected' },
+      // Task #52: Store's queue of system-calculated shortages awaiting
+      // verification before Purchase can act on them.
+      { key: 'sidebar.inventory.shortageVerification', label: 'Shortage Verification', page: '/inventory/shortage-verification' },
       { key: 'sidebar.inventory.rackBin', label: 'Rack & Bin', page: '/inventory/rack-bin' },
       { key: 'sidebar.inventory.putaway', label: 'Stock Putaway', page: '/inventory/putaway' },
       { key: 'sidebar.inventory.batches', label: 'Batches & Lots', page: '/inventory/batches' },
