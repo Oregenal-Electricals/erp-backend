@@ -52,7 +52,7 @@ describe('IqcEscalationService.submitStageResult - IQC-054 suggestion-only escal
     rejectedStockSvc = { createFromIqc: jest.fn().mockResolvedValue({ id: 'rs-1', rejectionNumber: 'RS-1' }) };
     stockLedger = { receiveFromIqc: jest.fn().mockResolvedValue(undefined) };
     debitNotes = { createFromIqcRejection: jest.fn().mockResolvedValue({ id: 'dn-1', debitNoteNumber: 'DN-1' }) };
-    const ncrService = { createAuto: jest.fn().mockResolvedValue({ id: 'ncr-1' }) };
+    const ncrService: any = { createAuto: jest.fn().mockResolvedValue({ id: 'ncr-1' }) };
     service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes, ncrService);
   });
 
@@ -188,7 +188,7 @@ describe('IqcEscalationService.maybeCloseInspection - IQC reject raises an NCR',
     // debitNotes (6th ctor param) is irrelevant to maybeCloseInspection's
     // NCR trigger (closeAsFail is what calls it) - a bare mock keeps this
     // suite isolated to the NCR behavior it actually exercises.
-    const debitNotes = { createFromIqcRejection: jest.fn() };
+    const debitNotes: any = { createFromIqcRejection: jest.fn() };
     ncrService = { createAuto: jest.fn().mockResolvedValue({ id: 'ncr-1' }) };
     service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes, ncrService);
   });

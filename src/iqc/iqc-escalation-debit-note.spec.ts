@@ -17,6 +17,7 @@ describe('IqcEscalationService - Debit Note auto-trigger on final FAIL', () => {
   let rejectedStockSvc: any;
   let stockLedger: any;
   let debitNotes: any;
+  let ncrService: any;
 
   const user = { id: 'user-1', companyId: 'company-1', role: 'FINAL_AUTHORITY', allRoles: ['FINAL_AUTHORITY'] };
 
@@ -57,11 +58,14 @@ describe('IqcEscalationService - Debit Note auto-trigger on final FAIL', () => {
     rejectedStockSvc = { createFromIqc: jest.fn() };
     stockLedger = { receiveFromIqc: jest.fn() };
     debitNotes = { createFromIqcRejection: jest.fn().mockResolvedValue({ id: 'dn-1', debitNoteNumber: 'DN-2026-0001' }) };
+    // This file only exercises the debit-note/closeAsFail path (IQC-055),
+    // not the NCR auto-trigger (Task #62) - a bare mock is enough.
+    ncrService = { createAuto: jest.fn().mockResolvedValue({ id: 'ncr-1' }) };
   });
 
   it('wraps the final-fail IqcItem update and the Debit Note creation in a single transaction, and flips returnedToVendor', async () => {
     prisma = makePrisma(finalAuthorityItem);
-    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes);
+    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes, ncrService);
 
     await service.submitStageResult('item-1', { outcome: 'FAIL', remarks: 'Confirmed defective, deviation declined', rejectedQty: 10, acceptedQty: 0, rejectionReason: 'Out of spec' } as any, user);
 
@@ -86,7 +90,7 @@ describe('IqcEscalationService - Debit Note auto-trigger on final FAIL', () => {
 
   it('does not create a Debit Note when the fail is escalated to the next stage (not yet terminal)', async () => {
     prisma = makePrisma(iqcStageItem);
-    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes);
+    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes, ncrService);
 
     const nonTerminalUser = { ...user, role: 'QC_MANAGER', allRoles: ['QC_MANAGER'] };
     await service.submitStageResult('item-2', { outcome: 'FAIL', remarks: 'Needs escalation', rejectedQty: 10, acceptedQty: 0, rejectionReason: 'Out of spec' } as any, nonTerminalUser);
@@ -97,7 +101,7 @@ describe('IqcEscalationService - Debit Note auto-trigger on final FAIL', () => {
 
   it('does not create a Debit Note on a terminal FAIL with zero rejected quantity', async () => {
     prisma = makePrisma(finalAuthorityItem);
-    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes);
+    service = new IqcEscalationService(prisma, audit, notifications, rejectedStockSvc, stockLedger, debitNotes, ncrService);
 
     await service.submitStageResult('item-1', { outcome: 'FAIL', remarks: 'Administrative close-out', rejectedQty: 0, acceptedQty: 10 } as any, user);
 
