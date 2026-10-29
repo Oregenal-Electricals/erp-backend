@@ -474,7 +474,10 @@ export class BomService {
     }
     const sourceBom = await this.prisma.bom.findFirst({
       where: { id: sourceBomId, companyId: user.companyId },
-      include: { items: { where: { isActive: true } }, product: true },
+      include: {
+        items: { where: { isActive: true } },
+        product: { select: { id: true, code: true, name: true } },
+      },
     });
     if (!sourceBom) throw new NotFoundException('Source BOM not found');
 

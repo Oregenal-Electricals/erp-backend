@@ -112,13 +112,17 @@ export class ProductFamilyService {
     if (user.role !== 'SUPER_ADMIN') where.companyId = user.companyId;
     // Explicit select: products.hourlyTarget/dailyTarget columns are missing in prod (PR #28 not deployed yet).
     // Only `id`/`familyId` are read on this record below, so those columns are unaffected.
-    const product = await this.prisma.product.findFirst({ where, select: { id: true, familyId: true } });
+    const product = await this.prisma.product.findFirst({
+      where,
+      select: { id: true, familyId: true },
+    });
     if (!product) throw new NotFoundException('Product not found');
     if (!product.familyId) throw new BadRequestException('Product is not assigned to any Product Family');
 
     const updated = await this.prisma.product.update({
       where: { id: productId },
       data: { familyId: null, updatedBy: user.id },
+      select: { id: true },
     });
     await this.audit.log({
       tableName: 'products', recordId: productId, action: 'UPDATE',
