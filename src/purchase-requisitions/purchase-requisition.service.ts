@@ -210,6 +210,20 @@ export class PurchaseRequisitionService {
     return updated;
   }
 
+  async cancel(id: string, user: any) {
+    const pr = await this.findOne(id, user);
+    if (['PO_RAISED', 'CLOSED', 'CANCELLED'].includes(pr.status)) {
+      throw new BadRequestException('Cannot cancel a PR that already resulted in a PO or is closed/cancelled');
+    }
+    const updated = await this.prisma.purchaseRequisition.update({
+      where: { id },
+      data: { status: 'CANCELLED', updatedBy: user.id },
+      include: this.includes(),
+    });
+    await this.audit.log({ tableName: 'purchase_requisitions', recordId: id, action: 'UPDATE', oldValues: pr, newValues: updated, changedBy: user.id });
+    return updated;
+  }
+
   async addItem(id: string, item: any, user: any) {
     const pr = await this.findOne(id, user);
     if (!['DRAFT', 'REJECTED'].includes(pr.status)) throw new BadRequestException('Cannot add items to this PR');

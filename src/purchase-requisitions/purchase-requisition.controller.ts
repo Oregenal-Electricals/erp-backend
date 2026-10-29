@@ -50,6 +50,10 @@ export class PurchaseRequisitionController {
   @RequirePermissions(Permission.PURCHASE_EDIT)
   reject(@Param('id') id: string, @Body() dto: RejectPrDto, @Request() req: any) { return this.prService.reject(id, dto, req.user); }
 
+  @Post(':id/cancel')
+  @RequirePermissions(Permission.PURCHASE_EDIT)
+  cancel(@Param('id') id: string, @Request() req: any) { return this.prService.cancel(id, req.user); }
+
   @Post(':id/items')
   @RequirePermissions(Permission.PURCHASE_CREATE)
   addItem(@Param('id') id: string, @Body() dto: PrItemDto, @Request() req: any) { return this.prService.addItem(id, dto, req.user); }
