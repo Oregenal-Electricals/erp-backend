@@ -85,6 +85,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to ensure production_entries.manpowerAllotted column - see 173_production_entry_manpower_allotted.sql', e as Error);
     }
+    try {
+      await this.ensureVendorReturnWindowDaysColumn();
+    } catch (e) {
+      this.logger.error('Failed to ensure vendors.returnWindowDays column - see 174_vendor_return_window_days.sql', e as Error);
+    }
   }
 
   /**
@@ -240,6 +245,16 @@ export class PrismaService
   private async ensureProductionEntryManpowerAllottedColumn() {
     await this.$executeRawUnsafe(`ALTER TABLE "production_entries" ADD COLUMN IF NOT EXISTS "manpowerAllotted" INTEGER;`);
     this.logger.log('production_entries.manpowerAllotted column ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 174_vendor_return_window_days.sql (adds vendors.returnWindowDays).
+   * Safe on every boot including one that already has it applied.
+   */
+  private async ensureVendorReturnWindowDaysColumn() {
+    await this.$executeRawUnsafe(`ALTER TABLE "vendors" ADD COLUMN IF NOT EXISTS "returnWindowDays" INTEGER;`);
+    this.logger.log('vendors.returnWindowDays column ensured');
   }
 
   /**

@@ -38,7 +38,7 @@ describe('IqcEscalationService.submitStageResult - IQC-054 suggestion-only escal
         update: jest.fn().mockResolvedValue({}),
       },
       grnItem: { update: jest.fn().mockResolvedValue({}) },
-      grnHeader: { update: jest.fn().mockResolvedValue({}) },
+      grnHeader: { update: jest.fn().mockResolvedValue({}), findFirst: jest.fn().mockResolvedValue(null) },
       rejectedStock: { findFirst: jest.fn().mockResolvedValue(null) },
       user: { findMany: jest.fn().mockResolvedValue([]) },
       debitNote: { create: jest.fn().mockResolvedValue({ id: 'dn-1', debitNoteNumber: 'DN-1' }) },
@@ -176,7 +176,7 @@ describe('IqcEscalationService.maybeCloseInspection - IQC reject raises an NCR',
         update: jest.fn().mockResolvedValue({}),
       },
       grnItem: { update: jest.fn().mockResolvedValue({}) },
-      grnHeader: { update: jest.fn().mockResolvedValue({}) },
+      grnHeader: { update: jest.fn().mockResolvedValue({}), findFirst: jest.fn().mockResolvedValue(null) },
       rejectedStock: { findFirst: jest.fn().mockResolvedValue(null) },
       rejectedStockItem: { updateMany: jest.fn().mockResolvedValue({}) },
       user: { findMany: jest.fn().mockResolvedValue([]) },
@@ -267,5 +267,57 @@ describe('IqcEscalationService.maybeCloseInspection - IQC reject raises an NCR',
     expect(ncrCall.itemCode).toBeUndefined();
     expect(ncrCall.qtyAffected).toBe(15);
     expect(ncrCall.description).toContain('2 item(s) rejected');
+  });
+
+  describe('per-vendor return window (174_vendor_return_window_days.sql)', () => {
+    function daysBetween(a: Date, b: Date) {
+      return Math.round((a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    it("uses the vendor's own returnWindowDays when the GRN's PO has one set, not the 21-day default", async () => {
+      prisma.grnHeader.findFirst.mockResolvedValue({ po: { vendor: { returnWindowDays: 14 } } });
+      prisma.user.findMany.mockResolvedValue([{ id: 'finance-1' }]);
+      const items = [
+        { id: 'item-1', grnItemId: 'gi-1', itemCode: 'RM-01', currentStage: 'CLOSED', acceptedQty: 180, rejectedQty: 20, receivedQty: 200, rejectionReason: 'bad' },
+      ];
+      prisma.iqcInspection.findFirst.mockResolvedValue(makeInspection(items));
+
+      const before = new Date();
+      await (service as any).maybeCloseInspection('iqc-1', user);
+
+      const call = prisma.rejectedStockItem.updateMany.mock.calls[0][0];
+      expect(daysBetween(call.data.vendorPickupDeadline, before)).toBe(14);
+
+      const notifyCall = notifications.createBulk.mock.calls[0][0][0];
+      expect(notifyCall.message).toContain('within 14 days');
+    });
+
+    it("falls back to the 21-day company default when the vendor has no returnWindowDays override", async () => {
+      prisma.grnHeader.findFirst.mockResolvedValue({ po: { vendor: { returnWindowDays: null } } });
+      const items = [
+        { id: 'item-1', grnItemId: 'gi-1', itemCode: 'RM-01', currentStage: 'CLOSED', acceptedQty: 180, rejectedQty: 20, receivedQty: 200, rejectionReason: 'bad' },
+      ];
+      prisma.iqcInspection.findFirst.mockResolvedValue(makeInspection(items));
+
+      const before = new Date();
+      await (service as any).maybeCloseInspection('iqc-1', user);
+
+      const call = prisma.rejectedStockItem.updateMany.mock.calls[0][0];
+      expect(daysBetween(call.data.vendorPickupDeadline, before)).toBe(21);
+    });
+
+    it('also falls back to the 21-day default when the GRN has no PO at all (e.g. a non-PO receipt)', async () => {
+      prisma.grnHeader.findFirst.mockResolvedValue(null);
+      const items = [
+        { id: 'item-1', grnItemId: 'gi-1', itemCode: 'RM-01', currentStage: 'CLOSED', acceptedQty: 180, rejectedQty: 20, receivedQty: 200, rejectionReason: 'bad' },
+      ];
+      prisma.iqcInspection.findFirst.mockResolvedValue(makeInspection(items));
+
+      const before = new Date();
+      await (service as any).maybeCloseInspection('iqc-1', user);
+
+      const call = prisma.rejectedStockItem.updateMany.mock.calls[0][0];
+      expect(daysBetween(call.data.vendorPickupDeadline, before)).toBe(21);
+    });
   });
 });

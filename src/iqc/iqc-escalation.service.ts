@@ -63,6 +63,9 @@ function isAuthorizedForStage(stage: string, user: any): boolean {
   }
 }
 
+// Company-wide fallback only. Real window is per-vendor
+// (Vendor.returnWindowDays, see 174_vendor_return_window_days.sql) -
+// this is used only when that vendor record has no override set.
 const VENDOR_PICKUP_DAYS = 21;
 
 @Injectable()
@@ -467,8 +470,18 @@ export class IqcEscalationService {
       const existing = await this.prisma.rejectedStock.findFirst({ where: { iqcId, companyId: user.companyId } });
       if (!existing) {
         const rejected = await this.rejectedStock.createFromIqc(iqcId, user);
+
+        // Per-vendor return window (varies 14/30/etc. days by vendor
+        // terms) - falls back to the company default when this GRN's PO
+        // has no vendor override set, or isn't linked to a PO at all.
+        const grnHeader = await this.prisma.grnHeader.findFirst({
+          where: { id: refreshed.grnId },
+          select: { po: { select: { vendor: { select: { returnWindowDays: true } } } } },
+        });
+        const windowDays = grnHeader?.po?.vendor?.returnWindowDays ?? VENDOR_PICKUP_DAYS;
+
         const deadline = new Date();
-        deadline.setDate(deadline.getDate() + VENDOR_PICKUP_DAYS);
+        deadline.setDate(deadline.getDate() + windowDays);
         await this.prisma.rejectedStockItem.updateMany({
           where: { rejectedStockId: rejected.id },
           data: { disposition: 'RTV', vendorPickupDeadline: deadline, vendorNotifiedAt: new Date(), updatedBy: user.id },
@@ -484,7 +497,7 @@ export class IqcEscalationService {
               userId: t.id,
               type: 'QUALITY_ALERT',
               title: `Material rejected — vendor return required`,
-              message: `${(rejected as any).rejectionNumber} failed final IQC review and is dead stock pending vendor pickup within ${VENDOR_PICKUP_DAYS} days.`,
+              message: `${(rejected as any).rejectionNumber} failed final IQC review and is dead stock pending vendor pickup within ${windowDays} days.`,
               referenceType: 'REJECTED_STOCK', referenceId: rejected.id, referenceNumber: (rejected as any).rejectionNumber,
               priority: 'HIGH',
             })) as any,

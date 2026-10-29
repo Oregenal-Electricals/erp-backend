@@ -2197,6 +2197,11 @@ model Vendor {
   tdsApplicable     Boolean  @default(false)
   tdsSection        String?
   rating            Int?     // 1-5
+  // Days this vendor has to pick up/replace IQC-rejected material before
+  // the company is treated as free to scrap it. NULL = use the 21-day
+  // company default (see VENDOR_PICKUP_DAYS in iqc-escalation.service.ts).
+  // See 174_vendor_return_window_days.sql.
+  returnWindowDays  Int?
   notes             String?
   isActive          Boolean  @default(true)
   isTestData        Boolean  @default(false)
