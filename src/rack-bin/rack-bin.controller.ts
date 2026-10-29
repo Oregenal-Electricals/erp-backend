@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { RackBinService } from './rack-bin.service';
-import { CreateZoneDto, CreateRackDto, CreateBinDto, BulkCreateBinsDto, UpdateBinStatusDto } from './dto/rack-bin.dto';
+import { CreateZoneDto, CreateRackDto, CreateBinDto, BulkCreateBinsDto, UpdateBinStatusDto, GenerateRackLocationsDto } from './dto/rack-bin.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -46,6 +46,13 @@ export class RackBinController {
   @Post('bins/bulk')
   @RequirePermissions(Permission.INVENTORY_CREATE)
   bulkCreate(@Body() dto: BulkCreateBinsDto, @Request() req: any) { return this.rbService.bulkCreateBins(dto, req.user); }
+
+  // STORE task #56 — recommended way to populate a rack's bins going
+  // forward: vertical-first (bay-by-bay, all levels within a bay before
+  // the next bay), matching how the physical racks are laid out.
+  @Post('bins/generate-vertical')
+  @RequirePermissions(Permission.INVENTORY_CREATE)
+  generateRackLocations(@Body() dto: GenerateRackLocationsDto, @Request() req: any) { return this.rbService.generateRackLocations(dto, req.user); }
 
   @Put('bins/:id/status')
   @RequirePermissions(Permission.INVENTORY_EDIT)
