@@ -71,6 +71,7 @@ describe('SalesOrdersService - DSP-001', () => {
       stockBatch: { findFirst: jest.fn().mockResolvedValue(null) },
       stockBalance: { findMany: jest.fn().mockResolvedValue([{ availableQty: 10000, reservedQty: 0 }]) },
       workOrder: { findMany: jest.fn().mockResolvedValue([]) },
+      customerPoItem: { findFirst: jest.fn().mockResolvedValue(null) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     customerItemMapping = {
@@ -394,6 +395,44 @@ describe('SalesOrdersService - DSP-001', () => {
     it('blocks creating the Sales Order when a CPO line has no mapping yet', async () => {
       customerItemMapping.resolve.mockResolvedValue(null);
       await expect(service.createFromCpo(cpo, [{ id: 'cpoitem-1', itemCode: 'UNMAPPED-CODE', itemName: 'Something', qty: 10, uom: 'PCS', unitPrice: 50, discount: 0, gstRate: 18 }], user)).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  // Naming display rule across CPO -> SO -> (future) Sales Invoice: the SO
+  // line shows OUR internal product code/name (above), but must also
+  // carry the customer's own original wording forward unresolved, so a
+  // downstream Sales Invoice can print naming the customer recognizes.
+  describe('Customer naming passthrough (CPO -> SO -> Invoice)', () => {
+    it('createFromCpo() preserves the CPO line\'s own wording as customerItemCode/customerItemName alongside the resolved internal code/name', async () => {
+      customerItemMapping.resolve.mockResolvedValue({ product: { code: 'BULB-9W-WW', name: '9W LED Bulb Warm White' } });
+      const so = await service.createFromCpo(cpo, [{ id: 'cpoitem-1', itemCode: 'HAV-BULB-WARM-9', itemName: "Customer's own name", qty: 100, uom: 'PCS', unitPrice: 80, discount: 0, gstRate: 18 }], user);
+      expect(so.items[0].itemCode).toBe('BULB-9W-WW');
+      expect(so.items[0].itemName).toBe('9W LED Bulb Warm White');
+      expect(so.items[0].customerItemCode).toBe('HAV-BULB-WARM-9');
+      expect(so.items[0].customerItemName).toBe("Customer's own name");
+    });
+
+    it('manual create() pulls customerItemCode/customerItemName from the linked CPO line when cpoItemId is given', async () => {
+      prisma.customerPoItem.findFirst.mockResolvedValue({ id: 'cpoitem-9', itemCode: 'HAV-BULB-WARM-9', itemName: "Customer's own name" });
+      const so = await service.create({ cpoId: 'cpo-1', deliveryDate: '2026-12-01', items: [fgLine({ cpoItemId: 'cpoitem-9', itemCode: 'BULB-9W', itemName: '9W LED Bulb' })] } as any, user);
+      expect(prisma.customerPoItem.findFirst).toHaveBeenCalledWith({ where: { id: 'cpoitem-9', cpo: { companyId: 'company-1' } } });
+      expect(so.items[0].itemCode).toBe('BULB-9W');
+      expect(so.items[0].customerItemCode).toBe('HAV-BULB-WARM-9');
+      expect(so.items[0].customerItemName).toBe("Customer's own name");
+    });
+
+    it('manual create() leaves customerItemCode/customerItemName null when no cpoItemId was picked', async () => {
+      const so = await service.create({ cpoId: 'cpo-1', deliveryDate: '2026-12-01', items: [fgLine()] } as any, user);
+      expect(so.items[0].customerItemCode).toBeNull();
+      expect(so.items[0].customerItemName).toBeNull();
+    });
+
+    it('naming passthrough fields are never touched by confirm() or cancel() - set once at creation like every other line field', async () => {
+      customerItemMapping.resolve.mockResolvedValue({ product: { code: 'BULB-9W-WW', name: '9W LED Bulb Warm White' } });
+      const so = await service.createFromCpo(cpo, [{ id: 'cpoitem-1', itemCode: 'HAV-BULB-WARM-9', itemName: "Customer's own name", qty: 100, uom: 'PCS', unitPrice: 80, discount: 0, gstRate: 18 }], user);
+      const cancelled = await service.cancel(so.id, { cancelReason: 'test' } as any, user);
+      expect(cancelled.items[0].customerItemCode).toBe('HAV-BULB-WARM-9');
+      expect(cancelled.items[0].customerItemName).toBe("Customer's own name");
     });
   });
 });
