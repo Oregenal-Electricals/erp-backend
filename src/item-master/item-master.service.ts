@@ -30,11 +30,23 @@ export class ItemMasterService {
   }
 
   async findAllUoms(user: any) {
-    return this.prisma.unitOfMeasure.findMany({
+    const uoms = await this.prisma.unitOfMeasure.findMany({
       where: { companyId: user.companyId, isActive: true },
-      include: { _count: { select: { items: true } } },
+      // `items` is the legacy Item Master relation, which the real
+      // Products/Raw Materials screens don't write to - they use their
+      // own uomId FK (UnitOfMeasure.products / .rawMaterials). Counting
+      // only `items` here made the "Items" column show 0 for every UOM
+      // even when products/raw materials were actively using it.
+      include: { _count: { select: { items: true, products: true, rawMaterials: true } } },
       orderBy: { code: 'asc' },
     });
+    // Fold all three relations into the single `items` count the
+    // frontend already reads (u._count.items), so no frontend change
+    // is needed.
+    return uoms.map((u) => ({
+      ...u,
+      _count: { items: u._count.items + u._count.products + u._count.rawMaterials },
+    }));
   }
 
   async updateUom(id: string, dto: UpdateUomDto, user: any) {
