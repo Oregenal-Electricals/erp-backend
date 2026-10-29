@@ -16,8 +16,12 @@ export class RoutingService {
     if (!dto.stages || dto.stages.length === 0) {
       throw new BadRequestException('A routing needs at least one stage');
     }
+    // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+    // on the live DB (PR #28 not deployed) - an unselected findFirst would
+    // crash. This is used only as an existence check below.
     const product = await this.prisma.product.findFirst({
       where: { id: dto.finalProductId, companyId: user.companyId },
+      select: { id: true },
     });
     if (!product) throw new NotFoundException('Final product not found');
 
@@ -84,7 +88,13 @@ export class RoutingService {
     for (const stage of stagesToRun) {
       const bom = await this.prisma.bom.findFirst({ where: { id: stage.bomId, companyId: user.companyId } });
       if (!bom) throw new NotFoundException(`BOM not found for stage ${stage.stageName}`);
-      const stageProduct = await this.prisma.product.findFirst({ where: { id: bom.productId, companyId: user.companyId } });
+      // Explicit select: products.hourlyTarget/dailyTarget don't exist yet
+      // on the live DB (PR #28 not deployed) - an unselected findFirst
+      // would crash. id/code/name/isActive are all used below.
+      const stageProduct = await this.prisma.product.findFirst({
+        where: { id: bom.productId, companyId: user.companyId },
+        select: { id: true, code: true, name: true, isActive: true },
+      });
       if (!stageProduct) throw new NotFoundException(`Product not found for stage ${stage.stageName}`);
       if (!stageProduct.isActive) throw new BadRequestException(`Product for stage ${stage.stageName} (${stageProduct.code}) is inactive and cannot be released for production`);
 
