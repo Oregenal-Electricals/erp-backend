@@ -15,6 +15,11 @@ build/
 .next/
 out/
 
+# TypeScript incremental build cache - not runtime output, dist/ itself
+# stays committed per this project's convention, but this cache file
+# churns on every build and was never meant to be tracked.
+*.tsbuildinfo
+
 # Prisma
 prisma/migrations/**/migration.sql
 
