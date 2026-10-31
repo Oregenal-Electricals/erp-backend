@@ -101,9 +101,9 @@ export class PrismaService
       this.logger.error('Failed to revoke PLANT_MANAGER PRODUCTION_COST_SHEET_VIEW - see 176_plant_manager_cost_sheet_permission_revoke.sql', e as Error);
     }
     try {
-      await this.ensureShiftBoardNav();
+      await this.ensureShiftBoardNavRemoved();
     } catch (e) {
-      this.logger.error('Failed to ensure Shift Board sidebar nav - see 177_ui_control_shift_board_nav.sql', e as Error);
+      this.logger.error('Failed to remove Shift Board sidebar nav - see 178_ui_control_shift_board_nav_remove.sql', e as Error);
     }
   }
 
@@ -299,20 +299,22 @@ export class PrismaService
    */
   /**
    * One-time, idempotent startup check for
-   * 177_ui_control_shift_board_nav.sql - adds the "Shift Board" sidebar
-   * item under Production (default_visible=true, no per-role override, so
-   * it shows for every role per ui-control.service.ts's merge order).
-   * Points at /production/shift-board, a new client-side-only hourly
-   * entry tool Rahul is iterating the UX of before it's wired to the
-   * database. Safe on every boot, including one that already applied it.
+   * 178_ui_control_shift_board_nav_remove.sql - undoes migration 177
+   * (which added a standalone "Shift Board" sidebar item/page). Rahul's
+   * call: a separate tab duplicated Production Recording's own entry
+   * flow, so Shift Board was merged directly into
+   * /production/recording (ShiftBoardSection.jsx) instead, and this
+   * removes the now-dead sidebar row and route so nothing orphaned is
+   * left behind. Safe on every boot, including one where it's already
+   * removed or was never applied (DELETE is a no-op either way).
    */
-  private async ensureShiftBoardNav() {
+  private async ensureShiftBoardNavRemoved() {
     await this.$executeRawUnsafe(`
-      INSERT INTO ui_control_elements (id, company_id, key, element_type, module, page, label, icon, parent_key, sort_order, default_visible, created_at, updated_at, is_active, is_test_data)
-      VALUES (gen_random_uuid(), '83eda866-ba63-472c-902f-561f05b6b1c1', 'sidebar.production.shiftBoard', 'SIDEBAR_ITEM', 'Production', '/production/shift-board', 'Shift Board', 'calculator', 'sidebar.production', 15, true, now(), now(), true, false)
-      ON CONFLICT (company_id, key) DO NOTHING;
+      DELETE FROM ui_control_elements
+      WHERE company_id = '83eda866-ba63-472c-902f-561f05b6b1c1'
+        AND key = 'sidebar.production.shiftBoard';
     `);
-    this.logger.log('Shift Board sidebar nav ensured');
+    this.logger.log('Shift Board sidebar nav removal ensured');
   }
 
   private async ensurePlantManagerCostSheetPermissionRevoked() {
