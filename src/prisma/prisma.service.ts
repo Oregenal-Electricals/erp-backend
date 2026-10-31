@@ -100,6 +100,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to revoke PLANT_MANAGER PRODUCTION_COST_SHEET_VIEW - see 176_plant_manager_cost_sheet_permission_revoke.sql', e as Error);
     }
+    try {
+      await this.ensureShiftBoardNav();
+    } catch (e) {
+      this.logger.error('Failed to ensure Shift Board sidebar nav - see 177_ui_control_shift_board_nav.sql', e as Error);
+    }
   }
 
   /**
@@ -292,6 +297,24 @@ export class PrismaService
    * Settings > Roles & Permissions if a company genuinely wants it back.
    * Safe on every boot, including one that already applied it.
    */
+  /**
+   * One-time, idempotent startup check for
+   * 177_ui_control_shift_board_nav.sql - adds the "Shift Board" sidebar
+   * item under Production (default_visible=true, no per-role override, so
+   * it shows for every role per ui-control.service.ts's merge order).
+   * Points at /production/shift-board, a new client-side-only hourly
+   * entry tool Rahul is iterating the UX of before it's wired to the
+   * database. Safe on every boot, including one that already applied it.
+   */
+  private async ensureShiftBoardNav() {
+    await this.$executeRawUnsafe(`
+      INSERT INTO ui_control_elements (id, company_id, key, element_type, module, page, label, icon, parent_key, sort_order, default_visible, created_at, updated_at, is_active, is_test_data)
+      VALUES (gen_random_uuid(), '83eda866-ba63-472c-902f-561f05b6b1c1', 'sidebar.production.shiftBoard', 'SIDEBAR_ITEM', 'Production', '/production/shift-board', 'Shift Board', 'calculator', 'sidebar.production', 15, true, now(), now(), true, false)
+      ON CONFLICT (company_id, key) DO NOTHING;
+    `);
+    this.logger.log('Shift Board sidebar nav ensured');
+  }
+
   private async ensurePlantManagerCostSheetPermissionRevoked() {
     await this.$executeRawUnsafe(`
       UPDATE role_permissions rp
