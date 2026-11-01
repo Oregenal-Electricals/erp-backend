@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { CustomerPoService } from './customer-po.service';
-import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, ParseCpoSourceFileDto, VerifyMaterialShortageDto } from './dto/customer-po.dto';
+import { CreateCpoDto, UpdateCpoDto, CancelCpoDto, ParseCpoSourceFileDto, VerifyMaterialShortageDto, BulkVerifyMaterialShortageDto } from './dto/customer-po.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -28,6 +28,16 @@ export class CustomerPoController {
   @RequirePermissions(Permission.MATERIAL_SHORTAGE_VERIFY)
   verifyShortage(@Param('id') id: string, @Body() dto: VerifyMaterialShortageDto, @Request() req: any) {
     return this.cpoService.verifyShortage(id, dto, req.user);
+  }
+
+  // Store's multi-select "verify as accurate" action - confirms the
+  // system-calculated shortage as-is for every selected row in one click.
+  // No qty override here by design; a row Store has doubts about is left
+  // out of the selection and handled individually via the endpoint above.
+  @Post('shortages/bulk-verify')
+  @RequirePermissions(Permission.MATERIAL_SHORTAGE_VERIFY)
+  bulkVerifyShortages(@Body() dto: BulkVerifyMaterialShortageDto, @Request() req: any) {
+    return this.cpoService.bulkVerifyShortages(dto.ids, req.user);
   }
 
   @Get('shortages/open')

@@ -457,6 +457,56 @@ describe('CustomerPoService - Price Integrity', () => {
     });
   });
 
+  describe('bulkVerifyShortages() - Store multi-select "verify as accurate" (task #52 follow-up)', () => {
+    it('confirms every selected row as accurate in one call, with no reason required', async () => {
+      seedShortage({ id: 'shortage-1', shortageQty: 60 });
+      seedShortage({ id: 'shortage-2', shortageQty: 15 });
+      const result = await service.bulkVerifyShortages(['shortage-1', 'shortage-2'], user);
+      expect(result.verifiedCount).toBe(2);
+      expect(result.verified).toEqual(['shortage-1', 'shortage-2']);
+      expect(result.skipped).toEqual([]);
+      expect(shortageRecords['shortage-1'].status).toBe('OPEN');
+      expect(shortageRecords['shortage-1'].verifiedQty).toBe(60);
+      expect(shortageRecords['shortage-1'].verificationReason).toBeNull();
+      expect(shortageRecords['shortage-2'].status).toBe('OPEN');
+      expect(shortageRecords['shortage-2'].verifiedQty).toBe(15);
+    });
+
+    it('skips rows not belonging to this company or already past verification, without failing the rest of the batch', async () => {
+      seedShortage({ id: 'shortage-1', shortageQty: 60 });
+      seedShortage({ id: 'shortage-2', status: 'OPEN', shortageQty: 15 });
+      seedShortage({ id: 'shortage-3', companyId: 'other-company', shortageQty: 10 });
+      const result = await service.bulkVerifyShortages(['shortage-1', 'shortage-2', 'shortage-3', 'does-not-exist'], user);
+      expect(result.verifiedCount).toBe(1);
+      expect(result.verified).toEqual(['shortage-1']);
+      expect(result.skipped).toEqual([
+        { id: 'shortage-2', reason: "Already 'OPEN'" },
+        { id: 'shortage-3', reason: 'Not found' },
+        { id: 'does-not-exist', reason: 'Not found' },
+      ]);
+      expect(shortageRecords['shortage-1'].status).toBe('OPEN');
+      expect(shortageRecords['shortage-2'].status).toBe('OPEN'); // unchanged, was already OPEN
+    });
+
+    it('de-duplicates repeated ids in the selection', async () => {
+      seedShortage({ id: 'shortage-1', shortageQty: 60 });
+      const result = await service.bulkVerifyShortages(['shortage-1', 'shortage-1'], user);
+      expect(result.verifiedCount).toBe(1);
+      expect(result.verified).toEqual(['shortage-1']);
+    });
+
+    it('never requires or stores a reason, even for a large batch - this action is only for rows Store has no doubt about', async () => {
+      seedShortage({ id: 'shortage-1', shortageQty: 60 });
+      seedShortage({ id: 'shortage-2', shortageQty: 15 });
+      seedShortage({ id: 'shortage-3', shortageQty: 8 });
+      await service.bulkVerifyShortages(['shortage-1', 'shortage-2', 'shortage-3'], user);
+      for (const id of ['shortage-1', 'shortage-2', 'shortage-3']) {
+        expect(shortageRecords[id].verificationReason).toBeNull();
+        expect(shortageRecords[id].systemCalculatedQty).toBe(shortageRecords[id].shortageQty);
+      }
+    });
+  });
+
   // Cancelling a CPO must cascade to its Sales Order(s): auto-cancel a
   // not-yet-started one (still DRAFT/CONFIRMED - no Work Order exists
   // against it), but block the CPO cancel outright once real work is
