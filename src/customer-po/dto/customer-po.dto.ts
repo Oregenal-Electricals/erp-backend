@@ -18,6 +18,19 @@ export class VerifyMaterialShortageDto {
   reason?: string;
 }
 
+// Store's "verify selected as accurate" action (multi-select on the
+// Shortage Verification screen) - confirms the system-calculated
+// shortageQty as-is for every listed row in one click. There is no
+// per-row qty override here by design: a row the Store has any doubt
+// about is excluded from the selection and verified individually
+// instead (VerifyMaterialShortageDto above), where a differing qty and
+// mandatory reason are still fully supported.
+export class BulkVerifyMaterialShortageDto {
+  @IsArray()
+  @IsString({ each: true })
+  ids: string[];
+}
+
 export class CpoItemDto {
   @IsString() itemCode: string;
   @IsString() itemName: string;

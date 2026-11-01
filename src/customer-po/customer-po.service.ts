@@ -1015,6 +1015,59 @@ export class CustomerPoService {
   }
 
   /**
+   * Task #52 follow-up: Store's "verify selected as accurate" bulk action.
+   * Confirms the system-calculated shortageQty as-is (no override, no
+   * reason) for every id in the list, in one click - meant for the rows
+   * Store has no doubt about. A row still needing a look (different real
+   * stock, wrong system figure) is simply left unselected and verified
+   * individually via verifyShortage() above, where a qty override with its
+   * mandatory reason is still fully supported.
+   * Best-effort per row, not one all-or-nothing transaction: a row that
+   * someone else already verified (or that doesn't belong to this
+   * company) a moment ago is reported back as skipped rather than failing
+   * the whole batch, since the rest of the selection is still valid work.
+   */
+  async bulkVerifyShortages(ids: string[], user: any) {
+    const uniqueIds = [...new Set(ids)];
+    const verified: string[] = [];
+    const skipped: { id: string; reason: string }[] = [];
+
+    for (const shortageId of uniqueIds) {
+      const shortage = await this.prisma.materialShortage.findFirst({
+        where: { id: shortageId, companyId: user.companyId },
+      });
+      if (!shortage) { skipped.push({ id: shortageId, reason: 'Not found' }); continue; }
+      if (shortage.status !== 'PENDING_STORE_VERIFICATION') {
+        skipped.push({ id: shortageId, reason: `Already '${shortage.status}'` });
+        continue;
+      }
+
+      const oldValues = { status: shortage.status, shortageQty: shortage.shortageQty };
+      await this.prisma.materialShortage.update({
+        where: { id: shortageId },
+        data: {
+          status: 'OPEN',
+          systemCalculatedQty: shortage.shortageQty,
+          verifiedQty: shortage.shortageQty,
+          verificationReason: null,
+          verifiedById: user.id,
+          verifiedAt: new Date(),
+          updatedBy: user.id,
+        },
+      });
+      await this.audit.log({
+        tableName: 'material_shortages', recordId: shortageId, action: 'UPDATE',
+        oldValues,
+        newValues: { status: 'OPEN', shortageQty: shortage.shortageQty, systemCalculatedQty: shortage.shortageQty, isOverride: false },
+        changedBy: user.id,
+      });
+      verified.push(shortageId);
+    }
+
+    return { verifiedCount: verified.length, verified, skipped };
+  }
+
+  /**
    * Aggregated view for Purchase: every OPEN material shortage across
    * every Customer PO, grouped by item so Purchase sees "I need to buy
    * X total of item Y" in one place, rather than checking each order
