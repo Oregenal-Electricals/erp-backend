@@ -64,6 +64,7 @@ import { InventoryDashboardModule } from './inventory-dashboard/inventory-dashbo
 import { InventoryReportsModule } from './inventory-reports/inventory-reports.module';
 import { WorkOrderModule } from './work-orders/work-order.module';
 import { ManpowerModule } from './manpower/manpower.module';
+import { OvertimeRequestModule } from './overtime-requests/overtime-request.module';
 import { ContractorsModule } from './contractors/contractors.module';
 import { GateMastersModule } from './gate-masters/gate-masters.module';
 import { GateEventsModule } from './gate-events/gate-events.module';
@@ -241,6 +242,7 @@ import configuration from './config/configuration';
     InventoryReportsModule,
     WorkOrderModule,
     ManpowerModule,
+    OvertimeRequestModule,
     ContractorsModule,
     GateMastersModule,
     GateEventsModule,

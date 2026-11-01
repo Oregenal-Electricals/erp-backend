@@ -304,6 +304,10 @@ export enum Permission {
   MANPOWER_QUERY = 'MANPOWER_QUERY',
   MANPOWER_ADJUST = 'MANPOWER_ADJUST',
   MANPOWER_ASSIGN = 'MANPOWER_ASSIGN', // assign/end an individual employee's assignment
+  // Overtime request/approval (Shift Board "Request Overtime" -> Plant Manager -> Admin/Management)
+  OVERTIME_REQUEST_CREATE = 'OVERTIME_REQUEST_CREATE',
+  OVERTIME_REQUEST_VIEW = 'OVERTIME_REQUEST_VIEW',
+  OVERTIME_REQUEST_ADJUST = 'OVERTIME_REQUEST_ADJUST', // final-level approver reducing requested men/hours before approving
   // Stage-to-stage FG handoff (Give/Receive)
   STAGE_TRANSFER_VIEW = 'STAGE_TRANSFER_VIEW',
   STAGE_TRANSFER_GIVE = 'STAGE_TRANSFER_GIVE',

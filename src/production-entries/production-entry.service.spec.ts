@@ -8,6 +8,7 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
   let materialReservation: any;
   let settings: any;
   let notifications: any;
+  let overtimeRequests: any;
   const user = { id: 'user-1', companyId: 'company-1', role: 'SUPERVISOR' };
 
   const firstStageWo = {
@@ -46,7 +47,11 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
       }),
     };
     notifications = { createBulk: jest.fn().mockResolvedValue(undefined) };
-    service = new ProductionEntryService(prisma, audit, materialReservation, settings, notifications);
+    // No approved overtime by default - every pre-existing test above
+    // keeps running with manpowerQty within manpowerAllotted, so this
+    // is never even consulted for them.
+    overtimeRequests = { findApprovedForWorkOrderOnDate: jest.fn().mockResolvedValue(null) };
+    service = new ProductionEntryService(prisma, audit, materialReservation, settings, notifications, overtimeRequests);
   });
 
   describe('the exact spec example: normal hourly entry (manual test 1, section 65)', () => {
@@ -377,6 +382,120 @@ describe('ProductionEntryService — PROD-007: Stage-Wise Hourly Production Entr
       await expect(
         service.create({ workOrderId: 'wo-smt', manpowerQty: 0, goodQty: 0, periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00' } as any, user),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('Overtime (Shift Board "Request Overtime" -> OvertimeRequest approval -> 181_overtime_requests.sql)', () => {
+    it('manpowerQty beyond manpowerAllotted with NO approved OT request on file is blocked outright', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 20 });
+      overtimeRequests.findApprovedForWorkOrderOnDate.mockResolvedValue(null);
+
+      await expect(
+        service.create({
+          workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 180,
+          periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+        } as any, user),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(overtimeRequests.findApprovedForWorkOrderOnDate).toHaveBeenCalledWith(
+        'wo-smt', new Date('2026-05-10T08:00:00'), 'company-1',
+      );
+      expect(prisma.productionEntry.create).not.toHaveBeenCalled();
+    });
+
+    it('excess manpower beyond the approved ceiling is blocked, even with an approved OT request on file', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 20 });
+      overtimeRequests.findApprovedForWorkOrderOnDate.mockResolvedValue({
+        id: 'ot-1', requestNumber: 'OT-2026-0001', approvedMenCount: 3, otMultiplierSnapshot: 1.5,
+      });
+
+      await expect(
+        service.create({
+          // excess = 25 - 20 = 5, but only 3 were approved
+          workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 180,
+          periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+        } as any, user),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('excess manpower within an approved OT ceiling is allowed: cost splits into normal + OT-rate portions, target/labour-hours use the full manpowerQty, and the remark auto-explains it', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 20 });
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+      overtimeRequests.findApprovedForWorkOrderOnDate.mockResolvedValue({
+        id: 'ot-1', requestNumber: 'OT-2026-0001', approvedMenCount: 5, otMultiplierSnapshot: 1.5,
+      });
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 200,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      // target/achievement/actualLabourHours still reflect the full (normal+OT) manpowerQty = 25
+      expect(entry.targetQty).toBe(200);
+      expect(entry.actualLabourHours).toBe(25);
+
+      expect(entry.otMenCount).toBe(5);
+      expect(entry.overtimeRequestId).toBe('ot-1');
+      // normal: 20 men x 1hr x ₹15 = 300; OT: 5 men x 1hr x ₹15 x 1.5 = 112.5
+      expect(entry.otLabourCost).toBe(112.5);
+      expect(entry.actualLabourCost).toBe(412.5);
+
+      expect(entry.remarks).toContain('5 approved overtime manpower');
+      expect(entry.remarks).toContain('OT-2026-0001');
+      expect(entry.remarks).toContain('1.5x rate');
+    });
+
+    it('an operator-written remark is kept, with the OT explanation appended rather than replacing it', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 20 });
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+      overtimeRequests.findApprovedForWorkOrderOnDate.mockResolvedValue({
+        id: 'ot-1', requestNumber: 'OT-2026-0001', approvedMenCount: 5, otMultiplierSnapshot: 1.5,
+      });
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 200, remarks: 'Line ran a rush order',
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(entry.remarks).toContain('Line ran a rush order');
+      expect(entry.remarks).toContain('5 approved overtime manpower');
+    });
+
+    it('manpowerQty within manpowerAllotted never consults OvertimeRequest at all, and otMenCount/overtimeRequestId stay at their defaults', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue({ count: 25 });
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 180,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(overtimeRequests.findApprovedForWorkOrderOnDate).not.toHaveBeenCalled();
+      expect(entry.otMenCount).toBe(0);
+      expect(entry.overtimeRequestId).toBeNull();
+      expect(entry.otLabourCost).toBeNull();
+      expect(entry.actualLabourCost).toBe(375); // unchanged from the no-OT spec example
+      expect(entry.remarks).toBeUndefined();
+    });
+
+    it('no manpowerAllotted on record at all (no allocation) skips the OT ceiling check entirely - nothing to call "excess" against', async () => {
+      prisma.workOrder.findFirst.mockResolvedValue(firstStageWo);
+      prisma.manpowerAllocation.findFirst.mockResolvedValue(null);
+      prisma.productionEntry.create.mockImplementation(({ data }: any) => Promise.resolve({ id: 'entry-1', ...data }));
+
+      const entry = await service.create({
+        workOrderId: 'wo-smt', manpowerQty: 25, goodQty: 180,
+        periodStart: '2026-05-10T08:00:00', periodEnd: '2026-05-10T09:00:00',
+      } as any, user);
+
+      expect(overtimeRequests.findApprovedForWorkOrderOnDate).not.toHaveBeenCalled();
+      expect(entry.otMenCount).toBe(0);
+      expect(entry.manpowerAllotted).toBeNull();
     });
   });
 });

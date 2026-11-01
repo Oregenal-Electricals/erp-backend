@@ -325,6 +325,7 @@ model Company {
   alertLogs          AlertLog[]
   workflowDefinitions WorkflowDefinition[]
   approvalRequests   ApprovalRequest[]
+  overtimeRequests   OvertimeRequest[]
   tasks              Task[]
   documents          Document[]
   hrDepartments      HrDepartment[]
@@ -582,6 +583,8 @@ model User {
   gateEventsRecorded GateEvent[] @relation("GateEventSecurityUser")
   manpowerQueryRaisedBy ManpowerQuery[] @relation("QueryRaisedBy")
   manpowerQueryRaisedTo ManpowerQuery[] @relation("QueryRaisedTo")
+  overtimeRequested    OvertimeRequest[] @relation("OvertimeRequestedBy")
+  overtimeAdjusted     OvertimeRequest[] @relation("OvertimeAdjustedBy")
   bomQueryRaisedBy BomQuery[] @relation("BomQueryRaisedBy")
   bomQueryRaisedTo BomQuery[] @relation("BomQueryRaisedTo")
   transfersGiven    StageTransferNote[] @relation("TransferGivenBy")
@@ -4616,6 +4619,7 @@ model WorkOrder {
   materialReservations MaterialReservation[]
   manpowerAllocations ManpowerAllocation[]
   manpowerAssignments ManpowerAssignment[]
+  overtimeRequests    OvertimeRequest[]
   stageTransfersFrom StageTransferNote[] @relation("StageTransferFrom")
   stageTransfersTo   StageTransferNote[] @relation("StageTransferTo")
   downtimes           Downtime[]
@@ -4929,6 +4933,20 @@ model ProductionEntry {
   // Cost data - see 175_production_entry_profit_loss.sql for why this
   // must stay restricted to management/accounts, same as the cost sheet.
   profitLossAmount    Float?
+  // Overtime (task: Shift Board OT request/approval): how much of this
+  // entry's manpowerQty/actualLabourCost above is attributable to an
+  // APPROVED OvertimeRequest, rather than the WO's normal approved
+  // allocation. otMenCount is the portion of manpowerQty beyond
+  // manpowerAllotted that an approved OT request covers; otLabourCost is
+  // that same slice costed at the OT rate (labourRateSnapshot x
+  // otMultiplierSnapshot), already folded into actualLabourCost above -
+  // kept here separately so the OT premium is visible on its own rather
+  // than hidden inside one flat labour-cost figure. overtimeRequestId is
+  // null whenever otMenCount is 0 (no OT involved in this entry).
+  otMenCount          Int?      @default(0)
+  otLabourCost        Float?
+  overtimeRequestId   String?
+  overtimeRequest     OvertimeRequest? @relation(fields: [overtimeRequestId], references: [id])
   downtimeMinutes     Float     @default(0)
   downtimeReason      String?
   totalQty      Float     @default(0)
@@ -4945,6 +4963,68 @@ model ProductionEntry {
   @@unique([companyId, entryNumber])
   @@index([companyId, workOrderId])
   @@map("production_entries")
+}
+
+// Supervisor's request for authorized overtime on a line/Work Order -
+// how many extra men and/or extra hours, for Plant Head then Management
+// to approve via the generic workflow engine (documentType
+// OVERTIME_REQUEST, see workflows.service.ts DEFAULT_WORKFLOWS) before
+// any production entry may actually use it. Deliberately a separate
+// document from ManpowerAllocation/ManpowerAssignment (same
+// quantity-tracking shape - requested vs approved - as
+// AdditionalMaterialRequest is kept separate from MaterialIssueOverride:
+// same pattern, different question, never merged) rather than extending
+// the existing PROD-004/005 Stage Head -> Plant Head allocation chain,
+// since that chain is live and already serves a different purpose
+// (handing off the normal shift headcount, not authorizing extra time/
+// men beyond it).
+model OvertimeRequest {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  requestNumber     String
+  workOrderId       String
+  workOrder         WorkOrder @relation(fields: [workOrderId], references: [id])
+  shiftDate         DateTime
+  requestedMenCount Int
+  requestedHours    Float
+  // Management (final level) may grant less than what was requested -
+  // same requested-vs-approved shape used by AdditionalMaterialRequest/
+  // MaterialIssueOverride elsewhere in this codebase. Set via a
+  // dedicated adjust() call, available only to the final-level approver
+  // and only before they act on the workflow request itself; defaults to
+  // the requested figures at approval time if never explicitly adjusted.
+  approvedMenCount  Int?
+  approvedHours     Float?
+  reason            String
+  status            String   @default("PENDING_APPROVAL") // PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED
+  requestedById     String
+  requestedByUser   User     @relation("OvertimeRequestedBy", fields: [requestedById], references: [id])
+  adjustedById      String?
+  adjustedByUser    User?    @relation("OvertimeAdjustedBy", fields: [adjustedById], references: [id])
+  adjustedAt        DateTime?
+  // Rate snapshots taken at request time so a later master-rate change
+  // never retroactively alters this request's planned cost - same
+  // pattern already used throughout ManpowerAllocation/WorkOrder.
+  // otMultiplierSnapshot comes from the new STANDARD_OT_MULTIPLIER
+  // setting (default 1.5), the same SettingsService convention already
+  // used for STANDARD_LABOUR_RATE_PER_SHIFT/STANDARD_SHIFT_HOURS.
+  labourRateSnapshot   Float?
+  otMultiplierSnapshot Float?
+  estimatedOtCost      Float?
+  isActive          Boolean  @default(true)
+  isTestData        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  productionEntries ProductionEntry[]
+
+  @@unique([companyId, requestNumber])
+  @@map("overtime_requests")
+  @@index([companyId])
+  @@index([workOrderId])
 }
 
 // MODULE 58 — IN-PROCESS QUALITY CONTROL (IPQC)

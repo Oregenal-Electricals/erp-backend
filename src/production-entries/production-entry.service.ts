@@ -4,6 +4,7 @@ import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { SettingsService } from '../settings/settings.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { OvertimeRequestService } from '../overtime-requests/overtime-request.service';
 import { CreateProductionEntryDto } from './dto/production-entry.dto';
 
 // Who the hourly profit/loss alert goes to (175_production_entry_profit_loss.sql).
@@ -19,6 +20,7 @@ export class ProductionEntryService {
     private materialReservation: MaterialReservationService,
     private settings: SettingsService,
     private notifications: NotificationsService,
+    private overtimeRequests: OvertimeRequestService,
   ) {}
 
   private async generateNumber(companyId: string): Promise<string> {
@@ -94,6 +96,36 @@ export class ProductionEntryService {
       manpowerQty = approvedAllocation?.count || 0;
     }
 
+    // Overtime (Shift Board "Request Overtime"): manpowerQty beyond the
+    // normal manpowerAllotted is only legitimate when an APPROVED
+    // OvertimeRequest for this WO covers this entry's date, and only up
+    // to its approvedMenCount - otherwise this is unauthorized excess
+    // headcount, blocked outright (spec parallel: STORE-013's additional-
+    // material approval ceiling). Skipped entirely when there's no normal
+    // allocation on record at all (manpowerAllotted null) - nothing to
+    // call "excess" against, same as every other allotted-vs-used check
+    // in this method already defaults gracefully in that case.
+    let otMenCount = 0;
+    let overtimeRequestId: string | null = null;
+    let otMultiplierSnapshot: number | null = null;
+    let otRequestNumber: string | null = null;
+    if (manpowerAllotted != null && manpowerQty > manpowerAllotted) {
+      const excessMen = manpowerQty - manpowerAllotted;
+      const approvedOt = await this.overtimeRequests.findApprovedForWorkOrderOnDate(dto.workOrderId, periodStart, user.companyId);
+      if (!approvedOt || !approvedOt.approvedMenCount || excessMen > approvedOt.approvedMenCount) {
+        const approvedCeiling = approvedOt?.approvedMenCount ?? 0;
+        throw new BadRequestException(
+          `Manpower (${manpowerQty}) exceeds the approved allocation (${manpowerAllotted})` +
+          (approvedCeiling > 0 ? ` plus the approved overtime ceiling (${approvedCeiling}) for this date` : ' and no approved overtime request covers this date') +
+          ` - raise an Overtime Request and get it approved first`,
+        );
+      }
+      otMenCount = excessMen;
+      overtimeRequestId = approvedOt.id;
+      otMultiplierSnapshot = approvedOt.otMultiplierSnapshot ?? null;
+      otRequestNumber = approvedOt.requestNumber ?? null;
+    }
+
     const goodQty = dto.goodQty;
     const scrapQty = dto.scrapQty || 0;
     const reworkQty = dto.reworkQty || 0;
@@ -143,9 +175,33 @@ export class ProductionEntryService {
     const shiftHours = parseFloat(await this.settings.getSettingValue('STANDARD_SHIFT_HOURS', '8')) || 8;
     let labourRateSnapshot: number | null = null;
     let actualLabourCost: number | null = null;
+    // otLabourCost is only the premium-rate slice (otMenCount's hours at
+    // otMultiplierSnapshot) - kept separate so Efficiency/costing reports
+    // can see how much of the hour's spend was overtime vs. normal,
+    // while actualLabourCost itself stays the one true total this
+    // method's every other downstream consumer (profitLossAmount,
+    // totalActualLabourCost summaries, alertPnlToManagement) already
+    // expects, unchanged by the OT split.
+    let otLabourCost: number | null = null;
     if (rate > 0) {
       labourRateSnapshot = rate / shiftHours;
-      actualLabourCost = Math.round(actualLabourHours * labourRateSnapshot * 100) / 100;
+      const normalMenCount = Math.max(manpowerQty - otMenCount, 0);
+      const normalLabourCost = Math.round(normalMenCount * durationHours * labourRateSnapshot * 100) / 100;
+      if (otMenCount > 0 && otMultiplierSnapshot != null) {
+        otLabourCost = Math.round(otMenCount * durationHours * labourRateSnapshot * otMultiplierSnapshot * 100) / 100;
+      }
+      actualLabourCost = Math.round((normalLabourCost + (otLabourCost || 0)) * 100) / 100;
+    }
+
+    // Auto-explain the OT portion in the remark (point 2's "ready answer
+    // for management" principle, applied here to point 1) rather than
+    // relying on the operator to type why the hour's cost/target looks
+    // different - the request number lets anyone trace it back to the
+    // approval.
+    let remarks = dto.remarks;
+    if (otMenCount > 0) {
+      const otNote = `Includes ${otMenCount} approved overtime manpower (OT request ${otRequestNumber || overtimeRequestId}) at ${otMultiplierSnapshot}x rate.`;
+      remarks = remarks ? `${remarks} | ${otNote}` : otNote;
     }
 
     // Labour efficiency variance ("the hour's profit/loss" per the
@@ -174,8 +230,9 @@ export class ProductionEntryService {
         productivityRateSnapshot, labourRateSnapshot,
         targetQty, achievementPercent,
         actualLabourHours, actualLabourCost, profitLossAmount,
+        otMenCount, otLabourCost, overtimeRequestId,
         downtimeMinutes: dto.downtimeMinutes || 0, downtimeReason: dto.downtimeReason,
-        remarks: dto.remarks, status: 'DRAFT',
+        remarks, status: 'DRAFT',
         companyId: user.companyId, createdBy: user.id, updatedBy: user.id,
       },
       include: this.includes(),
