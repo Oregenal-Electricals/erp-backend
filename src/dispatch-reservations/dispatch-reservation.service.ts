@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
+import { isTestSessionActive } from '../common/context/test-session.context';
 
 @Injectable()
 export class DispatchReservationService {
@@ -30,8 +31,12 @@ export class DispatchReservationService {
   // against one authoritative balance. Never trusts a DSP-003
   // snapshot - re-reads and re-validates right here.
   private async claimRmFgAtomically(companyId: string, itemCode: string, warehouseType: string, plantId: string, wantQty: number, userId: string): Promise<{ claimed: number; warehouseId: string | null }> {
+    // Test-session isolation (same as WarehouseService/SalesOrdersService):
+    // a real reservation must never claim stock through a test-tagged
+    // warehouse, and vice versa.
+    const testFlag = isTestSessionActive();
     const warehouses = await this.prisma.warehouse.findMany({
-      where: { companyId, plantId, type: { in: [warehouseType, 'GENERAL'] as any }, isActive: true },
+      where: { companyId, plantId, type: { in: [warehouseType, 'GENERAL'] as any }, isActive: true, isTestData: testFlag },
       select: { id: true },
     });
     let remaining = wantQty;
@@ -41,7 +46,7 @@ export class DispatchReservationService {
       if (remaining <= 0.0001) break;
       const MAX_RETRIES = 5;
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        const stock = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode, warehouseId: wh.id } });
+        const stock = await this.prisma.stockBalance.findFirst({ where: { companyId, itemCode, warehouseId: wh.id, isTestData: testFlag } });
         if (!stock) break;
         const freeAvailable = Math.max(stock.availableQty - stock.reservedQty, 0);
         const claimQty = Math.min(freeAvailable, remaining);
