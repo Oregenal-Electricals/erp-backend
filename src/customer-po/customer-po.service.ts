@@ -9,6 +9,7 @@ import { parseCpoSourceText } from './cpo-source-parser';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pdfParse = require('pdf-parse');
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
+import { CancelSoDto } from '../sales-orders/dto/sales-order.dto';
 import { MrpService } from '../mrp/mrp.service';
 import { CreditControlService } from '../credit-control/credit-control.service';
 import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
@@ -546,12 +547,45 @@ export class CustomerPoService {
     if (!cpo) throw new NotFoundException('CPO not found');
     if (['COMPLETED', 'CANCELLED'].includes(cpo.status)) throw new BadRequestException(`Cannot cancel ${cpo.status} CPO`);
 
+    // Cancelling a CPO must cascade to its Sales Order(s) - but only when
+    // no real work is behind them yet. "Started" is defined the same way
+    // production itself defines it: an SO leaves CONFIRMED the moment MRP
+    // allocation creates a Work Order against it (see
+    // sales-orders.service.ts / mrp.service.ts - CONFIRMED -> IN_PRODUCTION
+    // only happens there). So a still-DRAFT/CONFIRMED SO has no Work Order,
+    // no dispatch, nothing committed - safe to auto-cancel. Anything past
+    // that (IN_PRODUCTION/DISPATCHED/PARTIALLY_DISPATCHED/COMPLETED) blocks
+    // the CPO cancellation outright rather than silently leaving the SO
+    // orphaned from a cancelled CPO.
+    const linkedSos = await this.prisma.salesOrder.findMany({
+      where: { cpoId: id, companyId: user.companyId, isActive: true, status: { not: 'CANCELLED' } },
+    });
+    const startedSos = linkedSos.filter((so) => !['DRAFT', 'CONFIRMED'].includes(so.status));
+    if (startedSos.length > 0) {
+      throw new BadRequestException(
+        `Cannot cancel this CPO - Sales Order ${startedSos[0].soNumber} already has work in progress (status: ${startedSos[0].status}). Cancel or complete it first.`,
+      );
+    }
+
     const updated = await this.prisma.customerPo.update({
       where: { id },
       data: { status: 'CANCELLED', cancelledDate: new Date(), cancelReason: dto.cancelReason, updatedBy: user.id },
       include: this.includes(),
     });
     await this.audit.log({ tableName: 'customer_pos', recordId: id, action: 'UPDATE', newValues: updated, changedBy: user.id });
+
+    // Auto-cancel every not-yet-started SO under this CPO now that the CPO
+    // itself is cancelled. Reuses SalesOrdersService.cancel() directly so
+    // the same validation/audit trail as a manual SO cancel applies - never
+    // duplicates that logic here.
+    for (const so of linkedSos) {
+      try {
+        const soCancelDto: CancelSoDto = { cancelReason: `Auto-cancelled: linked Customer PO ${cpo.cpoNumber} was cancelled` };
+        await this.salesOrders.cancel(so.id, soCancelDto, user);
+      } catch (e) {
+        this.logger.error(`Failed to auto-cancel Sales Order ${so.soNumber} after CPO ${cpo.cpoNumber} cancellation`, e as Error);
+      }
+    }
 
     try {
       await this.recheckAllOpenPos(user.companyId, user.id);
