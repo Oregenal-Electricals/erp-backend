@@ -325,6 +325,7 @@ model Company {
   alertLogs          AlertLog[]
   workflowDefinitions WorkflowDefinition[]
   approvalRequests   ApprovalRequest[]
+  overtimeRequests   OvertimeRequest[]
   tasks              Task[]
   documents          Document[]
   hrDepartments      HrDepartment[]
