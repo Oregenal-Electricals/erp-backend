@@ -6,6 +6,7 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
   let prisma: any;
   let bomService: any;
   let productService: any;
+  let overtimeRequestService: any;
   const user = { id: 'user-1', companyId: 'company-1', role: 'RND' };
   const superAdmin = { id: 'super-1', companyId: 'company-1', role: 'SUPER_ADMIN' };
 
@@ -45,7 +46,8 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
     bomService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
     productService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
     const customerItemMappingService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() } as any;
-    service = new WorkflowsService(prisma, { log: jest.fn() } as any, bomService, productService, customerItemMappingService);
+    overtimeRequestService = { onWorkflowApproved: jest.fn(), onWorkflowRejected: jest.fn() };
+    service = new WorkflowsService(prisma, { log: jest.fn() } as any, bomService, productService, customerItemMappingService, overtimeRequestService);
   });
 
   it('submit() creates a PENDING ApprovalRequest at level 1 with totalLevels taken from the matching workflow definition', async () => {
@@ -129,6 +131,39 @@ describe('WorkflowsService - configurable multi-level approval engine (BOM/Produ
     await service.act('req-2', { action: 'APPROVED' }, finalApprover);
     expect(productService.onWorkflowApproved).toHaveBeenCalledWith('product-1', finalApprover);
     expect(bomService.onWorkflowApproved).not.toHaveBeenCalled();
+  });
+
+  it('OVERTIME_REQUEST ROUTING (181_overtime_requests.sql): final approval of an OVERTIME_REQUEST dispatches to overtimeRequestService, not bomService/productService', async () => {
+    const twoLevelWorkflow = { id: 'wf-ot', documentType: 'OVERTIME_REQUEST', triggerCondition: 'ALWAYS', levels: 2, steps: [
+      { level: 1, stepName: 'Plant Manager Review', approverUserId: null },
+      { level: 2, stepName: 'Management Approval', approverUserId: null },
+    ] };
+    const request = { id: 'req-ot-1', status: 'PENDING', currentLevel: 2, totalLevels: 2, documentType: 'OVERTIME_REQUEST', documentId: 'ot-1', workflow: twoLevelWorkflow };
+    prisma.approvalRequest.findFirst.mockResolvedValue(request);
+    prisma.approvalRequest.update.mockResolvedValue({ id: 'req-ot-1', status: 'APPROVED', currentLevel: 2 });
+    const management = { id: 'admin-1', companyId: 'company-1', role: 'ADMIN' };
+
+    await service.act('req-ot-1', { action: 'APPROVED' }, management);
+
+    expect(overtimeRequestService.onWorkflowApproved).toHaveBeenCalledWith('ot-1', management);
+    expect(bomService.onWorkflowApproved).not.toHaveBeenCalled();
+    expect(productService.onWorkflowApproved).not.toHaveBeenCalled();
+  });
+
+  it('OVERTIME_REQUEST REJECTION dispatches to overtimeRequestService.onWorkflowRejected', async () => {
+    const twoLevelWorkflow = { id: 'wf-ot', documentType: 'OVERTIME_REQUEST', triggerCondition: 'ALWAYS', levels: 2, steps: [
+      { level: 1, stepName: 'Plant Manager Review', approverUserId: null },
+      { level: 2, stepName: 'Management Approval', approverUserId: null },
+    ] };
+    const request = { id: 'req-ot-1', status: 'PENDING', currentLevel: 1, totalLevels: 2, documentType: 'OVERTIME_REQUEST', documentId: 'ot-1', workflow: twoLevelWorkflow };
+    prisma.approvalRequest.findFirst.mockResolvedValue(request);
+    prisma.approvalRequest.update.mockResolvedValue({ id: 'req-ot-1', status: 'REJECTED', currentLevel: 1 });
+    const plantManager = { id: 'pm-1', companyId: 'company-1', role: 'PLANT_MANAGER' };
+
+    await service.act('req-ot-1', { action: 'REJECTED', comments: 'Not enough backlog to justify it' }, plantManager);
+
+    expect(overtimeRequestService.onWorkflowRejected).toHaveBeenCalledWith('ot-1', plantManager);
+    expect(overtimeRequestService.onWorkflowApproved).not.toHaveBeenCalled();
   });
 
   it('CRITICAL REJECTION: rejecting at ANY level (not just the last) immediately sets REJECTED and syncs the document, without needing to reach the final level', async () => {

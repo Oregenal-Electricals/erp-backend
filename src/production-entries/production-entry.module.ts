@@ -6,8 +6,9 @@ import { CommonModule } from '../common/common.module';
 import { WorkOrderModule } from '../work-orders/work-order.module';
 import { SettingsModule } from '../settings/settings.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { OvertimeRequestModule } from '../overtime-requests/overtime-request.module';
 @Module({
-  imports: [PrismaModule, CommonModule, WorkOrderModule, SettingsModule, NotificationsModule],
+  imports: [PrismaModule, CommonModule, WorkOrderModule, SettingsModule, NotificationsModule, OvertimeRequestModule],
   controllers: [ProductionEntryController],
   providers: [ProductionEntryService],
   exports: [ProductionEntryService],

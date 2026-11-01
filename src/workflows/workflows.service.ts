@@ -5,6 +5,7 @@ import { CreateWorkflowDto, UpdateWorkflowDto, SubmitForApprovalDto, ApproveReje
 import { BomService } from '../bom/bom.service';
 import { ProductService } from '../products/product.service';
 import { CustomerItemMappingService } from '../customer-item-mapping/customer-item-mapping.service';
+import { OvertimeRequestService } from '../overtime-requests/overtime-request.service';
 
 const DEFAULT_WORKFLOWS = [
   { name:'Purchase Order Approval', documentType:'PURCHASE_ORDER', triggerCondition:'ALWAYS', levels:1, description:'All POs require manager approval', steps:[{ level:1, stepName:'Manager Approval', timeoutHours:48 }] },
@@ -27,6 +28,10 @@ const DEFAULT_WORKFLOWS = [
   { name: 'Customer Item Mapping Change Approval', documentType: 'CUSTOMER_ITEM_MAPPING', triggerCondition: 'ALWAYS', levels: 1, description: 'Changing an existing customer item mapping requires Admin approval - a first-time mapping does not', steps: [
     { level: 1, stepName: 'Admin Approval', timeoutHours: 48 },
   ] },
+  { name: 'Overtime Request Approval', documentType: 'OVERTIME_REQUEST', triggerCondition: 'ALWAYS', levels: 2, description: 'A Supervisor\'s overtime request needs Plant Manager review, then Admin/Management approval, before any production entry may use it', steps: [
+    { level: 1, stepName: 'Plant Manager Review', timeoutHours: 24 },
+    { level: 2, stepName: 'Management Approval', timeoutHours: 24 },
+  ] },
 ];
 
 @Injectable()
@@ -37,6 +42,7 @@ export class WorkflowsService {
     @Inject(forwardRef(() => BomService)) private bomService: BomService,
     @Inject(forwardRef(() => ProductService)) private productService: ProductService,
     @Inject(forwardRef(() => CustomerItemMappingService)) private customerItemMappingService: CustomerItemMappingService,
+    @Inject(forwardRef(() => OvertimeRequestService)) private overtimeRequestService: OvertimeRequestService,
   ) {}
 
   async seedDefaults(companyId: string, userId: string) {
@@ -228,6 +234,9 @@ export class WorkflowsService {
       } else if (request.documentType === 'CUSTOMER_ITEM_MAPPING') {
         if (newStatus === 'APPROVED') await this.customerItemMappingService.onWorkflowApproved(request.documentId, user);
         else await this.customerItemMappingService.onWorkflowRejected(request.documentId, user);
+      } else if (request.documentType === 'OVERTIME_REQUEST') {
+        if (newStatus === 'APPROVED') await this.overtimeRequestService.onWorkflowApproved(request.documentId, user);
+        else await this.overtimeRequestService.onWorkflowRejected(request.documentId, user);
       }
     }
 
