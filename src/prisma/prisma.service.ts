@@ -71,6 +71,11 @@ export class PrismaService
       this.logger.error('Failed to ensure shortage-verification permissions/nav - see 156_material_shortage_verify_permissions.sql and 172_ui_control_shortage_verification_nav.sql', e as Error);
     }
     try {
+      await this.ensureMaterialShortageVerificationColumns();
+    } catch (e) {
+      this.logger.error('Failed to ensure material_shortages verification columns - see 155_material_shortage_store_verification.sql', e as Error);
+    }
+    try {
       await this.ensureRackBinVerticalNumberingColumns();
     } catch (e) {
       this.logger.error('Failed to ensure warehouse_bins.bay/level/sequenceOrder columns - see 161_store_rack_bin_vertical_numbering.sql', e as Error);
@@ -201,6 +206,35 @@ export class PrismaService
       ON CONFLICT (company_id, key) DO NOTHING;
     `);
     this.logger.log('Shortage-verification role permissions and sidebar nav ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 155_material_shortage_store_verification.sql (adds
+   * material_shortages.systemCalculatedQty/verifiedQty/verificationReason/
+   * verifiedById/verifiedAt, and switches the status column's DEFAULT to
+   * 'PENDING_STORE_VERIFICATION'). Same self-apply-on-boot pattern as the
+   * methods above, for the same reason: this migration was merged (backing
+   * task #52's Store shortage-verification gate) but never actually run
+   * against production. Discovered live 2026-11-01 via a user report that
+   * CPO creation no longer surfaces material shortages - both
+   * POST .../run-shortage-check and GET .../shortages were throwing "the
+   * column material_shortages.systemCalculatedQty does not exist" in
+   * production. The ADD COLUMNs are IF NOT EXISTS; the ALTER COLUMN ...
+   * SET DEFAULT is naturally idempotent (just re-applies the same default
+   * every boot). Safe on every boot including one that already has it
+   * applied. Remove once 155_material_shortage_store_verification.sql is
+   * confirmed applied everywhere and this has had a chance to run at
+   * least once.
+   */
+  private async ensureMaterialShortageVerificationColumns() {
+    await this.$executeRawUnsafe(`ALTER TABLE "material_shortages" ADD COLUMN IF NOT EXISTS "systemCalculatedQty" DOUBLE PRECISION;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "material_shortages" ADD COLUMN IF NOT EXISTS "verifiedQty" DOUBLE PRECISION;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "material_shortages" ADD COLUMN IF NOT EXISTS "verificationReason" TEXT;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "material_shortages" ADD COLUMN IF NOT EXISTS "verifiedById" TEXT;`);
+    await this.$executeRawUnsafe(`ALTER TABLE "material_shortages" ADD COLUMN IF NOT EXISTS "verifiedAt" TIMESTAMP(3);`);
+    await this.$executeRawUnsafe(`ALTER TABLE "material_shortages" ALTER COLUMN "status" SET DEFAULT 'PENDING_STORE_VERIFICATION';`);
+    this.logger.log('material_shortages verification columns and status default ensured');
   }
 
   /**
