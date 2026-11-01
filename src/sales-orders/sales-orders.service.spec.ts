@@ -72,6 +72,7 @@ describe('SalesOrdersService - DSP-001', () => {
       stockBalance: { findMany: jest.fn().mockResolvedValue([{ availableQty: 10000, reservedQty: 0 }]) },
       workOrder: { findMany: jest.fn().mockResolvedValue([]) },
       customerPoItem: { findFirst: jest.fn().mockResolvedValue(null) },
+      dispatch: { findMany: jest.fn().mockResolvedValue([]) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     customerItemMapping = {
@@ -381,6 +382,62 @@ describe('SalesOrdersService - DSP-001', () => {
 
     it('has no update() method that could rewrite a confirmed line price', () => {
       expect((service as any).update).toBeUndefined();
+    });
+  });
+
+  // "Work started" = left CONFIRMED - the same threshold
+  // CustomerPoService.cancel() uses to decide whether cancelling the
+  // parent CPO can auto-cancel this SO or must block outright. Previously
+  // cancel() only blocked the literal 'DISPATCHED' status, silently
+  // allowing an IN_PRODUCTION or PARTIALLY_DISPATCHED SO (a real Work
+  // Order/dispatch already in progress) to be cancelled outright.
+  describe('cancel() blocks once work has started', () => {
+    it('still allows cancelling a DRAFT SO', async () => {
+      const created = await service.create({ cpoId: 'cpo-5', deliveryDate: '2026-12-01', items: [fgLine()] } as any, user);
+      const cancelled = await service.cancel(created.id, { cancelReason: 'x' } as any, user);
+      expect(cancelled.status).toBe('CANCELLED');
+    });
+
+    it('still allows cancelling a CONFIRMED SO (no Work Order yet)', async () => {
+      const created = await service.create({ cpoId: 'cpo-5', deliveryDate: '2026-12-01', items: [fgLine()] } as any, user);
+      await service.confirm(created.id, user);
+      const cancelled = await service.cancel(created.id, { cancelReason: 'x' } as any, user);
+      expect(cancelled.status).toBe('CANCELLED');
+    });
+
+    it('blocks cancelling an IN_PRODUCTION SO (a Work Order already exists)', async () => {
+      const created = await service.create({ cpoId: 'cpo-5', deliveryDate: '2026-12-01', items: [fgLine()] } as any, user);
+      await service.confirm(created.id, user);
+      await prisma.salesOrder.update({ where: { id: created.id }, data: { status: 'IN_PRODUCTION' } });
+      await expect(service.cancel(created.id, { cancelReason: 'x' } as any, user)).rejects.toThrow(/work has already started/);
+    });
+
+    it('blocks cancelling a PARTIALLY_DISPATCHED SO', async () => {
+      const created = await service.create({ cpoId: 'cpo-5', deliveryDate: '2026-12-01', items: [fgLine()] } as any, user);
+      await service.confirm(created.id, user);
+      await prisma.salesOrder.update({ where: { id: created.id }, data: { status: 'PARTIALLY_DISPATCHED' } });
+      await expect(service.cancel(created.id, { cancelReason: 'x' } as any, user)).rejects.toThrow(/work has already started/);
+    });
+  });
+
+  // Lets the SO detail screen offer "Mark Delivered" directly, instead of
+  // sending Sales to the separate Delivery Confirmations page to find the
+  // same thing.
+  describe('getPendingDeliveries()', () => {
+    it('returns this SO\'s dispatched-but-not-yet-delivered Dispatch records', async () => {
+      const created = await service.create({ cpoId: 'cpo-5', deliveryDate: '2026-12-01', items: [fgLine()] } as any, user);
+      prisma.dispatch.findMany.mockResolvedValue([{ id: 'dis-1', dispatchNumber: 'DIS-2026-0001' }]);
+
+      const result = await service.getPendingDeliveries(created.id, user);
+
+      expect(prisma.dispatch.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ soId: created.id, status: 'DISPATCHED', deliveryConfirmation: null }),
+      }));
+      expect(result).toEqual([{ id: 'dis-1', dispatchNumber: 'DIS-2026-0001' }]);
+    });
+
+    it('404s for a Sales Order that does not exist', async () => {
+      await expect(service.getPendingDeliveries('nonexistent', user)).rejects.toThrow(NotFoundException);
     });
   });
 

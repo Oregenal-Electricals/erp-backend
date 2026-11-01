@@ -353,8 +353,16 @@ export class SalesOrdersService {
     if (!so) throw new NotFoundException('Sales Order not found');
     if (['COMPLETED', 'CANCELLED'].includes(so.status))
       throw new BadRequestException(`Cannot cancel ${so.status} SO`);
-    if (so.status === 'DISPATCHED')
-      throw new BadRequestException('Cannot cancel partially dispatched SO');
+    // "Work started" = left CONFIRMED - the same threshold
+    // CustomerPoService.cancel() uses to decide whether a CPO cancel can
+    // auto-cancel this SO vs. must block outright. Previously this only
+    // blocked the literal 'DISPATCHED' status (and with a stale message -
+    // DISPATCHED is actually set only once FULLY dispatched, see
+    // dispatch.service.ts/dispatch-gate-out.service.ts), silently allowing
+    // an IN_PRODUCTION or PARTIALLY_DISPATCHED SO (real work orders/
+    // dispatch already in progress) to be cancelled outright.
+    if (!['DRAFT', 'CONFIRMED'].includes(so.status))
+      throw new BadRequestException(`Cannot cancel ${so.status} SO - work has already started`);
 
     const updated = await this.prisma.salesOrder.update({
       where: { id },
@@ -374,6 +382,28 @@ export class SalesOrdersService {
       changedBy: user.id,
     });
     return updated;
+  }
+
+  /**
+   * Lets the Sales Order detail screen offer a direct "Mark Delivered"
+   * action without sending the user to the separate Delivery Confirmations
+   * page. Returns this SO's own Dispatch records that have physically left
+   * (status DISPATCHED) but have no Delivery Confirmation (POD) against
+   * them yet - i.e. exactly the set eligible for
+   * DeliveryConfirmationService.create(), which is what actually marks the
+   * SO (and, once every SO under it is done, the CPO) COMPLETED. Kept on
+   * Permission.SALES_VIEW like the rest of this controller's reads, rather
+   * than DISPATCH_VIEW, so Sales doesn't need a separate Dispatch
+   * permission just to see this.
+   */
+  async getPendingDeliveries(soId: string, user: any) {
+    const so = await this.prisma.salesOrder.findFirst({ where: { id: soId, companyId: user.companyId } });
+    if (!so) throw new NotFoundException('Sales Order not found');
+    return this.prisma.dispatch.findMany({
+      where: { soId, companyId: user.companyId, status: 'DISPATCHED', deliveryConfirmation: null },
+      orderBy: { dispatchDate: 'asc' },
+      select: { id: true, dispatchNumber: true, dispatchDate: true, vehicleNumber: true, lrNumber: true, transporterName: true },
+    });
   }
 
   async findAll(user: any, query: any) {

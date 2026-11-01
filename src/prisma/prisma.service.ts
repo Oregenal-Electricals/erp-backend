@@ -110,6 +110,11 @@ export class PrismaService
     } catch (e) {
       this.logger.error('Failed to remove Shift Board sidebar nav - see 178_ui_control_shift_board_nav_remove.sql', e as Error);
     }
+    try {
+      await this.ensureDeliveryConfirmationNav();
+    } catch (e) {
+      this.logger.error('Failed to ensure Delivery Confirmations sidebar nav/permission - see 179_sidebar_delivery_confirmation_nav.sql', e as Error);
+    }
   }
 
   /**
@@ -349,6 +354,41 @@ export class PrismaService
         AND key = 'sidebar.production.shiftBoard';
     `);
     this.logger.log('Shift Board sidebar nav removal ensured');
+  }
+
+  /**
+   * One-time, idempotent startup check for
+   * 179_sidebar_delivery_confirmation_nav.sql. Delivery Confirmation
+   * (delivery-confirmation.service.ts) already marks an SO COMPLETED on
+   * POD and cascades the parent CPO to COMPLETED once every SO under it
+   * is done - but the live Sidebar.jsx (the one AppLayout.jsx actually
+   * imports and renders; Sidebar.legacy.jsx is dead, unreferenced code)
+   * never had a ui_control_elements nav row pointing at it, so nobody
+   * could reach the screen that actually completes an SO/CPO. Adds the
+   * nav item under the existing "Sales" section (same company/admin ids
+   * used throughout this file set) and grants DELIVERY_CONFIRMATION_VIEW
+   * to the same roles that already see that section, idempotently (guards
+   * via WHERE NOT EXISTS / ON CONFLICT DO NOTHING, matching
+   * 170_cpo_so_sidebar_tab_split.sql's own convention). Safe on every boot
+   * including one that already has it applied.
+   */
+  private async ensureDeliveryConfirmationNav() {
+    await this.$executeRawUnsafe(`
+      INSERT INTO ui_control_elements (
+        id, company_id, key, element_type, module, page, label, icon, parent_key,
+        sort_order, default_visible, created_at, updated_at, created_by, updated_by, is_active, is_test_data
+      )
+      SELECT gen_random_uuid(), '83eda866-ba63-472c-902f-561f05b6b1c1', 'sidebar.sales.deliveryConfirmation', 'SIDEBAR_ITEM', 'SALES', '/sales/delivery', 'Delivery Confirmations', 'truck', 'sidebar.sales', 9, true, now(), now(), '19b228a1-c479-4b25-bf69-a5d3e091f682', '19b228a1-c479-4b25-bf69-a5d3e091f682', true, false
+      WHERE NOT EXISTS (SELECT 1 FROM ui_control_elements WHERE company_id = '83eda866-ba63-472c-902f-561f05b6b1c1' AND key = 'sidebar.sales.deliveryConfirmation');
+    `);
+    await this.$executeRawUnsafe(`
+      INSERT INTO role_permissions (id, "companyId", "roleId", permission, "isActive", "isTestData", "createdAt", "updatedAt", "createdBy", "updatedBy")
+      SELECT gen_random_uuid()::text, r."companyId", r.id, 'DELIVERY_CONFIRMATION_VIEW', true, false, now(), now(), 'delivery-confirmation-nav-migration', 'delivery-confirmation-nav-migration'
+      FROM roles r
+      WHERE r.name IN ('SUPER_ADMIN', 'ADMIN', 'SALES', 'PLANT_MANAGER')
+      ON CONFLICT DO NOTHING;
+    `);
+    this.logger.log('Delivery Confirmations sidebar nav and permission ensured');
   }
 
   private async ensurePlantManagerCostSheetPermissionRevoked() {

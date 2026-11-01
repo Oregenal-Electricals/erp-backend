@@ -31,6 +31,13 @@ describe('CustomerPoService - Price Integrity', () => {
   let cpoRecords: Record<string, any>;
   let cpoItems: Record<string, any[]>;
   let shortageRecords: Record<string, any>;
+  let soRecords: Record<string, any>;
+
+  function seedSo(overrides: any = {}) {
+    const rec = { id: `so-${Object.keys(soRecords).length + 1}`, companyId: 'company-1', cpoId: 'cpo-1', soNumber: 'SO-2026-0001', status: 'CONFIRMED', isActive: true, ...overrides };
+    soRecords[rec.id] = rec;
+    return rec;
+  }
 
   function seedShortage(overrides: any = {}) {
     const rec = {
@@ -51,6 +58,7 @@ describe('CustomerPoService - Price Integrity', () => {
     cpoRecords = {};
     cpoItems = {};
     shortageRecords = {};
+    soRecords = {};
     let idCounter = 0;
 
     prisma = {
@@ -135,6 +143,17 @@ describe('CustomerPoService - Price Integrity', () => {
         }
       }),
       role: { findMany: jest.fn().mockResolvedValue([]) },
+      salesOrder: {
+        findMany: jest.fn().mockImplementation(({ where }: any) => {
+          const recs = Object.values(soRecords).filter((so: any) => {
+            if (so.cpoId !== where.cpoId) return false;
+            if (where.isActive !== undefined && so.isActive !== where.isActive) return false;
+            if (where.status?.not && so.status === where.status.not) return false;
+            return true;
+          });
+          return Promise.resolve(recs as any[]);
+        }),
+      },
     };
 
     audit = { log: jest.fn().mockResolvedValue(undefined) };
@@ -144,6 +163,11 @@ describe('CustomerPoService - Price Integrity', () => {
         id: 'so-1', soNumber: 'SO-2026-0001', status: 'CONFIRMED',
         items: items.map((it: any, i: number) => ({ id: `so-item-${i}`, itemCode: it.itemCode, unitPrice: it.unitPrice, qty: it.qty })),
       })),
+      cancel: jest.fn().mockImplementation((id: string, dto: any) => {
+        const so = soRecords[id];
+        if (so) Object.assign(so, { status: 'CANCELLED', cancelReason: dto.cancelReason });
+        return Promise.resolve(so);
+      }),
     };
     mrpService = { explodeMultiCpoMaterialNeeds: jest.fn().mockRejectedValue(new Error('shortage check not under test')) };
     customerItemMapping = { resolve: jest.fn().mockResolvedValue(null) };
@@ -430,6 +454,58 @@ describe('CustomerPoService - Price Integrity', () => {
       seedShortage({ shortageQty: 80, requiredQty: 100, availableQty: 20 });
       const result = await service.verifyShortage('shortage-1', { verifiedQty: 80 }, user);
       expect(result.status).toBe('OPEN');
+    });
+  });
+
+  // Cancelling a CPO must cascade to its Sales Order(s): auto-cancel a
+  // not-yet-started one (still DRAFT/CONFIRMED - no Work Order exists
+  // against it), but block the CPO cancel outright once real work is
+  // behind the SO, rather than leaving an orphaned SO under a cancelled
+  // CPO or silently cancelling work already in progress.
+  describe('cancel()', () => {
+    it('auto-cancels a still-DRAFT/CONFIRMED linked Sales Order when the CPO is cancelled', async () => {
+      cpoRecords['cpo-1'] = { id: 'cpo-1', companyId: 'company-1', status: 'ACKNOWLEDGED', cpoNumber: 'CPO-2026-0001' };
+      const so = seedSo({ status: 'CONFIRMED' });
+
+      const result = await service.cancel('cpo-1', { cancelReason: 'Customer backed out' } as any, user);
+
+      expect(result.status).toBe('CANCELLED');
+      expect(salesOrders.cancel).toHaveBeenCalledTimes(1);
+      expect(salesOrders.cancel).toHaveBeenCalledWith(so.id, expect.objectContaining({ cancelReason: expect.stringContaining('CPO-2026-0001') }), user);
+      expect(so.status).toBe('CANCELLED');
+    });
+
+    it('blocks cancelling the CPO once its Sales Order has moved past CONFIRMED (a Work Order already exists)', async () => {
+      cpoRecords['cpo-1'] = { id: 'cpo-1', companyId: 'company-1', status: 'ACKNOWLEDGED', cpoNumber: 'CPO-2026-0001' };
+      const so = seedSo({ status: 'IN_PRODUCTION', soNumber: 'SO-2026-0007' });
+
+      await expect(service.cancel('cpo-1', { cancelReason: 'Customer backed out' } as any, user)).rejects.toThrow(BadRequestException);
+      await expect(service.cancel('cpo-1', { cancelReason: 'Customer backed out' } as any, user)).rejects.toThrow(/SO-2026-0007/);
+
+      expect(salesOrders.cancel).not.toHaveBeenCalled();
+      expect(cpoRecords['cpo-1'].status).toBe('ACKNOWLEDGED'); // CPO itself never got cancelled either
+      expect(so.status).toBe('IN_PRODUCTION'); // untouched
+    });
+
+    it('also blocks when the linked SO is DISPATCHED or COMPLETED', async () => {
+      cpoRecords['cpo-1'] = { id: 'cpo-1', companyId: 'company-1', status: 'ACKNOWLEDGED', cpoNumber: 'CPO-2026-0001' };
+      seedSo({ status: 'DISPATCHED' });
+      await expect(service.cancel('cpo-1', { cancelReason: 'x' } as any, user)).rejects.toThrow(BadRequestException);
+    });
+
+    it('cancels the CPO normally when it has no linked Sales Order at all', async () => {
+      cpoRecords['cpo-1'] = { id: 'cpo-1', companyId: 'company-1', status: 'RECEIVED', cpoNumber: 'CPO-2026-0001' };
+      const result = await service.cancel('cpo-1', { cancelReason: 'Never acknowledged' } as any, user);
+      expect(result.status).toBe('CANCELLED');
+      expect(salesOrders.cancel).not.toHaveBeenCalled();
+    });
+
+    it('ignores an already-CANCELLED linked SO - does not re-cancel it and does not let it block the CPO', async () => {
+      cpoRecords['cpo-1'] = { id: 'cpo-1', companyId: 'company-1', status: 'ACKNOWLEDGED', cpoNumber: 'CPO-2026-0001' };
+      seedSo({ status: 'CANCELLED' });
+      const result = await service.cancel('cpo-1', { cancelReason: 'x' } as any, user);
+      expect(result.status).toBe('CANCELLED');
+      expect(salesOrders.cancel).not.toHaveBeenCalled();
     });
   });
 });

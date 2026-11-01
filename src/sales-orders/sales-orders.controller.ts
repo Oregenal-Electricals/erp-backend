@@ -43,6 +43,10 @@ export class SalesOrdersController {
   @RequirePermissions(Permission.SALES_VIEW)
   findOne(@Param('id') id: string, @Request() req: any) { return this.soService.findOne(id, req.user); }
 
+  @Get(':id/pending-deliveries')
+  @RequirePermissions(Permission.SALES_VIEW)
+  getPendingDeliveries(@Param('id') id: string, @Request() req: any) { return this.soService.getPendingDeliveries(id, req.user); }
+
   @Post()
   @RequirePermissions(Permission.SALES_CREATE)
   create(@Body() dto: CreateSoDto, @Request() req: any) { return this.soService.create(dto, req.user); }
