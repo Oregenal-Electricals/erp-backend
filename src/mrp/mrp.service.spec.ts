@@ -7,6 +7,7 @@ describe('MrpService.calculateMrp - warehouse-scoped stock lookup', () => {
   let audit: any;
   let materialReservation: any;
   let routingService: any;
+  let salesOrdersService: any;
 
   const user = { id: 'user-1', companyId: 'company-1' };
   const wo = {
@@ -29,7 +30,8 @@ describe('MrpService.calculateMrp - warehouse-scoped stock lookup', () => {
     audit = {};
     materialReservation = {};
     routingService = {};
-    service = new MrpService(prisma, audit, materialReservation, routingService);
+    salesOrdersService = { tryAutoRelease: jest.fn().mockResolvedValue(undefined) };
+    service = new MrpService(prisma, audit, materialReservation, routingService, salesOrdersService);
   });
 
   it('scopes the stock balance lookup to the work order\'s own warehouse', async () => {
@@ -121,7 +123,7 @@ describe('MrpService.checkSoMaterialCompleteness - SO material-completeness gate
       purchaseOrderItem: { findMany: jest.fn().mockResolvedValue([]) },
       rawMaterial: { findFirst: jest.fn().mockResolvedValue(null) },
     };
-    service = new MrpService(prisma, {} as any, {} as any, {} as any);
+    service = new MrpService(prisma, {} as any, {} as any, {} as any, { tryAutoRelease: jest.fn().mockResolvedValue(undefined) } as any);
   });
 
   // The engine nets the finished-good item itself against its own on-hand
@@ -198,5 +200,76 @@ describe('MrpService.checkSoMaterialCompleteness - SO material-completeness gate
   it('throws NotFoundException when the Sales Order does not exist (or belongs to another company)', async () => {
     prisma.salesOrder.findFirst.mockResolvedValue(null);
     await expect(service.checkSoMaterialCompleteness('missing-so', 'company-1', 'wh-1')).rejects.toThrow(NotFoundException);
+  });
+});
+
+// Rahul's correction: "release for Dispatch" should not be a manual Sales
+// button at all - it's driven by the Work Order itself ("jab Work Order
+// banega, uske hisab se release hoga"). These prove that wiring: the
+// moment runAllocation() actually creates a Work Order against a Sales
+// Order line, that line gets an automatic release attempt, in both the
+// routed and non-routed branches.
+describe('MrpService.runAllocation - auto-release wiring', () => {
+  let service: MrpService;
+  let prisma: any;
+  let audit: any;
+  let materialReservation: any;
+  let routingService: any;
+  let salesOrdersService: any;
+
+  const user = { id: 'user-1', companyId: 'company-1' };
+  const soItem = {
+    id: 'soi-1', itemCode: 'FG-1', itemName: 'Finished Good 1', uom: 'PCS',
+    qty: 100, pendingQty: 100, isActive: true,
+    salesOrder: { id: 'so-1', soNumber: 'SO-2026-0001', companyId: 'company-1', status: 'CONFIRMED' },
+  };
+  const product = { id: 'product-1', code: 'FG-1', name: 'Finished Good 1' };
+
+  beforeEach(() => {
+    prisma = {
+      salesOrderItem: { findFirst: jest.fn().mockResolvedValue(soItem) },
+      product: { findFirst: jest.fn().mockResolvedValue(product) },
+      bom: { findFirst: jest.fn().mockResolvedValue({ id: 'bom-1', items: [] }) },
+      workOrder: {
+        aggregate: jest.fn().mockResolvedValue({ _sum: { plannedQty: 0 } }),
+        count: jest.fn().mockResolvedValue(0),
+        create: jest.fn().mockResolvedValue({ id: 'wo-1', woNumber: 'WO-2026-0001' }),
+        update: jest.fn().mockResolvedValue({}),
+      },
+      productRouting: { findFirst: jest.fn().mockResolvedValue(null) },
+      routingStage: { findFirst: jest.fn().mockResolvedValue(null) },
+      salesOrder: { updateMany: jest.fn().mockResolvedValue({}) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    materialReservation = { reserveForWorkOrder: jest.fn().mockResolvedValue([]) };
+    routingService = { startProduction: jest.fn() };
+    salesOrdersService = { tryAutoRelease: jest.fn().mockResolvedValue(undefined) };
+    service = new MrpService(prisma, audit, materialReservation, routingService, salesOrdersService);
+    jest.spyOn(service as any, 'explodeMaterialNeeds').mockResolvedValue([]);
+  });
+
+  it('auto-releases the line for Dispatch right after creating its Work Order (non-routed branch - no ProductRouting)', async () => {
+    await service.runAllocation({ warehouseId: 'wh-1', allocations: [{ soItemId: 'soi-1', buildQty: 100 }] }, user);
+    expect(prisma.workOrder.create).toHaveBeenCalled();
+    expect(salesOrdersService.tryAutoRelease).toHaveBeenCalledWith('soi-1', user);
+  });
+
+  it('auto-releases the line for Dispatch right after creating its Work Order (routed branch - has a ProductRouting)', async () => {
+    prisma.productRouting.findFirst.mockResolvedValue({ id: 'routing-1', companyId: 'company-1', finalProductId: 'product-1', isActive: true });
+    routingService.startProduction.mockResolvedValue({
+      routingGroupId: 'rg-1',
+      stages: [{ woId: 'wo-stage-1', woNumber: 'WO-2026-0002' }],
+    });
+    await service.runAllocation({ warehouseId: 'wh-1', allocations: [{ soItemId: 'soi-1', buildQty: 100 }] }, user);
+    expect(routingService.startProduction).toHaveBeenCalled();
+    expect(salesOrdersService.tryAutoRelease).toHaveBeenCalledWith('soi-1', user);
+  });
+
+  it('never lets an auto-release failure block Work Order creation itself', async () => {
+    salesOrdersService.tryAutoRelease.mockRejectedValue(new Error('boom'));
+    await expect(
+      service.runAllocation({ warehouseId: 'wh-1', allocations: [{ soItemId: 'soi-1', buildQty: 100 }] }, user),
+    ).resolves.toBeDefined();
+    expect(prisma.workOrder.create).toHaveBeenCalled();
   });
 });
