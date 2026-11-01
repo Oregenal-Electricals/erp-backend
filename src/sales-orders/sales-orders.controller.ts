@@ -59,6 +59,12 @@ export class SalesOrdersController {
   @RequirePermissions(Permission.SALES_EDIT)
   cancel(@Param('id') id: string, @Body() dto: CancelSoDto, @Request() req: any) { return this.soService.cancel(id, dto, req.user); }
 
+  // Release for Dispatch now happens automatically (SO confirm for RM
+  // lines, Work Order creation for FG/SFG lines - see
+  // SalesOrdersService.confirm()/tryAutoRelease() and
+  // MrpService.runAllocation()). This endpoint stays only as a manual
+  // retry for a line whose automatic attempt failed (see
+  // sourceInvalidReason on the line) - no longer a routine Sales gate.
   @Post('items/:soItemId/release-for-dispatch')
   @RequirePermissions(Permission.SALES_ORDER_RELEASE_DISPATCH)
   releaseLineForDispatch(@Param('soItemId') soItemId: string, @Request() req: any) { return this.soService.releaseLineForDispatch(soItemId, req.user); }

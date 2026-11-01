@@ -1,17 +1,21 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
 import { MaterialReservationService } from '../work-orders/material-reservation.service';
 import { RoutingService } from '../routing/routing.service';
+import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { isTestSessionActive } from '../common/context/test-session.context';
 
 @Injectable()
 export class MrpService {
+  private readonly logger = new Logger(MrpService.name);
+
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
     private materialReservation: MaterialReservationService,
     private routingService: RoutingService,
+    private salesOrdersService: SalesOrdersService,
   ) {}
 
   /**
@@ -896,6 +900,15 @@ export class MrpService {
           where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
           data: { status: 'IN_PRODUCTION', updatedBy: user.id },
         });
+        // A Work Order now genuinely exists for this line's build qty -
+        // "release" (material becoming available to Dispatch) is driven
+        // by the Work Order, not by the SO header, so release it for
+        // Dispatch right here rather than waiting on a manual Sales
+        // click. Never blocks WO creation: failures are logged/recorded
+        // for the manual retry action (see tryAutoRelease()).
+        await this.salesOrdersService.tryAutoRelease(r.soItem.id, user).catch((e) => {
+          this.logger.error(`tryAutoRelease threw unexpectedly for SO item ${r.soItem.id}`, e as Error);
+        });
         createdEntry = {
           woId: finalStage.woId, woNumber: finalStage.woNumber,
           soNumber: r.soItem.salesOrder.soNumber,
@@ -922,6 +935,11 @@ export class MrpService {
         await this.prisma.salesOrder.updateMany({
           where: { id: r.soItem.salesOrder.id, status: 'CONFIRMED' },
           data: { status: 'IN_PRODUCTION', updatedBy:user.id },
+        });
+        // Same as the routed branch above - this Work Order is what
+        // actually makes the line releasable for Dispatch now.
+        await this.salesOrdersService.tryAutoRelease(r.soItem.id, user).catch((e) => {
+          this.logger.error(`tryAutoRelease threw unexpectedly for SO item ${r.soItem.id}`, e as Error);
         });
         createdEntry = {
           woId: wo.id, woNumber, soNumber: r.soItem.salesOrder.soNumber,

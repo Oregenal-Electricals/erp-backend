@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
@@ -11,6 +12,8 @@ import { CustomerItemMappingService } from '../customer-item-mapping/customer-it
 
 @Injectable()
 export class SalesOrdersService {
+  private readonly logger = new Logger(SalesOrdersService.name);
+
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
@@ -321,6 +324,7 @@ export class SalesOrdersService {
   async confirm(id: string, user: any) {
     const so = await this.prisma.salesOrder.findFirst({
       where: { id, companyId: user.companyId },
+      include: { items: { where: { isActive: true, saleType: 'RM' } } },
     });
     if (!so) throw new NotFoundException('Sales Order not found');
     if (so.status !== 'DRAFT')
@@ -343,6 +347,21 @@ export class SalesOrdersService {
       newValues: updated,
       changedBy: user.id,
     });
+
+    // Release for Dispatch is no longer a manual Sales action (per Rahul:
+    // "release" conceptually means releasing material, and for a Raw
+    // Material line there's no Work Order/manufacturing step to wait for
+    // at all - it's ready the moment the SO itself is confirmed. FG/SFG
+    // lines are different: those get released automatically once a Work
+    // Order actually exists for them (see MrpService.runAllocation(),
+    // which calls tryAutoRelease() right after creating the WO) - "jab
+    // Work Order banega, uske hisab se release hoga", not at SO confirm
+    // time. Best-effort: a line that can't yet resolve its source (bad
+    // master data) is left for the retry action, never blocks confirm.
+    for (const item of so.items) {
+      await this.tryAutoRelease(item.id, user);
+    }
+
     return updated;
   }
 
@@ -434,7 +453,7 @@ export class SalesOrdersService {
               pendingQty: true,
             },
           },
-          cpo: { select: { cpoNumber: true, customerPoNumber: true } },
+          cpo: { select: { cpoNumber: true, customerPoNumber: true, status: true } },
         },
       }),
       this.prisma.salesOrder.count({ where }),
@@ -464,13 +483,23 @@ export class SalesOrdersService {
     });
   }
 
-  // DSP-001 sections 13-15, 21: explicit per-line release action - a
-  // line only becomes visible to Dispatch once released, separately
-  // from the SO header's own approval status, so different lines on
-  // the same SO can release independently (RM ready, SFG ready, FG
-  // not yet). Re-validates SFG saleable-stage configuration at release
-  // time, not just at line-creation time, since routing/saleable
-  // config can change in between.
+  // DSP-001 sections 13-15, 21: a line only becomes visible to Dispatch
+  // once released, separately from the SO header's own approval status,
+  // so different lines on the same SO release independently (RM ready,
+  // SFG ready, FG not yet). Re-validates SFG saleable-stage configuration
+  // at release time, not just at line-creation time, since routing/
+  // saleable config can change in between.
+  //
+  // No longer a manual Sales action - "release" means releasing
+  // material, so it's now triggered automatically at the point that
+  // actually makes material available: SO confirm for RM lines (no
+  // manufacturing involved, see confirm() above), Work Order creation
+  // for FG/SFG lines (see tryAutoRelease() below, called from
+  // MrpService.runAllocation() right after a WO is created). This
+  // method itself is unchanged and still throws on failure; it's kept
+  // reachable via POST items/:soItemId/release-for-dispatch purely as a
+  // manual retry/recourse action for a line whose automatic attempt
+  // failed (e.g. a master-data gap) - not a routine gate anymore.
   // DSP-002 section 25-26: which plant this order dispatches from -
   // explicit if set on the SO, else falls back to the company's plant
   // (this is a single-plant company today; multi-plant selection is a
@@ -581,6 +610,35 @@ export class SalesOrdersService {
     });
     await this.audit.log({ tableName: 'sales_order_items', recordId: soItemId, action: 'UPDATE', newValues: updated, changedBy: user.id });
     return updated;
+  }
+
+  /**
+   * Best-effort, non-throwing wrapper around releaseLineForDispatch() for
+   * every automatic trigger point (SO confirm for RM lines, Work Order
+   * creation for FG/SFG lines). Release itself never blocks the action
+   * that triggered it: "already released" is silently ignored (expected
+   * if called more than once for the same line), and a genuine failure
+   * (bad master data, SFG stage not saleable, source not resolvable) is
+   * logged AND persisted onto the line's own sourceValid/sourceInvalidReason
+   * fields, so the frontend can show Sales exactly why a line is still
+   * pending and offer the manual retry action - never a silent stuck line.
+   */
+  async tryAutoRelease(soItemId: string, user: any) {
+    try {
+      await this.releaseLineForDispatch(soItemId, user);
+    } catch (e) {
+      const message = e instanceof BadRequestException ? (e as any).message : 'Unexpected error while trying to auto-release this line for Dispatch';
+      if (/already released/i.test(message)) return;
+      this.logger.warn(`Auto-release for Dispatch did not complete for SO item ${soItemId}: ${message}`);
+      try {
+        await this.prisma.salesOrderItem.update({
+          where: { id: soItemId },
+          data: { sourceValid: false, sourceInvalidReason: message, updatedBy: user.id },
+        });
+      } catch (e2) {
+        this.logger.error(`Failed to record auto-release failure reason for SO item ${soItemId}`, e2 as Error);
+      }
+    }
   }
 
   // DSP-001 sections 7-10: what the SO creation form needs to populate

@@ -30,8 +30,17 @@ describe('SalesOrdersService - DSP-001', () => {
     prisma = {
       customerPo: { findFirst: jest.fn().mockResolvedValue(cpo), update: jest.fn().mockResolvedValue({}) },
       salesOrder: {
-        findFirst: jest.fn().mockImplementation(({ where }: any) => {
+        findFirst: jest.fn().mockImplementation(({ where, include }: any) => {
           if (where?.cpoId) return Promise.resolve(null); // no existing SO for this CPO by default
+          if (!soRecord) return Promise.resolve(null);
+          // confirm() asks for only the RM items (it auto-releases those
+          // directly - see SalesOrdersService.confirm()) - mirror Prisma's
+          // own include/where filtering here rather than always handing
+          // back every item regardless of saleType.
+          const itemsSaleType = include?.items?.where?.saleType;
+          if (itemsSaleType) {
+            return Promise.resolve({ ...soRecord, items: itemRecords.filter((i: any) => i.saleType === itemsSaleType && i.isActive !== false) });
+          }
           return Promise.resolve(soRecord);
         }),
         count: jest.fn().mockResolvedValue(0),
@@ -169,7 +178,9 @@ describe('SalesOrdersService - DSP-001', () => {
 
     it('resolves RM lines to RM_INVENTORY, sourced from an RAW_MATERIAL warehouse at the resolved plant', async () => {
       const so = await createConfirmedSo([rmLine()]);
-      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      // RM releases automatically on confirm - read back rather than
+      // re-releasing (which would throw "already released").
+      const released = await prisma.salesOrderItem.findFirst({ where: { id: so.items[0].id } });
       expect(released.sourceType).toBe('RM_INVENTORY');
       expect(released.sourceWarehouseType).toBe('RAW_MATERIAL');
       expect(released.sourcePlantId).toBe('plant-1');
@@ -206,7 +217,9 @@ describe('SalesOrdersService - DSP-001', () => {
     it('flags batch control based on whether the item actually has StockBatch records, not a guess', async () => {
       prisma.stockBatch.findFirst.mockResolvedValue({ id: 'batch-1' });
       const so = await createConfirmedSo([rmLine()]);
-      const released = await service.releaseLineForDispatch(so.items[0].id, user);
+      // RM releases automatically on confirm - read back rather than
+      // re-releasing (which would throw "already released").
+      const released = await prisma.salesOrderItem.findFirst({ where: { id: so.items[0].id } });
       expect(released.sourceBatchControlled).toBe(true);
     });
 
@@ -227,6 +240,13 @@ describe('SalesOrdersService - DSP-001', () => {
       const items = saleType === 'SFG' ? [sfgLine(qtyOverride ? { qty: qtyOverride } : {})] : saleType === 'FG' ? [fgLine(qtyOverride ? { qty: qtyOverride } : {})] : [rmLine(qtyOverride ? { qty: qtyOverride } : {})];
       const so = await service.create({ cpoId: 'cpo-1', deliveryDate: '2026-12-01', items } as any, user);
       await service.confirm(so.id, user);
+      // RM lines release automatically the moment the SO is confirmed
+      // (see SalesOrdersService.confirm()) - calling releaseLineForDispatch
+      // again here would throw "already released", so just read back the
+      // state confirm() already produced.
+      if (saleType === 'RM') {
+        return prisma.salesOrderItem.findFirst({ where: { id: so.items[0].id } });
+      }
       const released = await service.releaseLineForDispatch(so.items[0].id, user);
       return released;
     }
